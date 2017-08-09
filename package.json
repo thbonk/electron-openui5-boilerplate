@@ -1,0 +1,21 @@
+{
+  "name": "${APPNAME}",
+  "version": "0.0.1",
+  "description": "${DESCRIPTION}>",
+  "main": "main.js",
+  "namespace": "${UI5_APP_NAMESPACE}",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "${REPOSITORY_URL}"
+  },
+  "keywords": [
+  ],
+  "author": "${AUTHOR}",
+  "email": "${EMAIL}",
+  "license": "Apache-2.0",
+  "dependencies": {
+  }
+}
