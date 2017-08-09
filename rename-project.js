@@ -32,7 +32,7 @@ const FILES_TO_PROCESS = [
     "./index.html", 
     "./main.js", 
     "./package-lock.json",
-    "./app/*"
+    "./app/**"
 ];
 const PACKAGE_FILENAME = "./package.json";
 
@@ -73,7 +73,7 @@ function replacePlaceholdersInFiles(filenames, name, description, namespace, rep
     };
     const changedFiles = replace.sync(options);
 
-    console.log('\n\nModified files:', changedFiles.join('\n'), '\n');
+    console.log('\n\nModified files:\n', changedFiles.join('\n'), '\n');
 }
 
 function readAndValidatePackageFile(packageFilename) {
