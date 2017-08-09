@@ -40,7 +40,7 @@
         data-sap-ui-libs='sap.m'
         data-sap-ui-compatVersion="edge" 
         data-sap-ui-resourceroots='{ 
-            "${UI5_APP_NAMESPACE}": "./" 
+            "UI5_APP_NAMESPACE_PLACEHOLDER": "./" 
         }'>
     </script>
 
@@ -48,7 +48,7 @@
         sap.ui.getCore().attachInit(function () {
             new sap.m.Shell({
                 app: new sap.ui.core.ComponentContainer({
-                        name: "${UI5_APP_NAMESPACE}.app"
+                        name: "UI5_APP_NAMESPACE_PLACEHOLDER.app"
                         }),
                 appWidthLimited: false
             }).placeAt("content");
