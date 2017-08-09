@@ -28,7 +28,12 @@ const REPOSITORY_URL_PLACEHOLDER = "REPOSITORY_URL_PLACEHOLDER";
 const AUTHOR_PLACEHOLDER = "AUTHOR_PLACEHOLDER";
 const EMAIL_PLACEHOLDER = "EMAIL_PLACEHOLDER";
 
-const FILES_TO_PROCESS = ["./index.html", "./main.js", "./package-lock.json"];
+const FILES_TO_PROCESS = [
+    "./index.html", 
+    "./main.js", 
+    "./package-lock.json",
+    "./app/*"
+];
 const PACKAGE_FILENAME = "./package.json";
 
 (function () {
@@ -68,7 +73,7 @@ function replacePlaceholdersInFiles(filenames, name, description, namespace, rep
     };
     const changedFiles = replace.sync(options);
 
-    console.log('Modified files:', changedFiles.join(', '), '\n');
+    console.log('\n\nModified files:', changedFiles.join('\n'), '\n');
 }
 
 function readAndValidatePackageFile(packageFilename) {
