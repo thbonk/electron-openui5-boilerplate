@@ -40,5 +40,5 @@ function readAndValidatePackageFile(packageFilename) {
 }
 
 (function() {
-    var package = readAndValidatePackageFile(PACKAGE_FILENAME);
+    var packageData = readAndValidatePackageFile(PACKAGE_FILENAME);
 })();
