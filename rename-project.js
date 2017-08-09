@@ -80,17 +80,17 @@ function readAndValidatePackageFile(packageFilename) {
 }
 
 function validatePackageData(packageData) {
-    checkOrThrow(packageData.name != APPNAME_PLACEHOLDER,
+    checkOrThrow(packageData.name !== APPNAME_PLACEHOLDER,
         "Please set the attribute >name< in the file package.json");
-    checkOrThrow(packageData.description != DESCRIPTION_PLACEHOLDER,
+    checkOrThrow(packageData.description !== DESCRIPTION_PLACEHOLDER,
         "Please set the attribute >description< in the file package.json");
-    checkOrThrow(packageData.namespace != UI5_APP_NAMESPACE_PLACEHOLDER,
+    checkOrThrow(packageData.namespace !== UI5_APP_NAMESPACE_PLACEHOLDER,
         "Please set the attribute >namespace< in the file package.json");
-    checkOrThrow(packageData.repository.url != REPOSITORY_URL_PLACEHOLDER,
+    checkOrThrow(packageData.repository.url !== REPOSITORY_URL_PLACEHOLDER,
         "Please set the attribute >repository.url< in the file package.json");
-    checkOrThrow(packageData.author != AUTHOR_PLACEHOLDER,
+    checkOrThrow(packageData.author !== AUTHOR_PLACEHOLDER,
         "Please set the attribute >author< in the file package.json");
-    checkOrThrow(packageData.email != EMAIL_PLACEHOLDER,
+    checkOrThrow(packageData.email !== EMAIL_PLACEHOLDER,
         "Please set the attribute >email< in the file package.json");
 }
 
