@@ -4,6 +4,7 @@
   "description": "${DESCRIPTION}>",
   "main": "main.js",
   "namespace": "${UI5_APP_NAMESPACE}",
+  "readme": "README.md",
   "scripts": {
     "start": "electron ."
   },
@@ -11,11 +12,13 @@
     "type": "git",
     "url": "${REPOSITORY_URL}"
   },
-  "keywords": [
-  ],
+  "keywords": [],
   "author": "${AUTHOR}",
   "email": "${EMAIL}",
   "license": "Apache-2.0",
-  "dependencies": {
+  "production": false,
+  "dependencies": {},
+  "devDependencies": {
+    "replace-in-file": "^2.5.3"
   }
 }
