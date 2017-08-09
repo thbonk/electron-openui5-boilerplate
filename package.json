@@ -1,20 +1,20 @@
 {
-  "name": "${APPNAME}",
+  "name": "APPNAME_PLACEHOLDER",
   "version": "0.0.1",
-  "description": "${DESCRIPTION}>",
+  "description": "DESCRIPTION_PLACEHOLDER",
   "main": "main.js",
-  "namespace": "${UI5_APP_NAMESPACE}",
+  "namespace": "UI5_APP_NAMESPACE_PLACEHOLDER",
   "readme": "README.md",
   "scripts": {
     "start": "electron ."
   },
   "repository": {
     "type": "git",
-    "url": "${REPOSITORY_URL}"
+    "url": "REPOSITORY_URL_PLACEHOLDER"
   },
   "keywords": [],
-  "author": "${AUTHOR}",
-  "email": "${EMAIL}",
+  "author": "AUTHOR_PLACEHOLDER",
+  "email": "EMAIL_PLACEHOLDER",
   "license": "Apache-2.0",
   "production": false,
   "dependencies": {},
