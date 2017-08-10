@@ -22,20 +22,22 @@ sap.ui.define([
 	"use strict";
 
 	/**
-	 * Retrieves changes (LabelChange, etc.) for a sap.ui.core.mvc.View and applies these changes
+	 * Retrieves changes (LabelChange, etc.) for an sap.ui.core.mvc.View and applies these changes
 	 *
-	 * @param {string} sComponentName - the component name the flexibility controller is responsible for
+	 * @param {string} sComponentName - Component name the flexibility controller is responsible for
+	 * @param {string} sAppVersion - Current version of the application
 	 * @constructor
 	 * @class
 	 * @alias sap.ui.fl.FlexController
 	 * @experimental Since 1.27.0
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 */
-	var FlexController = function (sComponentName) {
+	var FlexController = function (sComponentName, sAppVersion) {
 		this._oChangePersistence = undefined;
 		this._sComponentName = sComponentName || "";
-		if (this._sComponentName) {
+		this._sAppVersion = sAppVersion || Utils.DEFAULT_APP_VERSION;
+		if (this._sComponentName && this._sAppVersion) {
 			this._createChangePersistence();
 		}
 	};
@@ -63,6 +65,16 @@ sap.ui.define([
 	 */
 	FlexController.prototype.getComponentName = function () {
 		return this._sComponentName;
+	};
+
+	/**
+	 * Returns the application version of the FlexController
+	 *
+	 * @returns {String} Application version
+	 * @public
+	 */
+	FlexController.prototype.getAppVersion = function () {
+		return this._sAppVersion;
 	};
 
 	/**
@@ -113,18 +125,22 @@ sap.ui.define([
 			oChangeSpecificData.selector.idIsLocal = false;
 		}
 
-		var oAppDescr = Utils.getAppDescriptor(oAppComponent);
-		var sComponentName = this.getComponentName();
-		oChangeSpecificData.reference = sComponentName; //in this case the component name can also be the value of sap-app-id
-		if (oAppDescr && oAppDescr["sap.app"]) {
-			oChangeSpecificData.componentName = oAppDescr["sap.app"].componentName || oAppDescr["sap.app"].id;
-		} else {
-			//fallback in case no appdescriptor is available (e.g. during unit testing)
-			oChangeSpecificData.componentName = sComponentName;
-		}
-		oChangeSpecificData.packageName = "$TMP"; // first a flex change is always local, until all changes of a component are made transportable
 
+		oChangeSpecificData.reference = this.getComponentName(); //in this case the component name can also be the value of sap-app-id
+		oChangeSpecificData.packageName = "$TMP"; // first a flex change is always local, until all changes of a component are made transportable
 		oChangeSpecificData.context = aCurrentDesignTimeContext.length === 1 ? aCurrentDesignTimeContext[0] : "";
+
+		//fallback in case no application descriptor is available (e.g. during unit testing)
+		var sAppVersion = this.getAppVersion();
+		var oValidAppVersions = {
+			creation: sAppVersion,
+			from: sAppVersion
+		};
+		if (sAppVersion && oChangeSpecificData.developerMode) {
+			oValidAppVersions.to = sAppVersion;
+		}
+
+		oChangeSpecificData.validAppVersions = oValidAppVersions;
 
 		oChangeFileContent = Change.createInitialFileContent(oChangeSpecificData);
 		oChange = new Change(oChangeFileContent);
@@ -164,18 +180,17 @@ sap.ui.define([
 
 	/**
 	 * Adds an already prepared change to the flex persistence (not yet saved). This method will not call
-	 * createChange again, but expects an fully computed and appliable change.
+	 * createChange again, but expects a fully computed and appliable change.
 	 * Will be saved with #saveAll.
 	 *
 	 * @param {object} oChange property bag (nvp) holding the change information (see sap.ui.fl.Change#createInitialFileContent
-	 *        oPropertyBag). The property "packageName" is set to $TMP and internally since flex changes are always local when they are created.
-	 * @param {sap.ui.core.Control} oControl control for which the change will be added
+	 *        oPropertyBag). The property "packageName" is set to $TMP and internally since flex changes are always local when they are created
+	 * @param {object} oAppComponent component object
 	 * @returns {sap.ui.fl.Change} the created change
 	 * @public
 	 */
-	FlexController.prototype.addPreparedChange = function (oChange, oControl) {
-		var oComponent = Utils.getAppComponentForControl(oControl);
-		this._oChangePersistence.addChange(oChange, oComponent);
+	FlexController.prototype.addPreparedChange = function (oChange, oAppComponent) {
+		this._oChangePersistence.addChange(oChange, oAppComponent);
 		return oChange;
 	};
 
@@ -238,6 +253,7 @@ sap.ui.define([
 	 *
 	 * @param {object} mPropertyBag
 	 * @param {object} mPropertyBag.view - the view to process as XML tree
+	 * @param {string} mPropertyBag.viewId - id of the processed view
 	 * @param {object} mPropertyBag.modifier - polymorph reuse operations handling the changes on the given view type
 	 * @param {string} mPropertyBag.appComponent - app component
 	 * @returns {Promise} without parameters. Promise resolves once all changes of the view have been applied
@@ -245,15 +261,11 @@ sap.ui.define([
 	 */
 	FlexController.prototype.processViewByModifier = function (mPropertyBag) {
 
-		mPropertyBag.viewId = mPropertyBag.modifier.getId(mPropertyBag.view);
 		mPropertyBag.siteId = Utils.getSiteId(mPropertyBag.appComponent);
 
-		var oGetFlexSettingsPromise = FlexSettings.getInstance(this.getComponentName(), mPropertyBag);
-		return oGetFlexSettingsPromise.then(
-			this._oChangePersistence.getChangesForView.bind(this._oChangePersistence, mPropertyBag.viewId, mPropertyBag),
+		return this._oChangePersistence.getChangesForView(mPropertyBag.viewId, mPropertyBag).then(
+			this._resolveGetChangesForView.bind(this, mPropertyBag),
 			this._handlePromiseChainError.bind(this, mPropertyBag.view)
-		).then(
-			this._resolveGetChangesForView.bind(this, mPropertyBag)
 		);
 	};
 
@@ -504,7 +516,7 @@ sap.ui.define([
 	FlexController.prototype._getChangeRegistry = function () {
 		var oInstance = ChangeRegistry.getInstance();
 		// make sure to use the most current flex settings that have been retrieved during processView
-		oInstance.initSettings(this.getComponentName());
+		oInstance.initSettings();
 		return oInstance;
 	};
 
@@ -524,11 +536,16 @@ sap.ui.define([
 	 * Determines if an active personalization - user specific changes or variants - for the flexibility reference
 	 * of the controller instance (<code>this._sComponentName</code>) is in place.
 	 *
-	 * @returns {Promise} resolves with a boolean; true if a personalization that has been made via flexibility is active in the application
+	 * @param {map} [mPropertyBag] - Contains additional data needed for checking personalization
+	 * @param {boolean} [mPropertyBag.ignoreMaxLayerParameter] - Indicates that personalization shall be checked without layer filtering
+	 * @returns {Promise} Resolves with a boolean; true if a personalization change made using SAPUI5 flexibility services is active in the application
 	 * @public
 	 */
-	FlexController.prototype.isPersonalized = function () {
-		return this.getComponentChanges({}).then(function (aChanges) {
+	FlexController.prototype.isPersonalized = function (mPropertyBag) {
+		mPropertyBag = mPropertyBag || {};
+		//Always include smart variants when checking personalization
+		mPropertyBag.includeVariants = true;
+		return this.getComponentChanges(mPropertyBag).then(function (aChanges) {
 			var bIsPersonalized = aChanges.some(function (oChange) {
 				return oChange.isUserDependent();
 			});
@@ -544,7 +561,7 @@ sap.ui.define([
 	 * @private
 	 */
 	FlexController.prototype._createChangePersistence = function () {
-		this._oChangePersistence = ChangePersistenceFactory.getChangePersistenceForComponent(this.getComponentName());
+		this._oChangePersistence = ChangePersistenceFactory.getChangePersistenceForComponent(this.getComponentName(), this.getAppVersion());
 		return this._oChangePersistence;
 	};
 
@@ -603,7 +620,7 @@ sap.ui.define([
 	 * @private
 	 */
 	FlexController.prototype._setMergeError = function () {
-		return FlexSettings.getInstance(this.getComponentName()).then(function (oSettings) {
+		return FlexSettings.getInstance().then(function (oSettings) {
 			oSettings.setMergeErrorOccured(true);
 		});
 	};

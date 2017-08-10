@@ -18,7 +18,7 @@ sap.ui.define([
 	 * @class The <code>P13nColumnsPanel</code> control is used to define column-specific settings for table personalization.
 	 * @extends sap.m.P13nPanel
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @constructor
 	 * @public
 	 * @since 1.26.0
@@ -1074,7 +1074,7 @@ sap.ui.define([
 	};
 
 	/**
-	 * This method shall reorder all existing table items. First all selected, and then the unselected items in a alphabetical order
+	 * This method shall reorder all existing table items. First all selected, and then the unselected items in an alphabetical order
 	 *
 	 * @private
 	 * @param {object} oColumnsItem is an item from columnsItems aggregation

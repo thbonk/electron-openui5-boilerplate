@@ -29,10 +29,12 @@ sap.ui.define([
 	 * @param {any[]} [aValues]
 	 *   The values to be combined via the static method <code>SyncPromise.all</code>; assumes that
 	 *   <code>oPromise</code> and <code>fnCallback</code> are both omitted (<code>null</code>)
+	 * @param {boolean} [bReject=false]
+	 *   Whether to reject the new promise with the reason <code>oPromise</code>
 	 * @returns {SyncPromise}
 	 *   The SyncPromise created
 	 */
-	function SyncPromise(oPromise, fnCallback, aValues) {
+	function SyncPromise(oPromise, fnCallback, aValues, bReject) {
 		var bFulfilled = false,
 			iPending,
 			bRejected = false,
@@ -47,7 +49,10 @@ sap.ui.define([
 			}
 		}
 
-		if (aValues) {
+		if (bReject) {
+			vResult = oPromise;
+			bRejected = true;
+		} else if (aValues) {
 			iPending = aValues.length; // number of pending promises
 			checkFulfilled();
 			aValues.forEach(function (oValue, i) {
@@ -119,6 +124,14 @@ sap.ui.define([
 
 		/**
 		 * @returns {boolean}
+		 *   Whether this SyncPromise is still pending
+		 */
+		this.isPending = function () {
+			return vResult === this;
+		};
+
+		/**
+		 * @returns {boolean}
 		 *   Whether this SyncPromise is rejected
 		 */
 		this.isRejected = function () {
@@ -142,6 +155,20 @@ sap.ui.define([
 				oPromise = Promise.all(aValues);
 			}
 			return new SyncPromise(oPromise.then(fnOnFulfilled, fnOnRejected));
+		};
+
+		/**
+		 * Returns a string representation of this SyncPromise.
+		 * If this SyncPromise is resolved a String representation of the result is returned,
+		 * if it is rejected a String representation of the error is returned.
+		 *
+		 * @return {string} A string description of this SyncPromise
+		 */
+		this.toString = function () {
+			if (this.isPending()) {
+				return "SyncPromise: pending";
+			}
+			return String(this.getResult());
 		};
 	}
 
@@ -203,7 +230,17 @@ sap.ui.define([
 			};
 		},
 
-		// reject not implemented as there is no use case so far
+		/**
+		 * Returns a SyncPromise that is rejected with the given reason.
+		 *
+		 * @param {any} [vReason]
+		 *   The reason for rejection
+		 * @returns {SyncPromise}
+		 *   The SyncPromise
+		 */
+		reject : function (vReason) {
+			return new SyncPromise(vReason, null, null, true);
+		},
 
 		/**
 		 * Returns a SyncPromise wrapping the given promise <code>oPromise</code> or

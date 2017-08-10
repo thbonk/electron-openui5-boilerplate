@@ -24,7 +24,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -67,13 +67,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		}
 	}});
 
-
 	PullToRefresh.prototype.init = function(){
 		this._bTouchMode = sap.ui.Device.support.touch && !sap.ui.Device.system.combi || jQuery.sap.simulateMobileOnDesktop;
-
 		this._iState = 0; // 0 - normal; 1 - release to refresh; 2 - loading
-		this.oRb = sap.ui.getCore().getLibraryResourceBundle("sap.m"); // texts
-
 	};
 
 	PullToRefresh.prototype._loadBI = function(){
@@ -203,24 +199,26 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 		var $this = this.$();
 		var $text = $this.find(".sapMPullDownText");
+		var oResourceBundle = this._getRB();
+
 		switch (iState) {
 			case 0:
 				$this.toggleClass("sapMFlip", false).toggleClass("sapMLoading", false);
-				$text.html(this.oRb.getText(this._bTouchMode ? "PULL2REFRESH_PULLDOWN" : "PULL2REFRESH_REFRESH"));
+				$text.html(oResourceBundle.getText(this._bTouchMode ? "PULL2REFRESH_PULLDOWN" : "PULL2REFRESH_REFRESH"));
 				$this.removeAttr("aria-live");
 				$this.find(".sapMPullDownInfo").html(jQuery.sap.encodeHTML(this.getDescription()));
 				break;
 			case 1:
 				$this.toggleClass("sapMFlip", true);
-				$text.html(this.oRb.getText("PULL2REFRESH_RELEASE"));
+				$text.html(oResourceBundle.getText("PULL2REFRESH_RELEASE"));
 				$this.removeAttr("aria-live");
 				break;
 			case 2:
 				$this.toggleClass("sapMFlip", false).toggleClass("sapMLoading", true);
 				this._oBusyIndicator.setVisible(true);
-				$text.html(this.oRb.getText("PULL2REFRESH_LOADING"));
+				$text.html(oResourceBundle.getText("PULL2REFRESH_LOADING"));
 				$this.attr("aria-live", "assertive");
-				$this.find(".sapMPullDownInfo").html(this._bTouchMode ? this.oRb.getText("PULL2REFRESH_LOADING_LONG") : "");
+				$this.find(".sapMPullDownInfo").html(this._bTouchMode ? oResourceBundle.getText("PULL2REFRESH_LOADING_LONG") : "");
 				break;
 		}
 	};
@@ -336,6 +334,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		return this.setProperty("visible", bVisible);
 	};
 
+	PullToRefresh.prototype._getRB = function(){
+		return sap.ui.getCore().getLibraryResourceBundle("sap.m");
+	};
 
 	return PullToRefresh;
 

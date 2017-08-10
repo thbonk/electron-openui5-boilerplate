@@ -11,10 +11,6 @@
 @import "../../../../../sap/ui/core/themes/base/global.less";
 /* START "shared.less" */
 /* This CSS shares it rules with all other CSS of this library */
-
-/* default image for thumbnails in feeder and feedChunk*/
-@sapUiFeedPersonPlaceholder: url("img/feed/person_placeholder_48.png");
-
 /* END "shared.less" */
 
 
@@ -1187,6 +1183,9 @@ html[dir=rtl] .sapUiUx3ExactLstCollapsed > .sapUiUx3ExactLstHead > .sapUiUx3Exac
 /* CSS for control sap.ui.ux3/FeedChunk.control */
 /* ============================================ */
 
+/* default image for thumbnails in feedChunk*/
+@_sap_ui_ux3_FeedChunk_PersonPlaceholder: url("img/feed/person_placeholder_48.png");
+
 .sapUiFeedChunk {
 	border: 1px solid @sapUiMediumBorder;
 /*  width: 100%;*/
@@ -1303,6 +1302,9 @@ html[dir=rtl] .sapUiUx3ExactLstCollapsed > .sapUiUx3ExactLstHead > .sapUiUx3Exac
 /* ============================================= */
 /* CSS for control sap.ui.commons/Feeder.control */
 /* ============================================= */
+
+/* default image for thumbnails in feeder*/
+@_sap_ui_ux3_Feeder_PersonPlaceholder: url("img/feed/person_placeholder_48.png");
 
 .sapUiFeeder {
 	box-sizing: border-box;

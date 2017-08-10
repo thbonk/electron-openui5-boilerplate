@@ -5,8 +5,8 @@
  */
 
 // Provides control sap.m.ListBase.
-sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './ListItemBase', './library', 'sap/ui/core/Control', 'sap/ui/core/delegate/ItemNavigation', 'sap/ui/core/InvisibleText'],
-	function(jQuery, GroupHeaderListItem, ListItemBase, library, Control, ItemNavigation, InvisibleText) {
+sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './ListItemBase', './library', 'sap/ui/core/Control', 'sap/ui/core/delegate/ItemNavigation', 'sap/ui/core/InvisibleText', 'sap/ui/core/LabelEnablement'],
+	function(jQuery, GroupHeaderListItem, ListItemBase, library, Control, ItemNavigation, InvisibleText, LabelEnablement) {
 	"use strict";
 
 
@@ -24,7 +24,7 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './ListItemBase', '
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -385,7 +385,9 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './ListItemBase', '
 					srcControl : {type : "sap.ui.core.Control"}
 				}
 			}
-		}
+		},
+		designTime : true
+
 	}});
 
 	// announce acc states at the initial focus
@@ -1472,6 +1474,10 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './ListItemBase', '
 			oBinding = this.getBinding("rows"),
 			oBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m");
 
+		if (LabelEnablement.isRequired(this)) {
+			sStates += oBundle.getText("LIST_REQUIRED") + " ";
+		}
+
 		if (sMode == mMode.MultiSelect) {
 			sStates += oBundle.getText("LIST_MULTISELECTABLE") + " ";
 		} else if (sMode == mMode.Delete) {
@@ -1479,6 +1485,7 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './ListItemBase', '
 		} else if (sMode != mMode.None) {
 			sStates += oBundle.getText("LIST_SELECTABLE") + " ";
 		}
+
 		if (oBinding && oBinding.isGrouped()) {
 			sStates += oBundle.getText("LIST_GROUPED") + " ";
 		}

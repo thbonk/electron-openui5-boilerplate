@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/LayoutData', './library'],
 	 * @extends sap.ui.core.LayoutData
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -36,7 +36,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/LayoutData', './library'],
 		properties : {
 
 			/**
-			 * Defines the minimal size in px of an ResponsiveFlowLayout element. The element will be shrunk down to this value.
+			 * Defines the minimal size in px of a ResponsiveFlowLayout element. The element will be shrunk down to this value.
 			 */
 			minWidth : {type : "int", group : "Misc", defaultValue : 100},
 

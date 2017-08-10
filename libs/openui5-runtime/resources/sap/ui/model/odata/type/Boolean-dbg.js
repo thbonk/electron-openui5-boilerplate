@@ -80,7 +80,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Core',
 	 * @extends sap.ui.model.odata.type.ODataType
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @alias sap.ui.model.odata.type.Boolean
 	 * @param {object} [oFormatOptions]

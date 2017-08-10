@@ -24,7 +24,7 @@ sap.ui.define(['jquery.sap.global', './ListBase', './ListItemBase', './library']
 	 * @extends sap.m.ListBase
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -65,7 +65,8 @@ sap.ui.define(['jquery.sap.global', './ListBase', './ListItemBase', './library']
 			 * Defines the columns of the table.
 			 */
 			columns : {type : "sap.m.Column", multiple : true, singularName : "column"}
-		}
+		},
+		designTime: true
 	}});
 
 	// class name for the navigation items

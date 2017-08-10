@@ -27,6 +27,7 @@ Common Compact/Cozy
 
 .sapUxAPAnchorBar.sapMTB {
 	padding-left: 0;
+	box-shadow: @sapUiShadowHeader;
 }
 
 /* M, L or splitview paddings */
@@ -806,7 +807,7 @@ html[data-sap-ui-animation="off"] .sapUxAPObjectPageHeaderStickied & .sapUxAPObj
 }
 
 .sapUiSizeCompact .sapUxAPObjectPageHeaderIdentifier {
-	min-height:2.5rem;
+	min-height:2.5625rem;
 }
 
 .sapUiMedia-Std-Tablet .sapUxAPObjectPageHeaderIdentifier,
@@ -1027,6 +1028,10 @@ html[dir=rtl] .sapUxAPObjectPageHeaderMarks .sapMObjStatusMarker .sapUiIcon:firs
 	margin-top: 0.25rem;
 }
 
+.sapUiSizeCompact .sapUxAPObjectPageHeaderIdentifier .sapUxAPObjectPageHeaderIdentifierActions {
+	padding-top: 0.75rem;
+}
+
 /* Fiori 2.0 adaptation */
 .sapF2CollapsedHeader .sapUxAPObjectPageHeaderNavigation > .sapMBar {
   height: 0;
@@ -1132,6 +1137,17 @@ html[dir=rtl] .sapUxAPObjectPageHeaderMarks .sapMObjStatusMarker .sapUiIcon:firs
 				right: 0.5rem;
 				margin-left: 0;
 			}
+		}
+
+		/* ObjectAttribute will not truncate inside ObjectPage but rather will go on more lines */
+		.sapUxAPObjectPageHeaderContentItem.sapMObjectAttributeActive {
+			line-height:1rem;
+		}
+		.sapMObjectAttributeActive .sapMObjectAttributeTitle,
+		.sapMObjectAttributeActive .sapMObjectAttributeText {
+			display: initial;
+			white-space: pre-line;
+			word-wrap: break-word;
 		}
 
 		.sapUiVltCell > .sapMObjectAttributeDiv, .sapUiVltCell > .sapMObjStatus {
@@ -1401,7 +1417,7 @@ body > .sapUxAPObjectPageLayout,
 }
 
 .sapUxAPObjectPageContainerNoBar > .sapUxAPObjectPageSection:first-child {
-	margin-top: 0;
+	margin-top:  2rem;
 }
 
 /****
@@ -1475,7 +1491,10 @@ body > .sapUxAPObjectPageLayout,
 	}
 }
 
-.sapUiSizeCompact .sapUxAPObjectPageLayout .sapUxAPObjectPageFooter .sapUxAPObjectPageFloatingFooter {
+.sapUiSizeCompact .sapUxAPObjectPageLayout .sapUxAPObjectPageFooter {
+	.sapUxAPObjectPageFloatingFooter {
+		height: 2.5rem;
+	}
 	height: 2.5rem;
 }
 
@@ -1788,27 +1807,80 @@ html .sapUiContainer-Medium .sapUxAPObjectPageSubSectionHeader {
 }
 
 /* remove the padding of form content, since form itself is already in a grid-cell that provides the required extra spacing */
-/* (1) remove the padding of direct children: */
-.sapUxAPBlockContainer .sapUiFormResGrid > div {
-	padding-left: 0;
-	padding-top: 0;
-}
-
-/* (2) if the direct child is a form container with a title, a more specific selector is needed: */
+/* (1) if the direct child is a form container with a title, a more specific selector is needed: */
 .sapUxAPBlockContainer .sapUiFormResGrid > div.sapUiFormContainerTitle {
 	padding-top: 0;
 }
 
-/* (3) if the direct child is a form container with a title, a more specific selector is needed for the title itself: */
+/* (2) if the direct child is a form container with a title, a more specific selector is needed for the title itself: */
 .sapUxAPBlockContainer .sapUiFormResGrid > div.sapUiFormContainerTitle > .sapUiFormTitle {
 	line-height: 2rem;
 	margin-bottom: 0;
 }
 
+.sapUxAPBlockContainerDesktop {
+	padding: 1rem 2rem 3rem 2rem;
+	.sapUiFormResGrid > div {
+		padding: 0 0;
+	}
+}
+.sapUxAPBlockContainerTablet {
+	padding: 1rem 1rem 3rem 1rem;
+	.sapUiFormResGrid > div {
+		padding: 0 0;
+	}
+}
+.sapUxAPBlockContainerPhone {
+	padding: 0 1rem;
+	.sapUiFormResGrid > div {
+		padding: 0 0;
+	}
+	.sapUiRespGrid.sapUiRespGridHSpace1 {
+		padding: 0 0;
+	}
+	.sapUiRespGrid.sapUiRespGridHSpace1 > div {
+		margin: 0 0;
+	}
+}
+
+.sapUxAPObjectPageSubSectionPromoted .sapUxAPBlockContainerPhone {
+	padding-top: 1rem;
+}
+
+.sapUiMedia-Std-Desktop .sapMSplitContainer:not(.sapMSplitContainerHideMode) .sapMSplitContainerDetail,
+.sapUiMedia-Std-Phone .sapMSplitContainer:not(.sapMSplitContainerHideMode) {
+	.sapUiRespGrid.sapUiRespGridHSpace1 {
+		padding: 0 0;
+	}
+	.sapUiRespGrid.sapUiRespGridHSpace1 > div {
+		margin: 0 0;
+	}
+}
+
 /* compact size */
-.sapUiSizeCompact .sapUxAPObjectPageSubSectionHeaderTitle {
-	height: 2rem;
-	line-height: 2rem;
+.sapUiSizeCompact {
+	.sapUxAPObjectPageSubSectionHeaderTitle {
+		height: 2rem;
+		line-height: 2rem;
+	}
+	.sapUxAPBlockContainerDesktop {
+		padding: 1rem 2rem 2rem 2rem;
+	}
+	.sapUxAPBlockContainerTablet,
+	.sapUxAPBlockContainerPhone {
+		padding: 1rem 1rem 2rem 1rem;
+	}
+	.sapUxAPBlockContainerPhone {
+		.sapUiFormResGrid > div {
+			padding: 0 0;
+		}
+		.sapUiRespGrid.sapUiRespGridHSpace1 {
+			padding: 0 0;
+		}
+		.sapUiRespGrid.sapUiRespGridHSpace1 > div {
+			margin: 0 0;
+		}
+	}
 }
 
 /* IE and Edge ignores outline-offset. Use an overlay: */

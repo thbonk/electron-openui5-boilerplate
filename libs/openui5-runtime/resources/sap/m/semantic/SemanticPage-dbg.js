@@ -4,8 +4,8 @@
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/m/semantic/SegmentedContainer', 'sap/m/semantic/SemanticConfiguration','sap/m/Button', 'sap/m/Title', 'sap/m/ActionSheet', 'sap/m/Page', 'sap/m/OverflowToolbar', 'sap/m/OverflowToolbarButton', 'sap/m/OverflowToolbarLayoutData', 'sap/m/ToolbarSpacer', 'sap/m/Bar', 'sap/ui/core/CustomData', 'sap/ui/base/ManagedObject', 'sap/ui/core/AccessibleLandmarkRole', 'sap/m/PageAccessibleLandmarkInfo'],
-function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, ActionSheet, Page, OverflowToolbar, OverflowToolbarButton, OverflowToolbarLayoutData, ToolbarSpacer, Bar, CustomData, ManagedObject, AccessibleLandmarkRole, PageAccessibleLandmarkInfo) {
+sap.ui.define(['jquery.sap.global', 'sap/m/semantic/SegmentedContainer', 'sap/m/semantic/SemanticConfiguration','sap/m/Button', 'sap/m/Title', 'sap/m/ActionSheet', 'sap/m/Page', 'sap/m/OverflowToolbar', 'sap/m/OverflowToolbarButton', 'sap/m/OverflowToolbarLayoutData', 'sap/m/ToolbarSpacer', 'sap/m/Bar', 'sap/ui/core/CustomData', 'sap/ui/base/ManagedObject', 'sap/ui/core/AccessibleLandmarkRole', 'sap/m/PageAccessibleLandmarkInfo','sap/ui/base/ManagedObjectObserver'],
+function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, ActionSheet, Page, OverflowToolbar, OverflowToolbarButton, OverflowToolbarLayoutData, ToolbarSpacer, Bar, CustomData, ManagedObject, AccessibleLandmarkRole, PageAccessibleLandmarkInfo, ManagedObjectObserver) {
 	"use strict";
 
 	/**
@@ -37,7 +37,7 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 	 * @abstract
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -193,17 +193,13 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 	});
 
 	SemanticPage.prototype.init = function () {
+		this._oHeaderObserver = new ManagedObjectObserver(SemanticPage.prototype._updateHeaderVisibility.bind(this));
 
 		this._currentMode = SemanticConfiguration._PageMode.display;
 		this._getPage().setCustomHeader(this._getInternalHeader());
 		this._getPage().setFooter(new OverflowToolbar(this.getId() + "-footer"));
 		this._getPage().setLandmarkInfo(new PageAccessibleLandmarkInfo());
 		this._getPage().setShowHeader(false);
-
-		var oHeader = this._getInternalHeader();
-		oHeader._attachModifyAggregation("contentLeft", null, this._updateHeaderVisibility, this);
-		oHeader._attachModifyAggregation("contentMiddle", null, this._updateHeaderVisibility, this);
-		oHeader._attachModifyAggregation("contentRight", null, this._updateHeaderVisibility, this);
 	};
 
 
@@ -232,6 +228,11 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 		if (this._oNavButton) {
 			this._oNavButton.destroy();
 			this._oNavButton = null;
+		}
+
+		if ( this._oHeaderObserver ) {
+			this._oHeaderObserver.disconnect();
+			this._oHeaderObserver = null;
 		}
 
 		this._oPositionsMap = null;
@@ -706,6 +707,14 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 
 		if (!this._oInternalHeader) {
 			this._oInternalHeader = new Bar(this.getId() + "-intHeader");
+
+			if (this._oHeaderObserver) {
+				this._oHeaderObserver.observe(this._oInternalHeader, {
+					aggregations: [
+						"contentLeft", "contentMiddle", "contentRight"
+					]
+				});
+			}
 		}
 
 		return this._oInternalHeader;

@@ -60,7 +60,7 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject'],
 		if (sOldId) {
 			aLabelsOfControl = CONTROL_TO_LABELS_MAPPING[sOldId];
 			if (aLabelsOfControl) {
-				aLabelsOfControl = jQuery.grep(aLabelsOfControl, function(sCurrentLabelId) {
+				aLabelsOfControl = aLabelsOfControl.filter(function(sCurrentLabelId) {
 					  return sCurrentLabelId != sLabelId;
 				});
 				if (aLabelsOfControl.length) {
@@ -112,7 +112,7 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject'],
 	 * @see sap.ui.core.LabelEnablement#enrich
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @protected
 	 * @alias sap.ui.core.LabelEnablement
 	 * @namespace
@@ -140,7 +140,7 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject'],
 
 		var oControl = toControl(sControlId);
 		if (oControl && oControl.getIdForLabel) {
-			// for some controls the label must point to an special HTML element, not the outer one.
+			// for some controls the label must point to a special HTML element, not the outer one.
 			sControlId = oControl.getIdForLabel();
 		}
 
@@ -192,7 +192,7 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject'],
 	};
 
 	function checkRequired(oElem) {
-		return !!(oElem && oElem.getMetadata().getProperty("required") && oElem.getRequired());
+		return !!(oElem && oElem.getRequired && oElem.getRequired());
 	}
 
 	/**

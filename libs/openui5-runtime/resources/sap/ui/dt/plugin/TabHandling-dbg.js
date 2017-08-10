@@ -17,7 +17,7 @@ sap.ui.define([
 	 * @class The TabHandling plugin adjusts the tabindex for the elements.
 	 * @extends sap.ui.dt.Plugin
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @constructor
 	 * @private
 	 * @since 1.38
@@ -104,7 +104,9 @@ sap.ui.define([
 	 * @private
 	 */
 	TabHandling.prototype._onDomChanged = function() {
-		this._removeTabIndex();
+		if (this.getDesignTime().getEnabled()) {
+			this._removeTabIndex();
+		}
 	};
 
 	return TabHandling;

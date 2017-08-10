@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -77,7 +77,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 			 * Controls that are placed into Grid layout.
 			 */
 			content : {type : "sap.ui.core.Control", multiple : true, singularName : "content"}
-		}
+		},
+		designTime: true
 	}});
 
 	/**

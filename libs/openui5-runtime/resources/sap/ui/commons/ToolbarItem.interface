@@ -8,5 +8,5 @@ an icon instead of a text caption.
 
 Toolbar items must have a fixed height compatible with the toolbar being
 a single horizontal row. They can refer to the toolbar's marker class
-"sapUiTb" to adjust their own theming when used inside a toolbar.</documentation>
+&quot;sapUiTb&quot; to adjust their own theming when used inside a toolbar.</documentation>
 </interface>

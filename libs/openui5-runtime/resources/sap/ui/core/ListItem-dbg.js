@@ -22,7 +22,7 @@ sap.ui.define(['./Item', './library'],
 	 * @extends sap.ui.core.Item
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -36,7 +36,7 @@ sap.ui.define(['./Item', './library'],
 
 			/**
 			 * The icon belonging to this list item instance.
-			 * This can be an URI to an image or an icon font URI.
+			 * This can be a URI to an image or an icon font URI.
 			 */
 			icon : {type : "string", group : "Appearance", defaultValue : null},
 

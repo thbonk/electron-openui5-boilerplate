@@ -32,7 +32,7 @@
 			 *        feature - DO NOT USE IN PRODUCTIVE SCENARIOS!!
 			 *
 			 * @author Peter Muessig
-			 * @version 1.46.12
+			 * @version 1.48.5
 			 * @private
 			 * @alias sap.ui.core.plugin.LessSupport
 			 */
@@ -95,15 +95,6 @@
 
 				this.oCore = oCore;
 				this.bActive = true;
-
-				// overwrite the toCSS method of the Color function to return "transparent" instead of rgba(0,0,0,0)
-				var fnToCSS = window.less.tree.Color.prototype.toCSS;
-				window.less.tree.Color.prototype.toCSS = function(){
-					if (this.alpha == 0 && this.rgb[0] == 0 && this.rgb[1] == 0 && this.rgb[2] == 0){
-						return "transparent";
-					}
-					return fnToCSS.apply(this, arguments);
-				};
 
 				// overwrite the includeLibraryTheme/applyTheme function to inject LESS
 				this.oCore.includeLibraryTheme = jQuery.proxy(this.includeLibraryTheme, this);
@@ -491,7 +482,7 @@
 					// Run less build
 					window.less.refresh();
 
-					// Update Theming Parameters without triggering an library-parameters.json request
+					// Update Theming Parameters without triggering a library-parameters.json request
 					var Parameters = sap.ui.requireSync('sap/ui/core/theming/Parameters');
 					Parameters._setOrLoadParameters(mLibVariables);
 
@@ -530,20 +521,11 @@
 	//  - when available immediately define the LessSupport
 	//  - if not we delay the definition till the body is loaded
 	if (!(window.sap && window.sap.ui && window.sap.ui.define)) {
-		var fnHandler;
-		if (document.addEventListener) {
-			fnHandler = function() {
-				document.removeEventListener("DOMContentLoaded", fnHandler, false);
-				defineLessSupport();
-			};
-			document.addEventListener("DOMContentLoaded", fnHandler, false);
-		} else if (document.attachEvent) {
-			fnHandler = function() {
-				document.detachEvent("onreadystatechange", fnHandler);
-				defineLessSupport();
-			};
-			document.attachEvent("onreadystatechange", fnHandler);
-		}
+		var fnHandler = function() {
+			document.removeEventListener("DOMContentLoaded", fnHandler, false);
+			defineLessSupport();
+		};
+		document.addEventListener("DOMContentLoaded", fnHandler, false);
 	} else {
 		defineLessSupport();
 	}

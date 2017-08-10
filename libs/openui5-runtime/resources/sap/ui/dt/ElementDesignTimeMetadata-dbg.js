@@ -25,7 +25,7 @@ function(jQuery, DesignTimeMetadata, AggregationDesignTimeMetadata) {
 	 * @extends sap.ui.core.DesignTimeMetadata
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private
@@ -82,7 +82,8 @@ function(jQuery, DesignTimeMetadata, AggregationDesignTimeMetadata) {
 	};
 
 	/**
-	 * Returns the plain DT metadata for an aggregation name
+	 * Returns the plain DT metadata for an aggregation name,
+	 * including also aggregation-like associations
 	 * @param {string} sAggregationName an aggregation name
 	 * @return {object} returns the DT metadata for an aggregation with a given name
 	 * @public
@@ -92,7 +93,7 @@ function(jQuery, DesignTimeMetadata, AggregationDesignTimeMetadata) {
 	};
 
 	/**
-	 * Creates a aggregation DT metadata class for an aggregation,
+	 * Creates an aggregation DT metadata class for an aggregation,
 	 * ensure to destroy it if it is no longer needed, otherwise you get memory leak.
 	 * @param {string} sAggregationName an aggregation name
 	 * @return {sap.ui.dt.AggregationDesignTimeMetadata} returns the aggregation DT metadata for an aggregation with a given name
@@ -107,12 +108,21 @@ function(jQuery, DesignTimeMetadata, AggregationDesignTimeMetadata) {
 	};
 
 	/**
-	 * Returns the DT metadata for all aggregations
+	 * Returns the DT metadata for all aggregations,
+	 * including also aggregation-like associations
 	 * @return {map} returns the DT metadata for all aggregations
 	 * @public
 	 */
 	ElementDesignTimeMetadata.prototype.getAggregations = function() {
-		return this.getData().aggregations;
+		var mAggregations = this.getData().aggregations;
+		var mAssociations = this.getData().associations || {};
+		Object.keys(mAssociations).forEach(function(sAssociation){
+			var mAssociation = mAssociations[sAssociation];
+			if (mAssociation.aggregationLike){
+				mAggregations[sAssociation] = mAssociation;
+			}
+		});
+		return mAggregations;
 	};
 
 	/**
@@ -122,6 +132,7 @@ function(jQuery, DesignTimeMetadata, AggregationDesignTimeMetadata) {
 	 * @return {object} returns the relevant container
 	 * @public
 	 */
+	//TODO: Remove this method as soon as DTMetadata propagation is finalized
 	ElementDesignTimeMetadata.prototype.getRelevantContainer = function(oElement) {
 		var fnGetRelevantContainer = this.getData().getRelevantContainer;
 		if (!fnGetRelevantContainer || typeof fnGetRelevantContainer !== "function") {
@@ -189,6 +200,25 @@ function(jQuery, DesignTimeMetadata, AggregationDesignTimeMetadata) {
 			};
 		}
 	};
+
+	/**
+	 * Returns property "ignore" of aggregation DT metadata
+	 * @param {Object} oElement Element whose aggregation has to be checked
+	 * @param {String} sAggregationName Name of the Aggregation
+	 * @return {boolean} if ignored
+	 * @public
+	 */
+	ElementDesignTimeMetadata.prototype.isAggregationIgnored = function(oElement, sAggregationName) {
+		var mAggregations = this.getAggregations();
+		var oAggregationMetadata = mAggregations[sAggregationName];
+		var vIgnore = (oAggregationMetadata) ? oAggregationMetadata.ignore : false;
+		if (!vIgnore || (vIgnore && typeof vIgnore === "function" && !vIgnore(oElement))) {
+			return false;
+		} else {
+			return true;
+		}
+	};
+
 
 	return ElementDesignTimeMetadata;
 }, /* bExport= */ true);

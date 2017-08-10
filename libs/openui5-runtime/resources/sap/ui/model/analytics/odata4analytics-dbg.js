@@ -2217,7 +2217,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 	 *
 	 * @constructor
 	 *
-	 * @class Representation of a OData entity set.
+	 * @class Representation of an OData entity set.
 	 * @name sap.ui.model.analytics.odata4analytics.EntitySet
 	 * @public
 	 */
@@ -2376,7 +2376,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 	 *
 	 * @constructor
 	 *
-	 * @class Representation of a OData entity type.
+	 * @class Representation of an OData entity type.
 	 * @name sap.ui.model.analytics.odata4analytics.EntityType
 	 * @public
 	 */
@@ -3185,7 +3185,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		 * @name sap.ui.model.analytics.odata4analytics.FilterExpression#addUI5FilterConditions
 		 */
 		addUI5FilterConditions : function(aUI5Filter) {
-			if (!jQuery.isArray(aUI5Filter)) {
+			if (!Array.isArray(aUI5Filter)) {
 				throw "Argument is not an array";
 			}
 			if (aUI5Filter.length == 0) {
@@ -3711,6 +3711,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		 * this expression.
 		 *
 		 * @param {object} oSelectedPropertyNames Object with properties requested for $select
+		 *
 		 * @returns {string} The $orderby value for the sort expressions
 		 * @public
 		 * @function
@@ -4925,7 +4926,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		},
 
 		/**
-		 * Get the value of an query option for the OData request URI corresponding
+		 * Get the value of a query option for the OData request URI corresponding
 		 * to this request.
 		 *
 		 * @param {String}
@@ -5294,7 +5295,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		},
 
 		/**
-		 * Get the value of an query option for the OData request URI corresponding
+		 * Get the value of a query option for the OData request URI corresponding
 		 * to this request.
 		 *
 		 * @param {String}

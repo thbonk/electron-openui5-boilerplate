@@ -18,7 +18,7 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 	 * @class
 	 * The InPlaceEdit is a functionality to have text in display mode that can be changed in place.
 	 * @extends sap.ui.core.Control
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -34,7 +34,7 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 
 			/**
 			 * Visualizes warnings or errors related to the InPlaceEdit. Possible values: Warning, Error, Success.
-			 * If the content control has a own valueState property this will be used.
+			 * If the content control has an own valueState property this will be used.
 			 */
 			valueState : {type : "sap.ui.core.ValueState", group : "Data", defaultValue : sap.ui.core.ValueState.None},
 

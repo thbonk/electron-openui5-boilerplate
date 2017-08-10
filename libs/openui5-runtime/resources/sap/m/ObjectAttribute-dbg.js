@@ -12,15 +12,20 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 
 
 	/**
-	 * Constructor for a new ObjectAttribute.
+	 * Constructor for a new <code>ObjectAttribute</code>.
 	 *
 	 * @param {string} [sId] ID for the new control, generated automatically if no ID is given
 	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
-	 * The ObjectAttribute control displays a text field that can be normal or active. The ObjectAttribute fires a press event when the user selects active text.
+	 * The <code>ObjectAttribute</code> control displays a text field that can be normal or active.
+	 * The <code>ObjectAttribute</code> fires a <code>press</code> event when the user chooses the active text.
+	 *
+	 * <b>Note:</b> If property <code>active</code> is set to <code>true</code>, only the value of the
+	 * <code>text</code> property is styled and acts as a link. In this case the <code>text</code>
+	 * property must also be set, as otherwise there will be no link displayed for the user.
 	 * @extends sap.ui.core.Control
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -44,7 +49,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 			text : {type : "string", group : "Misc", defaultValue : null},
 
 			/**
-			 * Indicates if the ObjectAttribute text is selectable for the user.
+			 * Indicates if the <code>ObjectAttribute</code> text is selectable for the user.
+			 *
+			 * <b>Note:</b> As of version 1.48, only the value of the <code>text</code> property becomes active (styled and acts like a link) as opposed to both the <code>title</code> and <code>text</code> in the previous versions. If you set this property to <code>true</code>, you have to also set the <code>text</code> property.
 			 */
 			active : {type : "boolean", group : "Misc", defaultValue : null},
 
@@ -222,7 +229,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	};
 
 	ObjectAttribute.prototype._isSimulatedLink = function () {
-		return this.getActive() && !this.getAggregation('customContent');
+		return (this.getActive() && this.getText() !== "") && !this.getAggregation('customContent');
 	};
 
 	return ObjectAttribute;

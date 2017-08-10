@@ -11,7 +11,7 @@
  * This API is independent from any other part of the UI5 framework. This allows it to be loaded beforehand, if it is needed, to create the UI5 bootstrap
  * dynamically depending on the capabilities of the browser or device.
  *
- * @version 1.46.12
+ * @version 1.48.5
  * @namespace
  * @name sap.ui.Device
  * @public
@@ -37,7 +37,7 @@ if (typeof window.sap.ui !== "object") {
 
 	//Skip initialization if API is already available
 	if (typeof window.sap.ui.Device === "object" || typeof window.sap.ui.Device === "function" ) {
-		var apiVersion = "1.46.12";
+		var apiVersion = "1.48.5";
 		window.sap.ui.Device._checkAPIVersion(apiVersion);
 		return;
 	}
@@ -95,7 +95,7 @@ if (typeof window.sap.ui !== "object") {
 
 	//Only used internal to make clear when Device API is loaded in wrong version
 	device._checkAPIVersion = function(sVersion){
-		var v = "1.46.12";
+		var v = "1.48.5";
 		if (v != sVersion) {
 			logger.log(WARNING, "Device API version differs: " + v + " <-> " + sVersion);
 		}
@@ -1370,12 +1370,8 @@ if (typeof window.sap.ui !== "object") {
 				q.media.addListener(oConfig.listener);
 			}
 		} else { //IE, Safari (<6?)
-			if (window.addEventListener) {
-				window.addEventListener("resize", oConfig.listener, false);
-				window.addEventListener("orientationchange", oConfig.listener, false);
-			} else { //IE8
-				window.attachEvent("onresize", oConfig.listener);
-			}
+			window.addEventListener("resize", oConfig.listener, false);
+			window.addEventListener("orientationchange", oConfig.listener, false);
 		}
 
 		oConfig.listener();
@@ -1451,12 +1447,8 @@ if (typeof window.sap.ui !== "object") {
 				queries[i].media.removeListener(oConfig.listener);
 			}
 		} else { //IE, Safari (<6?)
-			if (window.removeEventListener) {
-				window.removeEventListener("resize", oConfig.listener, false);
-				window.removeEventListener("orientationchange", oConfig.listener, false);
-			} else { //IE8
-				window.detachEvent("onresize", oConfig.listener);
-			}
+			window.removeEventListener("resize", oConfig.listener, false);
+			window.removeEventListener("orientationchange", oConfig.listener, false);
 		}
 
 		refreshCSSClasses(sName, "", true);
@@ -1825,7 +1817,7 @@ if (typeof window.sap.ui !== "object") {
 	var bKeyboardOpen = false;
 	var iLastResizeTime;
 	var rInputTagRegex = /INPUT|TEXTAREA|SELECT/;
-	// On iPhone with iOS version 7.0.x and on iPad with iOS version 7.x (tested with all versions below 7.1.1), there's a invalide resize event fired
+	// On iPhone with iOS version 7.0.x and on iPad with iOS version 7.x (tested with all versions below 7.1.1), there's an invalid resize event fired
 	// when changing the orientation while keyboard is shown.
 	var bSkipFirstResize = device.os.ios && device.browser.name === "sf" &&
 		((device.system.phone && device.os.version >= 7 && device.os.version < 7.1) || (device.system.tablet && device.os.version >= 7));
@@ -1837,7 +1829,7 @@ if (typeof window.sap.ui !== "object") {
 			if (bKeyboardOpen && bFromOrientationChange) {
 				return !device.orientation.landscape;
 			}
-			if (bKeyboardOpen) { //when keyboard opens, the last orientation change value will be retured.
+			if (bKeyboardOpen) { //when keyboard opens, the last orientation change value will be returned.
 				return device.orientation.landscape;
 			}
 		} else if (device.support.matchmedia && device.support.orientation) { //most desktop browsers and windows phone/tablet which not support orientationchange
@@ -1939,19 +1931,14 @@ if (typeof window.sap.ui !== "object") {
 	//Add API to global namespace
 	window.sap.ui.Device = device;
 
-	// Add handler for orientationchange and resize after initialization of Device API (IE8 fires onresize synchronously)
+	// Add handler for orientationchange and resize after initialization of Device API
 	if (device.support.touch && device.support.orientation) {
-		//logic for mobile devices which support orientationchange (like ios, android, blackberry)
+		// logic for mobile devices which support orientationchange (like ios, android)
 		window.addEventListener("resize", handleMobileOrientationResizeChange, false);
 		window.addEventListener("orientationchange", handleMobileOrientationResizeChange, false);
 	} else {
-		if (window.addEventListener) {
-			//most desktop browsers and windows phone/tablet which not support orientationchange
-			window.addEventListener("resize", handleOrientationResizeChange, false);
-		} else {
-			//IE8
-			window.attachEvent("onresize", handleOrientationResizeChange);
-		}
+		// desktop browsers and windows phone/tablet which not support orientationchange
+		window.addEventListener("resize", handleOrientationResizeChange, false);
 	}
 
 	//Always initialize the default media range set

@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 	 * @extends sap.m.NotificationListBase
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -174,6 +174,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 	//================================================================================
 
 	NotificationListItem.prototype.onBeforeRendering = function () {
+		this._updateAriaAdditionalInfo();
 		this._deregisterResize();
 	};
 
@@ -276,6 +277,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 		var notificationDomRef = this.getDomRef();
 
 		if (this._canTruncate() && (!this.getHideShowMoreButton())) { // if the Notification has long text
+
 			// show the truncate button
 			this.getDomRef('expandCollapseButton').classList.remove('sapMNLI-CollapseButtonHide');
 

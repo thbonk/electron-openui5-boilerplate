@@ -295,7 +295,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/TreeBin
 		};
 
 		/**
-		 * Traverses an re-inserted or newly added subtree.
+		 * Traverses a re-inserted or newly added subtree.
 		 * This can be a combination of flat and deep trees.
 		 *
 		 * Decides if the traversal has to branche over to a flat or a deep part of the tree.
@@ -308,7 +308,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/TreeBin
 
 			if (oSubtreeHandle) {
 				// subtree is flat
-				if (jQuery.isArray(oSubtree)) {
+				if (Array.isArray(oSubtree)) {
 					if (oSubtreeHandle._oSubtreeRoot) {
 						// jump to a certain position in the flat structure and map the nodes
 						fnTraverseFlatSubtree(oSubtree, oSubtreeHandle._oSubtreeRoot.serverIndex, oSubtreeHandle._oSubtreeRoot, oSubtreeHandle._oSubtreeRoot.originalLevel || 0, oNode.level + 1);
@@ -879,6 +879,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/TreeBin
 			jQuery.sap.assert(oToggledNode != undefined, "expand(" + vRowIndex + "): Node not found!");
 		}
 
+		if (oToggledNode.nodeState.expanded) {
+			return; // Nothing to do here
+		}
+
 		//expand
 		oToggledNode.nodeState.expanded = true;
 		oToggledNode.nodeState.collapsed = false;
@@ -943,6 +947,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/TreeBin
 			oToggledNode = this.findNode(vRowIndex);
 			jQuery.sap.assert(oToggledNode != undefined, "expand(" + vRowIndex + "): Node not found!");
 		}
+
+		if (oToggledNode.nodeState.collapsed) {
+			return; // Nothing to do here
+		}
+
 		//collapse
 		oToggledNode.nodeState.expanded = false;
 		oToggledNode.nodeState.collapsed = true;
@@ -2861,7 +2870,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/TreeBin
 	 *  1. it's not a manually expanded node.
 	 *  2. it's not contained in the range of another collapsed node
 	 *
-	 * A expanded node contributes to the delta when it meets the following conditions:
+	 * An expanded node contributes to the delta when it meets the following conditions:
 	 *  1. it's not expanded with the initial call which means it's either initially collapsed or manually loaded
 	 *  2. none of its ancestor it's collapsed.
 	 */

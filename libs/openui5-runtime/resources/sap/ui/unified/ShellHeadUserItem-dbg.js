@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/IconPool
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -49,7 +49,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/IconPool
 			showPopupIndicator : {type : "boolean", group : "Accessibility", defaultValue : true},
 
 			/**
-			 * An image of the user, normally an URI to a image but also an icon from the sap.ui.core.IconPool is possible.
+			 * An image of the user, normally a URI to an image but also an icon from the sap.ui.core.IconPool is possible.
 			 */
 			image : {type : "sap.ui.core.URI", group : "Appearance", defaultValue : null}
 		},

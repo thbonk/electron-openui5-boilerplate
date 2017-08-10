@@ -109,7 +109,7 @@ sap.ui.define(['jquery.sap.global', 'jquery.sap.strings'],
 		 *
 		 */
 		$.sap.history = function(mSettings){
-			//if mSetting is not a object map, return
+			//if mSetting is not an object map, return
 			if (!jQuery.isPlainObject(mSettings)) {
 				return;
 			}
@@ -468,7 +468,7 @@ sap.ui.define(['jquery.sap.global', 'jquery.sap.strings'],
 
 		/**
 		 * This function returns a hash with suffix added to the end based on the sHash parameter. It handles as well when the current
-		 * hash is already with suffix. It returns a new suffix with an unique number in the end.
+		 * hash is already with suffix. It returns a new suffix with a unique number in the end.
 		 *
 		 * @private
 		 */
@@ -496,7 +496,7 @@ sap.ui.define(['jquery.sap.global', 'jquery.sap.strings'],
 
 		/**
 		 * This function checks if the combination of the identifier and data is unique in the current history stack.
-		 * If yes, it returns an empty string. Otherwise it returns an unique id.
+		 * If yes, it returns an empty string. Otherwise it returns a unique id.
 		 *
 		 * @private
 		 */

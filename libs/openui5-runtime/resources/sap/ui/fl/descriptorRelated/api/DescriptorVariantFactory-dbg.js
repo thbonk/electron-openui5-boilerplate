@@ -9,8 +9,8 @@ sap.ui.define([
 	"sap/ui/fl/Utils",
 	"sap/ui/fl/LrepConnector",
 	"sap/ui/fl/descriptorRelated/internal/Utils",
-	"sap/ui/fl/descriptorRelated/api/Settings"
-], function(DescriptorInlineChangeFactory, LrepUtils, LrepConnector, Utils, Settings) {
+	"sap/ui/fl/registry/Settings"
+], function(DescriptorInlineChangeFactory, FlexUtils, LrepConnector, Utils, Settings) {
 	"use strict";
 
 	/**
@@ -22,12 +22,12 @@ sap.ui.define([
 	 * @param {boolean} [mParameters.isAppVariantRoot=true]
 	 * @param {object} mFileContent file content of the existing descriptor variant to be provided if descriptor variant shall be created from an existing
 	 * @param {boolean} [bDeletion=false] deletion indicator to be provided if descriptor variant shall be deleted
-	 * @param {sap.ui.fl.descriptorRelated.api.Settings} oSettings settings
+	 * @param {sap.ui.fl.registry.Settings} oSettings settings
 	 *
 	 * @constructor
 	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorVariant
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @private
 	 * @sap-restricted
 	 */
@@ -173,11 +173,11 @@ sap.ui.define([
 		if (this._sTransportRequest) {
 		//set to URL-Parameter 'changelist', as done in LrepConnector
 			sRoute += '?changelist=' + this._sTransportRequest;
-		} else if ( this._oSettings.isAtoEnabled() && mMap.layer == 'CUSTOMER' ) {
+		} else if ( this._oSettings.isAtoEnabled() && FlexUtils.isCustomerDependentLayer(mMap.layer) ) {
 			sRoute += '?changelist=ATO_NOTIFICATION';
 		}
 
-		var oLREPConnector = new LrepConnector();
+		var oLREPConnector = LrepConnector.createConnector();
 
 		return oLREPConnector.send(sRoute, sMethod, mMap);
 	};
@@ -232,7 +232,7 @@ sap.ui.define([
 	 * @namespace
 	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorVariantFactory
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @private
 	 * @sap-restricted
 	 */
@@ -240,7 +240,7 @@ sap.ui.define([
 
 	DescriptorVariantFactory._getDescriptorVariant = function(sId) {
 		var sRoute = '/sap/bc/lrep/appdescr_variants/' + sId;
-		var oLREPConnector = new LrepConnector();
+		var oLREPConnector = LrepConnector.createConnector();
 		return oLREPConnector.send(sRoute, 'GET');
 	};
 
@@ -268,9 +268,9 @@ sap.ui.define([
 		} else {
 			Utils.checkParameterAndType(mParameters, "layer", "string");
 			//TODO: is this necessary? already checked in Utils-method? -> checks only type
-			if (mParameters.layer != 'VENDOR' && mParameters.layer != 'CUSTOMER') {
+			if (mParameters.layer != 'VENDOR' && mParameters.layer != 'PARTNER' && !FlexUtils.isCustomerDependentLayer(mParameters.layer)) {
 				//TODO: this should do a reject 	return Promise.reject(oError);
-				throw new Error("Parameter \"layer\" needs to be 'VENDOR', 'CUSTOMER'");
+				throw new Error("Parameter \"layer\" needs to be 'VENDOR', 'PARTNER' or customer dependent");
 			}
 		}
 
@@ -278,7 +278,6 @@ sap.ui.define([
 		if (mParameters.isAppVariantRoot){
 			Utils.checkParameterAndType(mParameters, "isAppVariantRoot", "boolean");
 		}
-
 		return Settings.getInstance().then(function(oSettings) {
 			return Promise.resolve( new DescriptorVariant(mParameters,null,false,oSettings) );
 		});

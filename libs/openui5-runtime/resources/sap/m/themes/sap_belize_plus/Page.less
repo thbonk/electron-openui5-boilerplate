@@ -3,6 +3,10 @@
 /* Base theme                  */
 /* =========================== */
 
+@_sap_m_Page_AppHeight: 3333px; // Ux decision: never show the header, so make this value large enough even for zoom-out cases
+@_sap_m_Page_HeaderHeight: 68px; // should be 4.25rem
+@_sap_m_Page_MinHeightForHeader: (@_sap_m_Page_AppHeight + @_sap_m_Page_HeaderHeight);
+
 .sapMPage,
 .sapMPage > section {
 	width: 100%;
@@ -17,10 +21,22 @@
 
 .sapMPage > section {
   position: absolute;
+  overflow-y: hidden;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+}
+
+.sapMPage > section.sapMPageEnableScrolling {
+	overflow-y: auto;
+}
+
+html[data-sap-ui-os^="bb"],
+html[data-sap-ui-os^="iOS"] {
+  .sapMPage > section.sapMPageEnableScrolling {
+    overflow-y: scroll;
+  }
 }
 
 /* Fix for a ToolBar set as headerContent */
@@ -75,7 +91,7 @@ html[data-sap-ui-browser^="ff"].sap-desktop {
   border-bottom-width: 0;
 }
 
-.sapMIBar-CTX.sapMFooter-CTX.sapMPageFooter.sapMTB {
+.sapMPageFloatingFooter .sapMIBar-CTX.sapMFooter-CTX.sapMPageFooter.sapMTB {
   border-top-width: 0;
 }
 
@@ -246,7 +262,7 @@ html[data-sap-ui-animation='on'] .sapMPageFloatingFooter {
 
 /* sap.m.Shell + Tiles Page specific style */
 
-@media (min-height: @sapMShellMinHeightForHeader) {
+@media (min-height: @_sap_m_Page_MinHeightForHeader) {
 	.sap-desktop .sapMShell .sapMPage.sapMPageHideHeaderWhenShellHeader header.sapMIBar {
 		display: none;
 	}

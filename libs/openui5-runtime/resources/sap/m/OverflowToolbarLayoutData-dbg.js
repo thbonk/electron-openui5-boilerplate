@@ -10,16 +10,16 @@ sap.ui.define(['sap/m/ToolbarLayoutData', 'sap/m/OverflowToolbarPriority'],
 	"use strict";
 
 	/**
-	 * Constructor for a new OverflowToolbarLayoutData.
+	 * Constructor for a new <code>OverflowToolbarLayoutData</code>.
 	 *
-	 * @param {string} [sId] id for the new element, generated automatically if no id is given
-	 * @param {object} [mSettings] initial settings for the new control
+	 * @param {string} [sId] ID for the new element, generated automatically if no ID is given
+	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
-	 * Holds layout data for the OverflowToolbar items.
+	 * Holds layout data for the {@link sap.m.OverflowToolbar} items.
 	 * @extends sap.m.ToolbarLayoutData
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public

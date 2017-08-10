@@ -18,9 +18,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * The <code>sap.m.InputBase</code> control provides a basic functionality for input controls.
 	 *
 	 * @extends sap.ui.core.Control
+	 * @implements sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -30,6 +31,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 */
 	var InputBase = Control.extend("sap.m.InputBase", /** @lends sap.m.InputBase.prototype */ { metadata: {
 
+		interfaces : ["sap.ui.core.IFormContent"],
 		library: "sap.m",
 		properties: {
 
@@ -430,7 +432,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				this._bIgnoreNextInputEventNonASCII = false;
 			}
 
-
 			// get the value back maybe formatted
 			sValue = this.getValue();
 
@@ -477,11 +478,17 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @param {String} sValue Reverted value of the input.
 	 * @since 1.26
 	 */
-	InputBase.prototype.onValueRevertedByEscape = function(sValue) {
+	InputBase.prototype.onValueRevertedByEscape = function(sValue, sPreviousValue) {
 
 		// fire private live change event
 		this.fireEvent("liveChange", {
 			value: sValue,
+
+			//indicate that ESC key is trigger
+			escPressed: true,
+
+			//the value that was before pressing ESC key
+			previousValue: sPreviousValue,
 
 			// backwards compatibility
 			newValue: sValue
@@ -526,7 +533,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			this.updateDomValue(this._lastValue);
 
 			// value is reverted, now call the hook to inform
-			this.onValueRevertedByEscape(this._lastValue);
+			this.onValueRevertedByEscape(this._lastValue, sValue);
 		}
 	};
 
@@ -590,7 +597,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	InputBase.prototype.onkeydown = function(oEvent) {
 
 		// Prevents browser back to previous page in IE
-		if (!this.getEditable() && oEvent.keyCode == jQuery.sap.KeyCodes.BACKSPACE) {
+		if (this.getDomRef("inner").getAttribute("readonly") && oEvent.keyCode == jQuery.sap.KeyCodes.BACKSPACE) {
 			oEvent.preventDefault();
 		}
 	};
@@ -792,6 +799,30 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 */
 	InputBase.prototype.getValueStateMessageId = function() {
 		return this.getId() + "-message";
+	};
+
+	/**
+	 * Gets the labels referencing this control.
+	 *
+	 * @returns {sap.m.Label[]} Array of objects which are the current targets of the <code>ariaLabelledBy</code>
+	 * association and the labels referencing this control.
+	 * @since 1.48
+	 * @protected
+	 */
+	InputBase.prototype.getLabels = function() {
+		var aLabelIDs = this.getAriaLabelledBy().map(function(sLabelID) {
+			return sap.ui.getCore().byId(sLabelID);
+		});
+
+		var oLabelEnablement = sap.ui.require("sap/ui/core/LabelEnablement");
+
+		if (oLabelEnablement) {
+			aLabelIDs = aLabelIDs.concat(oLabelEnablement.getReferencingLabels(this).map(function(sLabelID) {
+				return sap.ui.getCore().byId(sLabelID);
+			}));
+		}
+
+		return aLabelIDs;
 	};
 
 	/**

@@ -15,7 +15,7 @@ function(jQuery, Test, ElementEnablementTest) {
 
 
 	/**
-	 * Constructor for an LibraryEnablementTest.
+	 * Constructor for a LibraryEnablementTest.
 	 *
 	 * @param {string} [sId] id for the new object, generated automatically if no id is given
 	 * @param {object} [mSettings] initial settings for the new object
@@ -26,7 +26,7 @@ function(jQuery, Test, ElementEnablementTest) {
 	 * @extends sap.ui.dt.test.Test
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private

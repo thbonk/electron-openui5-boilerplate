@@ -23,7 +23,7 @@ sap.ui.define(['jquery.sap.global', './ListBase', './TreeItemBase', './library',
 	 * @extends sap.m.ListBase
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -133,6 +133,9 @@ sap.ui.define(['jquery.sap.global', './ListBase', './TreeItemBase', './library',
 			} else {
 				this.getBinding("items").collapse(iIndex);
 			}
+			if (oItem.getExpanded() && (oItem.getLevel() + 1 > this.getDeepestLevel())) {
+				this._iDeepestLevel = oItem.getLevel() + 1;
+			}
 		}
 	};
 
@@ -198,6 +201,24 @@ sap.ui.define(['jquery.sap.global', './ListBase', './TreeItemBase', './library',
 		return this;
 	};
 
+	/**
+	 * Defines the level to which the tree is expanded.
+	 * The function can be used to define the initial expanding state. An alternative way to define the initial expanding state is to set the parameter <code>numberOfExpandedLevels</code> of the binding.
+	 *
+	 * Example:
+	 * <pre>
+	 *   oTree.bindItems({
+	 *      path: "...",
+	 *      parameters: {
+	 *         numberOfExpandedLevels: 1
+	 *      }
+	 *   });
+	 * </pre>
+	 * @return {sap.m.Tree} A reference to the Tree control
+	 * @public
+	 * @param {int} iLevel The level to which the data is expanded
+	 * @since 1.48.0
+	 */
 	Tree.prototype.expandToLevel = function (iLevel) {
 		var oBinding = this.getBinding("items");
 
@@ -213,6 +234,25 @@ sap.ui.define(['jquery.sap.global', './ListBase', './TreeItemBase', './library',
 		return this;
 	};
 
+	Tree.prototype.getNumberOfExpandedLevel = function() {
+		return this.getBinding("items").getNumberOfExpandedLevels();
+	};
+
+	Tree.prototype.getDeepestLevel = function() {
+		if (this._iDeepestLevel === undefined) {
+			this._iDeepestLevel = this.getNumberOfExpandedLevel();
+		}
+
+		return this._iDeepestLevel;
+	};
+
+	/**
+	 * Collapses all nodes.
+	 *
+	 * @return {sap.m.Tree} A reference to the Tree control
+	 * @public
+	 * @since 1.48.0
+	 */
 	Tree.prototype.collapseAll = function () {
 		var oBinding = this.getBinding("items");
 

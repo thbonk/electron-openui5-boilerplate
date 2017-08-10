@@ -11,8 +11,9 @@ sap.ui.define([
 	"sap/ui/fl/registry/ChangeHandlerRegistration",
 	"sap/ui/fl/ChangePersistenceFactory",
 	"sap/ui/core/mvc/Controller",
-	"sap/ui/core/mvc/XMLView"
-], function(FlexControllerFactory, Component, ChangeHandlerRegistration, ChangePersistenceFactory, MvcController, XMLView) {
+	"sap/ui/core/mvc/XMLView",
+	"sap/ui/fl/EventHistory"
+], function(FlexControllerFactory, Component, ChangeHandlerRegistration, ChangePersistenceFactory, MvcController, XMLView, EventHistory) {
 	"use strict";
 
 	/**
@@ -22,14 +23,14 @@ sap.ui.define([
 	 * @class
 	 * @constructor
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @experimental Since 1.43.0
 	 */
 	var RegistrationDelegator = {
 	};
 
 	/**
-	 * Register the changes in the component
+	 * Registers the changes in the component
 	 *
 	 * @public
 	 */
@@ -38,7 +39,7 @@ sap.ui.define([
 	};
 
 	/**
-	 * Register change handlers
+	 * Registers change handlers
 	 *
 	 * @public
 	 */
@@ -56,7 +57,7 @@ sap.ui.define([
 	};
 
 	/**
-	 * Register the extension provider
+	 * Registers the extension provider
 	 *
 	 * @public
 	 */
@@ -65,7 +66,7 @@ sap.ui.define([
 	};
 
 	/**
-	 * Register the xml preprocessor
+	 * Registers the xml preprocessor
 	 *
 	 * @public
 	 */
@@ -76,11 +77,21 @@ sap.ui.define([
 	};
 
 	/**
-	 * Register everything in one call
+	 * Registers the event listener
+	 *
+	 * @public
+	 */
+	RegistrationDelegator.registerEventListener = function() {
+		EventHistory.start();
+	};
+
+	/**
+	 * Registers everything in one call
 	 *
 	 * @public
 	 */
 	RegistrationDelegator.registerAll = function() {
+		RegistrationDelegator.registerEventListener();
 		RegistrationDelegator.registerChangeHandlers();
 		RegistrationDelegator.registerLoadComponentEventHandler();
 		RegistrationDelegator.registerExtensionProvider();

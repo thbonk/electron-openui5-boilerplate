@@ -97,9 +97,7 @@
 
 		// content
 		rm.write("<div class='sapMShellContent sapMShellGlobalInnerBackground' id='" + oControl.getId() + "-content' data-sap-ui-root-content='true'>");
-
 		rm.renderControl(oControl.getApp());
-
 		rm.write("</div></div></div>");
 	};
 

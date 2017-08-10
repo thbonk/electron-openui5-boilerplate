@@ -11,14 +11,16 @@
 
 @import "../../../../../sap/ui/core/themes/sap_belize_hcb/global.less";
 
+/* shared local library less parameters */
+@_sap_ui_table_FocusOutlineWidth: 2px;
+
 /* START "Table.less" */
 /* =================================== */
 /* CSS for control sap.ui.table/Table  */
 /* Belize High Contrast Black theme    */
 /* =================================== */
 
-@_sapUiTableFocusOutlineWidth: 2px;
-@_sapUiTableFocusOutlineOffset: -3px;
+@_sap_ui_table_Table_FocusOutlineOffset: -3px;
 
 .sapUiTableHdr {
 	border-bottom: 3px solid @sapUiListHeaderBorderColor;
@@ -69,8 +71,8 @@ html.sap-desktop {
 
 	.sapUiTableHSb::-webkit-scrollbar,
 	.sapUiTableVSb::-webkit-scrollbar {
-		width: @_sapUiTableDefaultScrollBarSize;
-		height: @_sapUiTableDefaultScrollBarSize;
+		width: @_sap_ui_table_Scrolling_DefaultScrollBarSize;
+		height: @_sap_ui_table_Scrolling_DefaultScrollBarSize;
 		border: none;
 	}
 
@@ -89,7 +91,7 @@ html.sap-desktop {
 /* Belize High Contrast Black theme       */
 /* ====================================== */
 
-@_sapUiTableColumnDnDHighlightColor: @sapUiContentHelpColor;
+@_sap_ui_table_DragDrop_ColumnDnDHighlightColor: @sapUiContentHelpColor;
 
 .sapUiTableColReorderFade:after {
 	background-color: lighten(@sapUiBaseColor, 50);
@@ -103,5 +105,5 @@ html.sap-desktop {
 /* Belize High Contrast Black theme       */
 /* ====================================== */
 
-@_sapUiTableGroupIconBorderWidth: 3px;
+@_sap_ui_table_Grouping_GroupIconBorderWidth: 3px;
 /* END "Grouping.less" */

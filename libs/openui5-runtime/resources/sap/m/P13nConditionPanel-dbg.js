@@ -17,7 +17,7 @@ sap.ui.define([
 	 * @param {object} [mSettings] initial settings for the new control
 	 * @class The ConditionPanel Control will be used to implement the Sorting, Filtering and Grouping panel of the new Personalization dialog.
 	 * @extends sap.ui.core.Control
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @constructor
 	 * @public
 	 * @since 1.26.0
@@ -1202,7 +1202,14 @@ sap.ui.define([
 									// select the key from the condition above
 									if (iPos > 0 && !sKey) {
 										oGrid = oTargetGrid.getContent()[iPos - 1];
-										oControl.setSelectedKey(oGrid.keyField.getSelectedKey());
+										if (oGrid.keyField.getSelectedKey()) {
+											oControl.setSelectedKey(oGrid.keyField.getSelectedKey());
+										} else {
+											// if no item is selected, we have to select at least the first keyFieldItem
+											if (!oControl.getSelectedItem() && oControl.getItems().length > 0) {
+												oControl.setSelectedItem(oControl.getItems()[0]);
+											}
+										}
 									} else {
 										this._aKeyFields.some(function(oKeyField, index) {
 											if (oKeyField.isDefault) {
@@ -2574,7 +2581,7 @@ sap.ui.define([
 	 * @param {string} sOperation the operation type sap.m.P13nConditionOperation
 	 * @param {string} sValue1 text of the first condition field
 	 * @param {string} sValue2 text of the seoncd condition field
-	 * @param {boolean} bExclude indicates if the condition is a Exclude condition
+	 * @param {boolean} bExclude indicates if the condition is an Exclude condition
 	 * @param {string} sKeyField id
 	 * @returns {string} the condition text
 	 */

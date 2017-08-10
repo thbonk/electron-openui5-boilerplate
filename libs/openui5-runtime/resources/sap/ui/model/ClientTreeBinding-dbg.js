@@ -37,6 +37,8 @@ sap.ui.define(['jquery.sap.global', './ChangeReason', './Context', './TreeBindin
 			this.filterInfo.oParentContext = {};
 
 			if (aApplicationFilters) {
+				this.oModel.checkFilterOperation(aApplicationFilters);
+
 				if (this.oModel._getObject(this.sPath, this.oContext)) {
 					this.filter(aApplicationFilters, FilterType.Application);
 				}
@@ -121,8 +123,8 @@ sap.ui.define(['jquery.sap.global', './ChangeReason', './Context', './TreeBindin
 			aChildArray;
 
 		if (oNode) {
-			if (aArrayNames && jQuery.isArray(aArrayNames)) {
-				jQuery.each(aArrayNames, function(iIndex, sArrayName){
+			if (Array.isArray(aArrayNames)) {
+				aArrayNames.forEach(function(sArrayName){
 					aChildArray = oNode[sArrayName];
 					if (aChildArray) {
 						jQuery.each(aChildArray, function(sSubName, oSubChild) {
@@ -132,8 +134,8 @@ sap.ui.define(['jquery.sap.global', './ChangeReason', './Context', './TreeBindin
 				});
 			} else {
 				jQuery.sap.each(oNode, function(sName, oChild) {
-					if (jQuery.isArray(oChild)) {
-						jQuery.each(oChild, function(sSubName, oSubChild) {
+					if (Array.isArray(oChild)) {
+						oChild.forEach(function(oSubChild, sSubName) {
 							that._saveSubContext(oSubChild, aContexts, sContextPath, sName + "/" + sSubName);
 						});
 					} else if (typeof oChild == "object") {
@@ -240,9 +242,12 @@ sap.ui.define(['jquery.sap.global', './ChangeReason', './Context', './TreeBindin
 		// The filtering is applied recursively through the tree and stores all filtered contexts and its parent contexts in an array.
 
 		// wrap single filters in an array
-		if (aFilters && !jQuery.isArray(aFilters)) {
+		if (aFilters && !Array.isArray(aFilters)) {
 			aFilters = [aFilters];
 		}
+
+		// check filter integrity
+		this.oModel.checkFilterOperation(aFilters);
 
 		if (sFilterType == FilterType.Application) {
 			this.aApplicationFilters = aFilters || [];
@@ -308,6 +313,8 @@ sap.ui.define(['jquery.sap.global', './ChangeReason', './Context', './TreeBindin
 
 		if (aUnfilteredContexts.length > 0) {
 			jQuery.each(aUnfilteredContexts, function(i, oContext){
+				// Add parentContext reference for later use (currently to calculate correct group IDs in the adapter)
+				oContext._parentContext = oParentContext;
 				that._applyFilterRecursive(oContext);
 			});
 
@@ -340,7 +347,7 @@ sap.ui.define(['jquery.sap.global', './ChangeReason', './Context', './TreeBindin
 	 */
 	ClientTreeBinding.prototype.sort = function (aSorters) {
 		aSorters = aSorters || [];
-		this.aSorters = jQuery.isArray(aSorters) ? aSorters : [aSorters];
+		this.aSorters = Array.isArray(aSorters) ? aSorters : [aSorters];
 
 		this._fireChange({reason: ChangeReason.Sort});
 

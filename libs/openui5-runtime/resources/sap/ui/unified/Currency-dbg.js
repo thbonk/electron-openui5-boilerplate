@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.46.12
+		 * @version 1.48.5
 		 *
 		 * @constructor
 		 * @public
@@ -107,7 +107,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		Currency.prototype.setValue = function(sValue) {
 			// Check if the value is bound and is undefined. In case of
 			// undefined value the Currency control will not display any value! This workaround
-			// is necessary because of the default value 0 suppresses to set a undefined or null value
+			// is necessary because of the default value 0 suppresses to set an undefined or null value
 			// instead and this cannot be changed due to compatibility.
 			if (this.isBound("value")) {
 				this._bRenderNoValClass = sValue == null;

@@ -117,7 +117,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Element', '.
 	 *
 	 * @extends sap.ui.base.ManagedObject
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @param {sap.ui.core.Core} oCore internal API of the <core>Core</code> that manages this UIArea
 	 * @param {object} [oRootNode] reference to the Dom Node that should be 'hosting' the UI Area.
 	 * @public
@@ -435,7 +435,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Element', '.
 	};
 
 	/**
-	 * Notifies the UIArea about an just invalidated control.
+	 * Notifies the UIArea about an invalidated control.
 	 *
 	 * The UIArea internally decides whether to re-render just the modified
 	 * controls or the complete content. It also informs the Core when it
@@ -457,7 +457,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Element', '.
 
 		var sId = oControl.getId();
 		//check whether the control is already invalidated
-		if (/*jQuery.inArray(oControl, this.getContent()) || */oControl === this ) {
+		if ( oControl === this ) {
 			this.bRenderSelf = true; //everything in this UIArea
 			this.bNeedsRerendering = true;
 			this.mInvalidatedControls = {};
@@ -773,7 +773,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Element', '.
 		var bGroupChanged = false;
 
 		// dispatch the event to the controls (callback methods: onXXX)
-		while (oElement && oElement instanceof Element && oElement.isActive() && !oEvent.isPropagationStopped()) {
+		while (oElement instanceof Element && oElement.isActive() && !oEvent.isPropagationStopped()) {
 
 			// for each event type call the callback method
 			// if the execution should be stopped immediately
@@ -888,7 +888,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Element', '.
 	//		for (var evt in oPsEv) {
 	//				for (j = 0, js = oPsEv[evt].aTypes.length; j < js; j++) {
 	//					var type = oPsEv[evt].aTypes[j];
-	//					if (jQuery.inArray(type, aEvents) == -1) {
+	//					if (aEvents.indexOf(type) === -1) {
 	//						aEvents.push(type);
 	//					}
 	//				}
@@ -897,7 +897,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Element', '.
 	//		// check for events and register them
 	//		for (var i = 0, is = aEv.length; i < is; i++) {
 	//			var type = aEv[i];
-	//				if (jQuery.inArray(type, aEvents) == -1) {
+	//				if (aEvents.indexOf(type) === -1) {
 	//					aEvents.push(type);
 	//				}
 	//		}
@@ -953,7 +953,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Element', '.
 	};
 
 	/**
-	 * An UIArea can't be cloned and throws an error when trying to do so.
+	 * UIAreas can't be cloned and throw an error when trying to do so.
 	 */
 	UIArea.prototype.clone = function() {
 		throw new Error("UIArea can't be cloned");

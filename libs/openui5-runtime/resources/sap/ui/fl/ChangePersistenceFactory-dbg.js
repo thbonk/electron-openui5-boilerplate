@@ -15,7 +15,7 @@ sap.ui.define([
 	 * @alias sap.ui.fl.ChangePersistenceFactory
 	 * @experimental Since 1.27.0
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 */
 	var ChangePersistenceFactory = {};
 
@@ -23,20 +23,30 @@ sap.ui.define([
 
 	/**
 	 * Creates or returns an instance of the ChangePersistence
-	 * @param {String} sComponentName The name of the component
-	 * @returns {sap.ui.fl.ChangePersistence} instance
+	 * @param {String} sComponentName - Name of the component
+	 * @param {String} sAppVersion - Current running version of application
+	 * @returns {sap.ui.fl.ChangePersistence} <code>ChangePersistence<code> instance
 	 *
 	 * @public
 	 */
-	ChangePersistenceFactory.getChangePersistenceForComponent = function(sComponentName) {
+	ChangePersistenceFactory.getChangePersistenceForComponent = function(sComponentName, sAppVersion) {
 		var oChangePersistence;
+		sAppVersion = sAppVersion || Utils.DEFAULT_APP_VERSION;
+		var oComponent = {
+			name : sComponentName,
+			appVersion : sAppVersion
+		};
 
 		if (!ChangePersistenceFactory._instanceCache[sComponentName]) {
-			oChangePersistence = new ChangePersistence(sComponentName);
-			ChangePersistenceFactory._instanceCache[sComponentName] = oChangePersistence;
+			ChangePersistenceFactory._instanceCache[sComponentName] = {};
+		}
+		oChangePersistence = ChangePersistenceFactory._instanceCache[sComponentName][sAppVersion];
+		if (!oChangePersistence) {
+			oChangePersistence = new ChangePersistence(oComponent);
+			ChangePersistenceFactory._instanceCache[sComponentName][sAppVersion] = oChangePersistence;
 		}
 
-		return ChangePersistenceFactory._instanceCache[sComponentName];
+		return oChangePersistence;
 	};
 
 	/**
@@ -50,7 +60,8 @@ sap.ui.define([
 	ChangePersistenceFactory.getChangePersistenceForControl = function(oControl) {
 		var sComponentId;
 		sComponentId = this._getComponentClassNameForControl(oControl);
-		return ChangePersistenceFactory.getChangePersistenceForComponent(sComponentId);
+		var sAppVersion = Utils.getAppVersionFromManifest(Utils.getAppComponentForControl(oControl).getManifest());
+		return ChangePersistenceFactory.getChangePersistenceForComponent(sComponentId, sAppVersion);
 	};
 
 	/**
@@ -87,11 +98,15 @@ sap.ui.define([
 	ChangePersistenceFactory._doLoadComponent = function (oConfig, oManifest) {
 		var oChangePersistenceWrapper = {oChangePersistence: {}, oRequestOptions: {}};
 		var sComponentName = Utils.getFlexReference(oManifest);
+		var sAppVersion = Utils.getAppVersionFromManifest(oManifest);
+		var sMaxLayer, oStartupParameters, oTechnicalParameters;
 
-		if (oConfig.componentData && oConfig.componentData.startupParameters
-				&& oConfig.componentData.startupParameters["sap-app-id"] && oConfig.componentData.startupParameters["sap-app-id"].length === 1) {
+		oStartupParameters = oConfig && oConfig.componentData && oConfig.componentData.startupParameters || {};
+		oTechnicalParameters = oConfig && oConfig.componentData && oConfig.componentData.technicalParameters;
+
+		if (oStartupParameters["sap-app-id"] && oStartupParameters["sap-app-id"].length === 1) {
 			// deprecated app variant id support with no caching
-			sComponentName = oConfig.componentData.startupParameters["sap-app-id"][0];
+			sComponentName = oStartupParameters["sap-app-id"][0];
 		} else {
 			if (oConfig) {
 				var aAsyncHints = oConfig.asyncHints;
@@ -103,10 +118,16 @@ sap.ui.define([
 				}
 			}
 		}
+		//Checks technicalParameters/startup (old) parameter for sap-ui-fl-max-layer value
+		var oMaxLayerParameters = oTechnicalParameters || oStartupParameters;
+		if (oMaxLayerParameters && oMaxLayerParameters["sap-ui-fl-max-layer"] && oMaxLayerParameters["sap-ui-fl-max-layer"].length === 1) {
+			sMaxLayer = oMaxLayerParameters["sap-ui-fl-max-layer"][0];
+		}
+		Utils.setMaxLayerParameter(sMaxLayer);
 
 		oChangePersistenceWrapper.oRequestOptions.siteId = Utils.getSiteIdByComponentData(oConfig.componentData);
+		oChangePersistenceWrapper.oChangePersistence = this.getChangePersistenceForComponent(sComponentName, sAppVersion);
 
-		oChangePersistenceWrapper.oChangePersistence = this.getChangePersistenceForComponent(sComponentName);
 		return oChangePersistenceWrapper;
 	};
 
@@ -145,7 +166,7 @@ sap.ui.define([
 	 * @param {string} oManifest."sap.app".type - type of the component (i.e. "application").
 	 * @param {object} oComponent Component instance
 	 * The processing is only done for components of the type "application"
-	 * @returns {Promise} Promise resolving after the changes are loaded with an getter to retrieve the mapped changes.
+	 * @returns {Promise} Promise resolving after the changes are loaded with a getter to retrieve the mapped changes.
 	 * @since 1.43
 	 * @private
 	 */

@@ -10,11 +10,11 @@ sap.ui.define([
 		"use strict";
 
 		/**
-		 * Change handler for moving of a elements.
+		 * Change handler for moving of an elements.
 		 *
 		 * @alias sap.ui.fl.changeHandler.MoveElements
 		 * @author SAP SE
-		 * @version 1.46.12
+		 * @version 1.48.5
 		 * @experimental Since 1.34.0
 		 */
 		var MoveElements = { };
@@ -27,7 +27,7 @@ sap.ui.define([
 		 * @param {sap.ui.fl.Change} oChange change object with instructions to be applied on the control map
 		 * @param {sap.ui.core.Control} oSourceParent control that matches the change selector for applying the change, which is the source of the move
 		 * @param {object} mPropertyBag - map of properties
-		 * @param {object} mPropertyBag.view - xml node representing an ui5 view
+		 * @param {object} mPropertyBag.view - xml node representing a ui5 view
 		 * @param {sap.ui.fl.changeHandler.BaseTreeModifier} mPropertyBag.modifier - modifier for the controls
 		 * @param {sap.ui.core.UIComponent} mPropertyBag.appComponent - appComopnent
 		 * @return {boolean} true - if change could be applied

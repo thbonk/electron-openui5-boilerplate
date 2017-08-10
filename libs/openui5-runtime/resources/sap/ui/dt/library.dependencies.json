@@ -3,39 +3,39 @@
     {
       "name" : "sap/ui/dt/AggregationDesignTimeMetadata.js",
       "description" : "Provides class sap.ui.dt.AggregationDesignTimeMetadata.",
-      "size" : 1753,
-      "compressedSize" : 570,
+      "size" : 2703,
+      "compressedSize" : 1047,
       "required" : ["jquery.sap.global.js", "sap/ui/dt/DesignTimeMetadata.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/AggregationOverlay.js",
       "description" : "Provides class sap.ui.dt.AggregationOverlay.",
-      "size" : 3977,
-      "compressedSize" : 1223,
+      "size" : 4251,
+      "compressedSize" : 1325,
       "required" : ["jquery.sap.global.js", "sap/ui/dt/Overlay.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/AggregationOverlayRenderer.js",
       "description" : "Provides default renderer for control sap.ui.dt.AggregationOverlay",
-      "size" : 1046,
+      "size" : 1045,
       "compressedSize" : 354,
-      "required" : ["sap/ui/dt/RenderingUtil.js", "jquery.sap.global.js"],
+      "required" : ["jquery.sap.global.js", "sap/ui/dt/RenderingUtil.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/ContextMenuControl.js",
       "description" : "Provides control sap.ui.rta.ContextMenuControl.",
-      "size" : 6303,
-      "compressedSize" : 2424,
+      "size" : 5097,
+      "compressedSize" : 1940,
       "required" : ["jquery.sap.global.js", "sap/ui/dt/library.js", "sap/ui/unified/Menu.js", "sap/ui/unified/MenuItem.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/ControlObserver.js",
       "description" : "Provides class sap.ui.dt.ControlObserver.",
-      "size" : 2602,
+      "size" : 2601,
       "compressedSize" : 966,
       "required" : ["jquery.sap.global.js", "sap/ui/dt/ManagedObjectObserver.js"],
       "includes" : []
@@ -43,111 +43,111 @@
     {
       "name" : "sap/ui/dt/DOMUtil.js",
       "description" : "Provides object sap.ui.dt.DOMUtil.",
-      "size" : 7648,
-      "compressedSize" : 3143,
+      "size" : 9567,
+      "compressedSize" : 3867,
       "required" : ["jquery.sap.global.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/DesignTime.js",
       "description" : "Provides class sap.ui.dt.DesignTime.",
-      "size" : 19088,
-      "compressedSize" : 7462,
-      "required" : ["sap/ui/base/ManagedObject.js", "sap/ui/dt/ElementOverlay.js", "sap/ui/dt/OverlayRegistry.js", "sap/ui/dt/Selection.js", "sap/ui/dt/ElementDesignTimeMetadata.js", "sap/ui/dt/ElementUtil.js", "sap/ui/dt/OverlayUtil.js", "sap/ui/dt/library.js", "jquery.sap.global.js"],
+      "size" : 20368,
+      "compressedSize" : 7834,
+      "required" : ["jquery.sap.global.js", "sap/ui/base/ManagedObject.js", "sap/ui/dt/ElementDesignTimeMetadata.js", "sap/ui/dt/ElementOverlay.js", "sap/ui/dt/ElementUtil.js", "sap/ui/dt/Overlay.js", "sap/ui/dt/OverlayRegistry.js", "sap/ui/dt/OverlayUtil.js", "sap/ui/dt/Selection.js", "sap/ui/dt/library.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/DesignTimeMetadata.js",
       "description" : "Provides class sap.ui.dt.DesignTimeMetadata.",
-      "size" : 6002,
-      "compressedSize" : 1618,
-      "required" : ["jquery.sap.global.js", "sap/ui/base/ManagedObject.js", "sap/ui/dt/ElementUtil.js", "sap/ui/dt/DOMUtil.js"],
+      "size" : 6553,
+      "compressedSize" : 1812,
+      "required" : ["jquery.sap.global.js", "sap/ui/base/ManagedObject.js", "sap/ui/dt/DOMUtil.js", "sap/ui/dt/ElementUtil.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/ElementDesignTimeMetadata.js",
       "description" : "Provides class sap.ui.dt.ElementDesignTimeMetadata.",
-      "size" : 5915,
-      "compressedSize" : 2039,
-      "required" : ["jquery.sap.global.js", "sap/ui/dt/DesignTimeMetadata.js", "sap/ui/dt/AggregationDesignTimeMetadata.js"],
+      "size" : 7064,
+      "compressedSize" : 2352,
+      "required" : ["jquery.sap.global.js", "sap/ui/dt/AggregationDesignTimeMetadata.js", "sap/ui/dt/DesignTimeMetadata.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/ElementOverlay.js",
       "description" : "Provides class sap.ui.dt.ElementOverlay.",
-      "size" : 21851,
-      "compressedSize" : 8851,
-      "required" : ["sap/ui/dt/Overlay.js", "sap/ui/dt/ControlObserver.js", "sap/ui/dt/ManagedObjectObserver.js", "sap/ui/dt/ElementDesignTimeMetadata.js", "sap/ui/dt/AggregationDesignTimeMetadata.js", "sap/ui/dt/AggregationOverlay.js", "sap/ui/dt/OverlayRegistry.js", "sap/ui/dt/ElementUtil.js", "sap/ui/dt/OverlayUtil.js", "sap/ui/dt/DOMUtil.js", "jquery.sap.global.js"],
+      "size" : 30743,
+      "compressedSize" : 12381,
+      "required" : ["jquery.sap.global.js", "sap/ui/dt/AggregationDesignTimeMetadata.js", "sap/ui/dt/AggregationOverlay.js", "sap/ui/dt/ControlObserver.js", "sap/ui/dt/DOMUtil.js", "sap/ui/dt/ElementDesignTimeMetadata.js", "sap/ui/dt/ElementUtil.js", "sap/ui/dt/ManagedObjectObserver.js", "sap/ui/dt/Overlay.js", "sap/ui/dt/OverlayRegistry.js", "sap/ui/dt/OverlayUtil.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/ElementOverlayRenderer.js",
       "description" : "Provides default renderer for control sap.ui.dt.Overlay",
-      "size" : 954,
+      "size" : 953,
       "compressedSize" : 350,
-      "required" : ["sap/ui/dt/RenderingUtil.js", "jquery.sap.global.js"],
+      "required" : ["jquery.sap.global.js", "sap/ui/dt/RenderingUtil.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/ElementUtil.js",
       "description" : "Provides object sap.ui.dt.ElementUtil.",
-      "size" : 14743,
-      "compressedSize" : 5748,
+      "size" : 16742,
+      "compressedSize" : 6550,
       "required" : ["jquery.sap.global.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/ManagedObjectObserver.js",
       "description" : "Provides class sap.ui.dt.ManagedObjectObserver.",
-      "size" : 15247,
-      "compressedSize" : 7382,
-      "required" : ["sap/ui/base/ManagedObject.js", "sap/ui/dt/ElementUtil.js", "jquery.sap.global.js"],
+      "size" : 20934,
+      "compressedSize" : 10298,
+      "required" : ["jquery.sap.global.js", "sap/ui/base/ManagedObject.js", "sap/ui/dt/ElementUtil.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/MutationObserver.js",
       "description" : "Provides class sap.ui.dt.MutationObserver.",
-      "size" : 5089,
-      "compressedSize" : 2397,
-      "required" : ["jquery.sap.global.js", "sap/ui/dt/OverlayUtil.js", "sap/ui/dt/ElementUtil.js", "sap/ui/base/ManagedObject.js"],
+      "size" : 5356,
+      "compressedSize" : 2654,
+      "required" : ["jquery.sap.global.js", "sap/ui/base/ManagedObject.js", "sap/ui/dt/ElementUtil.js", "sap/ui/dt/OverlayUtil.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/Overlay.js",
       "description" : "Provides class sap.ui.dt.Overlay.",
-      "size" : 18555,
-      "compressedSize" : 7613,
-      "required" : ["jquery.sap.global.js", "sap/ui/core/Control.js", "sap/ui/dt/MutationObserver.js", "sap/ui/dt/ElementUtil.js", "sap/ui/dt/OverlayUtil.js", "sap/ui/dt/DOMUtil.js", "jquery.sap.dom.js"],
+      "size" : 18491,
+      "compressedSize" : 7811,
+      "required" : ["jquery.sap.dom.js", "jquery.sap.global.js", "sap/ui/core/Control.js", "sap/ui/dt/DOMUtil.js", "sap/ui/dt/ElementUtil.js", "sap/ui/dt/MutationObserver.js", "sap/ui/dt/OverlayUtil.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/OverlayRegistry.js",
       "description" : "Provides object sap.ui.dt.OverlayRegistry.",
-      "size" : 2377,
-      "compressedSize" : 675,
-      "required" : ["sap/ui/core/Element.js", "sap/ui/dt/ElementUtil.js", "jquery.sap.global.js"],
+      "size" : 2246,
+      "compressedSize" : 612,
+      "required" : ["jquery.sap.global.js", "sap/ui/base/ManagedObject.js", "sap/ui/dt/ElementUtil.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/OverlayUtil.js",
       "description" : "Provides object sap.ui.dt.OverlayUtil.",
-      "size" : 10920,
-      "compressedSize" : 4282,
-      "required" : ["jquery.sap.global.js", "sap/ui/dt/OverlayRegistry.js", "sap/ui/dt/ElementUtil.js"],
+      "size" : 11116,
+      "compressedSize" : 4318,
+      "required" : ["jquery.sap.global.js", "sap/ui/dt/ElementUtil.js", "sap/ui/dt/OverlayRegistry.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/Plugin.js",
       "description" : "Provides class sap.ui.dt.Plugin.",
-      "size" : 6573,
+      "size" : 6654,
       "compressedSize" : 1863,
-      "required" : ["sap/ui/base/ManagedObject.js", "jquery.sap.global.js"],
+      "required" : ["jquery.sap.global.js", "sap/ui/base/ManagedObject.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/RenderingUtil.js",
       "description" : "Provides object sap.ui.dt.RenderingUtil.",
-      "size" : 2395,
+      "size" : 2394,
       "compressedSize" : 1146,
       "required" : ["jquery.sap.global.js"],
       "includes" : []
@@ -155,109 +155,137 @@
     {
       "name" : "sap/ui/dt/Selection.js",
       "description" : "Provides class sap.ui.dt.Selection.",
-      "size" : 2915,
-      "compressedSize" : 1370,
-      "required" : ["sap/ui/base/ManagedObject.js", "sap/ui/dt/library.js", "jquery.sap.global.js"],
+      "size" : 2976,
+      "compressedSize" : 1421,
+      "required" : ["jquery.sap.global.js", "sap/ui/base/ManagedObject.js", "sap/ui/dt/library.js"],
       "includes" : []
+    },
+    {
+      "name" : "sap/ui/dt/library-preload.js",
+      "size" : 113207,
+      "required" : ["jquery.sap.dom.js", "jquery.sap.global.js", "sap/m/Button.js", "sap/m/Label.js", "sap/m/RatingIndicator.js", "sap/m/SearchField.js", "sap/m/Text.js", "sap/m/Title.js", "sap/m/Toolbar.js", "sap/m/ToolbarSpacer.js", "sap/ui/base/ManagedObject.js", "sap/ui/core/Control.js", "sap/ui/core/library.js", "sap/ui/fl/registry/ChangeRegistry.js", "sap/ui/layout/form/SimpleForm.js", "sap/ui/model/Filter.js", "sap/ui/model/FilterOperator.js", "sap/ui/model/json/JSONModel.js", "sap/ui/table/Column.js", "sap/ui/table/TreeTable.js", "sap/ui/unified/Menu.js", "sap/ui/unified/MenuItem.js"],
+      "includes" : ["sap/ui/dt/AggregationDesignTimeMetadata.js", "sap/ui/dt/AggregationOverlay.js", "sap/ui/dt/AggregationOverlayRenderer.js", "sap/ui/dt/ContextMenuControl.js", "sap/ui/dt/ControlObserver.js", "sap/ui/dt/DOMUtil.js", "sap/ui/dt/DesignTime.js", "sap/ui/dt/DesignTimeMetadata.js", "sap/ui/dt/ElementDesignTimeMetadata.js", "sap/ui/dt/ElementOverlay.js", "sap/ui/dt/ElementOverlayRenderer.js", "sap/ui/dt/ElementUtil.js", "sap/ui/dt/ManagedObjectObserver.js", "sap/ui/dt/MutationObserver.js", "sap/ui/dt/Overlay.js", "sap/ui/dt/OverlayRegistry.js", "sap/ui/dt/OverlayUtil.js", "sap/ui/dt/Plugin.js", "sap/ui/dt/RenderingUtil.js", "sap/ui/dt/Selection.js", "sap/ui/dt/library.js", "sap/ui/dt/manifest.json", "sap/ui/dt/plugin/ContextMenu.js", "sap/ui/dt/plugin/ControlDragDrop.js", "sap/ui/dt/plugin/CutPaste.js", "sap/ui/dt/plugin/DragDrop.js", "sap/ui/dt/plugin/ElementMover.js", "sap/ui/dt/plugin/MouseSelection.js", "sap/ui/dt/plugin/TabHandling.js", "sap/ui/dt/test/Element.js", "sap/ui/dt/test/ElementEnablementTest.js", "sap/ui/dt/test/ElementEnablementTest2.js", "sap/ui/dt/test/LibraryEnablementTest.js", "sap/ui/dt/test/LibraryEnablementTest2.js", "sap/ui/dt/test/Test.js", "sap/ui/dt/test/report/QUnit.js", "sap/ui/dt/test/report/Statistic.js", "sap/ui/dt/test/report/StatisticRenderer.js", "sap/ui/dt/test/report/Table.js", "sap/ui/dt/test/report/TableRenderer.js"]
+    },
+    {
+      "name" : "sap/ui/dt/library-preload.json",
+      "size" : 0,
+      "required" : ["jquery.sap.dom.js", "jquery.sap.global.js", "sap/m/Button.js", "sap/m/Label.js", "sap/m/RatingIndicator.js", "sap/m/SearchField.js", "sap/m/Text.js", "sap/m/Title.js", "sap/m/Toolbar.js", "sap/m/ToolbarSpacer.js", "sap/ui/base/ManagedObject.js", "sap/ui/core/Control.js", "sap/ui/core/library-preload.json", "sap/ui/core/library.js", "sap/ui/fl/registry/ChangeRegistry.js", "sap/ui/layout/form/SimpleForm.js", "sap/ui/model/Filter.js", "sap/ui/model/FilterOperator.js", "sap/ui/model/json/JSONModel.js", "sap/ui/table/Column.js", "sap/ui/table/TreeTable.js", "sap/ui/unified/Menu.js", "sap/ui/unified/MenuItem.js"],
+      "includes" : ["sap/ui/dt/AggregationDesignTimeMetadata.js", "sap/ui/dt/AggregationOverlay.js", "sap/ui/dt/AggregationOverlayRenderer.js", "sap/ui/dt/ContextMenuControl.js", "sap/ui/dt/ControlObserver.js", "sap/ui/dt/DOMUtil.js", "sap/ui/dt/DesignTime.js", "sap/ui/dt/DesignTimeMetadata.js", "sap/ui/dt/ElementDesignTimeMetadata.js", "sap/ui/dt/ElementOverlay.js", "sap/ui/dt/ElementOverlayRenderer.js", "sap/ui/dt/ElementUtil.js", "sap/ui/dt/ManagedObjectObserver.js", "sap/ui/dt/MutationObserver.js", "sap/ui/dt/Overlay.js", "sap/ui/dt/OverlayRegistry.js", "sap/ui/dt/OverlayUtil.js", "sap/ui/dt/Plugin.js", "sap/ui/dt/RenderingUtil.js", "sap/ui/dt/Selection.js", "sap/ui/dt/library.js", "sap/ui/dt/manifest.json", "sap/ui/dt/plugin/ContextMenu.js", "sap/ui/dt/plugin/ControlDragDrop.js", "sap/ui/dt/plugin/CutPaste.js", "sap/ui/dt/plugin/DragDrop.js", "sap/ui/dt/plugin/ElementMover.js", "sap/ui/dt/plugin/MouseSelection.js", "sap/ui/dt/plugin/TabHandling.js", "sap/ui/dt/test/Element.js", "sap/ui/dt/test/ElementEnablementTest.js", "sap/ui/dt/test/ElementEnablementTest2.js", "sap/ui/dt/test/LibraryEnablementTest.js", "sap/ui/dt/test/LibraryEnablementTest2.js", "sap/ui/dt/test/Test.js", "sap/ui/dt/test/report/QUnit.js", "sap/ui/dt/test/report/Statistic.js", "sap/ui/dt/test/report/StatisticRenderer.js", "sap/ui/dt/test/report/Table.js", "sap/ui/dt/test/report/TableRenderer.js"]
     },
     {
       "name" : "sap/ui/dt/library.js",
       "description" : "Initialization Code and shared classes of library sap.ui.dt.",
-      "size" : 1209,
-      "compressedSize" : 519,
+      "size" : 1207,
+      "compressedSize" : 518,
       "required" : ["jquery.sap.global.js", "sap/ui/core/library.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/manifest.json",
-      "size" : 702,
+      "size" : 700,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/plugin/ContextMenu.js",
       "description" : "Provides class sap.ui.rta.plugin.ContextMenu.",
-      "size" : 6110,
-      "compressedSize" : 2368,
-      "required" : ["jquery.sap.global.js", "sap/ui/dt/Plugin.js", "sap/ui/dt/ContextMenuControl.js"],
+      "size" : 6165,
+      "compressedSize" : 2399,
+      "required" : ["jquery.sap.global.js", "sap/ui/dt/ContextMenuControl.js", "sap/ui/dt/Plugin.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/plugin/ControlDragDrop.js",
       "description" : "Provides class sap.ui.dt.plugin.ControlDragDrop.",
-      "size" : 4565,
-      "compressedSize" : 2314,
-      "required" : ["sap/ui/dt/plugin/DragDrop.js", "sap/ui/dt/plugin/ElementMover.js", "sap/ui/dt/ElementUtil.js", "jquery.sap.global.js"],
+      "size" : 4573,
+      "compressedSize" : 2288,
+      "required" : ["jquery.sap.global.js", "sap/ui/dt/ElementUtil.js", "sap/ui/dt/plugin/DragDrop.js", "sap/ui/dt/plugin/ElementMover.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/plugin/CutPaste.js",
       "description" : "Provides class sap.ui.dt.plugin.CutPaste.",
-      "size" : 6742,
-      "compressedSize" : 3485,
-      "required" : ["sap/ui/dt/Plugin.js", "sap/ui/dt/plugin/ElementMover.js", "sap/ui/dt/OverlayUtil.js", "jquery.sap.global.js"],
+      "size" : 6750,
+      "compressedSize" : 3459,
+      "required" : ["jquery.sap.global.js", "sap/ui/dt/OverlayUtil.js", "sap/ui/dt/Plugin.js", "sap/ui/dt/plugin/ElementMover.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/plugin/DragDrop.js",
       "description" : "Provides class sap.ui.dt.plugin.DragDrop.",
-      "size" : 23569,
-      "compressedSize" : 12391,
-      "required" : ["sap/ui/dt/Plugin.js", "sap/ui/dt/DOMUtil.js", "sap/ui/dt/OverlayUtil.js", "sap/ui/dt/ElementUtil.js", "jquery.sap.global.js"],
+      "size" : 23647,
+      "compressedSize" : 12434,
+      "required" : ["jquery.sap.global.js", "sap/ui/dt/DOMUtil.js", "sap/ui/dt/ElementUtil.js", "sap/ui/dt/OverlayUtil.js", "sap/ui/dt/Plugin.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/plugin/ElementMover.js",
       "description" : "Provides class sap.ui.dt.plugin.ElementMover.",
-      "size" : 9770,
-      "compressedSize" : 3439,
-      "required" : ["sap/ui/base/ManagedObject.js", "sap/ui/dt/ElementUtil.js", "sap/ui/dt/OverlayUtil.js", "sap/ui/dt/OverlayRegistry.js", "jquery.sap.global.js"],
+      "size" : 9873,
+      "compressedSize" : 3508,
+      "required" : ["jquery.sap.global.js", "sap/ui/base/ManagedObject.js", "sap/ui/dt/ElementUtil.js", "sap/ui/dt/OverlayRegistry.js", "sap/ui/dt/OverlayUtil.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/plugin/MouseSelection.js",
       "description" : "Provides class sap.ui.dt.plugin.MouseSelection.",
-      "size" : 1992,
+      "size" : 1991,
       "compressedSize" : 826,
-      "required" : ["sap/ui/dt/Plugin.js", "jquery.sap.global.js"],
+      "required" : ["jquery.sap.global.js", "sap/ui/dt/Plugin.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/plugin/TabHandling.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 3211,
-      "compressedSize" : 1577,
-      "required" : ["jquery.sap.global.js", "sap/ui/dt/Plugin.js", "sap/ui/dt/Overlay.js"],
+      "size" : 3258,
+      "compressedSize" : 1616,
+      "required" : ["jquery.sap.global.js", "sap/ui/dt/Overlay.js", "sap/ui/dt/Plugin.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/test/Element.js",
       "description" : "Provides object sap.ui.dt.test.Element.",
-      "size" : 3155,
-      "compressedSize" : 1235,
+      "size" : 3242,
+      "compressedSize" : 1248,
       "required" : ["jquery.sap.global.js", "sap/ui/dt/ElementUtil.js", "sap/ui/dt/OverlayRegistry.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/test/ElementEnablementTest.js",
       "description" : "Provides class sap.ui.dt.test.ElementEnablementTest.",
-      "size" : 7761,
-      "compressedSize" : 4350,
-      "required" : ["jquery.sap.global.js", "sap/ui/dt/test/Test.js", "sap/ui/dt/DesignTime.js", "sap/ui/dt/test/Element.js"],
+      "size" : 7759,
+      "compressedSize" : 4349,
+      "required" : ["jquery.sap.global.js", "sap/ui/dt/DesignTime.js", "sap/ui/dt/test/Element.js", "sap/ui/dt/test/Test.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/dt/test/ElementEnablementTest2.js",
+      "description" : "Provides class sap.ui.dt.test.ElementEnablementTest.",
+      "size" : 4363,
+      "compressedSize" : 1735,
+      "required" : ["jquery.sap.global.js", "sap/ui/base/ManagedObject.js", "sap/ui/dt/test/Element.js", "sap/ui/fl/registry/ChangeRegistry.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/test/LibraryEnablementTest.js",
       "description" : "Provides class sap.ui.dt.test.LibraryEnablementTest.",
-      "size" : 3700,
+      "size" : 3698,
       "compressedSize" : 1339,
-      "required" : ["jquery.sap.global.js", "sap/ui/dt/test/Test.js", "sap/ui/dt/test/ElementEnablementTest.js"],
+      "required" : ["jquery.sap.global.js", "sap/ui/dt/test/ElementEnablementTest.js", "sap/ui/dt/test/Test.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/dt/test/LibraryEnablementTest2.js",
+      "description" : "Provides class sap.ui.dt.test.LibraryEnablementTest.",
+      "size" : 3762,
+      "compressedSize" : 1702,
+      "required" : ["jquery.sap.global.js", "sap/ui/base/ManagedObject.js", "sap/ui/dt/test/ElementEnablementTest2.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/test/Test.js",
       "description" : "Provides class sap.ui.dt.test.Test.",
-      "size" : 6255,
+      "size" : 6253,
       "compressedSize" : 2151,
       "required" : ["jquery.sap.global.js", "sap/ui/base/ManagedObject.js"],
       "includes" : []
@@ -265,7 +293,7 @@
     {
       "name" : "sap/ui/dt/test/report/QUnit.js",
       "description" : "Provides class sap.ui.dt.test.qunit.QUnit.",
-      "size" : 2626,
+      "size" : 2624,
       "compressedSize" : 1053,
       "required" : ["jquery.sap.global.js", "sap/ui/base/ManagedObject.js"],
       "includes" : []
@@ -273,15 +301,15 @@
     {
       "name" : "sap/ui/dt/test/report/Statistic.js",
       "description" : "Provides control sap.ui.dt.test.report.Statistic.",
-      "size" : 3206,
+      "size" : 3205,
       "compressedSize" : 1838,
-      "required" : ["jquery.sap.global.js", "sap/ui/core/Control.js", "sap/ui/model/json/JSONModel.js", "sap/ui/layout/form/SimpleForm.js", "sap/m/Label.js", "sap/m/Text.js"],
+      "required" : ["jquery.sap.global.js", "sap/m/Label.js", "sap/m/Text.js", "sap/ui/core/Control.js", "sap/ui/layout/form/SimpleForm.js", "sap/ui/model/json/JSONModel.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/test/report/StatisticRenderer.js",
       "description" : "Provides default renderer for control sap.ui.dt.test.report.Statistic",
-      "size" : 1108,
+      "size" : 1107,
       "compressedSize" : 468,
       "required" : ["jquery.sap.global.js"],
       "includes" : []
@@ -289,15 +317,15 @@
     {
       "name" : "sap/ui/dt/test/report/Table.js",
       "description" : "Provides control sap.ui.dt.test.report.Table.",
-      "size" : 5765,
+      "size" : 5764,
       "compressedSize" : 3075,
-      "required" : ["jquery.sap.global.js", "sap/ui/core/Control.js", "sap/ui/model/json/JSONModel.js", "sap/ui/table/TreeTable.js", "sap/ui/table/Column.js", "sap/m/Toolbar.js", "sap/m/Title.js", "sap/m/ToolbarSpacer.js", "sap/m/Button.js", "sap/m/SearchField.js", "sap/m/Text.js", "sap/m/RatingIndicator.js", "sap/ui/model/Filter.js", "sap/ui/model/FilterOperator.js"],
+      "required" : ["jquery.sap.global.js", "sap/m/Button.js", "sap/m/RatingIndicator.js", "sap/m/SearchField.js", "sap/m/Text.js", "sap/m/Title.js", "sap/m/Toolbar.js", "sap/m/ToolbarSpacer.js", "sap/ui/core/Control.js", "sap/ui/model/Filter.js", "sap/ui/model/FilterOperator.js", "sap/ui/model/json/JSONModel.js", "sap/ui/table/Column.js", "sap/ui/table/TreeTable.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/dt/test/report/TableRenderer.js",
       "description" : "Provides default renderer for control sap.ui.dt.test.report.Table",
-      "size" : 1073,
+      "size" : 1072,
       "compressedSize" : 465,
       "required" : ["jquery.sap.global.js"],
       "includes" : []

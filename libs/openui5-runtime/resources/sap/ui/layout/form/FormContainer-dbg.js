@@ -23,7 +23,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/EnabledP
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -79,7 +79,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/EnabledP
 			 * In this case add the <code>Title</code> to the <code>ariaLabelledBy</code> association.
 			 * @since 1.36.0
 			 */
-			toolbar : {type : "sap.ui.core.Toolbar", multiple : false}
+			toolbar : {type : "sap.ui.core.Toolbar", multiple : false},
+
+			/*
+			 * Internal Expand button
+			 */
+			_expandButton : {type : "sap.ui.core.Control", multiple : false, visibility: "hidden"}
 		},
 		associations: {
 
@@ -104,7 +109,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/EnabledP
 	FormContainer.prototype.exit = function(){
 
 		if (this._oExpandButton) {
-			this._oExpandButton.destroy();
 			delete this._oExpandButton;
 		}
 		this._rb = undefined;
@@ -118,15 +122,26 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/EnabledP
 		if (bExpandable) {
 			var that = this;
 			if (!this._oExpandButton) {
-				this._oExpandButton = sap.ui.layout.form.FormHelper.createButton.call(this, this.getId() + "--Exp", _handleExpButtonPress);
-				this._oExpandButton.setParent(this);
+				if (!this._bExpandButtonRequired) {
+					this._bExpandButtonRequired = true;
+					sap.ui.layout.form.FormHelper.createButton.call(this, this.getId() + "--Exp", _handleExpButtonPress, _expandButtonCreated);
+				}
+			} else {
+				_setExpanderIcon(that);
 			}
-			_setExpanderIcon(that);
 		}
 
 		return this;
 
 	};
+
+	function _expandButtonCreated(oButton) {
+
+		this._oExpandButton = oButton;
+		this.setAggregation("_expandButton", this._oExpandButton); // invalidate because this could happen after Form is already rendered
+		_setExpanderIcon(this);
+
+	}
 
 	FormContainer.prototype.setExpanded = function(bExpanded){
 
@@ -249,13 +264,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/EnabledP
 		var sIcon, sIconHovered, sText, sTooltip;
 
 		if (oContainer.getExpanded()) {
-			sIcon = Parameters._getThemeImage('sapUiFormContainerColImageURL');
-			sIconHovered = Parameters._getThemeImage('sapUiFormContainerColImageDownURL');
+			sIcon = Parameters._getThemeImage('_sap_ui_layout_Form_FormContainerColImageURL');
+			sIconHovered = Parameters._getThemeImage('_sap_ui_layout_Form_FormContainerColImageDownURL');
 			sText = "-";
 			sTooltip = oContainer._rb.getText("FORM_COLLAPSE");
 		} else {
-			sIcon = Parameters._getThemeImage('sapUiFormContainerExpImageURL');
-			sIconHovered = Parameters._getThemeImage('sapUiFormContainerExpImageDownURL');
+			sIcon = Parameters._getThemeImage('_sap_ui_layout_Form_FormContainerExpImageURL');
+			sIconHovered = Parameters._getThemeImage('_sap_ui_layout_Form_FormContainerExpImageDownURL');
 			sText = "+";
 			sTooltip = oContainer._rb.getText("FORM_EXPAND");
 		}

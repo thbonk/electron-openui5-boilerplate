@@ -18,10 +18,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @class
 	 * Enables users to trigger actions. For the button UI, you can define some text or an icon, or both.
 	 * @extends sap.ui.core.Control
+	 * @implements sap.ui.core.IFormContent
 	 * @mixes sap.ui.core.ContextMenuSupport
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -30,6 +31,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 */
 	var Button = Control.extend("sap.m.Button", /** @lends sap.m.Button.prototype */ { metadata : {
 
+		interfaces : ["sap.ui.core.IFormContent"],
 		library : "sap.m",
 		properties : {
 
@@ -108,7 +110,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			 * Event is fired when the user clicks on the control.
 			 */
 			press : {}
-		}
+		},
+		designTime: true
 	}});
 
 
@@ -515,7 +518,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		var sTooltip = this.getTooltip_AsString();
 
 		if (!sTooltip && !this.getText()) {
-			// get icon-font info. will return null if the icon is a image
+			// get icon-font info. will return null if the icon is an image
 			var oIconInfo = sap.ui.core.IconPool.getIconInfo(this.getIcon());
 
 			// add tooltip if available

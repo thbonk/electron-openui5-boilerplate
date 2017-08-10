@@ -86,7 +86,7 @@ sap.ui.define([
 	 * @extends sap.ui.model.Context
 	 * @public
 	 * @since 1.39.0
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 */
 	var Context = BaseContext.extend("sap.ui.model.odata.v4.Context", {
 			constructor : function (oModel, oBinding, sPath, iIndex, oCreatePromise) {
@@ -163,7 +163,7 @@ sap.ui.define([
 		if (this.isTransient()) {
 			return that.oBinding._delete(sGroupId, "n/a", that);
 		}
-		return this.requestCanonicalPath().then(function (sCanonicalPath) {
+		return this.fetchCanonicalPath().then(function (sCanonicalPath) {
 			return that.oBinding._delete(sGroupId, sCanonicalPath.slice(1), that);
 		});
 	};
@@ -179,6 +179,7 @@ sap.ui.define([
 	 * @private
 	 */
 	Context.prototype.deregisterChange = function (sPath, oListener) {
+		// Note: iIndex === -2 is OK here, no listener will be found...
 		this.oBinding.deregisterChange(sPath, oListener, this.iIndex);
 	};
 
@@ -245,7 +246,9 @@ sap.ui.define([
 	 * @private
 	 */
 	Context.prototype.fetchValue = function (sPath, oListener) {
-		return this.oBinding.fetchValue(sPath, oListener, this.iIndex);
+		return this.iIndex === -2
+			? _SyncPromise.resolve()
+			: this.oBinding.fetchValue(sPath, oListener, this.iIndex);
 	};
 
 	/**
@@ -381,15 +384,17 @@ sap.ui.define([
 	};
 
 	/**
-	 * Returns the query options from the associated binding.
+	 * Returns the query options from the associated binding for the given path.
 	 *
+	 * @param {string} sPath
+	 *   The relative path for which the query options are requested
 	 * @returns {object}
 	 *   The query options from the associated binding
 	 *
 	 * @private
 	 */
-	Context.prototype.getQueryOptions = function () {
-		return this.oBinding.getQueryOptions(this.oBinding.getContext());
+	Context.prototype.getQueryOptionsForPath = function (sPath) {
+		return this.oBinding.getQueryOptionsForPath(sPath);
 	};
 
 	/**
@@ -415,6 +420,7 @@ sap.ui.define([
 	 * @private
 	 */
 	Context.prototype.hasPendingChangesForPath = function (sPath) {
+		// Note: iIndex === -2 is OK here, no changes will be found...
 		return this.oBinding.hasPendingChangesForPath(_Helper.buildPath(this.iIndex, sPath));
 	};
 
@@ -429,9 +435,7 @@ sap.ui.define([
 	 * @since 1.43.0
 	 */
 	Context.prototype.isTransient = function () {
-		var oSyncCreatePromise = this.oSyncCreatePromise;
-
-		return oSyncCreatePromise && (oSyncCreatePromise.getResult() === oSyncCreatePromise);
+		return this.oSyncCreatePromise && this.oSyncCreatePromise.isPending();
 	};
 
 	/**
@@ -513,6 +517,7 @@ sap.ui.define([
 	 * @private
 	 */
 	Context.prototype.resetChangesForPath = function (sPath) {
+		// Note: iIndex === -2 is OK here, no changes will be found...
 		this.oBinding.resetChangesForPath(_Helper.buildPath(this.iIndex, sPath));
 	};
 
@@ -530,44 +535,6 @@ sap.ui.define([
 			sIndex = "[" + this.iIndex + (this.isTransient() ? "|transient" : "") + "]";
 		}
 		return this.sPath + sIndex;
-	};
-
-	/**
-	 * Delegates to the <code>updateValue</code> method of this context's binding which updates the
-	 * value for the given path, relative to this context, as maintained by that binding.
-	 *
-	 * @param {string} sGroupId
-	 *   The group ID to be used for this update call.
-	 * @param {string} sPropertyName
-	 *   Name of property to update
-	 * @param {any} vValue
-	 *   The new value
-	 * @param {string} [sEditUrl]
-	 *   The edit URL corresponding to the entity to be updated
-	 * @param {string} [sPath]
-	 *   Some relative path
-	 * @returns {Promise}
-	 *   A promise on the outcome of the binding's <code>updateValue</code> call
-	 *
-	 * @private
-	 */
-	Context.prototype.updateValue = function (sGroupId, sPropertyName, vValue, sEditUrl, sPath) {
-		var that = this;
-
-		sPath = _Helper.buildPath(this.iIndex, sPath);
-
-		if (this.isTransient()) {
-			// Note: must not be falsy, otherwise a parent context would insert its own edit URL
-			sEditUrl = "n/a";
-		}
-		if (sEditUrl) {
-			return this.oBinding.updateValue(sGroupId, sPropertyName, vValue, sEditUrl, sPath);
-		}
-
-		return this.fetchCanonicalPath().then(function (sEditUrl) {
-			return that.oBinding.updateValue(sGroupId, sPropertyName, vValue, sEditUrl.slice(1),
-				sPath);
-		});
 	};
 
 	return {

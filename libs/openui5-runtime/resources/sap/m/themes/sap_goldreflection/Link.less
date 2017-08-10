@@ -107,7 +107,15 @@ html.sap-desktop .sapMLnk:focus:not(.sapMLnkDsbl) {
 }
 
 .sapUiFormEdit .sapMLnk {
-	line-height: 3rem;
+	line-height: normal;
+	margin-top: 1rem;
+	margin-bottom: 0.75rem; /* for some reason browser adds 4px, display: block would lead to stretched focus outline*/
+}
+
+.sapUiFormToolbar .sapMTB .sapMLnk{
+	line-height: normal;
+	margin-top: auto;
+	margin-bottom: auto;
 }
 
 .sapMLnkEmphasized {
@@ -116,7 +124,8 @@ html.sap-desktop .sapMLnk:focus:not(.sapMLnkDsbl) {
 
 /* Compact size */
 .sapUiSizeCompact .sapUiFormEdit .sapMLnk {
-	line-height: 2rem;
+	margin-top: 0.5rem;
+	margin-bottom: 0.25rem;
 }
 
 .sapMLnk:-webkit-any-link:focus {

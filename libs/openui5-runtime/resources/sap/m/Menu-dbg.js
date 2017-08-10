@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Butto
 		 * @implements sap.ui.core.IContextMenu
 		 *
 		 * @author SAP SE
-		 * @version 1.46.12
+		 * @version 1.48.5
 		 *
 		 * @constructor
 		 * @public
@@ -223,7 +223,18 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Butto
 		Menu.prototype._initMenuForItems = function(aItems, oParentMenuItem) {
 			var oMenu = new UfdMenu();
 			oMenu.isCozy = this._isMenuCozy.bind(this, oMenu);
-			oMenu.addStyleClass('sapMMenu');
+
+			// Keep in mind that we are adding the style class to sap.m.Menu as the CustomStyleClassSupport is sync
+			// in a Mimic mode so only styles added to sap.m.Menu will be applied.
+			this.addStyleClass('sapMMenu');
+
+			// Every new menu style class properties should be a reference to the control style class properties.
+			// This is needed because every menu level has a new popup like DOM structure in the static area and it's
+			// a sibling and not a child of the previous menu. Keep in mind that if the sap.m.Menu introduces a renderer
+			// in the future this must not be propagated like this not to pollute the control itself with classes
+			// from the children.
+			oMenu.aCustomStyleClasses = this.aCustomStyleClasses;
+			oMenu.mCustomStyleClassMap = this.mCustomStyleClassMap;
 
 			aItems.forEach(function(oItem) {
 				this._addVisualMenuItemFromItem(oItem, oMenu);
@@ -349,7 +360,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Butto
 				title: oItem.getText(),
 				startsSection: oItem.getStartsSection(),
 				menuItem: oItem,
-				tooltip: oItem.getTooltip()
+				tooltip: oItem.getTooltip(),
+				visible: oItem.getVisible()
 			});
 		};
 
@@ -671,7 +683,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Butto
 					this._getDialog().close();
 				}
 			} else {
-				// try to find and update a unified menu item corresponding to the source instance on which a property was changed
+				// try to find and update an unified menu item corresponding to the source instance on which a property was changed
 				var sUnifiedMenuItemId = this._generateUnifiedMenuItemId(oEvent.getSource().getId());
 				!!sUnifiedMenuItemId && sap.ui.getCore().byId(sUnifiedMenuItemId).setProperty(sPropertyKey, oPropertyValue);
 			}
@@ -788,6 +800,25 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Butto
 				this._getMenu().openAsContextMenu(oEvent, oOpenerRef);
 			}
 		};
+
+		/**
+		 * Override mutator public methods for CustomStyleClassSupport so it's properly propagated to the dialog.
+		 * Keep in mind we don't overwrite <code>hasStyleClass</code> method - we are only propagating the state
+		 * we don't mimic the dialog custom style class support.
+		 * @override
+		 */
+		["addStyleClass", "removeStyleClass", "toggleStyleClass"].forEach(function (sMethodName) {
+			Menu.prototype[sMethodName] = function (sClass, bSuppressInvalidate) {
+				var oDialog = this._getDialog();
+
+				Control.prototype[sMethodName].apply(this, arguments);
+				if (oDialog) {
+					oDialog[sMethodName].apply(oDialog, arguments);
+				}
+
+				return this;
+			};
+		});
 
 		return Menu;
 	}, /* bExport= */ true);

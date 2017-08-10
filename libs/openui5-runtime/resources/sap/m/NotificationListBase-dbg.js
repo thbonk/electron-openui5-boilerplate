@@ -21,7 +21,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './ListI
          * @extends sap.m.ListItemBase
          *
          * @author SAP SE
-         * @version 1.46.12
+         * @version 1.48.5
          *
          * @constructor
          * @public
@@ -431,7 +431,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './ListI
         //================================================================================
 
         /**
-         * Checks is a sap.ui.core.URI parameter is a icon src or not.
+         * Checks is an sap.ui.core.URI parameter is an icon src or not.
          * @param {string} source The source to be checked.
          * @returns {boolean} The result of the check
          * @protected

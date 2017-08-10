@@ -16,7 +16,7 @@ function(jQuery, ManagedObject) {
 
 
 	/**
-	 * Constructor for an QUnit.
+	 * Constructor for a QUnit.
 	 *
 	 * @param {string} [sId] id for the new object, generated automatically if no id is given
 	 * @param {object} [mSettings] initial settings for the new object
@@ -26,7 +26,7 @@ function(jQuery, ManagedObject) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private

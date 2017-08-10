@@ -20,10 +20,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @class
 	 * A hyperlink control which can be used to trigger actions or to navigate to other applications or web pages.
 	 * @extends sap.ui.core.Control
-	 * @implements sap.ui.core.IShrinkable
+	 * @implements sap.ui.core.IShrinkable, sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -34,7 +34,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	var Link = Control.extend("sap.m.Link", /** @lends sap.m.Link.prototype */ { metadata : {
 
 		interfaces : [
-			"sap.ui.core.IShrinkable"
+			"sap.ui.core.IShrinkable",
+			"sap.ui.core.IFormContent"
 		],
 		library : "sap.m",
 		properties : {
@@ -111,8 +112,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			 * Event is fired when the user triggers the link control.
 			 */
 			press : {allowPreventDefault : true}
-		}
+		},
+		designTime: true
 	}});
+
+
 
 	EnabledPropagator.call(Link.prototype); // inherit "disabled" state from parent controls
 
@@ -191,7 +195,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		var $this = this.$();
 		this.setProperty("text", sText, true);
 		sText = this.getProperty("text");
-		$this.text(sText);
+		if (this.writeText) {
+			this.writeText(sText);
+		} else {
+			$this.text(sText);
+		}
 		if (sText) {
 			$this.attr("tabindex", "0");
 		} else {
@@ -373,6 +381,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			focusable: this.getEnabled(),
 			enabled: this.getEnabled()
 		};
+	};
+
+	/*
+	 * Link must not be stretched in Form because this would stretch the size of the focus outline
+	 */
+	Link.prototype.getFormDoNotAdjustWidth = function() {
+		return true;
 	};
 
 	return Link;

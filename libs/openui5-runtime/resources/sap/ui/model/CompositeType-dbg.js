@@ -25,7 +25,7 @@ sap.ui.define(['./FormatException', './ParseException', './SimpleType', './Valid
 	 * @extends sap.ui.model.SimpleType
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @param {object} [oFormatOptions] options as provided by concrete subclasses

@@ -31,7 +31,7 @@ sap.ui.define([
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -165,7 +165,7 @@ sap.ui.define([
 	};
 
 	Breadcrumbs.prototype.removeAllLinks = function () {
-		var aLinks = this.getAggregation("links");
+		var aLinks = this.getAggregation("links", []);
 		var vResult = this.removeAllAggregation.apply(this, fnConvertArguments("links", arguments));
 		aLinks.forEach(this._deregisterControlListener, this);
 		this._resetControl();
@@ -173,7 +173,7 @@ sap.ui.define([
 	};
 
 	Breadcrumbs.prototype.destroyLinks = function () {
-		var aLinks = this.getAggregation("links");
+		var aLinks = this.getAggregation("links", []);
 		var vResult = this.destroyAggregation.apply(this, fnConvertArguments("links", arguments));
 		aLinks.forEach(this._deregisterControlListener, this);
 		this._resetControl();

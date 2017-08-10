@@ -17,14 +17,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Metadata', 'sap/m/Button', 'sap
 	"use strict";
 
 	/**
-	 * Constructor for a sap.m.semantic.ShareMenu.
+	 * Constructor for an sap.m.semantic.ShareMenu.
 	 *
 	 * @class
 	 * Encapsulates the functionality of a ShareMenu control.
 	 * ShareMenu is a special menu that is represented by (1) an actionSheet with the menu items and (2) a button that opens the actionSheet.
 	 * If the menu has only one item, then that item appears in place of the button that opens the actionSheet.
 	 *
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @private
 	 * @since 1.30.0
 	 * @alias sap.m.semantic.ShareMenu

@@ -27,9 +27,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ClientModel', 'sap/ui/model/Co
 	 * @extends sap.ui.model.ClientModel
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
-	 * @param {object} oData either the URL where to load the XML from or a XML
+	 * @param {object} oData either the URL where to load the XML from or an XML
 	 * @constructor
 	 * @public
 	 * @alias sap.ui.model.xml.XMLModel
@@ -255,7 +255,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ClientModel', 'sap/ui/model/Co
 	*/
 	XMLModel.prototype.getObject = function(sPath, oContext) {
 		var oObject = this._getObject(sPath, oContext);
-		if (jQuery.isArray(oObject)) {
+		if (Array.isArray(oObject)) {
 			oObject = oObject[0];
 		}
 		return oObject;
@@ -429,6 +429,21 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ClientModel', 'sap/ui/model/Co
 	XMLModel.prototype.isList = function(sPath, oContext) {
 		return false;
 	};
+
+	/**
+	 * Sets the meta model associated with this model
+	 *
+	 * @private
+	 * @param {sap.ui.model.MetaModel} oMetaModel the meta model associated with this model
+	 */
+	XMLModel.prototype._setMetaModel = function(oMetaModel) {
+		this._oMetaModel = oMetaModel;
+	};
+
+	XMLModel.prototype.getMetaModel = function() {
+		return this._oMetaModel;
+	};
+
 
 	return XMLModel;
 

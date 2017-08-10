@@ -21,9 +21,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * The interactive control is displayed either as a horizontal or a vertical line with a pointer and units of measurement.
 	 * Users can move the pointer along the line to change values with graphical support.
 	 * @extends sap.ui.core.Control
+	 * @implements sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -33,6 +34,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 */
 	var Slider = Control.extend("sap.ui.commons.Slider", /** @lends sap.ui.commons.Slider.prototype */ { metadata : {
 
+		interfaces : ["sap.ui.core.IFormContent"],
 		library : "sap.ui.commons",
 		properties : {
 
@@ -121,7 +123,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		events : {
 
 			/**
-			 * Value was changed. This event is fired if the value has changed by an user action.
+			 * Value was changed. This event is fired if the value has changed by a user action.
 			 */
 			change : {
 				parameters : {

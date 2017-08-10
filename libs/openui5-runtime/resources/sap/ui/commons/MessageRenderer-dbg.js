@@ -36,7 +36,9 @@ sap.ui.define(['jquery.sap.global'],
 
 		// Opening the outer container:
 		// tabindex="0": Message must be focusable for accessibility?!?
-		rm.write('<div class="sapUiMsg" tabindex="0">');
+		rm.write('<div class="sapUiMsg" tabindex="0"');
+		rm.writeControlData(oControl);
+		rm.write('>');
 
 		// Message icon:
 		rm.write('<div class="sapUiMsgIcon sapUiMsgIcon' + oControl.getType() + '"></div>');

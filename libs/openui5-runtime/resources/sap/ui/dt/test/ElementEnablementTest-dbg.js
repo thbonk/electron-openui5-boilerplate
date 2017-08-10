@@ -27,7 +27,7 @@ function(jQuery, Test, DesignTime, ElementTest) {
 	 * @extends sap.ui.dt.test.Test
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private
@@ -101,7 +101,7 @@ function(jQuery, Test, DesignTime, ElementTest) {
 			var mElementTest = this.addGroup(
 				this._mResult.children,
 				this.getType(),
-				"Given that an DesignTime is created for " + this.getType()
+				"Given that a DesignTime is created for " + this.getType()
 			);
 
 			this._testAggregations(mElementTest.children);

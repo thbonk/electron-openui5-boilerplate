@@ -4,7 +4,7 @@
 /* ============================== */
 
 /* Forces the usage of compact arrow offset, because belize uses a compact arrow for all content densities. */
-@sapMPopoverForceCompactArrowOffset: true;
+@_sap_m_Popover_ForceCompactArrowOffset: true;
 
 /* shared mixin for arrow shadow*/
 .sapMPopoverArrAfterShadow(@horizontalShadow, @verticalShadow) {
@@ -170,6 +170,10 @@ html[data-sap-ui-animation='on'] .sapMPopover {
 		background-color: @sapUiGroupContentBackground;
 		transform: rotate(-45deg);
 	}
+}
+
+.sapMPopoverWithFooter .sapMPopoverArrDown:after {
+	background-color: @sapUiPageFooterBackground;
 }
 
 /* pointing upward arrow */

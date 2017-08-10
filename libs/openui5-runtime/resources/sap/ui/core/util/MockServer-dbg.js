@@ -34,7 +34,7 @@ sap.ui
 			 * @extends sap.ui.base.ManagedObject
 			 * @abstract
 			 * @author SAP SE
-			 * @version 1.46.12
+			 * @version 1.48.5
 			 * @public
 			 * @alias sap.ui.core.util.MockServer
 			 */
@@ -95,7 +95,7 @@ sap.ui
 						 * <br>
 						 * <code>xhr.respondJSON(iStatusCode, mHeaders, oJsonObjectOrString)</code>. By default a JSON header is set for response header
 						 * <br>
-						 * <code>xhr.respondXML(iStatusCode, mHeaders, sXmlString)</code>. By default a XML header is set for response header
+						 * <code>xhr.respondXML(iStatusCode, mHeaders, sXmlString)</code>. By default an XML header is set for response header
 						 * <br>
 						 * <code>xhr.respondFile(iStatusCode, mHeaders, sFileUrl)</code>. By default the mime type of the file is set for response header
 						 * </li>
@@ -279,9 +279,10 @@ sap.ui
 			 * @param {object} oFilteredData
 			 * @param {string} sQuery string in the form {query}={value}
 			 * @param {string} sEntitySetName the name of the entitySet the oFilteredData belongs to
+			 * @param {array} aUrlParamStrings all query string parts of the request (array of {query}={value})
 			 * @private
 			 */
-			MockServer.prototype._applyQueryOnCollection = function(oFilteredData, sQuery, sEntitySetName) {
+			MockServer.prototype._applyQueryOnCollection = function(oFilteredData, sQuery, sEntitySetName, aUrlParamStrings) {
 				var aQuery = sQuery.split('=');
 				var sODataQueryValue = aQuery[1];
 				if (sODataQueryValue === "") {
@@ -308,6 +309,20 @@ sap.ui
 						break;
 					case "$filter":
 						oFilteredData.results = this._recursiveOdataQueryFilter(oFilteredData.results, sODataQueryValue);
+						break;
+					case "search-focus":
+						// query parameter "search-focus" is evaluated together with parameter "search"
+						break;
+					case "search":
+						//Look for "search-focus" first...
+						var sSearchFocus = "";
+						for (var i = 0; i < aUrlParamStrings.length; i++ ) {
+							if ( aUrlParamStrings[i].indexOf("search-focus") != -1 ){
+								sSearchFocus = aUrlParamStrings[i].split('=')[1];
+								break;
+							}
+						}
+						oFilteredData.results = this._recursiveOdataQuerySearch( oFilteredData.results, sODataQueryValue, sSearchFocus, sEntitySetName );
 						break;
 					case "$select":
 						oFilteredData.results = this._getOdataQuerySelect(oFilteredData.results, sODataQueryValue, sEntitySetName);
@@ -664,34 +679,34 @@ sap.ui
 				switch (sODataFilterMethod) {
 					case "substringof":
 						return fnGetFilteredData(true, 0, 1, function(sPath, sValue, sComplexType, sPropName) {
-							return jQuery.grep(aDataSet, function(oMockData) {
+							return aDataSet.filter(function(oMockData) {
 								if (sComplexType && sPropName) {
-									return (oMockData[sComplexType][sPropName].indexOf(sValue) !== -1);
+									return (typeof oMockData[sComplexType][sPropName] === "string" && oMockData[sComplexType][sPropName].indexOf(sValue) !== -1);
 								}
-								return (oMockData[sPath].indexOf(sValue) !== -1);
+								return (typeof oMockData[sPath] === "string" && oMockData[sPath].indexOf(sValue) !== -1);
 							});
 						});
 					case "startswith":
 						return fnGetFilteredData(true, 1, 0, function(sPath, sValue, sComplexType, sPropName) {
-							return jQuery.grep(aDataSet, function(oMockData) {
+							return aDataSet.filter(function(oMockData) {
 								if (sComplexType && sPropName) {
-									return (oMockData[sComplexType][sPropName].indexOf(sValue) === 0);
+									return (typeof oMockData[sComplexType][sPropName] === "string" && oMockData[sComplexType][sPropName].indexOf(sValue) === 0);
 								}
-								return (oMockData[sPath].indexOf(sValue) === 0);
+								return (typeof oMockData[sPath] === "string" && oMockData[sPath].indexOf(sValue) === 0);
 							});
 						});
 					case "endswith":
 						return fnGetFilteredData(true, 1, 0, function(sPath, sValue, sComplexType, sPropName) {
-							return jQuery.grep(aDataSet, function(oMockData) {
+							return aDataSet.filter(function(oMockData) {
 								if (sComplexType && sPropName) {
-									return (oMockData[sComplexType][sPropName].indexOf(sValue) === (oMockData[sComplexType][sPropName].length - sValue.length));
+									return (typeof oMockData[sComplexType][sPropName] === "string" && oMockData[sComplexType][sPropName].indexOf(sValue) === (oMockData[sComplexType][sPropName].length - sValue.length));
 								}
-								return (oMockData[sPath].indexOf(sValue) === (oMockData[sPath].length - sValue.length));
+								return (typeof oMockData[sPath] === "string" && oMockData[sPath].indexOf(sValue) === (oMockData[sPath].length - sValue.length));
 							});
 						});
 					case "eq":
 						return fnGetFilteredData(false, 2, 0, function(sPath, sValue, sComplexType, sPropName) {
-							return jQuery.grep(aDataSet, function(oMockData) {
+							return aDataSet.filter(function(oMockData) {
 								if (sComplexType && sPropName) {
 									return (oMockData[sComplexType][sPropName] === sValue);
 								}
@@ -700,7 +715,7 @@ sap.ui
 						});
 					case "ne":
 						return fnGetFilteredData(false, 2, 0, function(sPath, sValue, sComplexType, sPropName) {
-							return jQuery.grep(aDataSet, function(oMockData) {
+							return aDataSet.filter(function(oMockData) {
 								if (sComplexType && sPropName) {
 									return (oMockData[sComplexType][sPropName] !== sValue);
 								}
@@ -709,7 +724,7 @@ sap.ui
 						});
 					case "gt":
 						return fnGetFilteredData(false, 2, 0, function(sPath, sValue, sComplexType, sPropName) {
-							return jQuery.grep(aDataSet, function(oMockData) {
+							return aDataSet.filter(function(oMockData) {
 								if (sComplexType && sPropName) {
 									return (oMockData[sComplexType][sPropName] > sValue);
 								}
@@ -718,7 +733,7 @@ sap.ui
 						});
 					case "lt":
 						return fnGetFilteredData(false, 2, 0, function(sPath, sValue, sComplexType, sPropName) {
-							return jQuery.grep(aDataSet, function(oMockData) {
+							return aDataSet.filter(function(oMockData) {
 								if (sComplexType && sPropName) {
 									return (oMockData[sComplexType][sPropName] < sValue);
 								}
@@ -727,7 +742,7 @@ sap.ui
 						});
 					case "ge":
 						return fnGetFilteredData(false, 2, 0, function(sPath, sValue, sComplexType, sPropName) {
-							return jQuery.grep(aDataSet, function(oMockData) {
+							return aDataSet.filter(function(oMockData) {
 								if (sComplexType && sPropName) {
 									return (oMockData[sComplexType][sPropName] >= sValue);
 								}
@@ -736,7 +751,7 @@ sap.ui
 						});
 					case "le":
 						return fnGetFilteredData(false, 2, 0, function(sPath, sValue, sComplexType, sPropName) {
-							return jQuery.grep(aDataSet, function(oMockData) {
+							return aDataSet.filter(function(oMockData) {
 								if (sComplexType && sPropName) {
 									return (oMockData[sComplexType][sPropName] <= sValue);
 								}
@@ -746,6 +761,35 @@ sap.ui
 					default:
 						this._logAndThrowMockServerCustomError(400, that._oErrorMessages.INVALID_FILTER_OPERATOR, sODataFilterMethod);
 				}
+			};
+
+			/**
+			 * Processes the search operation:
+			 * Technically a filter is applied with "substringof" filter on the given property (given as
+			 * search-focus URL parameter).
+			 *
+			 * @param {object} aDataSet
+			 * @param {string} sODataQueryValue search string
+			 * @param {string} sODataSearchFocusValue A property name on which entries should be searched
+			 * @return {object} Changed result data set
+			 *
+			 * @private
+			 */
+			MockServer.prototype._recursiveOdataQuerySearch = function(aDataSet, sODataQueryValue, sODataSearchFocusValue, sEntitySetName) {
+				var sFilterString = "";
+
+				if ( sODataSearchFocusValue == "" || sODataSearchFocusValue == undefined ){
+					for ( var i = 0; i < this._mEntitySets[sEntitySetName].keys.length; i++ ) {
+						if (i != 0){
+							sFilterString = sFilterString + " or ";
+						}
+						sFilterString = sFilterString + "startswith(" + this._mEntitySets[sEntitySetName].keys[i] + ",'" + sODataQueryValue + "')";
+					}
+				} else {
+					sFilterString = "substringof('" + sODataQueryValue + "'," + sODataSearchFocusValue + ")";
+				}
+
+				return this._recursiveOdataQueryFilter(aDataSet, sFilterString);
 			};
 
 			/**
@@ -2338,7 +2382,7 @@ sap.ui
 												}
 												jQuery.each(aUrlParams, function(iIndex, sQuery) {
 													that._applyQueryOnCollection(oFilteredData, sQuery,
-														sEntitySetName);
+														sEntitySetName, aUrlParams);
 												});
 											}
 
@@ -2412,10 +2456,9 @@ sap.ui
 													}
 													jQuery.each(aUrlParams, function(iIndex, sQuery) {
 														that._applyQueryOnCollection(oFilteredData, sQuery,
-															sEntitySetName);
+															sEntitySetName, aUrlParams);
 													});
 												}
-
 												//trigger the after callback funtion
 												that.fireEvent(MockServer.HTTPMETHOD.GET + sEntitySetName + ":after", {
 													oXhr: oXhr,
@@ -2579,16 +2622,11 @@ sap.ui
 																}
 
 																if (sMultiplicity === "*") {
-																	jQuery
-																		.each(
-																			aUrlParams,
-																			function(iIndex, sQuery) {
-																				that
-																					._applyQueryOnCollection(
-																						oFilteredData,
-																						sQuery,
-																						that._mEntitySets[sEntitySetName].navprops[sNavProp].to.entitySet);
-																			});
+																	jQuery.each(aUrlParams, function(iIndex, sQuery) {
+																				that._applyQueryOnCollection(oFilteredData, sQuery,
+																						that._mEntitySets[sEntitySetName].navprops[sNavProp].to.entitySet,
+																						aUrlParams);
+																	});
 																} else {
 																	jQuery
 																		.each(
@@ -2695,16 +2733,13 @@ sap.ui
 																	}
 
 																	if (sMultiplicity === "*") {
-																		jQuery
-																			.each(
-																				aUrlParams,
-																				function(iIndex, sQuery) {
-																					that
-																						._applyQueryOnCollection(
-																							oFilteredData,
-																							sQuery,
-																							that._mEntitySets[sEntitySetName].navprops[sNavProp].to.entitySet);
-																				});
+																		jQuery.each(aUrlParams, function(iIndex, sQuery) {
+																			that._applyQueryOnCollection(
+																			oFilteredData,
+																			sQuery,
+																			that._mEntitySets[sEntitySetName].navprops[sNavProp].to.entitySet,
+																			aUrlParams);
+																		});
 																	} else {
 																		jQuery
 																			.each(
@@ -3106,7 +3141,7 @@ sap.ui
 			 * @private
 			 */
 			MockServer.prototype._orderQueryOptions = function(aUrlParams) {
-				var iFilterIndex, iInlinecountIndex, iSkipIndex, iTopIndex, iOrderbyIndex, iSelectindex, iExpandIndex, iFormatIndex, aOrderedUrlParams = [];
+				var iFilterIndex, iInlinecountIndex, iSkipIndex, iTopIndex, iOrderbyIndex, iSelectindex, iExpandIndex, iFormatIndex, iSearchIndex, iSearchFocusIndex, aOrderedUrlParams = [];
 				var that = this;
 				jQuery.each(aUrlParams, function(iIndex, sQuery) {
 					switch (sQuery.split('=')[0]) {
@@ -3134,6 +3169,12 @@ sap.ui
 						case "$format":
 							iFormatIndex = jQuery.inArray(sQuery, aUrlParams);
 							break;
+						case "search-focus":
+							iSearchFocusIndex = jQuery.inArray(sQuery, aUrlParams);
+							break;
+						case "search":
+							iSearchIndex = jQuery.inArray(sQuery, aUrlParams);
+							break;
 						default:
 							if (sQuery.split('=')[0].indexOf('$') === 0) {
 								that._logAndThrowMockServerCustomError(400, that._oErrorMessages.IS_NOT_A_VALID_SYSTEM_QUERY_OPTION, sQuery.split('=')[0]);
@@ -3145,6 +3186,12 @@ sap.ui
 				}
 				if (iFilterIndex >= 0) {
 					aOrderedUrlParams.push(aUrlParams[iFilterIndex]);
+				}
+				if (iSearchFocusIndex >= 0) {
+					aOrderedUrlParams.push(aUrlParams[iSearchFocusIndex]);
+				}
+				if (iSearchIndex >= 0) {
+					aOrderedUrlParams.push(aUrlParams[iSearchIndex]);
 				}
 				if (iInlinecountIndex >= 0) {
 					aOrderedUrlParams.push(aUrlParams[iInlinecountIndex]);

@@ -75,7 +75,7 @@ sap.ui.define(['jquery.sap.global', './NavContainer', './library', 'sap/ui/core/
 	 *
 	 * @extends sap.ui.core.Control
 	 * @implements sap.ui.core.IShrinkable
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -100,7 +100,7 @@ sap.ui.define(['jquery.sap.global', './NavContainer', './library', 'sap/ui/core/
 			type : {type : "sap.m.FacetFilterType", group : "Appearance", defaultValue : sap.m.FacetFilterType.Simple},
 
 			/**
-			 * Enables/disables live search on all search fields except for the FacetFilterList search.
+			 * Enables/disables live search in the search field of all <code>sap.m.FacetFilterList</code> instances.
 			 */
 			liveSearch : {type : "boolean", group : "Behavior", defaultValue : true},
 
@@ -424,18 +424,30 @@ sap.ui.define(['jquery.sap.global', './NavContainer', './library', 'sap/ui/core/
 		if (sap.ui.Device.system.phone) {
 			this.setType(sap.m.FacetFilterType.Light);
 		}
+
+		this._aOwnedLabels = [];
 	};
 
 	/**
 	 * @private
 	 */
 	FacetFilter.prototype.exit = function() {
-
+		var oCtrl;
 		sap.ui.getCore().detachIntervalTimer(this._checkOverflow, this);
 
 		if (this.oItemNavigation) {
 			this.removeDelegate(this.oItemNavigation);
 			this.oItemNavigation.destroy();
+		}
+
+		if (this._aOwnedLabels) {
+			this._aOwnedLabels.forEach(function (sId) {
+				oCtrl = sap.ui.getCore().byId(sId);
+				if (oCtrl) {
+					oCtrl.destroy();
+				}
+			});
+			this._aOwnedLabels = null;
 		}
 	};
 
@@ -462,7 +474,7 @@ sap.ui.define(['jquery.sap.global', './NavContainer', './library', 'sap/ui/core/
 	FacetFilter.prototype.onAfterRendering = function() {
 
 		if (this.getType() !== sap.m.FacetFilterType.Light && !sap.ui.Device.system.phone) {
-			// Attach a interval timer that periodically checks overflow of the "head" div in the event that the window is resized or the device orientation is changed. This is ultimately to
+			// Attach an interval timer that periodically checks overflow of the "head" div in the event that the window is resized or the device orientation is changed. This is ultimately to
 			// see if carousel arrows should be displayed.
 			sap.ui.getCore().attachIntervalTimer(this._checkOverflow, this); // proxy() is needed for the additional parameters, not for "this"
 		}
@@ -537,7 +549,7 @@ sap.ui.define(['jquery.sap.global', './NavContainer', './library', 'sap/ui/core/
 		}
 
 		oButton = sap.ui.getCore().byId(oEvent.target.id);
-		if (!oButton) { //not an UI5 object
+		if (!oButton) { //not a UI5 object
 			return;
 		}
 

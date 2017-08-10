@@ -20,9 +20,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library', 'sap/ui/
 	 * @class
 	 * The framework generates an input field and a button with text "Browse ...". The API supports features such as on change uploads (the upload starts immediately after a file has been selected), file uploads with explicit calls, adjustable control sizes, text display after uploads, or tooltips containing complete file paths.
 	 * @extends sap.ui.core.Control
+	 * @implements sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -31,6 +32,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library', 'sap/ui/
 	 */
 	var FileUploader = Control.extend("sap.ui.unified.FileUploader", /** @lends sap.ui.unified.FileUploader.prototype */ { metadata : {
 
+		interfaces : ["sap.ui.core.IFormContent"],
 		library : "sap.ui.unified",
 		properties : {
 
@@ -140,21 +142,21 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library', 'sap/ui/
 
 			/**
 			 * Icon to be displayed as graphical element within the button.
-			 * This can be an URI to an image or an icon font URI.
+			 * This can be a URI to an image or an icon font URI.
 			 * @since 1.26.0
 			 */
 			icon : {type : "sap.ui.core.URI", group : "Appearance", defaultValue : ''},
 
 			/**
 			 * Icon to be displayed as graphical element within the button when it is hovered (only if also a base icon was specified). If not specified the base icon is used.
-			 * If a icon font icon is used, this property is ignored.
+			 * If an icon font icon is used, this property is ignored.
 			 * @since 1.26.0
 			 */
 			iconHovered : {type : "sap.ui.core.URI", group : "Appearance", defaultValue : ''},
 
 			/**
 			 * Icon to be displayed as graphical element within the button when it is selected (only if also a base icon was specified). If not specified the base or hovered icon is used.
-			 * If a icon font icon is used, this property is ignored.
+			 * If an icon font icon is used, this property is ignored.
 			 * @since 1.26.0
 			 */
 			iconSelected : {type : "sap.ui.core.URI", group : "Appearance", defaultValue : ''},
@@ -692,21 +694,21 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library', 'sap/ui/
 	};
 
 	FileUploader.prototype.setEnabled = function(bEnabled){
+		var $oFileUpload = jQuery(this.oFileUpload);
+
 		this.setProperty("enabled", bEnabled, true);
 		this.oFilePath.setEnabled(bEnabled);
 		this.oBrowse.setEnabled(bEnabled);
-		if (bEnabled) {
-			jQuery(this.oFileUpload).removeAttr('disabled');
-		} else {
-			jQuery(this.oFileUpload).attr('disabled', 'disabled');
-		}
+		bEnabled ? $oFileUpload.removeAttr('disabled') : $oFileUpload.attr('disabled', 'disabled');
+		this.$().toggleClass("sapUiFupDisabled", !bEnabled);
+
 		return this;
 	};
 
 	FileUploader.prototype.setValueState = function(sValueState) {
 
 		this.setProperty("valueState", sValueState, true);
-		//as of 1.23.1 oFilePath can be a sap.ui.commons.TextField or a sap.m.Input, which both have a valueState
+		//as of 1.23.1 oFilePath can be an sap.ui.commons.TextField or an sap.m.Input, which both have a valueState
 		if (this.oFilePath.setValueState) {
 			this.oFilePath.setValueState(sValueState);
 		}
@@ -838,7 +840,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library', 'sap/ui/
 	};
 
 	FileUploader.prototype.ontap = function () {
-		this.FUEl.click();
+		if (this.getEnabled() && this.getVisible()) {
+			this.FUEl.click();
+		}
 	};
 
 	FileUploader.prototype.onmousedown = function(oEvent) {
@@ -1578,7 +1582,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library', 'sap/ui/
 		if (this.oBrowse &&  this.oBrowse.$().length) {
 			$browse = this.oBrowse.$();
 			$browse.attr("type', 'button"); // The default type of button is submit that's why on click of label there are submit of the form. This way we are avoiding the submit of form.
-			$browse.click(this.ontap.bind(this)); // The default behaviour on click on label is to open "open file" dialog. The only way to attach click event that is transferred from the label to the button is this way. AttachPress and attachTap don't work in this case.
+			$browse.click(function(e) {
+				e.preventDefault();
+				this.ontap(); // The default behaviour on click on label is to open "open file" dialog. The only way to attach click event that is transferred from the label to the button is this way. AttachPress and attachTap don't work in this case.
+			}.bind(this));
 		}
 	};
 

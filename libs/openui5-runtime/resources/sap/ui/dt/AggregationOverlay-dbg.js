@@ -25,7 +25,7 @@ function(jQuery, Overlay) {
 	 * @extends sap.ui.core.Overlay
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private
@@ -126,6 +126,15 @@ function(jQuery, Overlay) {
 	 */
 	AggregationOverlay.prototype.isTargetZone = function() {
 		return this.getTargetZone();
+	};
+
+	/**
+	 * Returns if the AggregationOverlay is an association
+	 * @public
+	 * @return {boolean} if the AggregationOverlay is an association
+	 */
+	AggregationOverlay.prototype.isAssociation = function() {
+		return !!this.getDesignTimeMetadata().getData().aggregationLike;
 	};
 
 	/**

@@ -88,7 +88,7 @@ sap.ui.define([
 		this._sSelectedKey = null; // keep track of sap.uxap.HierarchicalSelect selected key
 		this._bRtl = sap.ui.getCore().getConfiguration().getRTL();
 
-		//are we on a rtl scenario?
+		//are we on an rtl scenario?
 		//IE handles rtl in a transparent way (positions positives, scroll starts at the end)
 		//while firefox, safari and chrome have a special management (scroll at the beginning and negative positioning)
 		//therefore we will apply some specific actions only if are in rtl and not in IE.
@@ -96,7 +96,7 @@ sap.ui.define([
 
 		//there are 2 different uses cases:
 		//case 1: on a real phone we don't need the scrolling anchorBar, just the hierarchicalSelect
-		//case 2: on a a real ipad or a desktop we need both as the size may change
+		//case 2: on a real tablet or a desktop we need both as the size may change
 		this._bHasButtonsBar = Device.system.tablet || Device.system.desktop;
 
 		this._oSelect = this._getHierarchicalSelect();
@@ -686,7 +686,7 @@ sap.ui.define([
 			var iDuration = duration || AnchorBar.SCROLL_DURATION,
 				iScrollTo;
 
-			if ((this._sHierarchicalSelectMode === AnchorBar._hierarchicalSelectModes.Icon)
+			if (!library.Utilities.isPhoneScenario(this._getCurrentMediaContainerRange())
 				&& this._oSectionInfo[sId]) {
 
 				if (this._bRtlScenario && Device.browser.firefox) {
@@ -726,7 +726,7 @@ sap.ui.define([
 
 	// use type 'object' because Metamodel doesn't know ScrollEnablement
 	/**
-	 * Returns a sap.ui.core.delegate.ScrollEnablement object used to handle scrolling.
+	 * Returns an sap.ui.core.delegate.ScrollEnablement object used to handle scrolling.
 	 *
 	 * @type object
 	 * @public
@@ -968,8 +968,6 @@ sap.ui.define([
 		}
 
 		oSelectedButton = sap.ui.getCore().byId(this.getSelectedButton());
-
-		this._sHierarchicalSelectMode = AnchorBar._hierarchicalSelectModes.Text;
 
 		//save max for arrow show/hide management, the max position is the required scroll for the the item to be fully visible
 		this._iMaxPosition = -1;

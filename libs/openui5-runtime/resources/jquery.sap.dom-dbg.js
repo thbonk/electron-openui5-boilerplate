@@ -52,8 +52,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 
 
 	/**
-	 * Calls focus() on the given DOM element, but catches and ignores any errors that occur when doing so.
-	 * (i.e. IE8 throws an error when the DOM element is invisible or disabled)
+	 * Calls focus() on the given DOM element.
 	 *
 	 * @param {Element} oDomRef The DOM element to focus (or null - in this case the method does nothing)
 	 * @return {boolean} Whether the focus() command was executed without an error
@@ -64,16 +63,45 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 		if (!oDomRef) {
 			return;
 		}
-		try {
-			oDomRef.focus();
-		} catch (e) {
-			var id = (oDomRef && oDomRef.id) ? " (ID: '" + oDomRef.id + "')" : "";
-			jQuery.sap.log.warning("Error when trying to focus a DOM element" + id + ": " + e.message);
-			return false;
-		}
+		oDomRef.focus();
 		return true;
 	};
 
+	function getRootFontSize() {
+		var oRootDomRef = document.documentElement;
+
+		if (!oRootDomRef) {
+			return 16; // browser default font size
+		}
+
+		return parseFloat(window.getComputedStyle(oRootDomRef).getPropertyValue("font-size"));
+	}
+
+	/*
+	 * Convert <code>px</code> values to <code>rem</code>.
+	 *
+	 * @param {string|float} vPx The value in <code>px</code> units. E.g.: <code>"16px"</code> or <code>16</code>
+	 * @returns {float} The converted value in <code>rem</code> units. E.g.: <code>1</code>
+	 * @protected
+	 * @since 1.48
+	 */
+	jQuery.sap.pxToRem = function(vPx) {
+		jQuery.sap.assert(((typeof vPx === "string") && (vPx !== "") && !isNaN(parseFloat(vPx)) && (typeof parseFloat(vPx) === "number")) || ((typeof vPx === "number") && !isNaN(vPx)), 'jQuery.sap.pxToRem: either the "vPx" parameter must be an integer, or a string e.g.: "16px"');
+		return parseFloat(vPx) / getRootFontSize();
+	};
+
+	/*
+	 * Convert <code>rem</code> values to <code>px</code>.
+	 *
+	 * @param {string|float} vRem The value in <code>rem</code>. E.g.: <code>"1rem"</code> or <code>1</code>
+	 * @returns {float} The converted value in <code>px</code> units. E.g.: <code>16</code>
+	 * @protected
+	 * @since 1.48
+	 */
+	jQuery.sap.remToPx = function(vRem) {
+		jQuery.sap.assert(((typeof vRem === "string") && (vRem !== "") && !isNaN(parseFloat(vRem)) && (typeof parseFloat(vRem) === "number")) || ((typeof vRem === "number") && !isNaN(vRem)), 'jQuery.sap.remToPx: either the "vRem" parameter must be an integer, or a string e.g.: "1rem"');
+		return parseFloat(vRem) * getRootFontSize();
+	};
 
 	/**
 	 * Sets or gets the position of the cursor in an element that supports cursor positioning
@@ -88,7 +116,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 	 */
 	jQuery.fn.cursorPos = function cursorPos(iPos) {
 		var len = arguments.length,
-			oTextRange,iLength,
 			sTagName,
 			sType;
 
@@ -102,76 +129,19 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 
 			if (len > 0) { // SET
 
-				if (typeof (oDomRef.selectionStart) == "number") { // FF and IE9+ method
+				if (typeof (oDomRef.selectionStart) == "number") {
 					oDomRef.focus();
 					oDomRef.selectionStart = iPos;
 					oDomRef.selectionEnd = iPos;
-				} else if (oDomRef.createTextRange) { // IE method
-					oTextRange = oDomRef.createTextRange();
-					var iMaxLength = oDomRef.value.length;
-
-					if (iPos < 0 || iPos > iMaxLength) {
-						iPos = iMaxLength;
-					}
-					if (oTextRange) {
-						oTextRange.collapse();
-						oTextRange.moveEnd("character",iPos);
-						oTextRange.moveStart("character",iPos);
-						oTextRange.select();
-					}
 				}
 
 				return this;
 				// end of SET
 
 			} else { // GET
-				if (typeof (oDomRef.selectionStart) == "number") { // Firefox etc.
+				if (typeof (oDomRef.selectionStart) == "number") {
 					return oDomRef.selectionStart;
-				} else if (oDomRef.createTextRange) { // IE 8
-					oTextRange = window.document.selection.createRange();
-					var oCopiedTextRange = oTextRange.duplicate();
-					// Logic in TEXTAREA and INPUT is different in IE -> check for element type
-					if (oDomRef.tagName == "TEXTAREA") {
-						oCopiedTextRange.moveToElementText(oDomRef);
-						var oCheckTextRange = oCopiedTextRange.duplicate();
-						iLength = oCopiedTextRange.text.length;
-
-						// first check if cursor on last position
-						oCheckTextRange.moveStart("character", iLength);
-						var iStart = 0;
-						if (oCheckTextRange.inRange(oTextRange)) {
-							iStart = iLength;
-						} else {
-							// find out cursor position using a bisection algorithm
-							var iCheckLength = iLength;
-							while (iLength > 1) {
-								iCheckLength = Math.round(iLength / 2);
-								iStart = iStart + iCheckLength;
-
-								oCheckTextRange = oCopiedTextRange.duplicate();
-								oCheckTextRange.moveStart("character", iStart);
-								if (oCheckTextRange.inRange(oTextRange)) {
-									//cursor is after or on iStart -> Length = not checked Length
-									iLength = iLength - iCheckLength;
-
-								} else {
-									//cursor is before iStart  -> Length = checked Length
-									iStart = iStart - iCheckLength;
-									iLength = iCheckLength;
-								}
-							}
-						}
-						return iStart;
-					} else if (oCopiedTextRange.parentElement() === oDomRef) {
-						// ensure there is only the cursor and not the range (as this would create erroneous position)!
-						oCopiedTextRange.collapse();
-						// now, move the selection range to the beginning of the inputField and simply get the selected range's length
-						var iLength = oDomRef.value.length;
-						oCopiedTextRange.moveStart('character', -iLength);
-						return oCopiedTextRange.text.length;
-					}
 				}
-
 				return -1;
 			} // end of GET
 		} else {
@@ -201,12 +171,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 			// In Chrome 58 and above selection start is set to selection end when the first parameter of a setSelectionRange call is negative.
 			if (typeof (oDomRef.selectionStart) === "number") {
 				oDomRef.setSelectionRange(iStart > 0 ? iStart : 0, iEnd);
-			} else if (oDomRef.createTextRange) { // IE
-				var oTextEditRange = oDomRef.createTextRange();
-				oTextEditRange.collapse();
-				oTextEditRange.moveStart('character', iStart);
-				oTextEditRange.moveEnd('character', iEnd - iStart);
-				oTextEditRange.select();
 			}
 		} catch (e) {
 			// note: some browsers fail to read the "selectionStart" and "selectionEnd" properties from HTMLInputElement, e.g.: The input element's type "number" does not support selection.
@@ -233,11 +197,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 		try {
 			if (typeof oDomRef.selectionStart === "number") {
 				return oDomRef.value.substring(oDomRef.selectionStart, oDomRef.selectionEnd);
-			}
-
-			// older versions of Internet Explorer do not support the HTML5 "selectionStart" and "selectionEnd" properties
-			if (document.selection) {
-				return document.selection.createRange().text;
 			}
 		} catch (e) {
 			// note: some browsers fail to read the "selectionStart" and "selectionEnd" properties from HTMLInputElement, e.g.: The input element's type "number" does not support selection.

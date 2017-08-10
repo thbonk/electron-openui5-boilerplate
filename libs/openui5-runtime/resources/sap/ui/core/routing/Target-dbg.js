@@ -236,6 +236,21 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/base/EventPro
 				}
 			},
 
+			_addTitleProviderAsDependent : function(oView) {
+				if (!this._oTitleProvider) {
+					return;
+				}
+
+				// Remove the title provider from the old parent manually before adding
+				// it to the new view because the internal removal from old parent
+				// currently causes rerendering of the old parent.
+				var oOldParent = this._oTitleProvider.getParent();
+				if (oOldParent) {
+					oOldParent.removeDependent(this._oTitleProvider);
+				}
+				oView.addDependent(this._oTitleProvider);
+			},
+
 			/**
 			 * This function is called between the target view is loaded and the view is added to the container.
 			 *

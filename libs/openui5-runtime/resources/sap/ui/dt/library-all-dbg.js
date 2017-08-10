@@ -13,7 +13,9 @@ jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
 sap.ui.define("sap/ui/dt/DOMUtil",[
 	'jquery.sap.global'
 ],
-function(jQuery) {
+function(
+	jQuery
+) {
 	"use strict";
 
 	/**
@@ -23,7 +25,7 @@ function(jQuery) {
 	 * Utility functionality for DOM
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @private
 	 * @static
@@ -74,19 +76,73 @@ function(jQuery) {
 	};
 
 	/**
-	 *
+	 * Checks whether DOM Element has vertical scrollbar
+	 * @param oDomRef {HTMLElement} - DOM Element
+	 * @return {boolean}
 	 */
-	DOMUtil.hasScrollBar = function(oDomRef) {
+	DOMUtil.hasVerticalScrollBar = function(oDomRef) {
 		var $DomRef = jQuery(oDomRef);
-
 		var bOverflowYScroll = $DomRef.css("overflow-y") === "auto" || $DomRef.css("overflow-y") === "scroll";
+
+		return bOverflowYScroll && $DomRef.get(0).scrollHeight > $DomRef.height();
+	};
+
+	/**
+	 * Checks whether DOM Element has horizontal scrollbar
+	 * @param oDomRef {HTMLElement} - DOM Element
+	 * @return {boolean}
+	 */
+	DOMUtil.hasHorizontalScrollBar = function (oDomRef) {
+		var $DomRef = jQuery(oDomRef);
 		var bOverflowXScroll = $DomRef.css("overflow-x") === "auto" || $DomRef.css("overflow-x") === "scroll";
 
-		var bHasYScroll = bOverflowYScroll && $DomRef.get(0).scrollHeight > $DomRef.height();
-		var bHasXScroll = bOverflowXScroll && $DomRef.get(0).scrollWidth > $DomRef.width();
-
-		return bHasYScroll || bHasXScroll;
+		return bOverflowXScroll && $DomRef.get(0).scrollWidth > $DomRef.width();
 	};
+
+	/**
+	 * Checks whether DOM Element has vertical or horizontal scrollbar
+	 * @param oDomRef {HTMLElement} - DOM Element
+	 * @return {boolean}
+	 */
+	DOMUtil.hasScrollBar = function(oDomRef) {
+		return DOMUtil.hasVerticalScrollBar(oDomRef) || DOMUtil.hasHorizontalScrollBar(oDomRef);
+	};
+
+	/**
+	 * Gets scrollbar width in the running browser
+	 * @return {number} - returns width in pixels
+	 */
+	DOMUtil.getScrollbarWidth = function() {
+		if (typeof DOMUtil.getScrollbarWidth._cache === 'undefined') {
+			// add outer div
+			var oOuter = jQuery('<div/>')
+				.css({
+					position: 'absolute',
+					top: '-9999px',
+					left: '-9999px',
+					width: '100px'
+				})
+				.appendTo('body');
+
+			var iWidthNoScroll = oOuter.width();
+			oOuter.css('overflow', 'scroll');
+
+			// add inner div
+			var oInner = jQuery('<div/>')
+				.css('width', '100%')
+				.appendTo(oOuter);
+
+			var iWidthWithScroll = oInner.width();
+
+			// clean up
+			oOuter.remove();
+
+			DOMUtil.getScrollbarWidth._cache = iWidthNoScroll - iWidthWithScroll;
+		}
+
+		return DOMUtil.getScrollbarWidth._cache;
+	};
+
 
 	/**
 	 *
@@ -301,6 +357,24 @@ function(jQuery) {
 		jQuery(oTarget).append(oCopy);
 	};
 
+	/**
+	 * Inserts <style/> tag width specified styles into #overlay-container
+	 * @param {string} sStyles - string with plain CSS to be rendered into the page
+	 */
+	DOMUtil.insertStyles = function (sStyles) {
+		var oStyle = document.createElement('style');
+		oStyle.type = 'text/css';
+
+		if (oStyle.styleSheet) {
+			oStyle.styleSheet.cssText = sStyles;
+		} else {
+			oStyle.appendChild(document.createTextNode(sStyles));
+		}
+
+		// FIXME: we can't use Overlay module because of the cycled dependency
+		jQuery('#overlay-container').prepend(oStyle);
+	};
+
 	return DOMUtil;
 }, /* bExport= */ true);
 
@@ -325,7 +399,7 @@ sap.ui.define("sap/ui/dt/ElementUtil",['jquery.sap.global'],
 			 * @class Utility functionality to work with élements, e.g. iterate through aggregations, find parents, ...
 			 *
 			 * @author SAP SE
-			 * @version 1.46.12
+			 * @version 1.48.5
 			 *
 			 * @private
 			 * @static
@@ -349,11 +423,11 @@ sap.ui.define("sap/ui/dt/ElementUtil",['jquery.sap.global'],
 				if (vElement && vElement.length) {
 					for (var i = 0; i < vElement.length; i++) {
 						var oElement = vElement[i];
-						if (oElement instanceof sap.ui.core.Element) {
+						if (oElement instanceof sap.ui.base.ManagedObject) {
 							fnCallback(oElement);
 						}
 					}
-				} else if (vElement instanceof sap.ui.core.Element) {
+				} else if (vElement instanceof sap.ui.base.ManagedObject) {
 					fnCallback(vElement);
 				}
 			};
@@ -378,7 +452,8 @@ sap.ui.define("sap/ui/dt/ElementUtil",['jquery.sap.global'],
 			 */
 			ElementUtil.getElementInstance = function(vElement) {
 				if (typeof vElement === "string") {
-					return sap.ui.getCore().byId(vElement);
+					var oElement = sap.ui.getCore().byId(vElement);
+					return oElement || sap.ui.getCore().getComponent(vElement);
 				} else {
 					return vElement;
 				}
@@ -450,7 +525,7 @@ sap.ui.define("sap/ui/dt/ElementUtil",['jquery.sap.global'],
 					if (!oElement.getComponentInstance()) {
 						return;
 					}
-					return oElement.getComponentInstance().getAggregation("rootControl");
+					return oElement.getComponentInstance().getRootControl();
 				} else {
 					return oElement;
 				}
@@ -507,6 +582,27 @@ sap.ui.define("sap/ui/dt/ElementUtil",['jquery.sap.global'],
 			};
 
 			/**
+			 * Check the ancestor hierarchy of an overlay for a given relevant container
+			 * @param  {sap.ui.dt.Overlay} oOverlay overlay object which has to be checked
+			 * @param  {sap.ui.core.Element} oRelevantContainer object
+			 */
+			ElementUtil.hasSameRelevantContainer = function(oOverlay, oRelevantContainer) {
+				var oParentOverlay = oOverlay.getParent();
+				if (!oRelevantContainer || !oParentOverlay.getElementInstance) {
+					return false;
+				}
+
+				while (oParentOverlay && oParentOverlay.getElementInstance() !== oRelevantContainer) {
+					oParentOverlay = oParentOverlay.getParent();
+					if (!oParentOverlay.getElementInstance) {
+						return false;
+					}
+				}
+
+				return !!oParentOverlay;
+			};
+
+			/**
 			 *
 			 */
 			ElementUtil.isElementFiltered = function(oControl, aType) {
@@ -559,9 +655,6 @@ sap.ui.define("sap/ui/dt/ElementUtil",['jquery.sap.global'],
 				return ElementUtil.getAggregation(oParent, oElement.sParentAggregationName);
 			};
 
-			/**
-			 *
-			 */
 			ElementUtil.getAggregationAccessors = function(oElement, sAggregationName) {
 				var oMetadata = oElement.getMetadata();
 				oMetadata.getJSONKeys();
@@ -587,9 +680,6 @@ sap.ui.define("sap/ui/dt/ElementUtil",['jquery.sap.global'],
 				}
 			};
 
-			/**
-			 *
-			 */
 			ElementUtil.getAggregation = function(oElement, sAggregationName) {
 				var oValue;
 
@@ -635,12 +725,12 @@ sap.ui.define("sap/ui/dt/ElementUtil",['jquery.sap.global'],
 			/**
 			 *
 			 */
-			ElementUtil.removeAggregation = function(oParent, sAggregationName, oElement) {
+			ElementUtil.removeAggregation = function(oParent, sAggregationName, oElement, bSuppressInvalidate) {
 				var sAggregationRemoveMutator = this.getAggregationAccessors(oParent, sAggregationName).remove;
 				if (sAggregationRemoveMutator) {
-					oParent[sAggregationRemoveMutator](oElement);
+					oParent[sAggregationRemoveMutator](oElement, bSuppressInvalidate);
 				} else {
-					oParent.removeAggregation(sAggregationName, oElement);
+					oParent.removeAggregation(sAggregationName, oElement, bSuppressInvalidate);
 				}
 			};
 
@@ -651,14 +741,14 @@ sap.ui.define("sap/ui/dt/ElementUtil",['jquery.sap.global'],
 				if (this.hasAncestor(oParent, oElement)) {
 					throw new Error("Trying to add an element to itself or its successors");
 				}
-				if (this.getAggregation(oParent, sAggregationName).indexOf(oElement) !== -1) {
+				if (this.getIndexInAggregation(oElement, oParent, sAggregationName) !== -1) {
 					// ManagedObject.insertAggregation won't reposition element, if it's already inside of same aggregation
 					// therefore we need to remove the element and then insert it again. To prevent ManagedObjectObserver from
 					// firing
 					// setParent event with parent null, private flag is set.
 					oElement.__bSapUiDtSupressParentChangeEvent = true;
 					try {
-						oParent.removeAggregation(sAggregationName, oElement, true);
+						this.removeAggregation(oParent, sAggregationName, oElement, true);
 					} finally {
 						delete oElement.__bSapUiDtSupressParentChangeEvent;
 					}
@@ -697,6 +787,44 @@ sap.ui.define("sap/ui/dt/ElementUtil",['jquery.sap.global'],
 					return this.isInstanceOf(oElement, sTypeOrInterface) || this.hasInterface(oElement, sTypeOrInterface);
 				}
 
+			};
+
+			ElementUtil.getAssociationAccessors = function(oElement, sAggregationName) {
+				var oMetadata = oElement.getMetadata();
+				oMetadata.getJSONKeys();
+				var oAssociationMetadata = oMetadata.getAssociation(sAggregationName);
+				if (oAssociationMetadata) {
+					return {
+						get : oAssociationMetadata._sGetter,
+						add : oAssociationMetadata._sMutator,
+						remove : oAssociationMetadata._sRemoveMutator,
+						insert : oAssociationMetadata._sInsertMutator,
+						removeAll : oAssociationMetadata._sRemoveAllMutator
+					};
+				} else {
+					return {};
+				}
+			};
+
+			ElementUtil.getAssociation = function(oElement, sAssociationName) {
+				var oValue;
+				var sGetter = this.getAssociationAccessors(oElement, sAssociationName).get;
+				if (sGetter) {
+					oValue = oElement[sGetter]();
+				}
+				return oValue;
+			};
+
+			ElementUtil.getAssociationInstances = function(oElement, sAssociationName) {
+				var vValue = this.getAssociation(oElement, sAssociationName);
+				vValue = this.getElementInstance(vValue);
+				if (vValue && vValue.length){
+					vValue = vValue.map(function(sId){
+						return this.getElementInstance(sId);
+					});
+				}
+
+				return vValue;
 			};
 
 			/**
@@ -800,7 +928,7 @@ sap.ui.define("sap/ui/dt/ManagedObjectObserver",[
 	 * @class The ManagedObjectObserver observes changes of a ManagedObject and propagates them via events.
 	 * @extends sap.ui.base.ManagedObject
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @constructor
 	 * @private
 	 * @since 1.30
@@ -892,170 +1020,229 @@ sap.ui.define("sap/ui/dt/ManagedObjectObserver",[
 	 * @protected
 	 */
 	ManagedObjectObserver.prototype.observe = function(oTarget) {
-		var that = this;  // eslint-disable-line consistent-this
+		this._bIsObserved = true;
 
+		// _change event is triggered on property change of UI5 managed object
 		oTarget.attachEvent("_change", this._fnFireModified, this);
 
 		// Wrapper for the destroy method to recognize changes
 		this._fnOriginalDestroy = oTarget.destroy;
 		oTarget.destroy = function() {
-			that.unobserve();
+			this.unobserve();
 			// Original destroy method was restored by unobserve() call above
-			var vOriginalReturn = this.destroy.apply(this, arguments);
-			that.fireDestroyed();
+			var vOriginalReturn = oTarget.destroy.apply(oTarget, arguments);
+			this.fireDestroyed();
 
 			return vOriginalReturn;
-		};
+		}.bind(this);
 
 		// Wrapper for the bindProperty method to recognize changes
 		this._fnOriginalBindProperty = oTarget.bindProperty;
 		oTarget.bindProperty = function() {
-			var vOriginalReturn = that._fnOriginalBindProperty.apply(this, arguments);
-			that.fireModified();
+			var vOriginalReturn = this._fnOriginalBindProperty.apply(oTarget, arguments);
+			this.fireModified();
 
 			return vOriginalReturn;
-		};
+		}.bind(this);
 
 		// Wrapper for the unbindProperty method to recognize changes
 		this._fnOriginalUnBindProperty = oTarget.unbindProperty;
 		oTarget.unbindProperty = function() {
-			var vOriginalReturn = that._fnOriginalUnBindProperty.apply(this, arguments);
-			that.fireModified();
+			var vOriginalReturn = this._fnOriginalUnBindProperty.apply(oTarget, arguments);
+			this.fireModified();
 
 			return vOriginalReturn;
-		};
+		}.bind(this);
 
 		// Wrapper for the bindAggregation method to recognize changes
 		this._fnOriginalBindAggregation = oTarget.bindAggregation;
 		oTarget.bindAggregation = function(sAggregationName) {
-			var vOriginalReturn = that._fnOriginalBindAggregation.apply(this, arguments);
-			that.fireModified();
+			var vOriginalReturn = this._fnOriginalBindAggregation.apply(oTarget, arguments);
+			this.fireModified();
 
 			return vOriginalReturn;
-		};
+		}.bind(this);
 
 		// Wrapper for the unbindAggregation method to recognize changes
 		this._fnOriginalUnBindAggregation = oTarget.unbindAggregation;
 		oTarget.unbindAggregation = function(sAggregationName) {
-			var vOriginalReturn = that._fnOriginalUnBindAggregation.apply(this, arguments);
-			that.fireModified();
+			var vOriginalReturn = this._fnOriginalUnBindAggregation.apply(oTarget, arguments);
+			this.fireModified();
 
 			return vOriginalReturn;
-		};
+		}.bind(this);
 
 		// We wrap the native setParent method of the control with our logic
 		this._fnOriginalSetParent = oTarget.setParent;
 		oTarget.setParent = function(oParent, sAggregationName, bSuppressInvalidate) {
 			var bFireModified = false;
-			if (!this._bInSetParent) {
+			if (!oTarget._bInSetParent) {
 				bFireModified = true;
-				this._bInSetParent = true;
+				oTarget._bInSetParent = true;
 			}
 
-			var oCurrentParent = this.getParent();
-			var vOriginalReturn = that._fnOriginalSetParent.apply(this, arguments);
-			if (bFireModified && !this.__bSapUiDtSupressParentChangeEvent) {
-				this._bInSetParent = false;
+			var oCurrentParent = oTarget.getParent();
+			var vOriginalReturn = this._fnOriginalSetParent.apply(oTarget, arguments);
+			if (bFireModified && !oTarget.__bSapUiDtSupressParentChangeEvent) {
+				oTarget._bInSetParent = false;
 				// "dependents" is used to store some removed elements (e.g. from Combine)
 				if (oCurrentParent !== oParent || sAggregationName === "dependents") {
-					that.fireModified({
+					this.fireModified({
 						type: "setParent",
 						value: oParent,
 						oldValue: oCurrentParent,
-						target: this
+						target: oTarget
 					});
 				}
 			}
 
 			return vOriginalReturn;
-		};
+		}.bind(this);
 
 		// We wrap the native addAggregation method of the control with our logic
 		this._fnOriginalAddAggregation = oTarget.addAggregation;
 		oTarget.addAggregation = function(sAggregationName, oObject, bSuppressInvalidate) {
-			that._bAddOrSetAggregationCall = true;
-			var vOriginalReturn = that._fnOriginalAddAggregation.apply(this, arguments);
-			that.fireModified({
+			this._bAddOrSetAggregationCall = true;
+			var vOriginalReturn = this._fnOriginalAddAggregation.apply(oTarget, arguments);
+			this.fireModified({
 				type: "addOrSetAggregation",
 				name : sAggregationName,
 				value: oObject,
-				target: this
+				target: oTarget
 			});
 			return vOriginalReturn;
-		};
+		}.bind(this);
 
 		// We wrap the native setAggregation method of the control with our logic
 		this._fnOriginalSetAggregation = oTarget.setAggregation;
 		oTarget.setAggregation = function(sAggregationName, oObject, bSuppressInvalidate) {
 			// same mutator as addAggregation for multiple = false aggregations
-			that._bAddOrSetAggregationCall = true;
-			var vOriginalReturn = that._fnOriginalSetAggregation.apply(this, arguments);
-			that.fireModified({
+			this._bAddOrSetAggregationCall = true;
+			var vOriginalReturn = this._fnOriginalSetAggregation.apply(oTarget, arguments);
+			this.fireModified({
 				type: "addOrSetAggregation",
 				name : sAggregationName,
 				value: oObject,
-				target: this
+				target: oTarget
 			});
 			return vOriginalReturn;
-		};
+		}.bind(this);
 
 		// We wrap the native removeAggregation method of the control with our logic
 		this._fnOriginalRemoveAggregation = oTarget.removeAggregation;
 		oTarget.removeAggregation = function(sAggregationName, vObject, bSuppressInvalidate) {
-			that._bRemoveAggregationCall = true;
-			var vOriginalReturn = that._fnOriginalRemoveAggregation.apply(this, arguments);
-			that.fireModified({
+			this._bRemoveAggregationCall = true;
+			var vOriginalReturn = this._fnOriginalRemoveAggregation.apply(oTarget, arguments);
+			this.fireModified({
 				type: "removeAggregation",
 				name : sAggregationName,
 				value: vObject,
-				target: this
+				target: oTarget
 			});
 			return vOriginalReturn;
-		};
+		}.bind(this);
 
 		// We wrap the native insertAggregation method of the control with our logic
 		this._fnOriginalInsertAggregation = oTarget.insertAggregation;
 		oTarget.insertAggregation = function(sAggregationName, oObject, iIndex, bSuppressInvalidate) {
-			that._bInsertAggregationCall = true;
-			var vOriginalReturn = that._fnOriginalInsertAggregation.apply(this, arguments);
-			that.fireModified({
+			this._bInsertAggregationCall = true;
+			var vOriginalReturn = this._fnOriginalInsertAggregation.apply(oTarget, arguments);
+			this.fireModified({
 				type: "insertAggregation",
 				name : sAggregationName,
 				value: oObject,
-				target: this
+				target: oTarget
 			});
 			return vOriginalReturn;
-		};
+		}.bind(this);
 
 		// We wrap the native removeAllAggregations method of the control with our logic
 		this._fnOriginalRemoveAllAggregation = oTarget.removeAllAggregation;
 		oTarget.removeAllAggregation = function(sAggregationName, bSuppressInvalidate) {
-			that._bRemoveAllAggregationCall = true;
-			var aRemovedObjects = this.getAggregation(sAggregationName);
-			var vOriginalReturn = that._fnOriginalRemoveAllAggregation.apply(this, arguments);
-			that.fireModified({
+			this._bRemoveAllAggregationCall = true;
+			var aRemovedObjects = oTarget.getAggregation(sAggregationName);
+			var vOriginalReturn = this._fnOriginalRemoveAllAggregation.apply(oTarget, arguments);
+			this.fireModified({
 				type: "removeAllAggregation",
 				name : sAggregationName,
 				value: aRemovedObjects,
-				target: this
+				target: oTarget
 			});
 			return vOriginalReturn;
-		};
+		}.bind(this);
 
 		// We wrap the native destroyAggregation method of the control with our logic
 		this._fnOriginalDestroyAggregation = oTarget.destroyAggregation;
 		oTarget.destroyAggregation = function(sAggregationName, bSuppressInvalidate) {
-			that._bDestroyAggregationCall = true;
-			var aRemovedObjects = this.getAggregation(sAggregationName);
-			var vOriginalReturn = that._fnOriginalDestroyAggregation.apply(this, arguments);
-			that.fireModified({
+			this._bDestroyAggregationCall = true;
+			var aRemovedObjects = oTarget.getAggregation(sAggregationName);
+			var vOriginalReturn = this._fnOriginalDestroyAggregation.apply(oTarget, arguments);
+			this.fireModified({
 				type: "destroyAggregation",
 				name : sAggregationName,
 				value: aRemovedObjects,
-				target: this
+				target: oTarget
 			});
 			return vOriginalReturn;
-		};
+		}.bind(this);
+
+		// We wrap the native addAssociation method of the control with our logic
+		this._fnOriginalAddAssociation = oTarget.addAssociation;
+		oTarget.addAssociation = function(sAssociationName, oObject, bSuppressInvalidate) {
+			this._bAddOrSetAssociationCall = true;
+			var vOriginalReturn = this._fnOriginalAddAssociation.apply(oTarget, arguments);
+			this.fireModified({
+				type: "addOrSetAggregation",
+				name : sAssociationName,
+				value: oObject,
+				target: oTarget
+			});
+			return vOriginalReturn;
+		}.bind(this);
+
+		// We wrap the native setAssociation method of the control with our logic
+		this._fnOriginalSetAssociation = oTarget.setAssociation;
+		oTarget.setAssociation = function(sAssociationName, oObject, bSuppressInvalidate) {
+			// same mutator as addAssociation for multiple = false associations
+			this._bAddOrSetAssociationCall = true;
+			var vOriginalReturn = this._fnOriginalSetAssociation.apply(oTarget, arguments);
+			this.fireModified({
+				type: "addOrSetAggregation",
+				name : sAssociationName,
+				value: oObject,
+				target: oTarget
+			});
+			return vOriginalReturn;
+		}.bind(this);
+
+		// We wrap the native removeAssociation method of the control with our logic
+		this._fnOriginalRemoveAssociation = oTarget.removeAssociation;
+		oTarget.removeAssociation = function(sAssociationName, vObject, bSuppressInvalidate) {
+			this._bRemoveAssociationCall = true;
+			var vOriginalReturn = this._fnOriginalRemoveAssociation.apply(oTarget, arguments);
+			this.fireModified({
+				type: "removeAggregation",
+				name : sAssociationName,
+				value: vObject,
+				target: oTarget
+			});
+			return vOriginalReturn;
+		}.bind(this);
+
+		// We wrap the native removeAllAssociations method of the control with our logic
+		this._fnOriginalRemoveAllAssociation = oTarget.removeAllAssociation;
+		oTarget.removeAllAssociation = function(sAssociationName, bSuppressInvalidate) {
+			this._bRemoveAllAssociationCall = true;
+			var aRemovedObjects = oTarget.getAssociation(sAssociationName);
+			var vOriginalReturn = this._fnOriginalRemoveAllAssociation.apply(oTarget, arguments);
+			this.fireModified({
+				type: "removeAllAggregation",
+				name : sAssociationName,
+				value: aRemovedObjects,
+				target: oTarget
+			});
+			return vOriginalReturn;
+		}.bind(this);
 
 		this._aOriginalAddMutators = {};
 		this._aOriginalInsertMutators = {};
@@ -1068,96 +1255,156 @@ sap.ui.define("sap/ui/dt/ManagedObjectObserver",[
 			var _fnOriginalAddMutator = oTarget[oAggregation._sMutator];
 			this._aOriginalAddMutators[oAggregation.name] = _fnOriginalAddMutator;
 			oTarget[oAggregation._sMutator] = function(oObject) {
-				that._bAddOrSetAggregationCall = false;
+				this._bAddOrSetAggregationCall = false;
 				// if addAggregation or setAggregation method wasn't called directly
 
 				var vOriginalReturn;
-				vOriginalReturn = _fnOriginalAddMutator.apply(this, arguments);
+				vOriginalReturn = _fnOriginalAddMutator.apply(oTarget, arguments);
 
-				if (!that._bAddOrSetAggregationCall) {
-					that.fireModified({
+				if (!this._bAddOrSetAggregationCall) {
+					this.fireModified({
 						type: "addOrSetAggregation",
 						name : oAggregation.name,
 						value: oObject,
-						target: this
+						target: oTarget
 					});
 				}
 				return vOriginalReturn;
-			};
+			}.bind(this);
 
 			var _fnOriginalInsertMutator = oTarget[oAggregation._sInsertMutator];
 			this._aOriginalInsertMutators[oAggregation.name] = _fnOriginalInsertMutator;
 			oTarget[oAggregation._sInsertMutator] = function(oObject, iIndex) {
-				that._bInsertAggregationCall = false;
+				this._bInsertAggregationCall = false;
 
 				var vOriginalReturn;
-				vOriginalReturn = _fnOriginalInsertMutator.apply(this, arguments);
+				vOriginalReturn = _fnOriginalInsertMutator.apply(oTarget, arguments);
 
 				// if insertAggregation method wasn't called directly
-				if (!that._bInsertAggregationCall) {
-					that.fireModified({
+				if (!this._bInsertAggregationCall) {
+					this.fireModified({
 						type: "insertAggregation",
 						name : oAggregation.name,
 						value: oObject,
-						target: this
+						target: oTarget
 					});
 				}
 				return vOriginalReturn;
-			};
+			}.bind(this);
 
 			var _fnOriginalRemoveMutator = oTarget[oAggregation._sRemoveMutator];
 			this._aOriginalRemoveMutators[oAggregation.name] = _fnOriginalRemoveMutator;
 			oTarget[oAggregation._sRemoveMutator] = function(vObject, bSuppressInvalidate) {
-				that._bRemoveAggregationCall = false;
-				var vOriginalReturn = _fnOriginalRemoveMutator.apply(this, arguments);
+				this._bRemoveAggregationCall = false;
+				var vOriginalReturn = _fnOriginalRemoveMutator.apply(oTarget, arguments);
 				// if removeAggregation method wasn't called directly
-				if (!that._bRemoveAggregationCall) {
-					that.fireModified({
+				if (!this._bRemoveAggregationCall) {
+					this.fireModified({
 						type: "removeAggregation",
 						name : oAggregation.name,
 						value: vObject,
-						target: this
+						target: oTarget
 					});
 				}
 				return vOriginalReturn;
-			};
+			}.bind(this);
 
 			var _fnOriginalRemoveAllMutator = oTarget[oAggregation._sRemoveAllMutator];
 			this._aOriginalRemoveAllMutators[oAggregation.name] = _fnOriginalRemoveAllMutator;
 			oTarget[oAggregation._sRemoveAllMutator] = function(bSuppressInvalidate) {
-				that._bRemoveAllAggregationCall = false;
+				this._bRemoveAllAggregationCall = false;
 				var aRemovedObjects = this.getAggregation(sAggregationName);
-				var vOriginalReturn = _fnOriginalRemoveAllMutator.apply(this, arguments);
+				var vOriginalReturn = _fnOriginalRemoveAllMutator.apply(oTarget, arguments);
 				// if removeAllAggregation method wasn't called directly
-				if (!that._bRemoveAllAggregationCall) {
-					that.fireModified({
+				if (!this._bRemoveAllAggregationCall) {
+					this.fireModified({
 						type: "removeAllAggregation",
 						name : oAggregation.name,
 						value: aRemovedObjects,
-						target: this
+						target: oTarget
 					});
 				}
 				return vOriginalReturn;
-			};
+			}.bind(this);
 
 			var _fnOriginalDestructor = oTarget[oAggregation._sDestructor];
 			this._aOriginalDestructors[oAggregation.name] = _fnOriginalDestructor;
 			oTarget[oAggregation._sDestructor] = function(bSuppressInvalidate) {
-				that._bDestroyAggregationCall = false;
+				this._bDestroyAggregationCall = false;
 				var aRemovedObjects = this.getAggregation(sAggregationName);
-				var vOriginalReturn = _fnOriginalDestructor.apply(this, arguments);
+				var vOriginalReturn = _fnOriginalDestructor.apply(oTarget, arguments);
 				// if destroyAggregation method wasn't called directly
-				if (!that._bDestroyAggregationCall) {
-					that.fireModified({
+				if (!this._bDestroyAggregationCall) {
+					this.fireModified({
 						type: "destroyAggregation",
 						name : oAggregation.name,
 						value: aRemovedObjects,
-						target: this
+						target: oTarget
 					});
 				}
 				return vOriginalReturn;
-			};
-		}, this);
+			}.bind(this);
+		}.bind(this), this);
+
+		var mAllAssociations = oTarget.getMetadata().getAllAssociations();
+		Object.keys(mAllAssociations).forEach(function(sAssociationName) {
+			var oAssociation = mAllAssociations[sAssociationName];
+			var _fnOriginalAddMutator = oTarget[oAssociation._sMutator];
+			this._aOriginalAddMutators[oAssociation.name] = _fnOriginalAddMutator;
+			oTarget[oAssociation._sMutator] = function(oObject) {
+				this._bAddOrSetAssociationCall = false;
+				// if addAssociation or setAssociation method wasn't called directly
+
+				var vOriginalReturn;
+				vOriginalReturn = _fnOriginalAddMutator.apply(oTarget, arguments);
+
+				if (!this._bAddOrSetAssociationCall) {
+					this.fireModified({
+						type: "addOrSetAggregation",
+						name : oAssociation.name,
+						value: oObject,
+						target: oTarget
+					});
+				}
+				return vOriginalReturn;
+			}.bind(this);
+
+			var _fnOriginalRemoveMutator = oTarget[oAssociation._sRemoveMutator];
+			this._aOriginalRemoveMutators[oAssociation.name] = _fnOriginalRemoveMutator;
+			oTarget[oAssociation._sRemoveMutator] = function(vObject, bSuppressInvalidate) {
+				this._bRemoveAssociationCall = false;
+				var vOriginalReturn = _fnOriginalRemoveMutator.apply(oTarget, arguments);
+				// if removeAssociation method wasn't called directly
+				if (!this._bRemoveAssociationCall) {
+					this.fireModified({
+						type: "removeAggregation",
+						name : oAssociation.name,
+						value: vObject,
+						target: oTarget
+					});
+				}
+				return vOriginalReturn;
+			}.bind(this);
+
+			var _fnOriginalRemoveAllMutator = oTarget[oAssociation._sRemoveAllMutator];
+			this._aOriginalRemoveAllMutators[oAssociation.name] = _fnOriginalRemoveAllMutator;
+			oTarget[oAssociation._sRemoveAllMutator] = function(bSuppressInvalidate) {
+				this._bRemoveAllAssociationCall = false;
+				var aRemovedObjects = this.getAssociation(sAssociationName);
+				var vOriginalReturn = _fnOriginalRemoveAllMutator.apply(oTarget, arguments);
+				// if removeAllAssociation method wasn't called directly
+				if (!this._bRemoveAllAssociationCall) {
+					this.fireModified({
+						type: "removeAllAggregation",
+						name : oAssociation.name,
+						value: aRemovedObjects,
+						target: oTarget
+					});
+				}
+				return vOriginalReturn;
+			}.bind(this);
+
+		}.bind(this), this);
 
 	};
 
@@ -1170,7 +1417,8 @@ sap.ui.define("sap/ui/dt/ManagedObjectObserver",[
 	ManagedObjectObserver.prototype.unobserve = function() {
 		var oTarget = this.getTargetInstance();
 
-		if (oTarget) {
+		if (this._bIsObserved && oTarget) {
+			this._bIsObserved = false;
 			oTarget.destroy = this._fnOriginalDestroy;
 			oTarget.bindProperty = this._fnOriginalBindProperty;
 			oTarget.unbindProperty = this._fnOriginalUnBindProperty;
@@ -1185,6 +1433,11 @@ sap.ui.define("sap/ui/dt/ManagedObjectObserver",[
 			oTarget.removeAllAggregation = this._fnOriginalRemoveAllAggregation;
 			oTarget.destroyAggregation = this._fnOriginalDestroyAggregation;
 
+			oTarget.addAssociation = this._fnOriginalAddAssociation;
+			oTarget.removeAssociation = this._fnOriginalRemoveAssociation;
+			oTarget.setAssociation = this._fnOriginalSetAssociation;
+			oTarget.removeAllAssociation = this._fnOriginalRemoveAllAssociation;
+
 			var mAllAggregations = oTarget.getMetadata().getAllAggregations();
 			Object.keys(mAllAggregations).forEach(function(sAggregationName) {
 				var oAggregation = mAllAggregations[sAggregationName];
@@ -1193,6 +1446,14 @@ sap.ui.define("sap/ui/dt/ManagedObjectObserver",[
 				oTarget[oAggregation._sRemoveMutator] = this._aOriginalRemoveMutators[oAggregation.name];
 				oTarget[oAggregation._sRemoveAllMutator] = this._aOriginalRemoveAllMutators[oAggregation.name];
 				oTarget[oAggregation._sDestructor] = this._aOriginalDestructors[oAggregation.name];
+			}, this);
+
+			var mAllAssociations = oTarget.getMetadata().getAllAssociations();
+			Object.keys(mAllAssociations).forEach(function(sAssociationName) {
+				var oAssociation = mAllAssociations[sAssociationName];
+				oTarget[oAssociation._sMutator] = this._aOriginalAddMutators[oAssociation.name];
+				oTarget[oAssociation._sRemoveMutator] = this._aOriginalRemoveMutators[oAssociation.name];
+				oTarget[oAssociation._sRemoveAllMutator] = this._aOriginalRemoveAllMutators[oAssociation.name];
 			}, this);
 			oTarget.detachEvent("_change", this._fnFireModified, this);
 		}
@@ -1237,12 +1498,12 @@ if ( !jQuery.sap.isDeclared('sap.ui.dt.OverlayRegistry') ) {
 
 // Provides object sap.ui.dt.OverlayRegistry.
 jQuery.sap.declare('sap.ui.dt.OverlayRegistry'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-jQuery.sap.require('sap.ui.core.Element'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.base.ManagedObject'); // unlisted dependency retained
 sap.ui.define("sap/ui/dt/OverlayRegistry",[
-	"sap/ui/core/Element",
+	"sap/ui/base/ManagedObject",
 	"sap/ui/dt/ElementUtil"
 ],
-function(Element, ElementUtil) {
+function(ManagedObject, ElementUtil) {
 	"use strict";
 
 	/**
@@ -1252,7 +1513,7 @@ function(Element, ElementUtil) {
 	 * Static registry for Overlays
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @private
 	 * @static
@@ -1274,12 +1535,8 @@ function(Element, ElementUtil) {
 	OverlayRegistry.getOverlay = function(vElementOrId) {
 		var oElement = ElementUtil.getElementInstance(vElementOrId);
 		if (oElement) {
-			oElement = ElementUtil.fixComponentContainerElement(oElement);
-			oElement = ElementUtil.fixComponentParent(oElement);
-			if (oElement) {
-				var sId = oElement.getId();
-				return mOverlays[sId];
-			}
+			var sId = oElement.getId();
+			return mOverlays[sId];
 		}
 	};
 
@@ -1314,7 +1571,7 @@ function(Element, ElementUtil) {
 	};
 
 	function getElementId (vElementOrId) {
-		return (vElementOrId instanceof Element) ? vElementOrId.getId() : vElementOrId;
+		return (vElementOrId instanceof ManagedObject) ? vElementOrId.getId() : vElementOrId;
 	}
 
 	return OverlayRegistry;
@@ -1341,7 +1598,7 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	 *
 	 * @class Utility functionality to work with overlays
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @private
 	 * @static
 	 * @since 1.30
@@ -1372,19 +1629,13 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 			var oElement = oElementOverlay.getElementInstance();
 			var iIndex = aChildren.indexOf(oElement);
 
-			var oPublicParentOverlay = oElementOverlay.getPublicParentElementOverlay();
-
 			return {
-				publicParent : oPublicParentOverlay.getElementInstance(),
-				publicAggregation: oElementOverlay.getPublicParentAggregationOverlay().getAggregationName(),
 				parent: oParent,
 				aggregation : sParentAggregationName,
 				index: iIndex
 			};
 		} else {
 			return {
-				publicParent : null,
-				publicAggregation : "",
 				parent: null,
 				aggregation: "",
 				index: -1
@@ -1694,6 +1945,17 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 		}, this);
 	};
 
+	OverlayUtil.iterateOverAggregationLikeChildren = function(oElementOverlay, sAggregationName, fnCallback) {
+		var oElement = oElementOverlay.getElementInstance();
+		var vChildren;
+		if (oElementOverlay.getAggregationOverlay(sAggregationName).isAssociation()){
+			vChildren = ElementUtil.getAssociationInstances(oElement, sAggregationName);
+		} else {
+			vChildren = ElementUtil.getAggregation(oElement, sAggregationName);
+		}
+		ElementUtil.iterateOverElements(vChildren, fnCallback);
+	};
+
 	/**
 	 *
 	 */
@@ -1755,7 +2017,7 @@ function(ManagedObject) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private
@@ -1881,9 +2143,10 @@ function(ManagedObject) {
 	};
 
 	/**
-	 * @private
+	 * @param {sap.ui.dt.Overlay} oElementOverlay to call registration methods for
+	 * @protected
 	 */
-	Plugin.prototype._callAggregationOverlayRegistrationMehods = function(oElementOverlay) {
+	Plugin.prototype.callAggregationOverlayRegistrationMethods = function(oElementOverlay) {
 		if (this.registerAggregationOverlay) {
 			var aAggregationOverlays = oElementOverlay.getAggregationOverlays();
 			aAggregationOverlays.forEach(this.registerAggregationOverlay.bind(this));
@@ -1899,7 +2162,7 @@ function(ManagedObject) {
 			this.registerElementOverlay(oElementOverlay);
 		}
 
-		this._callAggregationOverlayRegistrationMehods(oElementOverlay);
+		this.callAggregationOverlayRegistrationMethods(oElementOverlay);
 	};
 
 	/**
@@ -1954,7 +2217,7 @@ function(jQuery) {
 	 * Utility functionality to work with élements, e.g. iterate through aggregations, find parents, ...
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @private
 	 * @static
@@ -2055,14 +2318,14 @@ function(jQuery) {
 	 * @namespace
 	 * @name sap.ui.dt
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @private
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.dt",
-		version: "1.46.12",
+		version: "1.48.5",
 		dependencies : ["sap.ui.core"],
 		types: [
 			"sap.ui.dt.SelectionMode"
@@ -2130,7 +2393,7 @@ function(Plugin, DOMUtil, OverlayUtil, ElementUtil) {
 	 * @extends sap.ui.dt.plugin.Plugin
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private
@@ -2408,6 +2671,7 @@ function(Plugin, DOMUtil, OverlayUtil, ElementUtil) {
 	    var fnDetachTouchHandlers = function() {
 			oTouchedOverlay.detachBrowserEvent("touchmove", fnTouchMoveHandler, this);
 			oTouchedOverlay.detachBrowserEvent("touchend", fnTouchEndHandler, this);
+			oTouchedOverlay.detachBrowserEvent("contextmenu", fnTouchEndHandler, this);
 	    };
 
 	    var fnGetMoveDistance = function(touchMoveX, touchMoveY) {
@@ -2434,8 +2698,8 @@ function(Plugin, DOMUtil, OverlayUtil, ElementUtil) {
 		};
 
 		bPreventScrollOnTouch = true;
-
 		oEvent.stopPropagation();
+
 		oTouchedOverlay.attachBrowserEvent("touchmove", fnTouchMoveHandler, this);
 		oTouchedOverlay.attachBrowserEvent("contextmenu", fnTouchEndHandler, this);
 		oTouchedOverlay.attachBrowserEvent("touchend", fnTouchEndHandler, this);
@@ -2949,7 +3213,7 @@ sap.ui.define("sap/ui/dt/plugin/ElementMover",['sap/ui/base/ManagedObject', 'sap
 	 * @class The ElementMover enables movement of UI5 elements based on aggregation types, which can be used by drag and
 	 *        drop or cut and paste behavior.
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -3129,24 +3393,23 @@ sap.ui.define("sap/ui/dt/plugin/ElementMover",['sap/ui/base/ManagedObject', 'sap
 		var oTargetParentInformation = OverlayUtil.getParentInformation(oTargetElementOverlay);
 		var oAggregationDesignTimeMetadata;
 
-		var oFirstHiddenAggregationOverlay = oMovedOverlay.getFirstHiddenAggregationOverlay();
-		var oFirstHiddenAggregationElement = oFirstHiddenAggregationOverlay.getElementInstance();
-		var oPublicParentElementOverlay = oMovedOverlay.getPublicParentElementOverlay();
+		var oParentAggregationOverlay = oMovedOverlay.getParentAggregationOverlay();
+		var oRelevantContainerElement = oMovedOverlay.getRelevantContainer();
+		var oParentElementOverlay = oMovedOverlay.getParentElementOverlay();
 
-		if (oFirstHiddenAggregationOverlay && oPublicParentElementOverlay) {
-			var sAggregationName = oFirstHiddenAggregationOverlay.getAggregationName();
-			oAggregationDesignTimeMetadata = oPublicParentElementOverlay.getDesignTimeMetadata().getAggregation(sAggregationName);
+		if (oParentAggregationOverlay && oParentElementOverlay) {
+			var sAggregationName = oParentAggregationOverlay.getAggregationName();
+			oAggregationDesignTimeMetadata = oParentElementOverlay.getDesignTimeMetadata().getAggregation(sAggregationName);
 		}
 
 		if (oTargetParentInformation.index !== -1) {
 			if (oAggregationDesignTimeMetadata && oAggregationDesignTimeMetadata.beforeMove){
-				oAggregationDesignTimeMetadata.beforeMove(oFirstHiddenAggregationElement, oMovedElement);
+				oAggregationDesignTimeMetadata.beforeMove(oRelevantContainerElement, oMovedElement);
 			}
-			ElementUtil
-					.insertAggregation(oTargetParentInformation.parent, oTargetParentInformation.aggregation,
-						oMovedElement, oTargetParentInformation.index);
+			ElementUtil.insertAggregation(oTargetParentInformation.parent, oTargetParentInformation.aggregation,
+				oMovedElement, oTargetParentInformation.index);
 			if (oAggregationDesignTimeMetadata && oAggregationDesignTimeMetadata.afterMove){
-				oAggregationDesignTimeMetadata.afterMove(oFirstHiddenAggregationElement, oMovedElement);
+				oAggregationDesignTimeMetadata.afterMove(oRelevantContainerElement, oMovedElement);
 			}
 		}
 	};
@@ -3164,24 +3427,26 @@ sap.ui.define("sap/ui/dt/plugin/ElementMover",['sap/ui/base/ManagedObject', 'sap
 		var oTargetParentElement = oTargetAggregationOverlay.getElementInstance();
 		var oAggregationDesignTimeMetadata;
 
-		var oFirstHiddenAggregationOverlay = oMovedOverlay.getFirstHiddenAggregationOverlay();
-		var oFirstHiddenAggregationElement = oFirstHiddenAggregationOverlay.getElementInstance();
-		var oPublicParentElementOverlay = oMovedOverlay.getPublicParentElementOverlay();
+		var oParentAggregationOverlay = oMovedOverlay.getParentAggregationOverlay();
+		var oRelevantContainerElement = oMovedOverlay.getRelevantContainer();
+		var oParentElementOverlay = oMovedOverlay.getParentElementOverlay();
 
-		if (oFirstHiddenAggregationOverlay && oPublicParentElementOverlay) {
-			var sAggregationName = oFirstHiddenAggregationOverlay.getAggregationName();
-			oAggregationDesignTimeMetadata = oPublicParentElementOverlay.getDesignTimeMetadata().getAggregation(sAggregationName);
+		if (oParentAggregationOverlay && oParentElementOverlay) {
+			var sAggregationName = oParentAggregationOverlay.getAggregationName();
+			oAggregationDesignTimeMetadata = oParentElementOverlay.getDesignTimeMetadata().getAggregation(sAggregationName);
 		}
 
-		var oSourceAggregationOverlay = oMovedOverlay.getParent();
-		if (oTargetAggregationOverlay !== oSourceAggregationOverlay) {
+		var aTargetAggregationItems = ElementUtil.getAggregation(oTargetAggregationOverlay.getElementInstance(), oTargetAggregationOverlay.getAggregationName());
+		var iIndex = aTargetAggregationItems.indexOf(oMovedElement);
+		// Don't do anything when the element is already in the aggregation and is the last element
+		if (!(iIndex > -1 && iIndex === aTargetAggregationItems.length - 1)) {
 			if (oAggregationDesignTimeMetadata && oAggregationDesignTimeMetadata.beforeMove){
-				oAggregationDesignTimeMetadata.beforeMove(oFirstHiddenAggregationElement, oMovedElement);
+				oAggregationDesignTimeMetadata.beforeMove(oRelevantContainerElement, oMovedElement);
 			}
 			var sTargetAggregationName = oTargetAggregationOverlay.getAggregationName();
 			ElementUtil.addAggregation(oTargetParentElement, sTargetAggregationName, oMovedElement);
 			if (oAggregationDesignTimeMetadata && oAggregationDesignTimeMetadata.afterMove){
-				oAggregationDesignTimeMetadata.afterMove(oFirstHiddenAggregationElement, oMovedElement);
+				oAggregationDesignTimeMetadata.afterMove(oRelevantContainerElement, oMovedElement);
 			}
 		}
 	};
@@ -3231,7 +3496,7 @@ function(Plugin) {
 	 * @extends sap.ui.dt.Plugin
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private
@@ -3317,7 +3582,7 @@ function(jQuery, ElementUtil, OverlayRegistry) {
 	 * Utility functionality for Element tests
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @private
 	 * @static
@@ -3361,12 +3626,15 @@ function(jQuery, ElementUtil, OverlayRegistry) {
 			overlayGeometryCalculatedByChildren : false,
 			overlayVisible : false
 		};
+		var oDesignTimeMetadata;
 
 		var mElementInfo = this.getInfo(oElement);
 		var oAggregationOverlay = mElementInfo.overlay.getAggregationOverlay(sAggregationName);
-		var oDesignTimeMetadata = oAggregationOverlay.getDesignTimeMetadata();
+		if (oAggregationOverlay) {
+			oDesignTimeMetadata = oAggregationOverlay.getDesignTimeMetadata();
+		}
 
-		if (!oDesignTimeMetadata.isIgnored()) {
+		if (oDesignTimeMetadata && !oDesignTimeMetadata.isIgnored(oElement)) {
 			mAggregationTest.ignored = false;
 			mAggregationTest.domRefDeclared = !!oDesignTimeMetadata.getDomRef();
 			var oAggregationDomRef = oAggregationOverlay.getAssociatedDomRef();
@@ -3407,6 +3675,331 @@ function(jQuery, ElementUtil, OverlayRegistry) {
 }, /* bExport= */ true);
 
 }; // end of sap/ui/dt/test/Element.js
+if ( !jQuery.sap.isDeclared('sap.ui.dt.test.ElementEnablementTest2') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+// Provides class sap.ui.dt.test.ElementEnablementTest.
+jQuery.sap.declare('sap.ui.dt.test.ElementEnablementTest2'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.base.ManagedObject'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.fl.registry.ChangeRegistry'); // unlisted dependency retained
+sap.ui.define("sap/ui/dt/test/ElementEnablementTest2",[
+	'jquery.sap.global',
+	'sap/ui/base/ManagedObject',
+	'sap/ui/dt/test/Element',
+	'sap/ui/fl/registry/ChangeRegistry'
+],
+function(jQuery, ManagedObject, ElementTest, ChangeRegistry) {
+	"use strict";
+
+
+	/**
+	 * Constructor for an ElementEnablementTest.
+	 *
+	 * @param {string} [sId] id for the new object, generated automatically if no id is given
+	 * @param {object} [mSettings] initial settings for the new object
+	 *
+	 * @class
+	 * The ElementEnablementTest class allows to create a design time test
+	 * which tests a given element on compatibility with the sap.ui.dt.DesignTime.
+	 * @extends sap.ui.base.ManagedObject
+	 *
+	 * @author SAP SE
+	 * @version 1.48.5
+	 *
+	 * @constructor
+	 * @private
+	 * @since 1.48
+	 * @alias sap.ui.dt.test.ElementEnablementTest2
+	 * @experimental Since 1.48. This class is experimental and provides only limited functionality. Also the API might be changed in future.
+	 */
+	var ElementEnablementTest2 = ManagedObject.extend("sap.ui.dt.test.ElementEnablementTest2", /** @lends sap.ui.dt.test.ElementEnablementTest.prototype */ {
+		metadata : {
+			// ---- object ----
+
+			// ---- control specific ----
+			library : "sap.ui.dt",
+			properties : {
+				type : {
+					type : "string"
+				}
+			}
+		}
+	});
+
+
+	/**
+	 * Called when the ElementEnablementTest is initialized
+	 * @protected
+	 */
+	ElementEnablementTest2.prototype.init = function() {
+
+	};
+
+
+	/**
+	 * Called when the ElementEnablementTest is destroyed
+	 * @protected
+	 */
+	ElementEnablementTest2.prototype.exit = function() {
+
+	};
+
+
+	/**
+	 * @return {Promise} A promise providing the test results.
+	 * @override
+	 */
+	ElementEnablementTest2.prototype.run = function() {
+		return this._setup().then(function(oData) {
+
+			var sActions;
+			this._mResult = {
+					name : this.getType(),
+					actions : undefined
+			};
+
+			if (!this._bError) {
+				sActions = this._testActions(oData);
+			}
+
+			if (sActions) {
+				this._mResult.actions = sActions;
+			}
+
+			return this._mResult;
+		}.bind(this));
+	};
+
+
+	/**
+	 * @private
+	 */
+	ElementEnablementTest2.prototype._setup = function() {
+		window.clearTimeout(this._iTimeout);
+		this._bNotSupported = false;
+		this._bError = false;
+
+		var oElement = jQuery.sap.getObject(this.getType());
+		return oElement.getMetadata().loadDesignTime().catch(function(oError){
+			this._bError = true;
+		}.bind(this));
+	};
+
+
+	/**
+	 * @private
+	 */
+	ElementEnablementTest2.prototype._testActions = function(oData) {
+
+		var sActionsResult;
+		var sPropagate;
+		var mActions = [];
+		var aActions = [];
+		var bActions = false;
+		var bAggregations = false;
+		var i = 0;
+
+		if (!oData || (!oData.actions && !oData.aggregations)) {
+			this._bNotSupported = true;
+		} else {
+			if (oData.actions) {
+				for (var sAction in oData.actions) {
+					aActions[i] = sAction;
+						mActions[i] = {
+							action : sAction,
+							aggregation : "self"
+						};
+					i = i + 1;
+				}
+				bActions = true;
+			}
+
+			if (oData.aggregations) {
+				for (var sAggregation in oData.aggregations) {
+					var oAggr = oData.aggregations[sAggregation];
+					if (oAggr.propagateMetadata) {
+						sPropagate = (sPropagate) ? sPropagate + ", " + sAggregation : "propagate (" + sAggregation;
+					}
+					for (var sAction in oAggr.actions) {
+						i = aActions.indexOf(sAction);
+						if (i === -1) {
+							aActions.push(sAction);
+							i = aActions.indexOf(sAction);
+							mActions[i] = {
+								action : sAction,
+								aggregation : sAggregation
+							};
+						} else {
+							mActions[i].aggregation = mActions[i].aggregation + ", " + sAggregation;
+						}
+						bAggregations = true;
+					}
+				}
+			}
+
+			if (!bActions && !bAggregations) {
+				this._bNotSupported = true;
+				return sActionsResult;
+			}
+
+			mActions.forEach(function(oAction) {
+				sActionsResult = (sActionsResult) ? sActionsResult + ", " : "";
+				sActionsResult = sActionsResult + oAction.action + " (" + oAction.aggregation + ")";
+			});
+
+			if (sPropagate) {
+				sPropagate = sPropagate + ")";
+				sActionsResult = sActionsResult + " + " + sPropagate;
+			}
+
+			return sActionsResult;
+		}
+	};
+
+
+	return ElementEnablementTest2;
+}, /* bExport= */ true);
+
+}; // end of sap/ui/dt/test/ElementEnablementTest2.js
+if ( !jQuery.sap.isDeclared('sap.ui.dt.test.LibraryEnablementTest2') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+// Provides class sap.ui.dt.test.LibraryEnablementTest.
+jQuery.sap.declare('sap.ui.dt.test.LibraryEnablementTest2'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.base.ManagedObject'); // unlisted dependency retained
+sap.ui.define("sap/ui/dt/test/LibraryEnablementTest2",[
+	'jquery.sap.global',
+	'sap/ui/base/ManagedObject',
+	'sap/ui/dt/test/ElementEnablementTest2'
+],
+function(jQuery, ManagedObject, ElementEnablementTest2) {
+	"use strict";
+
+
+	/**
+	 * Constructor for a LibraryEnablementTest.
+	 *
+	 * @param {string} [sId] id for the new object, generated automatically if no id is given
+	 * @param {object} [mSettings] initial settings for the new object
+	 *
+	 * @class
+	 * The LibraryEnablementTest class allows to create a design time test
+	 * which tests a given library on compatibility with the sap.ui.dt.DesignTime.
+	 * @extends sap.ui.base.ManagedObject
+	 *
+	 * @author SAP SE
+	 * @version 1.48.5
+	 *
+	 * @constructor
+	 * @private
+	 * @since 1.48
+	 * @alias sap.ui.dt.test.LibraryEnablementTest2
+	 * @experimental Since 1.48. This class is experimental and provides only limited functionality. Also the API might be changed in future.
+	 */
+	var LibraryEnablementTest2 = ManagedObject.extend("sap.ui.dt.test.LibraryEnablementTest2", /** @lends sap.ui.dt.test.LibraryEnablementTest2.prototype */ {
+	});
+
+
+	LibraryEnablementTest2.prototype._fillElementArray = function(sType) {
+		var oElementTestData = {};
+		if (["sap.ui.richtexteditor.RichTextEditor",
+				 "sap.ui.ux3.QuickView",
+				 "sap.uiext.inbox.SubstitutionRulesManager",
+				 "sap.ui.codeeditor.CodeEditor"].indexOf(sType) === -1) {
+			oElementTestData.type = sType;
+			this.aElementEnablementTest.push(new ElementEnablementTest2(oElementTestData));
+		}
+	};
+
+
+	/**
+	 * @return {Promise} A promise providing the test results.
+	 * @override
+	 */
+	LibraryEnablementTest2.prototype.run = function(aLibraries) {
+		this._aResult = [];
+
+		this.aElementEnablementTest = [];
+		var aLibraryControls = [];
+		this._aControlsCollection = [];
+
+		if (aLibraries.length === 0) {
+			var oVersionInfo = sap.ui.getVersionInfo();
+			oVersionInfo.libraries.forEach(function(oLib) {
+				if (oLib.name.indexOf("sap.ui.server") === -1 &&
+						oLib.name.indexOf("themelib_") === -1 &&
+						oLib.name.indexOf("sap.ui.dev") === -1 &&
+						oLib.name !== "sap.ui.core" &&
+						oLib.name !== "sap.ui.fl") {
+					sap.ui.getCore().loadLibrary(oLib.name);
+				}
+			});
+		} else {
+			aLibraries.forEach(function(sLib) {
+				sap.ui.getCore().loadLibrary(sLib);
+			});
+		}
+
+		var oLoadedLibs = sap.ui.getCore().getLoadedLibraries();
+		for (var sLibraryName in oLoadedLibs) {
+			if (aLibraries.length > 0 && aLibraries.indexOf(sLibraryName) === -1) {
+				continue;
+			}
+			var oLib = sap.ui.getCore().getLoadedLibraries()[sLibraryName];
+			if (oLib && sLibraryName !== "sap.ui.core") {
+				var aLibraryControls = oLib.controls;
+				var aLibraryElements = oLib.elements;
+				var aAllControls = aLibraryControls.concat(aLibraryElements).sort();
+				aAllControls.forEach(this._fillElementArray, this);
+			}
+		}
+
+		var aResults = [];
+		var fnIterate = function(mResult) {
+			if (mResult && mResult.actions) {
+				aResults.push(mResult);
+			}
+			var oElementEnablementTest = this.aElementEnablementTest.shift();
+			if (oElementEnablementTest) {
+				return oElementEnablementTest.run().then(function(mResult) {
+					oElementEnablementTest.destroy();
+					return fnIterate(mResult);
+				});
+			} else {
+				return Promise.resolve(aResults);
+			}
+		}.bind(this);
+
+
+		return fnIterate().then(function(aResults) {
+			var mResult = {
+					results : []
+			};
+
+			aResults.forEach(function(mElementTestResult) {
+				mResult.results.push(mElementTestResult);
+			});
+
+
+			return mResult;
+		});
+
+
+	};
+
+	return LibraryEnablementTest2;
+}, /* bExport= */ true);
+}; // end of sap/ui/dt/test/LibraryEnablementTest2.js
 if ( !jQuery.sap.isDeclared('sap.ui.dt.test.Test') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -3426,7 +4019,7 @@ function(jQuery, ManagedObject) {
 	"use strict";
 
 	/**
-	 * Constructor for an Test.
+	 * Constructor for a Test.
 	 *
 	 * @param {string} [sId] id for the new object, generated automatically if no id is given
 	 * @param {object} [mSettings] initial settings for the new object
@@ -3436,7 +4029,7 @@ function(jQuery, ManagedObject) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private
@@ -3719,7 +4312,7 @@ function(jQuery, ManagedObject) {
 
 
 	/**
-	 * Constructor for an QUnit.
+	 * Constructor for a QUnit.
 	 *
 	 * @param {string} [sId] id for the new object, generated automatically if no id is given
 	 * @param {object} [mSettings] initial settings for the new object
@@ -3729,7 +4322,7 @@ function(jQuery, ManagedObject) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private
@@ -3852,7 +4445,7 @@ sap.ui.define("sap/ui/dt/test/report/Statistic",['jquery.sap.global', 'sap/ui/co
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private
@@ -3952,7 +4545,7 @@ sap.ui.define("sap/ui/dt/test/report/StatisticRenderer",['jquery.sap.global'],
 
 	/**
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @namespace
 	 */
 	var StatisticRenderer = {
@@ -4026,7 +4619,7 @@ sap.ui.define("sap/ui/dt/test/report/Table",['jquery.sap.global', 'sap/ui/core/C
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private
@@ -4265,7 +4858,7 @@ sap.ui.define("sap/ui/dt/test/report/TableRenderer",['jquery.sap.global'],
 
 	/**
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @namespace
 	 */
 	var TableRenderer = {
@@ -4315,7 +4908,7 @@ sap.ui.define("sap/ui/dt/AggregationOverlayRenderer",['sap/ui/dt/RenderingUtil']
 
 	/**
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @namespace
 	 */
 	var AggregationOverlayRenderer = {
@@ -4359,7 +4952,7 @@ sap.ui.define("sap/ui/dt/ContextMenuControl",[
 	 * @class Context - Menu for Design time
 	 * @extends sap.ui.unified.Menu
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -4453,54 +5046,17 @@ sap.ui.define("sap/ui/dt/ContextMenuControl",[
 	};
 
 	/**
-	 * Method for calculating the x, y-offset for opening the context menu at the current mouse position
-	 *
-	 * @param {number} iPageX mouse x position
-	 * @param {number} iPageY mouse y position
-	 */
-	ContextMenuControl.prototype._open = function(iPageX, iPageY) {
-
-		// first check if there are some context menu entries
-		if (this.getItems().length === 0) {
-			return;
-		}
-
-		// calculate the offset (depending on context-menu size)
-		var mouseX = iPageX;
-		var mouseY = iPageY;
-		var X = mouseX;
-		var Y = mouseY;
-		var bodyX = jQuery('body').width();
-		var bodyY = jQuery('body').height();
-
-		if (!this.getDomRef()) {
-			this.open(false, undefined, undefined, undefined, undefined, -2000 + " " + -2000, "none");
-		}
-
-		var ContextMenuControlWidth = this.$().context.clientWidth;
-		var ContextMenuControlHeight = this.$().context.clientHeight;
-		var xFlipOffset = (bodyX - mouseX < ContextMenuControlWidth) ? ContextMenuControlWidth : 0;
-		var yFlipOffset = (bodyY - mouseY < ContextMenuControlHeight) ? ContextMenuControlHeight : 0;
-
-		X = ((bodyX / 2 - mouseX) * -1) + ContextMenuControlWidth / 2 + 2 - xFlipOffset;
-		Y = ((bodyY / 2 - mouseY) * -1) + ContextMenuControlHeight / 2 + 2 - yFlipOffset;
-
-		var yOffset = mouseY - ContextMenuControlHeight;
-		if (yOffset < 0 && yFlipOffset !== 0) {
-			Y = Y - yOffset;
-		}
-
-		this.close();
-		this.open(true, this._oOverlayDomRef, undefined, undefined, document.body, X + " " + Y, "flip");
-	};
-
-	/**
 	 * Handler Method for event open menu
 	 *
-	 * @param {object} oContextInfo Information on the context
+	 * @param {object} oOriginalEvent Original Event invoking Context menu
+	 * @param {object} oTargetOverlay Overlay invoking the context menu
 	 */
-	ContextMenuControl.prototype.openMenu = function(oContextInfo) {
-		this._open(oContextInfo.pageX, oContextInfo.pageY);
+	ContextMenuControl.prototype.openMenu = function(oOriginalEvent, oTargetOverlay) {
+		// first check if there are some context menu entries
+		if (this.getItems().length === 0 || !oTargetOverlay.getDomRef()) {
+			return;
+		}
+		this.openAsContextMenu(oOriginalEvent, oTargetOverlay);
 	};
 
 	/**
@@ -4570,7 +5126,7 @@ function(jQuery, ManagedObjectObserver) {
 	 * @extends sap.ui.dt.ManagedObjectObserver
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private
@@ -4684,7 +5240,7 @@ function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private
@@ -4703,7 +5259,7 @@ function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
 				 * Data to be used as DT metadata
 				 */
 				data : {
-					type : "object"
+					type : "any"
 				},
 				/**
 				* Name of the library the control belongs to
@@ -4757,11 +5313,17 @@ function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
 
 	/**
 	 * Returns property "ignore" of the DT metadata
+	 * @param {Object} oElement Element instance
 	 * @return {boolean} if ignored
 	 * @public
 	 */
-	DesignTimeMetadata.prototype.isIgnored = function() {
-		return this.getData().ignore;
+	DesignTimeMetadata.prototype.isIgnored = function(oElement) {
+		var vIgnore = this.getData().ignore;
+		if (!vIgnore || (vIgnore && typeof vIgnore === "function" && !vIgnore(oElement))) {
+			return false;
+		} else {
+			return true;
+		}
 	};
 
 	/**
@@ -4830,6 +5392,7 @@ function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
 			}
 		}
 	};
+
 	/**
 	 * Returns a locale-specific string value for the given key sKey.
 	 *
@@ -4852,6 +5415,23 @@ function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
 		var oLibResourceBundle = sap.ui.getCore().getLibraryResourceBundle(this.getLibraryName());
 		return oLibResourceBundle.getText(sKey, aArgs);
 	};
+
+	/**
+	 * Returns all available triggers from designtime metadata
+	 * @return {array.<Object>} array of available triggers
+	 * @public
+	 */
+	DesignTimeMetadata.prototype.getTriggers = function() {
+		var mData = this.getData();
+		var aTriggers = [];
+
+		if (mData && Array.isArray(mData.triggers)) {
+			aTriggers = mData.triggers;
+		}
+
+		return aTriggers;
+	};
+
 	return DesignTimeMetadata;
 }, /* bExport= */ true);
 
@@ -4872,7 +5452,7 @@ sap.ui.define("sap/ui/dt/ElementOverlayRenderer",['sap/ui/dt/RenderingUtil'],
 
 	/**
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @namespace
 	 */
 	var OverlayRenderer = {
@@ -4920,7 +5500,7 @@ sap.ui.define("sap/ui/dt/MutationObserver",[
 	 * @class The MutationObserver observes changes of a ManagedObject and propagates them via events.
 	 * @extends sap.ui.base.ManagedObject
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @constructor
 	 * @private
 	 * @since 1.30
@@ -4933,7 +5513,7 @@ sap.ui.define("sap/ui/dt/MutationObserver",[
 			library: "sap.ui.dt",
 			events: {
 				/**
-				 * Event fired when the observed object is modified
+				 * Event fired when the observed object is modified or some changes which might affect dom position and styling of overlays happens
 				 */
 				domChanged: {
 					parameters : {
@@ -4952,16 +5532,24 @@ sap.ui.define("sap/ui/dt/MutationObserver",[
 	 * @protected
 	 */
 	MutationObserver.prototype.init = function() {
-		this._fnFireResizeDomChanged = function() {
-			this.fireDomChanged({
-				type : "resize"
-			});
+		this._fnFireDomChanged = function() {
+			this.fireDomChanged();
 		}.bind(this);
 		this._onScroll = this._fireDomChangeOnScroll.bind(this);
 
 		this._startMutationObserver();
-		this._startResizeObserver();
-		this._startScrollObserver();
+
+		// after CSS transition / animation ends, domChanged event is triggered
+		window.addEventListener("transitionend", this._fnFireDomChanged, true);
+		window.addEventListener("webkitTransitionEnd", this._fnFireDomChanged, true);
+		window.addEventListener("otransitionend", this._fnFireDomChanged, true);
+		window.addEventListener("animationend", this._fnFireDomChanged, true);
+		window.addEventListener("webkitAnimationEnd", this._fnFireDomChanged, true);
+		window.addEventListener("oanimationend", this._fnFireDomChanged, true);
+
+		jQuery(window).on("resize", this._fnFireDomChanged);
+
+		window.addEventListener("scroll", this._onScroll, true);
 	};
 
 	/**
@@ -4971,8 +5559,13 @@ sap.ui.define("sap/ui/dt/MutationObserver",[
 	 */
 	MutationObserver.prototype.exit = function() {
 		this._stopMutationObserver();
-		this._stopResizeObserver();
-		this._stopScrollObserver();
+
+		window.removeEventListener("transitionend", this._fnFireDomChanged, true);
+		window.removeEventListener("animationend", this._fnFireDomChanged, true);
+
+		jQuery(window).off("resize", this._fnFireDomChanged);
+
+		window.removeEventListener("scroll", this._onScroll, true);
 	};
 
 	/**
@@ -5032,6 +5625,7 @@ sap.ui.define("sap/ui/dt/MutationObserver",[
 		}
 	};
 
+
 	/**
 	 * @private
 	 */
@@ -5045,41 +5639,16 @@ sap.ui.define("sap/ui/dt/MutationObserver",[
 	/**
 	 * @private
 	 */
-	MutationObserver.prototype._startResizeObserver = function() {
-		jQuery(window).on("resize", this._fnFireResizeDomChanged);
-	};
-
-	/**
-	 * @private
-	 */
-	MutationObserver.prototype._stopResizeObserver = function() {
-		jQuery(window).off("resize", this._fnFireResizeDomChanged);
-	};
-
-	/**
-	 * @private
-	 */
 	MutationObserver.prototype._fireDomChangeOnScroll = function(oEvent) {
 		var oTarget = oEvent.target;
-		if (!OverlayUtil.isInOverlayContainer(oTarget) && !OverlayUtil.getClosestOverlayForNode(oTarget)) {
+		if (!OverlayUtil.isInOverlayContainer(oTarget) &&
+			!OverlayUtil.getClosestOverlayForNode(oTarget) &&
+			oTarget !== document) {
+
 			this.fireDomChanged({
 				type : "scroll"
 			});
 		}
-	};
-
-	/**
-	 * @private
-	 */
-	MutationObserver.prototype._startScrollObserver = function() {
-		window.addEventListener("scroll", this._onScroll, true);
-	};
-
-	/**
-	 * @private
-	 */
-	MutationObserver.prototype._stopScrollObserver = function() {
-		window.removeEventListener("scroll", this._onScroll, true);
 	};
 
 	return MutationObserver;
@@ -5125,7 +5694,7 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private
@@ -5157,18 +5726,19 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 					defaultValue : true
 				},
 				/**
-				 * Whether the overlay is created for an element or aggregation, which is not accessible via the public tree
-				 */
-				inHiddenTree : {
-					type : "boolean",
-					defaultValue : false
-				},
-				/**
 				 * Whether the Overlay can get the browser focus (has tabindex)
 				 */
 				focusable : {
 					type : "boolean",
 					defaultValue : false
+				},
+
+				/**
+				 * Whether the Overlay is enabled
+				 */
+				enabled: {
+					type: "boolean",
+					defaultValue: true
 				}
 			},
 			associations : {
@@ -5334,7 +5904,6 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 
 	/**
 	 * Returns a DOM reference for the associated Element or null, if it can't be found
-	 * @return {Element} DOM element or null
 	 * @public
 	 */
 	Overlay.prototype.getAssociatedDomRef = function() {
@@ -5347,7 +5916,7 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	 * @public
 	 */
 	Overlay.prototype.getElementInstance = function() {
-		return sap.ui.getCore().byId(this.getElement());
+		return ElementUtil.getElementInstance(this.getElement());
 	};
 
 	/**
@@ -5391,6 +5960,24 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	 * @public
 	 */
 	Overlay.prototype.applyStyles = function() {
+
+		if (!this.getEnabled()) {
+			return;
+		}
+
+		var fnDeleteDummyContainer = function() {
+			if (this._oDummyScrollContainer) {
+				this._oDummyScrollContainer.remove();
+				delete this._oDummyScrollContainer;
+				if (this.getParent() && this.getParent().$) {
+					var $parent = this.getParent().$();
+					$parent.removeClass("sapUiDtOverlayWithScrollBar");
+					$parent.removeClass("sapUiDtOverlayWithScrollBarVertical");
+					$parent.removeClass("sapUiDtOverlayWithScrollBarHorizontal");
+				}
+			}
+		}.bind(this);
+
 		// invalidate cached geometry
 		delete this._mGeometry;
 
@@ -5407,6 +5994,8 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 
 		if (oGeometry && oGeometry.visible) {
 			var $overlay = this.$();
+			var iScrollingWidth = DOMUtil.getScrollbarWidth();
+			var mSize = oGeometry.size;
 
 			// ensure visibility
 			$overlay.css("display", "block");
@@ -5416,10 +6005,12 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 			var iParentScrollTop = (oOverlayParent && oOverlayParent instanceof Overlay) ? oOverlayParent.$().scrollTop() : null;
 			var iParentScrollLeft = (oOverlayParent && oOverlayParent instanceof Overlay) ? oOverlayParent.$().scrollLeft() : null;
 			var mParentOffset = (oOverlayParent && oOverlayParent instanceof Overlay) ? oOverlayParent.$().offset() : null;
+
+			if (mParentOffset && jQuery('html').attr('dir') === 'rtl' && DOMUtil.hasVerticalScrollBar(oOverlayParent.getDomRef())) {
+				mParentOffset.left += iScrollingWidth;
+			}
+
 			var mPosition = DOMUtil.getOffsetFromParent(oGeometry.position, mParentOffset, iParentScrollTop, iParentScrollLeft);
-
-
-			var mSize = oGeometry.size;
 
 			// OVERLAY SIZE
 			$overlay.css("width", mSize.width + "px");
@@ -5444,9 +6035,20 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 					}
 					var iScrollHeight = oGeometry.domRef.scrollHeight;
 					var iScrollWidth = oGeometry.domRef.scrollWidth;
-					if (iScrollHeight > mSize.height || iScrollWidth > mSize.width) {
+					// Math.ceil is needed because iScrollHeight is an integer value, mSize not. To compare we should have an integer value for mSize too.
+					// example: iScrollHeight = 24px, mSize.height = 23.98375. Both should be the same.
+					if (iScrollHeight > Math.ceil(mSize.height) || iScrollWidth > Math.ceil(mSize.width)) {
 						if (!this._oDummyScrollContainer) {
 							this._oDummyScrollContainer = jQuery("<div class='sapUiDtDummyScrollContainer' style='height: " + iScrollHeight + "px; width: " + iScrollWidth + "px;'></div>");
+
+							if (oOverlayParent.$ && DOMUtil.hasVerticalScrollBar(oGeometry.domRef)) {
+								oOverlayParent.$().addClass("sapUiDtOverlayWithScrollBar");
+								oOverlayParent.$().addClass("sapUiDtOverlayWithScrollBarVertical");
+							}
+							if (oOverlayParent.$ && DOMUtil.hasHorizontalScrollBar(oGeometry.domRef)) {
+								oOverlayParent.$().addClass("sapUiDtOverlayWithScrollBar");
+								oOverlayParent.$().addClass("sapUiDtOverlayWithScrollBarHorizontal");
+							}
 							this.$().append(this._oDummyScrollContainer);
 						} else {
 							this._oDummyScrollContainer.css({
@@ -5454,9 +6056,8 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 								"width" : iScrollWidth
 							});
 						}
-					} else if (this._oDummyScrollContainer) {
-						this._oDummyScrollContainer.remove();
-						delete this._oDummyScrollContainer;
+					} else {
+						fnDeleteDummyContainer();
 					}
 					this._attachDomRefScrollHandler();
 
@@ -5471,6 +6072,7 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 			});
 
 		} else {
+			fnDeleteDummyContainer();
 			this.$().css("display", "none");
 		}
 	};
@@ -5491,6 +6093,7 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	};
 
 	/**
+	 * @param {object} oDomRef element's DOM reference
 	 * @private
 	 */
 	Overlay.prototype._detachDomRefScrollHandler = function(oDomRef) {
@@ -5503,7 +6106,7 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	/**
 	 * @private
 	 */
-	Overlay.prototype._onSyncScrollWithDomRef = function(oEvt) {
+	Overlay.prototype._onSyncScrollWithDomRef = function() {
 		window.clearTimeout(this._iSyncScrollWithDomRef);
 		// timeout needed so that scroll wheel in chrome windows works fast
 		this._iSyncScrollWithDomRef = window.setTimeout(function() {
@@ -5515,7 +6118,7 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	/**
 	 * @private
 	 */
-	Overlay.prototype._syncScrollWithDomRef = function(oEvent) {
+	Overlay.prototype._syncScrollWithDomRef = function() {
 		DOMUtil.syncScroll(this._oDomRefWithScrollHandler, this.$());
 	};
 
@@ -5556,6 +6159,7 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	};
 
 	/**
+	 * @param {object} oDomRef element's DOM reference to be cloned
 	 * @private
 	 */
 	Overlay.prototype._cloneDomRef = function(oDomRef) {
@@ -5575,6 +6179,8 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 					} else {
 						$clonedDom.empty();
 					}
+
+					//TODO: disable update
 					DOMUtil.cloneDOMAndStyles(oDomRef, $clonedDom);
 				};
 
@@ -5673,34 +6279,6 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 		}
 	};
 
-
-	/**
-	 * Sets whether the Overlay is for an element/aggregation in a hidden tree (not accessible via public aggregations)
-	 * @param {boolean} bInHiddenTree if the Overlay is inHiddenTree
-	 * @returns {sap.ui.dt.Overlay} returns this
-	 * @public
-	 */
-	Overlay.prototype.setInHiddenTree = function(bInHiddenTree) {
-		bInHiddenTree = !!bInHiddenTree;
-		if (bInHiddenTree !== this.isInHiddenTree()) {
-
-			this.toggleStyleClass("sapUiDtOverlayInHiddenTree", bInHiddenTree);
-			this.setProperty("inHiddenTree", bInHiddenTree);
-		}
-
-		return this;
-	};
-
-	/**
-	 * Returns if the Overlay is for an element/aggregation in a hidden tree (not accessible via public aggregations)
-	 * @public
-	 * @return {boolean} if the Overlay is in hidden tree
-	 */
-	Overlay.prototype.isInHiddenTree = function() {
-		return this.getInHiddenTree();
-	};
-
-
 	/**
 	 * Sets whether the Overlay is visible
 	 * @param {boolean} bVisible if the Overlay is visible
@@ -5729,7 +6307,7 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 				return true;
 			}
 			var oDesignTimeMetadata = this.getDesignTimeMetadata();
-			return oDesignTimeMetadata ? !oDesignTimeMetadata.isIgnored() : false;
+			return oDesignTimeMetadata ? !oDesignTimeMetadata.isIgnored(this.getElementInstance()) : false;
 		} else {
 			return this.getProperty("visible");
 		}
@@ -5748,6 +6326,7 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	/**
 	 * Returns if overlay is root
 	 * @public
+	 * @return {boolean} if the Overlay is root
 	 */
 	Overlay.prototype.isRoot = function() {
 		var oParent = this.getParent();
@@ -5755,25 +6334,6 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 			if (!oParent.getDomRef) {
 				return true;
 			}
-		}
-	};
-
-	/**
-	 * Returns child of first ancestor overlay not flagged as inHiddenTree
-	 *
-	 * @return {sap.ui.dt.ElementOverlay} ElementOverlay public parents child
-	 * @public
-	 */
-	Overlay.prototype.getFirstHiddenAggregationOverlay = function() {
-		var oPreviousOverlay = this; // eslint-disable-line consistent-this
-		var oParentOverlay = this.getParentElementOverlay();
-		while (oParentOverlay && oParentOverlay.isInHiddenTree()
-				&& ElementUtil.isInstanceOf(oParentOverlay, "sap.ui.dt.ElementOverlay")) {
-			oPreviousOverlay = oParentOverlay;
-			oParentOverlay = oParentOverlay.getParentElementOverlay();
-		}
-		if (ElementUtil.isInstanceOf(oParentOverlay, "sap.ui.dt.ElementOverlay")) {
-			return oPreviousOverlay.getParent();
 		}
 	};
 
@@ -5810,7 +6370,7 @@ function(ManagedObject) {
 	 * @extends sap.ui.dt.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private
@@ -5881,7 +6441,7 @@ function(ManagedObject) {
 	Selection.prototype.add = function(oOverlay) {
 		this._syncSelectionWithMode();
 
-		this._aSelection.push(oOverlay);
+		this._aSelection = this._aSelection.concat(oOverlay);
 		this.fireChange({
 			selection : this.getSelection()
 		});
@@ -5893,9 +6453,10 @@ function(ManagedObject) {
 	Selection.prototype.remove = function(oOverlay) {
 		this._syncSelectionWithMode();
 
-		var iIndex = this._aSelection.indexOf(oOverlay);
-		if (iIndex !== -1) {
-			this._aSelection.splice(iIndex, 1);
+		if (this._aSelection.indexOf(oOverlay) !== -1) {
+			this._aSelection = this._aSelection.filter(function (oItem) {
+				return oOverlay !== oItem;
+			});
 		}
 		this.fireChange({
 			selection : this.getSelection()
@@ -5945,7 +6506,7 @@ sap.ui.define("sap/ui/dt/plugin/ContextMenu",[
 	 * @class The ContextMenu registers event handler to open the context menu. Menu entries can dynamically be added
 	 * @extends sap.ui.dt.Plugin
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -6032,17 +6593,12 @@ sap.ui.define("sap/ui/dt/plugin/ContextMenu",[
 		this._oContextMenuControl.setMenuItems(this._aMenuItems, oTargetOverlay);
 		this._oContextMenuControl.setOverlayDomRef(oTargetOverlay);
 		this._oContextMenuControl.attachItemSelect(this._onItemSelected, this);
-
-		this._oContextMenuControl.openMenu({
-			pageX: oOriginalEvent.pageX,
-			pageY: oOriginalEvent.pageY
-		});
-
+		this._oContextMenuControl.openMenu(oOriginalEvent, oTargetOverlay);
 		this.fireOpenedContextMenu();
 	};
 
 	/**
-	 * Called when an context menu item gets selected by user
+	 * Called when a context menu item gets selected by user
 	 *
 	 * @param {sap.ui.base.Event} oEvent event object
 	 * @override
@@ -6076,8 +6632,9 @@ sap.ui.define("sap/ui/dt/plugin/ContextMenu",[
 		document.activeElement.blur();
 
 		var oOverlay = sap.ui.getCore().byId(oEvent.currentTarget.id);
+		var sTargetClasses = oEvent.target.className;
 
-		if (oOverlay && oOverlay.isSelectable()) {
+		if (oOverlay && oOverlay.isSelectable() && sTargetClasses.indexOf("sapUiDtOverlay") > -1) {
 			if (!oOverlay.isSelected()) {
 				oOverlay.setSelected(true);
 			}
@@ -6144,7 +6701,7 @@ sap.ui.define("sap/ui/dt/plugin/ControlDragDrop",['sap/ui/dt/plugin/DragDrop', '
 	 * @class The ControlDragDrop enables D&D functionality for the overlays based on aggregation types
 	 * @extends sap.ui.dt.plugin.DragDrop"
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @constructor
 	 * @private
 	 * @since 1.30
@@ -6165,7 +6722,7 @@ sap.ui.define("sap/ui/dt/plugin/ControlDragDrop",['sap/ui/dt/plugin/DragDrop', '
 					defaultValue : ["sap.ui.core.Element"]
 				},
 				elementMover : {
-					type : "sap.ui.dt.plugin.ElementMover"
+					type : "any" // "sap.ui.dt.plugin.ElementMover"
 				}
 			},
 			associations : {}
@@ -6305,7 +6862,7 @@ sap.ui.define("sap/ui/dt/plugin/CutPaste",[
 	 * @class The CutPaste enables Cut & Paste functionality for the overlays based on aggregation types
 	 * @extends sap.ui.dt.Plugin"
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -6327,7 +6884,7 @@ sap.ui.define("sap/ui/dt/plugin/CutPaste",[
 					]
 				},
 				elementMover: {
-					type: "sap.ui.dt.plugin.ElementMover"
+					type: "any" // "sap.ui.dt.plugin.ElementMover"
 				}
 			},
 			associations: {}
@@ -6519,7 +7076,7 @@ sap.ui.define("sap/ui/dt/plugin/TabHandling",[
 	 * @class The TabHandling plugin adjusts the tabindex for the elements.
 	 * @extends sap.ui.dt.Plugin
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @constructor
 	 * @private
 	 * @since 1.38
@@ -6606,7 +7163,9 @@ sap.ui.define("sap/ui/dt/plugin/TabHandling",[
 	 * @private
 	 */
 	TabHandling.prototype._onDomChanged = function() {
-		this._removeTabIndex();
+		if (this.getDesignTime().getEnabled()) {
+			this._removeTabIndex();
+		}
 	};
 
 	return TabHandling;
@@ -6642,7 +7201,7 @@ function (jQuery, DesignTimeMetadata) {
 	 * @extends sap.ui.core.DesignTimeMetadata
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private
@@ -6659,15 +7218,44 @@ function (jQuery, DesignTimeMetadata) {
 		}
 	});
 
-	AggregationDesignTimeMetadata.prototype.getMoveAction = function (oMovedElement) {
+	AggregationDesignTimeMetadata.prototype.getPropagation = function(oElement, callback) {
 		var mData = this.getData();
-		if (mData.actions && mData.actions.move) {
-			var vMoveChangeType = mData.actions.move;
-			if (typeof (vMoveChangeType) === "function" ){
-				return vMoveChangeType.apply(null, arguments);
-			}
-			return vMoveChangeType;
+		if (!mData.propagationInfos) {
+			return false;
 		}
+		mData.propagationInfos.some(function(oPropagatedInfo){
+			return callback(oPropagatedInfo);
+		});
+	};
+
+	AggregationDesignTimeMetadata.prototype.getRelevantContainerForPropagation = function(oElement) {
+		var mData = this.getData();
+		var vRelevantContainerElement = false;
+		if (!mData.propagationInfos) {
+			return false;
+		}
+
+		this.getPropagation(oElement, function(oPropagatedInfo){
+			if (oPropagatedInfo.relevantContainerFunction &&
+				oPropagatedInfo.relevantContainerFunction(oElement)) {
+				vRelevantContainerElement = oPropagatedInfo.relevantContainerElement;
+				return true;
+			}
+		});
+
+		return vRelevantContainerElement ? vRelevantContainerElement : false;
+	};
+
+	AggregationDesignTimeMetadata.prototype.getMetadataForPropagation = function(oElement) {
+		var vReturnMetadata = false;
+
+		this.getPropagation(oElement, function(oPropagatedInfo) {
+			if (oPropagatedInfo.metadataFunction) {
+				vReturnMetadata = oPropagatedInfo.metadataFunction(oElement, oPropagatedInfo.relevantContainerElement);
+				return vReturnMetadata ? true : false;
+			}
+		});
+		return vReturnMetadata ? vReturnMetadata : false;
 	};
 
 	return AggregationDesignTimeMetadata;
@@ -6704,7 +7292,7 @@ function(jQuery, Overlay) {
 	 * @extends sap.ui.core.Overlay
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private
@@ -6808,6 +7396,15 @@ function(jQuery, Overlay) {
 	};
 
 	/**
+	 * Returns if the AggregationOverlay is an association
+	 * @public
+	 * @return {boolean} if the AggregationOverlay is an association
+	 */
+	AggregationOverlay.prototype.isAssociation = function() {
+		return !!this.getDesignTimeMetadata().getData().aggregationLike;
+	};
+
+	/**
 	 * Returns an array with Overlays for the public children of the aggregation, associated with this AggregationOverlay
 	 * @return {sap.ui.dt.Overlay[]} children Overlays
 	 * @public
@@ -6850,7 +7447,7 @@ function(jQuery, DesignTimeMetadata, AggregationDesignTimeMetadata) {
 	 * @extends sap.ui.core.DesignTimeMetadata
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private
@@ -6907,7 +7504,8 @@ function(jQuery, DesignTimeMetadata, AggregationDesignTimeMetadata) {
 	};
 
 	/**
-	 * Returns the plain DT metadata for an aggregation name
+	 * Returns the plain DT metadata for an aggregation name,
+	 * including also aggregation-like associations
 	 * @param {string} sAggregationName an aggregation name
 	 * @return {object} returns the DT metadata for an aggregation with a given name
 	 * @public
@@ -6917,7 +7515,7 @@ function(jQuery, DesignTimeMetadata, AggregationDesignTimeMetadata) {
 	};
 
 	/**
-	 * Creates a aggregation DT metadata class for an aggregation,
+	 * Creates an aggregation DT metadata class for an aggregation,
 	 * ensure to destroy it if it is no longer needed, otherwise you get memory leak.
 	 * @param {string} sAggregationName an aggregation name
 	 * @return {sap.ui.dt.AggregationDesignTimeMetadata} returns the aggregation DT metadata for an aggregation with a given name
@@ -6932,12 +7530,21 @@ function(jQuery, DesignTimeMetadata, AggregationDesignTimeMetadata) {
 	};
 
 	/**
-	 * Returns the DT metadata for all aggregations
+	 * Returns the DT metadata for all aggregations,
+	 * including also aggregation-like associations
 	 * @return {map} returns the DT metadata for all aggregations
 	 * @public
 	 */
 	ElementDesignTimeMetadata.prototype.getAggregations = function() {
-		return this.getData().aggregations;
+		var mAggregations = this.getData().aggregations;
+		var mAssociations = this.getData().associations || {};
+		Object.keys(mAssociations).forEach(function(sAssociation){
+			var mAssociation = mAssociations[sAssociation];
+			if (mAssociation.aggregationLike){
+				mAggregations[sAssociation] = mAssociation;
+			}
+		});
+		return mAggregations;
 	};
 
 	/**
@@ -6947,6 +7554,7 @@ function(jQuery, DesignTimeMetadata, AggregationDesignTimeMetadata) {
 	 * @return {object} returns the relevant container
 	 * @public
 	 */
+	//TODO: Remove this method as soon as DTMetadata propagation is finalized
 	ElementDesignTimeMetadata.prototype.getRelevantContainer = function(oElement) {
 		var fnGetRelevantContainer = this.getData().getRelevantContainer;
 		if (!fnGetRelevantContainer || typeof fnGetRelevantContainer !== "function") {
@@ -7015,6 +7623,25 @@ function(jQuery, DesignTimeMetadata, AggregationDesignTimeMetadata) {
 		}
 	};
 
+	/**
+	 * Returns property "ignore" of aggregation DT metadata
+	 * @param {Object} oElement Element whose aggregation has to be checked
+	 * @param {String} sAggregationName Name of the Aggregation
+	 * @return {boolean} if ignored
+	 * @public
+	 */
+	ElementDesignTimeMetadata.prototype.isAggregationIgnored = function(oElement, sAggregationName) {
+		var mAggregations = this.getAggregations();
+		var oAggregationMetadata = mAggregations[sAggregationName];
+		var vIgnore = (oAggregationMetadata) ? oAggregationMetadata.ignore : false;
+		if (!vIgnore || (vIgnore && typeof vIgnore === "function" && !vIgnore(oElement))) {
+			return false;
+		} else {
+			return true;
+		}
+	};
+
+
 	return ElementDesignTimeMetadata;
 }, /* bExport= */ true);
 
@@ -7055,7 +7682,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private
@@ -7222,6 +7849,100 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	/**
 	 * @override
 	 */
+	ElementOverlay.prototype.applyStyles = function() {
+		Overlay.prototype.applyStyles.apply(this, arguments);
+
+		var oGeometry = this.getGeometry();
+		if (oGeometry && oGeometry.visible) {
+			this._sortAggregationOverlaysInDomOrder();
+		}
+	};
+
+	/**
+	 * Sorts aggregation overlays in there UI order
+	 * @private
+	 */
+	ElementOverlay.prototype._sortAggregationOverlaysInDomOrder = function() {
+		// compares two aggregations domRefs and returns 1, if first aggregation should be bellow in dom order
+		var fnCompareAggregations = function(oAggregationOverlay1, oAggregationOverlay2) {
+			var oGeometry1 = oAggregationOverlay1.getGeometry();
+			var oGeometry2 = oAggregationOverlay2.getGeometry();
+			var oPosition1 = oGeometry1 && oGeometry1.position;
+			var oPosition2 = oGeometry2 && oGeometry2.position;
+
+			if (oPosition1 && oPosition2) {
+				var iBottom1 = oPosition1.top + oGeometry1.size.height;
+				var iBottom2 = oPosition2.top + oGeometry2.size.height;
+
+				if (oPosition1.top < oPosition2.top) {
+					if (iBottom1 >= iBottom2 && oPosition2.left < oPosition1.left) {
+						/*  Example:
+							            +--------------+
+							+------+    |              |
+							|  2   |    |       1      |
+							+------+    |              |
+							            +--------------+
+							Despites 1st overlay's top is above 2nd element,
+							the order should be switched, since 2nd element
+							is shorter and is more to the left
+						 */
+						return 1;
+					} else {
+						return -1; // do not switch order
+					}
+				} else
+
+				if (oPosition1.top === oPosition2.top) {
+					if (oPosition1.left === oPosition2.left) {
+						return 0;
+					} else if (oPosition1.left < oPosition2.left) {
+						return -1; // order is correct
+					} else {
+						return 1; // switch order
+					}
+				} else
+
+				// if (oPosition1.top > oPosition2.top)
+				 if (iBottom1 <= iBottom2 && oPosition2.left > oPosition1.left) {
+					/* see picture above, but switch 1 and 2 - order is correct */
+					return -1;
+				} else {
+					/*  Example:
+						            +--------------+
+						+------+    |       2      |
+						|  1   |    +--------------+
+						|      |
+						+------+
+
+						Since 1st overlay's both top and bottom coordinates are
+						bellow in dom, then top and bottom of 2nd, they should be switched
+					 */
+					return 1;
+				}
+			}
+		};
+
+		var aSortedAggregationOverlays = this.getAggregationOverlays().sort(fnCompareAggregations);
+
+		var bOrderSwitched = this.getAggregationOverlays().some(function(oOverlay, index) {
+			if (oOverlay.getId() !== aSortedAggregationOverlays[index].getId()) {
+				return true;
+			}
+		});
+
+		if (bOrderSwitched) {
+			// insert in sorted order & suppress invalidate to prevent rerendering
+			this.removeAllAggregation("aggregationOverlays", true);
+			aSortedAggregationOverlays.forEach(function(oAggregationOverlay) {
+				// suppress invalidate to prevent rerendering
+				this.addAggregation("aggregationOverlays", oAggregationOverlay, true);
+			}.bind(this));
+		}
+	};
+
+	/**
+	 * @override
+	 */
 	ElementOverlay.prototype.setLazyRendering = function(bLazyRendering) {
 		Overlay.prototype.setLazyRendering.apply(this, arguments);
 
@@ -7274,21 +7995,73 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 		return this;
 	};
 
+	ElementOverlay.prototype._addPropagationInfos = function(oDesignTimeMetadata) {
+		var oParentOverlay = this.getParentAggregationOverlay(),
+			oParentElementOverlay;
+
+		var oElement = this.getElementInstance();
+
+		if (!oParentOverlay && oElement) {
+			oParentElementOverlay = OverlayRegistry.getOverlay(oElement.getParent());
+			if (oParentElementOverlay && oElement.sParentAggregationName) {
+				oParentOverlay = oParentElementOverlay.getAggregationOverlay(oElement.sParentAggregationName);
+			}
+		}
+		if (!oParentOverlay){
+			return false;
+		}
+
+		var oParentDesignTimeMetadata = oParentOverlay.getDesignTimeMetadata();
+		var vRelevantContainerElement = oParentDesignTimeMetadata.getRelevantContainerForPropagation(oElement);
+		var vReturnMetadata = oParentDesignTimeMetadata.getMetadataForPropagation(oElement);
+		if (!vRelevantContainerElement && !vReturnMetadata) {
+			return false;
+		}
+
+		if (vRelevantContainerElement) {
+			oDesignTimeMetadata.getData().relevantContainer = vRelevantContainerElement;
+		}
+
+		if (vReturnMetadata){
+			var oData = oDesignTimeMetadata.getData();
+			if (vReturnMetadata.actions === null) {
+				var mAggregations = oElement.getMetadata().getAllAggregations();
+				var aAggregationNames = Object.keys(mAggregations);
+				aAggregationNames = aAggregationNames.concat(
+					Object.keys(oData.aggregations).filter(function (sAggregationName) {
+				    return aAggregationNames.indexOf(sAggregationName) < 0;
+				}));
+
+				aAggregationNames.forEach(function(sAggregationName) {
+					if (oData.aggregations[sAggregationName] && oData.aggregations[sAggregationName].actions) {
+						oData.aggregations[sAggregationName].actions = null;
+					}
+				});
+			}
+			jQuery.extend(true, oData, vReturnMetadata);
+		}
+
+		return true;
+	};
+
 	/**
 	 * @override
 	 */
-	ElementOverlay.prototype.setDesignTimeMetadata = function(vDesignTimeMetada) {
-		var oDesignTimeMetada;
-		if (vDesignTimeMetada instanceof ElementDesignTimeMetadata) {
-			oDesignTimeMetada = vDesignTimeMetada;
+	ElementOverlay.prototype.setDesignTimeMetadata = function(vDesignTimeMetadata) {
+		var oDesignTimeMetadata;
+		if (vDesignTimeMetadata instanceof ElementDesignTimeMetadata) {
+			oDesignTimeMetadata = vDesignTimeMetadata;
 		} else {
-			oDesignTimeMetada = new ElementDesignTimeMetadata({
+			oDesignTimeMetadata = new ElementDesignTimeMetadata({
 				libraryName : this.getElementInstance().getMetadata().getLibraryName(),
-				data : vDesignTimeMetada
+				data : vDesignTimeMetadata
 			});
 		}
-
-		var oReturn = this.setAggregation("designTimeMetadata", oDesignTimeMetada);
+		if (!this._oOriginalDesignTimeMetadata){
+			this._oOriginalDesignTimeMetadata = oDesignTimeMetadata;
+		}
+		this._addPropagationInfos(oDesignTimeMetadata);
+		var oReturn = this.setAggregation("designTimeMetadata", oDesignTimeMetadata);
 
 		if (this.getElementInstance()) {
 			this._renderAndCreateAggregation();
@@ -7327,7 +8100,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 		if (!oDomRef) {
 			var oDesignTimeMetadata = this.getDesignTimeMetadata();
 			if (!oDesignTimeMetadata) {
-				return;
+				return undefined;
 			}
 			var fnGetDomRef = oDesignTimeMetadata.getDomRef();
 			if (typeof fnGetDomRef === "function") {
@@ -7338,6 +8111,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 		if (oDomRef) {
 			return jQuery(oDomRef);
 		}
+		return undefined;
 	};
 
 	/**
@@ -7433,17 +8207,117 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 		}
 	};
 
+	ElementOverlay.prototype._getParentRelevantContainerPropagation = function() {
+		var oParentAggregationOverlay = this.getParent();
+		var oCopyOfParentPropagation = [];
+
+		if (oParentAggregationOverlay &&
+			oParentAggregationOverlay.getAggregation("designTimeMetadata")) {
+			jQuery.extend(oCopyOfParentPropagation, oParentAggregationOverlay.getDesignTimeMetadata().getData()["propagationInfos"]);
+			return oCopyOfParentPropagation;
+		}
+		return false;
+	};
+
+	ElementOverlay.prototype._getCurrentRelevantContainerPropagation = function(oElementDtMetadataForAggregation, oNewPropagationInfo) {
+		if (!oElementDtMetadataForAggregation.propagateRelevantContainer) {
+			return false;
+		} else if (typeof oElementDtMetadataForAggregation.propagateRelevantContainer === "function") {
+			oNewPropagationInfo.relevantContainerFunction = oElementDtMetadataForAggregation.propagateRelevantContainer;
+			oNewPropagationInfo.relevantContainerElement = this.getElementInstance();
+		} else if (typeof oElementDtMetadataForAggregation.propagateRelevantContainer === "boolean" &&
+			oElementDtMetadataForAggregation.propagateRelevantContainer) {
+			oNewPropagationInfo.relevantContainerFunction = function() { return true; };
+			oNewPropagationInfo.relevantContainerElement = this.getElementInstance();
+		} else {
+			throw new Error("wrong type: it should be either a function or a boolean value and it is:" +
+				typeof oElementDtMetadataForAggregation.propagateRelevantContainer);
+		}
+		return true;
+	};
+
+	ElementOverlay.prototype._getCurrentDesigntimePropagation = function(oElementDtMetadataForAggregation, oNewPropagationInfo) {
+		if (!oElementDtMetadataForAggregation.propagateMetadata) {
+			return false;
+		} else if (typeof oElementDtMetadataForAggregation.propagateMetadata === "function") {
+			oNewPropagationInfo.relevantContainerElement = this.getElementInstance();
+			oNewPropagationInfo.metadataFunction = oElementDtMetadataForAggregation.propagateMetadata;
+		} else {
+			throw new Error("wrong type: it should be a function and it is:",
+				typeof oElementDtMetadataForAggregation.propagateMetadata);
+		}
+		return true;
+	};
+
+	ElementOverlay.prototype._propagateDesigntimeObj = function(oAggregationDtMetadata, oNewRelevantContainerPropagation, aPropagatedRelevantContainersFromParent) {
+		var oAggregationData;
+
+		if (!aPropagatedRelevantContainersFromParent &&
+			!oNewRelevantContainerPropagation) {
+			return false;
+		}
+
+		if (oNewRelevantContainerPropagation) {
+			aPropagatedRelevantContainersFromParent = aPropagatedRelevantContainersFromParent ? aPropagatedRelevantContainersFromParent : [];
+			aPropagatedRelevantContainersFromParent.push(oNewRelevantContainerPropagation);
+		}
+
+		// get designtime metadata data-object from current aggregation
+		oAggregationData = oAggregationDtMetadata.getData();
+
+		// add propagation array to current aggregation designtime-metadata
+		oAggregationData.propagationInfos = aPropagatedRelevantContainersFromParent;
+
+		// propagate relevant container
+		oAggregationDtMetadata.setData(oAggregationData);
+
+		return true;
+	};
+
+	ElementOverlay.prototype._handleDesigntimePropagation = function(oAggregationDtMetadata) {
+		var oNewPropagationInfo = {
+			relevantContainerFunction : null,
+			relevantContainerElement : null,
+			metadataFunction: null
+		};
+		var bNewContentAdded = false;
+
+		var aPropagatedRelevantContainersFromParent = this._getParentRelevantContainerPropagation();
+
+		var oDtMetadataForAggregation = oAggregationDtMetadata.getData();
+		if (oDtMetadataForAggregation &&
+			oDtMetadataForAggregation !== {}) {
+			bNewContentAdded = (this._getCurrentRelevantContainerPropagation(oDtMetadataForAggregation, oNewPropagationInfo)
+				|| bNewContentAdded);
+			bNewContentAdded = (this._getCurrentDesigntimePropagation(oDtMetadataForAggregation, oNewPropagationInfo)
+				|| bNewContentAdded);
+		}
+
+		if (bNewContentAdded === false) {
+			oNewPropagationInfo = null;
+		}
+
+		if (aPropagatedRelevantContainersFromParent || oNewPropagationInfo) {
+			return this._propagateDesigntimeObj(oAggregationDtMetadata, oNewPropagationInfo, aPropagatedRelevantContainersFromParent);
+		} else {
+			return false;
+		}
+	};
+
 	/**
+	 * @param {string} sAggregationName name of aggregation to be created
+	 * @returns {object} aggregation overlay
 	 * @private
 	 */
-	ElementOverlay.prototype._createAggregationOverlay = function(sAggregationName, bInHiddenTree) {
+	ElementOverlay.prototype._createAggregationOverlay = function(sAggregationName) {
 		var oAggregationDesignTimeMetadata = this.getDesignTimeMetadata().createAggregationDesignTimeMetadata(sAggregationName);
+
+		this._handleDesigntimePropagation(oAggregationDesignTimeMetadata);
 
 		var oAggregationOverlay = new AggregationOverlay({
 			aggregationName : sAggregationName,
 			element : this.getElementInstance(),
-			designTimeMetadata : oAggregationDesignTimeMetadata,
-			inHiddenTree : bInHiddenTree
+			designTimeMetadata : oAggregationDesignTimeMetadata
 		});
 		this._mAggregationOverlays[sAggregationName] = oAggregationOverlay;
 		this.addAggregation("aggregationOverlays", oAggregationOverlay);
@@ -7466,24 +8340,32 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 
 		var mAggregationsWithOverlay = {};
 
-		ElementUtil.iterateOverAllPublicAggregations(oElement, function(oAggregation, aAggregationElements) {
-			var sAggregationName = oAggregation.name;
-			mAggregationsWithOverlay[sAggregationName] = true;
-			this._createAggregationOverlay(sAggregationName, this.isInHiddenTree());
+		var mElementAggregations = oElement.getMetadata().getAllAggregations();
+		var aElementAggregationNames = Object.keys(mElementAggregations);
+
+		var bIgnored;
+		aElementAggregationNames.forEach(function(sAggregationName) {
+			bIgnored = oDesignTimeMetadata.isAggregationIgnored(oElement, sAggregationName);
+			mAggregationsWithOverlay[sAggregationName] = !bIgnored;
+			// create aggregation overlays which are not ignored in the DT Metadata
+			if (!bIgnored) {
+				this._createAggregationOverlay(sAggregationName);
+			}
 		}.bind(this));
 
-		// create aggregation overlays also for a hidden aggregations which are not ignored in the DT Metadata
+		// create aggregation overlays also for a hidden aggregations and aggregation-like associations which are not ignored in the DT Metadata
 		var mAggregationsMetadata = oDesignTimeMetadata.getAggregations();
-		var aAggregationNames = Object.keys(mAggregationsMetadata);
-		aAggregationNames.forEach(function (sAggregationName) {
-			var oAggregationMetadata = mAggregationsMetadata[sAggregationName];
-			if (oAggregationMetadata.ignore === false && !mAggregationsWithOverlay[sAggregationName]) {
-				// this is needed to point out, that a control is both in public and private tree, so that it has a "public" parent, which can be different from a getParent()
-				// flag is needed so that parents could have possibility to handle actions for the children. The better solution yet to come: probably, propagation of metadata from parents to children
-				var bIsInHiddenTree = oAggregationMetadata.inHiddenTree;
-				this._createAggregationOverlay(sAggregationName, bIsInHiddenTree);
-			}
-		}, this);
+		if (mAggregationsMetadata) {
+			var aAggregationNames = Object.keys(mAggregationsMetadata);
+			aAggregationNames.forEach(function (sAggregationName) {
+				if (mAggregationsWithOverlay[sAggregationName] === undefined) {
+					bIgnored = oDesignTimeMetadata.isAggregationIgnored(oElement, sAggregationName);
+					if (!bIgnored) {
+						this._createAggregationOverlay(sAggregationName);
+					}
+				}
+			}, this);
+		}
 
 		this.sync();
 	};
@@ -7517,6 +8399,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	};
 
 	/**
+	 * @param {sap.ui.baseEvent} oEvent event object
 	 * @private
 	 */
 	ElementOverlay.prototype._onAggregationVisibleChanged = function(oEvent) {
@@ -7542,17 +8425,17 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 				}
 			}
 
-			var aAggregationElements = ElementUtil.getAggregation(this.getElementInstance(), sAggregationName);
-			aAggregationElements.forEach(function(oAggregationElement) {
+			OverlayUtil.iterateOverAggregationLikeChildren(this, sAggregationName, function(oAggregationElement) {
 				var oChildElementOverlay = OverlayRegistry.getOverlay(oAggregationElement);
 				if (oChildElementOverlay  && oChildElementOverlay.getParent() !== this) {
 					oAggregationOverlay.addChild(oChildElementOverlay);
 				}
-			}, this);
+			}.bind(this));
 		}
 	};
 
 	/**
+	 * @param {boolean} bVisible visible attribute
 	 * @protected
 	 */
 	ElementOverlay.prototype.setVisible = function(bVisible) {
@@ -7562,6 +8445,8 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	};
 
 	/**
+	 * @param {string} sAggregationName name of the aggregation
+	 * @param {boolean} bSuppressInvalidate suppress invalidate
 	 * @protected
 	 */
 	ElementOverlay.prototype.destroyAggregation = function(sAggregationName, bSuppressInvalidate) {
@@ -7595,6 +8480,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	};
 
 	/**
+	 * @param {sap.ui.baseEvent} oEvent event object
 	 * @private
 	 */
 	ElementOverlay.prototype._onDomChanged = function(oEvent) {
@@ -7736,31 +8622,19 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	};
 
 	/**
-	 * Returns agrregation overlay of public parent, which is an ancestor of this overlay
-	 *
-	 * @return {sap.ui.dt.Overlay} Overlay public parent
+	 * Returns the relevant container element for this overlay. As default the overlay parent element is returned
+	 * @return {sap.ui.core.Element} Relevant container element
 	 * @public
 	 */
-	ElementOverlay.prototype.getPublicParentAggregationOverlay = function() {
-		var oAggregationOverlay = this.getParentAggregationOverlay();
-		var oParentElementOverlay = this.getParentElementOverlay();
-		while (oParentElementOverlay && ElementUtil.isInstanceOf(oParentElementOverlay, "sap.ui.dt.ElementOverlay") && oParentElementOverlay.isInHiddenTree()) {
-			oAggregationOverlay = oParentElementOverlay.getParentAggregationOverlay();
-			oParentElementOverlay = oParentElementOverlay.getParentElementOverlay();
+	ElementOverlay.prototype.getRelevantContainer = function() {
+		var oDesignTimeMetadata = this.getDesignTimeMetadata();
+		if (oDesignTimeMetadata &&
+			oDesignTimeMetadata.getData().relevantContainer) {
+			return oDesignTimeMetadata.getData().relevantContainer;
 		}
-		return oAggregationOverlay;
-	};
-
-	/**
-	 * Returns first ancestor overlay not flagged as inHiddenTree
-	 * @return {sap.ui.dt.ElementOverlay} ElementOverlay public parent
-	 * @public
-	 */
-	ElementOverlay.prototype.getPublicParentElementOverlay = function() {
-		var oPublicParentAggregationOverlay = this.getPublicParentAggregationOverlay();
-		if (oPublicParentAggregationOverlay) {
-			return oPublicParentAggregationOverlay.getParent();
-		}
+		// setting the default value to direct parent
+		var oParentOverlay = this.getParentElementOverlay();
+		return oParentOverlay ? oParentOverlay.getElementInstance() : undefined;
 	};
 
 	return ElementOverlay;
@@ -7784,10 +8658,11 @@ sap.ui.define("sap/ui/dt/DesignTime",[
 	'sap/ui/dt/Selection',
 	'sap/ui/dt/ElementDesignTimeMetadata',
 	'sap/ui/dt/ElementUtil',
+	'sap/ui/dt/Overlay',
 	'sap/ui/dt/OverlayUtil',
 	'./library'
 ],
-function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesignTimeMetadata, ElementUtil, OverlayUtil) {
+function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesignTimeMetadata, ElementUtil, Overlay, OverlayUtil) {
 	"use strict";
 
 	/**
@@ -7802,7 +8677,7 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private
@@ -7831,6 +8706,15 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 				 */
 				 designTimeMetadata : {
 					type : "object"
+				 },
+
+				/**
+				 * Whether overlays of DT are enabled (shown on the screen). When 'false', DT is still
+				 * working, but overlays do not recalculate their styles.
+				 */
+				 enabled: {
+					type: "boolean",
+					defaultValue: true
 				 }
 			},
 			associations : {
@@ -7945,6 +8829,12 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	DesignTime.prototype.exit = function() {
 		delete this._iOverlaysPending;
 		delete this._aOverlaysCreatedInLastBatch;
+
+		// The plugins need to be destroyed before the overlays in order to go through the deregisterElementOverlay Methods
+		this.getPlugins().forEach(function(oPlugin) {
+			oPlugin.destroy();
+		});
+
 		this._destroyAllOverlays();
 		this._oSelection.destroy();
 	};
@@ -8072,7 +8962,7 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 
 	/**
 	 * Returns a designTimeMetadata for the element or className
-	 * @param {string|sap.ui.core.Element}
+	 * @param {string|sap.ui.core.Element} vElement element or string witch is needed to expect classname
 	 * @return {object} designTimeMetadata for a specific element or className
 	 * @protected
 	 */
@@ -8100,7 +8990,7 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 		// to prevent rerendering of UIArea during async loading process
 		this.attachEventOnce("synced", function() {
 			oRootOverlay.placeInOverlayContainer();
-		});
+		}, this);
 
 		return this;
 	};
@@ -8137,13 +9027,11 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	/**
 	 * Creates and returns the created instance of ElementOverlay for an element
 	 * @param {string|sap.ui.core.Element} oElement to create ElementOverlay for
-	 * @param {object} oDesignTimeMetadata to create ElementOverlay with
 	 * @return {sap.ui.dt.ElementOverlay} created ElementOverlay
 	 * @protected
 	 */
-	DesignTime.prototype.createElementOverlay = function(oElement, bInHiddenTree) {
+	DesignTime.prototype.createElementOverlay = function(oElement) {
 		return new ElementOverlay({
-			inHiddenTree : bInHiddenTree,
 			element : oElement
 		});
 	};
@@ -8168,8 +9056,7 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	 * @return {sap.ui.dt.ElementOverlay} created or already existing instance of ElementOverlay for oElement
 	 * @private
 	 */
-	DesignTime.prototype._createElementOverlay = function(oElement, bInHiddenTree) {
-		oElement = ElementUtil.fixComponentContainerElement(oElement);
+	DesignTime.prototype._createElementOverlay = function(oElement) {
 		var oElementOverlay = OverlayRegistry.getOverlay(oElement);
 		if (oElement && !oElement.bIsDestroyed && !oElementOverlay) {
 			if (this._iOverlaysPending === 0) {
@@ -8177,7 +9064,7 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 			}
 			this._iOverlaysPending++;
 
-			oElementOverlay = this.createElementOverlay(oElement, bInHiddenTree);
+			oElementOverlay = this.createElementOverlay(oElement);
 			if (oElementOverlay) {
 				oElementOverlay.attachRequestElementOverlaysForAggregation(this._onRequestElementOverlaysForAggregation, this);
 				oElementOverlay.attachElementModified(this._onElementModified, this);
@@ -8192,6 +9079,7 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 				}
 				// merge the DTMetadata from the DesignTime and from UI5
 				var oMergedDesignTimeMetadata = oDesignTimeMetadata || {};
+
 				jQuery.extend(true, oMergedDesignTimeMetadata, this.getDesignTimeMetadataFor(oElement));
 				var oElementDesignTimeMetadata = new ElementDesignTimeMetadata({
 					libraryName : oElement.getMetadata().getLibraryName(),
@@ -8246,18 +9134,18 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	};
 
 	/**
+	 * @param {sap.ui.core.ElementOverlay} oElementOverlay element overlay
+	 * @param {string} sAggregationName name of the aggregation for which element overlays has to be created
 	 * @private
 	*/
 	DesignTime.prototype._createChildOverlaysForAggregation = function(oElementOverlay, sAggregationName) {
-		var oAggregationOverlay = oElementOverlay.getAggregationOverlay(sAggregationName);
-		var oElement = oElementOverlay.getElementInstance();
-		var vChildren = ElementUtil.getAggregation(oElement, sAggregationName);
-		ElementUtil.iterateOverElements(vChildren, function(oChild) {
-			this._createElementOverlay(oChild, oAggregationOverlay.isInHiddenTree());
+		OverlayUtil.iterateOverAggregationLikeChildren(oElementOverlay, sAggregationName, function(oChild) {
+			this._createElementOverlay(oChild);
 		}.bind(this));
 	};
 
 	/**
+	 * @param {sap.ui.baseEvent} oEvent event object
 	 * @private
 	*/
 	DesignTime.prototype._onRequestElementOverlaysForAggregation = function(oEvent) {
@@ -8265,6 +9153,14 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 
 		var sAggregationName = oEvent.getParameter("name");
 		this._createChildOverlaysForAggregation(oElementOverlay, sAggregationName);
+		// if aggregation overlay is created without element overlay being created (not syncing),
+		// the aggregation overlay must be registered on the plugins
+		if (this._iOverlaysPending === 0){
+			var aPlugins = this.getPlugins();
+			aPlugins.forEach(function(oPlugin) {
+				oPlugin.callAggregationOverlayRegistrationMethods(oElementOverlay);
+			});
+		}
 	};
 
 	/**
@@ -8311,22 +9207,22 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	};
 
 	/**
-	 * @param {sap.ui.core.Element} oElement which was added
+	 * @param {sap.ui.core.Element} oChild which was added
 	 * @private
 	 */
 	DesignTime.prototype._onElementOverlayAddAggregation = function(oChild, oParent, sAggregationName) {
 		var oParentOverlay = OverlayRegistry.getOverlay(oParent);
 		var oParentAggregationOverlay = oParentOverlay.getAggregationOverlay(sAggregationName);
 		// oElement can be of an alternative type (setLabel(sText) for example)
-		if (oChild instanceof sap.ui.core.Element) {
+		if (oChild instanceof sap.ui.base.ManagedObject) {
 			var oChildElementOverlay = OverlayRegistry.getOverlay(oChild);
 			if (!oChildElementOverlay) {
-				var bIsInHiddenTree = oParentOverlay.getAggregationOverlay(sAggregationName).isInHiddenTree();
-				this._createElementOverlay(oChild, bIsInHiddenTree);
+				oChildElementOverlay = this._createElementOverlay(oChild);
+				oParentAggregationOverlay.addChild(oChildElementOverlay);
 			} else {
 				// element overlay needs to have a correct parent for propagation
 				oParentAggregationOverlay.addChild(oChildElementOverlay);
-
+				oChildElementOverlay.setDesignTimeMetadata(oChildElementOverlay._oOriginalDesignTimeMetadata);
 			}
 		}
 	};
@@ -8335,7 +9231,7 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	 * @param {sap.ui.core.Element} oElement which was modified
 	 * @private
 	 */
-	DesignTime.prototype._checkIfOverlayShouldBeDestroyed = function(oElement, oParent) {
+	DesignTime.prototype._checkIfOverlayShouldBeDestroyed = function(oElement) {
 		var oElementOverlay = OverlayRegistry.getOverlay(oElement);
 		// Overlays of elements in "dependents" aggregation or not in root elements should be destroyed
 		if (oElementOverlay &&
@@ -8364,6 +9260,7 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 
 	/**
 	 * @param {function} fnStep function called with every root element
+	 * @param {object} oScope provides scope object
 	 * @private
 	 */
 	DesignTime.prototype._iterateRootElements = function(fnStep, oScope) {
@@ -8392,9 +9289,26 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 		return aElementOverlays;
 	};
 
+	/**
+	 * Custom setter for property 'enabled'
+	 * @public
+	 */
+	DesignTime.prototype.setEnabled = function (bValue) {
+		var $OverlayContainer = jQuery(Overlay.getOverlayContainer());
+		$OverlayContainer[bValue ? 'show' : 'hide']();
+
+		this.getElementOverlays().forEach(function (oOverlay) {
+			oOverlay.setEnabled(bValue);
+			oOverlay.getChildren().forEach(function (oOverlayChild) {
+				oOverlayChild.setEnabled(bValue);
+			});
+		});
+
+		this.setProperty('enabled', bValue);
+	};
+
 	return DesignTime;
 }, /* bExport= */ true);
-
 }; // end of sap/ui/dt/DesignTime.js
 if ( !jQuery.sap.isDeclared('sap.ui.dt.test.ElementEnablementTest') ) {
 /*!
@@ -8428,7 +9342,7 @@ function(jQuery, Test, DesignTime, ElementTest) {
 	 * @extends sap.ui.dt.test.Test
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private
@@ -8502,7 +9416,7 @@ function(jQuery, Test, DesignTime, ElementTest) {
 			var mElementTest = this.addGroup(
 				this._mResult.children,
 				this.getType(),
-				"Given that an DesignTime is created for " + this.getType()
+				"Given that a DesignTime is created for " + this.getType()
 			);
 
 			this._testAggregations(mElementTest.children);
@@ -8720,7 +9634,7 @@ function(jQuery, Test, ElementEnablementTest) {
 
 
 	/**
-	 * Constructor for an LibraryEnablementTest.
+	 * Constructor for a LibraryEnablementTest.
 	 *
 	 * @param {string} [sId] id for the new object, generated automatically if no id is given
 	 * @param {object} [mSettings] initial settings for the new object
@@ -8731,7 +9645,7 @@ function(jQuery, Test, ElementEnablementTest) {
 	 * @extends sap.ui.dt.test.Test
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private

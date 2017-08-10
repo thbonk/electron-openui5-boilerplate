@@ -17,8 +17,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Model', './ControlPropertyBind
 	function(jQuery, Model, ControlPropertyBinding) {
 	"use strict";
 
-//jQuery.sap.require("sap.ui.model.control.ControlListBinding");
-
 	/**
 	 * Constructor for a new ControlModel.
 	 *
@@ -28,7 +26,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Model', './ControlPropertyBind
 	 * @extends sap.ui.model.Model
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @alias sap.ui.model.control.ControlModel

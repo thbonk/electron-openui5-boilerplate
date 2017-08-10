@@ -174,6 +174,7 @@
 	rows: [], // sap.ui.table.Row
 	noData: undefined, // sap.ui.core.Control
 	rowActionTemplate: undefined, // sap.ui.table.RowAction
+	rowSettingsTemplate: undefined, // sap.ui.table.RowSettings
 	groupBy: undefined, // sap.ui.table.Column
 	ariaLabelledBy: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
@@ -290,6 +291,7 @@
 		<rows></rows> <!-- sap.ui.table.Row -->
 		<noData></noData> <!-- sap.ui.core.Control -->
 		<rowActionTemplate></rowActionTemplate> <!-- sap.ui.table.RowAction -->
+		<rowSettingsTemplate></rowSettingsTemplate> <!-- sap.ui.table.RowSettings -->
 </AnalyticalTable>
 ]]></xmlTemplate>
 </Template>
@@ -480,6 +482,23 @@
 </RowActionItem>
 ]]></xmlTemplate>
 </Template>
+<Template name="sap.ui.table.RowSettings" alias="RowSettings,Settings">
+	<jsTemplate><![CDATA[new sap.ui.table.RowSettings({
+	id: "${id}", // sap.ui.core.ID
+	highlight: sap.ui.core.MessageType.None, // sap.ui.core.MessageType, since 1.48.0
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [] // sap.ui.core.Element, since 1.19
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<RowSettings xmlns="sap.ui.table"
+	id="${id}"
+	highlight="None">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+</RowSettings>
+]]></xmlTemplate>
+</Template>
 <Template name="sap.ui.table.Table" alias="Table">
 	<jsTemplate><![CDATA[new sap.ui.table.Table({
 	id: "${id}", // sap.ui.core.ID
@@ -526,6 +545,7 @@
 	rows: [], // sap.ui.table.Row
 	noData: undefined, // sap.ui.core.Control
 	rowActionTemplate: undefined, // sap.ui.table.RowAction
+	rowSettingsTemplate: undefined, // sap.ui.table.RowSettings
 	groupBy: undefined, // sap.ui.table.Column
 	ariaLabelledBy: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
@@ -636,6 +656,7 @@
 		<rows></rows> <!-- sap.ui.table.Row -->
 		<noData></noData> <!-- sap.ui.core.Control -->
 		<rowActionTemplate></rowActionTemplate> <!-- sap.ui.table.RowAction -->
+		<rowSettingsTemplate></rowSettingsTemplate> <!-- sap.ui.table.RowSettings -->
 </Table>
 ]]></xmlTemplate>
 </Template>
@@ -690,6 +711,7 @@
 	rows: [], // sap.ui.table.Row
 	noData: undefined, // sap.ui.core.Control
 	rowActionTemplate: undefined, // sap.ui.table.RowAction
+	rowSettingsTemplate: undefined, // sap.ui.table.RowSettings
 	groupBy: undefined, // sap.ui.table.Column
 	ariaLabelledBy: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
@@ -809,6 +831,7 @@
 		<rows></rows> <!-- sap.ui.table.Row -->
 		<noData></noData> <!-- sap.ui.core.Control -->
 		<rowActionTemplate></rowActionTemplate> <!-- sap.ui.table.RowAction -->
+		<rowSettingsTemplate></rowSettingsTemplate> <!-- sap.ui.table.RowSettings -->
 </TreeTable>
 ]]></xmlTemplate>
 </Template>

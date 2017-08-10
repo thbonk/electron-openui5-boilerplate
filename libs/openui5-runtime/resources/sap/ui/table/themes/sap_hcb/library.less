@@ -9,14 +9,16 @@
 @import "../base/library.less";
 @import "../../../../../sap/ui/core/themes/sap_hcb/global.less";
 
+/* shared local library less parameters */
+@_sap_ui_table_FocusOutlineWidth: 2px;
+
 /* START "Table.less" */
 /* =================================== */
 /* CSS for control sap.ui.table/Table  */
 /* High Contrast Black theme           */
 /* =================================== */
 
-@_sapUiTableFocusOutlineWidth: 2px;
-@_sapUiTableFocusOutlineOffset: -3px;
+@_sap_ui_table_Table_FocusOutlineOffset: -3px;
 
 .sapUiTableHdr {
 	border-bottom: 3px solid @sapUiListHeaderBorderColor;
@@ -83,7 +85,7 @@ html.sap-desktop .sapUiTableHSb  {
 /* High Contrast Black theme              */
 /* ====================================== */
 
-@_sapUiTableColumnDnDHighlightColor: @sapUiContentHelpColor;
+@_sap_ui_table_DragDrop_ColumnDnDHighlightColor: @sapUiContentHelpColor;
 
 .sapUiTableColReorderFade:after {
 	background-color: @sapUiBaseColor;
@@ -97,12 +99,5 @@ html.sap-desktop .sapUiTableHSb  {
 /* High Contrast Black theme              */
 /* ====================================== */
 
-@_sapUiTableGroupIconBorderWidth: 3px;
+@_sap_ui_table_Grouping_GroupIconBorderWidth: 3px;
 /* END "Grouping.less" */
-
-/* START "AnalyticalTable.less" */
-/* ============================================= */
-/* CSS for control sap.ui.table/AnalyticalTable  */
-/* High Contrast Black theme                     */
-/* ============================================= */
-/* END "AnalyticalTable.less" */

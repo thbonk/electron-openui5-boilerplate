@@ -17,12 +17,14 @@ if (!window.QUnit) {
 sap.ui.define([
   "jquery.sap.global", "sap/ui/base/Object", "sap/ui/test/opaQunit", "sap/ui/test/Opa5",
   "sap/ui/test/gherkin/GherkinTestGenerator", "sap/ui/test/gherkin/dataTableUtils", "sap/ui/test/gherkin/StepDefinitions",
-  "sap/ui/qunit/qunit-css", "sap/ui/qunit/qunit-junit", "sap/ui/qunit/qunit-coverage"
-], function($, UI5Object, opaTest, Opa5, GherkinTestGenerator, dataTableUtils, StepDefinitions) {
+  "sap/ui/test/launchers/componentLauncher", "sap/ui/test/launchers/iFrameLauncher", "sap/ui/qunit/qunit-css",
+  "sap/ui/qunit/qunit-junit", "sap/ui/qunit/qunit-coverage"
+], function($, UI5Object, opaTest, Opa5, GherkinTestGenerator, dataTableUtils, StepDefinitions, componentLauncher,
+  iFrameLauncher) {
   "use strict";
 
   /**
-   * Dynamically generates Opa5 tests based on a Gherkin feature file and step definitions.
+   * Dynamically generates and executes Opa5 tests based on a Gherkin feature file and step definitions.
    *
    * Logs activity to Opa5, and some debug information to the console with the prefix "[GHERKIN]"
    *
@@ -34,6 +36,34 @@ sap.ui.define([
    * @public
    */
   var opa5TestHarness = {
+
+    // for testability these need to be accessible outside of public 'test' function's scope
+    _oOpa5: new Opa5(),
+    _opaTest: opaTest,
+    _fnAlternateTestStepGenerator: function(oStep) {
+      // Automatically generates test steps from Opa Page Objects, only used when args.generateMissingSteps is true
+
+      var sToEval = oStep.keyword + ".";
+      var sFinalFunction = oStep.text;
+      var aMatch = oStep.text.match(/(.*?)\s*:\s*(.*)/);
+      if (aMatch) {
+        sToEval += dataTableUtils.normalization.camelCase(aMatch[1]) + ".";
+        sFinalFunction = aMatch[2];
+      }
+      sToEval += dataTableUtils.normalization.camelCase(sFinalFunction) + "();";
+
+      return {
+        isMatch: true,
+        text: oStep.text,
+        regex: /Generated Step/,
+        parameters: [],
+        func: function(Given, When, Then) {
+          $.sap.log.info("[GHERKIN] Generated Step: " + sToEval);
+          eval(sToEval);
+        },
+        _sToEval: sToEval // exposing this for testability
+      };
+    },
 
     /**
      * Dynamically generates Opa5 tests
@@ -50,18 +80,19 @@ sap.ui.define([
      * Chaining function calls, such as "Then.iStartMyApp().and.iCloseMyApp()" is not possible at this time.
      *
      * @param {object} args - the arguments to the function
-     * @param {string} args.featurePath - the path to the Gherkin feature file to parse, as a SAPUI5 module path. The
+     * @param {string} args.featurePath - the path to the Gherkin feature file to parse, as an SAPUI5 module path. The
      *                                    ".feature" extension is assumed and should not be included. See
      *                                    {@link jQuery.sap.registerModulePath}
-     * @param {function} [args.steps] - the constructor function of type sap.ui.test.gherkin.StepDefinitions. If this
-     *                                  parameter is ommitted then args.generateMissingSteps must be explicitly set
-     *                                  to true.
+     * @param {function} [args.steps] - the constructor function of type {@link sap.ui.test.gherkin.StepDefinitions}.
+     *                                  If this parameter is ommitted then args.generateMissingSteps must be explicitly
+     *                                  set to true.
      * @param {boolean} [args.generateMissingSteps=false] - When true: if a Gherkin step cannot be matched to a step
      *                                                      definition then it will be assumed that the user wants to
      *                                                      convert the step into an Opa Page Object call.
+     * @public
+     * @throws {Error} if any parameters are invalid
      * @function
      * @static
-     * @public
      */
     test: function(args) {
 
@@ -73,7 +104,7 @@ sap.ui.define([
         throw new Error("opa5TestHarness.test: parameter 'featurePath' must be a valid string");
       }
 
-      if (args.steps && ($.type(args.steps) !== "function")) {
+      if (args.steps && (($.type(args.steps) !== "function") || !((new args.steps())._generateTestStep))) {
         throw new Error("opa5TestHarness.test: if specified, parameter 'steps' must be a valid StepDefinitions constructor");
       }
 
@@ -85,47 +116,25 @@ sap.ui.define([
         throw new Error("opa5TestHarness.test: if specified, parameter 'generateMissingSteps' must be a valid boolean");
       }
 
-      // Automatically generates test steps from Opa Page Objects, only used when args.generateMissingSteps is true
-      var fnAlternateTestStepGenerator = function(oStep) {
-
-        var sToEval = oStep.keyword + ".";
-        var sFinalFunction = oStep.text;
-        var aMatch = oStep.text.match(/(.*?)\s*:\s*(.*)/);
-        if (aMatch) {
-          sToEval += dataTableUtils.normalization.camelCase(aMatch[1]) + ".";
-          sFinalFunction = aMatch[2];
-        }
-        sToEval += dataTableUtils.normalization.camelCase(sFinalFunction) + "();";
-
-        return {
-          isMatch: true,
-          text: oStep.text,
-          regex: /Generated Step/,
-          parameters: [],
-          func: function(Given, When, Then) {
-            $.sap.log.info("[GHERKIN] Generated Step: " + sToEval);
-            eval(sToEval);
-          }
-        };
-      };
-
       // if the user did not input a StepDefinitions constructor
       if (!args.steps) {
         // then use a default StepDefinitions constructor
         args.steps = StepDefinitions;
       }
-      var fnTestStepGenerator = (args.generateMissingSteps) ? fnAlternateTestStepGenerator : null;
+      var fnTestStepGenerator = (args.generateMissingSteps) ? this._fnAlternateTestStepGenerator : null;
 
       var oTestGenerator = new GherkinTestGenerator(args.featurePath, args.steps, fnTestStepGenerator);
       var oFeatureTest = oTestGenerator.generate();
-      var oOpa5 = new Opa5();
 
       QUnit.module(oFeatureTest.name, {
-        setup: function() {
+        beforeEach: function() {
           oTestGenerator.setUp();
         },
-        teardown: function() {
-          oOpa5.iTeardownMyApp();
+        afterEach: function() {
+          if (componentLauncher.hasLaunched() || iFrameLauncher.hasLaunched()) {
+            this._oOpa5.iTeardownMyApp();
+          }
+
           // Add a link to the page to allow the user to close the frame
           if ($("#frame-close-link").length === 0) {
             $("#qunit-header").append('<input id="frame-close-link" type="button"' +
@@ -133,18 +142,18 @@ sap.ui.define([
                 'margin-right: 0.5em; margin-top: -0.4em;" value="Close &#13;&#10;Frame"></input>');
           }
           oTestGenerator.tearDown();
-        }
+        }.bind(this)
       });
 
       $.sap.log.info("[GHERKIN] Running feature: '" + oFeatureTest.name + "'");
       oFeatureTest.testScenarios.forEach(function(oTestScenario) {
-        var fnTestFunction = (!oTestScenario.wip) ? opaTest : QUnit.skip;
+        var fnTestFunction = (!oFeatureTest.skip && !oTestScenario.skip) ? this._opaTest : QUnit.skip;
         fnTestFunction(oTestScenario.name, function(Given, When, Then) {
           $.sap.log.info("[GHERKIN] Running scenario: '" + oTestScenario.name + "'");
           oTestScenario.testSteps.forEach(function(oTestStep) {
             // Put test execution inside a waitFor so that they are executed in order, even if the user fails to put
             // a waitFor statement in one of the test steps
-            oOpa5.waitFor({
+            this._oOpa5.waitFor({
               viewName: "",
               success: function() {
                 $.sap.log.info("[GHERKIN] Running step: text='" + oTestStep.text + "' regex='" + oTestStep.regex + "'");
@@ -156,9 +165,9 @@ sap.ui.define([
                 oTestGenerator.execute(oTestStep);
               }
             });
-          });
-        });
-      });
+          }.bind(this));
+        }.bind(this));
+      }.bind(this));
     }
   };
 

@@ -5,13 +5,9 @@
  */
 
 // Provides class sap.ui.core.support.plugins.Trace (Trace support plugin)
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
-	function(jQuery, Plugin) {
+sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin', "sap/ui/core/format/DateFormat"],
+	function(jQuery, Plugin, DateFormat) {
 	"use strict";
-
-
-
-
 
 		/**
 		 * Creates an instance of sap.ui.core.support.plugins.Trace.
@@ -19,7 +15,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 		 *
 		 * @abstract
 		 * @extends sap.ui.core.support.Plugin
-		 * @version 1.46.12
+		 * @version 1.48.5
 		 * @constructor
 		 * @private
 		 * @alias sap.ui.core.support.plugins.Trace
@@ -33,7 +29,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 				if (this.runsAsToolPlugin()) {
 					this._aLogEntries = [];
 					this._iLogLevel = jQuery.sap.log.Level.ALL;
-					this._oDateFormat = sap.ui.requireSync('sap/ui/core/format/DateFormat').getDateTimeInstance();
+					this._oDateFormat = DateFormat.getDateTimeInstance();
 				} else {
 					var that = this;
 					this._oldLogLevel = jQuery.sap.log.getLevel();
@@ -70,9 +66,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 
 			var rm = sap.ui.getCore().createRenderManager();
 			rm.write("<div class='sapUiSupportToolbar'>");
-			rm.write("<button id='" + this.getId() + "-clear' class='sapUiSupportBtn'>Clear</button>");
+			rm.write("<button id='" + this.getId() + "-clear' class='sapUiSupportRoundedButton'>Clear</button>");
 			rm.write("<label class='sapUiSupportLabel'>Filter:</label><input type='text' id='" + this.getId() + "-filter' class='sapUiSupportTxtFld'/>");
-			rm.write("<label class='sapUiSupportLabel'>Log Level:</label><select id='" + this.getId() + "-loglevel' class='sapUiSupportTxtFld'>");
+			rm.write("<label class='sapUiSupportLabel'>Log Level:</label><select id='" + this.getId() + "-loglevel' class='sapUiSupportTxtFld sapUiSupportSelect'>");
 			rm.write("<option value='0'>FATAL</option>");
 			rm.write("<option value='1'>ERROR</option>");
 			rm.write("<option value='2'>WARNING</option>");

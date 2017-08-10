@@ -70,7 +70,7 @@ var mSeverityMap = {
  * @extends sap.ui.core.message.MessageParser
  *
  * @author SAP SE
- * @version 1.46.12
+ * @version 1.48.5
  * @public
  * @abstract
  * @alias sap.ui.model.odata.ODataMessageParser
@@ -155,7 +155,7 @@ ODataMessageParser.prototype.parse = function(oResponse, oRequest, mGetEntities,
 		this._propagateMessages(aMessages, mRequestInfo, mGetEntities, mChangeEntities);
 	} else {
 		// In case no message processor is attached, at least log to console.
-		// TODO: Maybe we should just output an error an do nothing, since this is not how messages are meant to be used like?
+		// TODO: Maybe we should just output an error and do nothing, since this is not how messages are meant to be used like?
 		this._outputMesages(aMessages);
 	}
 };
@@ -172,7 +172,7 @@ ODataMessageParser.prototype.parse = function(oResponse, oRequest, mGetEntities,
  *
  * @param {string} sParentEntity - The path of the parent entity in which to search for the NavigationProperty
  * @param {string} sPropertyName - The name of the property which should be checked whether it is a NavigationProperty
- * @returns {boolean} Returns true if the given property is an NavigationProperty
+ * @returns {boolean} Returns true if the given property is a NavigationProperty
  * @private
  */
 ODataMessageParser.prototype._isNavigationProperty = function(sParentEntity, sPropertyName) {
@@ -297,7 +297,7 @@ ODataMessageParser.prototype._propagateMessages = function(aMessages, mRequestIn
 };
 
 /**
- * Creates a sap.ui.core.message.Message from the given JavaScript object
+ * Creates an sap.ui.core.message.Message from the given JavaScript object
  *
  * @param {ODataMessageParser~ServerError} oMessageObject - The object containing the message data
  * @param {ODataMessageParser~RequestInfo} mRequestInfo - Info object about the request URL
@@ -366,7 +366,7 @@ ODataMessageParser.prototype._getFunctionTarget = function(mFunctionInfo, mReque
 
 	var i;
 
-	// In case of a function import the location header may point to the corrrect entry in the service.
+	// In case of a function import the location header may point to the correct entry in the service.
 	// This should be the case for writing/changing operations using POST
 	if (mRequestInfo.response && mRequestInfo.response.headers && mRequestInfo.response.headers["location"]) {
 		sTarget = mRequestInfo.response.headers["location"];
@@ -450,7 +450,24 @@ ODataMessageParser.prototype._createTarget = function(oMessageObject, mRequestIn
 	if (sTarget.substr(0, 1) !== "/") {
 		var sRequestTarget = "";
 
-		var mUrlData = this._parseUrl(mRequestInfo.url);
+		// special case for 201 POST requests which create a resource
+		// The target is a relative resource path segment that can be appended to the Location response header (for POST requests that create a new entity)
+		var sMethod = (mRequestInfo.request && mRequestInfo.request.method) ? mRequestInfo.request.method : "GET";
+		var bRequestCreatePost = (sMethod === "POST"
+			&& mRequestInfo.response
+			&& (mRequestInfo.response.statusCode === "201" || mRequestInfo.response.statusCode === 201)
+			&& mRequestInfo.response.headers
+			&& mRequestInfo.response.headers["location"]);
+
+		var sUrlForTargetCalculation;
+		if (bRequestCreatePost) {
+			sUrlForTargetCalculation = mRequestInfo.response.headers["location"];
+		} else {
+			sUrlForTargetCalculation = mRequestInfo.url;
+		}
+
+		//parsing
+		var mUrlData = this._parseUrl(sUrlForTargetCalculation);
 		var sUrl = mUrlData.url;
 
 		var iPos = sUrl.lastIndexOf(this._serviceUrl);
@@ -460,33 +477,35 @@ ODataMessageParser.prototype._createTarget = function(oMessageObject, mRequestIn
 			sRequestTarget = sUrl;
 		}
 
-		var sMethod = (mRequestInfo.request && mRequestInfo.request.method) ? mRequestInfo.request.method : "GET";
-		var mFunctionInfo = this._metadata._getFunctionImportMetadata(sRequestTarget, sMethod);
+		// function import case
+		if (!bRequestCreatePost) {
+			var mFunctionInfo = this._metadata._getFunctionImportMetadata(sRequestTarget, sMethod);
 
-		if (mFunctionInfo) {
-			sRequestTarget = this._getFunctionTarget(mFunctionInfo, mRequestInfo, mUrlData);
+			if (mFunctionInfo) {
+				sRequestTarget = this._getFunctionTarget(mFunctionInfo, mRequestInfo, mUrlData);
 
-			if (sTarget) {
-				sTarget = sRequestTarget + "/" + sTarget;
-			} else {
-				sTarget = sRequestTarget;
+				if (sTarget) {
+					sTarget = sRequestTarget + "/" + sTarget;
+				} else {
+					sTarget = sRequestTarget;
+				}
+				return sTarget;
 			}
+		}
 
+		sRequestTarget = "/" + sRequestTarget;
+
+		// If sRequestTarget is a collection, we have to add the target without a "/". In this case
+		// a target would start with the specific product (like "(23)"), but the request itself
+		// would not have the brackets
+		var iSlashPos = sRequestTarget.lastIndexOf("/");
+		var sRequestTargetName = iSlashPos > -1 ? sRequestTarget.substr(iSlashPos) : sRequestTarget;
+		if (sRequestTargetName.indexOf("(") > -1) {
+			// It is an entity
+			sTarget = sRequestTarget + "/" + sTarget;
 		} else {
-			sRequestTarget = "/" + sRequestTarget;
-
-			// If sRequestTarget is a collection, we have to add the target without a "/". In this case
-			// a target would start with the specific product (like "(23)"), but the request itself
-			// would not have the brackets
-			var iSlashPos = sRequestTarget.lastIndexOf("/");
-			var sRequestTargetName = iSlashPos > -1 ? sRequestTarget.substr(iSlashPos) : sRequestTarget;
-			if (sRequestTargetName.indexOf("(") > -1) {
-				// It is an entity
-				sTarget = sRequestTarget + "/" + sTarget;
-			} else {
-				// It's a collection
-				sTarget = sRequestTarget + sTarget;
-			}
+			// It's a collection
+			sTarget = sRequestTarget + sTarget;
 		}
 
 
@@ -531,7 +550,7 @@ ODataMessageParser.prototype._parseHeader = function(/* ref: */ aMessages, oResp
 
 		aMessages.push(this._createMessage(oServerMessage, mRequestInfo));
 
-		if (oServerMessage.details && jQuery.isArray(oServerMessage.details)) {
+		if (Array.isArray(oServerMessage.details)) {
 			for (var i = 0; i < oServerMessage.details.length; ++i) {
 				aMessages.push(this._createMessage(oServerMessage.details[i], mRequestInfo));
 			}
@@ -658,10 +677,10 @@ ODataMessageParser.prototype._parseBodyJSON = function(/* ref: */ aMessages, oRe
 
 		// Check if more than one error has been returned from the back-end
 		var aFurtherErrors = null;
-		if (jQuery.isArray(oError.details)) {
+		if (Array.isArray(oError.details)) {
 			// V4 errors
 			aFurtherErrors = oError.details;
-		} else if (oError.innererror && jQuery.isArray(oError.innererror.errordetails)) {
+		} else if (oError.innererror && Array.isArray(oError.innererror.errordetails)) {
 			// V2 errors
 			aFurtherErrors = oError.innererror.errordetails;
 		} else {

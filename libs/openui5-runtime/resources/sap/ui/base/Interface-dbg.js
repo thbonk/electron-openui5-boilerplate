@@ -18,16 +18,18 @@ sap.ui.define([], function() {
 	 *        only the defined functions will be visible, no internals of the class can be accessed.
 	 *
 	 * @author Malte Wedel, Daniel Brinkmann
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @param {sap.ui.base.Object}
 	 *            oObject the instance that needs an interface created
 	 * @param {string[]}
 	 *            aMethods the names of the methods, that should be available on this interface
+	 *
 	 * @constructor
 	 * @public
 	 * @alias sap.ui.base.Interface
 	 */
-	var Interface = function(oObject, aMethods) {
+	// bFacade: If true, the return value of a function call is this created Interface instance instead of the BaseObject interface
+	var Interface = function(oObject, aMethods, bFacade) {
 
 		// if object is null or undefined, return itself
 		if (!oObject) {
@@ -39,11 +41,15 @@ sap.ui.define([], function() {
 
 		function fCreateDelegator(oObject, sMethodName) {
 			return function() {
-	//				return oObject[sMethodName].apply(oObject, arguments);
+					// return oObject[sMethodName].apply(oObject, arguments);
 					var tmp = oObject[sMethodName].apply(oObject, arguments);
 					// to avoid to hide the implementation behind the interface you need
-					// to override the getInterface function in the object
-					return (tmp instanceof BaseObject) ? tmp.getInterface() : tmp;
+					// to override the getInterface function in the object or create the interface with bFacade = true
+					if (bFacade) {
+						return this;
+					} else {
+						return (tmp instanceof BaseObject) ? tmp.getInterface() : tmp;
+					}
 				};
 		}
 

@@ -66,6 +66,7 @@ sap.ui.define([
 	 *   Each entry with key <i>k</i> in this object has the same effect as a call <code>this.setBindingContext(bindingContexts[k], k);</code></li>
 	 * <li><code>objectBindings : <i>object</i></code>  a map of binding paths keyed by the corresponding model name.
 	 *   Each entry with key <i>k</i> in this object has the same effect as a call <code>this.bindObject(objectBindings[k], k);</code></li>
+	 * <li><code>metadataContexts : <i>object</i></code>  a map of binding paths keyed by the corresponding model name.</li>
 	 * </ul>
 	 *
 	 * @param {string} [sId] id for the new managed object; generated automatically if no non-empty id is given
@@ -175,7 +176,7 @@ sap.ui.define([
 	 *
 	 * @extends sap.ui.base.EventProvider
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @public
 	 * @alias sap.ui.base.ManagedObject
 	 */
@@ -353,6 +354,13 @@ sap.ui.define([
 				objectBindings : 'object',
 
 				/**
+				 * A map of model instances to which the object should be attached.
+				 * The models are keyed by their model name. For the default model, String(undefined) is expected.
+				 * The special setting is only for internal use.
+				 */
+				metadataContexts: 'object',
+
+				/**
 				 * Used by ManagedObject.create.
 				 */
 				Type : { type: 'string', visibility: 'hidden' }
@@ -397,9 +405,6 @@ sap.ui.define([
 			this.iSuppressInvalidate = 0;
 			this.oPropagatedProperties = ManagedObject._oEmptyPropagatedProperties;
 			this.mSkipPropagation = {};
-
-			//modify aggregation event handling disabled initially unless _attachModifyAggregation is used
-			this._fireModifyAggregation = null;
 
 			// data binding
 			this.oModels = {};
@@ -863,6 +868,12 @@ sap.ui.define([
 		// call the preprocessor if it has been defined
 		preprocessor && preprocessor.call(this, mSettings); // TODO: decide whether to call for empty settings as well?
 
+
+		//process metadataContext
+		if (mSettings.metadataContexts && this._processMetadataContexts) {
+			this._processMetadataContexts(mSettings.metadataContexts, mSettings);
+		}
+
 		// process models
 		if ( mSettings.models ) {
 			if ( typeof mSettings.models !== "object" ) {
@@ -1016,10 +1027,12 @@ sap.ui.define([
 	 *
 	 * If the value is not valid with regard to the declared data type of the property,
 	 * an Error is thrown. In case <code>null</code> or <code>undefined</code> is passed,
-	 * the default value for this property is used (see {@link #validateProperty}. If the validated and normalized
-	 * <code>oValue</code> equals the current value of the property, the internal state of
-	 * this object is not changed. If the value changes, it is stored internally and
-	 * the {@link #invalidate} method is called on this object. In the case of TwoWay
+	 * the default value for this property is used (see {@link #validateProperty}). To fully
+	 * reset the property to initial state, use {@link #resetProperty} instead.
+	 * If the validated and normalized <code>oValue</code> equals the current value of the property,
+	 * the internal state of this object is not changed (apart from the result of {@link #isPropertyInitial}).
+	 * If the value changes, it is stored internally
+	 * and the {@link #invalidate} method is called on this object. In the case of TwoWay
 	 * databinding, the bound model is informed about the property change.
 	 *
 	 * Note that ManagedObject only implements a single level of change tracking: if a first
@@ -1047,6 +1060,8 @@ sap.ui.define([
 		oValue = this.validateProperty(sPropertyName, oValue);
 
 		if (jQuery.sap.equal(oOldValue, oValue)) {
+			// ensure to set the own property explicitly to allow isPropertyInitial check (using hasOwnProperty on the map)
+			this.mProperties[sPropertyName] = oValue;
 			return this;
 		} // no change
 
@@ -1074,6 +1089,9 @@ sap.ui.define([
 				"oldValue": oOldValue,
 				"newValue": oValue
 			});
+		}
+		if (this._observer) {
+			this._observer.propertyChange(this, sPropertyName, oOldValue, oValue);
 		}
 
 		// reset suppress invalidate flag
@@ -1194,6 +1212,39 @@ sap.ui.define([
 	};
 
 	/**
+	 * Returns whether the given property value is initial and has not been explicitly set or bound.
+	 * Even after setting the default value or setting null/undefined (which also causes the default value to be set),
+	 * the property is no longer initial. A property can be reset to initial state by calling <code>resetProperty(sPropertyName)</code>.
+	 *
+	 * @param {string} sPropertyName the name of the property
+	 * @returns {boolean} true if the property is initial
+	 * @protected
+	 */
+	ManagedObject.prototype.isPropertyInitial = function(sPropertyName) {
+		return !Object.prototype.hasOwnProperty.call(this.mProperties, sPropertyName) && !this.isBound(sPropertyName);
+	};
+
+	/**
+	 * Resets the given property to the default value and also restores the "initial" state (like it has never been set).
+	 *
+	 * @param {string} sPropertyName the name of the property
+	 * @returns {sap.ui.base.ManagedObject} Returns <code>this</code> to allow method chaining
+	 * @protected
+	 */
+	ManagedObject.prototype.resetProperty = function(sPropertyName) {
+		if (this.mProperties.hasOwnProperty(sPropertyName)) {
+			var oPropertyInfo = this.getMetadata().getProperty(sPropertyName);
+			this[oPropertyInfo._sMutator](null); // let the control instance know the value is reset to default
+
+			// if control did no further effort to find and set an instance-specific default value, then go back to "initial" state (where the default value is served anyway)
+			if (this.mProperties[sPropertyName] === oPropertyInfo.getDefaultValue()) {
+				delete this.mProperties[sPropertyName];
+			}
+		}
+		return this;
+	};
+
+	/**
 	 * Returns the origin info for the value of the given property.
 	 *
 	 * The origin info might contain additional information for translatable
@@ -1254,9 +1305,13 @@ sap.ui.define([
 		if (bSuppressInvalidate) {
 			this.iSuppressInvalidate++;
 		}
-
+		if (this._observer && this.mAssociations[sAssociationName] != null) {
+			this._observer.associationChange(this, sAssociationName, "remove", this.mAssociations[sAssociationName]);
+		}
 		this.mAssociations[sAssociationName] = sId;
-
+		if (this._observer && this.mAssociations[sAssociationName] != null) {
+			this._observer.associationChange(this, sAssociationName, "insert", sId);
+		}
 		if (!this.isInvalidateSuppressed()) {
 			this.invalidate();
 		}
@@ -1353,7 +1408,9 @@ sap.ui.define([
 		} else {
 			aIds.push(sId);
 		}
-
+		if (this._observer) {
+			this._observer.associationChange(this, sAssociationName, "insert", sId);
+		}
 		if (!this.isInvalidateSuppressed()) {
 			this.invalidate();
 		}
@@ -1424,6 +1481,9 @@ sap.ui.define([
 			} else {
 				sId = aIds[vObject];
 				aIds.splice(vObject, 1);
+				if (this._observer) {
+					this._observer.associationChange(this, sAssociationName, "remove", sId);
+				}
 				if (!this.isInvalidateSuppressed()) {
 					this.invalidate();
 				}
@@ -1466,6 +1526,9 @@ sap.ui.define([
 		}
 
 		delete this.mAssociations[sAssociationName];
+		if (this._observer) {
+			this._observer.associationChange(this, sAssociationName, "remove", aIds);
+		}
 		if (!this.isInvalidateSuppressed()) {
 			this.invalidate();
 		}
@@ -1979,9 +2042,11 @@ sap.ui.define([
 			// FIXME DESTROY: this._removeChild(aChildren, sAggregationName, bSuppressInvalidate); // (optional, done by destroy())
 			aChildren.destroy(bSuppressInvalidate);
 
-			//fire aggregation lifecycle event on current parent as the control is removed, but not inserted to a a new parent
+			//fire aggregation lifecycle event on current parent as the control is removed, but not inserted to a new parent
 			// FIXME DESTROY: no more need to fire event here when destroy ever should be fixed
-			this._fireModifyAggregation && this._fireModifyAggregation("remove", sAggregationName, aChildren);
+			if (this._observer) {
+				this._observer.aggregationChange(this, sAggregationName, "remove", aChildren);
+			}
 		} else if (Array.isArray(aChildren)) {
 			for (i = aChildren.length - 1; i >= 0; i--) {
 				aChild = aChildren[i];
@@ -1989,8 +2054,10 @@ sap.ui.define([
 					// FIXME DESTROY: this._removeChild(aChild, sAggregationName, bSuppressInvalidate); // (optional, done by destroy())
 					aChild.destroy(bSuppressInvalidate);
 
-					//fire aggregation lifecycle event on current parent as the control is removed, but not inserted to a a new parent
-					this._fireModifyAggregation && this._fireModifyAggregation("remove", sAggregationName, aChild);
+					//fire aggregation lifecycle event on current parent as the control is removed, but not inserted to a new parent
+					if (this._observer) {
+						this._observer.aggregationChange(this, sAggregationName, "remove", aChild);
+					}
 				}
 			}
 		}
@@ -2078,14 +2145,13 @@ sap.ui.define([
 				} else {
 					this.removeAggregation(sAggregationName, iIndex, bSuppressInvalidate);
 				}
-			} //else {
-				// already removed!?
-				// this is the unexpected -1
-				// TODO: What would be better? Explicit removeCompositeChild callback on subclass?
-			//}
-			if (!this.isInvalidateSuppressed()) {
-				this.invalidate();
-			}
+			} /* else {
+				// item not found, this is unexpected; maybe mutator already removed it?
+				// we could at least invalidate this, but we are not aware of any changes that would justify this
+				if (!this.isInvalidateSuppressed()) {
+					this.invalidate();
+				}
+			}*/
 
 			// reset suppress invalidate flag
 			if (bSuppressInvalidate) {
@@ -2097,8 +2163,8 @@ sap.ui.define([
 	/**
 	 * Checks whether object <code>a</code> is an inclusive descendant of object <code>b</code>.
 	 *
-	 * @param {sap.ui.base.ManaagedObject} a Object that should be checked for being a descendant
-	 * @param {sap.ui.base.ManaagedObject} b Object that should be checked for having a descendant
+	 * @param {sap.ui.base.ManagedObject} a Object that should be checked for being a descendant
+	 * @param {sap.ui.base.ManagedObject} b Object that should be checked for having a descendant
 	 * @returns {boolean} Whether <code>a</code> is a descendant of (or the same as) <code>b</code>
 	 * @private
 	 */
@@ -2130,9 +2196,11 @@ sap.ui.define([
 
 		if ( !oParent ) {
 
-			//fire aggregation lifecycle event on current parent as the control is removed, but not inserted to a a new parent
+			//fire aggregation lifecycle event on current parent as the control is removed, but not inserted to a new parent
 			if (this.oParent) {
-				this.oParent._fireModifyAggregation && this.oParent._fireModifyAggregation("remove", this.sParentAggregationName, this);
+				if (this.oParent._observer) {
+					this.oParent._observer.aggregationChange(this.oParent, this.sParentAggregationName, "remove", this);
+				}
 			}
 
 			this.oParent = null;
@@ -2229,8 +2297,9 @@ sap.ui.define([
 		}
 
 		//fire aggregation lifecycle event on the new parent
-		oParent._fireModifyAggregation && oParent._fireModifyAggregation("insert", sAggregationName, this);
-
+		if (oParent._observer) {
+			oParent._observer.aggregationChange(oParent, sAggregationName, "insert", this);
+		}
 		return this;
 	};
 
@@ -2411,6 +2480,11 @@ sap.ui.define([
 			this.iSuppressInvalidate--;
 		}
 
+		if ( this._observer ) {
+			// TODO notify observer to cleanup bookkeeping?
+			this._observer = undefined;
+		}
+
 		EventProvider.prototype.destroy.apply(this, arguments);
 
 		// finally make the object unusable
@@ -2504,11 +2578,12 @@ sap.ui.define([
 
 	/**
 	 * Returns the binding infos for the given property or aggregation. The binding info contains information about path, binding object, format options,
-	 * sorter, filter etc. for the property or aggregation.
+	 * sorter, filter etc. for the property or aggregation. As the binding object is only created when the model becomes available, the binding property may be
+	 * undefined.
 	 *
 	 * @param {string} sName the name of the property or aggregation
 	 *
-	 * @returns {object} the binding info object, containing at least a path property
+	 * @returns {object} the binding info object, containing at least a path or parts property
 	 *                   and, depending on the binding type, additional properties
 	 *
 	 * @protected
@@ -2862,7 +2937,7 @@ sap.ui.define([
 							oMessageManager.removeMessages(oControlMessages);
 						}
 					}
-					oDataState.setInvalidValue(null); //assume that the model always sends valid data
+					oDataState.setInvalidValue(undefined); //assume that the model always sends valid data
 				}
 				if (oBinding.getBindingMode() === BindingMode.OneTime && oBinding.isResolved()) {
 					// if binding is one time but not resolved yet we don't destroy it yet.
@@ -2963,8 +3038,7 @@ sap.ui.define([
 	 * @public
 	 */
 	ManagedObject.prototype.unbindProperty = function(sName, bSuppressReset){
-		var oBindingInfo = this.mBindingInfos[sName],
-			oPropertyInfo = this.getMetadata().getPropertyLikeSetting(sName);
+		var oBindingInfo = this.mBindingInfos[sName];
 		if (oBindingInfo) {
 			if (oBindingInfo.binding) {
 				oBindingInfo.binding.detachChange(oBindingInfo.modelChangeHandler);
@@ -2976,14 +3050,14 @@ sap.ui.define([
 			}
 			delete this.mBindingInfos[sName];
 			if (!bSuppressReset) {
-				this[oPropertyInfo._sMutator](null);
+				this.resetProperty(sName);
 			}
 		}
 		return this;
 	};
 
 	/**
-	 * Generic method which is called, whenever an property binding is changed.
+	 * Generic method which is called, whenever a property binding is changed.
 	 * This method gets the external format from the property binding and applies
 	 * it to the setter.
 	 *
@@ -3017,7 +3091,7 @@ sap.ui.define([
 					message: oException.message
 				}, false, true); // bAllowPreventDefault, bEnableEventBubbling
 				oBindingInfo.skipModelUpdate = true;
-				this[oPropertyInfo._sMutator](null);
+				this.resetProperty(sName);
 				oBindingInfo.skipModelUpdate = false;
 			} else {
 				throw oException;
@@ -3702,7 +3776,7 @@ sap.ui.define([
 	 * Note: to be compatible with future versions of this API, applications must not use the value <code>null</code>,
 	 * the empty string <code>""</code> or the string literals <code>"null"</code> or <code>"undefined"</code> as model name.
 	 *
-	 * Note: A ManagedObject inherits binding contexts from the Core only when it is a descendant of an UIArea.
+	 * Note: A ManagedObject inherits binding contexts from the Core only when it is a descendant of a UIArea.
 	 *
 	 * @param {sap.ui.model.Context} oContext the new binding context for this object
 	 * @param {string} [sModelName] the name of the model to set the context for or <code>undefined</code>
@@ -3752,7 +3826,7 @@ sap.ui.define([
 			oBindingInfo,
 			i;
 
-		// find models that need an context update
+		// find models that need a context update
 		if (bUpdateAll) {
 			for (sModelName in this.oModels) {
 				if ( this.oModels.hasOwnProperty(sModelName) ) {
@@ -3832,17 +3906,23 @@ sap.ui.define([
 	 * Note: to be compatible with future versions of this API, applications must not use the value <code>null</code>,
 	 * the empty string <code>""</code> or the string literals <code>"null"</code> or <code>"undefined"</code> as model name.
 	 *
-	 * Note: A ManagedObject inherits binding contexts from the Core only when it is a descendant of an UIArea.
+	 * Note: A ManagedObject inherits binding contexts from the Core only when it is a descendant of a UIArea.
 	 *
 	 * @param {string} [sModelName] the name of the model or <code>undefined</code>
 	 * @return {sap.ui.model.Context} The binding context of this object
 	 * @public
 	 */
 	ManagedObject.prototype.getBindingContext = function(sModelName){
-		if (this.mElementBindingContexts[sModelName]) {
-			return this.mElementBindingContexts[sModelName];
+		var oModel = this.getModel(sModelName),
+			oElementBindingContext = this.mElementBindingContexts[sModelName];
+
+		if (oElementBindingContext && !oModel) {
+			return oElementBindingContext;
+		} else if (oElementBindingContext && oModel && oElementBindingContext.getModel() === oModel) {
+			return oElementBindingContext;
+		} else {
+			return this._getBindingContext(sModelName);
 		}
-		return this._getBindingContext(sModelName);
 	};
 
 	/**
@@ -3851,8 +3931,12 @@ sap.ui.define([
 	 */
 	ManagedObject.prototype._getBindingContext = function(sModelName){
 		var oModel = this.getModel(sModelName),
+			oContext = this.oBindingContexts[sModelName],
 			oPropagatedContext = this.oPropagatedProperties.oBindingContexts[sModelName];
-		if (this.oBindingContexts[sModelName]) {
+
+		if (oContext && !oModel) {
+			return this.oBindingContexts[sModelName];
+		} else if (oContext && oModel && oContext.getModel() === oModel) {
 			return this.oBindingContexts[sModelName];
 		} else if (oPropagatedContext && oModel && oPropagatedContext.getModel() !== oModel) {
 			return undefined;
@@ -3884,7 +3968,7 @@ sap.ui.define([
 	 * Note: By design, it is not possible to hide an inherited model by setting a <code>null</code> or
 	 * <code>undefined</code> model. Applications can set an empty model to achieve the same.
 	 *
-	 * Note: A ManagedObject inherits models from the Core only when it is a descendant of an UIArea.
+	 * Note: A ManagedObject inherits models from the Core only when it is a descendant of a UIArea.
 	 *
 	 * @param {sap.ui.model.Model} oModel the model to be set or <code>null</code> or <code>undefined</code>
 	 * @param {string} [sName] the name of the model or <code>undefined</code>
@@ -4093,7 +4177,7 @@ sap.ui.define([
 	/**
 	 * Check if any model is set to the ManagedObject or to one of its parents (including UIArea and Core).
 	 *
-	 * Note: A ManagedObject inherits models from the Core only when it is a descendant of an UIArea.
+	 * Note: A ManagedObject inherits models from the Core only when it is a descendant of a UIArea.
 	 *
 	 * @return {boolean} whether a model reference exists or not
 	 * @public
@@ -4310,104 +4394,12 @@ sap.ui.define([
 			ManagedObject._supportInfo.addSupportInfo(oClone.getId(), ManagedObject._supportInfo.byId(this.getId()));
 		}
 
+		//Clone the meta data contexts interpretation
+		if (this._cloneMetadataContexts) {
+			this._cloneMetadataContexts(oClone);
+		}
+
 		return oClone;
-	};
-
-	/**
-	 * Attaches to the internal <code>_modifyAggregation</code> event for a given aggregation.
-	 * The event monitors set, added, removed, destroyed operations for the aggregation.
-	 *
-	 * If no aggregation name is provided the event is fired for modifications on all aggregations of the object.
-	 *
-	 * @param {string}
-	 *            sAggregationName the name of the aggregation to monitor or <code>null</code> to monitor all aggregations
-	 * @param {object}
-	 *            [oData] An object that will be passed to the handler along with the event object when the event is fired
-	 * @param {function}
-	 *            fnFunction The handler function to call when the event occurs. This function will be called in the context of the
-	 *                       <code>oListener</code> instance (if present) or on the event provider instance. The event
-	 *                       object ({@link sap.ui.base.Event}) is provided as first argument of the handler. Handlers must not change
-	 *                       the content of the event. The second argument is the specified <code>oData</code> instance (if present).
-	 * @param {object}
-	 *            [oListener] The object that wants to be notified when the event occurs (<code>this</code> context within the
-	 *                        handler function). If it is not specified, the handler function is called in the context of the event provider.
-	 * @return {sap.ui.base.ManagedObject} Returns <code>this</code> to allow method chaining
-	 * @private
-	 */
-	ManagedObject.prototype._attachModifyAggregation = function(sAggregationName, oData, fnFunction, oListener) {
-		var bValid = sAggregationName == null;
-		if (bValid) {
-			this.attachEvent("_modifyAggregation", oData, fnFunction, oListener);
-		} else if (this.getMetadata().getAggregation(sAggregationName)) {
-			this.attachEvent("_modifyAggregation_" + sAggregationName, oData, fnFunction, oListener);
-			bValid = true;
-		}
-
-		if (!this._fireModifyAggregation && bValid) {
-			//activate implementation of _fireModifyAggregation for this instance
-			this._fireModifyAggregation = this.getMetadata().getClass().prototype._fireModifyAggregation;
-		}
-		return this;
-	};
-
-	/**
-	 * Removes a previously attached event handler from the internal _modifyAggregation event for a given aggregation.
-	 *
-	 * The passed parameters must match those used for registration with {@link #_attachModifyAggregation} beforehand.
-	 *
-	 * @param {string}
-	 *            sAggregationName the name of the aggregation to detach from or null
-	 * @param {function}
-	 *            fnFunction The handler function to detach from the event
-	 * @param {object}
-	 *            [oListener] The object that wanted to be notified when the event occurred
-	 * @return {sap.ui.base.EventProvider} Returns <code>this</code> to allow method chaining
-	 * @private
-	 */
-	ManagedObject.prototype._detachModifyAggregation = function(sAggregationName, fnFunction, oListener) {
-		if (sAggregationName == null) {
-			this.detachEvent("_modifyAggregation", fnFunction, oListener);
-		} else if (this.getMetadata().getAggregation(sAggregationName)){
-			this.detachEvent("_modifyAggregation_" + sAggregationName, fnFunction, oListener);
-		}
-		return this;
-	};
-
-	/**
-	 * Fires the internal _modifyAggregation event for registered aggregations.
-	 * The event is fired whenever a object is set, added, inserted to an aggregation
-	 * or removed, destroyed from an aggregation.
-	 * The objects parent might not be set or reset if the event is fired.
-	 *
-	 * This method is only available after _attachModifyAggregation was called.
-	 *
-	 * @see #_attachModifyAggregation
-	 * @see #_detachModifyAggregation
-	 *
-	 * @param {string}
-	 *            sType the type of modification, either "insert" or "remove".
-	 *                  The value of <code>sType</code> might be changed in future releases.
-	 * @param {string}
-	 *            sAggregationName the name of the aggregation to which the object oObject was inserted or removed
-	 * @param (sap.ui.base.ManagedObject}
-	 *            oObject the object inserted or removed
-	 * @private
-	 */
-	ManagedObject.prototype._fireModifyAggregation = function(sType, sAggregationName, oObject) {
-		if (sAggregationName && this.hasListeners("_modifyAggregation_" + sAggregationName)) {
-			EventProvider.prototype.fireEvent.call(this, "_modifyAggregation_" + sAggregationName, {
-				"type": sType,
-				"name": sAggregationName,
-				"object" : oObject
-			});
-		}
-		if (this.hasListeners("_modifyAggregation")) {
-			EventProvider.prototype.fireEvent.call(this, "_modifyAggregation", {
-				"type": sType,
-				"name": sAggregationName,
-				"object" : oObject
-			});
-		}
 	};
 
 	/**

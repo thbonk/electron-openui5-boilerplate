@@ -42,6 +42,8 @@
 	titleAlignment: sap.ui.core.HorizontalAlign.Begin, // sap.ui.core.HorizontalAlign
 	titleLevel: sap.ui.core.TitleLevel.Auto, // sap.ui.core.TitleLevel
 	width: 0, // int
+	backgroundColorSet: undefined, // sap.ui.layout.BlockLayoutCellColorSet, since 1.48
+	backgroundColorShade: undefined, // sap.ui.layout.BlockLayoutCellColorShade, since 1.48
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
@@ -61,6 +63,8 @@
 	titleAlignment="Begin"
 	titleLevel="Auto"
 	width="0"
+	backgroundColorSet=""
+	backgroundColorShade=""
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->

@@ -62,7 +62,7 @@ function(jQuery, library, Control, IconPool, Toolbar, CheckBox, SearchField, Lis
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -250,7 +250,7 @@ function(jQuery, library, Control, IconPool, Toolbar, CheckBox, SearchField, Lis
 		this._sCustomTabsButtonsIdPrefix    = '-custom-button-';
 
 		/* setup a name map between the sortItems
-		 aggregation and a sap.m.List with items
+		 aggregation and an sap.m.List with items
 		 the list itself will not be created right now */
 		this._aggregationToListItems("sortItems", {
 			text: {
@@ -2765,7 +2765,7 @@ function(jQuery, library, Control, IconPool, Toolbar, CheckBox, SearchField, Lis
 	}
 
 	/**
-	 * Gets a sap.m.ViewSettingsItem from a list of items by a given key.
+	 * Gets an sap.m.ViewSettingsItem from a list of items by a given key.
 	 *
 	 * @param aViewSettingsItems The list of sap.m.ViewSettingsItem objects to be searched
 	 * @param sKey
@@ -2788,7 +2788,7 @@ function(jQuery, library, Control, IconPool, Toolbar, CheckBox, SearchField, Lis
 	}
 
 	/**
-	 * Finds a sap.m.ViewSettingsItem from a list of items by a given key.
+	 * Finds an sap.m.ViewSettingsItem from a list of items by a given key.
 	 * If it does not succeed logs an error.
 	 *
 	 * @param {sap.m.ViewSettingsItem|string}
@@ -2816,10 +2816,10 @@ function(jQuery, library, Control, IconPool, Toolbar, CheckBox, SearchField, Lis
 	}
 
 	/**
-	 * Checks if the item is a sap.m.ViewSettingsItem.
+	 * Checks if the item is an sap.m.ViewSettingsItem.
 	 *
 	 * @param {*} oItem The item to be validated
-	 * @returns {*|boolean} Returns true if the item is a sap.m.ViewSettingsItem
+	 * @returns {*|boolean} Returns true if the item is an sap.m.ViewSettingsItem
 	 * @private
 	 */
 	function validateViewSettingsItem(oItem) {

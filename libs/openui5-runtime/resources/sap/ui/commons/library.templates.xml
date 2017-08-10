@@ -521,8 +521,8 @@
 	busyIndicatorDelay: 1000, // int
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
-	colorString: undefined, // string
-	mode: sap.ui.commons.ColorPickerMode.HSV, // sap.ui.commons.ColorPickerMode, since 1.38.1
+	colorString: undefined, // string, since 1.48.0
+	mode: sap.ui.unified.ColorPickerMode.HSV, // sap.ui.unified.ColorPickerMode, since 1.48.0
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
@@ -531,10 +531,10 @@
 	}, this],
 	change: [function (oEvent) {
 		var ${control} = oEvent.getSource();
-	}, this],
+	}, this], // since 1.48.0
 	liveChange: [function (oEvent) {
 		var ${control} = oEvent.getSource();
-	}, this]
+	}, this] // since 1.48.0
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<ColorPicker xmlns="sap.ui.commons"

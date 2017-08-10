@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Declarat
 	 * @class
 	 * This is the base class for all template controls. Template controls are declared based on templates.
 	 * @extends sap.ui.core.Control
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -302,7 +302,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Declarat
 
 
 	/**
-	 * Creates a pseudo binding for a aggregation to get notified once the property
+	 * Creates a pseudo binding for an aggregation to get notified once the property
 	 * changes to invalidate the control and trigger a re-rendering.
 	 *
 	 * @param {string} sPath the binding path

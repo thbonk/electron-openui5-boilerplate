@@ -6,10 +6,10 @@
 
 // Provides object sap.ui.dt.OverlayRegistry.
 sap.ui.define([
-	"sap/ui/core/Element",
+	"sap/ui/base/ManagedObject",
 	"sap/ui/dt/ElementUtil"
 ],
-function(Element, ElementUtil) {
+function(ManagedObject, ElementUtil) {
 	"use strict";
 
 	/**
@@ -19,7 +19,7 @@ function(Element, ElementUtil) {
 	 * Static registry for Overlays
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @private
 	 * @static
@@ -41,12 +41,8 @@ function(Element, ElementUtil) {
 	OverlayRegistry.getOverlay = function(vElementOrId) {
 		var oElement = ElementUtil.getElementInstance(vElementOrId);
 		if (oElement) {
-			oElement = ElementUtil.fixComponentContainerElement(oElement);
-			oElement = ElementUtil.fixComponentParent(oElement);
-			if (oElement) {
-				var sId = oElement.getId();
-				return mOverlays[sId];
-			}
+			var sId = oElement.getId();
+			return mOverlays[sId];
 		}
 	};
 
@@ -81,7 +77,7 @@ function(Element, ElementUtil) {
 	};
 
 	function getElementId (vElementOrId) {
-		return (vElementOrId instanceof Element) ? vElementOrId.getId() : vElementOrId;
+		return (vElementOrId instanceof ManagedObject) ? vElementOrId.getId() : vElementOrId;
 	}
 
 	return OverlayRegistry;

@@ -5,9 +5,13 @@
  */
 
 // Provides helper sap.ui.table.TableAccRenderExtension.
-sap.ui.define(['jquery.sap.global', './TableExtension'],
-	function(jQuery, TableExtension) {
+sap.ui.define([
+	"jquery.sap.global", "./TableExtension", "./library"
+], function(jQuery, TableExtension, library) {
 	"use strict";
+
+	// Shortcuts
+	var SelectionMode = library.SelectionMode;
 
 	/*
 	 * Renders a hidden element with the given id, text and css classes.
@@ -36,7 +40,7 @@ sap.ui.define(['jquery.sap.global', './TableExtension'],
 	 *
 	 * @extends sap.ui.table.TableExtension
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @constructor
 	 * @private
 	 * @alias sap.ui.table.TableAccRenderExtension
@@ -105,6 +109,12 @@ sap.ui.define(['jquery.sap.global', './TableExtension'],
 			// aria description for invalid table (table with overlay)
 			_writeAccText(oRm, sTableId, "ariainvalid", oBundle.getText("TBL_TABLE_INVALID"));
 
+			var oSelectionMode = oTable.getSelectionMode();
+			if (oSelectionMode !== SelectionMode.None) {
+				// aria description for selection mode in table
+				_writeAccText(oRm, sTableId, "ariaselection", oBundle.getText(oSelectionMode == SelectionMode.MultiToggle ? "TBL_TABLE_SELECTION_MULTI" : "TBL_TABLE_SELECTION_SINGLE"));
+			}
+
 			if (oTable.getFixedColumnCount() > 0) {
 				// aria description for fixed columns
 				_writeAccText(oRm, sTableId, "ariafixedcolumn", oBundle.getText("TBL_FIXED_COLUMN"));
@@ -155,8 +165,23 @@ sap.ui.define(['jquery.sap.global', './TableExtension'],
 			var sText = mTooltipTexts.keyboard[bIsSelected ? "rowDeselect" : "rowSelect"];
 
 			_writeAccText(oRm, oRow.getId(), "rowselecttext", oRow._bHidden ? "" : sText, ["sapUiTableAriaRowSel"]);
-		}
+		},
 
+		/*
+		 * Renders the default row highlight content.
+		 * @see sap.ui.table.TableRenderer#writeRowHighlightContent
+		 * @public (Part of the API for Table control only!)
+		 */
+		writeAccRowHighlightText: function(oRm, oTable, oRow, iRowIndex) {
+			if (!oTable._getAccExtension().getAccMode()) {
+				return;
+			}
+
+			var oRowSettings = oRow.getAggregation("_settings");
+			var sHighlightText = oRowSettings._getHighlightText();
+
+			_writeAccText(oRm, oRow.getId(), "highlighttext", sHighlightText);
+		}
 	});
 
 	return AccRenderExtension;

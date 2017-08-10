@@ -44,7 +44,7 @@ sap.ui.define(['jquery.sap.global', 'jquery.sap.properties', 'jquery.sap.strings
 	 * Exception: Fallback for "zh_HK" is "zh_TW" before zh.
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @since 0.9.0
 	 * @name jQuery.sap.util.ResourceBundle
 	 * @public
@@ -318,7 +318,7 @@ sap.ui.define(['jquery.sap.global', 'jquery.sap.properties', 'jquery.sap.strings
 	 * Implements jQuery.sap.util.ResourceBundle.prototype._enhance
 	 */
 	Bundle.prototype._enhance = function(oCustomBundle) {
-		if (oCustomBundle && oCustomBundle instanceof Bundle) {
+		if (oCustomBundle instanceof Bundle) {
 			this.aCustomBundles.push(oCustomBundle);
 		} else {
 			// we report the error but do not break the execution

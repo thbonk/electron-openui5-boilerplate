@@ -46,9 +46,7 @@ sap.ui.define([
         },
 
         /**
-         * Registers the step definitions by calling the method "register". The order of the register calls is important.
-         * The first step definition whose regular expression matches the step text is the one that will be executed,
-         * however, the step definitions are checked in REVERSE ORDER (i.e. the last one you wrote is checked first).
+         * Registers the step definitions by calling the method "register".
          *
          * @see #register
          * @abstract
@@ -83,6 +81,7 @@ sap.ui.define([
          *                            specified in the regular expression. If a data table is specified for the step, it
          *                            will be passed as an additional final parameter. At execution time, all functions
          *                            within a particular scenario will execute within the same "this" context.
+         * @throws {Error} if any parameters are invalid, or if method is called twice with the same value for 'rRegex'
          * @public
          * @function
          * @static
@@ -94,7 +93,15 @@ sap.ui.define([
           if ($.type(fnFunc) !== "function") {
             throw new Error("StepDefinitions.register: parameter 'fnFunc' must be a valid Function");
           }
-          this._aDefinitions.unshift({ // stack registrations (last-in, first-checked)
+
+          this._aDefinitions.forEach(function(oStepDef) {
+            if (oStepDef.rRegex.source === rRegex.source) {
+              throw new Error("StepDefinitions.register: Duplicate step definition '" + rRegex + "'");
+            }
+          });
+
+          this._aDefinitions.push({
+            rRegex: rRegex,
             generateTestStep: function(oStep) {
               var aMatch = oStep.text.match(rRegex);
               if (!aMatch) { return {isMatch: false}; }
@@ -112,24 +119,44 @@ sap.ui.define([
         },
 
         /**
-         * Searches through the registered step definitions, finds the one that matches the given Gherkin test step and
+         * Searches through the registered step definitions, finds the one that matches the given feature file step and
          * generates a new TestStep object that combines the two.
          *
-         * @param {object} oStep - a Gherkin test step, optionally with an associated data table
-         * @param {string} oStep.text - the Gherkin test step's human-readable text
-         * @param {string[][]} [oStep.data] - (optional) a matrix of strings that represents a Gherkin data table
+         * @param {object} oStep - a feature file step, optionally with an associated data table
+         * @param {string} oStep.text - the feature file step's human-readable text
          * @returns {TestStep} a TestStep object
          * @see sap.ui.test.gherkin.GherkinTestGenerator
          * @private
          */
         _generateTestStep : function(oStep) {
-          for (var i = 0; i < this._aDefinitions.length; ++i) {
-            var oDefinition = this._aDefinitions[i];
+
+          var aMatchingTestSteps = [];
+
+          // for each registered step definition
+          this._aDefinitions.forEach(function(oDefinition) {
+            // check if the inputed Feature file step matches the registered step definition
             var oTestStep = oDefinition.generateTestStep(oStep);
             if (oTestStep.isMatch) {
-              return oTestStep;
+              aMatchingTestSteps.push(oTestStep);
             }
+          });
+
+          // if a unique match was made
+          if (aMatchingTestSteps.length === 1) {
+            return aMatchingTestSteps[0];
+
+          // if an ambiguous match was made
+          } else if (aMatchingTestSteps.length > 1) {
+
+            var sListOfHumanReadableRegexes = aMatchingTestSteps
+              .map(function(i){return "'" + i.regex + "'";}) // e.g. ['/regex1/', '/regex2/', '/regex3/']
+              .join(', ')                                    // e.g. "'/regex1/', '/regex2/', '/regex3/'"
+              .replace(/,([^,]*)$/, ' and$1');               // e.g. "'/regex1/', '/regex2/' and '/regex3/'"
+
+            throw new Error( "Ambiguous step definition error: " + aMatchingTestSteps.length + " step definitions " +
+              sListOfHumanReadableRegexes + " match the feature file step '" + oStep.text + "'");
           }
+          // else if no matches were made
           return {
             isMatch: false,
             text: "(NOT FOUND) " + oStep.text
@@ -137,6 +164,7 @@ sap.ui.define([
         }
 
       });
+
   return StepDefinitions;
 
 }, /* bExport= */ true);

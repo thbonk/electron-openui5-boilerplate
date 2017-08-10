@@ -16,7 +16,7 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject', './Component', './l
 	/**
 	 * Base Class for UIComponent.
 	 *
-	 * If you are extending an UIComponent make sure you read the {@link #.extend} documentation since the metadata is special.
+	 * If you are extending a UIComponent make sure you read the {@link #.extend} documentation since the metadata is special.
 	 *
 	 * @class
 	 * Creates and initializes a new UIComponent with the given <code>sId</code> and
@@ -38,7 +38,7 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject', './Component', './l
 	 * @extends sap.ui.core.Component
 	 * @abstract
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @alias sap.ui.core.UIComponent
 	 * @since 1.9.2
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
@@ -72,6 +72,7 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject', './Component', './l
 				 */
 				"rootControl": { type: "sap.ui.core.Control", multiple: false, visibility: "hidden" }
 			},
+			designTime : true,
 			routing: {
 			}
 			//autoDestroy: false // TODO: destroy component when view should be destroyed (not implemented yet!)
@@ -120,7 +121,7 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject', './Component', './l
 	 *             "controlId": "App",
 	 *             "controlAggregation": "pages",
 	 *             "viewNamespace": "myApplication.namespace",
-	 *             // If you are using the mobile library, you have to use a sap.m.Router, to get support for
+	 *             // If you are using the mobile library, you have to use an sap.m.Router, to get support for
 	 *             // the controls sap.m.App, sap.m.SplitApp, sap.m.NavContainer and sap.m.SplitContainer.
 	 *             "routerClass": "sap.m.routing.Router"
 	 *             // What happens if no route matches the hash?

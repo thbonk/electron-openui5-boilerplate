@@ -48,21 +48,53 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Core", "sap/ui/core/library", "
 			"sap.uxap.ModelMapping",
 			"sap.uxap.ObjectPageHeaderLayoutData"
 		],
-		version: "1.46.12",
+		version: "1.48.5",
 		extensions: {
 			flChangeHandlers: {
+				"sap.uxap.ObjectPageHeader" : "sap/uxap/flexibility/ObjectPageHeader",
 				"sap.uxap.ObjectPageLayout": {
-					"moveControls": "default"
+					"moveControls": {
+						"changeHandler": "default",
+						"layers": {
+							"USER": true
+						}
+					}
 				},
 				"sap.uxap.ObjectPageSection": {
-					"hideControl": "default",
-					"unhideControl": "default",
-					"stashControl": "default",
-					"unstashControl": "default"
+					"hideControl": {
+						"changeHandler": "default",
+						"layers": {
+							"USER": true
+						}
+					},
+					"unhideControl": {
+						"changeHandler": "default",
+						"layers": {
+							"USER": true
+						}
+					},
+					"stashControl": {
+						"changeHandler": "default",
+						"layers": {
+							"USER": true
+						}
+					},
+					"unstashControl": {
+						"changeHandler": "default",
+						"layers": {
+							"USER": true
+						}
+					}
 				},
-	             "sap.ui.core._StashedControl" : {
-                     "unstashControl": "default"
-	            }
+				"sap.uxap.ObjectPageSubSection" : "sap/uxap/flexibility/ObjectPageSubSection",
+				"sap.ui.core._StashedControl" : {
+					"unstashControl": {
+						"changeHandler": "default",
+						"layers": {
+							"USER": true
+						}
+					}
+				}
 			}
 		}
 	});
@@ -280,7 +312,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Core", "sap/ui/core/library", "
 		 */
 		getClosestOPL: function (oControl) {
 
-			while (oControl && oControl.getMetadata().getName() !== "sap.uxap.ObjectPageLayout") {
+			while (oControl && !(oControl instanceof sap.uxap.ObjectPageLayout)) {
 				oControl = oControl.getParent();
 			}
 

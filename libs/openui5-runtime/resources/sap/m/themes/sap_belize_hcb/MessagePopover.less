@@ -1,27 +1,66 @@
-/* ==================================== */
-/* CSS for control sap.m/MessagePopover */
-/* Belize High Contrast Black theme     */
-/* ==================================== */
+/* ===================================== */
+/* CSS for control sap.m/MessagePopover  */
+/* Base theme                            */
+/* ===================================== */
+
+.sapMMsgPopover.sapMMsgPopover-init {
+	.sapMNavItem.sapMPage {
+		position: relative;
+	}
+
+	.sapMIBar {
+		border-bottom: 0;
+	}
+}
+
+.sapMMsgPopoverCloseBtn {
+	.sapMBtnIcon {
+		width: 2.5rem;
+		height: 2.5rem;
+		font-size: 1rem;
+	}
+}
+
+/* Compact size */
+.sapUiSizeCompact.sapMMsgPopover {
+	.sapMMsgPopoverCloseBtn .sapMBtnIcon {
+		width: 1.626rem;
+		height: 1.626rem;
+		font-size: 0.75rem;
+	}
+
+	.sapMMsgPopoverCloseBtn .sapMBtnIcon {
+		margin-right: 0;
+	}
+
+	.sapMBtnCustomIcon  {
+		margin-left: 0;
+	}
+}
+
+.sapMPopover.sapMMsgPopover.sapMMsgPopover-init {
+	.sapMPopoverArr:after {
+		border-top-color: @sapUiPageHeaderBackground;
+	}
+}
+
+.sapMMsgPopoverCloseBtn .sapMBtnIcon {
+	color: @sapUiButtonIconColor;
+}
 
 // style links in the description as Link control
 .sapMMsgPopoverDescriptionText a {
-	text-decoration: underline;
+	text-decoration: none;
+	color: @sapUiLink;
 	&:hover {
-		text-decoration: none;
+		text-decoration: underline;
+		color: @sapUiLinkHover;
 	}
-	&:focus {
-		outline: 0.125rem dotted @sapUiContentFocusColor;
+	&:visited {
 		text-decoration: none;
+		color: @sapUiLinkVisited;
 	}
-}
-
-.sapMMsgPopoverItem:not(.sapMSLINoDescIcon):hover .sapMSLIImgIcon {
-	color: @sapUiContentIconColor;
-}
-
-.sapMMsgPopoverBtnError.sapMSegBBtnFocusable.sapMSegBBtn:hover .sapUiIcon,
-.sapMMsgPopoverBtnInformation.sapMSegBBtnFocusable.sapMSegBBtn:hover .sapUiIcon,
-.sapMMsgPopoverBtnWarning.sapMSegBBtnFocusable.sapMSegBBtn:hover .sapUiIcon,
-.sapMMsgPopoverBtnSuccess.sapMSegBBtnFocusable.sapMSegBBtn:hover .sapUiIcon  {
-	color: @sapUiSegmentedButtonIconColor;
+	&:active {
+		color: @sapUiLinkActive;
+	}
 }

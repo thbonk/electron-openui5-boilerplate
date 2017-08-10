@@ -21,7 +21,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', './l
 	 * @implements sap.ui.core.IShrinkable
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @since 1.27.0
 	 *
 	 * @constructor
@@ -45,7 +45,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', './l
 			/**
 			 * Defines the semantic level of the title.
 			 * This information is e.g. used by assistive technologies like screenreaders to create a hierarchical site map for faster navigation.
-			 * Depending on this setting either a HTML h1-h6 element is used or when using level <code>Auto</code> no explicit level information is written (HTML5 header element).
+			 * Depending on this setting either an HTML h1-h6 element is used or when using level <code>Auto</code> no explicit level information is written (HTML5 header element).
 			 * This property does not influence the style of the control. Use the property <code>titleStyle</code> for this purpose instead.
 			 */
 			level : {type : "sap.ui.core.TitleLevel", group : "Appearance", defaultValue : sap.ui.core.TitleLevel.Auto},

@@ -20,7 +20,7 @@ function(jQuery, ElementUtil, OverlayRegistry) {
 	 * Utility functionality for Element tests
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @private
 	 * @static
@@ -64,12 +64,15 @@ function(jQuery, ElementUtil, OverlayRegistry) {
 			overlayGeometryCalculatedByChildren : false,
 			overlayVisible : false
 		};
+		var oDesignTimeMetadata;
 
 		var mElementInfo = this.getInfo(oElement);
 		var oAggregationOverlay = mElementInfo.overlay.getAggregationOverlay(sAggregationName);
-		var oDesignTimeMetadata = oAggregationOverlay.getDesignTimeMetadata();
+		if (oAggregationOverlay) {
+			oDesignTimeMetadata = oAggregationOverlay.getDesignTimeMetadata();
+		}
 
-		if (!oDesignTimeMetadata.isIgnored()) {
+		if (oDesignTimeMetadata && !oDesignTimeMetadata.isIgnored(oElement)) {
 			mAggregationTest.ignored = false;
 			mAggregationTest.domRefDeclared = !!oDesignTimeMetadata.getDomRef();
 			var oAggregationDomRef = oAggregationOverlay.getAssociatedDomRef();

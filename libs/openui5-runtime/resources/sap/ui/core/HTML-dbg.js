@@ -19,7 +19,7 @@ sap.ui.define(['jquery.sap.global', './Control', './RenderManager'],
 	 * @param {object} [mSettings] initial settings for the new control
 	 *
 	 * @class
-	 * Embeds standard HTML in a SAPUI5 control tree.
+	 * Embeds standard HTML in an SAPUI5 control tree.
 	 *
 	 * Security Hint: By default, the HTML content (property 'content') is not sanitized and therefore
 	 * open to XSS attacks. Applications that want to show user defined input in an HTML control, should
@@ -37,7 +37,7 @@ sap.ui.define(['jquery.sap.global', './Control', './RenderManager'],
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -86,7 +86,7 @@ sap.ui.define(['jquery.sap.global', './Control', './RenderManager'],
 			 *
 			 * There are two scenarios where this flag is relevant (when set to true):
 			 * <ul>
-			 * <li>for the initial rendering: when an HTML control is added to an UIArea for the first time
+			 * <li>for the initial rendering: when an HTML control is added to a UIArea for the first time
 			 *     and if the root node of that UIArea contained DOM content with the same id as the HTML
 			 *     control, then that content will be used for rendering instead of any specified string
 			 *     content</li>

@@ -21,7 +21,7 @@ sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', '.
 	 * @extends sap.ui.core.Element
 	 * @abstract
 	 * @author Martin Schaus, Daniel Brinkmann
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @alias sap.ui.core.Control
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -159,7 +159,7 @@ sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', '.
 		var oUIArea;
 		if ( this.bOutput && (oUIArea = this.getUIArea()) ) {
 			// if this control has been rendered before (bOutput)
-			// and if it is contained in an UIArea (!!oUIArea)
+			// and if it is contained in a UIArea (!!oUIArea)
 			// then control re-rendering can be used (see UIArea.rerender() for details)
 			//
 			// The check for bOutput is necessary as the control
@@ -186,7 +186,7 @@ sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', '.
 				//       they have been omitted for better performance.
 				//
 				// If this control has a parent but either
-				//  - has produced output before ('this.bOutput') but is not part of an UIArea (!this.getUIArea())
+				//  - has produced output before ('this.bOutput') but is not part of a UIArea (!this.getUIArea())
 				//  - or if it didn't produce output (!this.bOutput') before and is/became visible
 				// then invalidate the parent to request re-rendering
 				//
@@ -422,7 +422,7 @@ sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', '.
 	 *
 	 * First it is checked whether <code>oRef</code> is a container element / control (has a
 	 * multiple aggregation with type <code>sap.ui.core.Control</code> and name 'content') or is an Id String
-	 * of such an container.
+	 * of such a container.
 	 * If this is not the case <code>oRef</code> can either be a Dom Reference or Id String of the UIArea
 	 * (if it does not yet exist implicitly a new UIArea is created),
 	 *
@@ -436,11 +436,11 @@ sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', '.
 	 * </ul>
 	 *
 	 * @param {string|Element|sap.ui.core.Control} oRef container into which the control should be put
-	 * @param {string|int} oPosition Describes the position where the control should be put into the container
+	 * @param {string|int} [vPosition="last"] Describes the position where the control should be put into the container
 	 * @return {sap.ui.core.Control} Returns <code>this</code> to allow method chaining
 	 * @public
 	 */
-	Control.prototype.placeAt = function(oRef, oPosition) {
+	Control.prototype.placeAt = function(oRef, vPosition) {
 		var oCore = sap.ui.getCore();
 		if (oCore.isInitialized()) {
 			// core already initialized, do it now
@@ -483,11 +483,11 @@ sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', '.
 				}
 			}
 
-			if (typeof oPosition === "number") {
-				oContainer.insertContent(this, oPosition);
+			if (typeof vPosition === "number") {
+				oContainer.insertContent(this, vPosition);
 			} else {
-				oPosition = oPosition || "last"; //"last" is default
-				switch (oPosition) {
+				vPosition = vPosition || "last"; //"last" is default
+				switch (vPosition) {
 					case "last":
 						oContainer.addContent(this);
 						break;
@@ -499,14 +499,14 @@ sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', '.
 						oContainer.addContent(this);
 						break;
 					default:
-						jQuery.sap.log.warning("Position " + oPosition + " is not supported for function placeAt.");
+						jQuery.sap.log.warning("Position " + vPosition + " is not supported for function placeAt.");
 				}
 			}
 		} else {
 			// core not yet initialized, defer execution
 			var that = this;
 			oCore.attachInitEvent(function () {
-				that.placeAt(oRef, oPosition);
+				that.placeAt(oRef, vPosition);
 			});
 		}
 		return this;

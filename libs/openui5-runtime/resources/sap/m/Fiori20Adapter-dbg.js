@@ -19,7 +19,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 	 *
 	 *
 	 * @class text
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @private
 	 * @since 1.38
 	 * @alias HeaderAdapter
@@ -136,7 +136,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 
 		if (HeaderAdapter._isAdaptableHeader(this._oHeader)) {
 			var aMiddleContent = this._oHeader.getContentMiddle();
-                if (aMiddleContent.length === 1 && isTextualControl(aMiddleContent[0])) {
+			if (aMiddleContent.length === 1 && isTextualControl(aMiddleContent[0])) {
 				var oTitle = aMiddleContent[0];
 				oTitleInfo = {
 					id: oTitle.getId(),
@@ -213,10 +213,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 
 
 	/**
-	 * Constructor for a sap.m.Fiori20Adapter.
+	 * Constructor for an sap.m.Fiori20Adapter.
 	 *
 	 * @class text
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @private
 	 * @since 1.38
 	 * @alias sap.m.Fiori20Adapter

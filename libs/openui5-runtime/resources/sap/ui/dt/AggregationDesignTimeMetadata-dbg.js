@@ -24,7 +24,7 @@ function (jQuery, DesignTimeMetadata) {
 	 * @extends sap.ui.core.DesignTimeMetadata
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @private
@@ -41,15 +41,44 @@ function (jQuery, DesignTimeMetadata) {
 		}
 	});
 
-	AggregationDesignTimeMetadata.prototype.getMoveAction = function (oMovedElement) {
+	AggregationDesignTimeMetadata.prototype.getPropagation = function(oElement, callback) {
 		var mData = this.getData();
-		if (mData.actions && mData.actions.move) {
-			var vMoveChangeType = mData.actions.move;
-			if (typeof (vMoveChangeType) === "function" ){
-				return vMoveChangeType.apply(null, arguments);
-			}
-			return vMoveChangeType;
+		if (!mData.propagationInfos) {
+			return false;
 		}
+		mData.propagationInfos.some(function(oPropagatedInfo){
+			return callback(oPropagatedInfo);
+		});
+	};
+
+	AggregationDesignTimeMetadata.prototype.getRelevantContainerForPropagation = function(oElement) {
+		var mData = this.getData();
+		var vRelevantContainerElement = false;
+		if (!mData.propagationInfos) {
+			return false;
+		}
+
+		this.getPropagation(oElement, function(oPropagatedInfo){
+			if (oPropagatedInfo.relevantContainerFunction &&
+				oPropagatedInfo.relevantContainerFunction(oElement)) {
+				vRelevantContainerElement = oPropagatedInfo.relevantContainerElement;
+				return true;
+			}
+		});
+
+		return vRelevantContainerElement ? vRelevantContainerElement : false;
+	};
+
+	AggregationDesignTimeMetadata.prototype.getMetadataForPropagation = function(oElement) {
+		var vReturnMetadata = false;
+
+		this.getPropagation(oElement, function(oPropagatedInfo) {
+			if (oPropagatedInfo.metadataFunction) {
+				vReturnMetadata = oPropagatedInfo.metadataFunction(oElement, oPropagatedInfo.relevantContainerElement);
+				return vReturnMetadata ? true : false;
+			}
+		});
+		return vReturnMetadata ? vReturnMetadata : false;
 	};
 
 	return AggregationDesignTimeMetadata;

@@ -14,7 +14,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType', 'sap/ui/base/Managed
 	 * @class Static class for enabling declarative UI support.
 	 *
 	 * @author Peter Muessig, Tino Butz
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @since 1.7.0
 	 * @public
 	 * @alias sap.ui.core.DeclarativeSupport
@@ -195,7 +195,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType', 'sap/ui/base/Managed
 
 
 	/**
-	 * Parses a given DOM ref and converts it into a HTMLControl.
+	 * Parses a given DOM ref and converts it into an HTMLControl.
 	 * @param {Element} oElement reference to a DOM element
 	 * @param {sap.ui.core.mvc.HTMLView} [oView] The view instance to use.
 	 * @return {sap.ui.core.HTML} reference to a Control

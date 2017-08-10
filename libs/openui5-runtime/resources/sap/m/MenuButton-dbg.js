@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Butto
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.46.12
+		 * @version 1.48.5
 		 *
 		 * @constructor
 		 * @public
@@ -45,6 +45,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Butto
 
 				/**
 				 * Defines the width of the <code>MenuButton</code>.
+				 * <br/><b>Note:</b>As per visual design this width can be maximum of 12rem (192px).
 				 */
 				width : {type : "sap.ui.core.CSSSize", group : "Misc", defaultValue : null},
 
@@ -111,7 +112,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Butto
 				 */
 				defaultAction: {}
 			},
-			defaultAggregation : "menu"
+			defaultAggregation : "menu",
+			designTime: true
 		}});
 
 		EnabledPropagator.call(MenuButton.prototype);
@@ -174,8 +176,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Butto
 		 * @private
 		 */
 		MenuButton.prototype._setInitialBtnWidth = function() {
+			var iInitialWidth;
 			if (this._isSplitButton() && !this._iInitialWidth) {
-				this._iInitialWidth = this.$().outerWidth() + 1; //for IE
+				iInitialWidth = this.$().outerWidth();
+				if (iInitialWidth) {
+					this._iInitialWidth = iInitialWidth + 1; //for IE
+				}
 			}
 		};
 
@@ -329,6 +335,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Butto
 
 		MenuButton.prototype._menuItemSelected = function(oEvent) {
 			var oMenuItem = oEvent.getParameter("item");
+
+			this.fireEvent("_menuItemSelected", { item: oMenuItem }); // needed for controls that listen to interaction events from within the control (e.g. for sap.m.OverflowToolbar)
+
 			if (
 				!this._isSplitButton() ||
 				this.getUseDefaultActionOnly() ||

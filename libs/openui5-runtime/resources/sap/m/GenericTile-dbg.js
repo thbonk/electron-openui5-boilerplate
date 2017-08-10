@@ -19,7 +19,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @since 1.34
 	 *
 	 * @public
@@ -53,7 +53,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 				 */
 				"size" : {type : "sap.m.Size", group : "Misc", defaultValue : sap.m.Size.Auto},
 				/**
-				 * The frame type: 1x1 or 2x1.
+				 * The frame type: OneByOne or TwoByOne. Set to OneByOne as default if no property is defined or set to Auto by the app.
 				 */
 				"frameType" : {type : "sap.m.FrameType", group : "Misc", defaultValue : sap.m.FrameType.OneByOne},
 				/**
@@ -143,10 +143,15 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 		Remove : "Remove"
 	};
 
+	GenericTile.LINEMODE_SIBILING_PROPERTIES = [ "state", "subheader", "header", "scope" ];
+
 	/* --- Lifecycle Handling --- */
 
 	GenericTile.prototype.init = function() {
 		this._oRb = sap.ui.getCore().getLibraryResourceBundle("sap.m");
+
+		// Defines custom screen range set: smaller than or equal to 449px defines 'small' and bigger than 449px defines 'large' screen
+		Device.media.initRangeSet("GenericTileDeviceSet", [450], "px", ["small", "large"]);
 
 		this._oTitle = new Text(this.getId() + "-title");
 		this._oTitle.addStyleClass("sapMGTTitle");
@@ -247,7 +252,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 			this._sParentResizeListenerId = null;
 		}
 
-		sap.ui.getCore().detachIntervalTimer(this._checkContentDensity, this);
+		Device.media.detachHandler(this._handleMediaChange, this, "GenericTileDeviceSet");
 
 		if (this._$RootNode) {
 			this._$RootNode.off(this._getAnimationEvents());
@@ -294,11 +299,15 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 			this._sParentResizeListenerId = null;
 		}
 
+		Device.media.detachHandler(this._handleMediaChange, this, "GenericTileDeviceSet");
+
 		if (this._$RootNode) {
 			this._$RootNode.off(this._getAnimationEvents());
 		}
 
-		sap.ui.getCore().detachIntervalTimer(this._checkContentDensity, this);
+		if (this.getFrameType() === library.FrameType.Auto) {
+			this.setProperty("frameType", library.FrameType.OneByOne, true);
+		}
 	};
 
 	GenericTile.prototype.onAfterRendering = function() {
@@ -308,9 +317,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 		// attaches handler this._removeTooltipFromControl to the event mouseleave and removes control's own tooltips (Truncated header text and MicroChart tooltip).
 		this.$().bind("mouseleave", this._removeTooltipFromControl.bind(this));
 
-		this._bCompact = this._isCompact();
 		var sMode = this.getMode();
-		if (sMode === library.GenericTileMode.LineMode && this._bCompact) {
+		if (sMode === library.GenericTileMode.LineMode && this._isScreenLarge()) {
 			// This class needs to be added in order to account for the paddings of the tile.
 			// As this LineMode tile is rendered with display: inline, we cannot apply padding to each line separately, but only the
 			// container can apply a padding for text containment. Thus, this class adds a preset padding-right to the tile's direct DOM parent.
@@ -332,9 +340,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 		}
 
 		if (sMode === library.GenericTileMode.LineMode) {
-			// attach an interval timer in order to check the control's density mode and invalidate on change
-			sap.ui.getCore().attachIntervalTimer(this._checkContentDensity, this);
+			// attach handler in order to check the device type based on width and invalidate on change
+			Device.media.attachHandler(this._handleMediaChange, this, "GenericTileDeviceSet");
 		}
+
 	};
 
 	/**
@@ -344,29 +353,23 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 	 * @private
 	 */
 	GenericTile.prototype._handleResize = function() {
-		if (this.getMode() === library.GenericTileMode.LineMode && this._isCompact() && this.getParent()) {
+		if (this.getMode() === library.GenericTileMode.LineMode && this._isScreenLarge() && this.getParent()) {
 			this._queueAnimationEnd();
 		}
 	};
 
 	/**
-	 * Checks the current content density and invalidates the control if it changed in order to trigger a rerendering.
+	 * Looks for the class '.sapUiSizeCompact' on the control and its parents to determine whether to render cozy or compact density mode.
 	 *
+	 * @returns {boolean} True if class 'sapUiSizeCompact' was found, otherwise false.
 	 * @private
 	 */
-	GenericTile.prototype._checkContentDensity = function() {
-		if (this.$().length > 0) {
-			var bCompact = this.$().is(".sapUiSizeCompact") || this.$().closest(".sapUiSizeCompact").length > 0;
-			if (bCompact !== this._bCompact) {
-				this._bCompact = bCompact;
-				sap.ui.getCore().detachIntervalTimer(this._checkContentDensity);
-				this.invalidate();
-			}
-		}
+	GenericTile.prototype._isCompact = function() {
+		return jQuery("body").hasClass("sapUiSizeCompact") || this.$().is(".sapUiSizeCompact") || this.$().closest(".sapUiSizeCompact").length > 0;
 	};
 
 	/**
-	 * Calculates all data that is necessary for displaying style helpers in LineMode (compact).
+	 * Calculates all data that is necessary for displaying style helpers in LineMode (large screens - floated view).
 	 * These helpers are used in order to imitate a per-line box effect.
 	 *
 	 * @returns {object|null} An object containing general data about the style helpers and information about each
@@ -376,7 +379,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 	GenericTile.prototype._calculateStyleData = function() {
 		this.$("lineBreak").remove();
 
-		if (!this._isCompact() || !this.getDomRef() || this.$().is(":hidden")) {
+		if (!this._isScreenLarge() || !this.getDomRef() || this.$().is(":hidden")) {
 			return null;
 		}
 
@@ -503,9 +506,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 	};
 
 	/**
-	 * Triggers and update of the hover style of the tile in compact LineMode.
+	 * Trigger and update the hover style of the tile in List View (small screens) in LineMode.
 	 * Also attaches the UIArea's transitionend and animationend events to an event handler in order for
-	 * the tile's hover style to be updated after e.g. a sap.m.NavContainer causes the whole page to be flipped.
+	 * the tile's hover style to be updated after e.g. an sap.m.NavContainer causes the whole page to be flipped.
 	 * This is done in order to avoid miscalculations.
 	 *
 	 * @param {boolean} forceUpdate If set to true, the tile's hover style is updated even if the data has not changed.
@@ -586,7 +589,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 	};
 
 	/**
-	 * Calculates the number of lines in the compact line tile by simply dividing the tile's entire height by the
+	 * Calculates the number of lines in the floated View line tile by simply dividing the tile's entire height by the
 	 * tile's line height.
 	 *
 	 * @returns {number} The number of lines
@@ -608,7 +611,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 	 */
 	GenericTile.prototype.getBoundingRects = function() {
 		var oPosition = this.$().offset(); //get the tile's position relative to the document (for drag and drop)
-		if (this.getMode() === library.GenericTileMode.LineMode && this._isCompact()) {
+		if (this.getMode() === library.GenericTileMode.LineMode && this._isScreenLarge()) {
 			this._getStyleData();
 			var aRects = [],
 				$StyleHelper,
@@ -647,7 +650,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 	 */
 	GenericTile.prototype._updateLineTileSiblings = function() {
 		var oParent = this.getParent();
-		if (this.getMode() === library.GenericTileMode.LineMode && this._isCompact() && oParent) {
+		if (this.getMode() === library.GenericTileMode.LineMode && this._isScreenLarge() && oParent) {
 			var i = oParent.indexOfAggregation(this.sParentAggregationName, this);
 			var aSiblings = oParent.getAggregation(this.sParentAggregationName).splice(i + 1);
 
@@ -766,9 +769,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 	GenericTile.prototype.setProperty = function(sPropertyName) {
 		sap.ui.core.Control.prototype.setProperty.apply(this, arguments);
 
-		//If these properties are being changed, update all sibling controls that are GenericTiles in LineMode
-		var aLineModeProperties = [ "state", "subheader", "header", "scope" ];
-		if (this.getMode() === library.GenericTileMode.LineMode && aLineModeProperties.indexOf(sPropertyName) !== -1) {
+		//If properties in GenericTile.LINEMODE_SIBILING_PROPERTIES are being changed, update all sibling controls that are GenericTiles in LineMode
+		if (this.getMode() === library.GenericTileMode.LineMode && GenericTile.LINEMODE_SIBILING_PROPERTIES.indexOf(sPropertyName) !== -1) {
 			this._bUpdateLineTileSiblings = true;
 		}
 		return this;
@@ -1124,99 +1126,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 	};
 
 	/**
-	 * Checks whether the control has compact content density.
-	 * @returns {boolean} Returns true if the control or its parents have the class sapUiSizeCompact, otherwise false.
+	 * Checks whether the screen is large enough for floating list.
+	 * @returns {boolean} Returns true if current screen is large enough to display complete floating list.
 	 * @private
 	 */
-	GenericTile.prototype._isCompact = function() {
-		return GenericTile.__getContentDensity(this) === "sapUiSizeCompact";
-	};
-
-	/**
-	 * Returns the content density style class which is relevant for the given control. First it tries to find the
-	 * definition via the control API. While traversing the controls parents, it's tried to find the closest DOM
-	 * reference. If that is found, the check will use the DOM reference to find the closest content density style class
-	 * in the parent chain. This approach caters both use cases: content density defined at DOM and/or control level.
-	 *
-	 * If at the same level, several style classes are defined, this is the priority:
-	 * sapUiSizeCompact, sapUiSizeCondensed, sapUiSizeCozy
-	 *
-	 * @param {sap.ui.table.Table} oControl Instance of the table
-	 * @returns {String|undefined} name of the content density stlye class or undefined if none was found
-	 * @private
-	 * @static
-	 */
-	GenericTile.__getContentDensity = function(oControl) {
-		var sContentDensity;
-		var aContentDensityStyleClasses = ["sapUiSizeCompact", "sapUiSizeCondensed", "sapUiSizeCozy"];
-
-		var fnGetContentDensity = function (sFnName, oObject) {
-			if (!oObject[sFnName]) {
-				return undefined;
-			}
-
-			for (var i = 0; i < aContentDensityStyleClasses.length; i++) {
-				if (oObject[sFnName](aContentDensityStyleClasses[i])) {
-					return aContentDensityStyleClasses[i];
-				}
-			}
-		};
-
-		var $DomRef = oControl.$();
-		if ($DomRef.length > 0) {
-			// table was already rendered, check by DOM and return content density class
-			sContentDensity = fnGetContentDensity("hasClass", $DomRef);
-		} else {
-			sContentDensity = fnGetContentDensity("hasStyleClass", oControl);
-		}
-
-		if (sContentDensity) {
-			return sContentDensity;
-		}
-
-		// since the table was not yet rendered, traverse its parents:
-		//   - to find a content density defined at control level
-		//   - to find the first DOM reference and then check on DOM level
-		var oParentDomRef = null;
-		var oParent = oControl.getParent();
-		// the table might not have a parent at all.
-		if (oParent) {
-			// try to get the DOM Ref of the parent. It might be required to traverse the complete parent
-			// chain to find one parent which has DOM rendered, as it may happen that an element does not have
-			// a corresponding DOM Ref
-			do {
-				// if the content density is defined at control level, we can return it, no matter the control was already
-				// rendered. By the time it will be rendered, it will have that style class
-				sContentDensity = fnGetContentDensity("hasStyleClass", oParent);
-				if (sContentDensity) {
-					return sContentDensity;
-				}
-
-				// if there was no style class set at control level, we try to find the DOM reference. Using that
-				// DOM reference, we can easily check for the content density style class via the DOM. This allows us
-				// to include e.g. the body tag as well.
-				if (oParent.getDomRef) {
-					// for Controls and elements
-					oParentDomRef = oParent.getDomRef();
-				} else if (oParent.getRootNode) {
-					// for UIArea
-					oParentDomRef = oParent.getRootNode();
-				}
-
-				if (!oParentDomRef && oParent.getParent) {
-					oParent = oParent.getParent();
-				} else {
-					// make sure there is not endless loop if oParent has no getParent function
-					oParent = null;
-				}
-			} while (oParent && !oParentDomRef);
-		}
-
-		// if we found a DOM reference, check for content density
-		$DomRef = jQuery(oParentDomRef || document.body);
-		sContentDensity = fnGetContentDensity("hasClass", $DomRef.closest("." + aContentDensityStyleClasses.join(",.")));
-
-		return sContentDensity;
+	GenericTile.prototype._isScreenLarge = function() {
+		return this._getCurrentMediaContainerRange("GenericTileDeviceSet").name === "large";
 	};
 
 	/**
@@ -1243,6 +1158,17 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 			domRef : oDomRef
 		};
 		return oParams;
+	};
+
+	/**
+	 * Perform needed style adjustments through invalidation of control if GenericTile in LineMode.
+	 * Triggered when changed from floating view (large screens) to list view (small screens) and vice versa.
+	 * @private
+	 */
+	GenericTile.prototype._handleMediaChange  = function() {
+		// no need to check previous state as the event is only triggered on change
+		this._bUpdateLineTileSiblings = true;
+		this.invalidate();
 	};
 
 	/**

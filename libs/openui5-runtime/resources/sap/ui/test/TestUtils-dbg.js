@@ -4,8 +4,11 @@
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define('sap/ui/test/TestUtils', ['jquery.sap.global', 'sap/ui/core/Core'],
-	function(jQuery/*, Core*/) {
+sap.ui.define("sap/ui/test/TestUtils", [
+		"jquery.sap.global",
+		"sap/ui/core/Core",
+		"sap/ui/thirdparty/URI"
+], function(jQuery, Core, URI) {
 	"use strict";
 	/*global QUnit, sinon */
 	// Note: The dependency to Sinon.js has been omitted deliberately. Most test files load it via
@@ -17,10 +20,14 @@ sap.ui.define('sap/ui/test/TestUtils', ['jquery.sap.global', 'sap/ui/core/Core']
 		sMimeHeaders = "\r\nContent-Type: application/http\r\n"
 			+ "Content-Transfer-Encoding: binary\r\n\r\nHTTP/1.1 ",
 		sRealOData = jQuery.sap.getUriParameters().get("realOData"),
-		rRequestLine = /^(GET|DELETE|POST) (\S+) HTTP\/1\.1$/,
+		rRequestLine = /^(GET|DELETE|PATCH|POST) (\S+) HTTP\/1\.1$/,
 		bProxy = sRealOData === "true" || sRealOData === "proxy",
 		bRealOData = bProxy || sRealOData === "direct",
 		TestUtils;
+
+	if (bRealOData) {
+		document.title = document.title + " (real OData)";
+	}
 
 	/**
 	 * Checks that the actual value deeply contains the expected value, ignoring additional
@@ -82,9 +89,9 @@ sap.ui.define('sap/ui/test/TestUtils', ['jquery.sap.global', 'sap/ui/core/Core']
 	function pushDeeplyContains(oActual, oExpected, sMessage, bExpectSuccess) {
 		try {
 			deeplyContains(oActual, oExpected, "/");
-			QUnit.push(bExpectSuccess, oActual, oExpected, sMessage);
+			QUnit.assert.push(bExpectSuccess, oActual, oExpected, sMessage);
 		} catch (ex) {
-			QUnit.push(!bExpectSuccess, oActual, oExpected,
+			QUnit.assert.push(!bExpectSuccess, oActual, oExpected,
 				(sMessage || "") + " failed because of " + ex.message);
 		}
 	}
@@ -132,25 +139,29 @@ sap.ui.define('sap/ui/test/TestUtils', ['jquery.sap.global', 'sap/ui/core/Core']
 
 		/**
 		 * Activates a sinon fake server in the given sandbox. The fake server responds to those
-		 * GET requests given in the fixture, all POST and all DELETE requests regardless of the
-		 * path. It is automatically restored when the sandbox is restored.
+		 * GET requests given in the fixture, and to all DELETE, PATCH and POST requests regardless
+		 * of the path. It is automatically restored when the sandbox is restored.
 		 *
 		 * The function uses <a href="http://sinonjs.org/docs/">Sinon.js</a> and expects that it
 		 * has been loaded.
 		 *
 		 * POST requests ending on "/$batch" are handled automatically. They are expected to be
-		 * multipart-mime requests where each part is a GET or DELETE request. The response has a
-		 * multipart-mime message containing responses to these inner requests. If an inner request
-		 * is not a DELETE or POST with any URL, a GET and its URL is not found in the fixture, or
-		 * its message is not JSON, it is responded with an error code. The batch itself is always
-		 * responded with code 200.
+		 * multipart-mime requests where each part is a DELETE, GET, PATCH or POST request.
+		 * The response has a multipart-mime message containing responses to these inner requests.
+		 * If an inner request is not a DELETE, PATCH or POST with any URL,
+		 * a GET and its URL is not found in the fixture, or its message is not JSON, it is
+		 * responded with an error code. The batch itself is always responded with code 200.
 		 *
 		 * All other POST requests are responded with code 200, the body is simply echoed.
 		 *
 		 * DELETE requests are always responded with code 204 ("No Data").
 		 *
+		 * PATCH requests are always responded with 200, the body is simply echoed.
+		 *
+		 * Note: $batch with multiple changesets are not supported
+		 *
 		 * @param {object} oSandbox
-		 *   a Sinon sandbox as created using <code>sinon.sandbox.create()</code>
+		 *   A Sinon sandbox as created using <code>sinon.sandbox.create()</code>
 		 * @param {string} sBase
 		 *   The base path for <code>source</code> values in the fixture. The path must be in the
 		 *   project's test folder, typically it should start with "sap".
@@ -200,7 +211,7 @@ sap.ui.define('sap/ui/test/TestUtils', ['jquery.sap.global', 'sap/ui/core/Core']
 						sResponse = notFound(sRequestLine);
 					} else if (aMatches[1] === "DELETE") {
 						sResponse = "204 No Data\r\n\r\n\r\n";
-					} else if (aMatches[1] === "POST") {
+					} else if (aMatches[1] === "POST" || aMatches[1] === "PATCH") {
 						sResponse = "200 OK\r\nContent-Type: " + sJson + "\r\n\r\n"
 							+ message(sRequestPart);
 					} else {
@@ -269,6 +280,10 @@ sap.ui.define('sap/ui/test/TestUtils', ['jquery.sap.global', 'sap/ui/core/Core']
 				return "application/x-octet-stream";
 			}
 
+			function echo(oRequest) {
+				oRequest.respond(200, {"Content-Type" : sJson}, oRequest.requestBody);
+			}
+
 			function firstLine(sText) {
 				return sText.slice(0, sText.indexOf("\r\n"));
 			}
@@ -283,7 +298,7 @@ sap.ui.define('sap/ui/test/TestUtils', ['jquery.sap.global', 'sap/ui/core/Core']
 					batch(sUrl.slice(0, sUrl.indexOf("/$batch") + 1), mUrls, oRequest);
 				} else {
 					// respond each POST request with code 200 and the message simply echoed
-					oRequest.respond(200, {"Content-Type" : sJson}, oRequest.requestBody);
+					echo(oRequest);
 				}
 			}
 
@@ -325,6 +340,9 @@ sap.ui.define('sap/ui/test/TestUtils', ['jquery.sap.global', 'sap/ui/core/Core']
 					oServer.respondWith("GET", sUrl, mUrls[sUrl]);
 				}
 				oServer.respondWith("DELETE", /.*/, [204, {}, ""]);
+				// for PATCH/POST we simply echo the body, in real scenarios the server would
+				// respond with different data (generated keys, side-effects, ETag)
+				oServer.respondWith("PATCH", /.*/, echo);
 				oServer.respondWith("POST", /.*/, post.bind(null, mUrls));
 
 				// wrap oServer.restore to also clear the filter
@@ -339,9 +357,9 @@ sap.ui.define('sap/ui/test/TestUtils', ['jquery.sap.global', 'sap/ui/core/Core']
 				// requests.
 				sinon.xhr.supportsCORS = jQuery.support.cors;
 				sinon.FakeXMLHttpRequest.useFilters = true;
-				sinon.FakeXMLHttpRequest.addFilter(function (sMethod, sUrl, bAsync) {
+				sinon.FakeXMLHttpRequest.addFilter(function (sMethod, sUrl) {
 					// must return true if the request is NOT processed by the fake server
-					return sMethod !== "DELETE" && sMethod !== "POST" &&
+					return sMethod !== "DELETE" && sMethod !== "PATCH" && sMethod !== "POST" &&
 						!(sMethod === "GET" && sUrl in mUrls);
 				});
 			}
@@ -383,12 +401,12 @@ sap.ui.define('sap/ui/test/TestUtils', ['jquery.sap.global', 'sap/ui/core/Core']
 		 *
 		 * <b>Usage</b>:
 		 * <pre>
-		 * test("parse error", function () {
+		 * QUnit.test("parse error", function (assert) {
 		 *     sap.ui.test.TestUtils.withNormalizedMessages(function () {
 		 *         var oType = new sap.ui.model.odata.type.Decimal({},
 		 *                        {constraints: {precision: 10, scale: 3});
 		 *
-		 *         throws(function () {
+		 *         assert.throws(function () {
 		 *             oType.parseValue("-123.4567", "string");
 		 *         }, /EnterNumber 10 3/);
 		 *     });
@@ -432,19 +450,48 @@ sap.ui.define('sap/ui/test/TestUtils', ['jquery.sap.global', 'sap/ui/core/Core']
 		},
 
 		/**
+		 * Returns the realOData query parameter so that it can be forwarded to an embedded test
+		 *
+		 * @returns {String}
+		 *  the realOData query parameter or "" if none was given
+		 */
+		getRealOData : function () {
+			return sRealOData ? "&realOData=" + sRealOData : "";
+		},
+
+		/**
+		 * Returns the document's base URI, even on IE where the property <code>baseURI</code> is
+		 * not supported.
+		 *
+		 * @returns {string} The base URI
+		 */
+		getBaseUri : function () {
+			var aElements;
+
+			if (document.baseURI) {
+				return document.baseURI;
+			}
+			aElements = document.getElementsByTagName("base");
+			return aElements[0] && aElements[0].href || location.href;
+		},
+
+		/**
 		 * Adjusts the given absolute path so that (in case of "realOData=proxy" or
 		 * "realOData=true") the request is passed through the SimpleProxyServlet.
 		 *
 		 * @param {string} sAbsolutePath
 		 *   some absolute path
 		 * @returns {string}
-		 *   the absolute path transformed in a way that invokes a proxy
+		 *   the absolute path transformed in a way that invokes a proxy, but still absolute
 		 */
 		proxy : function (sAbsolutePath) {
-			return bProxy ?
-					jQuery.sap.getResourcePath("sap/ui").replace("resources/sap/ui", "proxy")
-						+ sAbsolutePath
-				: sAbsolutePath;
+			var sProxyUrl;
+
+			if (!bProxy) {
+				return sAbsolutePath;
+			}
+			sProxyUrl = jQuery.sap.getResourcePath("sap/ui").replace("resources/sap/ui", "proxy");
+			return new URI(sProxyUrl + sAbsolutePath, TestUtils.getBaseUri()).pathname().toString();
 		},
 
 		/**

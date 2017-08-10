@@ -21,7 +21,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider', './HTMLViewSeri
 	 * @class ViewSerializer class.
 	 * @extends sap.ui.base.EventProvider
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @alias sap.ui.core.util.serializer.ViewSerializer
 	 * @private
 	 * @sap-restricted sap.watt com.sap.webide
@@ -107,7 +107,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider', './HTMLViewSeri
 				this._serializeRecursive(aContent[i]);
 			}
 		} else if (oControl.getMetadata().getClass() === this._oWindow.sap.ui.core.ComponentContainer) {
-			this._serializeRecursive(oControl.getComponentInstance().getAggregation("rootControl"));
+			this._serializeRecursive(oControl.getComponentInstance().getRootControl());
 		} else {
 			var mAggregations = oControl.getMetadata().getAllAggregations();
 			if (mAggregations) {

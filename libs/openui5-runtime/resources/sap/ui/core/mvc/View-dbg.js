@@ -31,7 +31,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/core/Co
 	 * and provides lifecycle events.
 	 *
 	 * @extends sap.ui.core.Control
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -464,7 +464,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/core/Co
 			}
 
 			if ( oController ) {
-				oController = Controller.extendIfRequired(oController, sName, oThis.oAsyncState);
+				oController = Controller.extendIfRequired(oController, sName, !!oThis.oAsyncState);
 				if (oController instanceof Promise) {
 					if (!oThis.oAsyncState) {
 						throw new Error("The view " + oThis.sViewName + " runs in sync mode and therefore cannot use async controller extensions!");

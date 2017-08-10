@@ -18,7 +18,7 @@ sap.ui.define('sap/ui/debug/PropertyList', ['jquery.sap.global', 'sap/ui/base/Da
 	 *
 	 * @extends sap.ui.base.EventProvider
 	 * @author Martin Schaus
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @param {sap.ui.core.Core}
 	 *            oCore the core instance to use for analysis
@@ -339,7 +339,6 @@ sap.ui.define('sap/ui/debug/PropertyList', ['jquery.sap.global', 'sap/ui/base/Da
 				var sUrl = this.oWindow.jQuery.sap.getModulePath(this.sCurrentHelpDoc, ".control");
 				var that = this;
 				jQuery.ajax({
-					async: true,
 					url : sUrl,
 					dataType : 'xml',
 					error : function(xhr,status) {
@@ -362,7 +361,6 @@ sap.ui.define('sap/ui/debug/PropertyList', ['jquery.sap.global', 'sap/ui/base/Da
 		if ( oDocument ) {
 			var oControlNode = oDocument.getElementsByTagName("control")[0];
 			if ( oControlNode ) {
-				// debugger;
 				var get = function(oXMLNode, sName) {
 					var result = [];
 					var oCandidate = oXMLNode.firstChild;

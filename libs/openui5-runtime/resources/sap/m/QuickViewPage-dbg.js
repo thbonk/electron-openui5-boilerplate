@@ -37,7 +37,7 @@ sap.ui.define([
 			* @extends sap.ui.core.Control
 			*
 			* @author SAP SE
-			* @version 1.46.12
+			* @version 1.48.5
 			*
 			* @constructor
 			* @public
@@ -333,11 +333,11 @@ sap.ui.define([
 			QuickViewPage.prototype._getPageHeaderContent = function() {
 				var oIcon,
 					oVLayout = new VerticalLayout(),
-					oHLayout = new HorizontalLayout();
-
-				var sIcon = this.getIcon();
-				var sTitle = this.getTitle();
-				var sDescription = this.getDescription();
+					oHLayout = new HorizontalLayout(),
+					sIcon = this.getIcon(),
+					sTitle = this.getTitle(),
+					sDescription = this.getDescription(),
+					sTitleUrl = this.getTitleUrl();
 
 				if (!sIcon && !sTitle && !sDescription) {
 					return null;
@@ -347,20 +347,21 @@ sap.ui.define([
 					if (this.getIcon().indexOf("sap-icon") == 0) {
 						oIcon = new Icon({
 							src: sIcon,
-							useIconTooltip : false,
-							tooltip : sTitle
+							decorative: !sTitleUrl,
+							useIconTooltip: false,
+							tooltip: sTitle
 						});
 					} else {
 						oIcon = new Image({
 							src: sIcon,
-							decorative : false,
-							tooltip : sTitle
+							decorative: false,
+							tooltip: sTitle
 						}).addStyleClass("sapUiIcon");
 					}
 
 					oIcon.addStyleClass("sapMQuickViewThumbnail");
 
-					if (this.getTitleUrl()) {
+					if (sTitleUrl) {
 						oIcon.attachPress(this._crossApplicationNavigation(this));
 					}
 
@@ -369,10 +370,10 @@ sap.ui.define([
 
 				var oTitle;
 
-				if (this.getTitleUrl()) {
+				if (sTitleUrl) {
 					oTitle = new Link({
 						text	: sTitle,
-						href	: this.getTitleUrl(),
+						href	: sTitleUrl,
 						target	: "_blank"
 					});
 				} else if (this.getCrossAppNavCallback()) {
@@ -450,10 +451,6 @@ sap.ui.define([
 						// Add dummy text element so that the form renders the oLabel
 						oForm.addContent(new sap.m.Text({text : ""}));
 						continue;
-					}
-
-					if (oCurrentGroupElementValue instanceof Link) {
-						oCurrentGroupElementValue.addAriaLabelledBy(oCurrentGroupElementValue);
 					}
 
 					oLabel.setLabelFor(oCurrentGroupElementValue.getId());

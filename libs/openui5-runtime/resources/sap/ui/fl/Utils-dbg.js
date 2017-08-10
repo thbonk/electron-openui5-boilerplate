@@ -8,18 +8,35 @@ sap.ui.define([
 	"jquery.sap.global", "sap/ui/core/Component"
 ], function (jQuery, Component) {
 	"use strict";
-
+	//Stack of layers in the layered repository
+	var aLayers = [
+			"VENDOR",
+			"PARTNER",
+			"CUSTOMER_BASE",
+			"CUSTOMER",
+			"USER"
+		];
+	//Precalculates index of layers
+	var mLayersIndex = {};
+	aLayers.forEach(function(sLayer, iIndex){
+		mLayersIndex[sLayer] = iIndex;
+	});
 	/**
-	 * Provides utility functions for the flexibility library
+	 * Provides utility functions for the SAPUI5 flexibility library
 	 *
 	 * @namespace
 	 * @alias sap.ui.fl.Utils
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @experimental Since 1.25.0
 	 */
 	var Utils = {
 
+		_aLayers : aLayers,
+		_mLayersIndex : mLayersIndex,
+		_sTopLayer : aLayers[aLayers.length - 1],
+		_sMaxLayer : aLayers[aLayers.length - 1],
+		DEFAULT_APP_VERSION : "DEFAULT_APP_VERSION",
 		/**
 		 * log object exposes available log functions
 		 *
@@ -32,6 +49,9 @@ sap.ui.define([
 			},
 			warning: function (sMessage, sDetails, sComponent) {
 				jQuery.sap.log.warning(sMessage, sDetails, sComponent);
+			},
+			debug: function (sMessage, sDetails, sComponent) {
+				jQuery.sap.log.debug(sMessage, sDetails, sComponent);
 			}
 		},
 
@@ -109,12 +129,24 @@ sap.ui.define([
 				}
 			}
 
-			return Utils._getComponentName(oAppComponent);
+			return Utils.getComponentName(oAppComponent);
+		},
+
+		isVariantByStartupParameter: function (oControl) {
+			// determine UI5 component out of given control
+			if (oControl) {
+				var oAppComponent = this.getAppComponentForControl(oControl);
+				if (oAppComponent) {
+					return !!this._getComponentStartUpParameter(oAppComponent, "sap-app-id");
+				}
+			}
+
+			return false;
 		},
 
 		/**
 		 * Returns the class name of the application component owning the passed component or the component name itself if
-		 * this is already a application component.
+		 * this is already an application component.
 		 *
 		 * @param {sap.ui.base.Component} oComponent - SAPUI5 component
 		 * @returns {String} The component class name, ending with ".Component"
@@ -264,8 +296,56 @@ sap.ui.define([
 		isApplicationVariant: function (oControl) {
 			var sFlexReference = Utils.getComponentClassName(oControl);
 			var oAppComponent = Utils.getAppComponentForControl(oControl);
-			var sComponentName = Utils._getComponentName(oAppComponent);
+			var sComponentName = Utils.getComponentName(oAppComponent);
 			return sFlexReference !== sComponentName;
+		},
+
+		/**
+		 * Sets the top layer that the changes are applied to; if max layer is not specified, the highest layer in the layer stack is used.
+		 *
+		 * @param {string} sMaxLayer (optional) - name of the max layer
+		 * @public
+		 * @function
+		 * @name sap.ui.fl.Utils.setMaxLayerParameter
+		 */
+		setMaxLayerParameter: function(sMaxLayer) {
+			this._sMaxLayer = sMaxLayer || this._sTopLayer;
+		},
+
+		/**
+		 * Converts layer name into index
+		 * @param {string} sLayer - layer name
+		 * @returns {Integer} index of the layer
+		 * @function
+		 * @name sap.ui.fl.Utils.getLayerIndex
+		 */
+		getLayerIndex: function(sLayer) {
+			return this._mLayersIndex[sLayer];
+		},
+
+		/**
+		 * Determines whether a layer is higher than the max layer.
+		 *
+		 * @param {String} sLayer - Layer name to be evaluated
+		 * @returns {boolean} <code>true<code> if input layer is higher than max layer, otherwise <code>false<code>
+		 * @public
+		 * @function
+		 * @name sap.ui.fl.Utils.isOverMaxLayer
+		 */
+		isOverMaxLayer: function(sLayer) {
+			return (this.getLayerIndex(sLayer) > this.getLayerIndex(this._sMaxLayer));
+		},
+
+		/**
+		 * Determines if filtering of changes based on layer is required.
+		 *
+		 * @returns {boolean} <code>true<code> if the top layer is also the max layer, otherwise <code>false<code>
+		 * @public
+		 * @function
+		 * @name sap.ui.fl.Utils.isLayerFilteringRequired
+		 */
+		isLayerFilteringRequired: function() {
+			return !(this._sTopLayer === this._sMaxLayer);
 		},
 
 		/**
@@ -301,9 +381,9 @@ sap.ui.define([
 		 *
 		 * @param {sap.ui.core.Component} oComponent component instance
 		 * @returns {String} component name
-		 * @private
+		 * @public
 		 */
-		_getComponentName: function (oComponent) {
+		getComponentName: function (oComponent) {
 			var sComponentName = "";
 			if (oComponent) {
 				sComponentName = oComponent.getMetadata().getName();
@@ -413,7 +493,7 @@ sap.ui.define([
 		 *
 		 * @param {sap.ui.base.Component} oComponent - SAPUI5 component
 		 * @returns {sap.ui.base.Component} found component
-		 * private
+		 * @private
 		 */
 		_getAppComponentForComponent: function (oComponent) {
 			var oSapApp = null;
@@ -708,8 +788,8 @@ sap.ui.define([
 		 * Check if the control id is generated or maintained by the application
 		 *
 		 * @param {sap.ui.core.Control | string} vControl Control instance or id
-		 * @param {sap.ui.core.Component} (optional) oAppComponent application component, needed only if vControl is string (id)
-		 * @param {boolean} (optional) bSuppressLogging flag to suppress the warning in the console
+		 * @param {sap.ui.core.Component} [oAppComponent] oAppComponent application component, needed only if vControl is string (id)
+		 * @param {boolean} [bSuppressLogging] bSuppressLogging flag to suppress the warning in the console
 		 * @returns {boolean} Returns true if the id is maintained by the application
 		 */
 		checkControlId: function (vControl, oAppComponent, bSuppressLogging) {
@@ -817,6 +897,36 @@ sap.ui.define([
 			}
 			this.log.warning("No Manifest received.");
 			return "";
+		},
+
+		/**
+		 * Returns the semantic application version using format: "major.minor.patch".
+		 *
+		 * @param {object} oManifest - Manifest of the component
+		 * @returns {string} Version of application if it is available in the manifest, otherwise an empty string
+		 * @public
+		 */
+		getAppVersionFromManifest: function (oManifest) {
+			var sVersion = "";
+			if (oManifest){
+				var oSapApp = (oManifest.getEntry) ? oManifest.getEntry("sap.app") : oManifest["sap.app"];
+				if (oSapApp && oSapApp.applicationVersion && oSapApp.applicationVersion.version){
+					sVersion = oSapApp.applicationVersion.version;
+				}
+			} else {
+				this.log.warning("No Manifest received.");
+			}
+			return sVersion;
+		},
+
+		/**
+		 * Returns whether provided layer is a customer dependent layer
+		 *
+		 * @returns {boolean} true if provided layer is customer dependent layer else false
+		 * @public
+		 */
+		isCustomerDependentLayer : function(sLayerName) {
+			return (["CUSTOMER", "CUSTOMER_BASE"].indexOf(sLayerName) > -1);
 		}
 	};
 	return Utils;

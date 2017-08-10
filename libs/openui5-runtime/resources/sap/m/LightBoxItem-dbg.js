@@ -17,12 +17,12 @@ sap.ui.define([
          * @param {object} [mSettings] Initial settings for the new control
          *
          * @class
-         * Represents an item which is displayed within a sap.m.LightBox. This item holds all properties of the image as
+         * Represents an item which is displayed within an sap.m.LightBox. This item holds all properties of the image as
          * well as the title and subtitle.
          * @extends sap.ui.core.Element
          *
          * @author SAP SE
-         * @version 1.46.12
+         * @version 1.48.5
          *
          * @constructor
          * @public

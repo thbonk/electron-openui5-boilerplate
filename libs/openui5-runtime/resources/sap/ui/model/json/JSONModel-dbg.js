@@ -31,7 +31,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ClientModel', 'sap/ui/model/Co
 	 * @extends sap.ui.model.ClientModel
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @param {object} oData either the URL where to load the JSON from or a JS object
 	 * @param {boolean} bObserve whether to observe the JSON data for property changes (experimental)
@@ -68,7 +68,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ClientModel', 'sap/ui/model/Co
 	JSONModel.prototype.setData = function(oData, bMerge){
 		if (bMerge) {
 			// do a deep copy
-			this.oData = jQuery.extend(true, jQuery.isArray(this.oData) ? [] : {}, this.oData, oData);
+			this.oData = jQuery.extend(true, Array.isArray(this.oData) ? [] : {}, this.oData, oData);
 		} else {
 			this.oData = oData;
 		}
@@ -109,7 +109,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ClientModel', 'sap/ui/model/Co
 			}
 		}
 		function observeRecursive(oObject, oParentObject, sName) {
-			if (jQuery.isArray(oObject)) {
+			if (Array.isArray(oObject)) {
 				for (var i = 0; i < oObject.length; i++) {
 					observeRecursive(oObject[i], oObject, i);
 				}
@@ -358,9 +358,22 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ClientModel', 'sap/ui/model/Co
 
 	JSONModel.prototype.isList = function(sPath, oContext) {
 		var sAbsolutePath = this.resolve(sPath, oContext);
-		return jQuery.isArray(this._getObject(sAbsolutePath));
+		return Array.isArray(this._getObject(sAbsolutePath));
 	};
 
+	/**
+	 * Sets the meta model associated with this model
+	 *
+	 * @private
+	 * @param {sap.ui.model.MetaModel} oMetaModel the meta model associated with this model
+	 */
+	JSONModel.prototype._setMetaModel = function(oMetaModel) {
+		this._oMetaModel = oMetaModel;
+	};
+
+	JSONModel.prototype.getMetaModel = function() {
+		return this._oMetaModel;
+	};
 
 	return JSONModel;
 

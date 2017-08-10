@@ -9,12 +9,15 @@
 	fieldGroupIds: [], // string[], since 1.31
 	name: undefined, // string
 	url: undefined, // sap.ui.core.URI
+	async: false, // boolean
 	handleValidation: false, // boolean
 	settings: undefined, // object
 	propagateModel: false, // boolean
 	width: undefined, // sap.ui.core.CSSSize
 	height: undefined, // sap.ui.core.CSSSize
 	lifecycle: sap.ui.core.ComponentLifecycle.Legacy, // sap.ui.core.ComponentLifecycle
+	autoPrefixId: false, // boolean
+	usage: undefined, // string
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
@@ -32,12 +35,15 @@
 	fieldGroupIds=""
 	name=""
 	url=""
+	async="false"
 	handleValidation="false"
 	settings=""
 	propagateModel="false"
 	width=""
 	height=""
 	lifecycle="Legacy"
+	autoPrefixId="false"
+	usage=""
 	component=""
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->

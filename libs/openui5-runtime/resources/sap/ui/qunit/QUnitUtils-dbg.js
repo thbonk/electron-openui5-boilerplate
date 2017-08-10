@@ -20,11 +20,17 @@ sap.ui.define('sap/ui/qunit/QUnitUtils', ['jquery.sap.global', 'sap/ui/Device', 
 
 	if ( typeof QUnit !== 'undefined' ) {
 
+		// any version < 2.0 activates legacy support
+		// note that the strange negated condition properly handles NaN
+		var bLegacySupport = !(parseFloat(QUnit.version) >= 2.0);
+
 		// extract the URL parameters
 		var mParams = jQuery.sap.getUriParameters();
 
+		if ( bLegacySupport ) {
 		// TODO: Remove deprecated code once all projects adapted
 		QUnit.equals = window.equals = window.equal;
+		}
 
 		// Set global timeout for all tests
 		var sTimeout = mParams.get("sap-ui-qunittimeout");
@@ -33,16 +39,18 @@ sap.ui.define('sap/ui/qunit/QUnitUtils', ['jquery.sap.global', 'sap/ui/Device', 
 		}
 		QUnit.config.testTimeout = parseInt(sTimeout, 10);
 
+		if ( bLegacySupport ) {
 		// Do not reorder tests, as most of the tests depend on each other
 		QUnit.config.reorder = false;
+		}
 
 		// only when instrumentation is done on server-side blanket itself doesn't
 		// take care about rendering the report - in this case we do it manually
 		// when the URL parameter "coverage-report" is set to true or x
 		if (window["sap-ui-qunit-coverage"] !== "client" && /x|true/i.test(mParams.get("coverage-report"))) {
 			QUnit.done(function(failures, total) {
-				// only when coverage is available and modern browser (not IE8!)
-				if (window._$blanket && document.addEventListener) {
+				// only when coverage is available
+				if (window._$blanket) {
 					// we remove the QUnit object to avoid blanket to automatically
 					// trigger start on QUnit which leads to failures in qunit-reporter-junit
 					var QUnit = window.QUnit;

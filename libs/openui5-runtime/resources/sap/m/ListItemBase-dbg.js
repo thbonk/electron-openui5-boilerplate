@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -195,6 +195,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	ListItemBase.prototype.DetailIconURI = IconPool.getIconURI("edit");
 	ListItemBase.prototype.DeleteIconURI = IconPool.getIconURI("sys-cancel");
 	ListItemBase.prototype.NavigationIconURI = IconPool.getIconURI("slim-arrow-right");
+
+	// defines the root tag name for rendering purposes
+	ListItemBase.prototype.TagName = "li";
 
 	// internal active state of the listitem
 	ListItemBase.prototype.init = function() {

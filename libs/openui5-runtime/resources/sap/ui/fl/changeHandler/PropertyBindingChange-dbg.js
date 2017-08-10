@@ -12,7 +12,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/fl/changeHandler/Base", "sap/ui/fl/U
 	 *
 	 * @alias sap.ui.fl.changeHandler.PropertyBindingChange
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @since 1.38
 	 * @private
 	 * @experimental Since 1.38. This class is experimental and provides only limited functionality. Also the API might be changed in future.

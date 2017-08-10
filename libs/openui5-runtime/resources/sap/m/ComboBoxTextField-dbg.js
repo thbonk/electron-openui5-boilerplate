@@ -19,7 +19,7 @@ sap.ui.define(['jquery.sap.global', './InputBase', './library', 'sap/ui/core/Inv
 		 * @extends sap.m.InputBase
 		 *
 		 * @author SAP SE
-		 * @version 1.46.12
+		 * @version 1.48.5
 		 *
 		 * @constructor
 		 * @public
@@ -164,29 +164,6 @@ sap.ui.define(['jquery.sap.global', './InputBase', './library', 'sap/ui/core/Inv
 
 			// else return the value from the model
 			return this.getProperty("value");
-		};
-
-		/**
-		 * Gets the labels referencing this control.
-		 *
-		 * @returns {sap.m.Label[]} Array of objects which are the current targets of the <code>ariaLabelledBy</code>
-		 * association and the labels referencing this control.
-		 * @since 1.38
-		 */
-		ComboBoxTextField.prototype.getLabels = function() {
-			var aLabelIDs = this.getAriaLabelledBy().map(function(sLabelID) {
-				return sap.ui.getCore().byId(sLabelID);
-			});
-
-			var oLabelEnablement = sap.ui.require("sap/ui/core/LabelEnablement");
-
-			if (oLabelEnablement) {
-				aLabelIDs = aLabelIDs.concat(oLabelEnablement.getReferencingLabels(this).map(function(sLabelID) {
-					return sap.ui.getCore().byId(sLabelID);
-				}));
-			}
-
-			return aLabelIDs;
 		};
 
 		/**

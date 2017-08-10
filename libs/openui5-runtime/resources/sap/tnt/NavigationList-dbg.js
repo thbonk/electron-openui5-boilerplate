@@ -21,7 +21,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/P
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.46.12
+		 * @version 1.48.5
 		 *
 		 * @constructor
 		 * @public
@@ -88,6 +88,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/P
 			this.addEventDelegate(this._itemNavigation);
 
 			this._itemNavigation.setPageSize(10);
+			this._itemNavigation.setDisabledModifiers({
+				sapnext : ["alt", "meta"],
+				sapprevious : ["alt", "meta"]
+			});
 
 			this._resourceBundle = sap.ui.getCore().getLibraryResourceBundle("sap.ui.core");
 

@@ -16,7 +16,7 @@ sap.ui.define([
 	 * @param {object} [mSettings] initial settings for the new control
 	 * @class Type for <code>selectionItems</code> aggregation in P13nChartSelectionPanel control.
 	 * @extends sap.m.P13nSelectionItem
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @constructor
 	 * @author SAP SE
 	 * @private

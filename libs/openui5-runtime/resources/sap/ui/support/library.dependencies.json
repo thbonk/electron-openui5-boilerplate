@@ -1,0 +1,386 @@
+{
+  "modules" : [
+    {
+      "name" : "sap/m/Button.support.js",
+      "description" : "Defines support rules of the Button control of sap.m library.",
+      "size" : 2315,
+      "compressedSize" : 1298,
+      "required" : ["jquery.sap.global.js", "sap/ui/support/library.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/m/Dialog.support.js",
+      "description" : "Defines support rules of the List, Table and Tree controls of sap.m library.",
+      "size" : 2657,
+      "compressedSize" : 1496,
+      "required" : ["jquery.sap.global.js", "sap/ui/support/library.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/m/Input.support.js",
+      "description" : "Defines support rules of the List, Table and Tree controls of sap.m library.",
+      "size" : 2318,
+      "compressedSize" : 1274,
+      "required" : ["jquery.sap.global.js", "sap/ui/support/library.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/m/library.support.js",
+      "description" : "Adds support rules of the sap.m library to the support infrastructure.",
+      "size" : 845,
+      "compressedSize" : 542,
+      "required" : ["jquery.sap.global.js", "sap/m/Button.support.js", "sap/m/Dialog.support.js", "sap/m/Input.support.js", "sap/ui/support/library.js", "sap/ui/support/supportRules/RuleSet.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/core/App.support.js",
+      "description" : "Defines Application related support rules.",
+      "size" : 5032,
+      "compressedSize" : 1796,
+      "required" : ["jquery.sap.global.js", "sap/ui/support/library.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/core/Config.support.js",
+      "description" : "Defines support rules for the app configuration.",
+      "size" : 4238,
+      "compressedSize" : 2392,
+      "required" : ["jquery.sap.global.js", "sap/ui/support/library.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/core/Misc.support.js",
+      "description" : "Defines miscellaneous support rules.",
+      "size" : 1732,
+      "compressedSize" : 888,
+      "required" : ["jquery.sap.global.js", "sap/ui/support/library.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/core/Model.support.js",
+      "description" : "Defines support rules related to the model.",
+      "size" : 7355,
+      "compressedSize" : 3878,
+      "required" : ["jquery.sap.global.js", "sap/ui/model/CompositeBinding.js", "sap/ui/model/ListBinding.js", "sap/ui/model/PropertyBinding.js", "sap/ui/model/json/JSONModel.js", "sap/ui/model/odata/ODataMetadata.js", "sap/ui/support/library.js", "sap/ui/support/supportRules/util/StringAnalyzer.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/core/View.support.js",
+      "description" : "Defines support rules related to the view.",
+      "size" : 5965,
+      "compressedSize" : 3556,
+      "required" : ["jquery.sap.global.js", "sap/ui/support/library.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/core/library.support.js",
+      "description" : "Adds support rules to the core",
+      "size" : 1483,
+      "compressedSize" : 897,
+      "required" : ["jquery.sap.global.js", "sap/ui/core/App.support.js", "sap/ui/core/Config.support.js", "sap/ui/core/Misc.support.js", "sap/ui/core/Model.support.js", "sap/ui/core/View.support.js", "sap/ui/support/supportRules/RuleSet.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/layout/Form.support.js",
+      "description" : "Defines support rules of the Form controls of sap.ui.layout library.",
+      "size" : 3187,
+      "compressedSize" : 1889,
+      "required" : ["jquery.sap.global.js", "sap/ui/support/library.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/layout/library.support.js",
+      "description" : "Adds support rules of the sap.m library to the support infrastructure.",
+      "size" : 1061,
+      "compressedSize" : 463,
+      "required" : ["jquery.sap.global.js", "sap/ui/layout/Form.support.js", "sap/ui/support/library.js", "sap/ui/support/supportRules/RuleSet.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/Bootstrap.js",
+      "description" : "Provides control sap.ui.support.Bootstrap.",
+      "size" : 892,
+      "compressedSize" : 496,
+      "required" : ["jquery.sap.global.js", "sap/ui/support/library.js", "sap/ui/support/supportRules/Main.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/library-preload.js",
+      "size" : 138206,
+      "required" : ["jquery.sap.global.js", "sap/m/Bar.js", "sap/m/Button.js", "sap/m/CheckBox.js", "sap/m/FlexBox.js", "sap/m/FlexItemData.js", "sap/m/HBox.js", "sap/m/IconTabFilter.js", "sap/m/IconTabHeader.js", "sap/m/Image.js", "sap/m/Input.js", "sap/m/InputListItem.js", "sap/m/Label.js", "sap/m/Link.js", "sap/m/List.js", "sap/m/ListItemBase.js", "sap/m/Menu.js", "sap/m/MenuButton.js", "sap/m/MenuItem.js", "sap/m/MessageToast.js", "sap/m/MultiComboBox.js", "sap/m/NavContainer.js", "sap/m/Page.js", "sap/m/Panel.js", "sap/m/Popover.js", "sap/m/ProgressIndicator.js", "sap/m/RadioButton.js", "sap/m/Select.js", "sap/m/StandardListItem.js", "sap/m/Text.js", "sap/m/TextArea.js", "sap/m/Title.js", "sap/m/Toolbar.js", "sap/m/ToolbarSpacer.js", "sap/m/VBox.js", "sap/ui/base/ManagedObject.js", "sap/ui/base/Object.js", "sap/ui/codeeditor/CodeEditor.js", "sap/ui/core/CustomData.js", "sap/ui/core/Fragment.js", "sap/ui/core/HTML.js", "sap/ui/core/Icon.js", "sap/ui/core/Item.js", "sap/ui/core/ListItem.js", "sap/ui/core/library.js", "sap/ui/core/mvc/Controller.js", "sap/ui/core/mvc/XMLView.js", "sap/ui/core/support/ToolsAPI.js", "sap/ui/core/util/File.js", "sap/ui/layout/FixFlex.js", "sap/ui/layout/HorizontalLayout.js", "sap/ui/layout/Splitter.js", "sap/ui/layout/SplitterLayoutData.js", "sap/ui/layout/VerticalLayout.js", "sap/ui/layout/form/SimpleForm.js", "sap/ui/model/CompositeBinding.js", "sap/ui/model/ListBinding.js", "sap/ui/model/PropertyBinding.js", "sap/ui/model/json/JSONModel.js", "sap/ui/model/odata/ODataMetadata.js", "sap/ui/thirdparty/URI.js", "sap/ui/thirdparty/handlebars.js", "sap/ui/thirdparty/jszip.js"],
+      "includes" : ["sap/m/Button.support.js", "sap/m/Dialog.support.js", "sap/m/Input.support.js", "sap/m/library.support.js", "sap/ui/core/App.support.js", "sap/ui/core/Config.support.js", "sap/ui/core/Misc.support.js", "sap/ui/core/Model.support.js", "sap/ui/core/View.support.js", "sap/ui/core/library.support.js", "sap/ui/layout/Form.support.js", "sap/ui/layout/library.support.js", "sap/ui/support/Bootstrap.js", "sap/ui/support/library.js", "sap/ui/support/manifest.json", "sap/ui/support/supportRules/Analyzer.js", "sap/ui/support/supportRules/Constants.js", "sap/ui/support/supportRules/CoreFacade.js", "sap/ui/support/supportRules/ElementTree.js", "sap/ui/support/supportRules/ExecutionScope.js", "sap/ui/support/supportRules/Highlighter.js", "sap/ui/support/supportRules/IssueManager.js", "sap/ui/support/supportRules/Main.js", "sap/ui/support/supportRules/RuleSerializer.js", "sap/ui/support/supportRules/RuleSet.js", "sap/ui/support/supportRules/Storage.js", "sap/ui/support/supportRules/WCBChannels.js", "sap/ui/support/supportRules/WindowCommunicationBus.js", "sap/ui/support/supportRules/report/AnalysisHistoryFormatter.js", "sap/ui/support/supportRules/report/Archiver.js", "sap/ui/support/supportRules/report/DataCollector.js", "sap/ui/support/supportRules/report/IssueRenderer.js", "sap/ui/support/supportRules/report/ReportProvider.js", "sap/ui/support/supportRules/report/resources/collapseExpand.js", "sap/ui/support/supportRules/report/resources/filter.js", "sap/ui/support/supportRules/ui/IFrameController.js", "sap/ui/support/supportRules/ui/controllers/Analysis.controller.js", "sap/ui/support/supportRules/ui/controllers/Issues.controller.js", "sap/ui/support/supportRules/ui/controllers/Main.controller.js", "sap/ui/support/supportRules/ui/models/SharedModel.js", "sap/ui/support/supportRules/ui/views/Analysis.view.xml", "sap/ui/support/supportRules/ui/views/AnalyzeSettings.fragment.xml", "sap/ui/support/supportRules/ui/views/Issues.view.xml", "sap/ui/support/supportRules/ui/views/Main.view.xml", "sap/ui/support/supportRules/ui/views/StorageSettings.fragment.xml", "sap/ui/support/supportRules/util/StringAnalyzer.js", "sap/ui/table/TableHelper.support.js", "sap/ui/table/library.support.js"]
+    },
+    {
+      "name" : "sap/ui/support/library-preload.json",
+      "size" : 0,
+      "required" : ["jquery.sap.global.js", "sap/m/Bar.js", "sap/m/Button.js", "sap/m/CheckBox.js", "sap/m/FlexBox.js", "sap/m/FlexItemData.js", "sap/m/HBox.js", "sap/m/IconTabFilter.js", "sap/m/IconTabHeader.js", "sap/m/Image.js", "sap/m/Input.js", "sap/m/InputListItem.js", "sap/m/Label.js", "sap/m/Link.js", "sap/m/List.js", "sap/m/ListItemBase.js", "sap/m/Menu.js", "sap/m/MenuButton.js", "sap/m/MenuItem.js", "sap/m/MessageToast.js", "sap/m/MultiComboBox.js", "sap/m/NavContainer.js", "sap/m/Page.js", "sap/m/Panel.js", "sap/m/Popover.js", "sap/m/ProgressIndicator.js", "sap/m/RadioButton.js", "sap/m/Select.js", "sap/m/StandardListItem.js", "sap/m/Text.js", "sap/m/TextArea.js", "sap/m/Title.js", "sap/m/Toolbar.js", "sap/m/ToolbarSpacer.js", "sap/m/VBox.js", "sap/m/library-preload.json", "sap/ui/base/ManagedObject.js", "sap/ui/base/Object.js", "sap/ui/codeeditor/CodeEditor.js", "sap/ui/codeeditor/library-preload.json", "sap/ui/core/CustomData.js", "sap/ui/core/Fragment.js", "sap/ui/core/HTML.js", "sap/ui/core/Icon.js", "sap/ui/core/Item.js", "sap/ui/core/ListItem.js", "sap/ui/core/library-preload.json", "sap/ui/core/library.js", "sap/ui/core/mvc/Controller.js", "sap/ui/core/mvc/XMLView.js", "sap/ui/core/support/ToolsAPI.js", "sap/ui/core/util/File.js", "sap/ui/fl/library-preload.json", "sap/ui/layout/FixFlex.js", "sap/ui/layout/HorizontalLayout.js", "sap/ui/layout/Splitter.js", "sap/ui/layout/SplitterLayoutData.js", "sap/ui/layout/VerticalLayout.js", "sap/ui/layout/form/SimpleForm.js", "sap/ui/layout/library-preload.json", "sap/ui/model/CompositeBinding.js", "sap/ui/model/ListBinding.js", "sap/ui/model/PropertyBinding.js", "sap/ui/model/json/JSONModel.js", "sap/ui/model/odata/ODataMetadata.js", "sap/ui/thirdparty/URI.js", "sap/ui/thirdparty/handlebars.js", "sap/ui/thirdparty/jszip.js"],
+      "includes" : ["sap/m/Button.support.js", "sap/m/Dialog.support.js", "sap/m/Input.support.js", "sap/m/library.support.js", "sap/ui/core/App.support.js", "sap/ui/core/Config.support.js", "sap/ui/core/Misc.support.js", "sap/ui/core/Model.support.js", "sap/ui/core/View.support.js", "sap/ui/core/library.support.js", "sap/ui/layout/Form.support.js", "sap/ui/layout/library.support.js", "sap/ui/support/Bootstrap.js", "sap/ui/support/library.js", "sap/ui/support/manifest.json", "sap/ui/support/supportRules/Analyzer.js", "sap/ui/support/supportRules/Constants.js", "sap/ui/support/supportRules/CoreFacade.js", "sap/ui/support/supportRules/ElementTree.js", "sap/ui/support/supportRules/ExecutionScope.js", "sap/ui/support/supportRules/Highlighter.js", "sap/ui/support/supportRules/IssueManager.js", "sap/ui/support/supportRules/Main.js", "sap/ui/support/supportRules/RuleSerializer.js", "sap/ui/support/supportRules/RuleSet.js", "sap/ui/support/supportRules/Storage.js", "sap/ui/support/supportRules/WCBChannels.js", "sap/ui/support/supportRules/WindowCommunicationBus.js", "sap/ui/support/supportRules/report/AnalysisHistoryFormatter.js", "sap/ui/support/supportRules/report/Archiver.js", "sap/ui/support/supportRules/report/DataCollector.js", "sap/ui/support/supportRules/report/IssueRenderer.js", "sap/ui/support/supportRules/report/ReportProvider.js", "sap/ui/support/supportRules/report/resources/collapseExpand.js", "sap/ui/support/supportRules/report/resources/filter.js", "sap/ui/support/supportRules/ui/IFrameController.js", "sap/ui/support/supportRules/ui/controllers/Analysis.controller.js", "sap/ui/support/supportRules/ui/controllers/Issues.controller.js", "sap/ui/support/supportRules/ui/controllers/Main.controller.js", "sap/ui/support/supportRules/ui/models/SharedModel.js", "sap/ui/support/supportRules/ui/views/Analysis.view.xml", "sap/ui/support/supportRules/ui/views/AnalyzeSettings.fragment.xml", "sap/ui/support/supportRules/ui/views/Issues.view.xml", "sap/ui/support/supportRules/ui/views/Main.view.xml", "sap/ui/support/supportRules/ui/views/StorageSettings.fragment.xml", "sap/ui/support/supportRules/util/StringAnalyzer.js", "sap/ui/table/TableHelper.support.js", "sap/ui/table/library.support.js"]
+    },
+    {
+      "name" : "sap/ui/support/library.js",
+      "description" : "Initialization Code and shared classes of library sap.ui.support.",
+      "size" : 1426,
+      "compressedSize" : 905,
+      "required" : ["jquery.sap.global.js", "sap/ui/core/library.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/manifest.json",
+      "size" : 979,
+      "required" : [],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/Analyzer.js",
+      "description" : "Creates an Analyser that async runs tasks added by addTask function. Analysis can be started, stopped, restarted, paused and continued. THe analyser can be used to update the UI while a task is running with the current progress",
+      "size" : 5751,
+      "compressedSize" : 2583,
+      "required" : ["jquery.sap.global.js", "sap/ui/base/Object.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/Constants.js",
+      "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
+      "size" : 900,
+      "compressedSize" : 661,
+      "required" : ["jquery.sap.global.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/CoreFacade.js",
+      "description" : "! An interface to the core to be used by rules",
+      "size" : 1106,
+      "compressedSize" : 468,
+      "required" : ["jquery.sap.global.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/ElementTree.js",
+      "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
+      "size" : 17400,
+      "compressedSize" : 7989,
+      "required" : ["jquery.sap.global.js", "sap/ui/base/ManagedObject.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/ExecutionScope.js",
+      "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
+      "size" : 3233,
+      "compressedSize" : 1521,
+      "required" : ["jquery.sap.global.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/Highlighter.js",
+      "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
+      "size" : 2438,
+      "compressedSize" : 1089,
+      "required" : ["jquery.sap.global.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/IssueManager.js",
+      "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
+      "size" : 7045,
+      "compressedSize" : 2946,
+      "required" : ["jquery.sap.global.js", "sap/ui/base/Object.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/Main.js",
+      "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
+      "size" : 23736,
+      "compressedSize" : 12060,
+      "required" : ["jquery.sap.global.js", "sap/ui/base/ManagedObject.js", "sap/ui/model/json/JSONModel.js", "sap/ui/support/supportRules/Analyzer.js", "sap/ui/support/supportRules/Constants.js", "sap/ui/support/supportRules/CoreFacade.js", "sap/ui/support/supportRules/ExecutionScope.js", "sap/ui/support/supportRules/Highlighter.js", "sap/ui/support/supportRules/IssueManager.js", "sap/ui/support/supportRules/RuleSerializer.js", "sap/ui/support/supportRules/RuleSet.js", "sap/ui/support/supportRules/WCBChannels.js", "sap/ui/support/supportRules/WindowCommunicationBus.js", "sap/ui/support/supportRules/report/DataCollector.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/RuleSerializer.js",
+      "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
+      "size" : 945,
+      "compressedSize" : 650,
+      "required" : ["jquery.sap.global.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/RuleSet.js",
+      "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
+      "size" : 7826,
+      "compressedSize" : 4023,
+      "required" : ["jquery.sap.global.js", "sap/ui/support/supportRules/Constants.js", "sap/ui/support/supportRules/Storage.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/Storage.js",
+      "description" : "global localStorage",
+      "size" : 3752,
+      "compressedSize" : 2163,
+      "required" : ["jquery.sap.global.js", "sap/ui/support/supportRules/Constants.js", "sap/ui/support/supportRules/RuleSerializer.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/WCBChannels.js",
+      "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
+      "size" : 1620,
+      "compressedSize" : 1298,
+      "required" : ["jquery.sap.global.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/WindowCommunicationBus.js",
+      "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
+      "size" : 3270,
+      "compressedSize" : 1744,
+      "required" : ["jquery.sap.global.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/report/AnalysisHistoryFormatter.js",
+      "description" : "Formats the analysis history in a single string.",
+      "size" : 3739,
+      "compressedSize" : 1383,
+      "required" : ["jquery.sap.global.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/report/Archiver.js",
+      "description" : "Creates a zip file",
+      "size" : 2258,
+      "compressedSize" : 1441,
+      "required" : ["jquery.sap.global.js", "sap/ui/core/util/File.js", "sap/ui/thirdparty/jszip.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/report/DataCollector.js",
+      "description" : "Provides methods for information retrieval from the core.",
+      "size" : 3177,
+      "compressedSize" : 2057,
+      "required" : ["jquery.sap.global.js", "sap/ui/core/support/ToolsAPI.js", "sap/ui/thirdparty/URI.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/report/IssueRenderer.js",
+      "description" : "Renders issues",
+      "size" : 7585,
+      "compressedSize" : 3975,
+      "required" : ["jquery.sap.global.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/report/ReportProvider.js",
+      "description" : "Creates a report from data.",
+      "size" : 15311,
+      "compressedSize" : 8666,
+      "required" : ["jquery.sap.global.js", "sap/ui/support/supportRules/report/Archiver.js", "sap/ui/support/supportRules/report/IssueRenderer.js", "sap/ui/thirdparty/handlebars.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/report/resources/collapseExpand.js",
+      "size" : 2000,
+      "compressedSize" : 1251,
+      "required" : [],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/report/resources/filter.js",
+      "size" : 3612,
+      "compressedSize" : 1913,
+      "required" : [],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/ui/IFrameController.js",
+      "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
+      "size" : 5418,
+      "compressedSize" : 3270,
+      "required" : ["jquery.sap.global.js", "sap/ui/base/ManagedObject.js", "sap/ui/support/supportRules/Constants.js", "sap/ui/support/supportRules/WCBChannels.js", "sap/ui/support/supportRules/WindowCommunicationBus.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/ui/controllers/Analysis.controller.js",
+      "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
+      "size" : 21813,
+      "compressedSize" : 13840,
+      "required" : ["jquery.sap.global.js", "sap/m/Button.js", "sap/m/InputListItem.js", "sap/m/Label.js", "sap/m/List.js", "sap/m/ListItemBase.js", "sap/m/MessageToast.js", "sap/m/Panel.js", "sap/m/StandardListItem.js", "sap/m/Toolbar.js", "sap/m/ToolbarSpacer.js", "sap/ui/core/mvc/Controller.js", "sap/ui/model/json/JSONModel.js", "sap/ui/support/supportRules/Constants.js", "sap/ui/support/supportRules/RuleSerializer.js", "sap/ui/support/supportRules/RuleSet.js", "sap/ui/support/supportRules/Storage.js", "sap/ui/support/supportRules/WCBChannels.js", "sap/ui/support/supportRules/WindowCommunicationBus.js", "sap/ui/support/supportRules/ui/models/SharedModel.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/ui/controllers/Issues.controller.js",
+      "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
+      "size" : 7302,
+      "compressedSize" : 4899,
+      "required" : ["jquery.sap.global.js", "sap/ui/core/mvc/Controller.js", "sap/ui/model/json/JSONModel.js", "sap/ui/support/supportRules/ElementTree.js", "sap/ui/support/supportRules/WCBChannels.js", "sap/ui/support/supportRules/WindowCommunicationBus.js", "sap/ui/support/supportRules/ui/models/SharedModel.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/ui/controllers/Main.controller.js",
+      "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
+      "size" : 6060,
+      "compressedSize" : 4448,
+      "required" : ["jquery.sap.global.js", "sap/ui/core/mvc/Controller.js", "sap/ui/model/json/JSONModel.js", "sap/ui/support/supportRules/Constants.js", "sap/ui/support/supportRules/Storage.js", "sap/ui/support/supportRules/WCBChannels.js", "sap/ui/support/supportRules/WindowCommunicationBus.js", "sap/ui/support/supportRules/ui/models/SharedModel.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/ui/models/SharedModel.js",
+      "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
+      "size" : 2950,
+      "compressedSize" : 2554,
+      "required" : ["jquery.sap.global.js", "sap/ui/model/json/JSONModel.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/ui/views/Analysis.view.xml",
+      "size" : 11080,
+      "required" : ["sap/m/Bar.js", "sap/m/Button.js", "sap/m/IconTabFilter.js", "sap/m/IconTabHeader.js", "sap/m/Input.js", "sap/m/Label.js", "sap/m/Link.js", "sap/m/List.js", "sap/m/MultiComboBox.js", "sap/m/NavContainer.js", "sap/m/Page.js", "sap/m/Panel.js", "sap/m/StandardListItem.js", "sap/m/Text.js", "sap/m/TextArea.js", "sap/m/Title.js", "sap/ui/codeeditor/CodeEditor.js", "sap/ui/core/Item.js", "sap/ui/core/mvc/XMLView.js", "sap/ui/layout/HorizontalLayout.js", "sap/ui/layout/Splitter.js", "sap/ui/layout/SplitterLayoutData.js", "sap/ui/layout/VerticalLayout.js", "sap/ui/layout/form/SimpleForm.js", "sap/ui/support/supportRules/ui/controllers/Analysis.controller.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/ui/views/AnalyzeSettings.fragment.xml",
+      "size" : 2316,
+      "required" : ["sap/m/CheckBox.js", "sap/m/Input.js", "sap/m/Popover.js", "sap/m/RadioButton.js", "sap/m/VBox.js", "sap/ui/core/CustomData.js", "sap/ui/core/Fragment.js", "sap/ui/layout/VerticalLayout.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/ui/views/Issues.view.xml",
+      "size" : 4877,
+      "required" : ["sap/m/Button.js", "sap/m/FlexBox.js", "sap/m/HBox.js", "sap/m/Label.js", "sap/m/Link.js", "sap/m/List.js", "sap/m/Menu.js", "sap/m/MenuButton.js", "sap/m/MenuItem.js", "sap/m/Page.js", "sap/m/Select.js", "sap/m/StandardListItem.js", "sap/m/Text.js", "sap/m/Toolbar.js", "sap/m/ToolbarSpacer.js", "sap/ui/core/HTML.js", "sap/ui/core/ListItem.js", "sap/ui/core/mvc/XMLView.js", "sap/ui/layout/Splitter.js", "sap/ui/layout/VerticalLayout.js", "sap/ui/layout/form/SimpleForm.js", "sap/ui/support/supportRules/ui/controllers/Issues.controller.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/ui/views/Main.view.xml",
+      "size" : 3327,
+      "required" : ["sap/m/Bar.js", "sap/m/Button.js", "sap/m/FlexBox.js", "sap/m/FlexItemData.js", "sap/m/Image.js", "sap/m/NavContainer.js", "sap/m/Page.js", "sap/m/ProgressIndicator.js", "sap/m/Text.js", "sap/ui/core/Icon.js", "sap/ui/core/mvc/XMLView.js", "sap/ui/layout/FixFlex.js", "sap/ui/support/supportRules/ui/controllers/Main.controller.js", "sap/ui/support/supportRules/ui/views/Analysis.view.xml", "sap/ui/support/supportRules/ui/views/Issues.view.xml"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/ui/views/StorageSettings.fragment.xml",
+      "size" : 1003,
+      "required" : ["sap/m/Button.js", "sap/m/CheckBox.js", "sap/m/FlexBox.js", "sap/m/Popover.js", "sap/m/Text.js", "sap/ui/core/Fragment.js", "sap/ui/layout/HorizontalLayout.js", "sap/ui/layout/VerticalLayout.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/support/supportRules/util/StringAnalyzer.js",
+      "description" : "Contains String analyzing functionality such as calculating the levenshtein distance between 2 strings",
+      "size" : 2041,
+      "compressedSize" : 651,
+      "required" : ["jquery.sap.global.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/table/TableHelper.support.js",
+      "description" : "Helper functionality for table, list and tree controls for the Support Tool infrastructure.",
+      "size" : 6801,
+      "compressedSize" : 1395,
+      "required" : ["jquery.sap.global.js", "sap/ui/support/library.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/ui/table/library.support.js",
+      "description" : "Adds support rules of the sap.ui.table library to the support infrastructure.",
+      "size" : 3850,
+      "compressedSize" : 2304,
+      "required" : ["jquery.sap.global.js", "sap/ui/support/library.js", "sap/ui/support/supportRules/RuleSet.js", "sap/ui/table/TableHelper.support.js"],
+      "includes" : []
+    }
+  ]
+}

@@ -23,7 +23,6 @@ Common compact/cozy
 
 .sapUxAPAnchorBar.sapMTB {
 	border: none;
-	box-shadow: inset 0 -0.125rem @sapUiObjectHeaderBorderColor, 0 0.125rem 0 0 @sapUiObjectHeaderBackground;
 	background: @sapUiObjectHeaderBackground;
 }
 
@@ -339,6 +338,7 @@ html[data-sap-ui-browser^="cr4"].sap-phone {
 		box-shadow: none;
 	}
 
+	.sapUxAPObjectPageHeaderChangesBtn .sapMBtnTransparent:not(.sapMBtnActive) > .sapMBtnIcon,
 	.sapUxAPObjectPageHeaderLockBtn .sapMBtnTransparent:not(.sapMBtnActive) > .sapMBtnIcon {
 		color:  @sapUiContentMarkerIconColor;
 	}
@@ -394,10 +394,6 @@ html .sapUiContainer-Narrow .sapUxAPObjectPageHeaderIdentifier {
 			right: 0.5rem;
 		}
 	}
-}
-
-.sapUxAPObjectPageHeaderChangesBtn .sapMBtnTransparent > .sapMBtnIcon {
-	color:  fade(@sapUiContentIconColor, 5);
 }
 
 html.sapUiMedia-Std-Phone .sapUiSizeCompact.sapUxAPObjectPageHeaderChangesBtn .sapMBtn,

@@ -17,7 +17,7 @@ sap.ui.define([
 	 * @param {string} [sStableIdPropertyName='id'] the stable id
 	 * @alias sap.ui.fl.Persistence
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @experimental Since 1.25.0
 	 */
 	var Persistence = function(oControl, sStableIdPropertyName) {
@@ -29,9 +29,10 @@ sap.ui.define([
 
 		this._sComponentName = Utils.getComponentClassName(oControl);
 		if (!this._sComponentName) {
-			Utils.log.error("The Control does not belong to a SAPUI5 component. Variants and Changes for this control might not work as expected.");
+			Utils.log.error("The Control does not belong to an SAPUI5 component. Variants and Changes for this control might not work as expected.");
 		}
 		this._oAppDescriptor = Utils.getAppDescriptor(oControl);
+		this._sAppVersion = Utils.getAppVersionFromManifest(this._oAppDescriptor);
 		this._sSiteId = Utils.getSiteId(oControl);
 
 		this._oChanges = {};
@@ -171,7 +172,6 @@ sap.ui.define([
 	 */
 	Persistence.prototype.getChanges = function() {
 		var that = this;
-		var sComponentName = this._sComponentName;
 		var mPropertyBag = {
 			appDescriptor: this._oAppDescriptor,
 			siteId: this._sSiteId
@@ -183,7 +183,7 @@ sap.ui.define([
 			}
 			return Promise.resolve(this._oChanges);
 		}
-		return Cache.getChangesFillingCache(this._oConnector, sComponentName, mPropertyBag).then(that._resolveFillingCacheWithChanges.bind(that));
+		return Cache.getChangesFillingCache(this._oConnector, {name : this._sComponentName, appVersion: this._sAppVersion}, mPropertyBag).then(that._resolveFillingCacheWithChanges.bind(that));
 	};
 
 	/**
@@ -215,7 +215,7 @@ sap.ui.define([
 			appDescriptor: this._oAppDescriptor,
 			siteId: this._sSiteId
 		};
-		return Cache.getChangesFillingCache(this._oConnector, this._sComponentName, mPropertyBag).then(function(oFile) {
+		return Cache.getChangesFillingCache(this._oConnector, {name : this._sComponentName, appVersion: this._sAppVersion}, mPropertyBag).then(function(oFile) {
 			var bNoFilter = true;
 			that._fillRelevantChanges(oFile, bNoFilter);
 			return that._oChanges;
@@ -262,11 +262,14 @@ sap.ui.define([
 			aChangeList = oFile.changes.changes;
 			len = aChangeList.length;
 			for (j = 0; j < len; j++) {
-				oChangeContent = aChangeList[j];
-				oSelector = oChangeContent.selector;
-				if (oSelector) {
-					// filter out only controls of the current
-					jQuery.each(oSelector, fAppendValidChanges);
+				//filter out user changes and variants when no personalization was triggered
+				if (!Utils.isOverMaxLayer(aChangeList[j].layer)){
+					oChangeContent = aChangeList[j];
+					oSelector = oChangeContent.selector;
+					if (oSelector) {
+						// filter out only controls of the current
+						jQuery.each(oSelector, fAppendValidChanges);
+					}
 				}
 			}
 		}
@@ -333,21 +336,24 @@ sap.ui.define([
 			});
 		}
 
-		var oAppDescr = Utils.getAppDescriptor(this._oControl);
-		var sComponentName = this._sComponentName; //only used in case ui core provides no app descriptor e.g. during unit tests
-		if ( oAppDescr && oAppDescr["sap.app"] ){
-			sComponentName = oAppDescr["sap.app"].componentName || oAppDescr["sap.app"].id;
+		var oValidAppVersions = {
+			creation: this._sAppVersion,
+			from: this._sAppVersion
+		};
+		if (this._sAppVersion && mParameters.developerMode) {
+			oValidAppVersions.to = this._sAppVersion;
 		}
+
 		oInfo = {
 			changeType: mParameters.type,
 			service: mParameters.ODataService,
 			texts: mInternalTexts,
 			content: mParameters.content,
 			reference: this._sComponentName, //in this case the component name can also be the value of sap-app-id
-			componentName: sComponentName,
 			isVariant: mParameters.isVariant,
 			packageName: mParameters.packageName,
-			isUserDependent: mParameters.isUserDependent
+			isUserDependent: mParameters.isUserDependent,
+			validAppVersions: oValidAppVersions
 		};
 
 		oInfo.selector = this._getSelector();
@@ -617,7 +623,7 @@ sap.ui.define([
 					aPromises.push(that._oConnector.create(oChange.getDefinition(), oChange.getRequest(), oChange.isVariant()).then(function(result) {
 						oChange.setResponse(result.response);
 						if (Cache.isActive()) {
-							Cache.addChange(oChange.getComponent(), result.response);
+							Cache.addChange({ name: that._sComponentName, appVersion: that._sAppVersion}, result.response);
 						}
 						return result;
 					}));
@@ -626,7 +632,7 @@ sap.ui.define([
 					aPromises.push(that._oConnector.update(oChange.getDefinition(), oChange.getId(), oChange.getRequest(), oChange.isVariant()).then(function(result) {
 						oChange.setResponse(result.response);
 						if (Cache.isActive()) {
-							Cache.updateChange(oChange.getComponent(), result.response);
+							Cache.updateChange({ name: that._sComponentName, appVersion: that._sAppVersion}, result.response);
 						}
 						return result;
 					}));
@@ -645,7 +651,7 @@ sap.ui.define([
 						};
 						oChange.fireEvent(Change.events.markForDeletion, mParameter);
 						if (Cache.isActive()) {
-							Cache.deleteChange(oChange.getComponent(), oChange.getDefinition());
+							Cache.deleteChange({ name: that._sComponentName, appVersion: that._sAppVersion}, oChange.getDefinition());
 						}
 						return result;
 					}));

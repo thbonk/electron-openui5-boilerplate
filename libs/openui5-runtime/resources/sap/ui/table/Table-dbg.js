@@ -54,7 +54,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 	 *
 	 *
 	 * @extends sap.ui.core.Control
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -103,8 +103,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 			selectionMode : {type : "sap.ui.table.SelectionMode", group : "Behavior", defaultValue : SelectionMode.MultiToggle},
 
 			/**
-			 * Selection behavior of the Table. This property defines whether the row selector is displayed and whether the row, the row selector or both
-			 * can be clicked to select a row.
+			 * Selection behavior of the Table. This property defines whether the row selector is displayed and whether the row, the row selector or
+			 * both can be clicked to select a row.
 			 */
 			selectionBehavior : {type : "sap.ui.table.SelectionBehavior", group : "Behavior", defaultValue : SelectionBehavior.RowSelector},
 
@@ -229,9 +229,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 			enableCustomFilter : {type : "boolean", group : "Behavior", defaultValue : false},
 
 			/**
-			 * Set this parameter to true to make the table handle the busy indicator by its own.
-			 * The table will switch to busy as soon as it scrolls into an unpaged area. This feature can only
-			 * be used when the navigation mode is set to scrolling.
+			 * If set to <code>true</code>, the table changes its busy state, resulting in showing or hiding the busy indicator.
+			 * The table will switch to busy as soon as data is retrieved to be displayed in the currently visible rows. This happens,
+			 * for example, during scrolling, filtering, or sorting. As soon as the data has been retrieved, the table switches back to not busy.
+			 * The busy state of the table can still be set manually by calling {@link sap.ui.core.Control#setBusy}.
 			 * @since 1.27.0
 			 */
 			enableBusyIndicator : {type : "boolean", group : "Behavior", defaultValue : false},
@@ -286,10 +287,17 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 
 			/**
 			 * Template for row actions. A template is decoupled from the row or table. Each time
-			 * the template's properties or aggregations have been changed, the template has to be applied again via
+			 * the template's properties or aggregations are changed, the template has to be applied again via
 			 * <code>setRowActionTemplate</code> for the changes to take effect.
 			 */
-			rowActionTemplate : {type : "sap.ui.table.RowAction", multiple : false}
+			rowActionTemplate : {type : "sap.ui.table.RowAction", multiple : false},
+
+			/**
+			 * Template for row settings. A template is decoupled from the row or table. Each time
+			 * the template's properties or aggregations are changed, the template has to be applied again via
+			 * <code>setRowSettingsTemplate</code> for the changes to take effect.
+			 */
+			rowSettingsTemplate : {type : "sap.ui.table.RowSettings", multiple : false}
 		},
 		associations : {
 
@@ -553,7 +561,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 			},
 
 			/**
-			 * This event is triggered when the custom filter item of the column menu is pressed. The column on which the event was triggered is passed as parameter.
+			 * This event is triggered when the custom filter item of the column menu is pressed. The column on which the event was triggered is
+			 * passed as parameter.
 			 * @since 1.23.0
 			 */
 			customFilter : {
@@ -627,7 +636,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 		 */
 		this._lastCalledUpdateRows = 0;
 		this._iBindingTimerDelay = 50;
-		this._iMaxScrollbarHeight = 1000000; // maximum px height of an DOM element in FF/IE/Chrome
+		this._iMaxScrollbarHeight = 1000000; // maximum px height of a DOM element in FF/IE/Chrome
 		this._aRowHeights = [];
 		this._iRowHeightsDelta = 0;
 		this._iRenderedFirstVisibleRow = 0;
@@ -640,7 +649,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 			// update only if control not marked as destroyed (could happen because updateRows is called during destroying the table)
 			if (!that.bIsDestroyed) {
 				that._lastCalledUpdateRows = Date.now();
-				that._updateBindingContexts(undefined, undefined, sReason);
+				that._updateBindingContexts();
 
 				if (!that._bInvalid) {
 					// subsequent DOM updates are only required if there is no rendering to be expected
@@ -678,7 +687,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 
 				that._mTimeouts.bindingTimer = undefined;
 				// Helper event for testing
-				that.fireEvent("_rowsUpdated");
+				that._fireRowsUpdated(sReason);
 			}
 
 			that._bBindingLengthChanged = false;
@@ -698,9 +707,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 		// text selection for column headers?
 		this._bAllowColumnHeaderTextSelection = false;
 
-		this._iDataRequestedCounter = 0;
-
+		this._bPendingRequest = false;
 		this._iBindingLength = 0;
+
 		this._iTableRowContentHeight = 0;
 		this._bFirstRendering = true;
 
@@ -744,6 +753,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 		this._detachExtensions();
 
 		// cleanup
+		if (this._dataReceivedHandlerId != null) {
+			jQuery.sap.clearDelayedCall(this._dataReceivedHandlerId);
+			delete this._dataReceivedHandlerId;
+		}
 		this._cleanUpTimers();
 		this._detachEvents();
 
@@ -799,24 +812,36 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 		if (bRtlChanged) {
 			this._bRtlMode = sap.ui.getCore().getConfiguration().getRTL();
 		}
+
 		if (bLangChanged) {
-			// Update bundle
+			var aRows = this.getRows();
+			var i;
+
+			// Update the resource bundle.
 			this._oResBundle = sap.ui.getCore().getLibraryResourceBundle("sap.ui.table");
 
-			// Update bundle of row actions
-			var aRows = this.getRows();
+			// Update the resource bundle of row actions.
 			var oRowAction;
-			for (var i = 0; i < aRows.length; i++) {
+			for (i = 0; i < aRows.length; i++) {
 				oRowAction = aRows[i].getAggregation("_rowAction");
 				if (oRowAction) {
 					oRowAction._oResBundle = this._oResBundle;
 				}
 			}
 
-			//Clear Cell Context Menu
+			// Update the resource bundle of row settings.
+			var oRowSettings;
+			for (i = 0; i < aRows.length; i++) {
+				oRowSettings = aRows[i].getAggregation("_settings");
+				if (oRowSettings) {
+					oRowSettings._oResBundle = this._oResBundle;
+				}
+			}
+
+			// Clear the cell context menu.
 			TableUtils.Menu.cleanupDataCellContextMenu(this);
 
-			//Update Column Menus
+			// Update the column menus.
 			this._invalidateColumnMenus(true);
 		}
 	};
@@ -1090,7 +1115,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 	 * @private
 	 */
 	Table.prototype.onBeforeRendering = function(oEvent) {
-		if (oEvent && oEvent.isMarked("insertTableRows")) {
+		if (oEvent && oEvent.isMarked("renderRows")) {
 			return;
 		}
 
@@ -1108,17 +1133,17 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 			sVisibleRowCountMode == VisibleRowCountMode.Fixed ||
 			(sVisibleRowCountMode == VisibleRowCountMode.Auto && this._iTableRowContentHeight && aRows.length == 0)) {
 			if (this.getBinding("rows")) {
-				this._adjustRows(this._calculateRowsToDisplay());
+				this._updateRows(this._calculateRowsToDisplay(), TableUtils.RowsUpdateReason.Render);
 			} else {
 				var that = this;
 				this._mTimeouts.onBeforeRenderingAdjustRows = this._mTimeouts.onBeforeRenderingAdjustRows || window.setTimeout(function() {
-						that._adjustRows(that._calculateRowsToDisplay());
+						that._updateRows(that._calculateRowsToDisplay(), TableUtils.RowsUpdateReason.Render);
 						that._mTimeouts.onBeforeRenderingAdjustRows = undefined;
 					}, 0);
 			}
 		} else if (this._bRowAggregationInvalid && aRows.length > 0) {
 			// Rows got invalidated, recreate rows with new template
-			this._adjustRows(aRows.length);
+			this._updateRows(aRows.length, TableUtils.RowsUpdateReason.Render);
 		}
 		this._aTableHeaders = []; // free references to DOM elements
 	};
@@ -1128,7 +1153,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 	 * @private
 	 */
 	Table.prototype.onAfterRendering = function(oEvent) {
-		var bEventIsMarked = oEvent && oEvent.isMarked("insertTableRows");
+		var bEventIsMarked = oEvent && oEvent.isMarked("renderRows");
 
 		if (bEventIsMarked) {
 			this._getScrollExtension().updateVerticalScrollbarHeight();
@@ -1169,9 +1194,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 			this._bFirstRendering = false;
 			// Wait until everything is rendered (parent height!) before reading/updating sizes. Use a promise to make sure
 			// to be executed before timeouts may be executed.
-			Promise.resolve().then(this._updateTableSizes.bind(this, true));
+			Promise.resolve().then(this._updateTableSizes.bind(this, TableUtils.RowsUpdateReason.Render, true));
 		} else {
-			this._updateTableSizes();
+			this._updateTableSizes(TableUtils.RowsUpdateReason.Render);
 		}
 
 		if (!bEventIsMarked) {
@@ -1179,7 +1204,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 			this._aTableHeaders = this.$().find(".sapUiTableColHdrCnt th");
 
 			if (this.getBinding("rows")) {
-				this.fireEvent("_rowsUpdated");
+				this._fireRowsUpdated(TableUtils.RowsUpdateReason.Render);
 			}
 		}
 	};
@@ -1205,7 +1230,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 	 * First collects all table sizes, then synchronizes row/column heights, updates scrollbars and selection.
 	 * @private
 	 */
-	Table.prototype._updateTableSizes = function(bForceUpdateTableSizes, bSkipHandleRowCountMode) {
+	Table.prototype._updateTableSizes = function(sReason, bForceUpdateTableSizes, bSkipHandleRowCountMode) {
 		var oDomRef = this.getDomRef();
 		var that = this;
 
@@ -1232,8 +1257,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 			iRowContentSpace = this._determineAvailableSpace();
 			// if no height is granted we do not need to do any further row adjustment or layout sync.
 			// Saves time on initial start up and reduces flickering on rendering.
-			if (this._handleRowCountModeAuto(iRowContentSpace) && !bForceUpdateTableSizes) {
-				// updateTableSizes was already called by insertTableRows, therefore skip the rest of this function execution
+			if (this._handleRowCountModeAuto(iRowContentSpace, sReason) && !bForceUpdateTableSizes) {
+				// updateTableSizes was already called by _renderRows, therefore skip the rest of this function execution
 				return;
 			}
 		}
@@ -1561,7 +1586,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 			this.setProperty("firstVisibleRow", iRowIndex, true);
 
 			if (this.getBinding("rows")) {
-				this.updateRows();
+				var sReason = bOnScroll === true ? TableUtils.RowsUpdateReason.VerticalScroll : TableUtils.RowsUpdateReason.FirstVisibleRowChange;
+				this.updateRows(sReason);
 
 				if (!bOnScroll) {
 					this._updateVSbScrollTop();
@@ -1627,7 +1653,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 
 	/**
 	 * Initialises a new selection model for the Table instance.
-	 * @param {sap.ui.model.SelectionModel.MULTI_SELECTION|sap.ui.model.SelectionModel.SINGLE_SELECTION} sSelectionMode the selection mode of the selection model
+	 * @param {sap.ui.model.SelectionModel.MULTI_SELECTION|sap.ui.model.SelectionModel.SINGLE_SELECTION} sSelectionMode the selection mode of the
+	 *     selection model
 	 * @return {sap.ui.table.Table} the table instance for chaining
 	 * @private
 	 */
@@ -1673,7 +1700,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 			// metadata might have changed
 			this._invalidateColumnMenus();
 			this._updateBindingLength();
-			this.updateRows("unbindAggregation");
+			this.updateRows(TableUtils.RowsUpdateReason.Unbind);
 		}
 
 		return vReturn;
@@ -1786,25 +1813,33 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 	};
 
 	/**
-	 * Requests all required contexts for visibleRowCount from the binding
-	 * @returns {sap.ui.model.Context[]} Array of row contexts
+	 * Requests all contexts from the binding which are required to display the data in the current viewport.
+	 *
+	 * @param {int} [iVisibleRows=undefined] The amount of rows to display. Default value is the number of rows in the rows aggregation.
+	 * @param {boolean} [bSuppressUpdate=false] If set to <code>true</code>, no UI updates will be performed.
+	 * @param {boolean} [bSecondCall=false] If this parameter is set to <code>true</code>, it means that the function called itself recursively.
+	 * 										In this case some parts of the function will be skipped.
+	 * @returns {Object[]} Array of row contexts returned from the binding.
 	 * @private
 	 */
-	Table.prototype._getRowContexts = function (iVisibleRows, bSkipSecondCall, sReason) {
-		var bReceivedLessThanRequested;
-		var aContexts = [];
+	Table.prototype._getRowContexts = function (iVisibleRows, bSuppressUpdate, bSecondCall) {
 		var oBinding = this.getBinding("rows");
-		var iVisibleRowCount = iVisibleRows || this.getRows().length;
+		var iVisibleRowCount = iVisibleRows == null ? this.getRows().length : iVisibleRows;
+
 		if (!oBinding || iVisibleRowCount <= 0) {
-			// without binding there are no contexts to be retrieved
+			// Without binding there are no contexts to be retrieved.
 			return [];
 		}
 
-		var iFirstVisibleRow = this.getFirstVisibleRow();
+		bSuppressUpdate = bSuppressUpdate === true;
+		bSecondCall = bSecondCall === true;
 
+		var iFirstVisibleRow = this.getFirstVisibleRow();
 		var iFixedRowCount = this.getFixedRowCount();
 		var iFixedBottomRowCount = this.getFixedBottomRowCount();
 		var iReceivedLength = 0;
+		var bReceivedLessThanRequested;
+		var aContexts = [];
 		var aTmpContexts;
 
 		// because of the analytical table the fixed bottom row must always be requested separately as it is the grand
@@ -1846,7 +1881,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 		// since the tree gets only build once (as result of getContexts call). If first the fixed bottom row would
 		// be requested the analytical binding would build the tree twice.
 		aTmpContexts = this._getContexts(iStartIndex, iLength, iThreshold);
-		var iBindingLength = this._updateBindingLength(sReason);
+		var iBindingLength = this._updateBindingLength(bSuppressUpdate);
 		// iLength is the number of rows which shall get filled. It might be more than the binding actually has data.
 		// Therefore Math.min is required to make sure to not request data again from the binding.
 		bReceivedLessThanRequested = aTmpContexts.length < Math.min(iLength, iBindingLength - iFixedBottomRowCount);
@@ -1869,7 +1904,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 			fnMergeArrays(aContexts, aTmpContexts, iMergeOffsetBottomRow);
 		}
 
-		if (bReceivedLessThanRequested && !bSkipSecondCall) {
+		if (bReceivedLessThanRequested && !bSecondCall) {
 			if (iBindingLength > 0) {
 				var iMaxRowIndex = this._getMaxRowIndex();
 
@@ -1878,67 +1913,60 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 					this.setProperty("firstVisibleRow", iFirstVisibleRow, true);
 
 					// Get the contexts again, this time with the maximum possible value for the first visible row.
-					aContexts = this._getRowContexts(iVisibleRowCount, true);
+					aContexts = this._getRowContexts(iVisibleRowCount, bSuppressUpdate, true);
 					iReceivedLength = aContexts.length;
 				}
 			}
 		}
 
-		if (!bSkipSecondCall) {
-			var that = this;
-			if (this._mTimeouts.getContextsSetBusy) {
-				window.clearTimeout(this._mTimeouts.getContextsSetBusy);
-			}
-			this._mTimeouts.getContextsSetBusy = window.setTimeout(function() {
-				that._setBusy({
-					requestedLength: iFixedRowCount + iLength + iFixedBottomRowCount,
-					receivedLength: iReceivedLength,
-					contexts: aContexts,
-					reason: sReason});
-			}, 0);
-		}
-
 		return aContexts;
 	};
 
-	Table.prototype._updateBindingLength = function(sReason) {
-		// get current binding length. If the binding length changes it must call updateAggregation (updateRows)
-		// therefore it should be save to buffer the binding lenght here. This gives some performance advantage
+	/**
+	 * Get current binding length and store it in <code>Table._iBindingLength</code>.
+	 *
+	 * @param {boolean} [bSuppressUpdate=false] If set to <code>true</code>, the dependent UI parts of the table will not be updated when the
+	 * 											binging length has changed.
+	 * @returns {int} The binding length
+	 * @private
+	 */
+	Table.prototype._updateBindingLength = function(bSuppressUpdate) {
+		// If the binding length changes it must call updateAggregation (updateRows).
+		// Therefore it should be save to buffer the binding length here. This gives some performance advantage,
 		// especially for tree bindings using the TreeBindingAdapter where a tree structure must be created to
 		// calculate the correct length.
 		var oBinding = this.getBinding("rows");
 		var iBindingLength = 0;
+
+		bSuppressUpdate = bSuppressUpdate === true;
+
 		if (oBinding) {
 			iBindingLength = oBinding.getLength();
 		}
 
 		if (iBindingLength != this._iBindingLength) {
 			this._iBindingLength = iBindingLength;
-			this._onBindingLengthChange(sReason);
+			this._bBindingLengthChanged = true;
+
+			// When the binding length has changed, some UI parts need to be updated.
+			if (!bSuppressUpdate) {
+				this._updateFixedBottomRows();
+				this._toggleVSb();
+				this._updateVSbRange();
+
+				var bClientBinding = TableUtils.isInstanceOf(oBinding, "sap/ui/model/ClientListBinding") ||
+									 TableUtils.isInstanceOf(oBinding, "sap/ui/model/ClientTreeBinding");
+
+				if (oBinding == null || bClientBinding) {
+					// A client binding does not fire dataReceived events. Therefore we need to update the no data area here.
+					// When the binding has been removed, the table might not be completely re-rendered (just the content). But the bindingLengthChange event
+					// is fired. In this case we also need to update the no data area.
+					this._updateNoData();
+				}
+			}
 		}
 
 		return iBindingLength;
-	};
-
-	Table.prototype._onBindingLengthChange = function(sReason) {
-		this._bBindingLengthChanged = true;
-
-		if (sReason === ChangeReason.Refresh) {
-			return;
-		}
-
-		// update visualization of fixed bottom row
-		this._updateFixedBottomRows();
-		this._toggleVSb();
-		this._updateVSbRange();
-
-		// show or hide the no data container
-		if (sReason != "skipNoDataUpdate") {
-			// in order to have less UI updates, the NoData text should not be updated when the reason is refresh. When
-			// refreshRows was called, the table will request data and later get another change event. In that turn, the
-			// noData text gets updated.
-			this._updateNoData();
-		}
 	};
 
 	/**
@@ -1954,10 +1982,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 
 		var that = this;
 		var sReason = typeof (vEvent) === "object" ? vEvent.getParameter("reason") : vEvent;
-		if (sReason == ChangeReason.Refresh) {
+		if (sReason === ChangeReason.Refresh) {
 			this._attachBindingListener();
 		}
-		this._bBusyIndicatorAllowed = true;
 		// make getContexts call to force data load
 		var sVisibleRowCountMode = this.getVisibleRowCountMode();
 		if ((this.bOutput && sVisibleRowCountMode === VisibleRowCountMode.Auto) || sVisibleRowCountMode !== VisibleRowCountMode.Auto) {
@@ -1971,18 +1998,15 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 						window.clearTimeout(that._mTimeouts.refreshRowsAdjustRows);
 					}
 					that._mTimeouts.refreshRowsAdjustRows = window.setTimeout(function() {
-						that._adjustRows(iRowsToDisplay, true);
+						that._updateRows(iRowsToDisplay, sReason, false);
 					}, 0);
 				});
 			}
 			// request contexts from binding
-			if (sReason == ChangeReason.Filter || sReason == ChangeReason.Sort) {
-				sReason = "skipNoDataUpdate";
+			if (sReason === ChangeReason.Filter || sReason === ChangeReason.Sort) {
 				this.setFirstVisibleRow(0);
-			} else if (sReason == ChangeReason.Refresh) {
-				sReason = "skipNoDataUpdate";
 			}
-			this._updateBindingContexts(true, iRowsToDisplay, sReason);
+			this._updateBindingContexts(iRowsToDisplay, true);
 		}
 	};
 
@@ -1996,23 +2020,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 			return;
 		}
 
-		// update busy indicator state
-		this._setBusy(sReason ? {changeReason: sReason} : false);
-
-		// if the binding length has changed due to filter or sorter, it may happened that the noData text was not updated in order
-		// to avoid flickering of the table.
-		// therefore we need to update the noData text here
-		if (this._bBindingLengthChanged) {
-			this._updateNoData();
-		}
-
 		// Rows should only be created/cloned when the number of rows can be determined. For the VisibleRowCountMode: Auto
 		// this can only happen after the table control was rendered one. At this point in time we know how much space is
 		// consumed by the table header, toolbar, footer... and we can calculate how much space is left for the table rows.
 		var sVisibleRowCountMode = this.getVisibleRowCountMode();
 		if ((this.getRows().length <= 0 || this._bRowAggregationInvalid) && ((sVisibleRowCountMode == VisibleRowCountMode.Auto && this.bOutput) || sVisibleRowCountMode != VisibleRowCountMode.Auto)) {
 			if (this._iTableRowContentHeight) {
-				this._adjustRows(this._calculateRowsToDisplay());
+				this._updateRows(this._calculateRowsToDisplay(), sReason);
 			}
 		}
 
@@ -2029,9 +2043,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 			// except if the reason is coming from the binding with reason "change" then
 			// we do an immediate update instead of a delayed one
 
-			var iBindingTimerDelay = (sReason == ChangeReason.Change || (!this._mTimeouts.bindingTimer && Date.now() - this._lastCalledUpdateRows > this._iBindingTimerDelay) || sReason == "unbindAggregation" ? 0 : this._iBindingTimerDelay);
+			var iBindingTimerDelay = (sReason === ChangeReason.Change
+									  || (!this._mTimeouts.bindingTimer && Date.now() - this._lastCalledUpdateRows > this._iBindingTimerDelay)
+									  || sReason === TableUtils.RowsUpdateReason.Unbind ?
+									  0 : this._iBindingTimerDelay);
 			var that = this;
-			if (iBindingTimerDelay == 0 && sReason) {
+
+			if (iBindingTimerDelay === 0 && sReason) {
 				Promise.resolve().then(function() {
 					that._performUpdateRows(sReason);
 				});
@@ -2116,13 +2134,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 		}
 
 		if (sap.ui.getCore().getConfiguration().getAnimation()) {
-			jQuery("body").bind('webkitTransitionEnd transitionend',
-				jQuery.proxy(function(oEvent) {
+			jQuery(document.body).on("webkitTransitionEnd transitionend",
+				function(oEvent) {
 					if (jQuery(oEvent.target).has($this).length > 0) {
 						this._iDefaultRowHeight = undefined;
-						this._updateTableSizes();
+						this._updateTableSizes(TableUtils.RowsUpdateReason.Animation);
 					}
-			}, this));
+				}.bind(this)
+			);
 		}
 
 		TableExtension.attachEvents(this);
@@ -2133,7 +2152,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 	 * @private
 	 */
 	Table.prototype._detachEvents = function() {
-		jQuery(document.body).unbind('webkitTransitionEnd transitionend');
+		jQuery(document.body).off('webkitTransitionEnd transitionend');
 
 		TableUtils.deregisterResizeHandler(this);
 		TableExtension.detachEvents(this);
@@ -2157,11 +2176,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 	 * @private
 	 */
 	Table.prototype._cleanUpTimers = function() {
-
 		for (var sKey in this._mTimeouts) {
 			if (this._mTimeouts[sKey]) {
-				clearTimeout(this._mTimeouts[sKey]);
-				this._mTimeouts[sKey] = undefined;
+				window.clearTimeout(this._mTimeouts[sKey]);
+				delete this._mTimeouts[sKey];
 			}
 		}
 	};
@@ -2237,7 +2255,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 		var oTableCCnt = this.getDomRef("tableCCnt");
 		if (oTableCCnt) {
 			var iTop = oTableCCnt.offsetTop;
-
 			var oVSbBg = this.getDomRef("vsb-bg");
 			oVSbBg.style.top = iTop + "px";
 
@@ -2250,16 +2267,20 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 	};
 
 	Table.prototype._updateVSbScrollTop = function(iScrollTop) {
-		var oVSb = this._getScrollExtension().getVerticalScrollbar();
+		var oScrollExtension = this._getScrollExtension();
+		var oVSb = oScrollExtension.getVerticalScrollbar();
 		if (!oVSb) {
 			return;
 		}
-
+		if (!this._isVSbRequired()) {
+			return;
+		}
 		if (iScrollTop === undefined) {
 			iScrollTop = Math.ceil(this.getFirstVisibleRow() * this._getScrollingPixelsForRow());
 		}
 
-		oVSb.scrollTop = iScrollTop;
+		oScrollExtension._iVerticalScrollPosition = null;
+		window.requestAnimationFrame(function(){oVSb.scrollTop = iScrollTop;});
 	};
 
 	/**
@@ -2280,15 +2301,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 	 * @private
 	 */
 	Table.prototype._toggleVSb = function() {
-		var $this = this.$();
-		if (this.getDomRef()) {
-			// in case of Scrollbar Mode show/hide the scrollbar depending whether it is needed.
-			var isVSbRequired = this._isVSbRequired();
-			if (!isVSbRequired) {
-				// reset scroll position to zero when Scroll Bar disappe
-				this._updateVSbScrollTop(0);
+		var oDomRef = this.getDomRef();
+		if (oDomRef) {
+			if (this._isVSbRequired()) {
+				if (!oDomRef.classList.contains("sapUiTableVScr")) {
+					oDomRef.classList.add("sapUiTableVScr");
+					this._updateVSbScrollTop(0);
+				}
+			} else {
+				oDomRef.classList.remove("sapUiTableVScr");
 			}
-			$this.toggleClass("sapUiTableVScr", isVSbRequired);
 		}
 	};
 
@@ -2306,23 +2328,25 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 	};
 
 	/**
-	 * updates the binding contexts of the currently visible controls
-	 * @param {boolean} bSuppressUpdate if true, only context will be requested but no binding context set
-	 * @param {int} iRowCount number of rows to be updated and number of contexts to be requested from binding
-	 * @param {String} sReason reason for the update; used to control further lifecycle
+	 * Updates the binding contexts of the cells (column template clones).
+	 *
+	 * @param {int} [iRowCount=undefined] The number of rows to be updated and number of contexts to be requested from binding.
+	 * @param {boolean} [bSuppressUpdate=false] If set to <code>true</code>, the contexts will only be requested, but not assigned to the cells.
 	 * @private
 	 */
-	Table.prototype._updateBindingContexts = function(bSuppressUpdate, iRowCount, sReason) {
-		var oBinding = this.getBinding("rows"),
-			aContexts;
+	Table.prototype._updateBindingContexts = function(iRowCount, bSuppressUpdate) {
+		var oBinding = this.getBinding("rows");
+		var aContexts;
 
-		// fetch the contexts from the binding
-		if (oBinding) {
-			aContexts = this._getRowContexts(iRowCount, false, sReason);
+		bSuppressUpdate = bSuppressUpdate === true;
+
+		// Get the contexts from the binding.
+		if (oBinding != null) {
+			aContexts = this._getRowContexts(iRowCount, bSuppressUpdate);
 		}
 
 		if (!bSuppressUpdate) {
-			// row heights must be reset to make sure that rows can shrink if they may have smaller content. The content
+			// Row heights must be reset to make sure that rows can shrink if they may have smaller content. The content
 			// shall control the row height.
 			this._resetRowHeights();
 
@@ -2646,21 +2670,23 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 			return;
 		}
 
-		this._updateTableSizes();
+		this._updateTableSizes(TableUtils.RowsUpdateReason.Resize);
 	};
 
-	Table.prototype._handleRowCountModeAuto = function(iTableAvailableSpace) {
+	Table.prototype._handleRowCountModeAuto = function(iTableAvailableSpace, sReason) {
 		var oBinding = this.getBinding("rows");
+
 		if (oBinding && this.getRows().length > 0) {
-			return this._executeAdjustRows(iTableAvailableSpace);
+			return this._executeAdjustRows(sReason, iTableAvailableSpace);
 		} else {
-			var that = this;
 			var bReturn = !this._mTimeouts.handleRowCountModeAutoAdjustRows;
-			var iBusyIndicatorDelay = that.getBusyIndicatorDelay();
-			var bEnableBusyIndicator = this.getEnableBusyIndicator();
-			if (oBinding && bEnableBusyIndicator) {
-				that.setBusyIndicatorDelay(0);
-				that.setBusy(true);
+			var iBusyIndicatorDelay = this.getBusyIndicatorDelay();
+			var bBusyIndicatorEnabled = this.getEnableBusyIndicator();
+			var that = this;
+
+			if (oBinding && bBusyIndicatorEnabled) {
+				this.setBusyIndicatorDelay(0);
+				this.setBusy(true);
 			}
 
 			if (iTableAvailableSpace) {
@@ -2668,21 +2694,24 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 			}
 
 			this._mTimeouts.handleRowCountModeAutoAdjustRows = this._mTimeouts.handleRowCountModeAutoAdjustRows || window.setTimeout(function() {
-					if (!that._executeAdjustRows()) {
-						// table sizes were not updated by AdjustRows
-						that._updateTableSizes(false, true);
-					}
-					that._mTimeouts.handleRowCountModeAutoAdjustRows = undefined;
-					if (bEnableBusyIndicator) {
-						that.setBusy(false);
-						that.setBusyIndicatorDelay(iBusyIndicatorDelay);
-					}
-				}, 0);
+				if (!that._executeAdjustRows(sReason)) {
+					// table sizes were not updated by AdjustRows
+					that._updateTableSizes(sReason, false, true);
+				}
+
+				delete that._mTimeouts.handleRowCountModeAutoAdjustRows;
+
+				if (oBinding && bBusyIndicatorEnabled) {
+					that.setBusyIndicatorDelay(iBusyIndicatorDelay);
+					that.setBusy(false);
+				}
+			}, 0);
+
 			return bReturn;
 		}
 	};
 
-	Table.prototype._executeAdjustRows = function(iTableAvailableSpace) {
+	Table.prototype._executeAdjustRows = function(sReason, iTableAvailableSpace) {
 		iTableAvailableSpace = iTableAvailableSpace || this._determineAvailableSpace();
 
 		//if visibleRowCountMode is auto change the visibleRowCount according to the parents container height
@@ -2695,7 +2724,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 			this.$().height("0px");
 		}
 
-		return this._adjustRows(iRows);
+		return this._updateRows(iRows, sReason);
 	};
 
 	/**
@@ -3186,49 +3215,49 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 	 */
 	Table.prototype.setGroupBy = function(vValue) {
 		// determine the group by column
-		var oGroupBy = vValue;
-		if (typeof oGroupBy === "string") {
-			oGroupBy = sap.ui.getCore().byId(oGroupBy);
+		var oGroupByColumn = vValue;
+		if (typeof oGroupByColumn === "string") {
+			oGroupByColumn = sap.ui.getCore().byId(oGroupByColumn);
 		}
 
 		// only for columns we do the full handling here - otherwise the method
 		// setAssociation will fail below with a specific fwk error message
 		var bReset = false;
-		if (oGroupBy && oGroupBy instanceof Column) {
+		if (oGroupByColumn && oGroupByColumn instanceof Column) {
 
 			// check for column being part of the columns aggregation
-			if (jQuery.inArray(oGroupBy, this.getColumns()) === -1) {
+			if (jQuery.inArray(oGroupByColumn, this.getColumns()) === -1) {
 				throw new Error("Column has to be part of the columns aggregation!");
 			}
 
 			// fire the event (to allow to cancel the event)
-			var bExecuteDefault = this.fireGroup({column: oGroupBy, groupedColumns: [oGroupBy.getId()], type: GroupEventType.group});
+			var bExecuteDefault = this.fireGroup({column: oGroupByColumn, groupedColumns: [oGroupByColumn.getId()], type: GroupEventType.group});
 
 			// first we reset the grouping indicator of the old column (will show the column)
-			var oOldGroupBy = sap.ui.getCore().byId(this.getGroupBy());
-			if (oOldGroupBy) {
-				oOldGroupBy.setGrouped(false);
+			var oOldGroupByColumn = sap.ui.getCore().byId(this.getGroupBy());
+			if (oOldGroupByColumn) {
+				oOldGroupByColumn.setGrouped(false);
 				bReset = true;
 			}
 
 			// then we set the grouping indicator of the new column (will hide the column)
 			// ==> only if the default behavior is not prevented
-			if (bExecuteDefault && oGroupBy instanceof Column) {
-				oGroupBy.setGrouped(true);
+			if (bExecuteDefault && oGroupByColumn instanceof Column) {
+				oGroupByColumn.setGrouped(true);
 			}
 
 		}
 
 		// reset the binding when no value is given or the binding needs to be reseted
 		// TODO: think about a better handling to recreate the group binding
-		if (!oGroupBy || bReset) {
+		if (!oGroupByColumn || bReset) {
 			var oBindingInfo = this.getBindingInfo("rows");
 			delete oBindingInfo.binding;
 			this._bindAggregation("rows", oBindingInfo);
 		}
 
 		// set the new group by column (TODO: undefined doesn't work!)
-		return this.setAssociation("groupBy", oGroupBy);
+		return this.setAssociation("groupBy", oGroupByColumn);
 	};
 
 	Table.prototype.getBinding = function(sName) {
@@ -3399,26 +3428,36 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 	};
 
 	Table.prototype._getRowClone = function(iIndex) {
-		var oClone = new Row(this.getId() + "-rows" + "-row" + iIndex);
+		var oRowClone = new Row(this.getId() + "-rows" + "-row" + iIndex);
+
+		// Add cells to the row clone.
 		var aColumns = this.getColumns();
 		for (var i = 0, l = aColumns.length; i < l; i++) {
 			if (aColumns[i].getVisible()) {
 				var oColumnTemplateClone = aColumns[i].getTemplateClone(i);
 				if (oColumnTemplateClone) {
-					oClone.addCell(oColumnTemplateClone);
+					oRowClone.addCell(oColumnTemplateClone);
 				}
 			}
 		}
-		var oRowActionTemplate = this.getRowActionTemplate();
-		if (oRowActionTemplate) {
-			var oRowAction = oRowActionTemplate.clone();
+
+		// Add the row actions to the row clone.
+		if (TableUtils.hasRowActions(this)) {
+			var oRowAction = this.getRowActionTemplate().clone();
 			oRowAction._setFixedLayout(true);
 			oRowAction._setCount(this.getRowActionCount());
 			oRowAction._setIconLabel(this.getId() + "-rowacthdr");
-			oRowAction._show = true; //TBD: Remove the _show flag, only needed to protect misuse in dev phase
-			oClone.setAggregation("_rowAction", oRowAction, true);
+			oRowClone.setAggregation("_rowAction", oRowAction, true);
 		}
-		return oClone;
+
+		// Add the row settings to the row clone.
+		var oRowSettingsTemplate = this.getRowSettingsTemplate();
+		if (oRowSettingsTemplate) {
+			var oRowSettings = oRowSettingsTemplate.clone();
+			oRowClone.setAggregation("_settings", oRowSettings, true);
+		}
+
+		return oRowClone;
 	};
 
 	/**
@@ -3430,12 +3469,22 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 	};
 
 	/**
-	 * Creates the rows for the rows aggregation.
+	 * Updates the rows aggregation and renders the rows.
+	 * As specified by <code>bUpdateUI</code>, also the the row binding contexts and the table cells are updated.
+	 *
+	 * @param {int} iNumberOfRows The number of rows to be updated.
+	 * @param {sap.ui.table.TableUtils.RowsUpdateReason|undefined} [sReason=undefined] The reason for updating the rows.
+	 * @param {boolean} [bUpdateUI=true] Whether the contexts and the cells should be updated.
+	 * @return {boolean} Returns <code>true</code>, if the UI was updated.
 	 * @private
 	 */
-	Table.prototype._adjustRows = function(iNumberOfRows, bNoUpdate) {
+	Table.prototype._updateRows = function(iNumberOfRows, sReason, bUpdateUI) {
 		if (isNaN(iNumberOfRows)) {
 			return false;
+		}
+
+		if (bUpdateUI == null) {
+			bUpdateUI = true;
 		}
 
 		// Create one additional row, for half-scrolled rows at the bottom.
@@ -3461,13 +3510,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 
 		if (TableUtils.isVariableRowHeightEnabled(this)) {
 			// One additional row was created for half-scrolled rows at the bottom.,
-			// this should not lead to a increase of the visibleRowCount defined by the user.
+			// this should not lead to an increase of the visibleRowCount defined by the user.
 			this.setProperty("visibleRowCount", iNumberOfRows - 1, true);
 		} else {
 			this.setProperty("visibleRowCount", iNumberOfRows, true);
 		}
 
-		// this call might cause the cell (controls) to invalidate theirself and therefore also the table. It should be
+		// this call might cause the cell (controls) to invalidate themselves and therefore also the table. It should be
 		// avoided to rerender the complete table since rendering of the rows is handled here. All child controls get
 		// rendered.
 		this._ignoreInvalidateOfChildControls = true;
@@ -3476,7 +3525,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 		var sModelName;
 		var oBinding = this.getBinding("rows");
 
-		if (!bNoUpdate) {
+		if (bUpdateUI) {
 			// set binding contexts for known rows
 			oBindingInfo = this.getBindingInfo("rows");
 			sModelName = oBindingInfo && oBindingInfo.model;
@@ -3493,12 +3542,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 				// add new rows and set their binding contexts in the same run in order to avoid unnecessary context
 				// propagations.
 				var oClone = this._getRowClone(i);
-				if (!bNoUpdate) {
+				if (bUpdateUI) {
 					oClone.setRowBindingContext(aContexts[i], sModelName, oBinding);
 				}
 				this.addAggregation("rows", oClone, true);
 				this._bRowAggregationInvalid = false;
-				if (!bNoUpdate) {
+				if (bUpdateUI) {
 					// As long the clone is not yet in the aggregation setRowBindingContext will not process the following,
 					// therefore call it manually here.
 					oClone._updateTableCells(aContexts[i]);
@@ -3507,30 +3556,33 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 		}
 		this._ignoreInvalidateOfChildControls = false;
 
-		aRows = this.getRows();
-		bNoUpdate = bNoUpdate || aContexts.length == 0;
-		return this._insertTableRows(aRows, bNoUpdate);
+		var bFireRowsUpdated = bUpdateUI && aContexts.length > 0;
+		return this._renderRows(sReason, bFireRowsUpdated);
 	};
 
 	/**
-	 * Insert table rows into DOM.
+	 * Renders the rows and their containers and writes the HTML to the DOM.
 	 *
-	 * @param {sap.ui.table.Row[]} [aRows] Rows aggregation to be rendered.
-	 * @param {Number} [iMaxRowCount] Maximum amount of row to be rendered.
+	 * @param {sap.ui.table.TableUtils.RowsUpdateReason|undefined} [sReason=undefined] The reason why the rows need to be rendered.
+	 * @param {boolean} [bFireRowsUpdated=false] Whether the <code>_rowsUpdated</code> event should be fired after the HTML has been written.
+	 * @return {boolean} Returns <code>true</code>, if rendering and writing to the DOM was performed.
 	 * @private
 	 */
-	Table.prototype._insertTableRows = function(aRows, bNoUpdate) {
+	Table.prototype._renderRows = function(sReason, bFireRowsUpdated) {
 		var bReturn = false;
-		if (!this._bInvalid) {
-			this._detachEvents();
 
+		bFireRowsUpdated = bFireRowsUpdated === true;
+
+		if (!this._bInvalid) {
 			var oTBody = this.getDomRef("tableCCnt");
-			aRows = aRows || this.getRows();
-			if (!aRows.length || !oTBody) {
-				return;
+
+			if (this.getRows().length === 0 || !oTBody) {
+				return false;
 			}
 
-			if (this.getVisibleRowCountMode() == VisibleRowCountMode.Auto) {
+			this._detachEvents();
+
+			if (this.getVisibleRowCountMode() === VisibleRowCountMode.Auto) {
 				var oDomRef = this.getDomRef();
 				if (oDomRef) {
 					oDomRef.style.height = "0px";
@@ -3539,7 +3591,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 
 			// make sure to call rendering event delegates even in case of DOM patching
 			var oEvent = jQuery.Event("BeforeRendering");
-			oEvent.setMarked("insertTableRows");
+			oEvent.setMarked("renderRows");
 			oEvent.srcControl = this;
 			this._handleEvent(oEvent);
 
@@ -3552,19 +3604,19 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 
 			// make sure to call rendering event delegates even in case of DOM patching
 			oEvent = jQuery.Event("AfterRendering");
-			oEvent.setMarked("insertTableRows");
+			oEvent.setMarked("renderRows");
 			oEvent.srcControl = this;
 			this._handleEvent(oEvent);
 			bReturn = true;
 		}
 
-		if (!bNoUpdate && !this._bInvalid && this.getBinding("rows")) {
+		if (bFireRowsUpdated && !this._bInvalid && this.getBinding("rows")) {
 			var that = this;
 			if (this._mTimeouts._rowsUpdated) {
 				window.clearTimeout(this._mTimeouts._rowsUpdated);
 			}
 			this._mTimeouts._rowsUpdated = window.setTimeout(function() {
-				that.fireEvent("_rowsUpdated");
+				that._fireRowsUpdated(sReason);
 			}, 0);
 		}
 
@@ -3692,7 +3744,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 	};
 
 	/**
-	 * Creates a new {@link sap.ui.core.util.Export} object and fills row/column information from the table if not provided. For the cell content, the column's "sortProperty" will be used (experimental!)
+	 * Creates a new {@link sap.ui.core.util.Export} object and fills row/column information from the table if not provided. For the cell content,
+	 * the column's "sortProperty" will be used (experimental!)
 	 *
 	 * <p><b>Please note: The return value was changed from jQuery Promises to standard ES6 Promises.
 	 * jQuery specific Promise methods ('done', 'fail', 'always', 'pipe' and 'state') are still available but should not be used.
@@ -3824,52 +3877,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 		});
 	};
 
-	/**
-	 *
-	 * @param mParameters
-	 * @private
-	 */
-	Table.prototype._setBusy = function (mParameters) {
-		var oBinding,
-			i,
-			bSetBusy;
-
-		if (!this.getEnableBusyIndicator() || !this._bBusyIndicatorAllowed) {
-			return;
-		}
-
-		oBinding = this.getBinding("rows");
-		if (!oBinding) {
-			return;
-		}
-
-		this.setBusy(false);
-		if (mParameters && this._iDataRequestedCounter > 0) {
-			var sReason = mParameters.reason;
-			if (mParameters.contexts && mParameters.contexts.length !== undefined) {
-				// TreeBinding and AnalyticalBinding always return a contexts array with the
-				// requested length. Both put undefined in it for contexts which need to be loaded
-				// Check for undefined in the contexts array.
-				bSetBusy = false;
-				for (i = 0; i < mParameters.contexts.length; i++) {
-					if (mParameters.contexts[i] === undefined) {
-						bSetBusy = true;
-						break;
-					}
-				}
-			} else if (mParameters.changeReason === ChangeReason.Expand) {
-				this.setBusy(true);
-			}
-
-			var iLength = oBinding.getLength();
-			if ((sReason == ChangeReason.Expand && this._iDataRequestedCounter !== 0) || bSetBusy || (oBinding.isInitial()) || (mParameters.receivedLength === 0 && this._iDataRequestedCounter !== 0) ||
-				(mParameters.receivedLength < mParameters.requestedLength && mParameters.receivedLength !== iLength &&
-				 mParameters.receivedLength !== iLength - this.getFirstVisibleRow())) {
-				this.setBusy(true);
-			}
-		}
-	};
-
 	Table.prototype.setBusy = function (bBusy, sBusySection) {
 		var bBusyChanged = this.getBusy() != bBusy;
 
@@ -3894,13 +3901,20 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 	 *
 	 * @private
 	 */
+	Table.prototype._attachBindingListener = function() {
+		this._attachDataRequestedListeners();
+	};
+
+	/**
+	 *
+	 * @private
+	 */
 	Table.prototype._attachDataRequestedListeners = function () {
 		var oBinding = this.getBinding("rows");
 		if (oBinding) {
-			oBinding.detachDataRequested(this._onBindingDataRequestedListener, this);
-			oBinding.detachDataReceived(this._onBindingDataReceivedListener, this);
-			this._iDataRequestedCounter = 0;
+			oBinding.detachDataRequested(this._onBindingDataRequestedListener);
 			oBinding.attachDataRequested(this._onBindingDataRequestedListener, this);
+			oBinding.detachDataReceived(this._onBindingDataReceivedListener);
 			oBinding.attachDataReceived(this._onBindingDataReceivedListener, this);
 		}
 	};
@@ -3911,7 +3925,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 	 */
 	Table.prototype._onBindingDataRequestedListener = function (oEvent) {
 		if (oEvent.getSource() == this.getBinding("rows") && !oEvent.getParameter("__simulateAsyncAnalyticalBinding")) {
-			this._iDataRequestedCounter++;
+			this._bPendingRequest = true;
+
+			if (this.getEnableBusyIndicator()) {
+				this.setBusy(true);
+			}
+
+			if (this._dataReceivedHandlerId != null) {
+				jQuery.sap.clearDelayedCall(this._dataReceivedHandlerId);
+				delete this._dataReceivedHandlerId;
+			}
 		}
 	};
 
@@ -3921,16 +3944,27 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 	 */
 	Table.prototype._onBindingDataReceivedListener = function (oEvent) {
 		if (oEvent.getSource() == this.getBinding("rows") && !oEvent.getParameter("__simulateAsyncAnalyticalBinding")) {
-			this._iDataRequestedCounter--;
-		}
-	};
+			this._bPendingRequest = false;
 
-	/**
-	 *
-	 * @private
-	 */
-	Table.prototype._attachBindingListener = function() {
-		this._attachDataRequestedListeners();
+			if (this._dataReceivedHandlerId != null) {
+				jQuery.sap.clearDelayedCall(this._dataReceivedHandlerId);
+				delete this._dataReceivedHandlerId;
+			}
+
+			// The table will be set to busy when a request is sent, and set to not busy when a response is received.
+			// When scrolling down fast it can happen that there are multiple requests in the request queue of the binding, which will be processed
+			// sequentially. In this case the busy indicator will be shown and hidden multiple times (flickering) until all requests have been
+			// processed. With this timer we avoid the flickering, as the table will only be set to not busy after all requests have been processed.
+			// The same applied for updating the NoData area.
+			this._dataReceivedHandlerId = jQuery.sap.delayedCall(0, this, function() {
+				if (this.getEnableBusyIndicator()) {
+					this.setBusy(false);
+				}
+				this._updateBindingLength(true);
+				this._updateNoData();
+				delete this._dataReceivedHandlerId;
+			});
+		}
 	};
 
 	/**
@@ -3993,20 +4027,98 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device',
 		return this;
 	};
 
+	/*
+	 * @see JSDoc generated by SAPUI5 control API generator
+	 */
+	Table.prototype.setRowSettingsTemplate = function(oTemplate) {
+		this.setAggregation("rowSettingsTemplate", oTemplate);
+		this.invalidateRowsAggregation();
+		return this;
+	};
+
+	Table.prototype._validateRow = function(oRow) {
+		return oRow && oRow instanceof Row && oRow.getParent() === this;
+	};
+
+	/**
+	 * Returns the row to which the given cell belongs or <code>null</code>
+	 * if the given control is no direct child of a row of the table.
+	 *
+	 * @param {sap.ui.core.Control} oCell The cell control
+	 * @returns {sap.ui.table.Row} The row to which the given cell belongs
+	 * @private
+	 */
+	Table.prototype.getRowForCell = function(oCell) { //TBD: Make it public if needed
+		if (oCell) {
+			var oRow = oCell.getParent();
+			if (this._validateRow(oRow)) {
+				return oRow;
+			}
+		}
+		return null;
+	};
+
+	/**
+	 * Returns the column to which the given cell belongs or <code>null</code>
+	 * if the given control is not connected with a visible column of the table.
+	 *
+	 * @param {sap.ui.core.Control} oCell The cell control
+	 * @returns {sap.ui.table.Column} The column to which the given cell belongs
+	 * @private
+	 */
+	Table.prototype.getColumnForCell = function(oCell) { //TBD: Make it public if needed
+		if (this.getRowForCell(oCell)) { // Ensures cell is part of some row of this table
+			var iIndex = oCell.data("sap-ui-colindex");
+			var aColumns = this.getColumns();
+			if (iIndex >= 0 && iIndex < aColumns.length) {
+				return aColumns[iIndex];
+			}
+		}
+		return null;
+	};
+
 	/**
 	 * Returns the control inside the cell with the given row index (in the <code>rows</code> aggregation)
 	 * and column index (in the <code>columns</code> aggregation or in the list of visible columns only, depending on
 	 * parameter <code>bVisibleColumnIndex</code>).
 	 *
 	 * @param {int} iRowIndex Index of row in the table's <code>rows</code> aggregation
-	 * @param {int} iColumnIndex Index of column in the list of visible columns or in the <code>columns</code> aggregation, as indicated with <code>bVisibleColumnIndex</code>
-	 * @param {boolean} bVisibleColumnIndex If set to <code>true</code>, the given column index is interpreted as index in the list of visible columns, otherwise as index in the <code>columns</code> aggregation
+	 * @param {int} iColumnIndex Index of column in the list of visible columns or in the <code>columns</code> aggregation, as indicated with
+	 *     <code>bVisibleColumnIndex</code>
+	 * @param {boolean} bVisibleColumnIndex If set to <code>true</code>, the given column index is interpreted as index in the list of visible
+	 *     columns, otherwise as index in the <code>columns</code> aggregation
 	 * @return {sap.ui.core.Control} Control inside the cell with the given row and column index or <code>null</code> if no such control exists
 	 * @protected
 	 */
 	Table.prototype.getCellControl = function(iRowIndex, iColumnIndex, bVisibleColumnIndex) {
 		var oInfo = TableUtils.getRowColCell(this, iRowIndex, iColumnIndex, !bVisibleColumnIndex);
 		return oInfo.cell;
+	};
+
+	/**
+	 * Fires the <code>_rowsUpdated</code> event.
+	 *
+	 * @param {sap.ui.table.TableUtils.RowsUpdateReason} [sReason=sap.ui.table.TableUtils.RowsUpdateReason.Unknown]
+	 * The reason why the rows have been updated.
+	 * @fires Table#_rowsUpdated
+	 * @private
+	 */
+	Table.prototype._fireRowsUpdated = function(sReason) {
+		if (sReason == null) {
+			sReason = TableUtils.RowsUpdateReason.Unknown;
+		}
+
+		/**
+		 * This event is fired after the rows have been updated.
+		 *
+		 * @event Table#_rowsUpdated
+		 * @type {Object}
+		 * @property {sap.ui.table.TableUtils.RowsUpdateReason} reason - The reason why the rows have been updated.
+		 * @protected
+		 */
+		this.fireEvent("_rowsUpdated", {
+			reason: sReason
+		});
 	};
 
 	return Table;

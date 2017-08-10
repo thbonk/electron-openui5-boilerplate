@@ -73,7 +73,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 * @param {Element[]} aItemDomRefs Array of DOM references representing the items for the navigation
 	 * @param {boolean} [bNotInTabChain=false] Whether the selected element should be in the tab chain or not
 	 *
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @constructor
 	 * @alias sap.ui.core.delegate.ItemNavigation
 	 * @public
@@ -326,7 +326,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 
 				if ($Item.data("sap.INRoot") && i != this.iFocusedIndex) {
 
-					// item is root of an nested ItemNavigation -> set tabindexes from its items to -1
+					// item is root of a nested ItemNavigation -> set tabindexes from its items to -1
 					$Item.data("sap.INRoot").setNestedItemsTabindex();
 				}
 			}

@@ -18,11 +18,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/core/Control', 'sap
 	 * @param {object} [mSettings] initial settings for the new control
 	 *
 	 * @class
-	 * ShellOverlay to be opened in front of a sap.ui.unified.Shell
+	 * ShellOverlay to be opened in front of an sap.ui.unified.Shell
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -274,14 +274,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/core/Control', 'sap
 	ShellOverlay.prototype._getAnimDuration = function(bOpen){
 		if ((bOpen && this._animOpenDuration == -1) || (!bOpen && this._animCloseDuration == -1)) {
 			var sTxt = bOpen ? "Open" : "Close";
-			this["_anim" + sTxt + "Duration"] = this._getAnimDurationThemeParam("sapUiUfdShellOvrly" + sTxt + "AnimOverAll", true);
+			this["_anim" + sTxt + "Duration"] = this._getAnimDurationThemeParam("_sap_ui_unified_ShellOverlay_" + sTxt + "AnimOverAll", true);
 		}
 		return bOpen ? this._animOpenDuration : this._animCloseDuration;
 	};
 
 	ShellOverlay.prototype._getBLAnimDuration = function(){
 		if (this._animBlockLayerDuration == -1) {
-			this._animBlockLayerDuration = this._getAnimDurationThemeParam("sapUiUfdShellOvrlyBlockLayerAnimDuration", true);
+			this._animBlockLayerDuration = this._getAnimDurationThemeParam("_sap_ui_unified_ShellOverlay_BlockLayerAnimDuration", true);
 		}
 		return this._animBlockLayerDuration;
 	};

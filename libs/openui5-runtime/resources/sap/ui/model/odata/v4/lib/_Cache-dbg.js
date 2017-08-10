@@ -35,8 +35,11 @@ sap.ui.define([
 	 *   The function to process the converted options getting the name and the value
 	 * @param {boolean} [bDropSystemQueryOptions=false]
 	 *   Whether all system query options are dropped (useful for non-GET requests)
+	 * @param {boolean} [bSortExpandSelect=false]
+	 *   Whether the paths in $expand and $select shall be sorted in the cache's query string
 	 */
-	function convertSystemQueryOptions(mQueryOptions, fnResultHandler, bDropSystemQueryOptions) {
+	function convertSystemQueryOptions(mQueryOptions, fnResultHandler, bDropSystemQueryOptions,
+			bSortExpandSelect) {
 		Object.keys(mQueryOptions).forEach(function (sKey) {
 			var vValue = mQueryOptions[sKey];
 
@@ -46,45 +49,18 @@ sap.ui.define([
 
 			switch (sKey) {
 				case "$expand":
-					vValue = Cache.convertExpand(vValue);
-					break;
-				case "$apply":
-				case "$count":
-				case "$filter":
-				case "$orderby":
-				case "$search":
+					vValue = Cache.convertExpand(vValue, bSortExpandSelect);
 					break;
 				case "$select":
 					if (Array.isArray(vValue)) {
-						vValue = vValue.join(",");
+						vValue = bSortExpandSelect ? vValue.sort().join(",") : vValue.join(",");
 					}
 					break;
 				default:
-					if (sKey[0] === '$') {
-						throw new Error("Unsupported system query option " + sKey);
-					}
+					// nothing to do
 			}
 			fnResultHandler(sKey, vValue);
 		});
-	}
-
-	/**
-	 * Creates an object that has the given value exactly at the given property path allowing to
-	 * use the result in _Helper.updateCache().
-	 * Examples:
-	 * ["Age"], 42 -> {Age: 42}
-	 * ["Address", "City"], "Walldorf" -> {Address: {City: "Walldorf"}}
-	 *
-	 * @param {string[]} aPropertyPath The property path split into an array of segments
-	 * @param {any} vValue The property value
-	 * @returns {object} The resulting object
-	 */
-	function createUpdateData(aPropertyPath, vValue) {
-		return aPropertyPath.reduceRight(function (vValue0, sSegment) {
-			var oResult = {};
-			oResult[sSegment] = vValue0;
-			return oResult;
-		}, vValue);
 	}
 
 	/**
@@ -199,102 +175,6 @@ sap.ui.define([
 		_Helper.updateCache(mChangeListeners, sPath, aCollection, {$count : vCount});
 	}
 
-	/**
-	 * Updates the property of the given name with the given new value (and later with the server's
-	 * response), using the given group ID for batch control and the given edit URL to send a PATCH
-	 * request.
-	 *
-	 * @param {object} oCache
-	 *   The cache
-	 * @param {string} sGroupId
-	 *   The group ID
-	 * @param {string} sPropertyPath
-	 *   Name or path of the property to update relative to the edit URL
-	 * @param {any} vValue
-	 *   The new value
-	 * @param {string} sEditUrl
-	 *   The edit URL for the entity which is updated via PATCH
-	 * @param {string} sPath
-	 *   Relative path to drill-down into
-	 * @param {object} oCacheData
-	 *   The cache data for sPath
-	 * @returns {Promise}
-	 *   A promise for the PATCH request
-	 */
-	function update(oCache, sGroupId, sPropertyPath, vValue, sEditUrl, sPath, oCacheData) {
-		var oBody, // the body for the PATCH request
-			mHeaders, // the headers for the PATCH request
-			vOldValue, // the old value of the property
-			sParkedGroupId,
-			aPropertyPath = sPropertyPath.split("/"), // the property path as array of segments
-			sTransientGroup,
-			// the path that is updated; the promise is registered here
-			sUpdatePath = _Helper.buildPath(sPath, sPropertyPath),
-			oUpdatePromise;
-
-		/*
-		 * Synchronous callback to cancel the PATCH request so that it is really gone when
-		 * resetChangesForPath has been called on the binding or model.
-		 */
-		function onCancel() {
-			oCache.removeByPath(oCache.mPatchRequests, sUpdatePath, oUpdatePromise);
-			// write the previous value into the cache
-			_Helper.updateCache(oCache.mChangeListeners, sPath, oCacheData,
-				createUpdateData(aPropertyPath, vOldValue));
-		}
-
-		if (!oCacheData) {
-			throw new Error("Cannot update '" + sPropertyPath + "': '" + sPath
-				+ "' does not exist");
-		}
-		sTransientGroup = oCacheData["@$ui5.transient"];
-		if (sTransientGroup === true) {
-			throw new Error("No 'update' allowed while waiting for server response");
-		}
-		if (sTransientGroup && sTransientGroup.indexOf("$parked.") === 0) {
-			sParkedGroupId = sTransientGroup;
-			sTransientGroup = sTransientGroup.slice(8);
-		}
-		if (sTransientGroup && sTransientGroup !== sGroupId) {
-			throw new Error("The entity will be created via group '" + sTransientGroup
-				+ "'. Cannot patch via group '" + sGroupId + "'");
-		}
-
-		sEditUrl += Cache.buildQueryString(oCache.mQueryOptions, true);
-		mHeaders = {"If-Match" : oCacheData["@odata.etag"]};
-		// create the PATCH request body
-		oBody = createUpdateData(aPropertyPath, vValue);
-		// remember the old value
-		vOldValue = aPropertyPath.reduce(function (oValue, sSegment) {
-			return oValue && oValue[sSegment];
-		}, oCacheData);
-		// write the changed value into the cache
-		_Helper.updateCache(oCache.mChangeListeners, sPath, oCacheData,
-			createUpdateData(aPropertyPath, vValue));
-		if (sTransientGroup) {
-			// When updating a transient entity, _Helper.updateCache has already updated the POST
-			// request, because the request body is a reference into the cache.
-			if (sParkedGroupId) {
-				oCacheData["@$ui5.transient"] = sTransientGroup;
-				oCache.oRequestor.relocate(sParkedGroupId, oCacheData, sTransientGroup);
-			}
-			return Promise.resolve({});
-		}
-		// send and register the PATCH request
-		oUpdatePromise = oCache.oRequestor.request("PATCH", sEditUrl, sGroupId, mHeaders, oBody,
-			undefined, onCancel);
-		oCache.addByPath(oCache.mPatchRequests, sUpdatePath, oUpdatePromise);
-		return oUpdatePromise.then(function (oPatchResult) {
-			oCache.removeByPath(oCache.mPatchRequests, sUpdatePath, oUpdatePromise);
-			// update the cache with the PATCH response
-			_Helper.updateCache(oCache.mChangeListeners, sPath, oCacheData, oPatchResult);
-			return oPatchResult;
-		}, function (oError) {
-			oCache.removeByPath(oCache.mPatchRequests, sUpdatePath, oUpdatePromise);
-			throw oError;
-		});
-	}
-
 	//*********************************************************************************************
 	// Cache
 	//*********************************************************************************************
@@ -308,15 +188,94 @@ sap.ui.define([
 	 *   A resource path relative to the service URL
 	 * @param {object} [mQueryOptions]
 	 *   A map of key-value pairs representing the query string
+	 * @param {boolean} [bSortExpandSelect=false]
+	 *   Whether the paths in $expand and $select shall be sorted in the cache's query string
 	 */
-	function Cache(oRequestor, sResourcePath, mQueryOptions) {
+	function Cache(oRequestor, sResourcePath, mQueryOptions, bSortExpandSelect) {
 		this.bActive = true;
 		this.mChangeListeners = {};
-		this.mPatchRequests = {};
+		this.mPatchRequests = {}; //map path to an array of (PATCH) promises
+		this.mPostRequests = {}; //map path to an array of entity data (POST bodies)
 		this.mQueryOptions = mQueryOptions;
 		this.oRequestor = oRequestor;
-		this.sResourcePath = sResourcePath + Cache.buildQueryString(mQueryOptions);
+		this.sResourcePath = sResourcePath
+			+ Cache.buildQueryString(mQueryOptions, false, bSortExpandSelect);
+		this.bSortExpandSelect = bSortExpandSelect;
 	}
+
+	/**
+	 * Deletes an entity on the server and in the cached data.
+	 *
+	 * @param {string} sGroupId
+	 *   The group ID
+	 * @param {string} sEditUrl
+	 *   The entity's edit URL
+	 * @param {string} sPath
+	 *   The entity's path within the cache
+	 * @param {function} fnCallback
+	 *   A function which is called after a transient entity has been deleted from the cache or
+	 *   after the entity has been deleted from the server and from the cache; the index of the
+	 *   entity is passed as parameter
+	 * @returns {Promise}
+	 *   A promise for the DELETE request
+	 */
+	Cache.prototype._delete = function (sGroupId, sEditUrl, sPath, fnCallback) {
+		var aSegments = sPath.split("/"),
+			vDeleteProperty = aSegments.pop(),
+			sParentPath = aSegments.join("/"),
+			that = this;
+
+		return this.fetchValue(sGroupId, sParentPath).then(function (vCacheData) {
+			var oEntity = vDeleteProperty
+					? vCacheData[vDeleteProperty]
+					: vCacheData, // deleting at root level
+				mHeaders,
+				sTransientGroup = oEntity["@$ui5.transient"];
+
+			if (sTransientGroup === true) {
+				throw new Error("No 'delete' allowed while waiting for server response");
+			}
+			if (sTransientGroup) {
+				that.oRequestor.removePost(sTransientGroup, oEntity);
+				return Promise.resolve();
+			}
+			if (oEntity["$ui5.deleting"]) {
+				throw new Error("Must not delete twice: " + sEditUrl);
+			}
+			oEntity["$ui5.deleting"] = true;
+			mHeaders = {"If-Match" : oEntity["@odata.etag"]};
+			sEditUrl += Cache.buildQueryString(that.mQueryOptions, true);
+			return that.oRequestor.request("DELETE", sEditUrl, sGroupId, mHeaders)
+				["catch"](function (oError) {
+					if (oError.status !== 404) {
+						delete oEntity["$ui5.deleting"];
+						throw oError;
+					} // else: map 404 to 200
+				})
+				.then(function () {
+					if (Array.isArray(vCacheData)) {
+						if (vCacheData[vDeleteProperty] !== oEntity) {
+							// oEntity might have moved due to parallel insert/delete
+							vDeleteProperty = vCacheData.indexOf(oEntity);
+						}
+						if (vDeleteProperty === "-1") {
+							delete vCacheData[-1];
+						} else {
+							vCacheData.splice(vDeleteProperty, 1);
+						}
+						addToCount(that.mChangeListeners, sParentPath, vCacheData, -1);
+						fnCallback(Number(vDeleteProperty));
+					} else {
+						if (vDeleteProperty) {
+							vCacheData[vDeleteProperty] = null;
+						} else { // deleting at root level
+							oEntity["$ui5.deleted"] = true;
+						}
+						fnCallback();
+					}
+				});
+		});
+	};
 
 	/**
 	 * Adds an item to the given map by path.
@@ -351,6 +310,91 @@ sap.ui.define([
 			oError.canceled = true;
 			throw oError;
 		}
+	};
+
+	/**
+	 * Creates a transient entity with index -1 in the list and adds a POST request to the batch
+	 * group with the given ID. If the POST request failed, <code>fnErrorCallback</code> is called
+	 * with an Error object, the POST request is automatically added again to the same batch
+	 * group (for application group IDs) or parked (for '$auto' or '$direct'). Parked POST requests
+	 * are repeated with the next update of the entity data.
+	 *
+	 * @param {string} sGroupId
+	 *   The group ID
+	 * @param {string|SyncPromise} vPostPath
+	 *   The path for the POST request or a SyncPromise that resolves with that path
+	 * @param {string} sPath
+	 *   The entity's path within the cache
+	 * @param {string} [oEntityData={}]
+	 *   The initial entity data
+	 * @param {function} fnCancelCallback
+	 *   A function which is called after a transient entity has been canceled from the cache
+	 * @param {function} fnErrorCallback
+	 *   A function which is called with an Error object each time a POST request fails
+	 * @returns {Promise}
+	 *   A promise which is resolved without data when the POST request has been successfully sent
+	 *   and the entity has been marked as non-transient
+	 */
+	Cache.prototype.create = function (sGroupId, vPostPath, sPath, oEntityData,
+			fnCancelCallback, fnErrorCallback) {
+		var vCacheData, aCollection, sNavigationProperty, aSegments, that = this;
+
+		// Clean-up when the create has been canceled.
+		function cleanUp() {
+			that.removeByPath(that.mPostRequests, sPath, oEntityData);
+			delete aCollection[-1];
+			fnCancelCallback();
+		}
+
+		// Sets a marker that the create request is pending, so that update and delete fail.
+		function setCreatePending() {
+			oEntityData["@$ui5.transient"] = true;
+		}
+
+		function request(sPostGroupId) {
+			oEntityData["@$ui5.transient"] = sPostGroupId; // mark as transient (again)
+			return _SyncPromise.resolve(vPostPath).then(function (sPostPath) {
+				sPostPath += Cache.buildQueryString(that.mQueryOptions, true);
+				that.addByPath(that.mPostRequests, sPath, oEntityData);
+				return that.oRequestor.request("POST", sPostPath, sPostGroupId, null, oEntityData,
+						setCreatePending, cleanUp)
+					.then(function (oResult) {
+						delete oEntityData["@$ui5.transient"];
+						// now the server has one more element
+						addToCount(that.mChangeListeners, sPath, aCollection, 1);
+						that.removeByPath(that.mPostRequests, sPath, oEntityData);
+						// update the cache with the POST response
+						_Helper.updateCacheAfterPost(that.mChangeListeners,
+							_Helper.buildPath(sPath, "-1"), oEntityData, oResult,
+							_Helper.getSelectForPath(that.mQueryOptions, sPath));
+					}, function (oError) {
+						if (oError.canceled) {
+							// for cancellation no error is reported via fnErrorCallback
+							throw oError;
+						}
+						if (fnErrorCallback) {
+							fnErrorCallback(oError);
+						}
+						return request(sPostGroupId === "$auto" || sPostGroupId === "$direct"
+							? "$parked." + sPostGroupId : sPostGroupId);
+				});
+			});
+		}
+
+		// clone data to avoid modifications outside the cache
+		oEntityData = oEntityData ? JSON.parse(JSON.stringify(oEntityData)) : {};
+
+		aSegments = sPath.split("/");
+		sNavigationProperty = aSegments.pop();
+		vCacheData = this.fetchValue("$cached", aSegments.join("/")).getResult();
+		aCollection = sNavigationProperty ? vCacheData[sNavigationProperty] : vCacheData;
+		if (!Array.isArray(aCollection)) {
+			throw new Error("Create is only supported for collections; '" + sPath
+					+ "' does not reference a collection");
+		}
+		aCollection[-1] = oEntityData;
+
+		return request(sGroupId);
 	};
 
 	/**
@@ -424,6 +468,8 @@ sap.ui.define([
 	Cache.prototype.hasPendingChangesForPath = function (sPath) {
 		return Object.keys(this.mPatchRequests).some(function (sRequestPath) {
 			return isSubPath(sRequestPath, sPath);
+		}) || Object.keys(this.mPostRequests).some(function (sRequestPath) {
+			return isSubPath(sRequestPath, sPath);
 		});
 	};
 
@@ -473,17 +519,34 @@ sap.ui.define([
 	 *   yet.
 	 */
 	Cache.prototype.resetChangesForPath = function (sPath) {
+		var that = this;
+
 		Object.keys(this.mPatchRequests).forEach(function (sRequestPath) {
 			var i, aPromises;
 
 			if (isSubPath(sRequestPath, sPath)) {
-				aPromises = this.mPatchRequests[sRequestPath];
+				aPromises = that.mPatchRequests[sRequestPath];
 				for (i = aPromises.length - 1; i >= 0; i--) {
-					this.oRequestor.removePatch(aPromises[i]);
+					that.oRequestor.removePatch(aPromises[i]);
 				}
-				delete this.mPatchRequests[sRequestPath];
+				delete that.mPatchRequests[sRequestPath];
 			}
-		}, this);
+		});
+
+		Object.keys(this.mPostRequests).forEach(function (sRequestPath) {
+			var aEntities, i, sTransientGroup;
+
+			if (isSubPath(sRequestPath, sPath)) {
+				aEntities = that.mPostRequests[sRequestPath];
+				for (i = aEntities.length - 1; i >= 0; i--) {
+					sTransientGroup = aEntities[i]["@$ui5.transient"];
+					if (sTransientGroup) {
+						that.oRequestor.removePost(sTransientGroup, aEntities[i]);
+					}
+				}
+				delete that.mPostRequests[sRequestPath];
+			}
+		});
 	};
 
 	/**
@@ -508,6 +571,110 @@ sap.ui.define([
 	 */
 	Cache.prototype.toString = function () {
 		return this.oRequestor.getServiceUrl() + this.sResourcePath;
+	};
+
+	/**
+	 * Updates the property of the given name with the given new value (and later with the server's
+	 * response), using the given group ID for batch control and the given edit URL to send a PATCH
+	 * request.
+	 *
+	 * @param {string} sGroupId
+	 *   The group ID
+	 * @param {string} sPropertyPath
+	 *   Path of the property to update, relative to the entity
+	 * @param {any} vValue
+	 *   The new value
+	 * @param {function} fnErrorCallback
+	 *   A function which is called with an Error object each time a PATCH request fails
+	 * @param {string} sEditUrl
+	 *   The edit URL for the entity which is updated via PATCH
+	 * @param {string} [sEntityPath]
+	 *   Path of the entity, relative to the cache
+	 * @returns {Promise}
+	 *   A promise for the PATCH request
+	 */
+	Cache.prototype.update = function (sGroupId, sPropertyPath, vValue, fnErrorCallback, sEditUrl,
+			sEntityPath) {
+		var aPropertyPath = sPropertyPath.split("/"),
+			that = this;
+
+		return this.fetchValue(sGroupId, sEntityPath).then(function (oEntity) {
+			var sFullPath = _Helper.buildPath(sEntityPath, sPropertyPath),
+				vOldValue,
+				oPatchPromise,
+				sParkedGroup,
+				sTransientGroup,
+				oUpdateData = Cache.makeUpdateData(aPropertyPath, vValue);
+
+			/*
+			 * Synchronous callback to cancel the PATCH request so that it is really gone when
+			 * resetChangesForPath has been called on the binding or model.
+			 */
+			function onCancel () {
+				that.removeByPath(that.mPatchRequests, sFullPath, oPatchPromise);
+				// write the previous value into the cache
+				_Helper.updateCache(that.mChangeListeners, sEntityPath, oEntity,
+					Cache.makeUpdateData(aPropertyPath, vOldValue));
+			}
+
+			function patch() {
+				oPatchPromise = that.oRequestor.request("PATCH", sEditUrl, sGroupId,
+					{"If-Match" : oEntity["@odata.etag"]}, oUpdateData, undefined, onCancel);
+				that.addByPath(that.mPatchRequests, sFullPath, oPatchPromise);
+				return oPatchPromise.then(function (oPatchResult) {
+					that.removeByPath(that.mPatchRequests, sFullPath, oPatchPromise);
+					// update the cache with the PATCH response
+					_Helper.updateCache(that.mChangeListeners, sEntityPath, oEntity, oPatchResult);
+					return oPatchResult;
+				}, function (oError) {
+					that.removeByPath(that.mPatchRequests, sFullPath, oPatchPromise);
+					if (!oError.canceled) {
+						fnErrorCallback(oError);
+						if (sGroupId !== "$auto" && sGroupId !== "$direct") {
+							return patch();
+						}
+					}
+					throw oError;
+				});
+			}
+
+			if (!oEntity) {
+				throw new Error("Cannot update '" + sPropertyPath + "': '" + sEntityPath
+					+ "' does not exist");
+			}
+			sTransientGroup = oEntity["@$ui5.transient"];
+			if (sTransientGroup) {
+				if (sTransientGroup === true) {
+					throw new Error("No 'update' allowed while waiting for server response");
+				}
+				if (sTransientGroup.indexOf("$parked.") === 0) {
+					sParkedGroup = sTransientGroup;
+					sTransientGroup = sTransientGroup.slice(8);
+				}
+				if (sTransientGroup !== sGroupId) {
+					throw new Error("The entity will be created via group '" + sTransientGroup
+						+ "'. Cannot patch via group '" + sGroupId + "'");
+				}
+			}
+			// remember the old value
+			vOldValue = aPropertyPath.reduce(function (oValue, sSegment) {
+				return oValue && oValue[sSegment];
+			}, oEntity);
+			// write the changed value into the cache
+			_Helper.updateCache(that.mChangeListeners, sEntityPath, oEntity, oUpdateData);
+			if (sTransientGroup) {
+				// When updating a transient entity, _Helper.updateCache has already updated the
+				// POST request, because the request body is a reference into the cache.
+				if (sParkedGroup) {
+					oEntity["@$ui5.transient"] = sTransientGroup;
+					that.oRequestor.relocate(sParkedGroup, oEntity, sTransientGroup);
+				}
+				return Promise.resolve({});
+			}
+			// send and register the PATCH request
+			sEditUrl += Cache.buildQueryString(that.mQueryOptions, true);
+			return patch();
+		});
 	};
 
 	//*********************************************************************************************
@@ -537,142 +704,6 @@ sap.ui.define([
 
 	// make CollectionCache a Cache
 	CollectionCache.prototype = Object.create(Cache.prototype);
-
-	/**
-	 * Deletes an entity on the server and in the cached data.
-	 *
-	 * @param {string} sGroupId
-	 *   The group ID
-	 * @param {string} sEditUrl
-	 *   The entity's edit URL
-	 * @param {string} sPath
-	 *   The entity's path within the cache
-	 * @param {function} fnCallback
-	 *   A function which is called after a transient entity has been deleted from the cache or
-	 *   after the entity has been deleted from the server and from the cache; the index of the
-	 *   entity is passed as parameter
-	 * @returns {Promise}
-	 *   A promise for the DELETE request
-	 */
-	CollectionCache.prototype._delete = function (sGroupId, sEditUrl, sPath, fnCallback) {
-		var aSegments = sPath.split("/"),
-			vDeleteProperty = aSegments.pop(),
-			sParentPath = aSegments.join("/"),
-			that = this;
-
-		return this.fetchValue(sGroupId, sParentPath).then(function (oCacheData) {
-			var oEntity,
-				mHeaders,
-				sTransientGroup;
-
-			oEntity = oCacheData[vDeleteProperty];
-			sTransientGroup = oEntity["@$ui5.transient"];
-			if (sTransientGroup === true) {
-				throw new Error("No 'delete' allowed while waiting for server response");
-			}
-			if (sTransientGroup) {
-				that.oRequestor.removePost(sTransientGroup, oEntity);
-				return Promise.resolve();
-			}
-			if (oEntity["$ui5.deleting"]) {
-				throw new Error("Must not delete twice: " + sEditUrl);
-			}
-			oEntity["$ui5.deleting"] = true;
-			mHeaders = {"If-Match" : oEntity["@odata.etag"]};
-			sEditUrl += Cache.buildQueryString(that.mQueryOptions, true);
-			return that.oRequestor.request("DELETE", sEditUrl, sGroupId, mHeaders)
-				["catch"](function (oError) {
-					if (oError.status !== 404) {
-						delete oEntity["$ui5.deleting"];
-						throw oError;
-					} // else: map 404 to 200
-				})
-				.then(function () {
-					if (oCacheData[vDeleteProperty] !== oEntity) {
-						// oEntity might have moved due to parallel insert/delete
-						vDeleteProperty = oCacheData.indexOf(oEntity);
-					}
-					if (vDeleteProperty === "-1") {
-						delete oCacheData[-1];
-					} else {
-						oCacheData.splice(vDeleteProperty, 1);
-					}
-					addToCount(that.mChangeListeners, sParentPath, oCacheData, -1);
-					fnCallback(Number(vDeleteProperty));
-				});
-		});
-	};
-
-	/**
-	 * Creates a transient entity with index -1 in the list and adds a POST request to the batch
-	 * group with the given ID. If the POST request failed, <code>fnErrorCallback</code> is called
-	 * with an Error object, the POST request is automatically added again to the same batch
-	 * group (for application group IDs) or parked (for '$auto' or '$direct'). Parked POST requests
-	 * are repeated with the next update of the entity data.
-	 *
-	 * @param {string} sGroupId
-	 *   The group ID
-	 * @param {string} sPostPath
-	 *   The path for the POST request
-	 * @param {string} sPath
-	 *   The entity's path within the cache
-	 * @param {string} [oEntityData={}]
-	 *   The initial entity data
-	 * @param {function} fnCancelCallback
-	 *   A function which is called after a transient entity has been canceled from the cache
-	 * @param {function} fnErrorCallback
-	 *   A function which is called with an Error object each time a POST request fails
-	 * @returns {Promise}
-	 *   A promise which is resolved without data when the POST request has been successfully sent
-	 *   and the entity has been marked as non-transient
-	 */
-	CollectionCache.prototype.create = function (sGroupId, sPostPath, sPath, oEntityData,
-			fnCancelCallback, fnErrorCallback) {
-		var that = this;
-
-		// Clean-up when the create has been canceled.
-		function cleanUp() {
-			delete that.aElements[-1];
-			fnCancelCallback();
-		}
-
-		// Sets a marker that the create request is pending, so that update and delete fail.
-		function setCreatePending() {
-			oEntityData["@$ui5.transient"] = true;
-		}
-
-		function request(sPostGroupId) {
-			oEntityData["@$ui5.transient"] = sPostGroupId; // mark as transient (again)
-			return that.oRequestor.request("POST", sPostPath, sPostGroupId, null, oEntityData,
-					setCreatePending, cleanUp)
-				.then(function (oResult) {
-					delete oEntityData["@$ui5.transient"];
-					// now the server has one more element
-					addToCount(that.mChangeListeners, "", that.aElements, 1);
-					// update the cache with the POST response
-					_Helper.updateCache(that.mChangeListeners, "-1", oEntityData, oResult);
-				}, function (oError) {
-					if (oError.canceled) {
-						// for cancellation no error is reported via fnErrorCallback
-						throw oError;
-					}
-					if (fnErrorCallback) {
-						fnErrorCallback(oError);
-					}
-					return request(sPostGroupId === "$auto" || sPostGroupId === "$direct"
-						? "$parked." + sPostGroupId : sPostGroupId);
-				});
-		}
-
-		// clone data to avoid modifications outside the cache
-		oEntityData = oEntityData ? JSON.parse(JSON.stringify(oEntityData)) : {};
-
-		this.aElements[-1] = oEntityData;
-		// provide undefined ETag so that _Helper.updateCache() also updates ETag from server
-		oEntityData["@odata.etag"] = undefined;
-		sPostPath += Cache.buildQueryString(this.mQueryOptions, true);
-		return request(sGroupId);
-	};
 
 	/**
 	 * Returns a promise to be resolved with an OData object for the requested data.
@@ -716,19 +747,6 @@ sap.ui.define([
 			that.registerChange(sPath, oListener);
 			return that.drillDown(that.aElements, sPath);
 		});
-	};
-
-	/**
-	 * Returns <code>true</code> if there are pending changes below the given path.
-	 *
-	 * @param {string} sPath
-	 *   The relative path of a binding; must not end with '/'
-	 * @returns {boolean}
-	 *   <code>true</code> if there are pending changes
-	 */
-	CollectionCache.prototype.hasPendingChangesForPath = function (sPath) {
-		return !!(sPath === "" && this.aElements[-1] && this.aElements[-1]["@$ui5.transient"])
-			|| Cache.prototype.hasPendingChangesForPath.call(this, sPath);
 	};
 
 	/**
@@ -806,52 +824,6 @@ sap.ui.define([
 		});
 	};
 
-	/**
-	 * Resets all pending changes below the given path.
-	 *
-	 * @param {string} [sPath]
-	 *   The path
-	 * @throws {Error}
-	 *   If there is a change which has been sent to the server and for which there is no response
-	 *   yet.
-	 */
-	CollectionCache.prototype.resetChangesForPath = function (sPath) {
-		var sTransientGroup;
-
-		if (sPath === "" && this.aElements[-1]) {
-			sTransientGroup = this.aElements[-1]["@$ui5.transient"];
-			if (sTransientGroup) {
-				this.oRequestor.removePost(sTransientGroup, this.aElements[-1]);
-			}
-		}
-		Cache.prototype.resetChangesForPath.call(this, sPath);
-	};
-
-	/**
-	 * Updates the property of the given name with the given new value (and later with the server's
-	 * response), using the given group ID for batch control and the given edit URL to send a PATCH
-	 * request.
-	 * In case of a transient entity, all property updates for this entity will not lead to a PATCH
-	 * request, but update the POST.
-	 *
-	 * @param {string} sGroupId
-	 *   The group ID
-	 * @param {string} sPropertyName
-	 *   Name of property to update
-	 * @param {any} vValue
-	 *   The new value
-	 * @param {string} sEditUrl
-	 *   The edit URL for the entity which is updated via PATCH
-	 * @param {string} [sPath]
-	 *   Relative path to drill-down into
-	 * @returns {Promise}
-	 *   A promise for the PATCH request
-	 */
-	CollectionCache.prototype.update = function (sGroupId, sPropertyName, vValue, sEditUrl, sPath) {
-		return this.fetchValue(sGroupId, sPath)
-			.then(update.bind(null, this, sGroupId, sPropertyName, vValue, sEditUrl, sPath));
-	};
-
 	//*********************************************************************************************
 	// PropertyCache
 	//*********************************************************************************************
@@ -874,6 +846,26 @@ sap.ui.define([
 
 	// make PropertyCache a Cache
 	PropertyCache.prototype = Object.create(Cache.prototype);
+
+	/**
+	 * Not supported.
+	 *
+	 * @throws {Error}
+	 *   Deletion of a property is not supported.
+	 */
+	PropertyCache.prototype._delete = function () {
+		throw new Error("Unsupported");
+	};
+
+	/**
+	 * Not supported.
+	 *
+	 * @throws {Error}
+	 *   Creation of a property is not supported.
+	 */
+	PropertyCache.prototype.create = function () {
+		throw new Error("Unsupported");
+	};
 
 	/**
 	 * Returns a promise to be resolved with an OData object for the requested data.
@@ -910,6 +902,16 @@ sap.ui.define([
 		});
 	};
 
+	/**
+	 * Not supported.
+	 *
+	 * @throws {Error}
+	 *   Updating a single property is not supported.
+	 */
+	PropertyCache.prototype.update = function () {
+		throw new Error("Unsupported");
+	};
+
 	//*********************************************************************************************
 	// SingleCache
 	//*********************************************************************************************
@@ -923,12 +925,14 @@ sap.ui.define([
 	 *   A resource path relative to the service URL
 	 * @param {object} [mQueryOptions]
 	 *   A map of key-value pairs representing the query string
+	 * @param {boolean} [bSortExpandSelect=false]
+	 *   Whether the paths in $expand and $select shall be sorted in the cache's query string
 	 * @param {boolean} [bPost]
 	 *   Whether the cache uses POST requests. If <code>true</code>, only {@link #post} may lead to
 	 *   a request, {@link #read} may only read from the cache; otherwise {@link #post} throws an
 	 *   error.
 	 */
-	function SingleCache(oRequestor, sResourcePath, mQueryOptions, bPost) {
+	function SingleCache(oRequestor, sResourcePath, mQueryOptions, bSortExpandSelect, bPost) {
 		Cache.apply(this, arguments);
 
 		this.bPost = bPost;
@@ -938,66 +942,6 @@ sap.ui.define([
 
 	// make SingleCache a Cache
 	SingleCache.prototype = Object.create(Cache.prototype);
-
-	/**
-	 * Deletes an entity on the server and in the cached data.
-	 *
-	 * @param {string} sGroupId
-	 *   The group ID
-	 * @param {string} sEditUrl
-	 *   The entity's edit URL
-	 * @param {string} sPath
-	 *   The entity's path within the cache
-	 * @param {function} fnCallback
-	 *   A function which is called after the entity has been deleted from the server and from the
-	 *   cache; the index of the entity is passed as parameter
-	 * @returns {Promise}
-	 *   A promise for the DELETE request
-	 */
-	SingleCache.prototype._delete = function (sGroupId, sEditUrl, sPath, fnCallback) {
-		var aSegments = sPath.split("/"),
-			vDeleteProperty = aSegments.pop(),
-			sParentPath = aSegments.join("/"),
-			that = this;
-
-		return this.fetchValue(sGroupId, sParentPath).then(function (vCacheData) {
-			var oEntity = vDeleteProperty
-					? vCacheData[vDeleteProperty]
-					: vCacheData, // deleting at root level
-				mHeaders = {"If-Match" : oEntity["@odata.etag"]};
-
-			if (oEntity["$ui5.deleting"]) {
-				throw new Error("Must not delete twice: " + sEditUrl);
-			}
-			oEntity["$ui5.deleting"] = true;
-			sEditUrl += Cache.buildQueryString(that.mQueryOptions, true);
-			return that.oRequestor.request("DELETE", sEditUrl, sGroupId, mHeaders)
-				["catch"](function (oError) {
-					if (oError.status !== 404) {
-						delete oEntity["$ui5.deleting"];
-						throw oError;
-					} // else: map 404 to 200
-				})
-				.then(function () {
-					if (Array.isArray(vCacheData)) {
-						if (vCacheData[vDeleteProperty] !== oEntity) {
-							// oEntity might have moved due to parallel insert/delete
-							vDeleteProperty = vCacheData.indexOf(oEntity);
-						}
-						vCacheData.splice(vDeleteProperty, 1);
-						addToCount(that.mChangeListeners, sParentPath, vCacheData, -1);
-						fnCallback(Number(vDeleteProperty));
-					} else {
-						if (vDeleteProperty) {
-							vCacheData[vDeleteProperty] = null;
-						} else { // deleting at root level
-							oEntity["$ui5.deleted"] = true;
-						}
-						fnCallback();
-					}
-				});
-		});
-	};
 
 	/**
 	 * Returns a promise to be resolved with an OData object for a POST request with the given data.
@@ -1089,29 +1033,6 @@ sap.ui.define([
 		});
 	};
 
-	/**
-	 * Updates the property of the given name with the given new value (and later with the server's
-	 * response), using the given group ID for batch control and the given edit URL to send a PATCH
-	 * request.
-	 *
-	 * @param {string} sGroupId
-	 *   The group ID
-	 * @param {string} sPropertyName
-	 *   Name of property to update
-	 * @param {any} vValue
-	 *   The new value
-	 * @param {string} sEditUrl
-	 *   The edit URL for the entity which is updated via PATCH
-	 * @param {string} [sPath]
-	 *   Relative path to drill-down into
-	 * @returns {Promise}
-	 *   A promise for the PATCH request
-	 */
-	SingleCache.prototype.update = function (sGroupId, sPropertyName, vValue, sEditUrl, sPath) {
-		return this.fetchValue(sGroupId, sPath)
-			.then(update.bind(null, this, sGroupId, sPropertyName, vValue, sEditUrl, sPath));
-	};
-
 	//*********************************************************************************************
 	// "static" functions
 	//*********************************************************************************************
@@ -1125,6 +1046,8 @@ sap.ui.define([
 	 *   A map of key-value pairs representing the query string
 	 * @param {boolean} [bDropSystemQueryOptions=false]
 	 *   Whether all system query options are dropped (useful for non-GET requests)
+	 * @param {boolean} [bSortExpandSelect=false]
+	 *   Whether the paths in $expand and $select shall be sorted in the cache's query string
 	 * @returns {string}
 	 *   The query string; it is empty if there are no options; it starts with "?" otherwise
 	 * @example
@@ -1147,30 +1070,38 @@ sap.ui.define([
 	 *		"sap-client" : "003"
 	 *	}
 	 */
-	Cache.buildQueryString = function (mQueryOptions, bDropSystemQueryOptions) {
+	Cache.buildQueryString = function (mQueryOptions, bDropSystemQueryOptions, bSortExpandSelect) {
 		return _Helper.buildQuery(
-			Cache.convertQueryOptions(mQueryOptions, bDropSystemQueryOptions));
+			Cache.convertQueryOptions(mQueryOptions, bDropSystemQueryOptions, bSortExpandSelect));
 	};
 
 	/**
-	 *  Converts the value for a "$expand" in mQueryParams.
+	 * Converts the value for a "$expand" in mQueryParams.
 	 *
-	 *  @param {object} mExpandItems The expand items, a map from path to options
-	 *  @returns {string} The resulting value for the query string
-	 *  @throws {Error} If the expand items are not an object
+	 * @param {object} mExpandItems The expand items, a map from path to options
+	 * @param {boolean} [bSortExpandSelect=false]
+	 *   Whether the paths in $expand and $select shall be sorted in the cache's query string
+	 * @returns {string} The resulting value for the query string
+	 * @throws {Error} If the expand items are not an object
 	 */
-	Cache.convertExpand = function (mExpandItems) {
-		var aResult = [];
+	Cache.convertExpand = function (mExpandItems, bSortExpandSelect) {
+		var aKeys,
+			aResult = [];
 
 		if (!mExpandItems || typeof mExpandItems !== "object") {
 			throw new Error("$expand must be a valid object");
 		}
 
-		Object.keys(mExpandItems).forEach(function (sExpandPath) {
+		aKeys = Object.keys(mExpandItems);
+		if (bSortExpandSelect) {
+			aKeys = aKeys.sort();
+		}
+		aKeys.forEach(function (sExpandPath) {
 			var vExpandOptions = mExpandItems[sExpandPath];
 
 			if (vExpandOptions && typeof vExpandOptions === "object") {
-				aResult.push(Cache.convertExpandOptions(sExpandPath, vExpandOptions));
+				aResult.push(Cache.convertExpandOptions(sExpandPath, vExpandOptions,
+					bSortExpandSelect));
 			} else {
 				aResult.push(sExpandPath);
 			}
@@ -1185,15 +1116,17 @@ sap.ui.define([
 	 * @param {string} sExpandPath The expand path
 	 * @param {boolean|object} vExpandOptions
 	 *   The options; either a map or simply <code>true</code>
+	 * @param {boolean} [bSortExpandSelect=false]
+	 *   Whether the paths in $expand and $select shall be sorted in the cache's query string
 	 * @returns {string} The resulting string for the OData query in the form "path" (if no
 	 *   options) or "path($option1=foo;$option2=bar)"
 	 */
-	Cache.convertExpandOptions = function (sExpandPath, vExpandOptions) {
+	Cache.convertExpandOptions = function (sExpandPath, vExpandOptions, bSortExpandSelect) {
 		var aExpandOptions = [];
 
 		convertSystemQueryOptions(vExpandOptions, function (sOptionName, vOptionValue) {
 			aExpandOptions.push(sOptionName + '=' + vOptionValue);
-		});
+		}, undefined, bSortExpandSelect);
 		return aExpandOptions.length ? sExpandPath + "(" + aExpandOptions.join(";") + ")"
 			: sExpandPath;
 	};
@@ -1206,9 +1139,12 @@ sap.ui.define([
 	 * @param {object} mQueryOptions The query options
 	 * @param {boolean} [bDropSystemQueryOptions=false]
 	 *   Whether all system query options are dropped (useful for non-GET requests)
+	 * @param {boolean} [bSortExpandSelect=false]
+	 *   Whether the paths in $expand and $select shall be sorted in the cache's query string
 	 * @returns {object} The converted query options
 	 */
-	Cache.convertQueryOptions = function (mQueryOptions, bDropSystemQueryOptions) {
+	Cache.convertQueryOptions = function (mQueryOptions, bDropSystemQueryOptions,
+			bSortExpandSelect) {
 		var mConvertedQueryOptions = {};
 
 		if (!mQueryOptions) {
@@ -1216,7 +1152,7 @@ sap.ui.define([
 		}
 		convertSystemQueryOptions(mQueryOptions, function (sKey, vValue) {
 			mConvertedQueryOptions[sKey] = vValue;
-		}, bDropSystemQueryOptions);
+		}, bDropSystemQueryOptions, bSortExpandSelect);
 		return mConvertedQueryOptions;
 	};
 
@@ -1236,11 +1172,13 @@ sap.ui.define([
 	 *   Examples:
 	 *   {foo : "bar", "bar" : "baz"} results in the query string "foo=bar&bar=baz"
 	 *   {foo : ["bar", "baz"]} results in the query string "foo=bar&foo=baz"
+	 * @param {boolean} [bSortExpandSelect=false]
+	 *   Whether the paths in $expand and $select shall be sorted in the cache's query string
 	 * @returns {sap.ui.model.odata.v4.lib._Cache}
 	 *   The cache
 	 */
-	Cache.create = function (oRequestor, sResourcePath, mQueryOptions) {
-		return new CollectionCache(oRequestor, sResourcePath, mQueryOptions);
+	Cache.create = function (oRequestor, sResourcePath, mQueryOptions, bSortExpandSelect) {
+		return new CollectionCache(oRequestor, sResourcePath, mQueryOptions, bSortExpandSelect);
 	};
 
 	/**
@@ -1280,6 +1218,8 @@ sap.ui.define([
 	 *   Examples:
 	 *   {foo : "bar", "bar" : "baz"} results in the query string "foo=bar&bar=baz"
 	 *   {foo : ["bar", "baz"]} results in the query string "foo=bar&foo=baz"
+	 * @param {boolean} [bSortExpandSelect=false]
+	 *   Whether the paths in $expand and $select shall be sorted in the cache's query string
 	 * @param {boolean} [bPost]
 	 *   Whether the cache uses POST requests. If <code>true</code>, only {@link #post} may
 	 *   lead to a request, {@link #read} may only read from the cache; otherwise {@link #post}
@@ -1287,8 +1227,9 @@ sap.ui.define([
 	 * @returns {sap.ui.model.odata.v4.lib._Cache}
 	 *   The cache
 	 */
-	Cache.createSingle = function (oRequestor, sResourcePath, mQueryOptions, bPost) {
-		return new SingleCache(oRequestor, sResourcePath, mQueryOptions, bPost);
+	Cache.createSingle = function (oRequestor, sResourcePath, mQueryOptions, bSortExpandSelect,
+			bPost) {
+		return new SingleCache(oRequestor, sResourcePath, mQueryOptions, bSortExpandSelect, bPost);
 	};
 
 	/**
@@ -1318,6 +1259,31 @@ sap.ui.define([
 				Cache.computeCount(vValue);
 			}
 		});
+	};
+
+	/**
+	 * Makes an object that has the given value exactly at the given property path allowing to use
+	 * the result in _Helper.updateCache().
+	 *
+	 * Examples:
+	 * <ul>
+	 * <li>["Age"], 42 -> {Age: 42}
+	 * <li>["Address", "City"], "Walldorf" -> {Address: {City: "Walldorf"}}
+	 * </ul>
+	 *
+	 * @param {string[]} aPropertyPath
+	 *   The property path split into an array of segments
+	 * @param {any} vValue
+	 *   The property value
+	 * @returns {object}
+	 *   The resulting object
+	 */
+	Cache.makeUpdateData = function (aPropertyPath, vValue) {
+		return aPropertyPath.reduceRight(function (vValue0, sSegment) {
+			var oResult = {};
+			oResult[sSegment] = vValue0;
+			return oResult;
+		}, vValue);
 	};
 
 	return Cache;

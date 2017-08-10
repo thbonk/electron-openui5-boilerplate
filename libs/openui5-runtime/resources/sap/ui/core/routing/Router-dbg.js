@@ -11,7 +11,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 		var oRouters = {};
 
 		/**
-		 * Instantiates a SAPUI5 Router
+		 * Instantiates an SAPUI5 Router
 		 *
 		 * @class
 		 * @extends sap.ui.base.EventProvider
@@ -261,10 +261,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 			/**
 			 * Attaches the router to the hash changer @see sap.ui.core.routing.HashChanger
 			 *
+			 * @param {boolean} [bIgnoreInitialHash=false] @since 1.48.0 whether the current url hash shouldn't be parsed after the router is initialized
 			 * @public
 			 * @returns {sap.ui.core.routing.Router} this for chaining.
 			 */
-			initialize : function () {
+			initialize : function (bIgnoreInitialHash) {
 				var that = this,
 					oHashChanger = this.oHashChanger = HashChanger.getInstance();
 
@@ -283,13 +284,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 					that._bHashChangedAfterTitleChange = true;
 				};
 
-
 				if (!oHashChanger) {
 					jQuery.sap.log.error("navTo of the router is called before the router is initialized. If you want to replace the current hash before you initialize the router you may use getUrl and use replaceHash of the Hashchanger.", this);
 					return;
 				}
-
-				oHashChanger.attachEvent("hashChanged", this.fnHashChanged);
 
 				if (this._oTargets) {
 					var oHomeRoute = this._oRoutes[this._oConfig.homeRoute];
@@ -321,7 +319,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 					}
 				}
 
-				if (!oHashChanger.init()) {
+				oHashChanger.init();
+
+				// The event handler needs to be attached after hash changer is
+				// initialized because whether the current hash is parsed is
+				// controlled by the 'bSuppressHashParsing' parameter and the
+				// 'hashchanged' event which may be fired from hashChanger.init()
+				// shouldn't be processed.
+				oHashChanger.attachEvent("hashChanged", this.fnHashChanged);
+
+				if (!bIgnoreInitialHash) {
 					this.parse(oHashChanger.getHash());
 				}
 
@@ -336,7 +343,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 			 * @public
 			 */
 			stop : function () {
-
 				if (!this._bIsInitialized) {
 					jQuery.sap.log.warning("Router is not initialized. But it got stopped", this);
 				}

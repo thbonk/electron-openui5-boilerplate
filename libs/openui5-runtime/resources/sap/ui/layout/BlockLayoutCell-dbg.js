@@ -4,8 +4,8 @@
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['sap/ui/core/Control', './library'],
-	function(Control, library) {
+sap.ui.define(['sap/ui/core/Control', './library', 'sap/ui/core/theming/Parameters'],
+	function(Control, library, Parameters) {
 		"use strict";
 
 		/**
@@ -20,7 +20,7 @@ sap.ui.define(['sap/ui/core/Control', './library'],
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.46.12
+		 * @version 1.48.5
 		 *
 		 * @constructor
 		 * @public
@@ -32,7 +32,6 @@ sap.ui.define(['sap/ui/core/Control', './library'],
 
 			library : "sap.ui.layout",
 			properties : {
-
 				/**
 				 * Defines the title of the cell
 				 */
@@ -63,8 +62,21 @@ sap.ui.define(['sap/ui/core/Control', './library'],
 				 * According to the visual guidelines, it is suggested that you only use 25%, 50%, 75% or 100% cells in
 				 * you applications. For example, 12,5% width is not desirable (1 cell with width 1, and another with width 7)
 				 */
-				width: { type: "int", group: "Appearance", defaultValue: 0 }
-
+				width: { type: "int", group: "Appearance", defaultValue: 0 },
+				/**
+				 * The Background color set from which the background color will be selected.
+				 * By using background colors from the predefined sets your colors could later be customized from the Theme Designer.
+				 * <b>Note:</b> backgroundColorSet should be used only in combination with backgroundColorShade.
+				 * @since 1.48
+				 */
+				backgroundColorSet: { type: "sap.ui.layout.BlockLayoutCellColorSet", group: "Appearance" },
+				/**
+				 * The index of the background color in the color set from which the color will be selected.
+				 * By using background colors from the predefined sets your colors could later be customized from the Theme Designer.
+				 * <b>Note:</b> backgroundColorShade should be used only in combination with backgroundColorSet.
+				 * @since 1.48
+				 */
+				backgroundColorShade: { type: "sap.ui.layout.BlockLayoutCellColorShade", group: "Appearance" }
 			},
 			defaultAggregation : "content",
 			aggregations : {
@@ -79,7 +91,7 @@ sap.ui.define(['sap/ui/core/Control', './library'],
 		/**
 		 * When the width is set, the cell needs to notify the parent row if it's in scrollable mode
 		 * to update the other cells as well.
-		 * @param The width of the cell
+		 * @param width of the cell
 		 * @returns {BlockLayoutCell}
 		 */
 		BlockLayoutCell.prototype.setWidth = function (width) {
@@ -91,6 +103,13 @@ sap.ui.define(['sap/ui/core/Control', './library'],
 				}
 			}
 			return this;
+		};
+
+		/**
+		 * If the theme is changed and the cell has some color applied, we need to invalidate the cell to force rerendering
+		 */
+		BlockLayoutCell.prototype.onThemeChanged = function () {
+			this.invalidate();
 		};
 
 		/**

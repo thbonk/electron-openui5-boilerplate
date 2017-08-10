@@ -20,14 +20,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @namespace
 	 * @name sap.ui.commons
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @public
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.commons",
-		version: "1.46.12",
+		version: "1.48.5",
 		dependencies : ["sap.ui.core","sap.ui.layout","sap.ui.unified"],
 		types: [
 			"sap.ui.commons.ButtonStyle",
@@ -201,24 +201,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 *
 	 * @enum {string}
 	 * @public
+	 * @deprecated Since version 1.48.0. Moved to sap.ui.unified library. Please use this one.
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	sap.ui.commons.ColorPickerMode = {
-
-			/**
-			 * Color picker works with HSV values.
-			 * @public
-			 */
-			HSV : "HSV",
-
-			/**
-			 * Color picker works with HSL values.
-			 * @public
-			 */
-			HSL : "HSL"
-
-	};
-
+	sap.ui.commons.ColorPickerMode = sap.ui.unified.ColorPickerMode;
 
 	/**
 	 * Marker interface for common controls which are suitable for use within a FormattedTextView.
@@ -1198,18 +1184,61 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 		"horizontal" : sap.ui.core.Orientation.Horizontal
 	};
 
+	// implements ColorPicker helper factory with common controls
+	if (!sap.ui.unified.ColorPickerHelper || !sap.ui.unified.ColorPickerHelper.bFinal) {
+		sap.ui.unified.ColorPickerHelper = {
+			isResponsive: function () {
+				return false;
+			},
+			factory: {
+				createLabel: function (mConfig) {
+					return new sap.ui.commons.Label(mConfig);
+				},
+				createInput: function (sId, mConfig) {
+					return new sap.ui.commons.TextField(sId, mConfig);
+				},
+				createSlider: function (sId, mConfig) {
+					if (mConfig && mConfig.step) {
+						mConfig.smallStepWidth = mConfig.step;
+						delete mConfig.step;
+					}
+					return new sap.ui.commons.Slider(sId, mConfig);
+				},
+				createRadioButtonGroup: function (mConfig) {
+					if (mConfig && mConfig.buttons) {
+						mConfig.items = mConfig.buttons;
+						delete mConfig.buttons;
+					}
+					return new sap.ui.commons.RadioButtonGroup(mConfig);
+				},
+				createRadioButtonItem: function (mConfig) {
+					return new sap.ui.core.Item(mConfig);
+				}
+			},
+			bFinal: false /* to allow mobile to overwrite  */
+		};
+	}
+
 	// implement Form helper factory with common controls
 	if (!sap.ui.layout.form.FormHelper || !sap.ui.layout.form.FormHelper.bFinal) {
 		sap.ui.layout.form.FormHelper = {
 			createLabel: function(sText){
 				return new sap.ui.commons.Label({text: sText});
 			},
-			createButton: function(sId, fPressFunction){
-				var oButton = new sap.ui.commons.Button(sId,{
-					lite: true
-					});
-				oButton.attachEvent('press', fPressFunction, this); // attach event this way to have the right this-reference in handler
-				return oButton;
+			createButton: function(sId, fPressFunction, fnCallback){
+				var that = this;
+				var _createButton = function(Button){
+					var oButton = new Button(sId, {lite: true});
+					oButton.attachEvent('press', fPressFunction, that); // attach event this way to have the right this-reference in handler
+					fnCallback.call(that, oButton);
+				};
+				var fnButtonClass = sap.ui.require("sap/ui/commons/Button");
+				if (fnButtonClass) {
+					// already loaded -> execute synchron
+					_createButton(fnButtonClass);
+				} else {
+					sap.ui.require(["sap/ui/commons/Button"], _createButton);
+				}
 			},
 			setButtonContent: function(oButton, sText, sTooltip, sIcon, sIconHovered){
 				oButton.setText(sText);

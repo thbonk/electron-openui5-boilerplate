@@ -1002,6 +1002,65 @@
 </CustomTile>
 ]]></xmlTemplate>
 </Template>
+<Template name="sap.m.CustomTreeItem" alias="CustomTreeItem,Item">
+	<jsTemplate><![CDATA[new sap.m.CustomTreeItem({
+	id: "${id}", // sap.ui.core.ID
+	busy: false, // boolean
+	busyIndicatorDelay: 1000, // int
+	visible: true, // boolean
+	fieldGroupIds: [], // string[], since 1.31
+	type: sap.m.ListType.Inactive, // sap.m.ListType
+	visible: true, // boolean
+	unread: false, // boolean
+	selected: false, // boolean
+	counter: undefined, // int
+	highlight: sap.ui.core.MessageType.None, // sap.ui.core.MessageType, since 1.44.0
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Element, since 1.19
+	content: [], // sap.ui.core.Control
+	ariaLabelledBy: [], // sap.ui.core.Control, since 1.28.0
+	validateFieldGroup: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	tap: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	detailTap: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	press: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	detailPress: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this]
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<CustomTreeItem xmlns="sap.m"
+	id="${id}"
+	busy="false"
+	busyIndicatorDelay="1000"
+	visible="true"
+	fieldGroupIds=""
+	type="Inactive"
+	visible="true"
+	unread="false"
+	selected="false"
+	counter=""
+	highlight="None"
+	ariaLabelledBy=""
+	validateFieldGroup=""
+	tap=""
+	detailTap=""
+	press=""
+	detailPress="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<content></content> <!-- sap.ui.core.Control -->
+</CustomTreeItem>
+]]></xmlTemplate>
+</Template>
 <Template name="sap.m.DatePicker" alias="DatePicker,Picker">
 	<jsTemplate><![CDATA[new sap.m.DatePicker({
 	id: "${id}", // sap.ui.core.ID
@@ -3594,6 +3653,7 @@
 	markupDescription: false, // boolean
 	longtextUrl: undefined, // sap.ui.core.URI
 	counter: undefined, // int
+	groupName: "", // string
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
@@ -3612,7 +3672,8 @@
 	description=""
 	markupDescription="false"
 	longtextUrl=""
-	counter="">
+	counter=""
+	groupName="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 		<link></link> <!-- sap.m.Link -->
@@ -3686,7 +3747,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
-	items: [], // sap.m.MessagePopoverItem
+	items: [], // sap.m.MessageItem
 	headerButton: undefined, // sap.m.Button
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -3738,7 +3799,7 @@
 	urlValidated="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
-		<items></items> <!-- sap.m.MessagePopoverItem -->
+		<items></items> <!-- sap.m.MessageItem -->
 		<headerButton></headerButton> <!-- sap.m.Button -->
 </MessagePopover>
 ]]></xmlTemplate>
@@ -3757,6 +3818,7 @@
 	markupDescription: false, // boolean
 	longtextUrl: undefined, // sap.ui.core.URI
 	counter: undefined, // int
+	groupName: "", // string
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
@@ -3775,7 +3837,8 @@
 	description=""
 	markupDescription="false"
 	longtextUrl=""
-	counter="">
+	counter=""
+	groupName="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 		<link></link> <!-- sap.m.Link -->
@@ -3834,6 +3897,7 @@
 	fieldGroupIds: [], // string[], since 1.31
 	asyncDescriptionHandler: undefined, // any
 	asyncURLHandler: undefined, // any
+	groupItems: false, // boolean
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
@@ -3867,6 +3931,7 @@
 	fieldGroupIds=""
 	asyncDescriptionHandler=""
 	asyncURLHandler=""
+	groupItems="false"
 	validateFieldGroup=""
 	afterOpen=""
 	itemSelect=""
@@ -4551,6 +4616,7 @@
 	icon: undefined, // sap.ui.core.URI
 	iconActive: undefined, // boolean
 	iconAlt: undefined, // string
+	iconTooltip: undefined, // string
 	iconDensityAware: true, // boolean
 	markFavorite: false, // boolean, since 1.16.0
 	markFlagged: false, // boolean, since 1.16.0
@@ -4614,6 +4680,7 @@
 	icon=""
 	iconActive=""
 	iconAlt=""
+	iconTooltip=""
 	iconDensityAware="true"
 	markFavorite="false"
 	markFlagged="false"
@@ -5782,6 +5849,65 @@
 </P13nSortPanel>
 ]]></xmlTemplate>
 </Template>
+<Template name="sap.m.PDFViewer" alias="PDFViewer">
+	<jsTemplate><![CDATA[new sap.m.PDFViewer({
+	id: "${id}", // sap.ui.core.ID
+	busy: false, // boolean
+	busyIndicatorDelay: 1000, // int
+	visible: true, // boolean
+	fieldGroupIds: [], // string[], since 1.31
+	height: "100%", // sap.ui.core.CSSSize
+	width: "100%", // sap.ui.core.CSSSize
+	source: undefined, // sap.ui.core.URI
+	errorMessage: undefined, // string
+	errorPlaceholderMessage: undefined, // string
+	popupHeaderTitle: undefined, // string
+	title: undefined, // string
+	showDownloadButton: true, // boolean
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Element, since 1.19
+	errorPlaceholder: undefined, // sap.ui.core.Control
+	popupButtons: [], // sap.m.Button
+	validateFieldGroup: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	loaded: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	error: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	sourceValidationFailed: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this]
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<PDFViewer xmlns="sap.m"
+	id="${id}"
+	busy="false"
+	busyIndicatorDelay="1000"
+	visible="true"
+	fieldGroupIds=""
+	height="100%"
+	width="100%"
+	source=""
+	errorMessage=""
+	errorPlaceholderMessage=""
+	popupHeaderTitle=""
+	title=""
+	showDownloadButton="true"
+	validateFieldGroup=""
+	loaded=""
+	error=""
+	sourceValidationFailed="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<errorPlaceholder></errorPlaceholder> <!-- sap.ui.core.Control -->
+		<popupButtons></popupButtons> <!-- sap.m.Button -->
+</PDFViewer>
+]]></xmlTemplate>
+</Template>
 <Template name="sap.m.Page" alias="Page">
 	<jsTemplate><![CDATA[new sap.m.Page({
 	id: "${id}", // sap.ui.core.ID
@@ -6000,6 +6126,7 @@
 	showEmptyIntervalHeaders: true, // boolean, since 1.38.0
 	showRowHeaders: true, // boolean
 	noDataText: undefined, // string
+	groupAppointmentsMode: sap.ui.unified.GroupAppointmentsMode.Collapsed, // sap.ui.unified.GroupAppointmentsMode, since 1.48.0
 	appointmentsReducedHeight: false, // boolean, since 1.38.0
 	appointmentsVisualization: sap.ui.unified.CalendarAppointmentVisualization.Standard, // sap.ui.unified.CalendarAppointmentVisualization, since 1.40.0
 	minDate: undefined, // object, since 1.38.0
@@ -6051,6 +6178,7 @@
 	showEmptyIntervalHeaders="true"
 	showRowHeaders="true"
 	noDataText=""
+	groupAppointmentsMode="Collapsed"
 	appointmentsReducedHeight="false"
 	appointmentsVisualization="Standard"
 	minDate=""
@@ -7411,6 +7539,7 @@
 	defaultTransitionNameMaster: "slide", // string
 	mode: sap.m.SplitAppMode.ShowHideMode, // sap.m.SplitAppMode
 	masterButtonText: undefined, // string
+	masterButtonTooltip: undefined, // string, since 1.48
 	backgroundColor: undefined, // string, since 1.11.2
 	backgroundImage: undefined, // sap.ui.core.URI, since 1.11.2
 	backgroundRepeat: false, // boolean, since 1.11.2
@@ -7468,6 +7597,7 @@
 	defaultTransitionNameMaster="slide"
 	mode="ShowHideMode"
 	masterButtonText=""
+	masterButtonTooltip=""
 	backgroundColor=""
 	backgroundImage=""
 	backgroundRepeat="false"
@@ -7504,6 +7634,7 @@
 	defaultTransitionNameMaster: "slide", // string
 	mode: sap.m.SplitAppMode.ShowHideMode, // sap.m.SplitAppMode
 	masterButtonText: undefined, // string
+	masterButtonTooltip: undefined, // string, since 1.48
 	backgroundColor: undefined, // string, since 1.11.2
 	backgroundImage: undefined, // sap.ui.core.URI, since 1.11.2
 	backgroundRepeat: false, // boolean, since 1.11.2
@@ -7557,6 +7688,7 @@
 	defaultTransitionNameMaster="slide"
 	mode="ShowHideMode"
 	masterButtonText=""
+	masterButtonTooltip=""
 	backgroundColor=""
 	backgroundImage=""
 	backgroundRepeat="false"
@@ -8279,6 +8411,7 @@
 	cols: 20, // int
 	height: undefined, // sap.ui.core.CSSSize
 	maxLength: 0, // int
+	showExceededText: false, // boolean, since 1.48
 	wrapping: sap.ui.core.Wrapping.None, // sap.ui.core.Wrapping
 	valueLiveUpdate: false, // boolean, since 1.30
 	growing: false, // boolean, since 1.38.0
@@ -8320,6 +8453,7 @@
 	cols="20"
 	height=""
 	maxLength="0"
+	showExceededText="false"
 	wrapping="None"
 	valueLiveUpdate="false"
 	growing="false"
@@ -9418,6 +9552,7 @@
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
 	steps: [], // sap.m.WizardStep
+	currentStep: undefined, // sap.m.WizardStep
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -9440,6 +9575,7 @@
 	showNextButton="true"
 	finishButtonText="Review"
 	enableBranching="false"
+	currentStep=""
 	validateFieldGroup=""
 	stepActivate=""
 	complete="">

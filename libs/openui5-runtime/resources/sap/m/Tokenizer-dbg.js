@@ -30,7 +30,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * The tokenizer can only be used as part of {@link sap.m.MultiComboBox MultiComboBox},{@link sap.m.MultiInput MultiInput} or {@link sap.ui.comp.valuehelpdialog.ValueHelpDialog ValueHelpDialog}
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -616,7 +616,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 		var oFocusedElement = jQuery(document.activeElement).control()[0];
 
-		// oFocusedElement could be undefined since the focus element might not correspond to a SAPUI5 Control
+		// oFocusedElement could be undefined since the focus element might not correspond to an SAPUI5 Control
 		var index = oFocusedElement ? this.getTokens().indexOf(oFocusedElement) : -1;
 
 		if (index == 0) {
@@ -665,7 +665,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			return;
 		}
 
-		// oFocusedElement could be undefined since the focus element might not correspond to a SAPUI5 Control
+		// oFocusedElement could be undefined since the focus element might not correspond to an SAPUI5 Control
 		var index = oFocusedElement ? this.getTokens().indexOf(oFocusedElement) : -1;
 
 		if (index < iLength - 1) {
@@ -688,7 +688,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	};
 
 	/**
-	 * Function adds an validation callback called before any new token gets added to the tokens aggregation
+	 * Function adds a validation callback called before any new token gets added to the tokens aggregation
 	 *
 	 * @public
 	 * @param {function}
@@ -701,7 +701,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	};
 
 	/**
-	 * Function removes an validation callback
+	 * Function removes a validation callback
 	 *
 	 * @public
 	 * @param {function}
@@ -1280,6 +1280,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @param {jQuery.Event} oEvent The event object.
 	 */
 	Tokenizer.prototype.ontouchstart = function(oEvent) {
+
+		// needed when the control is inside active controls
+		oEvent.setMarked();
+
         // Workaround for chrome bug
         // BCP: 1680011538
 		if (Device.browser.chrome && window.getSelection()) {

@@ -15,7 +15,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/Device', './l
 		 * Note: Do not access the function of this helper directly but via <code>sap.ui.table.TableUtils.Column...</code>
 		 *
 		 * @author SAP SE
-		 * @version 1.46.12
+		 * @version 1.48.5
 		 * @namespace
 		 * @name sap.ui.table.TableColumnUtils
 		 * @private
@@ -314,7 +314,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/Device', './l
 					// get the direct relations for all collected columns
 					// columns have a logical relation with each other, if they are spanned by other column headers or
 					// of they by itself are spanning other columns. Since those columns are logically tightly coupled,
-					// they can be seen as a immutable block of columns.
+					// they can be seen as an immutable block of columns.
 					for (i = 0; i < aNewRelations.length; i++) {
 						oColumn = mColumns[aNewRelations[i]];
 						aDirectRelations = aDirectRelations.concat(TableColumnUtils.getParentSpannedColumns(oTable, oColumn.getId()));

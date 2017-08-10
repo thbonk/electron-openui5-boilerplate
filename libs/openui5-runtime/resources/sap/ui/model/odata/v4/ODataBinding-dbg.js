@@ -5,8 +5,9 @@
  */
 //Provides mixin sap.ui.model.odata.v4.ODataBinding for classes extending sap.ui.model.Binding
 sap.ui.define([
-	"./lib/_Helper"
-], function (_Helper) {
+	"./lib/_Helper",
+	"./lib/_SyncPromise"
+], function (_Helper, _SyncPromise) {
 	"use strict";
 
 	/**
@@ -16,6 +17,164 @@ sap.ui.define([
 	 * @mixin
 	 */
 	function ODataBinding() {}
+
+	/**
+	 * Creates a cache for this binding if a cache is needed and updates <code>oCachePromise</code>.
+	 *
+	 * @param {sap.ui.model.Context} [oContext]
+	 *   The context instance to be used, may be undefined for absolute bindings
+	 *
+	 * @private
+	 */
+	ODataBinding.prototype.fetchCache = function (oContext) {
+		var oCachePromise,
+			oCurrentCache,
+			that = this;
+
+		if (this.oOperation) { // operation binding manages its cache on its own
+			return;
+		}
+
+		if (!this.bRelative) {
+			oContext = undefined;
+		}
+		if (this.oCachePromise.isFulfilled()) {
+			oCurrentCache = this.oCachePromise.getResult();
+			if (oCurrentCache) {
+				oCurrentCache.setActive(false);
+			}
+		}
+		oCachePromise = this.fetchQueryOptionsForOwnCache(oContext).then(function (mQueryOptions) {
+			var vCanonicalPath;
+
+			// Note: do not create a cache for a virtual context
+			if (mQueryOptions && !(oContext && oContext.getIndex && oContext.getIndex() === -2)) {
+				vCanonicalPath = _SyncPromise.resolve(oContext && (oContext.fetchCanonicalPath
+					? oContext.fetchCanonicalPath() : oContext.getPath()));
+				return vCanonicalPath.then(function (sCanonicalPath) {
+					var oCache,
+						mCacheQueryOptions,
+						oError;
+
+					// create cache only if oCachePromise has not been changed in the meantime
+					if (!oCachePromise || that.oCachePromise === oCachePromise) {
+						mCacheQueryOptions = jQuery.extend(true, {}, that.oModel.mUriParameters,
+							mQueryOptions);
+						if (sCanonicalPath) { // quasi-absolute or relative binding
+							// mCacheByContext has to be reset if parameters are changing
+							that.mCacheByContext = that.mCacheByContext || {};
+							oCache = that.mCacheByContext[sCanonicalPath];
+							if (oCache) {
+								oCache.setActive(true);
+							} else {
+								oCache = that.doCreateCache(
+									_Helper.buildPath(sCanonicalPath, that.sPath).slice(1),
+									mCacheQueryOptions, oContext);
+								that.mCacheByContext[sCanonicalPath] = oCache;
+								oCache.$canonicalPath = sCanonicalPath;
+							}
+						} else { // absolute binding
+							oCache = that.doCreateCache(that.sPath.slice(1), mCacheQueryOptions,
+								oContext);
+						}
+						return oCache;
+					} else {
+						oError = new Error("Cache discarded as a new cache has been created");
+						oError.canceled = true;
+						throw oError;
+					}
+				});
+			}
+		});
+		oCachePromise["catch"](function (oError) {
+			//Note: this may also happen if the promise to read data for the canonical path's
+			// key predicate is rejected with a canceled error
+			that.oModel.reportError("Failed to create cache for binding " + that,
+				"sap.ui.model.odata.v4.ODataBinding", oError);
+		});
+		this.oCachePromise = oCachePromise;
+	};
+
+	/**
+	 * Fetches the query options to create the cache for this binding or <code>undefined</code> if
+	 * no cache is to be created.
+	 *
+	 * @param {sap.ui.model.Context} [oContext]
+	 *   The context instance to be used, must be undefined for absolute bindings
+	 * @returns {SyncPromise}
+	 *   A promise which resolves with the query options to create the cache for this binding,
+	 *   or with <code>undefined</code> if no cache is to be created
+	 *
+	 * @private
+	 */
+	ODataBinding.prototype.fetchQueryOptionsForOwnCache = function (oContext) {
+		var bHasNonSystemQueryOptions,
+			oQueryOptionsPromise,
+			that = this;
+
+		// operation binding
+		if (this.oOperation) {
+			return _SyncPromise.resolve(undefined);
+		}
+
+		// unresolved binding
+		if (this.bRelative && !oContext) {
+			return _SyncPromise.resolve(undefined);
+		}
+
+		// auto-$expand/$select and binding is a parent binding, so that it needs to wait until all
+		// its child bindings know via the corresponding promise in this.aChildCanUseCachePromises
+		// if they can use the parent binding's cache
+		oQueryOptionsPromise = this.doFetchQueryOptions(oContext);
+		if (this.oModel.bAutoExpandSelect && this.aChildCanUseCachePromises) {
+			// For auto-$expand/$select, wait for query options of dependent bindings:
+			// Promise.resolve() ensures all dependent bindings are created and have sent their
+			// query options promise to this binding via fetchIfChildCanUseCache.
+			// The aggregated query options of this binding and its dependent bindings are available
+			// in that.mAggregatedQueryOptions once all these promises are fulfilled.
+			oQueryOptionsPromise = _SyncPromise.all([
+				oQueryOptionsPromise,
+				Promise.resolve().then(function () {
+					return _SyncPromise.all(that.aChildCanUseCachePromises);
+				})
+			]).then(function (aResult) {
+				that.aChildCanUseCachePromises = [];
+				that.updateAggregatedQueryOptions(aResult[0]);
+				return that.mAggregatedQueryOptions;
+			});
+		}
+
+		// (quasi-)absolute binding
+		if (!that.bRelative || oContext && !oContext.fetchValue) {
+			return oQueryOptionsPromise;
+		}
+
+		// auto-$expand/$select: Use parent binding's cache if possible
+		if (this.oModel.bAutoExpandSelect) {
+			bHasNonSystemQueryOptions = that.mParameters
+				&& Object.keys(that.mParameters).some(function (sKey) {
+					return sKey[0] !== "$" || sKey[1] == "$";
+				});
+			if (bHasNonSystemQueryOptions) {
+				return oQueryOptionsPromise;
+			}
+			return oContext.getBinding()
+				.fetchIfChildCanUseCache(oContext, that.sPath, oQueryOptionsPromise)
+				.then(function (bCanUseCache) {
+					return bCanUseCache ? undefined : oQueryOptionsPromise;
+				});
+		}
+
+		// relative binding with parameters which are not query options (such as $$groupId)
+		if (this.mParameters && Object.keys(this.mParameters).length) {
+			return oQueryOptionsPromise;
+		}
+
+		// relative binding which may have query options from UI5 filter or sorter objects
+		return oQueryOptionsPromise.then(function (mQueryOptions) {
+			return Object.keys(mQueryOptions).length === 0 ? undefined : mQueryOptions;
+		});
+	};
 
 	/**
 	 * Returns the group ID of the binding that is used for read requests.
@@ -100,16 +259,25 @@ sap.ui.define([
 	 */
 	ODataBinding.prototype.hasPendingChangesInDependents = function () {
 		return this.oModel.getDependentBindings(this).some(function (oDependent) {
-			var oCache;
+			var oCache, bHasPendingChanges;
 
-			if (!oDependent.oCachePromise.isFulfilled()) {
-				// No pending changes because create and update are not allowed
-				return false;
+			if (oDependent.oCachePromise.isFulfilled()) {
+				// Pending changes for this cache are only possible when there is a cache already
+				oCache = oDependent.oCachePromise.getResult();
+				if (oCache && oCache.hasPendingChangesForPath("")) {
+					return true;
+				}
 			}
-
-			oCache = oDependent.oCachePromise.getResult();
-			return oCache && oCache.hasPendingChangesForPath("")
-				|| oDependent.hasPendingChangesInDependents();
+			if (oDependent.mCacheByContext) {
+				bHasPendingChanges = Object.keys(oDependent.mCacheByContext).some(function (sPath) {
+					return oDependent.mCacheByContext[sPath].hasPendingChangesForPath("");
+				});
+				if (bHasPendingChanges) {
+					return true;
+				}
+			}
+			// Ask dependents, they might have no cache, but pending changes in mCacheByContext
+			return oDependent.hasPendingChangesInDependents();
 		});
 	};
 
@@ -184,7 +352,7 @@ sap.ui.define([
 		this.oModel.checkGroupId(sGroupId);
 
 		// The actual refresh is specific to the binding and is implemented in each binding class.
-		this.refreshInternal(sGroupId);
+		this.refreshInternal(sGroupId, true);
 	};
 
 	/**
@@ -194,6 +362,8 @@ sap.ui.define([
 	 *
 	 * @param {string} [sGroupId]
 	 *   The group ID to be used for refresh
+	 * @param {boolean} [bCheckUpdate]
+	 *   If <code>true</code>, a property binding is expected to check for updates.
 	 *
 	 * @abstract
 	 * @function
@@ -202,7 +372,8 @@ sap.ui.define([
 	 */
 
 	/**
-	 * Resets all pending changes of this binding, see {@link #hasPendingChanges}.
+	 * Resets all pending changes of this binding, see {@link #hasPendingChanges}. Resets also
+	 * invalid user input.
 	 *
 	 * @throws {Error}
 	 *   If there is a change of this binding which has been sent to the server and for which there
@@ -214,6 +385,7 @@ sap.ui.define([
 	ODataBinding.prototype.resetChanges = function () {
 		this.resetChangesForPath("");
 		this.resetChangesInDependents();
+		this.resetInvalidDataState();
 	};
 
 	/**
@@ -256,17 +428,32 @@ sap.ui.define([
 		this.oModel.getDependentBindings(this).forEach(function (oDependent) {
 			var oCache;
 
-			if (!oDependent.oCachePromise.isFulfilled()) {
-				// No pending changes because create and update are not allowed
-				return;
+			if (oDependent.oCachePromise.isFulfilled()) {
+				// Pending changes for this cache are only possible when there is a cache already
+				oCache = oDependent.oCachePromise.getResult();
+				if (oCache) {
+					oCache.resetChangesForPath("");
+				}
+				oDependent.resetInvalidDataState();
 			}
-
-			oCache = oDependent.oCachePromise.getResult();
-			if (oCache) {
-				oCache.resetChangesForPath("");
+			// mCacheByContext may have changes nevertheless
+			if (oDependent.mCacheByContext) {
+				Object.keys(oDependent.mCacheByContext).forEach(function (sPath) {
+					oDependent.mCacheByContext[sPath].resetChangesForPath("");
+				});
 			}
+			// Reset dependents, they might have no cache, but pending changes in mCacheByContext
 			oDependent.resetChangesInDependents();
 		});
+	};
+
+	/**
+	 * A method to reset invalid data state, to be called by {@link #resetChanges}.
+	 * Does nothing, because only property bindings have data state.
+	 *
+	 * @private
+	 */
+	ODataBinding.prototype.resetInvalidDataState = function () {
 	};
 
 	/**

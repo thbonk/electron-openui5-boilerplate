@@ -161,7 +161,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool', 'sap/ui/core/theming
 	 * @protected
 	 */
 	ListItemBaseRenderer.openItemTag = function(rm, oLI) {
-		rm.write("<li");
+		rm.write("<" + oLI.TagName);
 	};
 
 	/**
@@ -172,7 +172,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool', 'sap/ui/core/theming
 	 * @protected
 	 */
 	ListItemBaseRenderer.closeItemTag = function(rm, oLI) {
-		rm.write("</li>");
+		rm.write("</" + oLI.TagName + ">");
 	};
 
 	ListItemBaseRenderer.renderTabIndex = function(rm, oLI) {

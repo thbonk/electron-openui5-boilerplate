@@ -18,9 +18,9 @@ sap.ui.define(['./LayoutData', './library'],
 	 * @param {object} [mSettings] initial settings for the new control
 	 *
 	 * @class
-	 * Allows to add multiple LayoutData to one control in case that a easy switch of layouts (e.g. in a Form) is needed.
+	 * Allows to add multiple LayoutData to one control in case that an easy switch of layouts (e.g. in a Form) is needed.
 	 * @extends sap.ui.core.LayoutData
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public

@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/IconPool
 		 * space is exceeded, a horizontal scrollbar appears.
 		 *
 		 * @extends sap.ui.core.Control
-		 * @version 1.46.12
+		 * @version 1.48.5
 		 *
 		 * @constructor
 		 * @private
@@ -339,6 +339,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/IconPool
 			this._oItemNavigation.setItemDomRefs(aTabDomRefs);
 			this._oItemNavigation.setCycling(false);
 			this._oItemNavigation.setPageSize(5);
+			//alt+right/left is used for browser navigation
+			this._oItemNavigation.setDisabledModifiers({
+				sapnext: ["alt"],
+				sapprevious: ["alt"]
+			});
 
 			//Attach ItemNavigation to the control delegate queue
 			this.addDelegate(this._oItemNavigation);

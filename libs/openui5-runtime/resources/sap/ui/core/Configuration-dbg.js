@@ -233,25 +233,6 @@ sap.ui.define(['jquery.sap.global', '../Device', '../Global', '../base/Object', 
 			/* TODO: RETHINK server wide sapui5 configuration to make it optional
 					 currently it is forcing a request which is annoying customers :
 					   - Think about an option which enables loading of server wide config!
-			var sUrl = "/sap-ui-config.json";
-			var oResponse = jQuery.sap.sjax({url:sUrl});
-			if (oResponse.success) {
-				var oServerCfg = {};
-				if (typeof oResponse.data == "string") {
-					try {
-						oServerCfg = jQuery.parseJSON(oResponse.data);
-					} catch(ex) {
-						jQuery.sap.log.warning("Error when parsing the JSON configuration content from " + sUrl + " : " + ex);
-					}
-				} else {
-					oServerCfg = oResponse.data;
-				}
-				for (var n in M_SETTINGS) {
-					if (oServerCfg[n]) {
-						setValue(n, oServerCfg[n]);
-					}
-				}
-			}
 			 */
 
 			// 3.-5. apply settings from global config object (already merged with script tag attributes)
@@ -558,7 +539,7 @@ sap.ui.define(['jquery.sap.global', '../Device', '../Global', '../base/Object', 
 		 * suggested dashes ('-') and not taking the case of letters into account.
 		 *
 		 * The exceptions mentioned above affect languages that have been specified via the URL parameter
-		 * <code>sap-language</code>. That parameter by definition represents a SAP logon language code
+		 * <code>sap-language</code>. That parameter by definition represents an SAP logon language code
 		 * ('ABAP language'). Most but not all of these language codes are valid ISO639 two-letter languages
 		 * and as such are valid BCP47 language tags. For better BCP47 compliance, the framework
 		 * maps the following non-BCP47 SAP logon codes to a BCP47 substitute:
@@ -594,7 +575,7 @@ sap.ui.define(['jquery.sap.global', '../Device', '../Global', '../base/Object', 
 		},
 
 		/**
-		 * Returns a SAP logon language for the current language.
+		 * Returns an SAP logon language for the current language.
 		 *
 		 * @return {string} The SAP logon language code for the current language
 		 * @public
@@ -613,6 +594,9 @@ sap.ui.define(['jquery.sap.global', '../Device', '../Global', '../base/Object', 
 		 * When the language has changed, the Core will fire its
 		 * {@link sap.ui.core.Core#event:localizationChanged localizationChanged} event.
 		 *
+		 *
+		 * <h3>Restrictions</h3>
+		 *
 		 * The framework <strong>does not</strong> guarantee that already created, language
 		 * dependent objects will be updated by this call. It therefore remains best practice
 		 * for applications to switch the language early, e.g. before any language dependent
@@ -626,7 +610,7 @@ sap.ui.define(['jquery.sap.global', '../Device', '../Global', '../base/Object', 
 		 * <ul>
 		 * <li>date and number data types that are used in property bindings or composite
 		 *     bindings in existing Elements, Controls, UIAreas or Components</li>
-		 * <li>ResourceModels currently assigned to the Core, an UIArea, Component,
+		 * <li>ResourceModels currently assigned to the Core, a UIArea, Component,
 		 *     Element or Control</li>
 		 * <li>Elements or Controls that implement the <code>onlocalizationChanged</code> hook
 		 *     (note the lowercase 'l' in onlocalizationChanged)</li>
@@ -642,10 +626,12 @@ sap.ui.define(['jquery.sap.global', '../Device', '../Global', '../base/Object', 
 		 * </ul>
 		 *
 		 * This method does not accept SAP language codes for <code>sLanguage</code>. Instead, a second
-		 * parameter <code>sSAPLogonLanguage</code> can be provided with a SAP language code corresponding
+		 * parameter <code>sSAPLogonLanguage</code> can be provided with an SAP language code corresponding
 		 * to the given language. A given value will be returned by the {@link #getSAPLogonLanguage} method.
 		 * It is up to the caller to provide a consistent pair of BCP47 language and SAP language code.
 		 * The SAP language code is only checked to be of length 2 and must consist of letters or digits only.
+		 *
+		 * <b>Note</b>: When using this method please take note of and respect the above mentioned restrictions.
 		 *
 		 * @param {string} sLanguage the new language as a BCP47 compliant language tag; case doesn't matter
 		 *   and underscores can be used instead of dashes to separate components (compatibility with Java Locale IDs)
@@ -658,7 +644,6 @@ sap.ui.define(['jquery.sap.global', '../Device', '../Global', '../base/Object', 
 		 * @return {sap.ui.core.Configuration} <code>this</code> to allow method chaining
 		 *
 		 * @see http://scn.sap.com/docs/DOC-14377
-		 * @experimental Since 1.11.1 - See method documentation for restrictions.
 		 * @public
 		 */
 		setLanguage : function (sLanguage, sSAPLogonLanguage) {
@@ -698,7 +683,7 @@ sap.ui.define(['jquery.sap.global', '../Device', '../Global', '../base/Object', 
 		},
 
 		/**
-		 * Returns a SAP parameter by it's name (e.g. sap-client, sap-system, sap-server).
+		 * Returns an SAP parameter by it's name (e.g. sap-client, sap-system, sap-server).
 		 *
 		 * @experimental
 		 * @since 1.45.0
@@ -859,12 +844,13 @@ sap.ui.define(['jquery.sap.global', '../Device', '../Global', '../base/Object', 
 		 * date or time format defined with a call to <code>setLegacyNumberFormat</code>,
 		 * <code>setLegacyDateFormat</code> or <code>setLegacyTimeFormat<code>.
 		 *
+		 * <b>Note</b>: See documentation of {@link #setLanguage} for restrictions.
+		 *
 		 * @param {string|null} sFormatLocale the new format locale as a BCP47 compliant language tag;
 		 *   case doesn't matter and underscores can be used instead of dashes to separate
 		 *   components (compatibility with Java Locale IDs)
 		 * @return {sap.ui.core.Configuration} <code>this</code> to allow method chaining
 		 * @public
-		 * @experimental Since 1.11.1 - See documentation of {@link #setLanguage} for restrictions.
 		 * @throws {Error} When <code>sFormatLocale</code> is given, but is not a valid BCP47 language
 		 *   tag or Java locale identifier
 		 */
@@ -966,10 +952,11 @@ sap.ui.define(['jquery.sap.global', '../Device', '../Global', '../base/Object', 
 		 * to update localization specific parts of the UI. See the documentation of
 		 * {@link #setLanguage} for details and restrictions.
 		 *
+		 * <b>Note</b>: See documentation of {@link #setLanguage} for restrictions.
+		 *
 		 * @param {boolean|null} bRTL new character orientation mode or <code>null</code>
 		 * @return {sap.ui.core.Configuration} <code>this</code> to allow method chaining
 		 * @public
-		 * @experimental Since 1.11.1 - See documentation of {@link #setLanguage} for restrictions.
 		 */
 		setRTL : function(bRTL) {
 			check(bRTL === null || typeof bRTL === "boolean", "bRTL must be null or a boolean");
@@ -1086,7 +1073,6 @@ sap.ui.define(['jquery.sap.global', '../Device', '../Global', '../base/Object', 
 		 *
 		 * @returns {string} name of the application
 		 * @public
-		 * @experimental Since 1.13.2
 		 * @deprecated Since 1.15.1. Please use the rootComponent configuration option {@link sap.ui.core.Configuration#getRootComponent}.
 		 */
 		getApplication : function() {
@@ -1140,7 +1126,7 @@ sap.ui.define(['jquery.sap.global', '../Device', '../Global', '../base/Object', 
 		 *
 		 * @returns {boolean} true if customizing is disabled
 		 * @private
-		 * @experimental Since 1.15.1
+		 * @sap-restricted
 		 */
 		getDisableCustomizing : function() {
 			return this["xx-disableCustomizing"];

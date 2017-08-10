@@ -5,8 +5,8 @@
  */
 
 // Provides control sap.m.DatePicker.
-sap.ui.define(['jquery.sap.global', 'sap/ui/Device', './InputBase', 'sap/ui/model/type/Date', 'sap/ui/core/date/UniversalDate', './library', 'sap/ui/unified/calendar/CalendarUtils'],
-	function(jQuery, Device, InputBase, Date1, UniversalDate, library, CalendarUtils) {
+sap.ui.define(['jquery.sap.global', 'sap/ui/Device', './InputBase', 'sap/ui/model/type/Date', 'sap/ui/core/date/UniversalDate', './library'],
+	function(jQuery, Device, InputBase, Date1, UniversalDate, library) {
 	"use strict";
 
 
@@ -84,7 +84,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', './InputBase', 'sap/ui/mode
 	 * the close event), or select Cancel.
 	 *
 	 * @extends sap.m.InputBase
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -167,6 +167,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', './InputBase', 'sap/ui/mode
 			/**
 			 * Date Range with type to visualize special days in the Calendar.
 			 * If one day is assigned to more than one Type, only the first one will be used.
+			 *
+			 * To set a single date (instead of a range), set only the startDate property of the sap.ui.unified.DateRange class.
+			 *
+			 * <b>Note:</b> Since 1.48 you could set a non-working day via the sap.ui.unified.CalendarDayType.NonWorking
+			 * enum type just as any other special date type using sap.ui.unified.DateRangeType.
+			 *
 			 * @since 1.38.5
 			 */
 			specialDates : {type : "sap.ui.core.Element", multiple : true, singularName : "specialDate"}
@@ -785,7 +791,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', './InputBase', 'sap/ui/mode
 			}
 			oLegend = sap.ui.getCore().byId(sId);
 			if (oLegend && !(oLegend instanceof sap.ui.unified.CalendarLegend)) {
-				throw new Error(oLegend + " is not a sap.ui.unified.CalendarLegend. " + this);
+				throw new Error(oLegend + " is not an sap.ui.unified.CalendarLegend. " + this);
 			}
 		}
 
@@ -1054,10 +1060,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', './InputBase', 'sap/ui/mode
 	DatePicker.prototype._getVisibleDatesRange = function (oCalendar) {
 		var aVisibleDays = oCalendar._getVisibleDays();
 
-		// Convert from UTC to local Date
+		// Convert to local JavaScript Date
 		return new sap.ui.unified.DateRange({
-			startDate: CalendarUtils._createLocalDate(aVisibleDays[0].oDate), // First visible date
-			endDate: CalendarUtils._createLocalDate(aVisibleDays[aVisibleDays.length - 1].oDate) // Last visible date
+			startDate: aVisibleDays[0].toLocalJSDate(), // First visible date
+			endDate: aVisibleDays[aVisibleDays.length - 1].toLocalJSDate() // Last visible date
 		});
 	};
 

@@ -24,9 +24,9 @@ sap.ui.define(["sap/ui/Device"], function (Device) {
 			oDynamicPageHeader = oDynamicPage.getHeader(),
 			oDynamicPageFooter = oDynamicPage.getFooter(),
 			oDynamicPageContent = oDynamicPage.getContent(),
+			bHeaderExpanded = oDynamicPage.getHeaderExpanded(),
 			aHeaderContent = oDynamicPageHeader ? oDynamicPageHeader.getContent() : [],
 			bHeaderHasContent = aHeaderContent.length > 0,
-			bHeaderExpanded = oDynamicPage.getHeaderExpanded(),
 			bShowFooter = oDynamicPage.getShowFooter(),
 			bPreserveHeaderStateOnScroll = oDynamicPage._preserveHeaderStateOnScroll();
 

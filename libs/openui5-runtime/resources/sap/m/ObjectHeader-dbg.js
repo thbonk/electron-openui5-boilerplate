@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * a specific object. The object header title is the key identifier of the object and
 	 * additional text and icons can be used to further distinguish it from other objects.
 	 * @extends sap.ui.core.Control
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -87,6 +87,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			 * displayed if the image for the icon is not available, or cannot be displayed.
 			 */
 			iconAlt : {type : "string", group : "Accessibility", defaultValue : null},
+
+			/**
+			 * Determines the tooltip text of the <code>ObjectHeader</code> icon.
+			 */
+			iconTooltip : {type : "string", group : "Accessibility", defaultValue : null},
 
 			/**
 			 * By default, this is set to <code>true</code> but then one or more requests are sent trying to get
@@ -312,7 +317,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 			/**
 			 * This aggregation takes only effect when you set "responsive" to true.
-			 * It can either be filled with an sap.m.IconTabBar or a sap.suite.ui.commons.HeaderContainer control. Overflow handling must be taken care of by the inner control. If used with an IconTabBar control, only the header will be displayed inside the object header, the content will be displayed below the ObjectHeader.
+			 * It can either be filled with an sap.m.IconTabBar or an sap.suite.ui.commons.HeaderContainer control. Overflow handling must be taken care of by the inner control. If used with an IconTabBar control, only the header will be displayed inside the object header, the content will be displayed below the ObjectHeader.
 			 * @since 1.21.1
 			 */
 			headerContainer : {type : "sap.m.ObjectHeaderContainer", multiple : false},
@@ -970,6 +975,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		var mProperties = jQuery.extend(
 			{
 				src : this.getIcon(),
+				tooltip: this.getIconTooltip(),
 				alt: this.getIconAlt(),
 				useIconTooltip : false,
 				densityAware : this.getIconDensityAware()

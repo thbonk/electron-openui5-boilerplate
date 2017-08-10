@@ -5,9 +5,9 @@
  */
 
 //Provides control sap.ui.unified.Calendar.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleData', 'sap/ui/model/type/Date', 'sap/ui/unified/calendar/CalendarUtils',
+sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap/ui/core/LocaleData', 'sap/ui/model/type/Date', 'sap/ui/unified/calendar/CalendarUtils',
 			   'sap/ui/core/date/UniversalDate', './library'],
-			   function(jQuery, Control, LocaleData, Date1, CalendarUtils, UniversalDate, library) {
+			   function(jQuery, Control, Device, LocaleData, Date1, CalendarUtils, UniversalDate, library) {
 	"use strict";
 
 	/*
@@ -26,9 +26,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
-	 * A calendar row with an header and appointments. The Appointments will be placed in the defined interval.
+	 * A calendar row with a header and appointments. The Appointments will be placed in the defined interval.
 	 * @extends sap.ui.core.Control
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -131,6 +131,15 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 			updateCurrentTime : {type : "boolean", group : "Behavior", defaultValue : true},
 
 			/**
+			 * Defines the mode in which the overlapping appointments are displayed.
+			 *
+			 * <b>Note:</b> This property takes effect, only if the <code>intervalType</code> of the current calendar view
+			 * is set to <code>sap.ui.unified.CalendarIntervalType.Month</code>. On phone devices this property is ignored,
+			 * and the default value is applied.
+			 */
+			groupAppointmentsMode : {type : "sap.ui.unified.GroupAppointmentsMode", group : "Appearance", defaultValue : sap.ui.unified.GroupAppointmentsMode.Collapsed},
+
+			/**
 			 * If set the appointments without text (only title) are rendered with a smaller height.
 			 *
 			 * <b>Note:</b> On phone devices this property is ignored, appointments are always rendered in full height
@@ -168,7 +177,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 			 */
 			intervalHeaders : {type : "sap.ui.unified.CalendarAppointment", multiple : true, singularName : "intervalHeader"},
 
-			groupAppointments : {type : "sap.ui.unified.CalendarAppointment", multiple : true, singularName : "groupAppointment", visibility : "hidden"}
+			groupAppointments : {type : "sap.ui.unified.CalendarAppointment", multiple : true, singularName : "groupAppointment", visibility : "hidden"},
+
+			_nonWorkingDates : {type : "sap.ui.unified.DateRange", multiple : true, visibility : "hidden"}
 
 		},
 		associations: {
@@ -255,6 +266,18 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 			}
 		}
 	}});
+
+   /**
+	* Used to link the items (DateRange) in aggregation _nonWorkingDates to any PlanningCalendarRow _nonWorkingDates
+	* @private
+	*/
+	CalendarRow.PCROW_FOREIGN_KEY_NAME = "relatedToPCRowDateRange";
+
+   /**
+	* Holds the name of the aggregation corresponding to non working dates
+	* @private
+	*/
+   CalendarRow.AGGR_NONWORKING_DATES_NAME = "_nonWorkingDates";
 
 	CalendarRow.prototype.init = function(){
 
@@ -366,14 +389,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 			oStartDate = new Date();
 		}
 
-		if (!(oStartDate instanceof Date)) {
-			throw new Error("Date must be a JavaScript date object; " + this);
-		}
+		CalendarUtils._checkJSDateObject(oStartDate);
 
 		var iYear = oStartDate.getFullYear();
-		if (iYear < 1 || iYear > 9999) {
-			throw new Error("Date must not be in valid range (between 0001-01-01 and 9999-12-31); " + this);
-		}
+		CalendarUtils._checkYearInValidRange(iYear);
 
 		this.setProperty("startDate", oStartDate);
 
@@ -401,6 +420,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 
 	};
 
+	CalendarRow.prototype.setGroupAppointmentsMode = function(bGroupAppointmentsMode) {
+
+		this.setProperty("groupAppointmentsMode", bGroupAppointmentsMode);
+
+		// as levels must be new calculated
+		this._aVisibleAppointments = [];
+
+		return this;
+	};
+
 	CalendarRow.prototype.setAppointmentsReducedHeight = function(bAppointmentsReducedHeight){
 
 		this.setProperty("appointmentsReducedHeight", bAppointmentsReducedHeight);
@@ -416,7 +445,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 
 		var bReducedHeight = false;
 
-		if (!sap.ui.Device.system.phone && this.getAppointmentsReducedHeight() && !oAppointment.getText()) {
+		if (!Device.system.phone && this.getAppointmentsReducedHeight() && !oAppointment.getText()) {
 			bReducedHeight = true;
 		}
 
@@ -573,7 +602,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 	 *
 	 * For this, each <code>CalendarRow</code> can trigger the resize check for it's own DOM.
 	 * But if multiple <code>CalendarRow</code>s are used in one container (e.g. <code>PlanningCalendar</code>),
-	 * it is better if the container triggers the resize check once an then calls this function
+	 * it is better if the container triggers the resize check once and then calls this function
 	 * of each <code>CalendarRow</code>.
 	 *
 	 * @param {jQuery.Event} oEvent The event object of the resize handler.
@@ -604,7 +633,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 	 *
 	 * For this, each <code>CalendarRow</code> can trigger a timer.
 	 * But if multiple <code>CalendarRow</code>s are used in one container (e.G. <code>PlanningCalendar</code>),
-	 * it is better if the container triggers the interval once an then calls this function
+	 * it is better if the container triggers the interval once and then calls this function
 	 * of each <code>CalendarRow</code>.
 	 *
 	 * @returns {sap.ui.unified.CalendarRow} <code>this</code> to allow method chaining
@@ -733,9 +762,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 	 */
 	CalendarRow.prototype.focusNearestAppointment = function(oDate) {
 
-		if (!oDate || !(oDate instanceof Date)) {
-			throw new Error("Date must be a JavaScript date object; " + this);
-		}
+		CalendarUtils._checkJSDateObject(oDate);
 
 		var aAppointments = _getAppointmentsSorted.call(this);
 		var oNextAppointment;
@@ -914,7 +941,15 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 	}
 
 	/*
-	 * returns a array of visible appointments
+	 * @returns {boolean} <code>true</code> if group appointments should be enabled, <code>false</code> otherwise.
+	 */
+	function _isGroupAppointmentsEnabled() {
+		return Device.system.phone ||
+			(this.getGroupAppointmentsMode() === sap.ui.unified.GroupAppointmentsMode.Collapsed);
+	}
+
+	/*
+	 * returns an array of visible appointments
 	 * each entry is an object with the following properties
 	 * - appointment: the appointment object
 	 * - begin: begin position in %
@@ -939,6 +974,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		var bFocusIdFound = false;
 		var i = 0;
 		var j = 0;
+		var bGroupsEnabled = _isGroupAppointmentsEnabled.call(this);
 
 		this.destroyAggregation("groupAppointments", true);
 
@@ -982,7 +1018,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 
 			if (oAppointmentStartDate && oAppointmentStartDate.getTime() <= iEndTime &&
 					oAppointmentEndDate && oAppointmentEndDate.getTime() >= iStartTime) {
-				if (sIntervalType == sap.ui.unified.CalendarIntervalType.Month && oAppointmentEndDate.getTime() - oAppointmentStartDate.getTime() < 604800000) {
+
+				if (bGroupsEnabled &&
+					(sIntervalType == sap.ui.unified.CalendarIntervalType.Month) &&
+					((oAppointmentEndDate.getTime() - oAppointmentStartDate.getTime()) < 604800000/*7 days*/)) {
 					// in month mode, group appointment < one week
 
 					oGroupAppointment = _getGroupAppointment.call(this, oAppointmentStartDate, oAppointment, sIntervalType, iIntervals, oStartDate, oEndDate, iStartTime, aVisibleAppointments);
@@ -1026,8 +1065,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		}
 
 		// if group appointment only has one appointment -> show this appointment
-		var aGropAppointments = this.getAggregation("groupAppointments", []);
-		if (aGropAppointments.length > 0) {
+		var aGroupAppointments = this.getAggregation("groupAppointments", []);
+		if (aGroupAppointments.length > 0) {
 			for (i = 0; i < aVisibleAppointments.length; i++) {
 				oAppointment = aVisibleAppointments[i];
 				if (oAppointment.appointment._aAppointments && oAppointment.appointment._aAppointments.length <= 1) {
@@ -1047,8 +1086,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 					}
 					if (!bFound) {
 						// check if in other group appointment - remove it
-						for (j = 0; j < aGropAppointments.length; j++) {
-							oGroupAppointment2 = aGropAppointments[j];
+						for (j = 0; j < aGroupAppointments.length; j++) {
+							oGroupAppointment2 = aGroupAppointments[j];
 							if (oGroupAppointment != oGroupAppointment2) {
 								for (var k = 0; k < oGroupAppointment2._aAppointments.length; k++) {
 									if (oGroupAppointment._aAppointments[0] == oGroupAppointment2._aAppointments[k]) {
@@ -1057,7 +1096,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 											// no appointments left -> delete group
 											this.removeAggregation("groupAppointments", oGroupAppointment2);
 											oGroupAppointment2.destroy();
-											aGropAppointments = this.getAggregation("groupAppointments", []);
+											aGroupAppointments = this.getAggregation("groupAppointments", []);
 										} else {
 											oGroupAppointment2.setProperty("title", oGroupAppointment2._aAppointments.length, true);
 										}
@@ -1078,7 +1117,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 					}
 					this.removeAggregation("groupAppointments", oGroupAppointment);
 					oGroupAppointment.destroy();
-					aGropAppointments = this.getAggregation("groupAppointments", []);
+					aGroupAppointments = this.getAggregation("groupAppointments", []);
 				}
 			}
 		}
@@ -1105,7 +1144,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		var oGroupAppointment;
 		var oLocaleData = _getLocaleData.call(this);
 		var iFirstDayOfWeek = oLocaleData.getFirstDayOfWeek();
-		var iDay = oDate.getDay();
+		var iDay = oDate.getUTCDay();
 		var oGroupStartDate = new UniversalDate(oDate.getTime());
 		oGroupStartDate.setUTCHours(0);
 		oGroupStartDate.setUTCMinutes(0);
@@ -1219,7 +1258,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 	}
 
 	/*
-	 * returns a array of visible intervalHeaders
+	 * returns an array of visible intervalHeaders
 	 * each entry is an object with the following properties
 	 * - interval: number of the interval
 	 * - appointment: the appointment object
@@ -1349,7 +1388,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		var iStaticHeight = 0;
 		var iLevels = 0;
 		var i = 0;
-		var bAppointmentsReducedHeight = !sap.ui.Device.system.phone && this.getAppointmentsReducedHeight();
+		var bAppointmentsReducedHeight = !Device.system.phone && this.getAppointmentsReducedHeight();
 
 		if (this.getShowIntervalHeaders() && (this.getShowEmptyIntervalHeaders() || this._getVisibleIntervalHeaders().length > 0)) {
 			iStaticHeight = jQuery(this.$("AppsInt0").children(".sapUiCalendarRowAppsIntHead")[0]).outerHeight(true);

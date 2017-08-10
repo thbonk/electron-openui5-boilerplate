@@ -81,7 +81,7 @@ sap.ui.define(['jquery.sap.global',
 	 * @param {string} [mParameters.treeAnnotationProperties.hierarchyParentNodeFor] Mapping to the property holding the parent node id,
 	 * @param {string} [mParameters.treeAnnotationProperties.hierarchyDrillStateFor] Mapping to the property holding the drill state for the node,
 	 * @param {string} [mParameters.treeAnnotationProperties.hierarchyNodeDescendantCountFor] Mapping to the property holding the descendant count for the node.
-	 * @param {object} [mParameters.navigation] An map describing the navigation properties between entity sets, which should be used for constructing and paging the tree.
+	 * @param {object} [mParameters.navigation] A map describing the navigation properties between entity sets, which should be used for constructing and paging the tree.
 	 * @param {int} [mParameters.numberOfExpandedLevels=0] This property defines the number of levels, which will be expanded initially.
 	 *													Please be aware, that this property leads to multiple backend requests. Default value is 0.
 	 *													The auto-expand feature is deprecated for services without the "hierarchy-node-descendant-count-for" annotation.
@@ -136,6 +136,9 @@ sap.ui.define(['jquery.sap.global',
 				aApplicationFilters = [aApplicationFilters];
 			}
 			this.aApplicationFilters = aApplicationFilters;
+
+			// check filter integrity
+			this.oModel.checkFilterOperation(this.aApplicationFilters);
 
 			// a queue containing all parallel running requests
 			// a request is identified by (node id, startindex, length)
@@ -919,7 +922,7 @@ sap.ui.define(['jquery.sap.global',
 
 			// Collecting contexts
 			// beware: oData.results can be an empty array -> so the length has to be checked
-			if (jQuery.isArray(oData.results) && oData.results.length > 0) {
+			if (Array.isArray(oData.results) && oData.results.length > 0) {
 
 				// Case 1: Result is an entity set
 				// Case 1a: Tree Annotations
@@ -947,7 +950,7 @@ sap.ui.define(['jquery.sap.global',
 						that.oKeys[sNodeId][i + iStartIndex] = sKey;
 					}
 				}
-			} else if (oData && !jQuery.isArray(oData.results)){
+			} else if (oData && !Array.isArray(oData.results)){
 				// Case 2: oData.results is not an array, so oData is a single entity
 				// this only happens if you bind to a single entity as root element)
 				that.oKeys[null] = that.oModel._getKey(oData);
@@ -1296,6 +1299,9 @@ sap.ui.define(['jquery.sap.global',
 		var bSuccess = false;
 		sFilterType = sFilterType || FilterType.Control;
 
+		// check filter integrity
+		this.oModel.checkFilterOperation(aFilters);
+
 		// check if filtering is supported for the current binding configuration
 		if (sFilterType == FilterType.Control && (!this.bClientOperation || this.sOperationMode == OperationMode.Server)) {
 			jQuery.sap.log.warning("Filtering with ControlFilters is ONLY possible if the ODataTreeBinding is running in OperationMode.Client or " +
@@ -1621,7 +1627,7 @@ sap.ui.define(['jquery.sap.global',
 		}
 
 		var oRef = this.oModel._getObject(sPath);
-		if (jQuery.isArray(oRef)) {
+		if (Array.isArray(oRef)) {
 			this.oKeys[sPath] = oRef;
 			this.oLengths[sPath] = oRef.length;
 			this.oFinalLengths[sPath] = true;
@@ -1631,8 +1637,8 @@ sap.ui.define(['jquery.sap.global',
 		}
 
 		if (sNavPath && oObject[sNavPath]) {
-			if (jQuery.isArray(oRef)) {
-				jQuery.each(oRef, function(iIndex, sRef) {
+			if (Array.isArray(oRef)) {
+				oRef.forEach(function(sRef) {
 					var oObject = that.getModel().getData("/" + sRef);
 					that._processODataObject(oObject, "/" + sRef + "/" + sNavPath, aNavPath.join("/"));
 				});
@@ -1926,7 +1932,7 @@ sap.ui.define(['jquery.sap.global',
 
 				if (this.oNavigationPaths) {
 					jQuery.each(this.oNavigationPaths, function(sParamKey, sParamName){
-						if (jQuery.inArray(sParamName, aNewSelectParams) == -1) {
+						if (aNewSelectParams.indexOf(sParamName) == -1) {
 							aNewSelectParams.push(sParamName);
 						}
 					});
@@ -1934,7 +1940,7 @@ sap.ui.define(['jquery.sap.global',
 
 				// add new select params to custom select params
 				jQuery.each(aNewSelectParams, function(sParamKey, sParamName){
-					if (jQuery.inArray(sParamName, aSelectParams) == -1) {
+					if (aSelectParams.indexOf(sParamName) == -1) {
 						aSelectParams.push(sParamName);
 					}
 				});
@@ -1942,7 +1948,7 @@ sap.ui.define(['jquery.sap.global',
 				if (this.bHasTreeAnnotations) {
 					jQuery.each(this.oTreeProperties, function(sAnnotationName, sTreePropName){
 						if (sTreePropName) {
-							if (jQuery.inArray(sTreePropName, aSelectParams) == -1) {
+							if (aSelectParams.indexOf(sTreePropName) == -1) {
 								aSelectParams.push(sTreePropName);
 							}
 						}
@@ -2086,7 +2092,7 @@ sap.ui.define(['jquery.sap.global',
 	 */
 	ODataTreeBinding.prototype.getFilterParams = function() {
 		if (this.aApplicationFilters) {
-			this.aApplicationFilters = jQuery.isArray(this.aApplicationFilters) ? this.aApplicationFilters : [this.aApplicationFilters];
+			this.aApplicationFilters = Array.isArray(this.aApplicationFilters) ? this.aApplicationFilters : [this.aApplicationFilters];
 			if (this.aApplicationFilters.length > 0 && !this.sFilterParams) {
 				this.sFilterParams = ODataUtils._createFilterParams(this.aApplicationFilters, this.oModel.oMetadata, this.oEntityType);
 				this.sFilterParams = this.sFilterParams ? this.sFilterParams : "";

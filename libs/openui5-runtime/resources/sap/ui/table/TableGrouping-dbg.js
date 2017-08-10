@@ -15,7 +15,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter'
 	 * Note: Do not access the function of this helper directly but via <code>sap.ui.table.TableUtils.Grouping...</code>
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @namespace
 	 * @name sap.ui.table.TableGrouping
 	 * @private
@@ -225,7 +225,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter'
 		},
 
 		/**
-		 * Returns whether the given cell is located in a analytical summary row.
+		 * Returns whether the given cell is located in an analytical summary row.
 		 * @param {Object} oCellRef DOM reference of table cell
 		 * @return {boolean}
 		 * @private

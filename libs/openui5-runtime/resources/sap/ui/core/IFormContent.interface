@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<interface xmlns="http://www.sap.com/sap.ui.library.xsd">
+    <name>IFormContent</name>
+    <derived/>
+    <documentation>Marker interface for controls that can be used as content of &lt;code&gt;sap.ui.layout.form.Form&lt;/code&gt;
+or &lt;code&gt;sap.ui.layout.form.SimpleForm&lt;/code&gt;.
+
+If the control's width must not be adjusted by the &lt;code&gt;Form&lt;/code&gt; control to meet the cell's width, the
+control must implement the &lt;code&gt;getFormDoNotAdjustWidth&lt;/code&gt; function and return &lt;code&gt;true&lt;/code&gt;.</documentation>
+    <since>1.48.0</since>
+</interface>

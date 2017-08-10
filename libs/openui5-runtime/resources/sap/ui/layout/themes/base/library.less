@@ -10,7 +10,64 @@
 
 @import "../../../../../sap/ui/core/themes/base/global.less";
 
+/* START "AlignedFlowLayout.less" */
+.sapUiAFLayout {
+	position: relative;
+	display: flex;
+	flex-wrap: wrap;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.sapUiAFLayoutItem {
+	flex-grow: 1;
+	flex-shrink: 0;
+	overflow: hidden;
+	/* text-align: center;  TODO: ? good for galleries, maybe not good for other usages... maybe a property? */
+}
+
+.sapUiAFLayoutItem > * {
+	max-width: 100%;
+}
+
+/* the dummy elements for the last line */
+.sapUiAFLayoutSpacer {
+	height: 0;
+	visibility: hidden;
+}
+
+.sapUiAFLayoutEnd {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	text-align: end;
+	display: inline-block;
+}
+
+.sapUiAFLayoutEnd:only-child {
+	position: relative;
+}
+
+.sapUiAFLayoutOneLine > .sapUiAFLayoutSpacer {
+	display: none;
+}
+
+.sapUiAFLayoutOneLine > li:last-child {
+	flex-basis: auto !important; /* needs to override inline style */
+	flex-grow: 0;
+}
+
+/* mixin call for creating container content padding classes (arguments: rootContainer, contentSelector) */
+.sapUiContainerContentPadding(~".sapUiAFLayout");
+/* END "AlignedFlowLayout.less" */
+
 /* START "DynamicSideContent.less" */
+/* ================================================= */
+/* CSS for control sap.ui.layout/DynamicSideContent  */
+/* Base theme                                        */
+/* ================================================= */
+
 .sapUiDSC {
 	&:after {
 		clear: both;
@@ -97,13 +154,13 @@
 
 /* mixin call for creating container content padding classes (arguments: rootContainer, sideContent) */
 .sapUiContainerContentPadding(~".sapUiDSC", ~"> aside");
-
 /* END "DynamicSideContent.less" */
 
 /* START "FixFlex.less" */
-/* ==========================================================================
-   CSS for control sap.m/FlexBox.control
-   ========================================================================== */
+/* ====================================== */
+/* CSS for control sap.ui.layout/FixFlex  */
+/* Base theme                             */
+/* ====================================== */
 
 /* Class for vertical (default) layout
    ========================================================================== */
@@ -260,14 +317,18 @@
 /* Base theme                          */
 /* =================================== */
 
-@sapUiFormContainerExpImageURL: url("sap-icon://expand-group");
-@sapUiFormContainerColImageURL: url("sap-icon://collapse-group");
+@_sap_ui_layout_Form_FormContainerExpImageURL: url("sap-icon://expand-group");
+@_sap_ui_layout_Form_FormContainerColImageURL: url("sap-icon://collapse-group");
 
 html.sap-tablet .sapUiFioriObjectPage > section > .sapUiForm,
 html.sap-desktop .sapUiFioriObjectPage > section > .sapUiForm {
 	margin: 1rem 0;
 	padding: 0 1rem;
 	box-sizing: border-box;
+}
+
+.sapUiFormElementLbl {
+	font-size: 1px; /* To prevent larger DIV because of invisible strut character*/
 }
 /* END "Form.less" */
 
@@ -277,8 +338,8 @@ html.sap-desktop .sapUiFioriObjectPage > section > .sapUiForm {
 /* Base theme                                */
 /* ========================================= */
 
-@sapUiFormTitleSize: ~"H4";
-@sapUiFormSubTitleSize: ~"H5";
+@_sap_ui_layout_FormLayout_FormTitleSize: ~"H4";
+@_sap_ui_layout_FormLayout_FormSubTitleSize: ~"H5";
 
 .sapUiFormLayout {
 	border: 1px solid @sapUiGroupTitleBorderColor;
@@ -372,20 +433,20 @@ html.sap-desktop .sapUiFioriObjectPage > section > .sapUiForm {
 /* START "Grid.less" */
 /* UI5 RESPONSIVE GRID */
 // Variables
-@sapUiRespGridCols: 12;
-@sapUiRespGridCols-1: @sapUiRespGridCols - 1;
-@sapUiRespGridOneCol: 100% / @sapUiRespGridCols;
-@sapUiRespGridMedia_Phone: sapUiRespGridMedia-Std-Phone;
-@sapUiRespGridMedia_Tablet: sapUiRespGridMedia-Std-Tablet;
-@sapUiRespGridMedia_Desktop: sapUiRespGridMedia-Std-Desktop;
-@sapUiRespGridMedia_XL: sapUiRespGridMedia-Std-LargeDesktop;
-@sapUiRespGridMedia_PhoneSize: 320px;
-@sapUiRespGridMedia_TabletSize: 600px;
-@sapUiRespGridMedia_DesktopSize: 1024px;
-@sapUiRespGridMedia_XLSize: 1440px;
-@sapUiRespGrid_PxInRem: 16;
-@sapUiRespGridVisible: sapUiRespGridVisible;
-@sapUiRespGridHidden: sapUiRespGridHidden;
+@_sap_ui_layout_Grid_RespGridCols: 12;
+@_sap_ui_layout_Grid_RespGridCols-1: @_sap_ui_layout_Grid_RespGridCols - 1;
+@_sap_ui_layout_Grid_RespGridOneCol: 100% / @_sap_ui_layout_Grid_RespGridCols;
+@_sap_ui_layout_Grid_RespGridMedia_Phone: sapUiRespGridMedia-Std-Phone;
+@_sap_ui_layout_Grid_RespGridMedia_Tablet: sapUiRespGridMedia-Std-Tablet;
+@_sap_ui_layout_Grid_RespGridMedia_Desktop: sapUiRespGridMedia-Std-Desktop;
+@_sap_ui_layout_Grid_RespGridMedia_XL: sapUiRespGridMedia-Std-LargeDesktop;
+@_sap_ui_layout_Grid_RespGridMedia_PhoneSize: 320px;
+@_sap_ui_layout_Grid_RespGridMedia_TabletSize: 600px;
+@_sap_ui_layout_Grid_RespGridMedia_DesktopSize: 1024px;
+@_sap_ui_layout_Grid_RespGridMedia_XLSize: 1440px;
+@_sap_ui_layout_Grid_RespGrid_PxInRem: 16;
+@_sap_ui_layout_Grid_RespGridVisible: sapUiRespGridVisible;
+@_sap_ui_layout_Grid_RespGridHidden: sapUiRespGridHidden;
 
 div[class*="sapUiRespGrid"] > div[class*="sapUiRespGridSpan"] {
     float: left;
@@ -456,14 +517,14 @@ div[class*="sapUiRespGrid"]:after {
 .sapUiRespGridBreak { clear: both; }
 
 .sapUiRespGridWriteSpanClass(@classFor, @hspace, @span, @screenSize) when (@classFor = Span) {
-    @a:  @sapUiRespGridOneCol * @span;
-    width: @a - 100% * @sapUiRespGrid_PxInRem * @hspace / @screenSize;
+    @a:  @_sap_ui_layout_Grid_RespGridOneCol * @span;
+    width: @a - 100% * @_sap_ui_layout_Grid_RespGrid_PxInRem * @hspace / @screenSize;
     .sapUiRespGrid-getCalcFuncSpan(@a, @hspace);
 }
 
 .sapUiRespGridWriteIndentClass(@classFor, @hspace, @span, @screenSize) when (@classFor = Indent) {
-    @a:  @sapUiRespGridOneCol * @span;
-    margin-left: @a + (100% * @sapUiRespGrid_PxInRem * @hspace/2) / @screenSize ;
+    @a:  @_sap_ui_layout_Grid_RespGridOneCol * @span;
+    margin-left: @a + (100% * @_sap_ui_layout_Grid_RespGrid_PxInRem * @hspace/2) / @screenSize ;
     .sapUiRespGrid-getCalcFuncIndent(@a, @hspace);
 }
 
@@ -505,13 +566,13 @@ div[class*="sapUiRespGrid"]:after {
 // MOVE LEFT
 .sapUiRespGridWriteMoveFwd(@counter, @media, @name) when (@counter > 0) {
   .sapUiRespGridWriteMoveFwd((@counter - 1), @media, @name);
-  .@{media} > .sapUiRespGridFwd@{name}@{counter} { left: @sapUiRespGridOneCol * @counter; }
+  .@{media} > .sapUiRespGridFwd@{name}@{counter} { left: @_sap_ui_layout_Grid_RespGridOneCol * @counter; }
 }
 
 // MOVE RIGHT
 .sapUiRespGridWriteMoveBwd(@counter, @media, @name) when (@counter > 0) {
   .sapUiRespGridWriteMoveBwd((@counter - 1), @media, @name);
-  .@{media} > .sapUiRespGridBwd@{name}@{counter} { right: @sapUiRespGridOneCol * @counter; }
+  .@{media} > .sapUiRespGridBwd@{name}@{counter} { right: @_sap_ui_layout_Grid_RespGridOneCol * @counter; }
 }
 
 .sapUiRespGridWriteBreak(@media, @name){
@@ -522,22 +583,22 @@ div[class*="sapUiRespGrid"]:after {
 .sapUiRespGridWriteCSS(@media, @name, @screenSize) {
 
     /*SPANS */
-    .sapUiRespGridWriteClasses(@sapUiRespGridCols, @media, Span, @name, 0, 0, @screenSize);
-    .sapUiRespGridWriteClasses(@sapUiRespGridCols, @media, Span, @name, ~"05", 0.5, @screenSize);
-    .sapUiRespGridWriteClasses(@sapUiRespGridCols, @media, Span, @name, 1, 1, @screenSize);
-    .sapUiRespGridWriteClasses(@sapUiRespGridCols, @media, Span, @name, 2, 2, @screenSize);
+    .sapUiRespGridWriteClasses(@_sap_ui_layout_Grid_RespGridCols, @media, Span, @name, 0, 0, @screenSize);
+    .sapUiRespGridWriteClasses(@_sap_ui_layout_Grid_RespGridCols, @media, Span, @name, ~"05", 0.5, @screenSize);
+    .sapUiRespGridWriteClasses(@_sap_ui_layout_Grid_RespGridCols, @media, Span, @name, 1, 1, @screenSize);
+    .sapUiRespGridWriteClasses(@_sap_ui_layout_Grid_RespGridCols, @media, Span, @name, 2, 2, @screenSize);
 
     /*INDENTS */
-    .sapUiRespGridWriteClasses(@sapUiRespGridCols-1, @media, Indent, @name, 0, 0, @screenSize);
-    .sapUiRespGridWriteClasses(@sapUiRespGridCols-1, @media, Indent, @name, ~"05", 0.5, @screenSize);
-    .sapUiRespGridWriteClasses(@sapUiRespGridCols-1, @media, Indent, @name, 1, 1, @screenSize);
-    .sapUiRespGridWriteClasses(@sapUiRespGridCols-1, @media, Indent, @name, 2, 2, @screenSize);
+    .sapUiRespGridWriteClasses(@_sap_ui_layout_Grid_RespGridCols-1, @media, Indent, @name, 0, 0, @screenSize);
+    .sapUiRespGridWriteClasses(@_sap_ui_layout_Grid_RespGridCols-1, @media, Indent, @name, ~"05", 0.5, @screenSize);
+    .sapUiRespGridWriteClasses(@_sap_ui_layout_Grid_RespGridCols-1, @media, Indent, @name, 1, 1, @screenSize);
+    .sapUiRespGridWriteClasses(@_sap_ui_layout_Grid_RespGridCols-1, @media, Indent, @name, 2, 2, @screenSize);
 
 	/* MOVE LEFT */
-	.sapUiRespGridWriteMoveFwd(@sapUiRespGridCols-1, @media, @name);
+	.sapUiRespGridWriteMoveFwd(@_sap_ui_layout_Grid_RespGridCols-1, @media, @name);
 
 	/* MOVE RIGHT */
-	.sapUiRespGridWriteMoveBwd(@sapUiRespGridCols-1, @media, @name);
+	.sapUiRespGridWriteMoveBwd(@_sap_ui_layout_Grid_RespGridCols-1, @media, @name);
 
 	/* BREAK */
 	.sapUiRespGridWriteBreak(@media, @name);
@@ -547,19 +608,19 @@ div[class*="sapUiRespGrid"]:after {
 /*   S M A L L   D E V I C E S     */
 /* =============================== */
 
-.sapUiRespGridWriteCSS(@sapUiRespGridMedia_Phone, S, @sapUiRespGridMedia_PhoneSize);
+.sapUiRespGridWriteCSS(@_sap_ui_layout_Grid_RespGridMedia_Phone, S, @_sap_ui_layout_Grid_RespGridMedia_PhoneSize);
 
 /* SHOW and HIDE for SMALL contexts */
 
-.@{sapUiRespGridMedia_Phone} > .@{sapUiRespGridVisible}XL { display: none }
-.@{sapUiRespGridMedia_Phone} > .@{sapUiRespGridVisible}L { display: none }
-.@{sapUiRespGridMedia_Phone} > .@{sapUiRespGridVisible}M { display: none }
-.@{sapUiRespGridMedia_Phone} > .@{sapUiRespGridVisible}S { display: block }
+.@{_sap_ui_layout_Grid_RespGridMedia_Phone} > .@{_sap_ui_layout_Grid_RespGridVisible}XL { display: none }
+.@{_sap_ui_layout_Grid_RespGridMedia_Phone} > .@{_sap_ui_layout_Grid_RespGridVisible}L { display: none }
+.@{_sap_ui_layout_Grid_RespGridMedia_Phone} > .@{_sap_ui_layout_Grid_RespGridVisible}M { display: none }
+.@{_sap_ui_layout_Grid_RespGridMedia_Phone} > .@{_sap_ui_layout_Grid_RespGridVisible}S { display: block }
 
-.@{sapUiRespGridMedia_Phone} > .@{sapUiRespGridHidden}XL { display: block }
-.@{sapUiRespGridMedia_Phone} > .@{sapUiRespGridHidden}L { display: block }
-.@{sapUiRespGridMedia_Phone} > .@{sapUiRespGridHidden}M { display: block }
-.@{sapUiRespGridMedia_Phone} > .@{sapUiRespGridHidden}S { display: none }
+.@{_sap_ui_layout_Grid_RespGridMedia_Phone} > .@{_sap_ui_layout_Grid_RespGridHidden}XL { display: block }
+.@{_sap_ui_layout_Grid_RespGridMedia_Phone} > .@{_sap_ui_layout_Grid_RespGridHidden}L { display: block }
+.@{_sap_ui_layout_Grid_RespGridMedia_Phone} > .@{_sap_ui_layout_Grid_RespGridHidden}M { display: block }
+.@{_sap_ui_layout_Grid_RespGridMedia_Phone} > .@{_sap_ui_layout_Grid_RespGridHidden}S { display: none }
 
 
 
@@ -567,54 +628,54 @@ div[class*="sapUiRespGrid"]:after {
 /*   M E D I U M   D E V I C E S   */
 /* =============================== */
 
-.sapUiRespGridWriteCSS(@sapUiRespGridMedia_Tablet, M, @sapUiRespGridMedia_TabletSize);
+.sapUiRespGridWriteCSS(@_sap_ui_layout_Grid_RespGridMedia_Tablet, M, @_sap_ui_layout_Grid_RespGridMedia_TabletSize);
 
   /* SHOW and HIDE for MEDIUM contexts */
-.@{sapUiRespGridMedia_Tablet} > .@{sapUiRespGridVisible}XL { display: none }
-.@{sapUiRespGridMedia_Tablet} > .@{sapUiRespGridVisible}L { display: none }
-.@{sapUiRespGridMedia_Tablet} > .@{sapUiRespGridVisible}M { display: block }
-.@{sapUiRespGridMedia_Tablet} > .@{sapUiRespGridVisible}S { display: none }
+.@{_sap_ui_layout_Grid_RespGridMedia_Tablet} > .@{_sap_ui_layout_Grid_RespGridVisible}XL { display: none }
+.@{_sap_ui_layout_Grid_RespGridMedia_Tablet} > .@{_sap_ui_layout_Grid_RespGridVisible}L { display: none }
+.@{_sap_ui_layout_Grid_RespGridMedia_Tablet} > .@{_sap_ui_layout_Grid_RespGridVisible}M { display: block }
+.@{_sap_ui_layout_Grid_RespGridMedia_Tablet} > .@{_sap_ui_layout_Grid_RespGridVisible}S { display: none }
 
-.@{sapUiRespGridMedia_Tablet} > .@{sapUiRespGridHidden}XL { display: block }
-.@{sapUiRespGridMedia_Tablet} > .@{sapUiRespGridHidden}L { display: block }
-.@{sapUiRespGridMedia_Tablet} > .@{sapUiRespGridHidden}M { display: none }
-.@{sapUiRespGridMedia_Tablet} > .@{sapUiRespGridHidden}S { display: block }
+.@{_sap_ui_layout_Grid_RespGridMedia_Tablet} > .@{_sap_ui_layout_Grid_RespGridHidden}XL { display: block }
+.@{_sap_ui_layout_Grid_RespGridMedia_Tablet} > .@{_sap_ui_layout_Grid_RespGridHidden}L { display: block }
+.@{_sap_ui_layout_Grid_RespGridMedia_Tablet} > .@{_sap_ui_layout_Grid_RespGridHidden}M { display: none }
+.@{_sap_ui_layout_Grid_RespGridMedia_Tablet} > .@{_sap_ui_layout_Grid_RespGridHidden}S { display: block }
 
 
 /* ============================= */
 /*   L A R G E   D E V I C E S   */
 /* ============================= */
 
-.sapUiRespGridWriteCSS(@sapUiRespGridMedia_Desktop, L, @sapUiRespGridMedia_DesktopSize);
+.sapUiRespGridWriteCSS(@_sap_ui_layout_Grid_RespGridMedia_Desktop, L, @_sap_ui_layout_Grid_RespGridMedia_DesktopSize);
 
  /* SHOW and HIDE for LARGE contexts */
-.@{sapUiRespGridMedia_Desktop} > .@{sapUiRespGridVisible}XL { display: block }
-.@{sapUiRespGridMedia_Desktop} > .@{sapUiRespGridVisible}L { display: block }
-.@{sapUiRespGridMedia_Desktop} > .@{sapUiRespGridVisible}M { display: none }
-.@{sapUiRespGridMedia_Desktop} > .@{sapUiRespGridVisible}S { display: none }
+.@{_sap_ui_layout_Grid_RespGridMedia_Desktop} > .@{_sap_ui_layout_Grid_RespGridVisible}XL { display: block }
+.@{_sap_ui_layout_Grid_RespGridMedia_Desktop} > .@{_sap_ui_layout_Grid_RespGridVisible}L { display: block }
+.@{_sap_ui_layout_Grid_RespGridMedia_Desktop} > .@{_sap_ui_layout_Grid_RespGridVisible}M { display: none }
+.@{_sap_ui_layout_Grid_RespGridMedia_Desktop} > .@{_sap_ui_layout_Grid_RespGridVisible}S { display: none }
 
-.@{sapUiRespGridMedia_Desktop} > .@{sapUiRespGridHidden}XL { display: none }
-.@{sapUiRespGridMedia_Desktop} > .@{sapUiRespGridHidden}L { display: none }
-.@{sapUiRespGridMedia_Desktop} > .@{sapUiRespGridHidden}M { display: block }
-.@{sapUiRespGridMedia_Desktop} > .@{sapUiRespGridHidden}S { display: block }
+.@{_sap_ui_layout_Grid_RespGridMedia_Desktop} > .@{_sap_ui_layout_Grid_RespGridHidden}XL { display: none }
+.@{_sap_ui_layout_Grid_RespGridMedia_Desktop} > .@{_sap_ui_layout_Grid_RespGridHidden}L { display: none }
+.@{_sap_ui_layout_Grid_RespGridMedia_Desktop} > .@{_sap_ui_layout_Grid_RespGridHidden}M { display: block }
+.@{_sap_ui_layout_Grid_RespGridMedia_Desktop} > .@{_sap_ui_layout_Grid_RespGridHidden}S { display: block }
 
 
 /* ====================================== */
 /*  E X T R A   L A R G E   D E V I C E S */
 /* ====================================== */
 
-.sapUiRespGridWriteCSS(@sapUiRespGridMedia_XL, XL, @sapUiRespGridMedia_XLSize);
+.sapUiRespGridWriteCSS(@_sap_ui_layout_Grid_RespGridMedia_XL, XL, @_sap_ui_layout_Grid_RespGridMedia_XLSize);
 
 /* SHOW and HIDE for XLARGE contexts */
-.@{sapUiRespGridMedia_XL} > .@{sapUiRespGridVisible}XL { display: block }
-.@{sapUiRespGridMedia_XL} > .@{sapUiRespGridVisible}L { display: block }
-.@{sapUiRespGridMedia_XL} > .@{sapUiRespGridVisible}M { display: none }
-.@{sapUiRespGridMedia_XL} > .@{sapUiRespGridVisible}S { display: none }
+.@{_sap_ui_layout_Grid_RespGridMedia_XL} > .@{_sap_ui_layout_Grid_RespGridVisible}XL { display: block }
+.@{_sap_ui_layout_Grid_RespGridMedia_XL} > .@{_sap_ui_layout_Grid_RespGridVisible}L { display: block }
+.@{_sap_ui_layout_Grid_RespGridMedia_XL} > .@{_sap_ui_layout_Grid_RespGridVisible}M { display: none }
+.@{_sap_ui_layout_Grid_RespGridMedia_XL} > .@{_sap_ui_layout_Grid_RespGridVisible}S { display: none }
 
-.@{sapUiRespGridMedia_XL} > .@{sapUiRespGridHidden}XL { display: none }
-.@{sapUiRespGridMedia_XL} > .@{sapUiRespGridHidden}L { display: none }
-.@{sapUiRespGridMedia_XL} > .@{sapUiRespGridHidden}M { display: block }
-.@{sapUiRespGridMedia_XL} > .@{sapUiRespGridHidden}S { display: block }
+.@{_sap_ui_layout_Grid_RespGridMedia_XL} > .@{_sap_ui_layout_Grid_RespGridHidden}XL { display: none }
+.@{_sap_ui_layout_Grid_RespGridMedia_XL} > .@{_sap_ui_layout_Grid_RespGridHidden}L { display: none }
+.@{_sap_ui_layout_Grid_RespGridMedia_XL} > .@{_sap_ui_layout_Grid_RespGridHidden}M { display: block }
+.@{_sap_ui_layout_Grid_RespGridMedia_XL} > .@{_sap_ui_layout_Grid_RespGridHidden}S { display: block }
 
 
 
@@ -865,9 +926,10 @@ html[data-sap-ui-browser^="ff"] .sapUiSizeCompact {
 /* END "GridLayout.less" */
 
 /* START "HorizontalLayout.less" */
-/* ====================================================== */
-/* CSS for control sap.ui.layout/HorizontalLayout.control */
-/* ====================================================== */
+/* =============================================== */
+/* CSS for control sap.ui.layout/HorizontalLayout  */
+/* Base theme                                      */
+/* =============================================== */
 
 .sapUiHLayout {
 	display: inline-block;
@@ -899,8 +961,6 @@ html[data-sap-ui-browser^="ff"] .sapUiSizeCompact {
 /* CSS for control sap.ui.layout/ResponsiveFlowLayout  */
 /* Base theme                                          */
 /* =================================================== */
-
-@sapUiRFLPadding: ~"8px";
 
 .sapUiRFL {
 	position: relative;
@@ -1388,28 +1448,12 @@ html.sap-phone .sapUiFormResLayout > .sapUiRFL > .sapUiRFLRow > .sapUiRFLContain
 	}
 }
 
-.sapUiResponsiveSplitterPaginatorButton:hover {
-	background-color: @sapUiButtonLiteHoverBackground;
-
-	&:after {
-		background-color: @sapUiContentIconColor;
-	}
-}
-
 .sapUiResponsiveSplitterPaginatorButton {
 	width: 2.5rem;
-	height: 2.5rem;
+	height: 2.375rem;
 	cursor: pointer;
 	background-color: transparent;
 	display: inline-block;
-
-	&:active {
-		background-color: @sapUiButtonLiteActiveBackground;
-
-		&:after {
-			background-color: @sapUiContentContrastIconColor;
-		}
-	};
 
 	&:after {
 		content: "";
@@ -1429,31 +1473,14 @@ html.sap-phone .sapUiFormResLayout > .sapUiRFL > .sapUiRFLRow > .sapUiRFLContain
 	&:focus:before {
 		content: "";
 		position: absolute;
-		border: 1px dotted @sapUiContentFocusColor;
 		width: 2.125rem;
 		height: 2.125rem;
-		margin: 2px 0 0 2px;
+		margin: 1px 0 0 2px;
 	}
 }
 
 .sapUiResponsiveSplitterPaginatorButton:first-child {
 	margin-left: 0;
-}
-
-.sapUiResponsiveSplitterPaginatorSelectedButton {
-	background-color: transparent;
-
-	&:hover {
-		background-color: @sapUiButtonLiteHoverBackground;
-
-		&:after {
-			background-color: @sapUiSelected;
-		}
-	}
-
-	&:after {
-		background-color: @sapUiSelected;
-	}
 }
 
 .sapUiResponsiveSplitterHiddenElement {
@@ -1462,7 +1489,7 @@ html.sap-phone .sapUiFormResLayout > .sapUiRFL > .sapUiRFLRow > .sapUiRFLContain
 
 .sapUiResponsiveSplitterPaginatorNavButton {
 	width: 2.5rem;
-    height: 2.5rem;
+    height: 2.375rem;
 	font-family: 'SAP-icons';
 	cursor: pointer;
 
@@ -1491,18 +1518,6 @@ html.sap-phone .sapUiFormResLayout > .sapUiRFL > .sapUiRFLRow > .sapUiRFLContain
 	background-color: @sapUiSelected;
 }
 
-.sapUiResponsiveSplitter > .sapUiResponsiveSplitterPage > .sapUiLoSplitter .sapUiLoSplitterBar {
-	background-color: @sapUiGlobalBackgroundColor;
-
-	&:hover {
-		background-color: @sapUiHighlight;
-	}
-
-	&:active {
-		background-color: @sapUiHighlight;
-	}
-}
-
 html.sap-phone .sapUiResponsiveSplitter > .sapUiResponsiveSplitterPage > .sapUiLoSplitter .sapUiLoSplitterBar,
 html.sap-tablet .sapUiResponsiveSplitter > .sapUiResponsiveSplitterPage > .sapUiLoSplitter .sapUiLoSplitterBar,
 html.sap-phone .sapUiResponsiveSplitter > .sapUiResponsiveSplitterPage > .sapUiLoSplitter .sapUiLoSplitterOverlayBar,
@@ -1513,32 +1528,23 @@ html.sap-tablet .sapUiResponsiveSplitter > .sapUiResponsiveSplitterPage > .sapUi
 		z-index: 1;
 		margin-left: -22px;
 		top: 50%;
-		display:block;
-		position:relative;
-		text-align:center;
+		display: block;
+		position: relative;
+		text-align: center;
+		touch-action: none;
 	}
 
 	& .sapUiLoSplitterBarIcon:after {
 		content: "";
 		width: 1.25rem;
 		height: 1.25rem;
-		border-color: @sapUiContentIconColor;
 		border-width: 0.125rem;
-		background-color: @sapUiGlobalBackgroundColor;
 		border-radius: 50%;
 		border-style: solid;
 		display: block;
 		position: relative;
 		left: 25%;
 		top: 25%;
-	}
-}
-
-html.sap-phone .sapUiResponsiveSplitter > .sapUiResponsiveSplitterPage > .sapUiLoSplitter .sapUiLoSplitterOverlayBar,
-html.sap-tablet .sapUiResponsiveSplitter > .sapUiResponsiveSplitterPage > .sapUiLoSplitter .sapUiLoSplitterOverlayBar {
-	& .sapUiLoSplitterBarIcon:after {
-		border-color: @sapUiContentIconColor;
-		background-color: @sapUiHighlight;
 	}
 }
 
@@ -1904,9 +1910,10 @@ html[data-sap-ui-browser^=ie].sap-phone .sapUiLoSplitterV > .sapUiLoSplitterBar:
 /* END "Splitter.less" */
 
 /* START "VerticalLayout.less" */
-/* ====================================================== */
-/* CSS for control sap.ui.layout/VerticalLayout.control   */
-/* ====================================================== */
+/* ============================================= */
+/* CSS for control sap.ui.layout/VerticalLayout  */
+/* Base theme                                    */
+/* ============================================= */
 
 .sapUiVlt {
 	display: inline-block;
@@ -1918,6 +1925,11 @@ html[data-sap-ui-browser^=ie].sap-phone .sapUiLoSplitterV > .sapUiLoSplitterBar:
 /* END "VerticalLayout.less" */
 
 /* START "BlockLayoutRow.less" */
+/* ============================================= */
+/* CSS for control sap.ui.layout/BlockLayoutRow  */
+/* Base theme                                    */
+/* ============================================= */
+
 .sapUiBlockScrollingRow {
 	display: -webkit-box;
 	display: -webkit-flex;
@@ -2001,10 +2013,16 @@ html[data-sap-ui-browser^=ie].sap-phone .sapUiLoSplitterV > .sapUiLoSplitterBar:
 		}
 	}
 }
-
 /* END "BlockLayoutRow.less" */
 
 /* START "BlockLayoutCell.less" */
+/* ============================================== */
+/* CSS for control sap.ui.layout/BlockLayoutCell  */
+/* Base theme                                     */
+/* ============================================== */
+
+@_sap_ui_BlockLayoutCell_background: transparent;
+
 .sapUiBlockLayoutCell {
 	display: -webkit-box;
 	display: -webkit-flex;
@@ -2012,14 +2030,10 @@ html[data-sap-ui-browser^=ie].sap-phone .sapUiLoSplitterV > .sapUiLoSplitterBar:
 	overflow: hidden;
 }
 
-.sapUiBlockCellCenteredContent {
+.sapUiBlockCellCenteredContent > .sapUiBlockCellTitle {
 	align-self: center;
 	text-align: center;
 	width: 100%;
-
-	.sapUiBlockCellTitle {
-		font-size: @sapUiFontHeader1Size;
-	}
 }
 
 .sapUiBlockCellLeft,
@@ -2045,6 +2059,7 @@ html[data-sap-ui-browser^=ie].sap-phone .sapUiLoSplitterV > .sapUiLoSplitterBar:
 	padding: 1rem;
 	overflow: hidden;
 	box-sizing: border-box;
+	background-color: @_sap_ui_BlockLayoutCell_background;
 }
 
 .sapUiBlockCellTitle {
@@ -2073,13 +2088,6 @@ html[data-sap-ui-browser^=ie].sap-phone .sapUiLoSplitterV > .sapUiLoSplitterBar:
 /* CSS for control sap.ui.layout/BlockLayout  */
 /* Base theme                                 */
 /* ========================================== */
-
-.sapUiBlockLayout {
-	.sapUiFormResLayout > div {
-		background-color: inherit;
-	}
-}
-
 .setCellsColorDoubles (@evenCell, @oddCell) {
 	// Match every even cell
 	.sapUiBlockLayoutCell:nth-child(2n) {
@@ -2089,6 +2097,12 @@ html[data-sap-ui-browser^=ie].sap-phone .sapUiLoSplitterV > .sapUiLoSplitterBar:
 	// Match every odd cell
 	.sapUiBlockLayoutCell:nth-child(2n+1) {
 		background-color: @oddCell;
+	}
+}
+
+.sapUiBlockLayout {
+	.sapUiFormResLayout > div {
+		background-color: inherit;
 	}
 }
 
@@ -2102,6 +2116,10 @@ html[data-sap-ui-browser^=ie].sap-phone .sapUiLoSplitterV > .sapUiLoSplitterBar:
 	> .sapUiIcon {
 		font-size: 2.25rem;
 	}
+
+	.sapUiBlockCellTitle {
+		font-size: @sapMFontHeader3Size;
+	}
 }
 
 .sapUiBlockCellTitle {
@@ -2111,7 +2129,12 @@ html[data-sap-ui-browser^=ie].sap-phone .sapUiLoSplitterV > .sapUiLoSplitterBar:
 // Styles & Sizes for Tablet
 .sapUiBlockLayoutSizeM {
 	.sapUiBlockCellContent {
-		padding: 2rem;
+		padding: 1rem 2rem;
+		font-size: @sapMFontMediumSize;
+
+		> .sapMText {
+			font-size: @sapMFontMediumSize;
+		}
 
 		> .sapUiIcon {
 			font-size: 3rem;
@@ -2122,11 +2145,11 @@ html[data-sap-ui-browser^=ie].sap-phone .sapUiLoSplitterV > .sapUiLoSplitterBar:
 // Styles & Sizes for Desktop
 .sapUiBlockLayoutSizeL {
 	.sapUiBlockCellContent {
-		padding: 3rem;
-		font-size: 1.125rem;
+		padding: 2rem 3rem;
+		font-size: @sapMFontLargeSize;
 
 		> .sapMText {
-			font-size: 1.125rem;
+			font-size: @sapMFontLargeSize;
 		}
 
 		> .sapUiIcon {
@@ -2135,18 +2158,18 @@ html[data-sap-ui-browser^=ie].sap-phone .sapUiLoSplitterV > .sapUiLoSplitterBar:
 	}
 
 	.sapUiBlockCellTitle {
-		font-size: 1.75rem;
+		font-size: @sapMFontHeader1Size;
 	}
 }
 
 // Styles & Sizes for LargeDesktop
 .sapUiBlockLayoutSizeXL {
 	.sapUiBlockCellContent {
-		padding: 4rem;
-		font-size: 1.5rem;
+		padding: 2rem 3rem;
+		font-size: @sapMFontLargeSize;
 
 		> .sapMText {
-			font-size: 1.125rem;
+			font-size: @sapMFontLargeSize;
 		}
 
 		> .sapUiIcon {
@@ -2155,7 +2178,7 @@ html[data-sap-ui-browser^=ie].sap-phone .sapUiLoSplitterV > .sapUiLoSplitterBar:
 	}
 
 	.sapUiBlockCellTitle {
-		font-size: 2.25rem;
+		font-size: @sapMFontHeader1Size;
 	}
 }
 

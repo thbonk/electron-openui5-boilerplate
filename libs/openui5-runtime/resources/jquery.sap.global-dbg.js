@@ -433,7 +433,7 @@
 									return fnHandler.call(oProxy, oEvent);
 								}
 							}
-							// If this is a asynchronous request and a sync request is ongoing,
+							// If this is an asynchronous request and a sync request is ongoing,
 							// the execution of all following handler calls needs to be delayed
 							if (!bSync && bSyncRequestOngoing) {
 								bDelay = true;
@@ -456,7 +456,7 @@
 						return deactivate(fnHandler.wrappedHandler);
 					}
 
-					// When a event handler is removed synchronously, it needs to be deactivated
+					// When an event handler is removed synchronously, it needs to be deactivated
 					// to avoid the situation, where the handler has been triggered while
 					// the sync request was ongoing, but removed afterwards.
 					function deactivate(fnWrappedHandler) {
@@ -596,6 +596,7 @@
 			// To reboot an alternative core just step down a few lines and set sRebootUrl
 			/*eslint-disable no-debugger */
 			debugger;
+			/*eslint-enable no-debugger */
 		}
 
 		// Check local storage for booting a different core
@@ -793,7 +794,7 @@
 	/**
 	 * Root Namespace for the jQuery plug-in provided by SAP SE.
 	 *
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @namespace
 	 * @public
 	 * @static
@@ -1216,18 +1217,6 @@
 				return (iLevel == null ? DEBUG : iLevel) <= level(sComponent || sDefaultComponent);
 			};
 
-			/**
-			 * Enables or disables whether additional support information is logged in a trace.
-			 * If enabled, logging methods like error, warning, info and debug are calling the additional
-			 * optional callback parameter fnSupportInfo and store the returned object in the log entry property supportInfo.
-			 *
-			 * @param {boolean} bEnabled true if the support information should be logged
-			 * @private
-			 * @since 1.46.0
-			 */
-			this.logSupportInfo = function logSupportInfo(bEnabled) {
-				bLogSupportInfo = bEnabled;
-			};
 		}
 
 		/**
@@ -1409,6 +1398,20 @@
 			removeLogListener : function(oListener) {
 				listener().detach(this, oListener);
 				return this;
+			},
+
+			/**
+			 * Enables or disables whether additional support information is logged in a trace.
+			 * If enabled, logging methods like error, warning, info and debug are calling the additional
+			 * optional callback parameter fnSupportInfo and store the returned object in the log entry property supportInfo.
+			 *
+			 * @param {boolean} bEnabled true if the support information should be logged
+			 * @private
+			 * @static
+			 * @since 1.46.0
+			 */
+			logSupportInfo: function logSupportInfo(bEnabled) {
+				bLogSupportInfo = bEnabled;
 			}
 
 		});
@@ -2688,7 +2691,7 @@
 		 * Whether sap.ui.define calls could be executed asynchronously in the current context.
 		 *
 		 * The initial value is determined by the preload flag. This is necessary to make
-		 * hard coded script tags work when their scripts include a sap.ui.define call and if
+		 * hard coded script tags work when their scripts include an sap.ui.define call and if
 		 * some later incline script expects the results of sap.ui.define.
 		 * Most prominent example: unit tests that include QUnitUtils as a script tag and use qutils
 		 * in one of their inline scripts.
@@ -2848,6 +2851,11 @@
 				'sap/ui/demokit/js/esprima.js': {
 					amd: true,
 					exports: 'esprima'
+				},
+				'sap/ui/thirdparty/RequestRecorder.js': {
+					amd: true,
+					exports: 'RequestRecorder',
+					deps: ['sap/ui/thirdparty/URI', 'sap/ui/thirdparty/sinon']
 				}
 			},
 
@@ -3534,7 +3542,7 @@
 		}
 
 		/**
-		 * Constructs an URL to load the module with the given name and file type (suffix).
+		 * Constructs a URL to load the module with the given name and file type (suffix).
 		 *
 		 * Searches the longest prefix of the given module name for which a registration
 		 * exists (see {@link jQuery.sap.registerModulePath}) and replaces that prefix
@@ -3569,7 +3577,7 @@
 		 * <b>Unified Resource Names</b><br>
 		 * Several UI5 APIs use <i>Unified Resource Names (URNs)</i> as naming scheme for resources that
 		 * they deal with (e.h. Javascript, CSS, JSON, XML, ...). URNs are similar to the path
-		 * component of an URL:
+		 * component of a URL:
 		 * <ul>
 		 * <li>they consist of a non-empty sequence of name segments</li>
 		 * <li>segments are separated by a forward slash '/'</li>
@@ -3609,7 +3617,7 @@
 		jQuery.sap.getResourcePath = getResourcePath;
 
 		/**
-		 * Registers an URL prefix for a module name prefix.
+		 * Registers a URL prefix for a module name prefix.
 		 *
 		 * Before a module is loaded, the longest registered prefix of its module name
 		 * is searched for and the associated URL prefix is used as a prefix for the request URL.
@@ -3644,7 +3652,7 @@
 		 * @SecSink {1|PATH} Parameter is used for future HTTP requests
 		 */
 		jQuery.sap.registerModulePath = function registerModulePath(sModuleName, vUrlPrefix) {
-			jQuery.sap.assert(!/\//.test(sModuleName), "module path must not contain a slash.");
+			jQuery.sap.assert(!/\//.test(sModuleName), "module name must not contain a slash.");
 			sModuleName = sModuleName.replace(/\./g, "/");
 			// URL must not be empty
 			vUrlPrefix = vUrlPrefix || '.';
@@ -3652,7 +3660,7 @@
 		};
 
 		/**
-		 * Registers an URL prefix for a resource name prefix.
+		 * Registers a URL prefix for a resource name prefix.
 		 *
 		 * Before a resource is loaded, the longest registered prefix of its unified resource name
 		 * is searched for and the associated URL prefix is used as a prefix for the request URL.
@@ -3805,7 +3813,7 @@
 		 * @sap-restricted sap.ui.core
 		 */
 		jQuery.sap.isResourceLoaded = function isResourceLoaded(sResourceName) {
-			return mModules[sResourceName];
+			return !!mModules[sResourceName];
 		};
 
 		/**
@@ -3967,7 +3975,7 @@
 		 *         // use a function from the dependency 'Helper' in the same package (e.g. 'sap/mylib/Helper' )
 		 *         var mSettings = Helper.foo();
 		 *
-		 *         // create and return a sap.m.Bar (using its local name 'Bar')
+		 *         // create and return an sap.m.Bar (using its local name 'Bar')
 		 *         return new Bar(mSettings);
 		 *
 		 *     }
@@ -4718,44 +4726,59 @@
 
 			if ( !oModule.loaded ) {
 
-				oModule.loaded = new Promise(function(resolve,reject) {
+				var oScript;
+				var fnCreateLoadScriptPromise = function(bRetryOnFailure){
+					return new Promise(function(resolve, reject) {
 
-					function onload(e) {
-						jQuery.sap.log.info("Javascript resource loaded: " + sResource);
-						// TODO either find a cross-browser solution to detect and assign execution errors or document behavior
-						//var error = e.target.dataset.sapUiModuleError;
-						//if ( error ) {
-						//	oModule.state = FAILED;
-						//	oModule.error = JSON.parse(error);
-						//	jQuery.sap.log.error("failed to load Javascript resource: " + sResource + ":" + error);
-						//	reject(oModule.error);
-						//}
-						oScript.removeEventListener('load', onload);
-						oScript.removeEventListener('error', onerror);
-						oModule.state = READY;
-						// TODO oModule.data = ?
-						resolve();
+						function onload(e) {
+							jQuery.sap.log.info("Javascript resource loaded: " + sResource);
+							// TODO either find a cross-browser solution to detect and assign execution errors or document behavior
+							//var error = e.target.dataset.sapUiModuleError;
+							//if ( error ) {
+							//	oModule.state = FAILED;
+							//	oModule.error = JSON.parse(error);
+							//	jQuery.sap.log.error("failed to load Javascript resource: " + sResource + ":" + error);
+							//	reject(oModule.error);
+							//}
+							oScript.removeEventListener('load', onload);
+							oScript.removeEventListener('error', onerror);
+							oModule.state = READY;
+							// TODO oModule.data = ?
+							resolve();
+						}
+
+						function onerror(e) {
+							oScript.removeEventListener('load', onload);
+							oScript.removeEventListener('error', onerror);
+							if (bRetryOnFailure) {
+								jQuery.sap.log.warning("retry loading Javascript resource: " + sResource);
+							} else {
+								jQuery.sap.log.error("failed to load Javascript resource: " + sResource);
+								oModule.state = FAILED;
+							}
+
+							// TODO oModule.error = xhr ? xhr.status + " - " + xhr.statusText : textStatus;
+							reject();
+						}
+
+						var sUrl = oModule.url = getResourcePath(sResource);
+						oModule.state = LOADING;
+
+						oScript = window.document.createElement('SCRIPT');
+						oScript.src = sUrl;
+						oScript.setAttribute("data-sap-ui-module", sResource); // IE9/10 don't support dataset :-(
+						// oScript.setAttribute("data-sap-ui-module-error", '');
+						oScript.addEventListener('load', onload);
+						oScript.addEventListener('error', onerror);
+						appendHead(oScript);
+					});
+				};
+				oModule.loaded = fnCreateLoadScriptPromise(/* bRetryOnFailure= */ true).catch(function(e){
+					if (oScript && oScript.parentNode) {
+						oScript.parentNode.removeChild(oScript);
 					}
-
-					function onerror(e) {
-						jQuery.sap.log.error("failed to load Javascript resource: " + sResource);
-						oScript.removeEventListener('load', onload);
-						oScript.removeEventListener('error', onerror);
-						oModule.state = FAILED;
-						// TODO oModule.error = xhr ? xhr.status + " - " + xhr.statusText : textStatus;
-						reject();
-					}
-
-					var sUrl = oModule.url = getResourcePath(sResource);
-					oModule.state = LOADING;
-
-					var oScript = window.document.createElement('SCRIPT');
-					oScript.src = sUrl;
-					oScript.setAttribute("data-sap-ui-module", sResource); // IE9/10 don't support dataset :-(
-					// oScript.setAttribute("data-sap-ui-module-error", '');
-					oScript.addEventListener('load', onload);
-					oScript.addEventListener('error', onerror);
-					appendHead(oScript);
+					//try to load the resource again if it fails the first time
+					return fnCreateLoadScriptPromise(/* bRetryOnFailure= */ false);
 				});
 
 			}
@@ -4773,7 +4796,7 @@
 
 			//remove final information in mUrlPrefixes
 			var mFlatUrlPrefixes = {};
-				jQuery.each(mUrlPrefixes, function(sKey,oUrlPrefix) {
+			jQuery.each(mUrlPrefixes, function(sKey,oUrlPrefix) {
 				mFlatUrlPrefixes[sKey] = oUrlPrefix.url;
 			});
 
@@ -4978,8 +5001,6 @@
 	 *            is loaded. This is the only option how to determine in IE if the load was successful
 	 *            or not since the native onerror callback for link elements doesn't work in IE. The IE
 	 *            always calls the onload callback of the link element.
-	 *            Another issue of the IE9 is that in case of loading too many stylesheets the eventing
-	 *            is not working and therefore the error or load callback will not be triggered anymore.
 	 * @return {void|Promise}
 	 *            When using the configuration object a <code>Promise</code> will be returned. The
 	 *            documentation for the <code>fnLoadCallback</code> applies to the <code>resolve</code>
@@ -5010,9 +5031,22 @@
 
 	// TODO should be in core, but then the 'callback' could not be implemented
 	if ( !(oCfgData.productive === true || oCfgData.productive === "true"  || oCfgData.productive === "x") ) {
+		// Check whether the left 'alt' key is used
+		// The TechnicalInfo should be shown only when left 'alt' key is used
+		// because the right 'alt' key is mapped to 'alt' + 'ctrl' on windows
+		// in some languages for example German or Polish which makes right
+		// 'alt' + 'shift' + S open the TechnicalInfo
+		var bLeftAlt = false;
+
 		document.addEventListener('keydown', function(e) {
 			try {
-				if ( e.shiftKey && e.altKey && e.ctrlKey ) {
+				if (e.keyCode === 18) { // 'alt' Key
+					bLeftAlt = (typeof e.location !== "number" /* location isn't supported */ || e.location === 1 /* left */);
+					return;
+				}
+
+				if (e.shiftKey && e.altKey && e.ctrlKey && bLeftAlt) {
+					// invariant: when e.altKey is true, there must have been a preceding keydown with keyCode === 18, so bLeftAlt is always up-to-date
 					if ( e.keyCode === 80 ) { // 'P'
 						sap.ui.require(['sap/ui/core/support/techinfo/TechnicalInfo'], function(TechnicalInfo) {
 							TechnicalInfo.open(function() {

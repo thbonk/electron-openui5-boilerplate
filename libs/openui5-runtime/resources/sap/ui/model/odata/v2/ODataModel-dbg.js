@@ -65,7 +65,7 @@ sap.ui.define([
 	 *
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -118,6 +118,7 @@ sap.ui.define([
 				aBindableResponseHeaders = mParameters.bindableResponseHeaders;
 			}
 			this.mSupportedBindingModes = {"OneWay": true, "OneTime": true, "TwoWay":true};
+			this.mUnsupportedFilterOperators = {"Any": true, "All": true};
 			this.sDefaultBindingMode = sDefaultBindingMode || BindingMode.OneWay;
 
 			this.bJSON = bJSON !== false;
@@ -980,7 +981,7 @@ sap.ui.define([
 			for (var i = 0; i < aBatchRequests.length; i++) {
 				var oBatchRequest = {};
 				//changeSets
-				if (jQuery.isArray(aBatchRequests[i])) {
+				if (Array.isArray(aBatchRequests[i])) {
 					var aChangeSet = aBatchRequests[i];
 					for (var j = 0; j < aChangeSet.length; j++) {
 						var oRequest = aChangeSet[j].request;
@@ -1169,7 +1170,7 @@ sap.ui.define([
 			jQuery.each(oData, function(sName, oProperty) {
 				if (oProperty && (oProperty.__metadata && oProperty.__metadata.uri || oProperty.results) && !oProperty.__deferred) {
 					oResult = that._importData(oProperty, mChangedEntities, oResponse);
-					if (jQuery.isArray(oResult)) {
+					if (Array.isArray(oResult)) {
 						oEntry[sName] = { __list: oResult };
 					} else {
 						oEntry[sName] = { __ref: oResult };
@@ -1293,7 +1294,7 @@ sap.ui.define([
 	ODataModel.prototype.initialize = function() {
 		// Call initialize on all bindings in case metadata was not available when they were created
 		var aBindings = this.aBindings.slice(0);
-		jQuery.each(aBindings, function(iIndex, oBinding) {
+		aBindings.forEach(function(oBinding) {
 			oBinding.initialize();
 		});
 	};
@@ -1336,7 +1337,7 @@ sap.ui.define([
 		var aBindings = this.aBindings.slice(0);
 		//the refresh calls read synchronous; we use this.sRefreshGroupId in this case
 		this.sRefreshGroupId = sGroupId;
-		jQuery.each(aBindings, function(iIndex, oBinding) {
+		aBindings.forEach(function(oBinding) {
 			oBinding._refresh(bForceUpdate, mChangedEntities, mEntityTypes);
 		});
 		this.sRefreshGroupId = undefined;
@@ -1365,7 +1366,7 @@ sap.ui.define([
 			this.sUpdateTimer = null;
 		}
 		var aBindings = this.aBindings.slice(0);
-		jQuery.each(aBindings, function(iIndex, oBinding) {
+		aBindings.forEach(function(oBinding) {
 			if (!bMetaModelOnly || this.isMetaModelPath(oBinding.getPath())) {
 				oBinding.checkUpdate(bForceUpdate, mChangedEntities);
 			}
@@ -1381,7 +1382,7 @@ sap.ui.define([
 	 */
 	ODataModel.prototype.checkDataState = function(mLaunderingState) {
 		var aBindings = this.aBindings.slice(0);
-		jQuery.each(aBindings, function(iIndex, oBinding) {
+		aBindings.forEach(function(oBinding) {
 			if (oBinding.checkDataState) {
 				oBinding.checkDataState(mLaunderingState);
 			}
@@ -1547,6 +1548,7 @@ sap.ui.define([
 
 		function handleSuccess(oData) {
 			var sKey = oData ? that._getKey(oData) : null,
+				bLink = !(sPath === "" || sPath.indexOf("/") > 0),
 				oRef = null,
 				sContextPath, oEntity;
 
@@ -1556,7 +1558,9 @@ sap.ui.define([
 				oNewContext = that.getContext('/' + sKey);
 				oRef = {__ref: sKey};
 			}
-			if (oContext && bIsRelative) {
+			/* in case of sPath == "" or a deep path (entity(1)/entities) we
+			   should not link the Entity */
+			if (oContext && bIsRelative && bLink) {
 				sContextPath = oContext.getPath();
 				// remove starting slash
 				sContextPath = sContextPath.substr(1);
@@ -2496,8 +2500,8 @@ sap.ui.define([
 				aRequests = oRequest.eventInfo.requests;
 			if (aRequests) {
 				jQuery.each(aRequests, function(i, oRequest) {
-					if (jQuery.isArray(oRequest)) {
-						jQuery.each(oRequest, function(i, oRequest) {
+					if (Array.isArray(oRequest)) {
+						oRequest.forEach(function(oRequest) {
 							jQuery.each(oRequest.parts, function(i, oPart) {
 								oEventInfo = that._createEventInfo(oRequest.request, oPart.fnError);
 								that["fireRequest" + sType](oEventInfo);
@@ -2688,7 +2692,7 @@ sap.ui.define([
 				for (i = 0; i < aBatchResponses.length; i++) {
 					oResponse = aBatchResponses[i];
 
-					if (jQuery.isArray(aRequests[i])) {
+					if (Array.isArray(aRequests[i])) {
 						//changeSet failed
 						if (oResponse.message) {
 							for (j = 0; j < aRequests[i].length; j++) {
@@ -2723,8 +2727,8 @@ sap.ui.define([
 
 			// Call procesError for all contained requests first
 			jQuery.each(aRequests, function(i, oRequest) {
-				if (jQuery.isArray(oRequest)) {
-					jQuery.each(oRequest, function(i, oRequest) {
+				if (Array.isArray(oRequest)) {
+					oRequest.forEach(function(oRequest) {
 						processResponse(oRequest, oError, bAborted);
 					});
 				} else {
@@ -3175,12 +3179,12 @@ sap.ui.define([
 			}
 
 			// broken implementations need this
-			if (oResultData && oResultData.results && !jQuery.isArray(oResultData.results)) {
+			if (oResultData && oResultData.results && !Array.isArray(oResultData.results)) {
 				oResultData = oResultData.results;
 			}
 
 			// adding the result data to the data object
-			if (!oResponse._imported && oResultData && (jQuery.isArray(oResultData) || typeof oResultData == 'object')) {
+			if (!oResponse._imported && oResultData && (Array.isArray(oResultData) || typeof oResultData == 'object')) {
 				//need a deep data copy for import
 				oImportData = jQuery.sap.extend(true, {}, oResultData);
 				that._importData(oImportData, mLocalGetEntities, oResponse);
@@ -3403,7 +3407,7 @@ sap.ui.define([
 		// delete nav props
 		if (oPayload && oEntityType) {
 			var aNavProps = this.oMetadata._getNavigationPropertyNames(oEntityType);
-			jQuery.each(aNavProps, function(iIndex, sNavPropName) {
+			aNavProps.forEach(function(sNavPropName) {
 				delete oPayload[sNavPropName];
 			});
 		}
@@ -4351,7 +4355,7 @@ sap.ui.define([
 			aEntitySets = [],
 			that = this;
 
-		jQuery.each(aUrls, function(i, sUrl) {
+		aUrls.forEach(function(sUrl) {
 			var iIndex = sUrl.indexOf("$metadata");
 			if (iIndex >= 0) {
 				//add serviceUrl for relative metadata urls
@@ -4492,8 +4496,8 @@ sap.ui.define([
 		oRequestHandle = {
 			abort: function() {
 				if (vRequestHandleInternal) {
-					if (jQuery.isArray(vRequestHandleInternal)) {
-						jQuery.each(vRequestHandleInternal, function(i, oRequestHandle) {
+					if (Array.isArray(vRequestHandleInternal)) {
+						vRequestHandleInternal.forEach(function(oRequestHandle) {
 							oRequestHandle.abort();
 						});
 					} else {
@@ -5006,7 +5010,7 @@ sap.ui.define([
 				jQuery.sap.assert(oEntityMetadata, "No Metadata for collection " + sPath + " found");
 				return undefined;
 			}
-			if (typeof vProperties === "object" && !jQuery.isArray(vProperties)) {
+			if (typeof vProperties === "object" && !Array.isArray(vProperties)) {
 				oEntity = vProperties;
 			} else {
 				for (var i = 0; i < oEntityMetadata.property.length; i++) {
@@ -5342,12 +5346,7 @@ sap.ui.define([
 	 * @public
 	 */
 	ODataModel.prototype.getDeferredGroups = function() {
-		var aGroupIds = [], i = 0;
-		jQuery.each(this.mDeferredGroups, function(sKey, sGroupId){
-			aGroupIds[i] = sGroupId;
-			i++;
-		});
-		return aGroupIds;
+		return Object.keys(this.mDeferredGroups);
 	};
 
 	/**

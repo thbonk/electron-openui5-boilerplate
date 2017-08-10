@@ -105,14 +105,14 @@ sap.ui.define([
 	 * <code>pageable</code>, <code>requires-filter</code>, <code>searchable</code>,
 	 * <code>topable</code>, <code>updatable</code> and <code>updatable-path</code> on entity sets;
 	 * </li>
-	 * <li><code>creatable</code>, <code>creatable-path</code>, <code>filterable</code>
-	 * on navigation properties;</li>
-	 * <li><code>aggregation-role</code> ("dimension" and "measure"), <code>creatable</code>,
-	 * <code>display-format</code> ("UpperCase" and "NonNegative"), <code>field-control</code>,
-	 * <code>filterable</code>, <code>filter-restriction</code>, <code>heading</code>,
-	 * <code>precision</code>, <code>quickinfo</code>, <code>required-in-filter</code>,
-	 * <code>sortable</code>, <code>text</code>, <code>unit</code>, <code>updatable</code> and
-	 * <code>visible</code> on properties;</li>
+	 * <li><code>creatable</code> (since 1.41.0), <code>creatable-path</code> (since 1.41.0) and
+	 * <code>filterable</code> (since 1.39.0) on navigation properties;</li>
+	 * <li><code>aggregation-role</code> ("dimension" and "measure", both since 1.45.0),
+	 * <code>creatable</code>, <code>display-format</code> ("UpperCase" and "NonNegative"),
+	 * <code>field-control</code>, <code>filterable</code>, <code>filter-restriction</code>,
+	 * <code>heading</code>, <code>precision</code>, <code>quickinfo</code>,
+	 * <code>required-in-filter</code>, <code>sortable</code>, <code>text</code>, <code>unit</code>,
+	 * <code>updatable</code> and <code>visible</code> on properties;</li>
 	 * <li><code>semantics</code>; the following values are supported:
 	 * <ul>
 	 * <li>"bday", "city", "country", "email" (including support for types, for example
@@ -172,7 +172,7 @@ sap.ui.define([
 	 * {@link #loaded loaded} has been resolved!
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @alias sap.ui.model.odata.ODataMetaModel
 	 * @extends sap.ui.model.MetaModel
 	 * @public
@@ -612,7 +612,8 @@ sap.ui.define([
 	};
 
 	/**
-	 * Returns the OData default entity container.
+	 * Returns the OData default entity container. If there is only a single schema with a single
+	 * entity container, the entity container does not need to be marked as default explicitly.
 	 *
 	 * @param {boolean} [bAsPath=false]
 	 *   determines whether the entity container is returned as a path or as an object
@@ -637,6 +638,13 @@ sap.ui.define([
 					return false; //break
 				}
 			});
+
+			if (!vResult && aSchemas.length === 1 && aSchemas[0].entityContainer
+					&& aSchemas[0].entityContainer.length === 1) {
+				vResult = bAsPath
+					? "/dataServices/schema/0/entityContainer/0"
+					: aSchemas[0].entityContainer[0];
+			}
 		}
 
 		return vResult;

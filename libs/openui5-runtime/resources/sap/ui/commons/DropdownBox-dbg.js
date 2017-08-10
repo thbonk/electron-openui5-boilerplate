@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 	 * The control provides a field that allows end users to an entry out of a list of pre-defined items.
 	 * The choosable items can be provided in the form of a complete <code>ListBox</code>, single <code>ListItems</code>.
 	 * @extends sap.ui.commons.ComboBox
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -251,7 +251,7 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 				return [];
 			}
 
-			// as an empty list can not have an history or an searchHelp just clear List
+			// as an empty list can not have a history or a searchHelp just clear List
 			ComboBox.prototype.removeAllItems.apply(this, arguments);
 
 			this.__aItems = [];
@@ -323,7 +323,7 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 		if (bDelayed) {
 			// Items are updated by binding. As items can be "reused" and have same IDSs,
 			// only one check at the end of all changes is needed
-			// only clear if really from an delayed call
+			// only clear if really from a delayed call
 			this._sHandleItemsChanged = null;
 			this._bNoItemCheck = undefined;
 		}
@@ -1353,7 +1353,7 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 	 * Handle the sapfocusleave pseudo event and ensure that when the focus moves to the list box,
 	 * the check change functionality (incl. fireChange) is not triggered.
 	 * Before the change event the value must be checked again if it fits to the items, because
-	 * it might be manipulated using DOM manipulation or a IME tool for entering foreign characters
+	 * it might be manipulated using DOM manipulation or an IME tool for entering foreign characters
 	 * @protected
 	 */
 	DropdownBox.prototype.onsapfocusleave = function(oEvent) {

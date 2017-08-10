@@ -16,7 +16,7 @@ sap.ui.define(['jquery.sap.global', './FormLayout', './GridContainerData', './Gr
 	 * @param {object} [mSettings] initial settings for the new control
 	 *
 	 * @class
-	 * This <code>FormLayout</code> renders a <code>Form</code> using a HTML-table based grid.
+	 * This <code>FormLayout</code> renders a <code>Form</code> using an HTML-table based grid.
 	 * This can be a 16 column grid or an 8 column grid. The grid is stable, so the alignment of the fields is the same for all screen sizes or widths of the <code>Form</code>.
 	 * Only the width of the single grid columns depends on the available width.
 	 *
@@ -29,7 +29,7 @@ sap.ui.define(['jquery.sap.global', './FormLayout', './GridContainerData', './Gr
 	 * @extends sap.ui.layout.form.FormLayout
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -67,7 +67,7 @@ sap.ui.define(['jquery.sap.global', './FormLayout', './GridContainerData', './Gr
 			var aContainers = oForm.getFormContainers();
 			for ( var i = 0; i < aContainers.length; i++) {
 				var oContainer = aContainers[i];
-				if (oContainer.getExpandable()) {
+				if (oContainer.getExpandable() && oContainer._oExpandButton) {
 					oContainer._oExpandButton.$().attr("tabindex", "-1");
 				}
 			}
@@ -82,7 +82,7 @@ sap.ui.define(['jquery.sap.global', './FormLayout', './GridContainerData', './Gr
 
 		FormLayout.prototype.contentOnAfterRendering.apply(this, arguments);
 
-		if (oControl.getMetadata().getName() != "sap.ui.commons.Image" ) {
+		if (!oControl.getFormDoNotAdjustWidth || !oControl.getFormDoNotAdjustWidth()) {
 			oControl.$().css("width", "100%");
 		}
 

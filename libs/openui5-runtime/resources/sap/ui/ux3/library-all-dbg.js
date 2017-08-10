@@ -1214,7 +1214,7 @@ sap.ui.define("sap/ui/ux3/FeedChunkRenderer",['jquery.sap.global'],
 		rm.write('<img id=' + sMyId + '-thumb');
 		var sThumbnail = oChunk.getThumbnailSrc();
 		if (!sThumbnail) {
-			sThumbnail = sap.ui.core.theming.Parameters._getThemeImage('sapUiFeedPersonPlaceholder');
+			sThumbnail = sap.ui.core.theming.Parameters._getThemeImage('_sap_ui_ux3_FeedChunk_PersonPlaceholder');
 		}
 		rm.writeAttributeEscaped('src', sThumbnail);
 		rm.writeAttributeEscaped('alt', oChunk.getSender());
@@ -1559,7 +1559,7 @@ sap.ui.define("sap/ui/ux3/FeederRenderer",['jquery.sap.global'],
 		rm.write('<img id=' + oFeeder.getId() + '-thumb');
 		var sThumbnail = oFeeder.getThumbnailSrc();
 		if (!sThumbnail) {
-			sThumbnail = sap.ui.core.theming.Parameters._getThemeImage("sapUiFeedPersonPlaceholder");
+			sThumbnail = sap.ui.core.theming.Parameters._getThemeImage("_sap_ui_ux3_Feeder_PersonPlaceholder");
 		}
 		rm.writeAttributeEscaped('src', sThumbnail);
 
@@ -3603,7 +3603,7 @@ sap.ui.define("sap/ui/ux3/ShellRenderer",['jquery.sap.global', 'sap/ui/core/Icon
 		rm.write("<span class='sapUiUx3ShellFocusDummy' id='" + sId + "-focusDummyHdrStart'" + tabIndex + "></span>");
 		ShellRenderer.renderHeader(rm, oControl);
 		rm.write("<span class='sapUiUx3ShellFocusDummy' id='" + sId + "-focusDummyHdrEnd'" + tabIndex + "></span>");
-		rm.write("</header>   <!-- end of sapUiUx3ShellHeader -->");
+		rm.write("</header>");
 
 
 
@@ -3619,14 +3619,14 @@ sap.ui.define("sap/ui/ux3/ShellRenderer",['jquery.sap.global', 'sap/ui/core/Icon
 		var wsMargin = bPaneOpen ? " style='margin-" + (bRtl ? "left" : "right") + ":" + (iPaneWidthPlus + 22) + "px'" : "";
 		rm.write("<div id='", sId, "-wBar'" + wsMargin + " class='sapUiUx3ShellWorksetBar'>");
 		ShellRenderer.renderWorksetItems(rm, oControl);
-		rm.write("</div>   <!--  end of worksetBar -->");
+		rm.write("</div>");
 
 
 
 		// write tool palette area
 		rm.write("<section id='" + sId + "-tp' class='sapUiUx3ShellToolPaletteArea' role='complementary' data-sap-ui-fastnavgroup='true'>");
 		ShellRenderer.renderToolPalette(rm, oControl);
-		rm.write("</section> <!-- end of toolPaletteArea -->");
+		rm.write("</section>");
 
 
 
@@ -3678,7 +3678,7 @@ sap.ui.define("sap/ui/ux3/ShellRenderer",['jquery.sap.global', 'sap/ui/core/Icon
 		rm.write("</div>");
 
 
-		rm.write("</aside>   <!-- end of paneBar -->");
+		rm.write("</aside>");
 
 
 
@@ -4441,14 +4441,14 @@ sap.ui.define("sap/ui/ux3/library",['jquery.sap.global',
 	 * @namespace
 	 * @name sap.ui.ux3
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @public
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.ux3",
-		version: "1.46.12",
+		version: "1.48.5",
 		dependencies : ["sap.ui.core","sap.ui.commons"],
 		types: [
 			"sap.ui.ux3.ActionBarSocialActions",
@@ -4583,7 +4583,7 @@ sap.ui.define("sap/ui/ux3/library",['jquery.sap.global',
 
 
 	/**
-	 * Type of an Feeder.
+	 * Type of a Feeder.
 	 *
 	 * @enum {string}
 	 * @public
@@ -4842,7 +4842,7 @@ sap.ui.define("sap/ui/ux3/ActionBar",['jquery.sap.global', 'sap/ui/core/Control'
 	 *
 	 * When using this control, please be aware that it fulfills rather specific requirements: it has been designed for and is used within composite controls QuickView and ThingInspector.
 	 * @extends sap.ui.core.Control
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -6384,7 +6384,7 @@ sap.ui.define("sap/ui/ux3/Collection",['jquery.sap.global', 'sap/ui/core/Element
 	 * @class
 	 * Collection
 	 * @extends sap.ui.core.Element
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -6588,7 +6588,7 @@ sap.ui.define("sap/ui/ux3/CollectionInspector",['jquery.sap.global', 'sap/ui/cor
 	 * @class
 	 * CollectionInspector
 	 * @extends sap.ui.core.Control
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -6970,7 +6970,7 @@ sap.ui.define("sap/ui/ux3/CollectionInspector",['jquery.sap.global', 'sap/ui/cor
 	};
 
 	/**
-	 * Removes an collection from the aggregation named <code>collections</code>.
+	 * Removes a collection from the aggregation named <code>collections</code>.
 	 *
 	 * @param {int | string | sap.ui.ux3.Collection} vCollection the collection to remove or its index or id
 	 * @return {sap.ui.ux3.Collection} the removed collection or null
@@ -7066,7 +7066,7 @@ sap.ui.define("sap/ui/ux3/CollectionInspector",['jquery.sap.global', 'sap/ui/cor
 	};
 
 	/**
-	 * Removes an content from the aggregation named <code>content</code>.
+	 * Removes a content from the aggregation named <code>content</code>.
 	 *
 	 * @param {int | string | sap.ui.core.Control} vContent the content to remove or its index or id
 	 * @return {sap.ui.core.Control} the removed content or null
@@ -7219,7 +7219,7 @@ sap.ui.define("sap/ui/ux3/DataSet",['jquery.sap.global', 'sap/ui/core/Control', 
 	 * @class
 	 * DataSet
 	 * @extends sap.ui.core.Control
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -7996,7 +7996,7 @@ sap.ui.define("sap/ui/ux3/DataSetItem",['jquery.sap.global', 'sap/ui/core/Elemen
 	 * @class
 	 * DataSet Item
 	 * @extends sap.ui.core.Element
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -8109,7 +8109,7 @@ sap.ui.define("sap/ui/ux3/DataSetSimpleView",['jquery.sap.global', 'sap/ui/core/
 	 * DataSetSimpleView provides a simple view example for DataSet usage.
 	 * @extends sap.ui.core.Control
 	 * @implements sap.ui.ux3.DataSetView
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -8598,7 +8598,7 @@ sap.ui.define("sap/ui/ux3/DataSetSimpleView",['jquery.sap.global', 'sap/ui/core/
 	 */
 	DataSetSimpleView.prototype.setScrollArea = function(aScrollArea, bSupress) {
 		if (typeof aScrollArea !== 'string' && !(aScrollArea instanceof jQuery)) {
-			jQuery.sap.log.error('You can only pass a string (ID of scroll area DOM) or an jQuery object as scrollarea');
+			jQuery.sap.log.error('You can only pass a string (ID of scroll area DOM) or a jQuery object as scrollarea');
 		}
 		this.setProperty('scrollArea', aScrollArea, bSupress);
 	};
@@ -8639,7 +8639,7 @@ sap.ui.define("sap/ui/ux3/ExactArea",['jquery.sap.global', 'sap/ui/commons/Toolb
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -8727,7 +8727,7 @@ sap.ui.define("sap/ui/ux3/ExactAttribute",['jquery.sap.global', 'sap/ui/core/Ele
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -9126,7 +9126,7 @@ sap.ui.define("sap/ui/ux3/ExactList",['jquery.sap.global', 'sap/ui/commons/ListB
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -10588,7 +10588,7 @@ sap.ui.define("sap/ui/ux3/ExactList",['jquery.sap.global', 'sap/ui/commons/ListB
 	 */
 
 	/**
-	 * Removes an subList from the aggregation named <code>subLists</code>.
+	 * Removes a subList from the aggregation named <code>subLists</code>.
 	 *
 	 * @param {int | string | sap.ui.ux3.ExactList} vSubList the subList to remove or its index or id
 	 * @return {sap.ui.ux3.ExactList} the removed subList or null
@@ -10653,7 +10653,7 @@ sap.ui.define("sap/ui/ux3/FacetFilter",['jquery.sap.global', 'sap/ui/core/Contro
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -10718,7 +10718,7 @@ sap.ui.define("sap/ui/ux3/FacetFilterList",['jquery.sap.global', 'sap/ui/commons
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -11043,7 +11043,7 @@ sap.ui.define("sap/ui/ux3/Feeder",['jquery.sap.global', 'sap/ui/commons/Button',
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -11376,7 +11376,7 @@ sap.ui.define("sap/ui/ux3/NavigationBar",['jquery.sap.global', 'sap/ui/core/Cont
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -12229,7 +12229,7 @@ sap.ui.define("sap/ui/ux3/NavigationItem",['jquery.sap.global', 'sap/ui/core/Ite
 	 * @extends sap.ui.core.Item
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -12305,7 +12305,7 @@ sap.ui.define("sap/ui/ux3/NotificationBar",['jquery.sap.global', 'sap/ui/core/Co
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -13634,7 +13634,7 @@ sap.ui.define("sap/ui/ux3/Notifier",['jquery.sap.global', 'sap/ui/commons/Callou
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -13942,7 +13942,7 @@ sap.ui.define("sap/ui/ux3/Overlay",['jquery.sap.global', 'sap/ui/core/Control', 
 	 * @implements sap.ui.core.PopupInterface
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -14352,7 +14352,7 @@ sap.ui.define("sap/ui/ux3/OverlayContainer",['jquery.sap.global', './Overlay', '
 	 * @extends sap.ui.ux3.Overlay
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -14510,7 +14510,7 @@ sap.ui.define("sap/ui/ux3/OverlayDialog",['jquery.sap.global', 'sap/ui/core/Inte
 	 * @class
 	 * Dialog implementation based on the Overlay. If used in a Shell it leaves the Tool-Palette, Pane-Bar and Header-Items accessible.
 	 * @extends sap.ui.ux3.Overlay
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -14825,7 +14825,7 @@ sap.ui.define("sap/ui/ux3/QuickView",['jquery.sap.global', 'sap/ui/commons/Callo
 	 * @extends sap.ui.commons.CalloutBase
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -15351,7 +15351,7 @@ sap.ui.define("sap/ui/ux3/Shell",['jquery.sap.global', 'sap/ui/commons/Menu', 's
 	 * The Ux3 GoldReflection Shell, which is an application frame with navigation capabilities.
 	 * It is supposed to be added to a direct child of the BODY tag of a page and there should be no other parts of the page consuming space outside the Shell.
 	 * @extends sap.ui.core.Control
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -18011,7 +18011,7 @@ sap.ui.define("sap/ui/ux3/ThingAction",['jquery.sap.global', 'sap/ui/core/Elemen
 	 * @class
 	 * Thing Action for Swatch, QuickView, Thinginspector
 	 * @extends sap.ui.core.Element
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -18100,7 +18100,7 @@ sap.ui.define("sap/ui/ux3/ThingGroup",['jquery.sap.global', 'sap/ui/core/Element
 	 * @class
 	 * Thing Group Area
 	 * @extends sap.ui.core.Element
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -18170,7 +18170,7 @@ sap.ui.define("sap/ui/ux3/ThingViewer",['jquery.sap.global', 'sap/ui/core/Contro
 	 * ThingViewer: Same as ThingInspector but decoupled from the Overlay and the ActionBar.
 	 * The control can be added to a Parent container that has a defined width. The ThingViewer fill the whole container. If the parent container has no width defined the control will not work properly.
 	 * @extends sap.ui.core.Control
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -18715,7 +18715,7 @@ sap.ui.define("sap/ui/ux3/ToolPopup",['jquery.sap.global', 'sap/ui/core/Control'
          *
          * @namespace
          * @author SAP SE
-         * @version 1.46.12
+         * @version 1.48.5
          *
          * @constructor
          * @public
@@ -20126,7 +20126,7 @@ sap.ui.define("sap/ui/ux3/ExactBrowser",['jquery.sap.global', 'sap/ui/commons/Bu
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -20529,7 +20529,7 @@ sap.ui.define("sap/ui/ux3/Feed",['jquery.sap.global', 'sap/ui/commons/DropdownBo
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -20702,8 +20702,8 @@ sap.ui.define("sap/ui/ux3/Feed",['jquery.sap.global', 'sap/ui/commons/DropdownBo
 			}).setParent(this);
 			this.oToolsButton.attachEvent('itemSelected', this.handleLtoolsButtonSelected, this); // attach event this way to have the right this-reference in handler
 
-			var sIcon = sap.ui.core.theming.Parameters._getThemeImage('sapUiFeedToolsIconUrl');
-			var sIconHover = sap.ui.core.theming.Parameters._getThemeImage('sapUiFeedToolsIconHoverUrl');
+			var sIcon = sap.ui.core.theming.Parameters._getThemeImage('_sap_ui_ux3_Feed_ToolsIconUrl');
+			var sIconHover = sap.ui.core.theming.Parameters._getThemeImage('_sap_ui_ux3_Feed_ToolsIconHoverUrl');
 			if (sIcon) {
 				this.oToolsButton.setProperty('icon', sIcon, true);
 			}
@@ -21021,7 +21021,7 @@ sap.ui.define("sap/ui/ux3/FeedChunk",['jquery.sap.global', 'sap/ui/commons/MenuB
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -21270,8 +21270,8 @@ sap.ui.define("sap/ui/ux3/FeedChunk",['jquery.sap.global', 'sap/ui/commons/MenuB
 			}).setParent(this);
 			this.oToolsButton.attachEvent('itemSelected', this.handleToolsButtonSelected, this); // attach event this way to have the right this-reference in handler
 
-			var sIcon = Parameters._getThemeImage('sapUiFeedToolsIconUrl');
-			var sIconHover = Parameters._getThemeImage('sapUiFeedToolsIconHoverUrl');
+			var sIcon = Parameters._getThemeImage('_sap_ui_ux3_Feed_ToolsIconUrl');
+			var sIconHover = Parameters._getThemeImage('_sap_ui_ux3_Feed_ToolsIconHoverUrl');
 			if (sIcon) {
 				this.oToolsButton.setProperty('icon', sIcon, true);
 			}
@@ -21723,7 +21723,7 @@ sap.ui.define("sap/ui/ux3/ThingInspector",['jquery.sap.global', './ActionBar', '
 	 * @class
 	 * Thing Inspector
 	 * @extends sap.ui.ux3.Overlay
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -22471,7 +22471,7 @@ sap.ui.define("sap/ui/ux3/Exact",['jquery.sap.global', 'sap/ui/commons/Button', 
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public

@@ -954,6 +954,14 @@ html.sapUiMedia-Std-Phone .sapUiCalendarRowWithHead > .sapUiCalendarRowApps{
 	margin-bottom: 0.25rem;
 }
 
+/* Removes the empty space in the cell that is below an appointment.
+Use it only if there's one appointment per day for a row that doesn't have interval headers set. */
+.sapMPlanCal.sapUiCalendarAppFitVertically .sapUiCalendarApp {
+	height: 4rem;
+	margin-bottom: 0;
+	line-height: 3rem;
+}
+
 .sapUiCalendarRowAppsRedHeight > .sapUiCalendarRowApps > .sapUiCalendarApp.sapUiCalendarAppTitleOnly{
 	height: 1.375rem;
 }
@@ -1361,6 +1369,371 @@ html.sap-desktop .sapUiCalendarApp.sapUiCalendarAppSel:focus:not(:active) > .sap
 }
 /* END "ContentSwitcher.less" */
 
+/* START "ColorPicker.less" */
+/* ============================================= */
+/* CSS for control sap.ui.commons/ColorPicker.control */
+/* ============================================= */
+@_sap_ui_unified_ColorPickerCircleSize: 8px;
+.sapUiColorPicker-ColorPickerMatrix {
+	background-color: @sapUiBaseBG;
+	padding-bottom: 0.2rem;
+	&.sapUiColorPickerHSL .hideForHSL {
+		display: none;
+	}
+	&:not(.sapUiColorPickerHSL) .hideForHSV {
+		display: none;
+	}
+	&:not(.sapUnifiedColorPicker) {
+		max-width: 300px;
+		min-width: 270px;
+		.sapUiVlt {
+			&:first-child,
+			&:last-child {
+				margin-left: 0.5rem;
+			}
+		}
+		.sapUiCPUnitLabel {
+			display: none;
+		}
+		.sapUiColorPicker-swatches {
+		  margin-left: 0.6rem;
+		}
+	}
+	&.sapUnifiedColorPicker {
+		max-width: 556px;
+		min-width: 200px;
+		.sapUiColorPicker-ColorPickerBox {
+			max-width: 240px;
+			max-height: 240px;
+			box-sizing: border-box;
+			width: 100%;
+			height: 100%;
+			margin: 0;
+			// This is very important to help stretch the color picker box to 100% height and for it to remain responsive
+			&:after {
+				content: "";
+				display: block;
+				width: 100%;
+				padding-bottom: 100%;
+			}
+		}
+		.sapUiColorPicker-ColorPickerNewColor,
+		.sapUiColorPicker-ColorPickerOldColor {
+			width: 2rem;
+			height: 2rem;
+		}
+		.sapUiColorPicker-swatches {
+			margin: 0;
+		}
+		.sapUiColorPicker-ColorPickerHexField.sapMInputBase {
+			width: ~"calc(100% - 3rem)";
+		}
+		.sapUiColorPicker-ColorPickerInputFieldsRight,
+		.sapUiColorPicker-ColorPickerInputFieldsLeft {
+			.sapMInputBaseInner {
+				width: 3.5rem;
+			}
+		}
+		.sapUiColorPicker-ColorPickerHexField {
+			margin-top: 5px;
+			margin-left: 2px;
+		}
+		// Make swatches and output type align center on phone screen size
+		&.sapUiRespGridMedia-Std-Phone .sapUiRespGridSpanS12 {
+			.sapUiColorPicker-RBRow,
+			.sapUiColorPicker-swatches {
+				text-align: center;
+				width: 100%;
+			}
+		}
+		// Black and white circle so it will be visible on top of all colors
+		.sapUiColorPicker-ColorPickerCircle {
+			position: absolute;
+			box-sizing: border-box;
+			width: @_sap_ui_unified_ColorPickerCircleSize;
+			height: @_sap_ui_unified_ColorPickerCircleSize;
+			border: 1px solid @sapUiWhiteBorder;
+			border-radius: 6px;
+			pointer-events: none;
+			&:after {
+				content: '';
+				position: absolute;
+				width: 4px;
+				height: 4px;
+				border: 1px solid @sapUiBlackBorder;
+				border-radius: 4px;
+				pointer-events: none;
+			}
+		}
+		// Big circle
+		.sapUiColorPicker-ColorPickerBox:active .sapUiColorPicker-ColorPickerCircle:before {
+			content: '';
+			position: absolute;
+			margin-left: -0.83rem;
+			top: -0.83rem;
+			height: 1.75rem;
+			width: 1.75rem;
+			border: 0.125rem solid @sapUiWhiteBorder;
+			border-radius: 1rem;
+		}
+		// Sliders - border
+		.sapUiColorPicker-ColorPickerSlider,
+		.sapUiColorPicker-ColorPickerAlphaSlider {
+			.sapMSliderInner {
+				border: solid @sapUiBlackBorder 1px;
+			}
+		}
+		// HSL Alpha transparency helper for swatches
+		&.sapUiColorPickerHSL .sapUiColorPicker-swatches {
+			> div:first-child,
+			> div:last-child {
+				// Overwrite commons color picker Swatch background
+				background-image: url(img/ColorPicker/Unified_Swatch_BG.png);
+			}
+		}
+	}
+	&.sapUiRespGrid.sapUiRespGridHSpace1 {
+		padding: 0;
+	}
+	input {
+		&.sapUiColorPicker-ColorPickerInputFieldsRight,
+		&.sapUiColorPicker-ColorPickerInputFieldsLeft {
+			width: 3em;
+		}
+	}
+}
+
+.sapUiColorPicker-ColorPickerBox {
+	float: left;
+	margin: 5px;
+	border-width: 1px;
+	border-style: solid;
+	border-color: @sapUiMediumBorder;
+	position: relative;
+	cursor: crosshair;
+	display: inline-block;
+	width: 105px;
+	height: 105px;
+	background-color: none;
+	background-image: url(img/ColorPicker/GradientBox.png);
+	background-size: 100%;
+	background-image: -webkit-linear-gradient(left, rgba(0, 0, 0, 1),
+		rgba(0, 0, 0, 0) ),
+		-webkit-linear-gradient(top, rgba(255, 255, 255, 0),
+		rgba(255, 255, 255, 1) );
+	background-image: -moz-linear-gradient(left, rgba(0, 0, 0, 1),
+		rgba(0, 0, 0, 0) ), -moz-linear-gradient(top, rgba(255, 255, 255, 0),
+		rgba(255, 255, 255, 1) );
+	background-image: linear-gradient(left, rgba(0, 0, 0, 1),
+		rgba(0, 0, 0, 0) ), linear-gradient(top, rgba(255, 255, 255, 0),
+		rgba(255, 255, 255, 1) );
+	background-image: -ms-linear-gradient(left, rgba(0, 0, 0, 1),
+		rgba(0, 0, 0, 0) ), -ms-linear-gradient(top, rgba(255, 255, 255, 0),
+		rgba(255, 255, 255, 1) );
+	-moz-user-select: none;
+	-webkit-user-select: none;
+}
+
+.sapUiColorPicker-ColorPickerMatrix:not(.sapUnifiedColorPicker) .sapUiColorPicker-ColorPickerBox > .sapUiColorPicker-ColorPickerCircle {
+	position: absolute;
+	box-sizing: border-box;
+	width: @_sap_ui_unified_ColorPickerCircleSize;
+	height: @_sap_ui_unified_ColorPickerCircleSize;
+	border-width: 1px;
+	border-style: solid;
+	border-color: @sapUiWhiteBorder;
+	border-radius: 5px;
+	pointer-events: none;
+}
+
+.sapUiColorPicker-ColorPickerOldColor {
+	margin-top: 5px;
+	width: 20px;
+	height: 20px;
+	border-width: 1px;
+	border-style: solid;
+	border-color: @sapUiBlackBorder;
+	background-color: @sapUiWhiteBG;
+}
+
+.sapUiColorPicker-ColorPickerNewColor {
+	margin-left: 6px;
+	margin-top: 5px;
+	width: 20px;
+	height: 20px;
+	border-width: 1px;
+	border-style: solid;
+	border-color: @sapUiBlackBorder;
+	background-color: @sapUiWhiteBG;
+}
+
+.sapUiColorPicker-ColorPickerMatrix .sapUiHLayoutChildWrapper {
+	vertical-align: middle;
+}
+
+.sapUiColorPicker-ColorPickerMatrix .sapUiMltPadRight{
+	padding-right: 0px;
+}
+
+.sapUiColorPicker-ColorPickerMatrix .sapUiMltPadRight .sapUiVlt{
+	padding-left: 5px;
+}
+
+.sapUiColorPicker-ColorPickerMatrix .sapUiMltPadRight .sapUiVlt.sapUiColorPicker-ColorPickerLastColumn{
+	padding-left: 13px;
+}
+
+.sapUiColorPicker-ColorPickerInputFieldsRight {
+	margin-top: 5px;
+	margin-left: 2px;
+	margin-right: 4px;
+}
+
+.sapUiColorPicker-ColorPickerInputFieldsLeft {
+	margin-top: 5px;
+	margin-left: 2px;
+	margin-right: 29px;
+}
+
+.sapUiColorPicker-ColorPickerLabels {
+	margin-top: 5px;
+	width: 1.1em;
+}
+
+.sapUiColorPicker-ColorPickerHexField.sapUiTf:not(.sapUiTfInner) {
+	margin-top: 5px;
+	margin-left: 2px;
+	width: 5em;
+}
+
+.sapUiColorPicker-ColorPickerSlider.sapUiSliHori .sapUiSliGrip {
+	background-color: transparent;
+	height: 12px;
+	top: -3px;
+}
+
+.sapUiColorPicker-ColorPickerAlphaSlider.sapUiSliHori .sapUiSliGrip {
+	background-color: transparent;
+	height: 12px;
+	top: -3px;
+}
+
+.sapUiColorPicker-ColorPickerSlider.sapUiSliHori .sapUiSliGrip:focus {
+	background-color: transparent;
+}
+
+.sapUiColorPicker-ColorPickerAlphaSlider.sapUiSliHori .sapUiSliGrip:focus {
+	background-color: transparent;
+}
+
+.sapUiColorPicker-ColorPickerSlider.sapUiSliHori .sapUiSliBar,
+.sapUnifiedColorPicker .sapUiColorPicker-ColorPickerSlider .sapMSliderInner {
+	height: 10px;
+	background-image: url(img/ColorPicker/ColorBar.png);
+	background-size: 100%;
+	background-image: -webkit-linear-gradient(left, #FF0000, #FFFF00, #00FF00, #00FFFF,
+		#0000FF, #FF00FF, #FF0000);
+	background-image: -moz-linear-gradient(left, #FF0000, #FFFF00, #00FF00, #00FFFF, #0000FF,
+		#FF00FF, #FF0000);
+	background-image: -ms-linear-gradient(left, #FF0000, #FFFF00, #00FF00, #00FFFF, #0000FF,
+		#FF00FF, #FF0000);
+	background-image: linear-gradient(left, #FF0000, #FFFF00, #00FF00, #00FFFF, #0000FF,
+		#FF00FF, #FF0000);
+	background-color: none;
+	margin: 0;
+}
+
+.sapUnifiedColorPicker {
+  .sapUiColorPicker-ColorPickerAlphaSlider,
+  .sapUiColorPicker-ColorPickerSlider {
+    .sapMSliderProgress {
+      background-color: transparent;
+    }
+    .sapMSliderHandle {
+      margin-top: 0.25rem;
+    }
+  }
+}
+
+.sapUiColorPicker-ColorPickerAlphaSlider.sapUiSliHori .sapUiSliBar,
+.sapUnifiedColorPicker .sapUiColorPicker-ColorPickerAlphaSlider .sapMSliderInner {
+	height: 10px;
+	background-image: url(img/ColorPicker/Alphaslider_BG.png);
+	background-repeat: repeat-x;
+	background-image: -webkit-linear-gradient(left,  rgba(0,0,0,0) 0%,rgba(0,0,0,1) 100%), url(img/ColorPicker/Alphaslider_BG.png); /* Chrome10+,Safari5.1+ */
+	background-image: linear-gradient(to right,  rgba(0,0,0,0) 0%,rgba(0,0,0,1) 100%), url(img/ColorPicker/Alphaslider_BG.png); /* W3C */
+	background-color: none;
+	margin: 0px;
+}
+
+.sapUiColorPicker-ColorPickerMatrix .sapUiSli.sapUiSliHori {
+	padding: 3px 0 0 0;
+	height: 10px;
+}
+
+
+/* AdvancedMode ColorPicker */
+
+.sapUiColorPickerHSL .sapUiColorPicker-ColorPickerBox {
+	background-size: 100%;
+	background-image: -webkit-linear-gradient(left,rgba(0,0,0,1),rgba(0,0,0,0),rgba(255,255,255,1)),-webkit-linear-gradient(top,rgba(128,128,128,0),rgba(128,128,128,1));
+	background-image: -moz-linear-gradient(left,rgba(0,0,0,1),rgba(0,0,0,0),rgba(255,255,255,1)),-moz-linear-gradient(top,rgba(128,128,128,0),rgba(128,128,128,1));
+	background-image: linear-gradient(left,rgba(0,0,0,1),rgba(0,0,0,0),rgba(255,255,255,1)),linear-gradient(top,rgba(128,128,128,0),rgba(128,128,128,1));
+	background-image: -ms-linear-gradient(left,rgba(0,0,0,1),rgba(0,0,0,0),rgba(255,255,255,1)),-ms-linear-gradient(top,rgba(128,128,128,0),rgba(128,128,128,1));
+	-moz-user-select: none;
+	-webkit-user-select: none;
+}
+
+.sapUiColorPickerHSL .sapUiColorPicker-ColorPickerMatrix .sapUiMltPadRight .sapUiVlt {
+	padding-left: 0;
+}
+
+.sapUiColorPickerHSL .sapUiColorPicker-swatches {
+	margin-left: 18px;
+	margin-right: 16px;
+}
+
+.sapUiColorPickerHSL .sapUiColorPickerHSL-RB .sapUiRb {
+	margin-left: 10px;
+	margin-right: 0;
+}
+.sapUiColorPickerHSL .sapUiColorPickerHSL-RB .sapUiRb:first-child {
+	margin-left: 8px;
+	margin-right: 0;
+}
+
+.sapUiColorPickerHSL .sapUiColorPicker-Arrow {
+	margin-left: 6px;
+	margin-top: 0px;
+	font-size: 12px;
+}
+
+.sapUiColorPickerHSL .sapUiColorPicker-ColorPickerOldColor {
+	margin-top: 0;
+}
+
+.sapUiColorPickerHSL .sapUiColorPicker-ColorPickerNewColor {
+	margin-top: 0;
+}
+
+.sapUiColorPickerHSL .sapUiColorPicker-swatches > div:last-child,
+.sapUiColorPickerHSL .sapUiColorPicker-swatches > div:first-child {
+	background-image: url(img/ColorPicker/Swatch_BG.png);
+	background-position: 100%;
+	background-repeat: no-repeat;
+}
+
+.sapUiColorPickerHSL .sapUiSliBar {
+	background-image: url(img/ColorPicker/Alphaslider_BG.png);
+}
+
+/* needed for the Theme Designer, to overwrite the current style "box-sizing: border-box;" of all div's */
+.sapUiColorPicker-ColorPickerMatrix:not(.sapUnifiedColorPicker) div {
+	box-sizing: content-box;
+}
+
+/* END "ColorPicker.less" */
+
 /* START "Currency.less" */
 /* ======================================== */
 /* CSS for control sap.ui.unified/Currency  */
@@ -1419,6 +1792,10 @@ html.sap-desktop .sapUiCalendarApp.sapUiCalendarAppSel:focus:not(:active) > .sap
 
 .sapUiFup {
 	display: inline-block;
+
+	&.sapUiFupDisabled {
+		pointer-events: none;
+	}
 }
 
 .sapUiFupInp .sapUiFUM {
@@ -1466,6 +1843,10 @@ html.sap-desktop .sapUiCalendarApp.sapUiCalendarAppSel:focus:not(:active) > .sap
 	cursor: pointer;
 	height: 2.5rem;
 	margin-top: 0.25rem;
+}
+
+.sapUiFup.sapUiFupDisabled .sapUiFupInputMask {
+	cursor: default;
 }
 
 .sapUiSizeCompact .sapUiFupInputMask {
@@ -1597,10 +1978,10 @@ html[data-sap-ui-browser^="cr"] .sapUiFupInputMask > input {
 /* Base theme                           */
 /* ==================================== */
 
-@sapUiMnuItmHeight: 2rem;
-@sapUiMnuItmPadding: 0.5rem;
-@sapUiMnuItmHeightCozy: 3rem;
-@sapUiMnuItmPaddingCozy: 1rem;
+@_sap_ui_unified_Menu_ItmHeight: 2rem;
+@_sap_ui_unified_Menu_ItmPadding: 0.5rem;
+@_sap_ui_unified_Menu_ItmHeightCozy: 3rem;
+@_sap_ui_unified_Menu_ItmPaddingCozy: 1rem;
 
 .sapUiMnu {
 	/* initially hidden off the screen */
@@ -1638,8 +2019,8 @@ html[data-sap-ui-browser^="cr"] .sapUiFupInputMask > input {
 
 .sapUiMnuItm {
 	display: block;
-	height: @sapUiMnuItmHeight;
-	line-height: @sapUiMnuItmHeight;
+	height: @_sap_ui_unified_Menu_ItmHeight;
+	line-height: @_sap_ui_unified_Menu_ItmHeight;
 	white-space: nowrap;
 	position: relative;
 }
@@ -1685,7 +2066,7 @@ html[data-sap-ui-browser^="cr"] .sapUiFupInputMask > input {
 
 .sapUiMnuItmIco {
 	text-align: center;
-	width: @sapUiMnuItmHeight;
+	width: @_sap_ui_unified_Menu_ItmHeight;
 	color: @sapUiContentNonInteractiveIconColor;
 }
 
@@ -1707,7 +2088,7 @@ html[data-sap-ui-browser^="cr"] .sapUiFupInputMask > input {
 
 .sapUiMnuItmTxt {
 	white-space: nowrap;
-	padding-right: @sapUiMnuItmHeight + @sapUiMnuItmPadding;
+	padding-right: @_sap_ui_unified_Menu_ItmHeight + @_sap_ui_unified_Menu_ItmPadding;
 }
 
 .sapUiMnuItm.sapUiMnuTfItm > .sapUiMnuItmTxt {
@@ -1717,7 +2098,7 @@ html[data-sap-ui-browser^="cr"] .sapUiFupInputMask > input {
 .sapUiMnuItm.sapUiMnuTfItm .sapUiMnuTfItemLbl {
 	vertical-align: top;
 	margin-right: 5px;
-	line-height: @sapUiMnuItmHeight;
+	line-height: @_sap_ui_unified_Menu_ItmHeight;
 	display: inline-block;
 	white-space: nowrap;
 	overflow: hidden;
@@ -1793,7 +2174,7 @@ html[data-sap-ui-browser^="cr"] .sapUiFupInputMask > input {
 
 .sapUiMnuItmSbMnu {
 	right: 0;
-	width: @sapUiMnuItmHeight;
+	width: @_sap_ui_unified_Menu_ItmHeight;
 	text-align: center;
 	font-size: 0.75rem;
 }
@@ -1855,7 +2236,7 @@ html[data-sap-ui-browser^="cr"] .sapUiFupInputMask > input {
 }
 
 .sapUiMnu.sapUiMnuScroll .sapUiMnuItmR {
-	width: @sapUiMnuItmPadding + 1rem;
+	width: @_sap_ui_unified_Menu_ItmPadding + 1rem;
 }
 
 .sapUiMnuItm.sapUiMnuItmSubMnuOpen,
@@ -1876,7 +2257,7 @@ html[data-sap-ui-browser^="cr"] .sapUiFupInputMask > input {
 
 .sapUiMnuItmR,
 .sapUiMnuNoIco .sapUiMnuItmL {
-	width: @sapUiMnuItmPadding;
+	width: @_sap_ui_unified_Menu_ItmPadding;
 }
 
 .sapUiMnuItm.sapUiMnuItmDsbl .sapUiMnuItmIco {
@@ -1893,22 +2274,22 @@ html[data-sap-ui-browser^="cr"] .sapUiFupInputMask > input {
 
 .sapUiMnuItmIco > img {
 	padding-left: 0;
-	max-width: @sapUiMnuItmHeight / 2;
-	max-height: @sapUiMnuItmHeight / 2;
+	max-width: @_sap_ui_unified_Menu_ItmHeight / 2;
+	max-height: @_sap_ui_unified_Menu_ItmHeight / 2;
 }
 
 .sapUiMnu.sapUiMnuScroll .sapUiMnuItmTxt {
-	padding-right: @sapUiMnuItmHeight + @sapUiMnuItmPadding + 1rem;
+	padding-right: @_sap_ui_unified_Menu_ItmHeight + @_sap_ui_unified_Menu_ItmPadding + 1rem;
 }
 
 .sapUiMnuNoSbMnu > .sapUiMnuItm > .sapUiMnuItmTxt,
 .sapUiMnuItm.sapUiMnuTfItm > .sapUiMnuItmTxt {
-	padding-right: @sapUiMnuItmPadding;
+	padding-right: @_sap_ui_unified_Menu_ItmPadding;
 }
 
 .sapUiMnu.sapUiMnuScroll .sapUiMnuNoSbMnu > .sapUiMnuItm > .sapUiMnuItmTxt,
 .sapUiMnu.sapUiMnuScroll .sapUiMnuItm.sapUiMnuTfItm > .sapUiMnuItmTxt {
-	padding-right: @sapUiMnuItmPadding + 1rem;
+	padding-right: @_sap_ui_unified_Menu_ItmPadding + 1rem;
 }
 
 .sapUiMnuNoIco .sapUiMnuItmTxt {
@@ -1916,7 +2297,7 @@ html[data-sap-ui-browser^="cr"] .sapUiFupInputMask > input {
 }
 
 .sapUiMnuItm.sapUiMnuTfItm > .sapUiMnuItmTxt > .sapUiMnuTfItemWrppr {
-	right: @sapUiMnuItmPadding;
+	right: @_sap_ui_unified_Menu_ItmPadding;
 }
 
 .sapUiMnuItm.sapUiMnuTfItm .sapUiMnuTfItemTf {
@@ -1924,15 +2305,15 @@ html[data-sap-ui-browser^="cr"] .sapUiFupInputMask > input {
 	font-size: @sapMFontMediumSize;
 	padding: 0.125rem 0.3125rem 0.125rem 0.3125rem;
 	margin-top: 0.1875rem;
-	height: @sapUiMnuItmHeight - 0.375rem;
+	height: @_sap_ui_unified_Menu_ItmHeight - 0.375rem;
 }
 
 .sapUiMnuItm.sapUiMnuTfItm .sapUiMnuTfItemLbl {
-	line-height: @sapUiMnuItmHeight;
+	line-height: @_sap_ui_unified_Menu_ItmHeight;
 	font-family: @sapUiFontFamily;
 	font-size: @sapMFontMediumSize;
 	color: @sapUiListTextColor;
-	margin-right: @sapUiMnuItmPadding;
+	margin-right: @_sap_ui_unified_Menu_ItmPadding;
 }
 
 .sapUiMnuItmSbMnu > div:after {
@@ -1958,62 +2339,62 @@ html[data-sap-ui-browser^="cr"] .sapUiFupInputMask > input {
 .sapUiMnu.sapUiMnuCozySupport.sapUiSizeCozy {
 
 	&.sapUiMnuScroll .sapUiMnuItmR {
-		width: @sapUiMnuItmPaddingCozy + 1rem;
+		width: @_sap_ui_unified_Menu_ItmPaddingCozy + 1rem;
 	}
 
 	.sapUiMnuItm {
-		height: @sapUiMnuItmHeightCozy;
-		line-height: @sapUiMnuItmHeightCozy;
+		height: @_sap_ui_unified_Menu_ItmHeightCozy;
+		line-height: @_sap_ui_unified_Menu_ItmHeightCozy;
 	}
 
 	.sapUiMnuItmR,
 	.sapUiMnuNoIco .sapUiMnuItmL {
-		width: @sapUiMnuItmPaddingCozy;
+		width: @_sap_ui_unified_Menu_ItmPaddingCozy;
 	}
 
 	.sapUiMnuItmIco {
-		width: @sapUiMnuItmHeightCozy;
-		font-size: @sapUiMnuItmHeightCozy / 2 - 0.125rem;
+		width: @_sap_ui_unified_Menu_ItmHeightCozy;
+		font-size: @_sap_ui_unified_Menu_ItmHeightCozy / 2 - 0.125rem;
 	}
 
 	.sapUiMnuItmIco > img {
-		max-width: @sapUiMnuItmHeightCozy / 2 - 0.125rem;
-		max-height: @sapUiMnuItmHeightCozy / 2 - 0.125rem;
+		max-width: @_sap_ui_unified_Menu_ItmHeightCozy / 2 - 0.125rem;
+		max-height: @_sap_ui_unified_Menu_ItmHeightCozy / 2 - 0.125rem;
 	}
 
 	.sapUiMnuItmTxt {
-		padding-right: @sapUiMnuItmHeightCozy + @sapUiMnuItmPaddingCozy;
+		padding-right: @_sap_ui_unified_Menu_ItmHeightCozy + @_sap_ui_unified_Menu_ItmPaddingCozy;
 	}
 
 	&.sapUiMnuScroll .sapUiMnuItmTxt {
-		padding-right: @sapUiMnuItmHeightCozy + @sapUiMnuItmPaddingCozy + 1rem;
+		padding-right: @_sap_ui_unified_Menu_ItmHeightCozy + @_sap_ui_unified_Menu_ItmPaddingCozy + 1rem;
 	}
 
 	.sapUiMnuNoSbMnu > .sapUiMnuItm > .sapUiMnuItmTxt,
 	.sapUiMnuItm.sapUiMnuTfItm > .sapUiMnuItmTxt {
-		padding-right: @sapUiMnuItmPaddingCozy;
+		padding-right: @_sap_ui_unified_Menu_ItmPaddingCozy;
 	}
 
 	&.sapUiMnuScroll .sapUiMnuNoSbMnu > .sapUiMnuItm > .sapUiMnuItmTxt,
 	&.sapUiMnuScroll .sapUiMnuItm.sapUiMnuTfItm > .sapUiMnuItmTxt {
-		padding-right: @sapUiMnuItmPaddingCozy + 1rem;
+		padding-right: @_sap_ui_unified_Menu_ItmPaddingCozy + 1rem;
 	}
 
 	.sapUiMnuItm.sapUiMnuTfItm > .sapUiMnuItmTxt > .sapUiMnuTfItemWrppr {
-		right: @sapUiMnuItmPaddingCozy;
+		right: @_sap_ui_unified_Menu_ItmPaddingCozy;
 	}
 
 	.sapUiMnuItm.sapUiMnuTfItm .sapUiMnuTfItemTf {
-		height: @sapUiMnuItmHeightCozy - 0.375rem;
+		height: @_sap_ui_unified_Menu_ItmHeightCozy - 0.375rem;
 	}
 
 	.sapUiMnuItm.sapUiMnuTfItm .sapUiMnuTfItemLbl {
-		line-height: @sapUiMnuItmHeightCozy;
-		margin-right: @sapUiMnuItmPaddingCozy;
+		line-height: @_sap_ui_unified_Menu_ItmHeightCozy;
+		margin-right: @_sap_ui_unified_Menu_ItmPaddingCozy;
 	}
 
 	.sapUiMnuItmSbMnu {
-		width: @sapUiMnuItmHeightCozy;
+		width: @_sap_ui_unified_Menu_ItmHeightCozy;
 	}
 
 }
@@ -2059,27 +2440,23 @@ html.sap-phone, html.sap-tablet {
 }
 /* END "Menu.less" */
 
-/* START "Shell.less" */
-/* ===================================== */
-/* CSS for control sap.ui.unified/Shell  */
-/* Base theme                            */
-/* ===================================== */
-/* END "Shell.less" */
-
 /* START "ShellHeader.less" */
 /* =========================================== */
 /* CSS for control sap.ui.unified/ShellHeader  */
 /* Base theme                                  */
 /* =========================================== */
 
-@sapUiUfdShellHeadCenterAnimDuration: 200ms; /*Duration of the transitions of the header center area width (must be defined in ms)*/
-@sapUiUfdShellHeadCenterAnimDelay: 30ms; /*Delay of the transitions of the header center area width (must be defined in ms)*/
-@sapUiUfdShellHeadButtonOuterSpace: 4px; /*Left/Right spacing of the header buttons*/
-@sapUiUfdShellHeadButtonInnerSpace: 9px; /*Spacing between icons and text (user button)*/
-@sapUiUfdShellHeadButtonOutlineWidth: 1px;
-@sapUiUfdShellHeadButtonSeparatorWidth: 1px;
-@sapUiUfdShellHeadButtonBorderRadius: 2px;
-@sapUiUfdShellHeadButtonHeight: @sapUiUfdShellHeaderBarHeight - 2*@sapUiUfdShellHeadButtonOuterSpace;
+@_sap_ui_unified_ShellHeader_CenterAnimDuration: 200ms; /*Duration of the transitions of the header center area width (must be defined in ms)*/
+@_sap_ui_unified_ShellHeader_CenterAnimDelay: 30ms; /*Delay of the transitions of the header center area width (must be defined in ms)*/
+@_sap_ui_unified_ShellHeader_ButtonOuterSpace: 4px; /*Left/Right spacing of the header buttons*/
+@_sap_ui_unified_ShellHeader_ButtonInnerSpace: 9px; /*Spacing between icons and text (user button)*/
+@_sap_ui_unified_ShellHeader_ButtonOutlineWidth: 1px;
+@_sap_ui_unified_ShellHeader_ButtonSeparatorWidth: 1px;
+@_sap_ui_unified_ShellHeader_ButtonBorderRadius: 2px;
+@_sap_ui_unified_ShellHeader_BrandHeight: 4px;
+@_sap_ui_unified_ShellHeader_HeaderBarHeight: 44px;
+@_sap_ui_unified_ShellHeader_ButtonHeight: @_sap_ui_unified_ShellHeader_HeaderBarHeight - 2*@_sap_ui_unified_ShellHeader_ButtonOuterSpace;
+@_sap_ui_unified_ShellHeader_AnimDuration: 500ms; /*Duration of the transitions (must be defined in ms)*/
 
 
 .sapUiUfdShellHeader {
@@ -2093,15 +2470,15 @@ html.sap-phone, html.sap-tablet {
 /* Animations */
 
 .sapUiUfdShellAnim .sapUiUfdShellHeadItmMarker {
-	-webkit-transition-duration: @sapUiUfdShellAnimDuration;
-	transition-duration: @sapUiUfdShellAnimDuration;
+	-webkit-transition-duration: @_sap_ui_unified_ShellHeader_AnimDuration;
+	transition-duration: @_sap_ui_unified_ShellHeader_AnimDuration;
 }
 
 .sapUiUfdShellAnim .sapUiUfdShellHeadCenter.sapUiUfdShellAnim {
-	-webkit-transition-duration: @sapUiUfdShellHeadCenterAnimDuration;
-	transition-duration: @sapUiUfdShellHeadCenterAnimDuration;
-	-webkit-transition-delay: @sapUiUfdShellHeadCenterAnimDelay;
-	transition-delay: @sapUiUfdShellHeadCenterAnimDelay;
+	-webkit-transition-duration: @_sap_ui_unified_ShellHeader_CenterAnimDuration;
+	transition-duration: @_sap_ui_unified_ShellHeader_CenterAnimDuration;
+	-webkit-transition-delay: @_sap_ui_unified_ShellHeader_CenterAnimDelay;
+	transition-delay: @_sap_ui_unified_ShellHeader_CenterAnimDelay;
 	-webkit-transition-property: left, right;
 	transition-property: left, right;
 	z-index: 1;
@@ -2148,7 +2525,6 @@ html.sap-phone, html.sap-tablet {
 	height: 100%;
 	display: inline-block;
 	vertical-align: top;
-	line-height: @sapUiUfdShellHeaderBarHeight - @sapUiUfdShellHeaderBarHeight/10;
 }
 
 .sapUiUfdShellHeadEnd > .sapUiUfdShellIco {
@@ -2162,7 +2538,7 @@ html.sap-phone, html.sap-tablet {
 
 .sapUiUfdShellHeadEnd > .sapUiUfdShellIco > img,
 .sapUiUfdShellHeadBegin > .sapUiUfdShellIco > img {
-	max-height: @sapUiUfdShellHeaderBarHeight - @sapUiUfdShellBrandHeight * 2;
+	max-height: @_sap_ui_unified_ShellHeader_HeaderBarHeight - @_sap_ui_unified_ShellHeader_BrandHeight * 2;
 	max-width: 96px;
 	vertical-align: middle;
 }
@@ -2181,7 +2557,7 @@ html.sap-phone, html.sap-tablet {
 }
 
 .sapUiUfdShellHeadItm {
-	width:  @sapUiUfdShellHeaderBarHeight;
+	width:  @_sap_ui_unified_ShellHeader_HeaderBarHeight;
 	height: 100%;
 	display: inline-block;
 	text-decoration: none;
@@ -2191,7 +2567,7 @@ html.sap-phone, html.sap-tablet {
 }
 
 .sapUiUfdShellHeadItm.sapUiUfdShellHeadItmSep {
-	width:  @sapUiUfdShellHeaderBarHeight + 2*@sapUiUfdShellHeadButtonOuterSpace + @sapUiUfdShellHeadButtonSeparatorWidth;
+	width:  @_sap_ui_unified_ShellHeader_HeaderBarHeight + 2*@_sap_ui_unified_ShellHeader_ButtonOuterSpace + @_sap_ui_unified_ShellHeader_ButtonSeparatorWidth;
 }
 
 .sapUiUfdShellHeadItm.sapUiUfdShellHidden {
@@ -2199,53 +2575,53 @@ html.sap-phone, html.sap-tablet {
 }
 
 .sapUiUfdShellHeadItm > span {
-	width: @sapUiUfdShellHeadButtonHeight;
-	height: @sapUiUfdShellHeadButtonHeight;
+	width: @_sap_ui_unified_ShellHeader_ButtonHeight;
+	height: @_sap_ui_unified_ShellHeader_ButtonHeight;
 	display: inline-block;
 	font-weight: normal;
-	line-height: @sapUiUfdShellHeadButtonHeight - 2*@sapUiUfdShellHeadButtonOutlineWidth;
+	line-height: @_sap_ui_unified_ShellHeader_ButtonHeight - 2*@_sap_ui_unified_ShellHeader_ButtonOutlineWidth;
 	text-align: center;
-	font-size: @sapUiUfdShellHeaderBarHeight / 2;
-	margin: @sapUiUfdShellHeadButtonOuterSpace - @sapUiUfdShellHeadButtonOutlineWidth;
-	margin-top: @sapUiUfdShellHeadButtonOuterSpace;
+	font-size: @_sap_ui_unified_ShellHeader_HeaderBarHeight / 2;
+	margin: @_sap_ui_unified_ShellHeader_ButtonOuterSpace - @_sap_ui_unified_ShellHeader_ButtonOutlineWidth;
+	margin-top: @_sap_ui_unified_ShellHeader_ButtonOuterSpace;
 	color: @sapUiBaseText;
-	border-radius: @sapUiUfdShellHeadButtonBorderRadius;
-	border: @sapUiUfdShellHeadButtonOutlineWidth solid transparent;
+	border-radius: @_sap_ui_unified_ShellHeader_ButtonBorderRadius;
+	border: @_sap_ui_unified_ShellHeader_ButtonOutlineWidth solid transparent;
 	box-sizing: border-box;
 }
 
 .sapUiUfdShellHeadBegin .sapUiUfdShellHeadItm.sapUiUfdShellHeadItmSep > span {
-	margin-right: 3*@sapUiUfdShellHeadButtonOuterSpace + @sapUiUfdShellHeadButtonSeparatorWidth;
-	margin-left: @sapUiUfdShellHeadButtonOuterSpace;
+	margin-right: 3*@_sap_ui_unified_ShellHeader_ButtonOuterSpace + @_sap_ui_unified_ShellHeader_ButtonSeparatorWidth;
+	margin-left: @_sap_ui_unified_ShellHeader_ButtonOuterSpace;
 }
 
 .sapUiUfdShellHeadEnd .sapUiUfdShellHeadItm.sapUiUfdShellHeadItmSep > span {
-	margin-left: 3*@sapUiUfdShellHeadButtonOuterSpace + @sapUiUfdShellHeadButtonSeparatorWidth;
-	margin-right: @sapUiUfdShellHeadButtonOuterSpace;
+	margin-left: 3*@_sap_ui_unified_ShellHeader_ButtonOuterSpace + @_sap_ui_unified_ShellHeader_ButtonSeparatorWidth;
+	margin-right: @_sap_ui_unified_ShellHeader_ButtonOuterSpace;
 }
 
 .sapUiUfdShellHeadUsrItm:before,
 .sapUiUfdShellHeadEnd .sapUiUfdShellHeadItm.sapUiUfdShellHeadItmSep:before,
 .sapUiUfdShellHeadBegin .sapUiUfdShellHeadItm.sapUiUfdShellHeadItmSep:after {
 	content: " ";
-    height: @sapUiUfdShellHeadButtonHeight - @sapUiUfdShellHeadButtonOuterSpace;
-    top: @sapUiUfdShellHeadButtonOuterSpace * 3 / 2;
+    height: @_sap_ui_unified_ShellHeader_ButtonHeight - @_sap_ui_unified_ShellHeader_ButtonOuterSpace;
+    top: @_sap_ui_unified_ShellHeader_ButtonOuterSpace * 3 / 2;
     position: absolute;
-    width: @sapUiUfdShellHeadButtonOuterSpace + @sapUiUfdShellHeadButtonSeparatorWidth;
+    width: @_sap_ui_unified_ShellHeader_ButtonOuterSpace + @_sap_ui_unified_ShellHeader_ButtonSeparatorWidth;
     box-sizing: border-box;
 }
 
 .sapUiUfdShellHeadBegin .sapUiUfdShellHeadItm.sapUiUfdShellHeadItmSep:after {
     right: 0;
-    border-right: @sapUiUfdShellHeadButtonOuterSpace solid transparent;
-    border-left: @sapUiUfdShellHeadButtonSeparatorWidth solid @sapUiToolbarSeparatorColor;
+    border-right: @_sap_ui_unified_ShellHeader_ButtonOuterSpace solid transparent;
+    border-left: @_sap_ui_unified_ShellHeader_ButtonSeparatorWidth solid @sapUiToolbarSeparatorColor;
 }
 
 .sapUiUfdShellHeadUsrItm:before,
 .sapUiUfdShellHeadEnd .sapUiUfdShellHeadItm.sapUiUfdShellHeadItmSep:before {
     left: 0;
-    border-left: @sapUiUfdShellHeadButtonOuterSpace solid transparent;
-    border-right: @sapUiUfdShellHeadButtonSeparatorWidth solid @sapUiToolbarSeparatorColor;
+    border-left: @_sap_ui_unified_ShellHeader_ButtonOuterSpace solid transparent;
+    border-right: @_sap_ui_unified_ShellHeader_ButtonSeparatorWidth solid @sapUiToolbarSeparatorColor;
 }
 
 .sapUiUfdShellHeadItm > span,
@@ -2278,9 +2654,9 @@ html.sapUiMedia-Std-Desktop .sapUiUfdShellHeadItm.sapUiUfdShellHeadItmSel:hover 
 }
 
 .sapUiUfdShellHeadItm > span > img {
-	margin-top: @sapUiUfdShellHeaderBarHeight / 4 - 4px;
-	width: @sapUiUfdShellHeaderBarHeight / 2;
-	height: @sapUiUfdShellHeaderBarHeight / 2;
+	margin-top: @_sap_ui_unified_ShellHeader_HeaderBarHeight / 4 - 4px;
+	width: @_sap_ui_unified_ShellHeader_HeaderBarHeight / 2;
+	height: @_sap_ui_unified_ShellHeader_HeaderBarHeight / 2;
 	border-width: 0;
 }
 
@@ -2290,7 +2666,7 @@ html.sapUiMedia-Std-Desktop .sapUiUfdShellHeadItm.sapUiUfdShellHeadItmSel:hover 
 }
 
 .sapUiUfdShellHeadItm:focus > span {
-	border: @sapUiUfdShellHeadButtonOutlineWidth dotted @sapUiContentFocusColor;
+	border: @_sap_ui_unified_ShellHeader_ButtonOutlineWidth dotted @sapUiContentFocusColor;
 }
 
 html[data-sap-ui-browser^="ie"] .sapUiUfdShellHeadItm:focus > span {
@@ -2305,9 +2681,9 @@ html[data-sap-ui-browser^="ie"] .sapUiUfdShellHeadItm:focus > span {
 	height: 100%;
 	box-sizing: border-box;
 	text-align: left;
-	line-height: @sapUiUfdShellHeaderBarHeight - @sapUiUfdShellHeaderBarHeight/10;
-	padding-left: @sapUiUfdShellHeadButtonOuterSpace;
-	padding-right: @sapUiUfdShellHeadButtonOuterSpace;
+	line-height: @_sap_ui_unified_ShellHeader_HeaderBarHeight - @_sap_ui_unified_ShellHeader_HeaderBarHeight/10;
+	padding-left: @_sap_ui_unified_ShellHeader_ButtonOuterSpace;
+	padding-right: @_sap_ui_unified_ShellHeader_ButtonOuterSpace;
 }
 
 .sapUiUfdShellSearch.sapUiUfdShellHidden {
@@ -2369,7 +2745,7 @@ html[data-sap-ui-browser^="ie"] .sapUiUfdShellHeadItm:focus > span {
 	text-decoration: none;
 	overflow: hidden;
 	position: relative;
-	line-height: @sapUiUfdShellHeaderBarHeight;
+	line-height: @_sap_ui_unified_ShellHeader_HeaderBarHeight;
 	display: inline-block;
 	vertical-align: top;
 	height: 100%;
@@ -2379,40 +2755,46 @@ html[data-sap-ui-browser^="ie"] .sapUiUfdShellHeadItm:focus > span {
 .sapUiUfdShellHeadUsrItm > * {
 	display: inline-block;
 	vertical-align: top;
-	height: @sapUiUfdShellHeadButtonHeight;
-	line-height: @sapUiUfdShellHeadButtonHeight - 2*@sapUiUfdShellHeadButtonOutlineWidth;
-	margin-top: @sapUiUfdShellHeadButtonOuterSpace;
-	margin-bottom: @sapUiUfdShellHeadButtonOuterSpace - @sapUiUfdShellHeadButtonOutlineWidth;
+	height: @_sap_ui_unified_ShellHeader_ButtonHeight;
+	line-height: @_sap_ui_unified_ShellHeader_ButtonHeight - 2*@_sap_ui_unified_ShellHeader_ButtonOutlineWidth;
+	margin-top: @_sap_ui_unified_ShellHeader_ButtonOuterSpace;
+	margin-bottom: @_sap_ui_unified_ShellHeader_ButtonOuterSpace - @_sap_ui_unified_ShellHeader_ButtonOutlineWidth;
 	box-sizing: border-box;
 }
 
 .sapUiUfdShellHeadUsrItmImg {
 	font-weight: normal;
 	text-align: center;
-	font-size: @sapUiUfdShellHeaderBarHeight / 2;
-	-webkit-border-top-left-radius: @sapUiUfdShellHeadButtonBorderRadius;
-	border-top-left-radius: @sapUiUfdShellHeadButtonBorderRadius;
-	-webkit-border-bottom-left-radius: @sapUiUfdShellHeadButtonBorderRadius;
-	border-bottom-left-radius: @sapUiUfdShellHeadButtonBorderRadius;
-	margin-left: 3*@sapUiUfdShellHeadButtonOuterSpace + @sapUiUfdShellHeadButtonSeparatorWidth;
-	border-left: @sapUiUfdShellHeadButtonOutlineWidth solid transparent;
-	border-top: @sapUiUfdShellHeadButtonOutlineWidth solid transparent;
-	border-bottom: @sapUiUfdShellHeadButtonOutlineWidth solid transparent;
-	padding-left: @sapUiUfdShellHeadButtonInnerSpace;
-	padding-right: @sapUiUfdShellHeadButtonInnerSpace;
+	font-size: @_sap_ui_unified_ShellHeader_HeaderBarHeight / 2;
+	-webkit-border-top-left-radius: @_sap_ui_unified_ShellHeader_ButtonBorderRadius;
+	border-top-left-radius: @_sap_ui_unified_ShellHeader_ButtonBorderRadius;
+	-webkit-border-bottom-left-radius: @_sap_ui_unified_ShellHeader_ButtonBorderRadius;
+	border-bottom-left-radius: @_sap_ui_unified_ShellHeader_ButtonBorderRadius;
+	margin-left: 3*@_sap_ui_unified_ShellHeader_ButtonOuterSpace + @_sap_ui_unified_ShellHeader_ButtonSeparatorWidth;
+	border-left: @_sap_ui_unified_ShellHeader_ButtonOutlineWidth solid transparent;
+	border-top: @_sap_ui_unified_ShellHeader_ButtonOutlineWidth solid transparent;
+	border-bottom: @_sap_ui_unified_ShellHeader_ButtonOutlineWidth solid transparent;
+	padding-left: @_sap_ui_unified_ShellHeader_ButtonInnerSpace;
+	padding-right: @_sap_ui_unified_ShellHeader_ButtonInnerSpace;
 }
 
 .sapUiUfdShellHeadUsrItm:focus .sapUiUfdShellHeadUsrItmImg {
-	border-left: @sapUiUfdShellHeadButtonOutlineWidth dotted @sapUiContentFocusColor;
-	border-top: @sapUiUfdShellHeadButtonOutlineWidth dotted @sapUiContentFocusColor;
-	border-bottom: @sapUiUfdShellHeadButtonOutlineWidth dotted @sapUiContentFocusColor;
+	border-left: @_sap_ui_unified_ShellHeader_ButtonOutlineWidth dotted @sapUiContentFocusColor;
+	border-top: @_sap_ui_unified_ShellHeader_ButtonOutlineWidth dotted @sapUiContentFocusColor;
+	border-bottom: @_sap_ui_unified_ShellHeader_ButtonOutlineWidth dotted @sapUiContentFocusColor;
+}
+
+html[data-sap-ui-browser^="ie"] .sapUiUfdShellHeadUsrItm:focus .sapUiUfdShellHeadUsrItmImg {
+	border-left-style: dashed;
+	border-top-style: dashed;
+	border-bottom-style: dashed;
 }
 
 .sapUiUfdShellHeadUsrItmImg > img {
 	margin-top: 1px;
-	width: @sapUiUfdShellHeadButtonHeight - 2*@sapUiUfdShellHeadButtonOutlineWidth - 2px;
-	height: @sapUiUfdShellHeadButtonHeight - 2*@sapUiUfdShellHeadButtonOutlineWidth - 2px;
-	border-radius: @sapUiUfdShellHeadButtonHeight - 2*@sapUiUfdShellHeadButtonOutlineWidth - 2px;
+	width: @_sap_ui_unified_ShellHeader_ButtonHeight - 2*@_sap_ui_unified_ShellHeader_ButtonOutlineWidth - 2px;
+	height: @_sap_ui_unified_ShellHeader_ButtonHeight - 2*@_sap_ui_unified_ShellHeader_ButtonOutlineWidth - 2px;
+	border-radius: @_sap_ui_unified_ShellHeader_ButtonHeight - 2*@_sap_ui_unified_ShellHeader_ButtonOutlineWidth - 2px;
 	border-width: 0;
 }
 
@@ -2420,15 +2802,20 @@ html[data-sap-ui-browser^="ie"] .sapUiUfdShellHeadItm:focus > span {
 	font-size: 14px;
 	max-width: 241px; /*15rem + 1px*/
 	overflow: hidden;
-	padding-right: @sapUiUfdShellHeadButtonInnerSpace;
+	padding-right: @_sap_ui_unified_ShellHeader_ButtonInnerSpace;
 	text-overflow: ellipsis;
-	border-top: @sapUiUfdShellHeadButtonOutlineWidth solid transparent;
-	border-bottom: @sapUiUfdShellHeadButtonOutlineWidth solid transparent;
+	border-top: @_sap_ui_unified_ShellHeader_ButtonOutlineWidth solid transparent;
+	border-bottom: @_sap_ui_unified_ShellHeader_ButtonOutlineWidth solid transparent;
 }
 
 .sapUiUfdShellHeadUsrItm:focus .sapUiUfdShellHeadUsrItmName {
-	border-top: @sapUiUfdShellHeadButtonOutlineWidth dotted @sapUiContentFocusColor;
-	border-bottom: @sapUiUfdShellHeadButtonOutlineWidth dotted @sapUiContentFocusColor;
+	border-top: @_sap_ui_unified_ShellHeader_ButtonOutlineWidth dotted @sapUiContentFocusColor;
+	border-bottom: @_sap_ui_unified_ShellHeader_ButtonOutlineWidth dotted @sapUiContentFocusColor;
+}
+
+html[data-sap-ui-browser^="ie"] .sapUiUfdShellHeadUsrItm:focus .sapUiUfdShellHeadUsrItmName {
+	border-top-style: dashed;
+	border-bottom-style: dashed;
 }
 
 .sapUiUfdShellHeadUsrItmLimit > .sapUiUfdShellHeadUsrItmName,
@@ -2438,21 +2825,21 @@ html.sapUiMedia-Std-Phone .sapUiUfdShellHeadUsrItmExp {
 }
 
 html.sapUiMedia-Std-Phone .sapUiUfdShellHeadUsrItmImg {
-	margin-right: @sapUiUfdShellHeadButtonOuterSpace;
-	border-radius: @sapUiUfdShellHeadButtonBorderRadius;
+	margin-right: @_sap_ui_unified_ShellHeader_ButtonOuterSpace;
+	border-radius: @_sap_ui_unified_ShellHeader_ButtonBorderRadius;
 }
 
 .sapUiUfdShellHeadUsrItmExp {
 	font-size: 16px;
-    padding-right: @sapUiUfdShellHeadButtonInnerSpace;
-    margin-right: @sapUiUfdShellHeadButtonOuterSpace;
-	-webkit-border-top-right-radius: @sapUiUfdShellHeadButtonBorderRadius;
-	border-top-right-radius: @sapUiUfdShellHeadButtonBorderRadius;
-	-webkit-border-bottom-right-radius: @sapUiUfdShellHeadButtonBorderRadius;
-	border-bottom-right-radius: @sapUiUfdShellHeadButtonBorderRadius;
-	border-right: @sapUiUfdShellHeadButtonOutlineWidth solid transparent;
-	border-top: @sapUiUfdShellHeadButtonOutlineWidth solid transparent;
-	border-bottom: @sapUiUfdShellHeadButtonOutlineWidth solid transparent;
+    padding-right: @_sap_ui_unified_ShellHeader_ButtonInnerSpace;
+    margin-right: @_sap_ui_unified_ShellHeader_ButtonOuterSpace;
+	-webkit-border-top-right-radius: @_sap_ui_unified_ShellHeader_ButtonBorderRadius;
+	border-top-right-radius: @_sap_ui_unified_ShellHeader_ButtonBorderRadius;
+	-webkit-border-bottom-right-radius: @_sap_ui_unified_ShellHeader_ButtonBorderRadius;
+	border-bottom-right-radius: @_sap_ui_unified_ShellHeader_ButtonBorderRadius;
+	border-right: @_sap_ui_unified_ShellHeader_ButtonOutlineWidth solid transparent;
+	border-top: @_sap_ui_unified_ShellHeader_ButtonOutlineWidth solid transparent;
+	border-bottom: @_sap_ui_unified_ShellHeader_ButtonOutlineWidth solid transparent;
 }
 
 .sapUiUfdShellHeadUsrItmExp:after {
@@ -2462,9 +2849,15 @@ html.sapUiMedia-Std-Phone .sapUiUfdShellHeadUsrItmImg {
 }
 
 .sapUiUfdShellHeadUsrItm:focus .sapUiUfdShellHeadUsrItmExp {
-	border-right: @sapUiUfdShellHeadButtonOutlineWidth dotted @sapUiContentFocusColor;
-	border-top: @sapUiUfdShellHeadButtonOutlineWidth dotted @sapUiContentFocusColor;
-	border-bottom: @sapUiUfdShellHeadButtonOutlineWidth dotted @sapUiContentFocusColor;
+	border-right: @_sap_ui_unified_ShellHeader_ButtonOutlineWidth dotted @sapUiContentFocusColor;
+	border-top: @_sap_ui_unified_ShellHeader_ButtonOutlineWidth dotted @sapUiContentFocusColor;
+	border-bottom: @_sap_ui_unified_ShellHeader_ButtonOutlineWidth dotted @sapUiContentFocusColor;
+}
+
+html[data-sap-ui-browser^="ie"] .sapUiUfdShellHeadUsrItm:focus .sapUiUfdShellHeadUsrItmExp {
+	border-right-style: dashed;
+	border-top-style: dashed;
+	border-bottom-style: dashed;
 }
 
 .sapUiUfdShellHeadUsrItmWithoutPopup .sapUiUfdShellHeadUsrItmExp {
@@ -2496,10 +2889,10 @@ html.sapUiMedia-Std-Phone .sapUiUfdShellHeadUsrItmImg {
 /* Base theme                                  */
 /* =========================================== */
 
-@sapUiUfdShellBrandHeight: 4px;
-@sapUiUfdShellHeaderBarHeight: 44px;
-@sapUiUfdShellHeadHeight: @sapUiUfdShellBrandHeight + @sapUiUfdShellHeaderBarHeight;
-@sapUiUfdShellAnimDuration: 500ms; /*Duration of the transitions (must be defined in ms)*/
+@_sap_ui_unified_ShellLayout_BrandHeight: 4px;
+@_sap_ui_unified_ShellLayout_HeaderBarHeight: 44px;
+@_sap_ui_unified_ShellLayout_HeadHeight: @_sap_ui_unified_ShellLayout_BrandHeight + @_sap_ui_unified_ShellLayout_HeaderBarHeight;
+@_sap_ui_unified_ShellLayout_AnimDuration: 500ms; /*Duration of the transitions (must be defined in ms)*/
 
 .sapUiUfdShellBG {
 	position: absolute;
@@ -2542,8 +2935,8 @@ html.sapUiMedia-Std-Phone .sapUiUfdShellHeadUsrItmImg {
 .sapUiUfdShellAnim .sapUiUfdShellHead > div,
 .sapUiUfdShellAnim .sapUiUfdShellCurtain,
 .sapUiUfdShellAnim .sapUiUfdShellCanvas {
-	-webkit-transition-duration: @sapUiUfdShellAnimDuration;
-	transition-duration: @sapUiUfdShellAnimDuration;
+	-webkit-transition-duration: @_sap_ui_unified_ShellLayout_AnimDuration;
+	transition-duration: @_sap_ui_unified_ShellLayout_AnimDuration;
 }
 
 .sapUiUfdShellAnim .sapUiUfdShellCanvas {
@@ -2584,7 +2977,7 @@ html.sapUiMedia-Std-Phone .sapUiUfdShellHeadUsrItmImg {
 .sapUiUfdShellBrand {
 	position: absolute;
 	top: 0;
-	height: @sapUiUfdShellBrandHeight;
+	height: @_sap_ui_unified_ShellLayout_BrandHeight;
 	left: 0;
 	right: 0;
 	border: medium none;
@@ -2599,8 +2992,8 @@ html.sapUiMedia-Std-Phone .sapUiUfdShellHeadUsrItmImg {
 
 .sapUiUfdShellHead {
 	position: absolute;
-	top: @sapUiUfdShellBrandHeight;
-	height: @sapUiUfdShellHeaderBarHeight;
+	top: @_sap_ui_unified_ShellLayout_BrandHeight;
+	height: @_sap_ui_unified_ShellLayout_HeaderBarHeight;
 	left: 0;
 	right: 0;
 	z-index: 3;
@@ -2614,7 +3007,7 @@ html.sapUiMedia-Std-Phone .sapUiUfdShellHeadUsrItmImg {
 .sapUiUfdShellHead > div {
 	position: absolute;
 	top: 0;
-	height: @sapUiUfdShellHeaderBarHeight;
+	height: @_sap_ui_unified_ShellLayout_HeaderBarHeight;
 	left: 0;
 	right: 0;
 	overflow: hidden;
@@ -2622,14 +3015,14 @@ html.sapUiMedia-Std-Phone .sapUiUfdShellHeadUsrItmImg {
 }
 
 .sapUiUfdShell.sapUiUfdShellHeadHidden .sapUiUfdShellHead {
-	top: -@sapUiUfdShellHeaderBarHeight;
+	top: -@_sap_ui_unified_ShellLayout_HeaderBarHeight;
 }
 
 
 /* Canvas / Curtain */
 
 .sapUiUfdShellCanvas {
-	top: @sapUiUfdShellHeadHeight;
+	top: @_sap_ui_unified_ShellLayout_HeadHeight;
 }
 
 .sapUiUfdShell.sapUiUfdShellNoHead > .sapUiUfdShellCanvas {
@@ -2642,12 +3035,12 @@ html.sapUiMedia-Std-Phone .sapUiUfdShellHeadUsrItmImg {
 }
 
 .sapUiUfdShell.sapUiUfdShellHeadHidden .sapUiUfdShellCanvas {
-	top: @sapUiUfdShellBrandHeight;
+	top: @_sap_ui_unified_ShellLayout_BrandHeight;
 }
 
 .sapUiUfdShellCurtain > .sapUiUfdShellCntnt {
 	overflow: auto;
-	top: @sapUiUfdShellHeadHeight;
+	top: @_sap_ui_unified_ShellLayout_HeadHeight;
 	-webkit-overflow-scrolling: touch;
 }
 
@@ -2677,25 +3070,26 @@ html.sapUiMedia-Std-Phone .sapUiUfdShellHeadUsrItmImg {
 /* Base theme                                   */
 /* ============================================ */
 
-@sapUiUfdShellOvrlyAnimDuration: 525ms;
+@_sap_ui_unified_ShellOverlay_AnimDuration: 525ms;
 
-@sapUiUfdShellOvrlyCntntOpenAnimDuration: @sapUiUfdShellOvrlyAnimDuration / 1.5;
-@sapUiUfdShellOvrlyCntntOpenAnimDelay: 75ms;
-@sapUiUfdShellOvrlyCntntCloseAnimDuration: @sapUiUfdShellOvrlyAnimDuration / 1.5;
-@sapUiUfdShellOvrlyCntntInnerOpenAnimDuration: @sapUiUfdShellOvrlyAnimDuration / 3;
-@sapUiUfdShellOvrlyCntntInnerOpenAnimDelay: @sapUiUfdShellOvrlyCntntOpenAnimDuration / 1.5 + @sapUiUfdShellOvrlyCntntOpenAnimDelay;
-@sapUiUfdShellOvrlyCntntInnerCloseAnimDuration: @sapUiUfdShellOvrlyAnimDuration / 3;
-@sapUiUfdShellOvrlyCntntInnerCloseAnimDelay: 0;
-@sapUiUfdShellOvrlyCntntCloseAnimDelay: @sapUiUfdShellOvrlyCntntInnerCloseAnimDuration + @sapUiUfdShellOvrlyCntntInnerCloseAnimDelay;
-@sapUiUfdShellOvrlySearchOpenAnimDuration: @sapUiUfdShellOvrlyAnimDuration;
-@sapUiUfdShellOvrlySearchCloseAnimDuration: @sapUiUfdShellOvrlyAnimDuration;
-@sapUiUfdShellOvrlyBlockLayerAnimDuration: @sapUiUfdShellOvrlyAnimDuration / 2.5;
+@_sap_ui_unified_ShellOverlay_CntntOpenAnimDuration: @_sap_ui_unified_ShellOverlay_AnimDuration / 1.5;
+@_sap_ui_unified_ShellOverlay_CntntOpenAnimDelay: 75ms;
+@_sap_ui_unified_ShellOverlay_CntntCloseAnimDuration: @_sap_ui_unified_ShellOverlay_AnimDuration / 1.5;
+@_sap_ui_unified_ShellOverlay_CntntInnerOpenAnimDuration: @_sap_ui_unified_ShellOverlay_AnimDuration / 3;
+@_sap_ui_unified_ShellOverlay_CntntInnerOpenAnimDelay: @_sap_ui_unified_ShellOverlay_CntntOpenAnimDuration / 1.5 + @_sap_ui_unified_ShellOverlay_CntntOpenAnimDelay;
+@_sap_ui_unified_ShellOverlay_CntntInnerCloseAnimDuration: @_sap_ui_unified_ShellOverlay_AnimDuration / 3;
+@_sap_ui_unified_ShellOverlay_CntntInnerCloseAnimDelay: 0;
+@_sap_ui_unified_ShellOverlay_CntntCloseAnimDelay: @_sap_ui_unified_ShellOverlay_CntntInnerCloseAnimDuration + @_sap_ui_unified_ShellOverlay_CntntInnerCloseAnimDelay;
+@_sap_ui_unified_ShellOverlay_SearchOpenAnimDuration: @_sap_ui_unified_ShellOverlay_AnimDuration;
+@_sap_ui_unified_ShellOverlay_SearchCloseAnimDuration: @_sap_ui_unified_ShellOverlay_AnimDuration;
+@_sap_ui_unified_ShellOverlay_BlockLayerAnimDuration: @_sap_ui_unified_ShellOverlay_AnimDuration / 2.5;
 
-@sapUiUfdShellOvrlyOpenAnimOverAll: @sapUiUfdShellOvrlyCntntInnerOpenAnimDelay + @sapUiUfdShellOvrlyCntntInnerOpenAnimDuration;
-@sapUiUfdShellOvrlyCloseAnimOverAll: @sapUiUfdShellOvrlyCntntInnerCloseAnimDuration + @sapUiUfdShellOvrlyCntntInnerCloseAnimDelay + @sapUiUfdShellOvrlyCntntCloseAnimDuration;
+@_sap_ui_unified_ShellOverlay_OpenAnimOverAll: @_sap_ui_unified_ShellOverlay_CntntInnerOpenAnimDelay + @_sap_ui_unified_ShellOverlay_CntntInnerOpenAnimDuration;
+@_sap_ui_unified_ShellOverlay_CloseAnimOverAll: @_sap_ui_unified_ShellOverlay_CntntInnerCloseAnimDuration + @_sap_ui_unified_ShellOverlay_CntntInnerCloseAnimDelay + @_sap_ui_unified_ShellOverlay_CntntCloseAnimDuration;
 
-@sapUiUfdShellOvrlyHeadHeight: @sapUiUfdShellHeadHeight;
-@sapUiUfdShellOvrlyBrandHeight: @sapUiUfdShellBrandHeight;
+@_sap_ui_unified_ShellOverlay_HeaderBarHeight: 44px;
+@_sap_ui_unified_ShellOverlay_BrandHeight: 4px;
+@_sap_ui_unified_ShellOverlay_HeadHeight: @_sap_ui_unified_ShellOverlay_BrandHeight + @_sap_ui_unified_ShellOverlay_HeaderBarHeight;
 
 
 .sapUiUfdShellOvrly {
@@ -2726,7 +3120,7 @@ html.sapUiMedia-Std-Phone .sapUiUfdShellOvrly > div {
 }
 
 .sapUiUfdShellOvrlyHead {
-	height: @sapUiUfdShellOvrlyHeadHeight;
+	height: @_sap_ui_unified_ShellOverlay_HeadHeight;
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -2740,7 +3134,7 @@ html.sapUiMedia-Std-Phone .sapUiUfdShellOvrly > div {
 	background-color: @sapUiBrand;
 	position: absolute;
 	top: 0;
-	height: @sapUiUfdShellOvrlyBrandHeight;
+	height: @_sap_ui_unified_ShellOverlay_BrandHeight;
 	left: 0;
 	right: 0;
 	border: medium none;
@@ -2773,6 +3167,14 @@ html.sapUiMedia-Std-Phone .sapUiUfdShellOvrly > div {
 	color: @sapUiButtonActiveTextColor;
 }
 
+.sapUiUfdShellOvrlyHeadClose:focus {
+	outline: @_sap_ui_unified_ShellHeader_ButtonOutlineWidth dotted @sapUiContentFocusColor;
+}
+
+html[data-sap-ui-browser^="ie"] .sapUiUfdShellOvrlyHeadClose:focus {
+	outline-style: dashed;
+}
+
 .sapUiUfdShellOvrlyCntnt {
 	background-color: @sapUiGroupContentBackground;
 	top: 0;
@@ -2780,7 +3182,7 @@ html.sapUiMedia-Std-Phone .sapUiUfdShellOvrly > div {
 	position: absolute;
 	width: 100%;
 	box-sizing: border-box;
-	border-top: @sapUiUfdShellOvrlyHeadHeight solid transparent;
+	border-top: @_sap_ui_unified_ShellOverlay_HeadHeight solid transparent;
 	box-shadow: 0 0 48px fade(@sapUiContentShadowColor, 30);
 }
 
@@ -2812,7 +3214,7 @@ html.sapUiMedia-Std-Phone .sapUiUfdShellOvrly > div {
 	bottom: 0;
 	left: 0;
 	right: 0;
-	top: @sapUiUfdShellOvrlyBrandHeight;
+	top: @_sap_ui_unified_ShellOverlay_BrandHeight;
 }
 
 .sapUiUfdShellOvrlyHeadCenter {
@@ -2834,7 +3236,7 @@ html.sapUiMedia-Std-Phone .sapUiUfdShellOvrlyHeadCenter {
 	width: 95%;
 	max-width: 600px;
 	height: 100%;
-	line-height: @sapUiUfdShellHeaderBarHeight - @sapUiUfdShellHeaderBarHeight/10;
+	line-height: @_sap_ui_unified_ShellOverlay_HeaderBarHeight - @_sap_ui_unified_ShellOverlay_HeaderBarHeight/10;
 	box-sizing: border-box;
 	text-align: left;
 }
@@ -2848,22 +3250,22 @@ html.sapUiMedia-Std-Phone .sapUiUfdShellOvrlyHeadCenter {
 .sapUiUfdShellOvrlyAnim.sapUiUfdShellOvrly > div {
 	-webkit-transition-property: width;
 	transition-property: width;
-	-webkit-transition-duration: @sapUiUfdShellOvrlyAnimDuration / 3;
-	transition-duration: @sapUiUfdShellOvrlyAnimDuration / 3;
+	-webkit-transition-duration: @_sap_ui_unified_ShellOverlay_AnimDuration / 3;
+	transition-duration: @_sap_ui_unified_ShellOverlay_AnimDuration / 3;
 }
 
 .sapUiUfdShellOvrlyAnim.sapUiUfdShellOvrlyOpening .sapUiUfdShellOvrlyCntnt {
-	-webkit-transition-duration: @sapUiUfdShellOvrlyCntntOpenAnimDuration;
-	transition-duration: @sapUiUfdShellOvrlyCntntOpenAnimDuration;
-	-webkit-transition-delay: @sapUiUfdShellOvrlyCntntOpenAnimDelay;
-	transition-delay: @sapUiUfdShellOvrlyCntntOpenAnimDelay;
+	-webkit-transition-duration: @_sap_ui_unified_ShellOverlay_CntntOpenAnimDuration;
+	transition-duration: @_sap_ui_unified_ShellOverlay_CntntOpenAnimDuration;
+	-webkit-transition-delay: @_sap_ui_unified_ShellOverlay_CntntOpenAnimDelay;
+	transition-delay: @_sap_ui_unified_ShellOverlay_CntntOpenAnimDelay;
 }
 
 .sapUiUfdShellOvrlyAnim.sapUiUfdShellOvrlyClosing .sapUiUfdShellOvrlyCntnt {
-	-webkit-transition-duration: @sapUiUfdShellOvrlyCntntCloseAnimDuration;
-	transition-duration: @sapUiUfdShellOvrlyCntntCloseAnimDuration;
-	-webkit-transition-delay: @sapUiUfdShellOvrlyCntntCloseAnimDelay;
-	transition-delay: @sapUiUfdShellOvrlyCntntCloseAnimDelay;
+	-webkit-transition-duration: @_sap_ui_unified_ShellOverlay_CntntCloseAnimDuration;
+	transition-duration: @_sap_ui_unified_ShellOverlay_CntntCloseAnimDuration;
+	-webkit-transition-delay: @_sap_ui_unified_ShellOverlay_CntntCloseAnimDelay;
+	transition-delay: @_sap_ui_unified_ShellOverlay_CntntCloseAnimDelay;
 }
 
 .sapUiUfdShellOvrlyAnim.sapUiUfdShellOvrlyOpening .sapUiUfdShellOvrlyCntnt,
@@ -2878,17 +3280,17 @@ html.sapUiMedia-Std-Phone .sapUiUfdShellOvrlyHeadCenter {
 }
 
 .sapUiUfdShellOvrlyAnim.sapUiUfdShellOvrlyOpening .sapUiUfdShellOvrlyCntnt > div {
-	-webkit-transition-duration: @sapUiUfdShellOvrlyCntntInnerOpenAnimDuration;
-	transition-duration: @sapUiUfdShellOvrlyCntntInnerOpenAnimDuration;
-	-webkit-transition-delay: @sapUiUfdShellOvrlyCntntInnerOpenAnimDelay;
-	transition-delay: @sapUiUfdShellOvrlyCntntInnerOpenAnimDelay;
+	-webkit-transition-duration: @_sap_ui_unified_ShellOverlay_CntntInnerOpenAnimDuration;
+	transition-duration: @_sap_ui_unified_ShellOverlay_CntntInnerOpenAnimDuration;
+	-webkit-transition-delay: @_sap_ui_unified_ShellOverlay_CntntInnerOpenAnimDelay;
+	transition-delay: @_sap_ui_unified_ShellOverlay_CntntInnerOpenAnimDelay;
 }
 
 .sapUiUfdShellOvrlyAnim.sapUiUfdShellOvrlyClosing .sapUiUfdShellOvrlyCntnt > div {
-	-webkit-transition-duration: @sapUiUfdShellOvrlyCntntInnerCloseAnimDuration;
-	transition-duration: @sapUiUfdShellOvrlyCntntInnerCloseAnimDuration;
-	-webkit-transition-delay: @sapUiUfdShellOvrlyCntntInnerCloseAnimDelay;
-	transition-delay: @sapUiUfdShellOvrlyCntntInnerCloseAnimDelay;
+	-webkit-transition-duration: @_sap_ui_unified_ShellOverlay_CntntInnerCloseAnimDuration;
+	transition-duration: @_sap_ui_unified_ShellOverlay_CntntInnerCloseAnimDuration;
+	-webkit-transition-delay: @_sap_ui_unified_ShellOverlay_CntntInnerCloseAnimDelay;
+	transition-delay: @_sap_ui_unified_ShellOverlay_CntntInnerCloseAnimDelay;
 }
 
 .sapUiUfdShellOvrlyAnim .sapUiUfdShellOvrlyCntnt > div {
@@ -2897,15 +3299,15 @@ html.sapUiMedia-Std-Phone .sapUiUfdShellOvrlyHeadCenter {
 }
 
 .sapUiUfdShellOvrlyAnim.sapUiUfdShellOvrlyOpening .sapUiUfdShellOvrlySearch {
-	-webkit-transition-duration: @sapUiUfdShellOvrlySearchOpenAnimDuration;
-	transition-duration: @sapUiUfdShellOvrlySearchOpenAnimDuration;
+	-webkit-transition-duration: @_sap_ui_unified_ShellOverlay_SearchOpenAnimDuration;
+	transition-duration: @_sap_ui_unified_ShellOverlay_SearchOpenAnimDuration;
 	-webkit-transition-timing-function: ease-out;
 	transition-timing-function: ease-out;
 }
 
 .sapUiUfdShellOvrlyAnim.sapUiUfdShellOvrlyClosing .sapUiUfdShellOvrlySearch {
-	-webkit-transition-duration: @sapUiUfdShellOvrlySearchCloseAnimDuration;
-	transition-duration: @sapUiUfdShellOvrlySearchCloseAnimDuration;
+	-webkit-transition-duration: @_sap_ui_unified_ShellOverlay_SearchCloseAnimDuration;
+	transition-duration: @_sap_ui_unified_ShellOverlay_SearchCloseAnimDuration;
 }
 
 .sapUiUfdShellOvrlyAnim .sapUiUfdShellOvrlySearch {
@@ -2916,15 +3318,15 @@ html.sapUiMedia-Std-Phone .sapUiUfdShellOvrlyHeadCenter {
 .sapUiUfdShellOvrlyAnim .sapUiUfdShellOvrlyHeadClose {
 	-webkit-transition-property: opacity;
 	transition-property: opacity;
-	-webkit-transition-duration: @sapUiUfdShellOvrlyAnimDuration;
-	transition-duration: @sapUiUfdShellOvrlyAnimDuration;
+	-webkit-transition-duration: @_sap_ui_unified_ShellOverlay_AnimDuration;
+	transition-duration: @_sap_ui_unified_ShellOverlay_AnimDuration;
 }
 
 .sapUiBLy.sapUiUfdShellOvrlyBly {
 	-webkit-transition-property: all;
 	transition-property: all;
-	-webkit-transition-duration: @sapUiUfdShellOvrlyBlockLayerAnimDuration;
-	transition-duration: @sapUiUfdShellOvrlyBlockLayerAnimDuration;
+	-webkit-transition-duration: @_sap_ui_unified_ShellOverlay_BlockLayerAnimDuration;
+	transition-duration: @_sap_ui_unified_ShellOverlay_BlockLayerAnimDuration;
 }
 
 .sapUiBLy.sapUiUfdShellOvrlyBly.sapUiUfdShellOvrlyBlyTp {
@@ -2933,7 +3335,7 @@ html.sapUiMedia-Std-Phone .sapUiUfdShellOvrlyHeadCenter {
 
 .sapUiUfdShellOvrlyHeadClose {
 	right: 0;
-	height: @sapUiUfdShellHeaderBarHeight - 8px;
+	height: @_sap_ui_unified_ShellOverlay_HeaderBarHeight - 8px;
 	margin: 4px;
 	padding-top: 10px;
 	padding-left: 10px;
@@ -2960,9 +3362,13 @@ html.sapUiMedia-Std-Desktop .sapUiUfdShellOvrlyHeadClose:active:hover {
 /* END "ShellOverlay.less" */
 
 /* START "SplitContainer.less" */
-/** TODO: Move to global.css in core (pending discussion with Jens P and Michael S)
+/* ============================================== */
+/* CSS for control sap.ui.unified/SplitContainer  */
+/* Base theme                                     */
+/* ============================================== */
+
 /* The animation duration must be in ms so it returns the correct integer value when used with parseInt */
-@sapUiUfdSplitContAnimationDuration: 500ms;
+@_sap_ui_unified_SplitContainer_AnimationDuration: 500ms;
 
 .sapUiUfdSpltCont {
 	overflow: hidden;
@@ -2975,8 +3381,8 @@ html.sapUiMedia-Std-Desktop .sapUiUfdShellOvrlyHeadClose:active:hover {
 
 .sapUiUfdSpltContAnim .sapUiUfdSpltContCanvas,
 .sapUiUfdSpltContAnim .sapUiUfdSpltContPane {
-	transition: height @sapUiUfdSplitContAnimationDuration ease 0ms, width @sapUiUfdSplitContAnimationDuration ease 0ms, left @sapUiUfdSplitContAnimationDuration ease 0ms, top @sapUiUfdSplitContAnimationDuration ease 0ms;
-	-webkit-transition: height @sapUiUfdSplitContAnimationDuration ease 0ms, width @sapUiUfdSplitContAnimationDuration ease 0ms, left @sapUiUfdSplitContAnimationDuration ease 0ms, top @sapUiUfdSplitContAnimationDuration ease 0ms;
+	transition: height @_sap_ui_unified_SplitContainer_AnimationDuration ease 0ms, width @_sap_ui_unified_SplitContainer_AnimationDuration ease 0ms, left @_sap_ui_unified_SplitContainer_AnimationDuration ease 0ms, top @_sap_ui_unified_SplitContainer_AnimationDuration ease 0ms;
+	-webkit-transition: height @_sap_ui_unified_SplitContainer_AnimationDuration ease 0ms, width @_sap_ui_unified_SplitContainer_AnimationDuration ease 0ms, left @_sap_ui_unified_SplitContainer_AnimationDuration ease 0ms, top @_sap_ui_unified_SplitContainer_AnimationDuration ease 0ms;
 }
 
 .sapUiUfdSpltContPane {
@@ -3031,4 +3437,3 @@ html.sapUiMedia-Std-Desktop .sapUiUfdShellOvrlyHeadClose:active:hover {
 
 
 /* END "SplitContainer.less" */
-

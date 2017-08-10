@@ -25,7 +25,7 @@ sap.ui.define([
 		 * <strong><i>Overview</i></strong>
 		 *
 		 * A {@link sap.m.Slider} control represents a numerical range and a handle.
-		 * The purpose of the control is to enable visual selection of а value in a continuous numerical range by moving an adjustable handle.
+		 * The purpose of the control is to enable visual selection of a value in a continuous numerical range by moving an adjustable handle.
 		 *
 		 * <strong>Notes:</strong>
 		 * <ul><li>Only horizontal sliders are possible. </li>
@@ -64,9 +64,10 @@ sap.ui.define([
 		 * </ul>
 		 *
 		 * @extends sap.ui.core.Control
+		 * @implements sap.ui.core.IFormContent
 		 *
 		 * @author SAP SE
-		 * @version 1.46.12
+		 * @version 1.48.5
 		 *
 		 * @constructor
 		 * @public
@@ -75,6 +76,7 @@ sap.ui.define([
 		 */
 		var Slider = Control.extend("sap.m.Slider", /** @lends sap.m.Slider.prototype */ { metadata: {
 
+			interfaces: ["sap.ui.core.IFormContent"],
 			library: "sap.m",
 			properties: {
 
@@ -109,7 +111,7 @@ sap.ui.define([
 				 * Defines the size of the slider's selection intervals. (e.g. min = 0, max = 10, step = 5 would result in possible selection of the values 0, 5, 10).
 				 *
 				 * The step must be positive, if a negative number is provided, the default value will be used instead.
-				 * If the width of the slider converted to pixels is less than the range (max – min), the value will be rounded to multiples of the step size.
+				 * If the width of the slider converted to pixels is less than the range (max - min), the value will be rounded to multiples of the step size.
 				 */
 				step: { type: "float", group: "Data", defaultValue: 1 },
 
@@ -121,7 +123,7 @@ sap.ui.define([
 				/**
 				 * Define the value.
 				 *
-				 * If the value is lower/higher than the allowed minimum/maximum, the value of the properties <code>min<code>/<code>max</code> are used instead.
+				 * If the value is lower/higher than the allowed minimum/maximum, the value of the properties <code>min</code>/<code>max</code> are used instead.
 				 */
 				value: { type: "float", group: "Data", defaultValue: 0 },
 
@@ -243,7 +245,10 @@ sap.ui.define([
 		 * @private
 		 */
 		Slider.prototype._recalculateStyles = function() {
-			var $Slider = this.$();
+			var $Slider = this.$(),
+				oHandle = this.$().find(".sapMSliderHandle").eq(0),
+				fHandleWidthTotal = parseFloat(oHandle.css("width")) + 2 * parseFloat(oHandle.css("border-width")),
+				fProgressParentWidth = parseFloat(this.$("progress").parent().css("width"));
 			this._fSliderWidth = $Slider.width();
 			this._fSliderPaddingLeft = parseFloat($Slider.css("padding-left"));
 			this._fSliderOffsetLeft = $Slider.offset().left;
@@ -251,6 +256,9 @@ sap.ui.define([
 
 			this._fTooltipHalfWidthPercent =
 					((this._fSliderWidth - (this._fSliderWidth - (this._iLongestRangeTextWidth / 2 + this._CONSTANTS.CHARACTER_WIDTH_PX))) / this._fSliderWidth) * 100;
+
+			this._fHandleWidthPercent = (fHandleWidthTotal / fProgressParentWidth * 100) / 2;
+
 		};
 
 		/**
@@ -305,18 +313,16 @@ sap.ui.define([
 		/**
 		 * Get the value on certain position
 		 *
-		 * @param fPercent
+		 * @param {float} fPercent
 		 * @returns {number}
 		 * @private
 		 */
 		Slider.prototype._getValueOfPercent = function(fPercent) {
-			var fMin = this.getMin();
-			var fValue = (fPercent * (this.getMax() - fMin) / 100) + fMin;
-			var valuePrecision = ("" + this.getStep()).split(".")[1];
+			var fMin = this.getMin(),
+				fValue = (fPercent * (this.getMax() - fMin) / 100) + fMin,
+				sNewValueFixedPoint = this.toFixed(fValue, this.getDecimalPrecisionOfNumber(this.getStep()));
 
-			valuePrecision = valuePrecision ? valuePrecision.length : 0;
-
-			return Number(fValue.toFixed(valuePrecision));
+			return Number(sNewValueFixedPoint);
 		};
 
 		/**
@@ -502,10 +508,10 @@ sap.ui.define([
 		Slider.prototype._getTooltipPosition = function (sNewValue) {
 			var fPerValue = this._getPercentOfValue(+sNewValue);
 
-			if (fPerValue < this._fTooltipHalfWidthPercent) {
-				return 0 + "%";
-			} else if (fPerValue > 100 - this._fTooltipHalfWidthPercent) {
-				return (100 - this._fTooltipHalfWidthPercent * 2) + "%";
+			if (fPerValue < this._fHandleWidthPercent / 2) {
+				return -this._fHandleWidthPercent  + "%";
+			} else if (fPerValue > 100 - this._fTooltipHalfWidthPercent + this._fHandleWidthPercent) {
+				return (100 - this._fTooltipHalfWidthPercent * 2 + this._fHandleWidthPercent) + "%";
 			} else {
 				return fPerValue - this._fTooltipHalfWidthPercent + "%";
 			}
@@ -601,6 +607,8 @@ sap.ui.define([
 			});
 
 			oInput.attachChange(this._handleInputChange.bind(this, oInput));
+			oInput.addEventDelegate({onsapdown: this._inputArrowDown}, this);
+			oInput.addEventDelegate({onsapup: this._inputArrowUp}, this);
 
 			oInput.addEventDelegate({
 				onfocusout: function (oEvent) {
@@ -613,10 +621,30 @@ sap.ui.define([
 			return oInput;
 		};
 
+		Slider.prototype._inputArrowDown = function(oEvent) {
+			var oModifiedEvent = oEvent;
+			oModifiedEvent.srcControl = this;
+
+			oEvent.preventDefault();
+			oEvent.stopPropagation();
+
+			this.onsapdecrease(oModifiedEvent);
+		};
+
+		Slider.prototype._inputArrowUp = function(oEvent) {
+			var oModifiedEvent = oEvent;
+			oModifiedEvent.srcControl = this;
+
+			oEvent.preventDefault();
+			oEvent.stopPropagation();
+
+			this.onsapincrease(oModifiedEvent);
+		};
+
 		Slider.prototype._handleInputChange = function (oInput, oEvent) {
 			var newValue = parseFloat(oEvent.getParameter("value"));
 
-			if (isNaN(newValue) || newValue < this.getMin() || newValue > this.getMax()) {
+			if (oEvent.getParameter("value") == "" || isNaN(newValue) || newValue < this.getMin() || newValue > this.getMax()) {
 				oInput.setValueState(this._CONSTANTS.INPUT_STATE_ERROR);
 				return;
 			}
@@ -646,6 +674,9 @@ sap.ui.define([
 
 			// half the width of the tooltip in percent of the total slider width
 			this._fTooltipHalfWidthPercent = 0;
+
+			// width of the handler in percent of the progress area width
+			this._fHandleWidthPercent = 0;
 
 			this._oResourceBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m");
 		};
@@ -973,7 +1004,7 @@ sap.ui.define([
 
 			// note: prevent document scrolling when arrow keys are pressed
 			oEvent.preventDefault();
-
+			oEvent.stopPropagation();
 			// mark the event for components that needs to know if the event was handled
 			oEvent.setMarked();
 
@@ -1025,7 +1056,7 @@ sap.ui.define([
 
 			// note: prevent document scrolling when arrow keys are pressed
 			oEvent.preventDefault();
-
+			oEvent.stopPropagation();
 			// mark the event for components that needs to know if the event was handled
 			oEvent.setMarked();
 
@@ -1252,7 +1283,6 @@ sap.ui.define([
 
 			// validate the new value before arithmetic calculations
 			if (typeof fNewValue !== "number" || !isFinite(fNewValue)) {
-				jQuery.sap.log.error("Error:", '"fNewValue" needs to be a finite number on ', this);
 				return this;
 			}
 

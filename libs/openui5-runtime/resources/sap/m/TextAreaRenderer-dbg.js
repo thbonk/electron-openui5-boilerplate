@@ -27,6 +27,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './InputBaseRenderer
 	// Adds control specific class
 	TextAreaRenderer.addOuterClasses = function(oRm, oControl) {
 		oRm.addClass("sapMTextArea");
+
+		if (oControl.getShowExceededText()) {
+			oRm.addClass("sapMTextAreaWithCounter");
+		}
+		if (oControl.getHeight()) {
+			oRm.addClass("sapMTextAreaWithHeight");
+		}
 	};
 
 	// Add extra styles to Container
@@ -42,6 +49,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './InputBaseRenderer
 	// Write the closing tag name of the TextArea
 	TextAreaRenderer.closeInputTag = function(oRm, oControl) {
 		oRm.write("</textarea>");
+		var oCounter = oControl.getAggregation("_counter");
+		oRm.renderControl(oCounter);
 	};
 
 	// TextArea does not have value property as HTML element, so overwrite base method

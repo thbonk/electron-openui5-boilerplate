@@ -15,7 +15,7 @@ sap.ui.define([
 	 *
 	 * @class Utility functionality to work with overlays
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @private
 	 * @static
 	 * @since 1.30
@@ -46,19 +46,13 @@ sap.ui.define([
 			var oElement = oElementOverlay.getElementInstance();
 			var iIndex = aChildren.indexOf(oElement);
 
-			var oPublicParentOverlay = oElementOverlay.getPublicParentElementOverlay();
-
 			return {
-				publicParent : oPublicParentOverlay.getElementInstance(),
-				publicAggregation: oElementOverlay.getPublicParentAggregationOverlay().getAggregationName(),
 				parent: oParent,
 				aggregation : sParentAggregationName,
 				index: iIndex
 			};
 		} else {
 			return {
-				publicParent : null,
-				publicAggregation : "",
 				parent: null,
 				aggregation: "",
 				index: -1
@@ -366,6 +360,17 @@ sap.ui.define([
 				this.iterateOverlayElementTree(oChildOverlay, fnCallback);
 			}, this);
 		}, this);
+	};
+
+	OverlayUtil.iterateOverAggregationLikeChildren = function(oElementOverlay, sAggregationName, fnCallback) {
+		var oElement = oElementOverlay.getElementInstance();
+		var vChildren;
+		if (oElementOverlay.getAggregationOverlay(sAggregationName).isAssociation()){
+			vChildren = ElementUtil.getAssociationInstances(oElement, sAggregationName);
+		} else {
+			vChildren = ElementUtil.getAggregation(oElement, sAggregationName);
+		}
+		ElementUtil.iterateOverElements(vChildren, fnCallback);
 	};
 
 	/**

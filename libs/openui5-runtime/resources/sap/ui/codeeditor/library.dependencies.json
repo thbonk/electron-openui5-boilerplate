@@ -3,22 +3,34 @@
     {
       "name" : "sap/ui/codeeditor/CodeEditor.js",
       "description" : "global ace",
-      "size" : 9119,
-      "compressedSize" : 3968,
-      "required" : ["jquery.sap.global.js", "sap/ui/core/Control.js", "sap/ui/codeeditor/js/ace/ace.js", "sap/ui/codeeditor/js/ace/mode-javascript.js", "sap/ui/codeeditor/js/ace/mode-json.js"],
+      "size" : 10405,
+      "compressedSize" : 4367,
+      "required" : ["jquery.sap.global.js", "sap/ui/codeeditor/js/ace/ace.js", "sap/ui/codeeditor/js/ace/mode-javascript.js", "sap/ui/codeeditor/js/ace/mode-json.js", "sap/ui/core/Control.js"],
       "includes" : []
+    },
+    {
+      "name" : "sap/ui/codeeditor/library-preload.js",
+      "size" : 5783,
+      "required" : ["jquery.sap.global.js", "sap/ui/codeeditor/js/ace/ace.js", "sap/ui/codeeditor/js/ace/mode-javascript.js", "sap/ui/codeeditor/js/ace/mode-json.js", "sap/ui/core/Control.js", "sap/ui/core/Core.js"],
+      "includes" : ["sap/ui/codeeditor/CodeEditor.js", "sap/ui/codeeditor/library.js", "sap/ui/codeeditor/manifest.json"]
+    },
+    {
+      "name" : "sap/ui/codeeditor/library-preload.json",
+      "size" : 0,
+      "required" : ["jquery.sap.global.js", "sap/ui/codeeditor/js/ace/ace.js", "sap/ui/codeeditor/js/ace/mode-javascript.js", "sap/ui/codeeditor/js/ace/mode-json.js", "sap/ui/core/Control.js", "sap/ui/core/Core.js", "sap/ui/core/library-preload.json"],
+      "includes" : ["sap/ui/codeeditor/CodeEditor.js", "sap/ui/codeeditor/library.js", "sap/ui/codeeditor/manifest.json"]
     },
     {
       "name" : "sap/ui/codeeditor/library.js",
       "description" : "Initialization Code and shared classes of library sap.ui.codeeditor.",
-      "size" : 813,
-      "compressedSize" : 475,
-      "required" : ["sap/ui/core/Core.js", "jquery.sap.global.js"],
+      "size" : 812,
+      "compressedSize" : 474,
+      "required" : ["jquery.sap.global.js", "sap/ui/core/Core.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/codeeditor/manifest.json",
-      "size" : 808,
+      "size" : 806,
       "required" : [],
       "includes" : []
     }

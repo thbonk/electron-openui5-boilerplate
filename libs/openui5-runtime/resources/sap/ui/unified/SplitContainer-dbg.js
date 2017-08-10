@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/theming/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -213,7 +213,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/theming/
 				// ignored by parseInt.
 				// TODO: Cache the value.
 				var iHideDelay = parseInt(
-					Parameters.get("sapUiUfdSplitContAnimationDuration"),
+					Parameters.get("_sap_ui_unified_SplitContainer_AnimationDuration"),
 					10
 				);
 				// Maybe we could also allow "s"-values and then multiply everything below 20 with 1000...?

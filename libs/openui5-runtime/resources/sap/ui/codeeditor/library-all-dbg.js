@@ -37,7 +37,7 @@ sap.ui.define("sap/ui/codeeditor/CodeEditor",[
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -105,6 +105,20 @@ sap.ui.define("sap/ui/codeeditor/CodeEditor",[
 						type: "boolean",
 						group: "Behavior",
 						defaultValue: false
+					},
+					/**
+					 * Sets whether the editor height should auto expand to a maximum number of lines. After reaching
+					 * the maximum number of lines specified, the content of the <code>CodeEditor</code> will become scrollable.
+					 *
+					 * <b>Note:</b> Keep in mind that the auto expand <code>CodeEditor</code> behavior requires the
+					 * <code>height</code> property to be set to <code>auto</code>.
+					 *
+					 * @since 1.48.1
+					 */
+					maxLines: {
+						type: "int",
+						group: "Behavior",
+						defaultValue: 0
 					},
 					/**
 					 * Sets the editors color theme
@@ -313,14 +327,32 @@ sap.ui.define("sap/ui/codeeditor/CodeEditor",[
 	 * @private
 	 */
 	CodeEditor.prototype.onAfterRendering = function() {
-		var oDomRef = this.getDomRef();
+		var oDomRef = this.getDomRef(),
+			oPropertyDefaults = this.getMetadata().getPropertyDefaults();
+
 		setTimeout(function() {
-			if (oDomRef.height < 20) {
+			if (this.getMaxLines() === oPropertyDefaults.maxLines && this.getHeight() === oPropertyDefaults.height
+				&& oDomRef.height < 20) {
 				oDomRef.style.height = "3rem";
 			}
-		}, 1000);
+		}.bind(this), 0);
 
-		this.getDomRef().appendChild(this._oEditorDomRef);
+		oDomRef.appendChild(this._oEditorDomRef);
+
+		// force text update
+		this._oEditor.renderer.updateText();
+	};
+
+	/**
+	 * Sets <code>maxLines</code> property.
+	 * @param {int} iMaxLines Maximum number of lines the editor should display
+	 * @override
+	 * @public
+	 * @since 1.48.1
+	 */
+	CodeEditor.prototype.setMaxLines = function (iMaxLines) {
+		this._oEditor.setOption("maxLines", iMaxLines);
+		return this.setProperty("maxLines", iMaxLines, true);
 	};
 
 	/**
@@ -331,6 +363,11 @@ sap.ui.define("sap/ui/codeeditor/CodeEditor",[
 	 */
 	CodeEditor.prototype._getEditorInstance = function() {
 		return this._oEditor;
+	};
+
+	CodeEditor.prototype.destroy = function (bSuppressInvalidate) {
+		this._oEditor.destroy(bSuppressInvalidate);
+		Control.prototype.destroy.call(this, bSuppressInvalidate);
 	};
 
 	return CodeEditor;
@@ -375,7 +412,7 @@ sap.ui.define("sap/ui/codeeditor/library",['sap/ui/core/Core'],
 		],
 		elements: [],
 		noLibraryCSS: false,
-		version: "1.46.12"
+		version: "1.48.5"
 	});
 
 

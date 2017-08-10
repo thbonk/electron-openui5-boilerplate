@@ -18,7 +18,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 	 *
 	 * @extends sap.ui.base.Object
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @public
 	 * @alias sap.ui.core.LocaleData
 	 */
@@ -360,8 +360,47 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 				oBestMatch = this._findBestMatch(aTokens, sSkeleton, oAvailableFormats),
 				sPattern,
 				rMixedSkeleton = /^([GyYqQMLwWEecdD]+)([hHkKjJmszZvVOXx]+)$/;
+			var bSymbolFound;
 
 			if (sIntervalDiff) {
+				// FieldGroup
+				if (sIntervalDiff.length > 1) {
+					// Find out the symbol of the given group
+					// and set the interval diff
+					bSymbolFound = aTokens.some(function(oToken) {
+						if (oToken.group === sIntervalDiff) {
+							sIntervalDiff = oToken.symbol;
+							return true;
+						}
+					});
+
+					// When no symbol is found
+					// an empty interval diff will be set
+					if (!bSymbolFound) {
+						sIntervalDiff = "";
+					}
+				}
+
+				// Special handling of "a" (Dayperiod)
+				if (sIntervalDiff === "a") {
+					// Find out whether dayperiod is needed
+					// If not, set the internal diff with the actual 'Hour' symbol
+					bSymbolFound = aTokens.some(function(oToken) {
+						if (oToken.group === "Hour") {
+							if (oToken.symbol !== "h" && oToken.symbol !== "K") {
+								sIntervalDiff = oToken.symbol;
+							}
+							return true;
+						}
+					});
+
+					// When no symbol is found
+					// an empty interval diff will be set
+					if (!bSymbolFound) {
+						sIntervalDiff = "";
+					}
+				}
+
 				// Only use best match, if there are no missing tokens, as there is no possibility
 				// to append items on interval formats
 				if (oBestMatch && oBestMatch.missingTokens.length === 0) {
@@ -1766,7 +1805,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 
 		// normalize language and handle special cases
 		sLanguage = (sLanguage && M_ISO639_OLD_TO_NEW[sLanguage]) || sLanguage;
-		// Special case 1: in a SAP context, the inclusive language code "no" always means Norwegian Bokmal ("nb")
+		// Special case 1: in an SAP context, the inclusive language code "no" always means Norwegian Bokmal ("nb")
 		if ( sLanguage === "no" ) {
 			sLanguage = "nb";
 		}

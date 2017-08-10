@@ -39,12 +39,12 @@ sap.ui.define([
      * Dynamically generates and executes QUnit tests
      *
      * @param {object} args - the arguments to the function
-     * @param {string} args.featurePath - the path to the Gherkin feature file to parse, as a SAPUI5 module path. The
+     * @param {string} args.featurePath - the path to the Gherkin feature file to parse, as an SAPUI5 module path. The
      *                                    ".feature" extension is assumed and should not be included. See
      *                                    {@link jQuery.sap.registerModulePath}
-     * @param {function} args.steps - the constructor function of type sap.ui.test.gherkin.StepDefinitions
+     * @param {function} args.steps - the constructor function of type {@link sap.ui.test.gherkin.StepDefinitions}
      * @public
-     * @throws {Error} for invalid parameters - parameter does not match the expected type
+     * @throws {Error} if any parameters are invalid
      * @function
      * @static
      */
@@ -66,17 +66,17 @@ sap.ui.define([
       var oFeatureTest = oTestGenerator.generate();
 
       QUnit.module(oFeatureTest.name, {
-        setup: function() {
+        beforeEach: function() {
           oTestGenerator.setUp();
         },
-        teardown: function() {
+        afterEach: function() {
           oTestGenerator.tearDown();
         }
       });
 
       $.sap.log.info("[GHERKIN] Running feature: '" + oFeatureTest.name + "'");
       oFeatureTest.testScenarios.forEach(function(oTestScenario) {
-        var fnTestFunction = (!oTestScenario.wip) ? QUnit.test : QUnit.skip;
+        var fnTestFunction = (!oFeatureTest.skip && !oTestScenario.skip) ? QUnit.test : QUnit.skip;
         fnTestFunction(oTestScenario.name, function() {
           $.sap.log.info("[GHERKIN] Running scenario: '" + oTestScenario.name + "'");
           oTestScenario.testSteps.forEach(function(oTestStep) {

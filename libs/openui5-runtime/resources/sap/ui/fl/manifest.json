@@ -8,7 +8,7 @@
       "support/apps/contentbrowser"
     ],
     "applicationVersion": {
-      "version": "1.46.12"
+      "version": "1.48.5"
     },
     "title": "SAPUI5 library with sap.ui.fl controls.",
     "description": "SAPUI5 library with sap.ui.fl controls.",
@@ -24,13 +24,13 @@
   "sap.ui5": {
     "_version": "1.1.0",
     "dependencies": {
-      "minUI5Version": "1.46",
+      "minUI5Version": "1.48",
       "libs": {
         "sap.ui.core": {
-          "minVersion": "1.46.12"
+          "minVersion": "1.48.5"
         },
         "sap.m": {
-          "minVersion": "1.46.12"
+          "minVersion": "1.48.5"
         }
       }
     }

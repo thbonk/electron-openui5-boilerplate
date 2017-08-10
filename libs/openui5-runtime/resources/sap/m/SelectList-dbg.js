@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.46.12
+		 * @version 1.48.5
 		 *
 		 * @constructor
 		 * @public
@@ -144,7 +144,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 					/**
 					 * This event is fired when the selection has changed.
 					 *
-					 * <b>Note: </b> The selection can be changed by pressing an non-selected item or
+					 * <b>Note: </b> The selection can be changed by pressing a non-selected item or
 					 * via keyboard and after the enter or space key is pressed.
 					 */
 					selectionChange: {

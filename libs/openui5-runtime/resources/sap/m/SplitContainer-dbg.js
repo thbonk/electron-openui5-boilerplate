@@ -25,7 +25,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 *
 	 * NOTE: This control must be rendered as a full screen control in order to make the show/hide master area work properly.
 	 * @extends sap.ui.core.Control
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -67,6 +67,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			 * Otherwise, the show/hide of master button needs to be managed by the application.
 			 */
 			masterButtonText : {type : "string", group : "Appearance", defaultValue : null},
+
+			/**
+			 * Specifies the tooltip of the master button. If the tooltip is not specified,
+			 * the title of the page, which is displayed is the master part, is set as tooltip to the master button.
+			 * @since 1.48
+			 */
+			masterButtonTooltip : {type : "string", group : "Appearance", defaultValue : null},
 
 			/**
 			 * Determines the background color of the SplitContainer. If set, this color overrides the default one,
@@ -461,6 +468,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				},
 				afterNavigate: function(oEvent){
 					that._handleNavigationEvent(oEvent, true, true);
+					that._updateMasterButtonTooltip();
 				}
 			});
 
@@ -556,6 +564,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			this._oShowMasterBtn.removeStyleClass("sapMSplitContainerMasterBtnHidden");
 			this._bMasterisOpen = false;
 		}
+
+		this._updateMasterButtonTooltip();
 	};
 
 	SplitContainer.prototype.exit = function() {
@@ -629,9 +639,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		}
 
 		var bIsMasterNav = true,
+			$targetContainer = jQuery(oEvent.target).closest(".sapMSplitContainerDetail, .sapMSplitContainerMaster"), // find the closest master or detail DOM element because SplitContainers may be nested
 			metaData = oEvent.srcControl.getMetadata();
 
-		if (jQuery(oEvent.target).closest(".sapMSplitContainerDetail").length > 0) {
+		if ($targetContainer.length > 0 && $targetContainer.hasClass("sapMSplitContainerDetail")) {
 			bIsMasterNav = false;
 		}
 
@@ -989,7 +1000,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		if (this._oMasterNav === this._oDetailNav && jQuery.inArray(oPage, this._oDetailNav.getPages()) !== -1) {
 			this._removePageFromArray(this._aDetailPages, oPage);
 		}
-		this._oMasterNav.addPage(oPage);
+		this._oMasterNav.insertPage(oPage, this._aMasterPages.length);
 		this._aMasterPages.push(oPage);
 		return this;
 	};
@@ -1856,6 +1867,34 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		return (this._portraitHide() || this._hideMode() || this._portraitPopover()) && (!this._bMasterisOpen || this._bMasterClosing);
 	};
 
+	SplitContainer.prototype._updateMasterButtonTooltip = function() {
+		if (!this._oShowMasterBtn) {
+			return;
+		}
+
+		var sTooltip = this.getMasterButtonTooltip();
+		if (sTooltip) {
+			this._oShowMasterBtn.setTooltip(sTooltip);
+			return;
+		}
+
+		var oPage = this._oMasterNav.getCurrentPage();
+
+		if (oPage && oPage.getTitle) {
+			var sTitle = oPage.getTitle();
+			if (sTitle) {
+				sTitle = sTitle.replace(/[_0-9]+$/, '');
+				sTooltip = this._rb.getText('SPLITCONTAINER_NAVBUTTON_TOOLTIP', sTitle);
+			}
+		}
+
+		if (!sTooltip) {
+			sTooltip = this._rb.getText('SPLITCONTAINER_NAVBUTTON_DEFAULT_TOOLTIP');
+		}
+
+		this._oShowMasterBtn.setTooltip(sTooltip);
+	};
+
 	SplitContainer.prototype._createShowMasterButton = function() {
 		if (this._oShowMasterBtn && !this._oShowMasterBtn.bIsDestroyed) {
 			return;
@@ -1863,7 +1902,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 		this._oShowMasterBtn = new sap.m.Button(this.getId() + "-MasterBtn", {
 			icon: IconPool.getIconURI("menu2"),
-			tooltip: this._rb.getText('SPLITCONTAINER_NAVBUTTON_TOOLTIP'),
+			tooltip: this.getMasterButtonTooltip(),
 			type: sap.m.ButtonType.Default,
 			press: jQuery.proxy(this._onMasterButtonTap, this)
 		}).addStyleClass("sapMSplitContainerMasterBtn");
@@ -1994,6 +2033,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 								fnCallBack(oPage);
 							}
 						}
+
 						this._oShowMasterBtn.destroy();
 						/*eslint-disable no-loop-func */
 						this._oShowMasterBtn.$().parent().bind("webkitAnimationEnd animationend", function(){

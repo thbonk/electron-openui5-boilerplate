@@ -19,14 +19,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @namespace
 	 * @name sap.ui.layout
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @public
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.layout",
-		version: "1.46.12",
+		version: "1.48.5",
 		dependencies : ["sap.ui.core"],
 		types: [
 			"sap.ui.layout.BackgroundDesign",
@@ -39,6 +39,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 		],
 		interfaces: [],
 		controls: [
+			"sap.ui.layout.AlignedFlowLayout",
 			"sap.ui.layout.DynamicSideContent",
 			"sap.ui.layout.FixFlex",
 			"sap.ui.layout.Grid",
@@ -72,6 +73,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 		extensions: {
 			flChangeHandlers: {
 				"sap.ui.layout.form.SimpleForm": "sap/ui/layout/flexibility/SimpleForm",
+				"sap.ui.layout.Grid": {
+					"moveControls": "default",
+					"hideControl": "default",
+					"unhideControl": "default"
+				},
+				"sap.ui.layout.form.Form": "sap/ui/layout/flexibility/Form",
+				"sap.ui.layout.form.FormContainer": "sap/ui/layout/flexibility/FormContainer",
+				"sap.ui.layout.form.FormElement": "sap/ui/layout/flexibility/FormElement",
 				"sap.ui.layout.HorizontalLayout": {
 					"moveControls": "default",
 					"hideControl": "default",
@@ -262,6 +271,121 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 		ColorSet4: "ColorSet4"
 	};
 
+
+	/**
+	 * A string type that is used inside the BlockLayoutCell to set a predefined set of colors for the cells.
+	 *
+	 * @enum {string}
+	 * @public
+	 * @since 1.48
+	 * @ui5-metamodel This simple type also will be described in the UI5 (legacy) designtime metamodel
+	 */
+	sap.ui.layout.BlockLayoutCellColorSet = {
+		/**
+		 * Color Set 1
+		 *
+		 * @public
+		 */
+		ColorSet1: "ColorSet1",
+		/**
+		 * Color Set 2
+		 *
+		 * @public
+		 */
+		ColorSet2: "ColorSet2",
+		/**
+		 * Color Set 3
+		 *
+		 * @public
+		 */
+		ColorSet3: "ColorSet3",
+		/**
+		 * Color Set 4
+		 *
+		 * @public
+		 */
+		ColorSet4: "ColorSet4",
+		/**
+		 * Color Set 5
+		 *
+		 * @public
+		 */
+		ColorSet5: "ColorSet5",
+		/**
+		 * Color Set 6
+		 *
+		 * @public
+		 */
+		ColorSet6: "ColorSet6",
+		/**
+		 * Color Set 7
+		 *
+		 * @public
+		 */
+		ColorSet7: "ColorSet7",
+		/**
+		 * Color Set 8
+		 *
+		 * @public
+		 */
+		ColorSet8: "ColorSet8",
+		/**
+		 * Color Set 9
+		 *
+		 * @public
+		 */
+		ColorSet9: "ColorSet9",
+		/**
+		 * Color Set 10
+		 *
+		 * @public
+		 */
+		ColorSet10: "ColorSet10",
+		/**
+		 * Color Set 11
+		 *
+		 * @public
+		 */
+		ColorSet11: "ColorSet11"
+	};
+
+		/**
+		 * A string type that is used inside the BlockLayoutCell to set a predefined set of color shades for the cells.
+		 * The colors are defined with sap.ui.layout.BlockLayoutCellColorSet. And this is for the shades only.
+		 *
+		 * @enum {string}
+		 * @public
+		 * @since 1.48
+		 * @ui5-metamodel This simple type also will be described in the UI5 (legacy) designtime metamodel
+		 */
+		sap.ui.layout.BlockLayoutCellColorShade = {
+			/**
+			 * Shade A
+			 *
+			 * @public
+			 */
+			ShadeA: "ShadeA",
+			/**
+			 * Shade B
+			 *
+			 * @public
+			 */
+			ShadeB: "ShadeB",
+			/**
+			 * Shade C
+			 *
+			 * @public
+			 */
+			ShadeC: "ShadeC",
+			/**
+			 * Shade D
+			 *
+			 * @public
+			 */
+			ShadeD: "ShadeD"
+		};
+
+
 	sap.ui.layout.form = sap.ui.layout.form || {};
 
 	/**
@@ -402,11 +526,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 		Begin : "Begin"
 	};
 
-	// factory for Form to create labels an buttons to be overwritten by commons and mobile library
+	// factory for Form to create labels and buttons to be overwritten by commons and mobile library
 	if (!sap.ui.layout.form.FormHelper) {
 		sap.ui.layout.form.FormHelper = {
 			createLabel: function(sText){ throw new Error("no Label control available!"); }, /* must return a Label control */
-			createButton: function(sId, fPressFunction){ throw new Error("no Button control available!"); }, /* must return a button control */
+			createButton: function(sId, fPressFunction, fnCallback){ throw new Error("no Button control available!"); }, /* must return a button control */
 			setButtonContent: function(oButton, sText, sTooltip, sIcon, sIconHovered){ throw new Error("no Button control available!"); },
 			addFormClass: function(){ return null; },
 			setToolbar: function(oToolbar){ return oToolbar; }, /* allow to overwrite toolbar settings */

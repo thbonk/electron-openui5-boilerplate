@@ -18,7 +18,7 @@ sap.ui.define([
 	 * @class The ContextMenu registers event handler to open the context menu. Menu entries can dynamically be added
 	 * @extends sap.ui.dt.Plugin
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -105,17 +105,12 @@ sap.ui.define([
 		this._oContextMenuControl.setMenuItems(this._aMenuItems, oTargetOverlay);
 		this._oContextMenuControl.setOverlayDomRef(oTargetOverlay);
 		this._oContextMenuControl.attachItemSelect(this._onItemSelected, this);
-
-		this._oContextMenuControl.openMenu({
-			pageX: oOriginalEvent.pageX,
-			pageY: oOriginalEvent.pageY
-		});
-
+		this._oContextMenuControl.openMenu(oOriginalEvent, oTargetOverlay);
 		this.fireOpenedContextMenu();
 	};
 
 	/**
-	 * Called when an context menu item gets selected by user
+	 * Called when a context menu item gets selected by user
 	 *
 	 * @param {sap.ui.base.Event} oEvent event object
 	 * @override
@@ -149,8 +144,9 @@ sap.ui.define([
 		document.activeElement.blur();
 
 		var oOverlay = sap.ui.getCore().byId(oEvent.currentTarget.id);
+		var sTargetClasses = oEvent.target.className;
 
-		if (oOverlay && oOverlay.isSelectable()) {
+		if (oOverlay && oOverlay.isSelectable() && sTargetClasses.indexOf("sapUiDtOverlay") > -1) {
 			if (!oOverlay.isSelected()) {
 				oOverlay.setSelected(true);
 			}

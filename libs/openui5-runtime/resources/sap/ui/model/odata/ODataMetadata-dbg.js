@@ -25,7 +25,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider', 'sap/ui/thirdpa
 	 * Implementation to access oData metadata
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -836,7 +836,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider', 'sap/ui/thirdpa
 	};
 
 	/**
-	*  extract the property metadata of a specified property of a entity type out of the metadata document
+	*  extract the property metadata of a specified property of an entity type out of the metadata document
 	*/
 	ODataMetadata.prototype._getPropertyMetadata = function(oEntityType, sProperty) {
 		var oPropertyMetadata, that = this;
@@ -958,17 +958,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider', 'sap/ui/thirdpa
 	/**
 	 * Add metadata url: The response will be merged with the existing metadata object
 	 *
-	 * @param string | array vUrl Either one URL as string or an array or Uri strings
+	 * @param {string | string[]} vUrl Either one URL as string or an array of Uri strings
 	 * @returns Promise The Promise for metadata loading
 	 * @private
 	 */
 	ODataMetadata.prototype._addUrl = function(vUrl) {
-		var aUrls = [].concat(vUrl),
-			that = this;
+		var aUrls = [].concat(vUrl);
 
-		return Promise.all(jQuery.map(aUrls, function(sUrl) {
-			return that._loadMetadata(sUrl, true);
-		}));
+		return Promise.all(aUrls.map(function(sUrl) {
+			return this._loadMetadata(sUrl, true);
+		}, this));
 	};
 
 	/**

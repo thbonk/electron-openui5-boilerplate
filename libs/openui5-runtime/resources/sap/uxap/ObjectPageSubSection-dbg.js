@@ -6,20 +6,32 @@
 
 // Provides control sap.uxap.ObjectPageSubSection.
 sap.ui.define([
+	"jquery.sap.global",
 	"sap/ui/core/CustomData",
 	"sap/ui/layout/Grid",
+	"sap/ui/layout/GridData",
 	"./ObjectPageSectionBase",
 	"./ObjectPageSubSectionLayout",
 	"./ObjectPageSubSectionMode",
+	"./ObjectPageLazyLoader",
 	"./BlockBase",
-	"sap/ui/layout/GridData",
 	"sap/m/Button",
 	"sap/ui/Device",
-	"./ObjectPageLazyLoader",
 	"sap/ui/core/StashedControlSupport",
 	"./library"
-], function (CustomData, Grid, ObjectPageSectionBase, ObjectPageSubSectionLayout,
-			 ObjectPageSubSectionMode, BlockBase, GridData, Button, Device, ObjectPageLazyLoader, StashedControlSupport, library) {
+], function (jQuery,
+			 CustomData,
+			 Grid,
+			 GridData,
+			 ObjectPageSectionBase,
+			 ObjectPageSubSectionLayout,
+			 ObjectPageSubSectionMode,
+			 ObjectPageLazyLoader,
+			 BlockBase,
+			 Button,
+			 Device,
+			 StashedControlSupport,
+			 library) {
 	"use strict";
 
 	/**
@@ -84,7 +96,8 @@ sap.ui.define([
 				 * Actions available for this Subsection
 				 */
 				actions: {type: "sap.ui.core.Control", multiple: true, singularName: "action"}
-			}
+			},
+			designTime: true
 		}
 	});
 
@@ -209,7 +222,7 @@ sap.ui.define([
 			this._oSeeMoreButton = null;
 		}
 
-		this._detachMediaContainerWidthChange(this._titleOnLeftSynchronizeLayouts, this);
+		this._detachMediaContainerWidthChange(this._synchronizeBlockLayouts, this);
 
 		this._cleanProxiedAggregations();
 
@@ -229,9 +242,8 @@ sap.ui.define([
 			return;
 		}
 
-		if (this._getUseTitleOnTheLeft()) {
-			this._attachMediaContainerWidthChange(this._titleOnLeftSynchronizeLayouts, this);
-		}
+		this._synchronizeBlockLayouts();
+		this._attachMediaContainerWidthChange(this._synchronizeBlockLayouts, this);
 
 		this._$spacer = jQuery.sap.byId(oObjectPageLayout.getId() + "-spacer");
 	};
@@ -241,7 +253,7 @@ sap.ui.define([
 			ObjectPageSectionBase.prototype.onBeforeRendering.call(this);
 		}
 
-		this._detachMediaContainerWidthChange(this._titleOnLeftSynchronizeLayouts, this);
+		this._detachMediaContainerWidthChange(this._synchronizeBlockLayouts, this);
 
 		this._setAggregationProxy();
 		this._getGrid().removeAllContent();
@@ -506,12 +518,33 @@ sap.ui.define([
 	 ************************************************************************************/
 
 	ObjectPageSubSection.prototype._onDesktopMediaRange = function (oCurrentMedia) {
-		var oMedia = oCurrentMedia || this._getCurrentMediaContainerRange();
-		return ["LargeDesktop", "Desktop"].indexOf(oMedia.name) > -1;
+		return this._onMediaRange(oCurrentMedia, ["LargeDesktop", "Desktop"]);
 	};
 
-	ObjectPageSubSection.prototype._titleOnLeftSynchronizeLayouts = function (oCurrentMedia) {
-		this.$("header").toggleClass("titleOnLeftLayout", this._onDesktopMediaRange(oCurrentMedia));
+	ObjectPageSubSection.prototype._onTabletMediaRange = function (oCurrentMedia) {
+		return this._onMediaRange(oCurrentMedia, ["Tablet"]);
+	};
+
+	ObjectPageSubSection.prototype._onPhoneMediaRange = function (oCurrentMedia) {
+		return this._onMediaRange(oCurrentMedia, ["Phone"]);
+	};
+
+	ObjectPageSubSection.prototype._onMediaRange = function (oCurrentMedia, aCompareWithMedia) {
+		var oMedia = oCurrentMedia || this._getCurrentMediaContainerRange();
+		return aCompareWithMedia.indexOf(oMedia.name) > -1;
+	};
+
+	ObjectPageSubSection.prototype._synchronizeBlockLayouts = function (oCurrentMedia) {
+		if (this._getUseTitleOnTheLeft()) {
+			this.$("header").toggleClass("titleOnLeftLayout", this._onDesktopMediaRange(oCurrentMedia));
+		}
+		this._toggleBlockLayoutResponsiveStyles(oCurrentMedia);
+	};
+
+	ObjectPageSubSection.prototype._toggleBlockLayoutResponsiveStyles = function (oCurrentMedia) {
+		this.$().find(".sapUxAPBlockContainer").toggleClass("sapUxAPBlockContainerDesktop", this._onDesktopMediaRange(oCurrentMedia));
+		this.$().find(".sapUxAPBlockContainer").toggleClass("sapUxAPBlockContainerTablet", this._onTabletMediaRange(oCurrentMedia));
+		this.$().find(".sapUxAPBlockContainer").toggleClass("sapUxAPBlockContainerPhone", this._onPhoneMediaRange(oCurrentMedia));
 	};
 
 
@@ -580,16 +613,23 @@ sap.ui.define([
 	};
 
 	/**
-	 * InsertAggregation is not supported by design.
-	 * If used, it works as addAggregation, e.g. the method adds a single block to the end of blocks or moreBlocks aggregations.
-	 */
-	ObjectPageSubSection.prototype.insertAggregation = function (sAggregationName, oObject, iIndex) {
-		if (this.hasProxy(sAggregationName)) {
-			jQuery.sap.log.warning("ObjectPageSubSection :: used of insertAggregation for " + sAggregationName + " is not supported, will use addAggregation instead");
-			return this.addAggregation(sAggregationName, oObject);
-		}
+	* The <code>insertBlock</code> method is not supported by design.
+	* If used, it works as an <code>addBlock</code>,
+	* adding a single block to the end of blocks aggregations.
+	*/
+	ObjectPageSubSection.prototype.insertBlock = function (oObject, iIndex) {
+		jQuery.sap.log.warning("ObjectPageSubSection :: usage of insertBlock is not supported - addBlock is performed instead.");
+		return this.addAggregation("blocks", oObject);
+	};
 
-		return ObjectPageSectionBase.prototype.insertAggregation.apply(this, arguments);
+	/**
+	* The <code>insertMoreBlock</code> method is not supported by design.
+	* If used, it works as an <code>addMoreBlock</code>,
+	* adding a single block to the end of moreBlocks aggregations.
+	*/
+	ObjectPageSubSection.prototype.insertMoreBlock = function (oObject, iIndex) {
+		jQuery.sap.log.warning("ObjectPageSubSection :: usage of insertMoreBlock is not supported - addMoreBlock is performed instead.");
+		return this.addAggregation("moreBlocks", oObject);
 	};
 
 	ObjectPageSubSection.prototype.removeAllAggregation = function (sAggregationName, bSuppressInvalidate) {

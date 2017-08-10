@@ -34,19 +34,9 @@ sap.ui.define(['jquery.sap.global', './Binding', './Filter', './Sorter'],
 		constructor : function(oModel, sPath, oContext, aSorters, aFilters, mParameters){
 			Binding.call(this, oModel, sPath, oContext, mParameters);
 
-			this.aSorters = aSorters;
-			if (!jQuery.isArray(this.aSorters) && this.aSorters instanceof Sorter) {
-				this.aSorters = [this.aSorters];
-			} else if (!jQuery.isArray(this.aSorters)) {
-				this.aSorters = [];
-			}
+			this.aSorters = makeArray(aSorters, Sorter);
 			this.aFilters = [];
-			if (!jQuery.isArray(aFilters) && aFilters instanceof Filter) {
-				aFilters = [aFilters];
-			} else if (!jQuery.isArray(aFilters)) {
-				aFilters = [];
-			}
-			this.aApplicationFilters = aFilters;
+			this.aApplicationFilters = makeArray(aFilters, Filter);
 			this.bUseExtendedChangeDetection = false;
 			this.bDetectUpdates = true;
 		},
@@ -62,6 +52,12 @@ sap.ui.define(['jquery.sap.global', './Binding', './Filter', './Sorter'],
 
 	});
 
+	function makeArray(a, FNClass) {
+		if ( Array.isArray(a) ) {
+			return a;
+		}
+		return a instanceof FNClass ? [a] : [];
+	}
 
 	// the 'abstract methods' to be implemented by child classes
 	/**
@@ -131,7 +127,7 @@ sap.ui.define(['jquery.sap.global', './Binding', './Filter', './Sorter'],
 
 	/**
 	 * Returns whether the length which can be retrieved using getLength() is a known, final length,
-	 * or an preliminary or estimated length which may change if further data is requested.
+	 * or a preliminary or estimated length which may change if further data is requested.
 	 *
 	 * @return {boolean} returns whether the length is final
 	 * @since 1.24

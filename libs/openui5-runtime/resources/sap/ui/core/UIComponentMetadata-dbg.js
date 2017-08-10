@@ -22,7 +22,7 @@ sap.ui.define(['./ComponentMetadata', './library'],
 	 * @experimental Since 1.15.1. The Component concept is still under construction, so some implementation details can be changed in future.
 	 * @class
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @since 1.15.1
 	 * @alias sap.ui.core.UIComponentMetadata
 	 */
@@ -61,7 +61,6 @@ sap.ui.define(['./ComponentMetadata', './library'],
 	 * @return {object} root view as configuration object or null ({@link sap.ui.view})
 	 * @protected
 	 * @since 1.15.1
-	 * @experimental Since 1.15.1. Implementation might change.
 	 * @deprecated Since 1.27.1. Please use {@link sap.ui.core.Component#getManifestEntry}("/sap.ui5/rootView")
 	 */
 	UIComponentMetadata.prototype.getRootView = function(bDoNotMerge) {
@@ -128,7 +127,7 @@ sap.ui.define(['./ComponentMetadata', './library'],
 		}
 
 		// if the root view is a string we convert it into a view
-		// configuration object and assume that it is a XML view
+		// configuration object and assume that it is an XML view
 		// !This should be kept in sync with the UIComponent#createContent functionality!
 		if (oUI5Manifest["rootView"] && typeof oUI5Manifest["rootView"] === "string") {
 			oUI5Manifest["rootView"] = {

@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/D
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.46.12
+		 * @version 1.48.5
 		 *
 		 * @constructor
 		 * @public
@@ -172,8 +172,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/D
 				this._oLabel = null;
 			}
 
-			this._oDialog.destroy();
-			this._oDialog = null;
+			if (this._oDialog) {
+				this._oDialog.destroy();
+				this._oDialog = null;
+			}
 		};
 
 		/**

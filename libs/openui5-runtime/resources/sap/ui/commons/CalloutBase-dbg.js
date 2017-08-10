@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/TooltipBase'],
 	 * @extends sap.ui.core.TooltipBase
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -142,7 +142,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/TooltipBase'],
 	};
 
 	/**
-	 * Check if the given DOM reference is part of a SAPUI5 popup
+	 * Check if the given DOM reference is part of an SAPUI5 popup
 	 * @param {oDOMNode}
 	 * DOM node reference
 	 * @private
@@ -554,6 +554,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/TooltipBase'],
 	CalloutBase.prototype.onmousedown = function(oEvent) {
 		if (jQuery(oEvent.target).control(0) === this._currentControl) {
 			this.close();
+
+			//removes the standard tooltip which appears after click
+			this.removeStandardTooltips();
 		}
 	};
 

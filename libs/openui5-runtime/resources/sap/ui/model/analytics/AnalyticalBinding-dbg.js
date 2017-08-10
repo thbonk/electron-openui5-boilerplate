@@ -748,7 +748,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/TreeBinding', 'sap/ui/model/Ch
 	 * @function
 	 * @name sap.ui.model.analytics.AnalyticalBinding.prototype.sort
 	 * @param {sap.ui.model.Sorter|array}
-	 *            aSorter an sorter object or an array of sorter objects which define the sort order.
+	 *            aSorter a sorter object or an array of sorter objects which define the sort order.
 	 * @return {sap.ui.model.analytics.AnalyticalBinding}
 	 *            returns <code>this</code> to facilitate method chaining.
 	 *
@@ -2080,6 +2080,25 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/TreeBinding', 'sap/ui/model/Ch
 			oResponseCollector.error(oResponse || oData);
 		}
 
+		// BCP: 1770008178
+
+		// Legacy Support:
+		// We set the bNeedsUpdate flag to "true" if ALL request details are empty.
+		// This happens when the initial analyticalInfo is empty and is not set correctly
+		// before the control calls getRootContexts etc.
+		// If at a later point the analyticalInfo is correctly set AND the bNeedsUpdate flag is still true
+		// we falsly force a change event in checkUpdate --> this might lead to an unnecessary re-rendering of the control.
+
+		// In case we have at least 1 valid request (including measures and/or dimensions)
+		// we set the bNeedsUpdate flag to false, because the update flag is set to true ANYWAY during the response-processing.
+		this.bNeedsUpdate = true;
+		for (var iDetail = 0; iDetail < aRequestDetails.length; iDetail++) {
+			var oDetail = aRequestDetails[iDetail];
+			if (oDetail.aAggregationLevel && oDetail.aAggregationLevel.length > 0) {
+				this.bNeedsUpdate = false;
+			}
+		}
+
 		//create sub-requests for all defined requestDetails
 		for (var i = -1, oRequestDetails; (oRequestDetails = aRequestDetails[++i]) !== undefined;) {
 			var oAnalyticalQueryRequest = oRequestDetails.oAnalyticalQueryRequest, sGroupId = oRequestDetails.sGroupId;
@@ -2093,7 +2112,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/TreeBinding', 'sap/ui/model/Ch
 				this.mServiceLength[sGroupId] = this.mLength[sGroupId] = 1;
 				this.mServiceFinalLength[sGroupId] = true;
 				this._setServiceKey(this._getKeyIndexMapping(sGroupId, 0), AnalyticalBinding._artificialRootContextGroupId);
-				this.bNeedsUpdate = true;
+				// BCP: 1770008178, see comment above
+				// this.bNeedsUpdate = true;
 				// simulate the async behavior, dataRequested and dataReceived have to be fired in pairs
 				setTimeout(triggerDataReceived);
 
@@ -4080,7 +4100,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/TreeBinding', 'sap/ui/model/Ch
 		delete oMultiUnitEntry.__metadata["self"];
 		delete oMultiUnitEntry.__metadata["self_link_extensions"];
 		oMultiUnitEntry["^~volatile"] = true; // mark entry to distinguish it from others contained in the regular OData result
-		this.oModel._importData(oMultiUnitEntry, {});
+
+		// 3rd argument: empty response, needed by the ODataModel, but we do not have a response, as we did not perform any requests.
+		this.oModel._importData(oMultiUnitEntry, {}, {});
+
 		// mark the context for this entry as volatile to facilitate special treatment by consumers
 		var sMultiUnitEntryModelKey = this.oModel._getKey(oMultiUnitEntry);
 		this.oModel.getContext('/' + sMultiUnitEntryModelKey)["_volatile"] = true;

@@ -16,7 +16,15 @@
 input.sapMComboBoxTextFieldInner {
 	border: none;
 	margin: 0;
+}
+
+.sapMComboBoxTextField .sapMInputDivWrapper {
 	height: 100% !important;
+	max-width: 100%;
+}
+
+.sapMComboBoxTextFieldInnerWidthExtraPadding:not(.sapMComboBoxTextFieldInnerReadonly) {
+	padding-right: 3rem;
 }
 
 .sapUiSizeCondensed .sapUiTableCell .sapMComboBoxTextField {
@@ -27,8 +35,8 @@ input.sapMComboBoxTextFieldInner {
 	border-color: transparent;
 }
 
-.sapMComboBoxTextFieldInnerWidthExtraPadding:not(.sapMComboBoxTextFieldInnerReadonly) {
-	padding-right: 3rem;
+.sapMComboBoxTextFieldInnerWidthExtraPadding {
+	height: 100%;
 }
 
 // removes additional icon in safari

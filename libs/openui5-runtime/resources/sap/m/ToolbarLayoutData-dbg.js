@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/LayoutData'],
 	 * @class
 	 * Defines layout data for the toolbar items.
 	 * @extends sap.ui.core.LayoutData
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public

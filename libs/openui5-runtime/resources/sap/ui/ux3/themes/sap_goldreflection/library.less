@@ -134,12 +134,6 @@ button.sapUiBtnS.sapUiBtnNorm.sapUiUx3EditCollectionButton.sapUiBtnStd:hover {
 }
 /* END "DataSet.less" */
 
-/* START "Exact.less" */
-/* ======================================== */
-/* CSS for control sap.ui.ux3/Exact.control */
-/* ======================================== */
-/* END "Exact.less" */
-
 /* START "ExactArea.less" */
 /* ============================================ */
 /* CSS for control sap.ui.ux3/ExactArea.control */
@@ -334,8 +328,8 @@ button.sapUiBtnS.sapUiBtnNorm.sapUiUx3EditCollectionButton.sapUiBtnStd:hover {
 /* Goldreflection                                */
 /* ============================================= */
 
-@sapUiFeedToolsIconUrl: url("img/feed/Action_Menu_regular.png");
-@sapUiFeedToolsIconHoverUrl: url("img/feed/Action_Menu_hover.png");
+@_sap_ui_ux3_Feed_ToolsIconUrl: url("img/feed/Action_Menu_regular.png");
+@_sap_ui_ux3_Feed_ToolsIconHoverUrl: url("img/feed/Action_Menu_hover.png");
 
 .sapUiFeed > header {
 	margin-top: 20px;
@@ -870,14 +864,9 @@ html[data-sap-ui-browser^="ie"] .sapUiFeedChunk button {
 /* Gold-Reflection                                    */
 /* ================================================== */
 
-/* TODO this is just a hack to ship this with 1.14.0 */
-/* Per default the overriding of the less-parameter through the global.css in GF does not work somehow */
-@sapUiNotificationBarBG: rgba(44,44,44, 0.92);
-
 .sapUiNotifier .sapUiIcon {
   color: @sapUiExtraLightBG;
 }
-
 /* END "NotificationBar.less" */
 
 /* START "Overlay.less" */

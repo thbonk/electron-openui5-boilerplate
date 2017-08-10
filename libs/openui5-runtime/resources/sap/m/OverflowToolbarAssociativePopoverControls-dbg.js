@@ -142,6 +142,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Metadata', './OverflowToolbarBu
 				listenForEvents: ["press"],
 				noInvalidationProps: ["enabled", "type"]
 			},
+			"sap.m.MenuButton": {
+				canOverflow: true,
+				listenForEvents: ["defaultAction", "_menuItemSelected"],
+				noInvalidationProps: ["enabled", "text", "icon"]
+			},
 			"sap.m.OverflowToolbarButton": {
 				canOverflow: true,
 				listenForEvents: ["press"],
@@ -211,6 +216,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Metadata', './OverflowToolbarBu
 				canOverflow: false,
 				listenForEvents: [],
 				noInvalidationProps: ["enabled", "value"]
+			},
+			"sap.m.IconTabHeader": {
+				canOverflow: false,
+				listenForEvents: [],
+				noInvalidationProps: ["selectedKey"]
 			},
 			"sap.ui.comp.smartfield.SmartField": {
 				canOverflow: true,

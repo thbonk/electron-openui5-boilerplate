@@ -17,6 +17,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	detailBox: undefined, // sap.m.LightBox, since 1.48
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -42,6 +43,7 @@
 	press="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<detailBox></detailBox> <!-- sap.m.LightBox, since 1.48 -->
 </Avatar>
 ]]></xmlTemplate>
 </Template>

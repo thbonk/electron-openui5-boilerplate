@@ -27,9 +27,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * From version 1.30, new image mode sap.m.ImageMode.Background is added. When this mode is set, the src property is set using the css style 'background-image'. The properties 'backgroundSize', 'backgroundPosition', 'backgroundRepeat' have effect only when image is in sap.m.ImageMode.Background mode. In order to make the high density image correctly displayed, the 'backgroundSize' should be set to the dimension of the normal density version.
 	 *
 	 * @extends sap.ui.core.Control
+	 * @implements sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -38,6 +39,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 */
 	var Image = Control.extend("sap.m.Image", /** @lends sap.m.Image.prototype */ { metadata : {
 
+		interfaces : ["sap.ui.core.IFormContent"],
 		library : "sap.m",
 		properties : {
 
@@ -115,8 +117,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 		},
 		aggregations : {
 			/**
-			 * Aggregation which holds data about the LightBox's image and its description. Although multiple LightBoxItems
-			 * may be added to this aggregation only the first one in the list will be taken into account.
+			 * A <code>sap.m.LightBox</code> instance, that will be opened automatically when the user interacts with the image.
+			 *
+			 * The <code>tap</code> event will still be fired.
 			 * @public
 			 */
 			detailBox: {type: 'sap.m.LightBox', multiple: false, bindable: "bindable"}
@@ -144,7 +147,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 			 * @since 1.36.2
 			 */
 			error : {}
-		}
+		},
+		designTime: true
 	}});
 
 	Image._currentDevicePixelRatio = (function() {
@@ -614,6 +618,14 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 			focusable: bHasPressListeners
 		};
 	};
+
+	/*
+	 * Image must not be stretched in Form because should have its original size.
+	 */
+	Image.prototype.getFormDoNotAdjustWidth = function() {
+		return true;
+	};
+
 
 	return Image;
 

@@ -21,7 +21,7 @@ sap.ui.define([
 	 * @constructor
 	 * @alias sap.ui.fl.support.apps.contentbrowser.controller.LayerContentMaster
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @experimental Since 1.45
 	 */
 	return Controller.extend("sap.ui.fl.support.apps.contentbrowser.controller.LayerContentMaster", {
@@ -68,6 +68,7 @@ sap.ui.define([
 		/**
 		 * Handler if content data was received;
 		 * Sets the received data to the current content model.
+		 * @param {Object} oPage
 		 * @param {Object} oData - data which is received from <code>LRepConnector<code> "getContent" promise
 		 * @private
 		 */

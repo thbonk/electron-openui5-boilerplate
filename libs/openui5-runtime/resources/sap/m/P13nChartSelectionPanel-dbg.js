@@ -19,7 +19,7 @@ sap.ui.define([
 	 *        dimensions and measures for table personalization.
 	 * @extends sap.m.P13nSelectionPanel
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 * @constructor
 	 * @private
 	 * @since 1.46.0
@@ -573,6 +573,7 @@ sap.ui.define([
 			text: this._oRb.getText('COLUMNSPANEL_CHARTTYPE')
 		});
 		var oChartTypeComboBox = new sap.m.ComboBox({
+			placeholder: this._oRb.getText('COLUMNSPANEL_CHARTTYPE'),
 			selectedKey: {
 				path: '/selectedChartTypeKey'
 			},

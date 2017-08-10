@@ -21,10 +21,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * A wrapper around the IMG tag. The image can be loaded from a remote or local server.
 	 * There are various size setting options available, and the images can be combined with actions.
 	 * @extends sap.ui.core.Control
-	 * @implements sap.ui.commons.ToolbarItem,sap.ui.commons.FormattedTextViewControl
+	 * @implements sap.ui.commons.ToolbarItem,sap.ui.commons.FormattedTextViewControl, sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -36,7 +36,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 
 		interfaces : [
 			"sap.ui.commons.ToolbarItem",
-			"sap.ui.commons.FormattedTextViewControl"
+			"sap.ui.commons.FormattedTextViewControl",
+			"sap.ui.core.IFormContent"
 		],
 		library : "sap.ui.commons",
 		properties : {
@@ -99,6 +100,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 */
 	Image.prototype.onsapenter = Image.prototype.onclick;
 
+	/*
+	 * Image must not be stretched in Form because should have its original size.
+	 */
+	Image.prototype.getFormDoNotAdjustWidth = function() {
+		return true;
+	};
 
 	return Image;
 

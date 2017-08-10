@@ -16,7 +16,7 @@ sap.ui.define(["./library", "sap/ui/core/Control"],
 	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
-	 * A container control used to aggregate user input controls as part of a sap.m.Wizard.
+	 * A container control used to aggregate user input controls as part of an sap.m.Wizard.
 	 * <h3>Overview</h3>
 	 * WizardStep gives the developer the ability to validate, invalidate the step and define subsequent steps.
 	 * The WizardStep control control is supposed to be used only as an aggregation of the {@link sap.m.Wizard Wizard} control,
@@ -28,7 +28,7 @@ sap.ui.define(["./library", "sap/ui/core/Control"],
 	 * <li>If the execution needs to branch after a given step, you should set all possible next steps in the <code>subsequentSteps</code> aggregation.
 	 * @extends sap.ui.core.Control
 	 * @author SAP SE
-	 * @version 1.46.12
+	 * @version 1.48.5
 	 *
 	 * @constructor
 	 * @public
@@ -107,6 +107,19 @@ sap.ui.define(["./library", "sap/ui/core/Control"],
 			parent.validateStep(this);
 		} else {
 			parent.invalidateStep(this);
+		}
+
+		return this;
+	};
+
+	WizardStep.prototype.setNextStep = function (value) {
+		this.setAssociation("nextStep", value, true);
+
+		var parent = this._getWizardParent();
+
+		if (parent !== null) {
+			parent._checkCircularReference(this._getNextStepReference());
+			parent._updateProgressNavigator();
 		}
 
 		return this;

@@ -128,6 +128,9 @@
 		color: @sapUiContentIconColor;
 	}
 }
+
+// Apply LightBox Magnifying glass mixin to control
+.lightBoxMagnifyingGlassMixing(~".sapFAvatar", ~".sapFAvatarMagnifyingGlass");
 /* END "Avatar.less" */
 
 /* START "DynamicPage.less" */
@@ -234,6 +237,8 @@
 	// when content changes above the viewport.
 	// See: https://github.com/WICG/ScrollAnchoring/blob/master/explainer.md
 	overflow-anchor: none;
+
+	overflow-y: auto;
 }
 
 .sapFDynamicPageSupressScroll {
@@ -249,6 +254,10 @@
 }
 
 .sapFDynamicPage .sapFDynamicPageTitleWrapper {
+	display: flex;
+	display: -webkit-flex;
+	flex-direction: column;
+	-webkit-flex-direction: column;
 	flex-shrink: 0;
 	-webkit-flex-shrink: 0;
 }
@@ -355,6 +364,7 @@ html[data-sap-ui-animation='on'] .sapFDynamicPage {
 .sapFDynamicPageTitle {
 	z-index: 2;
 	min-height: 3rem;
+	height: 100%; /* fixes IE flexbox item centering issue BCP: 1680351222 */
 	position: relative;
 	padding: 0 2rem 0 3rem;
 	display: flex;
@@ -376,6 +386,50 @@ html[data-sap-ui-animation='on'] .sapFDynamicPage {
 	box-shadow: inset 0 -0.125rem @sapUiObjectHeaderBorderColor, 0 0.125rem 0 0 @sapUiObjectHeaderBackground;
 	.sapFDynamicPageHeader {
 		border-bottom: none;
+	}
+}
+
+.sapFDynamicPageTitle:focus {
+	outline: 0.0625rem dotted @sapUiContentFocusColor;
+	outline-offset: -0.0625rem;
+}
+
+/* IE and Edge ignores outline-offset. Use an overlay: */
+html[data-sap-ui-browser^="ie"].sap-desktop,
+html[data-sap-ui-browser^="ed"].sap-desktop {
+	.sapFDynamicPageTitle:focus {
+		outline: none;
+		position: relative;
+	}
+	.sapFDynamicPageTitle:focus:before {
+		content: " ";
+		box-sizing: border-box;
+		width: 100%;
+		height: 100%;
+		position: absolute;
+		left: 0;
+		top: 0;
+		border: 0.0625rem dashed @sapUiContentFocusColor;
+		pointer-events: none;
+	}
+}
+
+/* Firefox fix due to focus cut out from top and left */
+html[data-sap-ui-browser^="ff"].sap-desktop {
+	.sapFDynamicPageTitle:focus {
+		outline: none;
+		position: relative;
+	}
+	.sapFDynamicPageTitle:focus:before {
+		content: " ";
+		box-sizing: border-box;
+		width: 100%;
+		height: 100%;
+		position: absolute;
+		left: 0;
+		top: 0;
+		border: 0.0625rem dotted @sapUiContentFocusColor;
+		pointer-events: none;
 	}
 }
 
@@ -459,7 +513,6 @@ html[data-sap-ui-animation='on'] .sapFDynamicPage {
 		padding-right: 0;
 	}
 }
-
 /* END "DynamicPageTitle.less" */
 
 /* START "DynamicPageHeader.less" */
@@ -480,7 +533,7 @@ html[data-sap-ui-animation='on'] .sapFDynamicPage {
 
 .sapFDynamicPageHeader.sapFDynamicPageHeaderWithContent {
 	padding: 0 3rem 1rem 3rem;
-	box-shadow: inset 0 -0.125rem @sapUiObjectHeaderBorderColor, 0 0.125rem 0 0 @sapUiObjectHeaderBackground;
+	box-shadow: @sapUiShadowHeader;
 }
 
 .sapFDynamicPageHeader.sapFDynamicPageHeaderPinnable {

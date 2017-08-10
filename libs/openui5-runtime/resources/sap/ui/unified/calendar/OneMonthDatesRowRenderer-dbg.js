@@ -4,8 +4,8 @@
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', 'sap/ui/unified/calendar/CalendarUtils', 'sap/ui/core/date/UniversalDate', './MonthRenderer', './DatesRowRenderer'],
-	function(jQuery, Renderer, CalendarUtils, UniversalDate, MonthRenderer, DatesRowRenderer) {
+sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', 'sap/ui/unified/calendar/CalendarUtils', './MonthRenderer', './DatesRowRenderer'],
+	function(jQuery, Renderer, CalendarUtils, MonthRenderer, DatesRowRenderer) {
 		"use strict";
 
 		/**
@@ -22,6 +22,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', 'sap/ui/unified/cale
 			}
 		};
 
+		/**
+		 * @param oRm
+		 * @param oDatesRow
+		 * @param {sap.ui.unified.calendar.CalendarDate} oDate
+		 */
 		OneMonthDatesRowRenderer.renderDays = function(oRm, oDatesRow, oDate) {
 			if (oDatesRow.iMode < 2) {
 				MonthRenderer.renderDays(oRm, oDatesRow, oDate);
