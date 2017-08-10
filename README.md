@@ -19,6 +19,7 @@ This repository contains a boilerplate for developing
 * Delete the `.git` folder, if present
   * this is necessary, since it points to the boilerplate repository on GitHub
 * Open the file `package.json` and replace the following placeholders:
+
   Place Holder                   | Description
   -------------------------------|-----------------------------------------------------------------
   `APPNAME_PLACEHOLDER`          | Application name, must only contain characters A-Z, a-z
@@ -27,6 +28,7 @@ This repository contains a boilerplate for developing
   `REPOSITORY_URL_PLACEHOLDER`   | URL of the source repository
   `AUTHOR_PLACEHOLDER`           | Your name
   `EMAIL_PLACEHOLDER`            | Your email address
+  
 * In the terminal, issue the following commands:
   * `npm install --only=dev`
   * `node rename-project.js`
