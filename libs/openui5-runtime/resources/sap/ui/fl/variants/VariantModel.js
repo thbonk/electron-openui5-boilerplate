@@ -1,0 +1,6 @@
+/*
+ * ! UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+sap.ui.define(["jquery.sap.global","sap/ui/model/json/JSONModel","sap/ui/fl/Utils"],function(q,J,U){"use strict";var V=J.extend("sap.ui.fl.variants.VariantModel",{constructor:function(d,f,c,o){this.pSequentialImportCompleted=Promise.resolve();J.apply(this,arguments);this.bObserve=o;this.oFlexController=f;this.oComponent=c;if(d&&typeof d=="object"){Object.keys(d).forEach(function(k){d[k].modified=false;d[k].variants.forEach(function(v){if(!d[k].currentVariant&&(v.key===d[k].defaultVariant)){d[k].currentVariant=v.key;}v.toBeDeleted=false;v.originalTitle=v.title;});});this.setData(d);}}});V.prototype._updateCurrentVariant=function(v,n){this.switchToVariant(v,n);this.oData[v].currentVariant=n;};V.prototype.getCurrentVariantRef=function(v){return this.oData[v].currentVariant;};V.prototype.switchToVariant=function(v,n){var c=this.oData[v].currentVariant;var C=this.oFlexController._oChangePersistence.loadSwitchChangesMapForComponent(v,c,n);var a=U.getAppComponentForControl(this.oComponent);this.oFlexController.revertChangesOnControl(C.aRevert,a);this.oFlexController.applyVariantChanges(C.aNew,this.oComponent);};return V;},true);

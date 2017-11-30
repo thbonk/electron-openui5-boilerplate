@@ -22,14 +22,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 	 * @namespace
 	 * @name sap.m
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @public
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.m",
-		version: "1.48.5",
+		version: "1.50.6",
 		dependencies : ["sap.ui.core"],
 		types: [
 			"sap.m.BackgroundDesign",
@@ -119,6 +119,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 			"sap.m.CustomTreeItem",
 			"sap.m.DatePicker",
 			"sap.m.DateRangeSelection",
+			"sap.m.DateTimeField",
 			"sap.m.DateTimeInput",
 			"sap.m.DateTimePicker",
 			"sap.m.Dialog",
@@ -167,6 +168,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 			"sap.m.NotificationListItem",
 			"sap.m.NotificationListGroup",
 			"sap.m.PagingButton",
+			"sap.m.PlanningCalendarLegend",
 			"sap.m.ObjectAttribute",
 			"sap.m.ObjectHeader",
 			"sap.m.ObjectIdentifier",
@@ -220,8 +222,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 			"sap.m.TableSelectDialog",
 			"sap.m.TabContainer",
 			"sap.m.TabStrip",
-			"sap.m.TabStripSelect",
-			"sap.m.TabStripSelectList",
 			"sap.m.Text",
 			"sap.m.TextArea",
 			"sap.m.Tile",
@@ -447,7 +447,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 
 
 	/**
-	 * Types of the Bar design
+	 * Types of the Bar design.
 	 *
 	 * @enum {string}
 	 * @public
@@ -483,7 +483,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 	};
 
 	/**
-	 * Different types for a button (predefined types)
+	 * Different types for a button (predefined types).
 	 *
 	 * @enum {string}
 	 * @public
@@ -542,7 +542,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 	};
 
 	/**
-	 * Carousel arrows align
+	 * Carousel arrows align.
 	 *
 	 * @enum {string}
 	 * @public
@@ -560,6 +560,45 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 		 * @public
 		 */
 		PageIndicator : "PageIndicator"
+	};
+
+	/**
+	 * A list of the default built-in views in a {@link sap.m.PlanningCalendar}, described by their keys.
+	 *
+	 * @enum {string}
+	 * @public
+	 * @since 1.50
+	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 */
+	sap.m.PlanningCalendarBuiltInView = {
+
+		/**
+		 * Represents the key of the built-in view, in which the intervals have the size of one hour.
+		 */
+		Hour : "Hour",
+
+		/**
+		 * Represents the key of the built-in view, in which the intervals have the size of one day.
+		 */
+		Day : "Day",
+
+		/**
+		 * Represents the key of the built-in view, in which the intervals have the size of one month.
+		 */
+		Month : "Month",
+
+		/**
+		 * Represents the key of the built-in view, in which the intervals have the size of one day
+		 * where 7 days are displayed, starting with the first day of the week.
+		 */
+		Week : "Week",
+
+		/**
+		 * Represents the key of the built-in view, in which the intervals have the size of one day
+		 * where 31 days are displayed, starting with the first day of the month.
+		 */
+		OneMonth : "One Month"
+
 	};
 
 	/**
@@ -597,7 +636,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 
 
 	/**
-	 * Enum for the type of sap.m.Dialog control.
+	 * Enum for the type of {@link sap.m.Dialog} control.
 	 *
 	 * @enum {string}
 	 * @public
@@ -652,7 +691,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 
 
 	/**
-	 * Enum for the state of sap.m.DraftIndicator control.
+	 * Enum for the state of {@link sap.m.DraftIndicator} control.
 	 *
 	 * @enum {string}
 	 * @public
@@ -1224,7 +1263,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 	};
 
 	/**
-	 * Different levels for headers
+	 * Different levels for headers.
 	 *
 	 * @enum {string}
 	 * @public
@@ -1932,7 +1971,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 	};
 
 	/**
-	 * Different mode for a MenuButton (predefined types)
+	 * Different modes for a MenuButton (predefined types).
 	 *
 	 * @enum {string}
 	 * @since 1.38.0
@@ -1956,7 +1995,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 	};
 
 	/**
-	 * Defines the priorities of the controls within sap.m.OverflowToolbar
+	 * Defines the priorities of the controls within {@link sap.m.OverflowToolbar}.
 	 *
 	 * @enum {string}
 	 * @public
@@ -2136,8 +2175,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 		Region: "Region"
 	};
 
-		/**
-	 * Types for the placement of popover control.
+	/**
+	 * Types for the placement of Popover control.
 	 *
 	 * @enum {string}
 	 * @public
@@ -2286,7 +2325,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 	};
 
 	/**
-	 * QuickViewGroupElement is a combination of one label and another control (Link or Text) associated to this label
+	 * QuickViewGroupElement is a combination of one label and another control (Link or Text) associated to this label.
 	 *
 	 * @enum {string}
 	 * @public
@@ -2333,7 +2372,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 	};
 
 	/**
-	* Types for the placement of message popover control.
+	* Types for the placement of message Popover control.
 	*
 	* @enum {string}
 	* @public
@@ -2361,7 +2400,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 	};
 
 	/**
-	 * Defines the display of table pop-ins
+	 * Defines the display of table pop-ins.
 	 *
 	 * @enum {string}
 	 * @public
@@ -2393,7 +2432,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 
 
 	/**
-	 * Possible values for the visualization of float values in the RatingIndicator Control.
+	 * Possible values for the visualization of float values in the RatingIndicator control.
 	 *
 	 * @enum {string}
 	 * @public
@@ -2578,7 +2617,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 
 
 	/**
-	 * Types for StandardTile
+	 * Types for StandardTile.
 	 *
 	 * @enum {string}
 	 * @public
@@ -2846,7 +2885,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 	/*global Element: true */
 
 	/**
-	 * Types of LightBox loading stages
+	 * Types of LightBox loading stages.
 	 *
 	 * @enum {string}
 	 * @public
@@ -3059,7 +3098,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 		};
 
 		/**
-		 * Base font-size
+		 * Base font-size.
 		 * @private
 		 * @since 1.12
 		 * @name sap.m#BaseFontSize

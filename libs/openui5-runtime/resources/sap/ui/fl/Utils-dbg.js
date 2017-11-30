@@ -27,7 +27,7 @@ sap.ui.define([
 	 * @namespace
 	 * @alias sap.ui.fl.Utils
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.25.0
 	 */
 	var Utils = {
@@ -37,6 +37,7 @@ sap.ui.define([
 		_sTopLayer : aLayers[aLayers.length - 1],
 		_sMaxLayer : aLayers[aLayers.length - 1],
 		DEFAULT_APP_VERSION : "DEFAULT_APP_VERSION",
+		APP_ID_AT_DESIGN_TIME : "sap.ui.fl",
 		/**
 		 * log object exposes available log functions
 		 *
@@ -327,7 +328,7 @@ sap.ui.define([
 		 * Determines whether a layer is higher than the max layer.
 		 *
 		 * @param {String} sLayer - Layer name to be evaluated
-		 * @returns {boolean} <code>true<code> if input layer is higher than max layer, otherwise <code>false<code>
+		 * @returns {boolean} <code>true</code> if input layer is higher than max layer, otherwise <code>false</code>
 		 * @public
 		 * @function
 		 * @name sap.ui.fl.Utils.isOverMaxLayer
@@ -339,7 +340,7 @@ sap.ui.define([
 		/**
 		 * Determines if filtering of changes based on layer is required.
 		 *
-		 * @returns {boolean} <code>true<code> if the top layer is also the max layer, otherwise <code>false<code>
+		 * @returns {boolean} <code>true</code> if the top layer is also the max layer, otherwise <code>false</code>
 		 * @public
 		 * @function
 		 * @name sap.ui.fl.Utils.isLayerFilteringRequired
@@ -892,7 +893,11 @@ sap.ui.define([
 					}
 				}
 				if (oManifest.getEntry("sap.app") && oManifest.getEntry("sap.app").id) {
-					return oManifest.getEntry("sap.app").id + ".Component";
+					var sAppId = oManifest.getEntry("sap.app").id;
+					if (sAppId === Utils.APP_ID_AT_DESIGN_TIME && oManifest.getComponentName) {
+						sAppId = oManifest.getComponentName();
+					}
+					return sAppId + ".Component";
 				}
 			}
 			this.log.warning("No Manifest received.");
@@ -922,12 +927,42 @@ sap.ui.define([
 		/**
 		 * Returns whether provided layer is a customer dependent layer
 		 *
+		 * @param {string} sLayerName - layer name
 		 * @returns {boolean} true if provided layer is customer dependent layer else false
 		 * @public
 		 */
 		isCustomerDependentLayer : function(sLayerName) {
 			return (["CUSTOMER", "CUSTOMER_BASE"].indexOf(sLayerName) > -1);
+		},
+
+		/**
+		 * Execute the passed asynchronous functions serialized - one after the other
+		 *
+		 * @param {array.<function>} aPromiseQueue - List of asynchronous functions that returns promises
+		 * @returns {Promise} Empty resolved promise when all passed promises inside functions have been executed
+		 */
+		execPromiseQueueSequentially : function(aPromiseQueue) {
+			if (aPromiseQueue.length === 0) {
+				return Promise.resolve();
+			}
+			var fnPromise = aPromiseQueue.shift();
+			if (typeof fnPromise === "function") {
+				return fnPromise()
+
+				.catch(function(e) {
+					this.log.error("Changes could not be applied. Merge error detected. " + e);
+				}.bind(this))
+
+				.then(function() {
+					return this.execPromiseQueueSequentially(aPromiseQueue);
+				}.bind(this));
+
+			} else {
+				this.log.error("Changes could not be applied, promise not wrapped inside function.");
+				return this.execPromiseQueueSequentially(aPromiseQueue);
+			}
 		}
+
 	};
 	return Utils;
 }, true);

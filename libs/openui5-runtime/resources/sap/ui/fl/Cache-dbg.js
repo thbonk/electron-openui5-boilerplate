@@ -15,7 +15,7 @@ sap.ui.define(["sap/ui/fl/Utils"], function (Utils) {
 	 * @alias sap.ui.fl.Cache
 	 * @experimental Since 1.25.0
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 */
 	var Cache = function () {
 	};
@@ -97,7 +97,8 @@ sap.ui.define(["sap/ui/fl/Utils"], function (Utils) {
 			Cache._entries[sComponentName][sAppVersion] = {
 				file: {
 					changes: {
-						changes: []
+						changes: [],
+						contexts: []
 					}
 				}
 			};
@@ -120,6 +121,24 @@ sap.ui.define(["sap/ui/fl/Utils"], function (Utils) {
 	};
 
 	/**
+	 * Deletes a single entry stored in the cache for a specific application component and application version.
+	 *
+	 * @param {string} sComponentName - Name of the application component
+	 * @param {string} sAppVersion - Current running version of application
+	 *
+	 * @private
+	 * @sap-restricted sap.ui.fl
+	 */
+	Cache._deleteEntry = function (sComponentName, sAppVersion) {
+		if (Cache._entries[sComponentName] && Cache._entries[sComponentName][sAppVersion]) {
+			delete Cache._entries[sComponentName][sAppVersion];
+		}
+		if (jQuery.isEmptyObject(Cache._entries[sComponentName])) {
+			delete Cache._entries[sComponentName];
+		}
+	};
+
+	/**
 	 * This method retrieves the changes for a given
 	 * component. It answers all subsequent calls with the same promise, which
 	 * will resolve with the same result. In the success case, it will keep the
@@ -137,7 +156,9 @@ sap.ui.define(["sap/ui/fl/Utils"], function (Utils) {
 	 * @param {string} oComponent.appVersion - Current running version of application
 	 * @param {map} [mPropertyBag] - Contains additional data needed for reading changes
 	 * @param {object} [mPropertyBag.appDescriptor] - Manifest that belongs to actual component
-	 * @param {string} [mPropertyBag.siteId] - <code>sideId<code> that belongs to actual component
+	 * @param {string} [mPropertyBag.siteId] - <code>sideId</code> that belongs to actual component
+	 * @param {string} [mPropertyBag.cacheKey] - key to validate the client side stored cache entry
+	 * @param {string} [mPropertyBag.url] - address to which the request for change should be sent in case the data is not cached
 	 * @returns {Promise} resolves with the change file for the given component, either from cache or back end
 	 *
 	 * @public
@@ -166,9 +187,6 @@ sap.ui.define(["sap/ui/fl/Utils"], function (Utils) {
 		}
 
 		var currentLoadChanges = oLrepConnector.loadChanges(oComponent, mPropertyBag).then(function (mChanges) {
-			if (oCacheEntry.file) {
-				Utils.log.error('sap.ui.fl.Cache: Cached changes for component ' + sComponentName + ' overwritten.');
-			}
 			if (mChanges && mChanges.changes && mChanges.changes.settings && mChanges.changes.settings.switchedOnBusinessFunctions) {
 				mChanges.changes.settings.switchedOnBusinessFunctions.forEach(function(sValue) {
 				Cache._switches[sValue] = true;
@@ -177,7 +195,7 @@ sap.ui.define(["sap/ui/fl/Utils"], function (Utils) {
 			oCacheEntry.file = mChanges;
 			return oCacheEntry.file;
 		}, function (err) {
-			delete oCacheEntry.promise;
+			Cache._deleteEntry(sComponentName, sAppVersion);
 			throw err;
 		});
 

@@ -14,7 +14,7 @@ sap.ui.define([
 		 *
 		 * @alias sap.ui.fl.changeHandler.MoveElements
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 * @experimental Since 1.34.0
 		 */
 		var MoveElements = { };
@@ -91,8 +91,8 @@ sap.ui.define([
 					return;
 				}
 
-				oModifier.removeAggregation(oSourceParent, sSourceAggregation, oMovedElement, oView);
-				oModifier.insertAggregation(oTargetParent, sTargetAggregation, oMovedElement, mMovedElement.targetIndex);
+				oModifier.removeAggregation(oSourceParent, sSourceAggregation, oMovedElement);
+				oModifier.insertAggregation(oTargetParent, sTargetAggregation, oMovedElement, mMovedElement.targetIndex, oView);
 			});
 
 			return true;

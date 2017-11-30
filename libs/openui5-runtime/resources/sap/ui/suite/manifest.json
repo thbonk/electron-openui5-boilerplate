@@ -6,7 +6,7 @@
     "type": "library",
     "embeds": [],
     "applicationVersion": {
-      "version": "1.48.5"
+      "version": "1.50.6"
     },
     "title": "SAP UI library: sap.ui.suite (by SAP, Author)",
     "description": "SAP UI library: sap.ui.suite (by SAP, Author)",
@@ -25,10 +25,10 @@
   "sap.ui5": {
     "_version": "1.1.0",
     "dependencies": {
-      "minUI5Version": "1.48",
+      "minUI5Version": "1.50",
       "libs": {
         "sap.ui.core": {
-          "minVersion": "1.48.5"
+          "minVersion": "1.50.6"
         }
       }
     }

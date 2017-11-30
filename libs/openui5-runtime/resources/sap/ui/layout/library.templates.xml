@@ -72,6 +72,29 @@
 </BlockLayoutCell>
 ]]></xmlTemplate>
 </Template>
+<Template name="sap.ui.layout.BlockLayoutCellData" alias="BlockLayoutCellData,Data">
+	<jsTemplate><![CDATA[new sap.ui.layout.BlockLayoutCellData({
+	id: "${id}", // sap.ui.core.ID
+	sSize: 1, // int
+	mSize: 1, // int
+	lSize: 1, // int
+	xlSize: 1, // int
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [] // sap.ui.core.Element, since 1.19
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<BlockLayoutCellData xmlns="sap.ui.layout"
+	id="${id}"
+	sSize="1"
+	mSize="1"
+	lSize="1"
+	xlSize="1">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+</BlockLayoutCellData>
+]]></xmlTemplate>
+</Template>
 <Template name="sap.ui.layout.BlockLayoutRow" alias="BlockLayoutRow,Row">
 	<jsTemplate><![CDATA[new sap.ui.layout.BlockLayoutRow({
 	id: "${id}", // sap.ui.core.ID
@@ -164,6 +187,7 @@
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
 	content: [], // sap.ui.core.Control
+	ariaLabelledBy: [], // sap.ui.core.Control, since 1.48.7
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this]
@@ -182,6 +206,7 @@
 	defaultSpan="XL3 L3 M6 S12"
 	defaultIndent="XL0 L0 M0 S0"
 	containerQuery="false"
+	ariaLabelledBy=""
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
@@ -307,6 +332,7 @@
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
 	content: [], // sap.ui.core.Control
+	ariaLabelledBy: [], // sap.ui.core.Control, since 1.48.7
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this]
@@ -319,6 +345,7 @@
 	visible="true"
 	fieldGroupIds=""
 	responsive="true"
+	ariaLabelledBy=""
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->

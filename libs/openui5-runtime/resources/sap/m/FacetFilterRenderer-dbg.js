@@ -121,21 +121,7 @@ sap.ui.define(['jquery.sap.global'],
 		oRm.addClass("sapMFF");
 		oRm.writeClasses();
 		oRm.write(">");
-		var oSummaryBar = oControl.getAggregation("summaryBar");
-
-		// Overrides the Toolbar's method in order to change the role to "button" when the FacetFilter is in "light" mode
-		// and adds "labelledby" info
-		oSummaryBar._writeLandmarkInfo = function (oRm, oCtrl) {
-			var sFacetFilterText = sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("FACETFILTER_ARIA_FACET_FILTER"),
-				sInvisibleLabelId = new sap.ui.core.InvisibleText({text: sFacetFilterText}).toStatic().getId();
-			oControl._aOwnedLabels.push(sInvisibleLabelId);
-			oRm.writeAccessibilityState(oCtrl, {
-				role: "button",
-				labelledby: sInvisibleLabelId
-			});
-		};
-
-		oRm.renderControl(oSummaryBar);
+		oRm.renderControl(oControl.getAggregation("summaryBar"));
 		oRm.write("</div>");
 	};
 
@@ -169,8 +155,8 @@ sap.ui.define(['jquery.sap.global'],
 	/**
 	 * Returns the inner aria describedby IDs for the accessibility.
 	 *
-	 * @param {sap.ui.core.Control} oLI an object representation of the control
-	 * @returns {String|undefined}
+	 * @param {sap.ui.core.Control} oControl an object representation of the control
+	 * @returns {String|undefined} The aria of the inner aria describedby IDs
 	 * @protected
 	 */
 	FacetFilterRenderer.getAriaDescribedBy = function(oControl) {
@@ -188,7 +174,8 @@ sap.ui.define(['jquery.sap.global'],
 	/**
 	 * Returns the accessibility state of the control.
 	 *
-	 * @param {sap.ui.core.Control} oLI an object representation of the control
+	 * @param {sap.ui.core.Control} oControl an object representation of the control
+	 * @returns {object} The accessibility state of the control
 	 * @protected
 	 */
 	FacetFilterRenderer.getAccessibilityState = function(oControl) {

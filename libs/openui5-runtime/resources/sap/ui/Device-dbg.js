@@ -11,7 +11,7 @@
  * This API is independent from any other part of the UI5 framework. This allows it to be loaded beforehand, if it is needed, to create the UI5 bootstrap
  * dynamically depending on the capabilities of the browser or device.
  *
- * @version 1.48.5
+ * @version 1.50.6
  * @namespace
  * @name sap.ui.Device
  * @public
@@ -37,7 +37,7 @@ if (typeof window.sap.ui !== "object") {
 
 	//Skip initialization if API is already available
 	if (typeof window.sap.ui.Device === "object" || typeof window.sap.ui.Device === "function" ) {
-		var apiVersion = "1.48.5";
+		var apiVersion = "1.50.6";
 		window.sap.ui.Device._checkAPIVersion(apiVersion);
 		return;
 	}
@@ -95,7 +95,7 @@ if (typeof window.sap.ui !== "object") {
 
 	//Only used internal to make clear when Device API is loaded in wrong version
 	device._checkAPIVersion = function(sVersion){
-		var v = "1.48.5";
+		var v = "1.50.6";
 		if (v != sVersion) {
 			logger.log(WARNING, "Device API version differs: " + v + " <-> " + sVersion);
 		}
@@ -1665,14 +1665,14 @@ if (typeof window.sap.ui !== "object") {
 	 * The current height of the document's window in pixels.
 	 *
 	 * @name sap.ui.Device.resize.height
-	 * @type integer
+	 * @type int
 	 * @public
 	 */
 	/**
 	 * The current width of the document's window in pixels.
 	 *
 	 * @name sap.ui.Device.resize.width
-	 * @type integer
+	 * @type int
 	 * @public
 	 */
 
@@ -1842,7 +1842,7 @@ if (typeof window.sap.ui !== "object") {
 
 	function handleMobileOrientationResizeChange(evt) {
 		if (evt.type == "resize") {
-			// supress the first invalid resize event fired before orientationchange event while keyboard is open on iPhone 7.0.x
+			// suppress the first invalid resize event fired before orientationchange event while keyboard is open on iPhone 7.0.x
 			// because this event has wrong size infos
 			if (bSkipFirstResize && rInputTagRegex.test(document.activeElement.tagName) && !bOrientationchange) {
 				return;

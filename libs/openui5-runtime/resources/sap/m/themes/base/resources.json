@@ -416,6 +416,11 @@
 			"theme": "base"
 		},
 		{
+			"name": "PlanningCalendarLegend.less",
+			"designtime": true,
+			"theme": "base"
+		},
+		{
 			"name": "Popover.less",
 			"designtime": true,
 			"theme": "base"
@@ -567,16 +572,6 @@
 		},
 		{
 			"name": "TabStrip.less",
-			"designtime": true,
-			"theme": "base"
-		},
-		{
-			"name": "TabStripSelect.less",
-			"designtime": true,
-			"theme": "base"
-		},
-		{
-			"name": "TabStripSelectList.less",
 			"designtime": true,
 			"theme": "base"
 		},

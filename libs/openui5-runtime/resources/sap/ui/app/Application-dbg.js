@@ -30,7 +30,7 @@ sap.ui.define(['jquery.sap.global', './ApplicationMetadata', 'sap/ui/core/Compon
 		 * @extends sap.ui.core.Component
 		 * @abstract
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 * @name sap.ui.app.Application
 		 * @experimental Since 1.11.1. The Application class is still under construction, so some implementation details can be changed in future.
 		 * @deprecated Since 1.15.1. The Component class is enhanced to take care about the Application code.

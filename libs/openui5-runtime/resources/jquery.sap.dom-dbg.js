@@ -473,11 +473,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 				if (Device.browser.msie || Device.browser.edge) {
 					return oDomRef.scrollWidth - oDomRef.scrollLeft - oDomRef.clientWidth;
 
-				} else if (Device.browser.webkit) {
-					return oDomRef.scrollLeft;
-
-				} else if (Device.browser.firefox) {
+				} else if (Device.browser.firefox || (Device.browser.safari && Device.browser.version >= 10)) {
+					// Firefox and Safari 10+ behave the same although Safari is a WebKit browser
 					return oDomRef.scrollWidth + oDomRef.scrollLeft - oDomRef.clientWidth;
+
+				} else if (Device.browser.webkit) {
+					// WebKit browsers (except Safari 10+, as it's handled above)
+					return oDomRef.scrollLeft;
 
 				} else {
 					// unrecognized browser; it is hard to return a best guess, as browser strategies are very different, so return the actual value
@@ -515,11 +517,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 			if (Device.browser.msie) {
 				return oDomRef.scrollLeft;
 
-			} else if (Device.browser.webkit) {
-				return oDomRef.scrollWidth - oDomRef.scrollLeft - oDomRef.clientWidth;
-
-			} else if (Device.browser.firefox) {
+			} else if (Device.browser.firefox || (Device.browser.safari && Device.browser.version >= 10)) {
+				// Firefox and Safari 10+ behave the same although Safari is a WebKit browser
 				return (-oDomRef.scrollLeft);
+
+			} else if (Device.browser.webkit) {
+				// WebKit browsers (except Safari 10+, as it's handled above)
+				return oDomRef.scrollWidth - oDomRef.scrollLeft - oDomRef.clientWidth;
 
 			} else {
 				// unrecognized browser; it is hard to return a best guess, as browser strategies are very different, so return the actual value
@@ -549,14 +553,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 	jQuery.sap.denormalizeScrollLeftRTL = function(iNormalizedScrollLeft, oDomRef) {
 
 		if (oDomRef) {
-			if (Device.browser.msie) {
+			if (Device.browser.msie || Device.browser.edge) {
 				return oDomRef.scrollWidth - oDomRef.clientWidth - iNormalizedScrollLeft;
 
-			} else if (Device.browser.webkit) {
-				return iNormalizedScrollLeft;
-
-			} else if (Device.browser.firefox) {
+			} else if (Device.browser.firefox || (Device.browser.safari && Device.browser.version >= 10)) {
+				// Firefox and Safari 10+ behave the same although Safari is a WebKit browser
 				return oDomRef.clientWidth + iNormalizedScrollLeft - oDomRef.scrollWidth;
+
+			} else if (Device.browser.webkit) {
+				// WebKit browsers (except Safari 10+, as it's handled above)
+				return iNormalizedScrollLeft;
 
 			} else {
 				// unrecognized browser; it is hard to return a best guess, as browser strategies are very different, so return the actual value
@@ -1032,9 +1038,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 	}
 
 	/**
-	 * Adds the given ID reference to the the aria-labelledby attribute.
+	 * Adds the given ID reference to the aria-labelledby attribute.
 	 *
-	 * @param {string} sID The ID reference of an element
+	 * @param {string} sId The ID reference of an element
 	 * @param {boolean} [bPrepend=false] whether prepend or not
 	 * @return {jQuery} <code>this</code> to allow method chaining.
 	 * @name jQuery#addAriaLabelledBy
@@ -1050,7 +1056,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 	/**
 	 * Removes the given ID reference from the aria-labelledby attribute.
 	 *
-	 * @param {string} sID The ID reference of an element
+	 * @param {string} sId The ID reference of an element
 	 * @return {jQuery} <code>this</code> to allow method chaining.
 	 * @name jQuery#removeAriaLabelledBy
 	 * @public
@@ -1065,7 +1071,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 	/**
 	 * Adds the given ID reference to the aria-describedby attribute.
 	 *
-	 * @param {string} sID The ID reference of an element
+	 * @param {string} sId The ID reference of an element
 	 * @param {boolean} [bPrepend=false] whether prepend or not
 	 * @return {jQuery} <code>this</code> to allow method chaining.
 	 * @name jQuery#addAriaDescribedBy
@@ -1081,7 +1087,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 	/**
 	 * Removes the given ID reference from the aria-describedby attribute.
 	 *
-	 * @param {string} sID The ID reference of an element
+	 * @param {string} sId The ID reference of an element
 	 * @return {jQuery} <code>this</code> to allow method chaining.
 	 * @name jQuery#removeAriaDescribedBy
 	 * @public

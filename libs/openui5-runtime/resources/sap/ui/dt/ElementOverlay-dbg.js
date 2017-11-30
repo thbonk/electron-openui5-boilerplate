@@ -32,7 +32,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -200,12 +200,12 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @override
 	 */
 	ElementOverlay.prototype.applyStyles = function() {
-		Overlay.prototype.applyStyles.apply(this, arguments);
-
 		var oGeometry = this.getGeometry();
 		if (oGeometry && oGeometry.visible) {
 			this._sortAggregationOverlaysInDomOrder();
 		}
+
+		Overlay.prototype.applyStyles.apply(this, arguments);
 	};
 
 	/**
@@ -414,6 +414,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 		var oReturn = this.setAggregation("designTimeMetadata", oDesignTimeMetadata);
 
 		if (this.getElementInstance()) {
+			this._aScrollContainers = this.getDesignTimeMetadata().getScrollContainers();
 			this._renderAndCreateAggregation();
 		}
 
@@ -489,7 +490,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	/**
 	 * Sets whether the ElementOverlay is selected and toggles corresponding css class
 	 * @param {boolean} bSelected if the ElementOverlay is selected
-	 * @param {boolean} bSuppressEvent (internal use only) supress firing "selectionChange" event
+	 * @param {boolean} bSuppressEvent (internal use only) suppress firing "selectionChange" event
 	 * @returns {sap.ui.dt.ElementOverlay} returns this
 	 * @public
 	 */
@@ -549,12 +550,10 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @public
 	 */
 	ElementOverlay.prototype.sync = function() {
-		if (this.isVisible()) {
-			var aAggregationOverlays = this.getAggregationOverlays();
-			aAggregationOverlays.forEach(function(oAggregationOverlay) {
-				this._syncAggregationOverlay(oAggregationOverlay);
-			}, this);
-		}
+		var aAggregationOverlays = this.getAggregationOverlays();
+		aAggregationOverlays.forEach(function(oAggregationOverlay) {
+			this._syncAggregationOverlay(oAggregationOverlay);
+		}, this);
 	};
 
 	ElementOverlay.prototype._getParentRelevantContainerPropagation = function() {
@@ -784,15 +783,6 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 		}
 	};
 
-	/**
-	 * @param {boolean} bVisible visible attribute
-	 * @protected
-	 */
-	ElementOverlay.prototype.setVisible = function(bVisible) {
-		Overlay.prototype.setVisible.apply(this, arguments);
-
-		this.sync();
-	};
 
 	/**
 	 * @param {string} sAggregationName name of the aggregation
@@ -813,19 +803,16 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 */
 	ElementOverlay.prototype._onElementModified = function(oEvent) {
 		var oParams = oEvent.getParameters();
-
 		var sAggregationName = oEvent.getParameters().name;
 		if (sAggregationName) {
 			var oAggregationOverlay = this.getAggregationOverlay(sAggregationName);
 			// private aggregations are also skipped
-			var bAggregationOverlayVisible = oAggregationOverlay && oAggregationOverlay.isVisible();
-			if (bAggregationOverlayVisible) {
+			if (oAggregationOverlay) {
 				this.fireElementModified(oParams);
 			}
 		} else if (oEvent.getParameters().type === "setParent") {
 			this.fireElementModified(oParams);
 		}
-
 		this.invalidate();
 	};
 
@@ -841,6 +828,8 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 			if (this._mGeometry && !this._mGeometry.visible) {
 				delete this._mGeometry;
 				this.invalidate();
+			} else if (!this._mGeometry) {
+				this.sync();
 			}
 		}
 
@@ -973,14 +962,17 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 
 	/**
 	 * Returns the relevant container element for this overlay. As default the overlay parent element is returned
+	 * @param {boolean} bForParent if true, the relevant container overlay is the overlay itself, if no relevant container is propagated in the designtime
 	 * @return {sap.ui.core.Element} Relevant container element
 	 * @public
 	 */
-	ElementOverlay.prototype.getRelevantContainer = function() {
+	ElementOverlay.prototype.getRelevantContainer = function(bForParent) {
 		var oDesignTimeMetadata = this.getDesignTimeMetadata();
 		if (oDesignTimeMetadata &&
 			oDesignTimeMetadata.getData().relevantContainer) {
 			return oDesignTimeMetadata.getData().relevantContainer;
+		} else if (bForParent) {
+			return this.getElementInstance();
 		}
 		// setting the default value to direct parent
 		var oParentOverlay = this.getParentElementOverlay();

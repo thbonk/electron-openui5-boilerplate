@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', 'sap/m/semantic/Segment', 'sap/ui/base/Metad
 	 * Constructor for an sap.m.semantic.SegmentedContainer.
 	 *
 	 * @class text
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @private
 	 * @since 1.30.0
 	 * @alias sap.m.semantic.SegmentedContainer
@@ -94,6 +94,10 @@ sap.ui.define(['jquery.sap.global', 'sap/m/semantic/Segment', 'sap/ui/base/Metad
 	SegmentedContainer.prototype.destroy = function (bSuppressInvalidate) {
 		this._oContainer.destroy(bSuppressInvalidate);
 		this.aSegments = null;
+	};
+
+	SegmentedContainer.prototype.getContainer = function () {
+		return this._oContainer;
 	};
 
 	return SegmentedContainer;

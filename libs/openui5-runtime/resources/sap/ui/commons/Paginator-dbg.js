@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * @class
 	 * Provides navigation between pages within a list of numbered pages.
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -364,7 +364,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	Paginator.prototype._handleSelect = function(oEvent) {
 		if (oEvent && oEvent.target) {
 
-			// Supress triggering beforeunload in IE
+			// suppress triggering beforeunload in IE
 			oEvent.preventDefault();
 
 			// go up one node if unnamed element is the source

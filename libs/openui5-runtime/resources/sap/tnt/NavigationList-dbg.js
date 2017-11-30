@@ -21,7 +21,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/P
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @public
@@ -232,7 +232,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/P
 				verticalScrolling: true,
 				initialFocus: selectedItem,
 				afterClose: function () {
-					that._popover = null;
+					if (that._popover) {
+						that._popover.destroy();
+						that._popover = null;
+					}
 				},
 				content: list,
 				ariaLabelledBy: [NavigationList._sAriaPopupLabelId]

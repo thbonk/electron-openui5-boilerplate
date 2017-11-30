@@ -52,7 +52,7 @@ sap.ui.define([
 	 * @mixes sap.ui.model.odata.v4.ODataBinding
 	 * @public
 	 * @since 1.37.0
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @borrows sap.ui.model.odata.v4.ODataBinding#hasPendingChanges as #hasPendingChanges
 	 * @borrows sap.ui.model.odata.v4.ODataBinding#isInitial as #isInitial
 	 * @borrows sap.ui.model.odata.v4.ODataBinding#refresh as #refresh
@@ -230,6 +230,9 @@ sap.ui.define([
 					bDataRequested = true;
 					that.fireDataRequested();
 				}, that);
+			}
+			if (!that.oContext) { // context may have been reset by another call to checkUpdate
+				return undefined;
 			}
 			if (that.oContext.getIndex() === -2) {
 				bForceUpdate = false; // no "change" event for virtual parent context
@@ -540,7 +543,7 @@ sap.ui.define([
 				sClassName, oError);
 		}
 
-		if (typeof vValue === "function" || typeof vValue === "object") {
+		if (typeof vValue === "function" || (vValue && typeof vValue === "object")) {
 			throw new Error("Not a primitive value");
 		}
 		this.oModel.checkGroupId(sGroupId);

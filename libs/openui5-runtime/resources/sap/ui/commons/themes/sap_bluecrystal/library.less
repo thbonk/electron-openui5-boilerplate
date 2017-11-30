@@ -1030,8 +1030,8 @@ html[data-sap-ui-os^="iOS6"] .sapUiTfDsbl > .sapUiTfInner.sapUiTf[type="date"]{
 /* Blue Crystal Desktop                          */
 /* ============================================= */
 
-@sapUiDlgHeaderHeight: 40px;
-@sapUiDlgFooterHeight: 44px;
+@_sap_ui_commons_Dialog_HeaderHeight: 40px;
+@_sap_ui_commons_Dialog_FooterHeight: 44px;
 
 .sapUiDlg {
 	font-family: @sapUiDesktopFontFamily;
@@ -1045,7 +1045,7 @@ html[data-sap-ui-os^="iOS6"] .sapUiTfDsbl > .sapUiTfInner.sapUiTf[type="date"]{
 }
 
 .sapUiDlgHdr {
-	height: @sapUiDlgHeaderHeight;
+	height: @_sap_ui_commons_Dialog_HeaderHeight;
 	color: @sapUiLightText;
 	border-bottom: 0;
 	margin-top: 0;
@@ -2207,9 +2207,9 @@ html[data-sap-ui-browser^="ie"] .sapUiRb:focus:after {
 
 /* START "RatingIndicator.less" */
 // Override image URLs defined in base to point to the theme specific images
-@sapUiRatingSymbolSelected: url("img/rating/star_selected.png");
-@sapUiRatingSymbolUnselected: url("img/rating/star_unselected.png");
-@sapUiRatingSymbolHovered: url("img/rating/star_hover.png");
+@_sap_ui_commons_RatingIndicator_SymbolSelected: url("img/rating/star_selected.png");
+@_sap_ui_commons_RatingIndicator_SymbolUnselected: url("img/rating/star_unselected.png");
+@_sap_ui_commons_RatingIndicator_SymbolHovered: url("img/rating/star_hover.png");
 
 .sapUiRating {
 	font-family: @sapUiDesktopFontFamily;
@@ -2462,11 +2462,11 @@ html[data-sap-ui-browser^="ie"] .sapUiRb:focus:after {
 .sapUiSearchField {
 	font-family: @sapUiDesktopFontFamily;
 	font-size: @sapUiDesktopFontSize;
-	height: 22px; /*@sapUiTextFieldHeight;*/
+	height: 22px;
 }
 
 .sapUiSearchFieldTf {
-	height: 22px; /*@sapUiTextFieldHeight;*/
+	height: 22px;
 	margin-top: 0;
 }
 
@@ -2958,7 +2958,7 @@ html[data-sap-ui-browser^="ie"] .sapUiRb:focus:after {
 /* END "Splitter.less" */
 
 /* START "TabStrip.less" */
-@sapUiTabBorderRadius: 0;
+@_sap_ui_commons_TabStrip_BorderRadius: 0;
 
 .sapUiTabStrip {
 	font-family: @sapUiDesktopFontFamily;
@@ -2986,7 +2986,7 @@ html[data-sap-ui-browser^="ie"] .sapUiRb:focus:after {
 	background-color: @sapUiExtraLightBG;
 	border: 1px solid @sapUiMediumBorder;
 	border-bottom-width: 0;
-	border-radius: @sapUiTabBorderRadius @sapUiTabBorderRadius 0 0;
+	border-radius: @_sap_ui_commons_TabStrip_BorderRadius @_sap_ui_commons_TabStrip_BorderRadius 0 0;
 }
 
 html[data-sap-ui-browser^="ie"] .sapUiTab,

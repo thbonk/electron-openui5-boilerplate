@@ -12,7 +12,7 @@ sap.ui.define([
 	"sap/ui/core/IconPool",
 	"sap/ui/base/EventProvider",
 	"sap/m/Button",
-	"sap/m/ButtonType",
+	"sap/m/library",
 	"sap/m/OverflowToolbarButton",
 	"sap/m/OverflowToolbarLayoutData",
 	"./SemanticConfiguration",
@@ -22,12 +22,15 @@ sap.ui.define([
 	IconPool,
 	EventProvider,
 	Button,
-	ButtonType,
+	mobileLibrary,
 	OverflowToolbarButton,
 	OverflowToolbarLayoutData,
 	SemanticConfiguration,
 	SemanticContainer) {
 	"use strict";
+
+	// shortcut for sap.m.ButtonType
+	var ButtonType = mobileLibrary.ButtonType;
 
 	/**
 	* Constructor for a <code>sap.f.semantic.SemanticShareMenu</code>.
@@ -311,8 +314,6 @@ sap.ui.define([
 	 * The method is called after a control has been removed
 	 * in order to update the <code>ShareMenu</code> mode.
 	 *
-	 *
-	 * @param {sap.f.semantic.SemanticControl} oControl
 	 * @returns {Boolean}
 	 */
 	SemanticShareMenu.prototype._onControlRemoved = function() {

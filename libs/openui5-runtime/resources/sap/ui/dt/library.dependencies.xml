@@ -7,7 +7,7 @@
       <module name="sap/ui/dt/DesignTimeMetadata.js"/>
     </requires>
   </module>
-  <module name="sap/ui/dt/AggregationOverlay.js" size="4251" compressedSize="1325">
+  <module name="sap/ui/dt/AggregationOverlay.js" size="4895" compressedSize="1587">
     <description>Provides class sap.ui.dt.AggregationOverlay.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -21,7 +21,7 @@
       <module name="sap/ui/dt/RenderingUtil.js"/>
     </requires>
   </module>
-  <module name="sap/ui/dt/ContextMenuControl.js" size="5097" compressedSize="1940">
+  <module name="sap/ui/dt/ContextMenuControl.js" size="5141" compressedSize="1981">
     <description>Provides control sap.ui.rta.ContextMenuControl.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -37,13 +37,13 @@
       <module name="sap/ui/dt/ManagedObjectObserver.js"/>
     </requires>
   </module>
-  <module name="sap/ui/dt/DOMUtil.js" size="9567" compressedSize="3867">
+  <module name="sap/ui/dt/DOMUtil.js" size="9586" compressedSize="3880">
     <description>Provides object sap.ui.dt.DOMUtil.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/ui/dt/DesignTime.js" size="20368" compressedSize="7834">
+  <module name="sap/ui/dt/DesignTime.js" size="20361" compressedSize="7865">
     <description>Provides class sap.ui.dt.DesignTime.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -67,7 +67,7 @@
       <module name="sap/ui/dt/ElementUtil.js"/>
     </requires>
   </module>
-  <module name="sap/ui/dt/ElementDesignTimeMetadata.js" size="7064" compressedSize="2352">
+  <module name="sap/ui/dt/ElementDesignTimeMetadata.js" size="7318" compressedSize="2440">
     <description>Provides class sap.ui.dt.ElementDesignTimeMetadata.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -75,7 +75,7 @@
       <module name="sap/ui/dt/DesignTimeMetadata.js"/>
     </requires>
   </module>
-  <module name="sap/ui/dt/ElementOverlay.js" size="30743" compressedSize="12381">
+  <module name="sap/ui/dt/ElementOverlay.js" size="30759" compressedSize="12402">
     <description>Provides class sap.ui.dt.ElementOverlay.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -104,7 +104,7 @@
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/ui/dt/ManagedObjectObserver.js" size="20934" compressedSize="10298">
+  <module name="sap/ui/dt/ManagedObjectObserver.js" size="20874" compressedSize="10297">
     <description>Provides class sap.ui.dt.ManagedObjectObserver.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -112,7 +112,7 @@
       <module name="sap/ui/dt/ElementUtil.js"/>
     </requires>
   </module>
-  <module name="sap/ui/dt/MutationObserver.js" size="5356" compressedSize="2654">
+  <module name="sap/ui/dt/MutationObserver.js" size="6431" compressedSize="3103">
     <description>Provides class sap.ui.dt.MutationObserver.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -121,7 +121,7 @@
       <module name="sap/ui/dt/OverlayUtil.js"/>
     </requires>
   </module>
-  <module name="sap/ui/dt/Overlay.js" size="18491" compressedSize="7811">
+  <module name="sap/ui/dt/Overlay.js" size="24054" compressedSize="10432">
     <description>Provides class sap.ui.dt.Overlay.</description>
     <requires>
       <module name="jquery.sap.dom.js"/>
@@ -141,7 +141,7 @@
       <module name="sap/ui/dt/ElementUtil.js"/>
     </requires>
   </module>
-  <module name="sap/ui/dt/OverlayUtil.js" size="11116" compressedSize="4318">
+  <module name="sap/ui/dt/OverlayUtil.js" size="14866" compressedSize="4378">
     <description>Provides object sap.ui.dt.OverlayUtil.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -156,7 +156,7 @@
       <module name="sap/ui/base/ManagedObject.js"/>
     </requires>
   </module>
-  <module name="sap/ui/dt/RenderingUtil.js" size="2394" compressedSize="1146">
+  <module name="sap/ui/dt/RenderingUtil.js" size="3298" compressedSize="1620">
     <description>Provides object sap.ui.dt.RenderingUtil.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -170,7 +170,7 @@
       <module name="sap/ui/dt/library.js"/>
     </requires>
   </module>
-  <module name="sap/ui/dt/library-preload.js" size="113207">
+  <module name="sap/ui/dt/library-preload.js" size="117452">
     <requires>
       <module name="jquery.sap.dom.js"/>
       <module name="jquery.sap.global.js"/>
@@ -307,7 +307,7 @@
       <module name="sap/ui/dt/test/report/TableRenderer.js"/>
     </includes>
   </module>
-  <module name="sap/ui/dt/library.js" size="1207" compressedSize="518">
+  <module name="sap/ui/dt/library.js" size="1334" compressedSize="518">
     <description>Initialization Code and shared classes of library sap.ui.dt.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -316,7 +316,7 @@
   </module>
   <module name="sap/ui/dt/manifest.json" size="700">
   </module>
-  <module name="sap/ui/dt/plugin/ContextMenu.js" size="6165" compressedSize="2399">
+  <module name="sap/ui/dt/plugin/ContextMenu.js" size="6275" compressedSize="2488">
     <description>Provides class sap.ui.rta.plugin.ContextMenu.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -333,10 +333,11 @@
       <module name="sap/ui/dt/plugin/ElementMover.js"/>
     </requires>
   </module>
-  <module name="sap/ui/dt/plugin/CutPaste.js" size="6750" compressedSize="3459">
+  <module name="sap/ui/dt/plugin/CutPaste.js" size="6935" compressedSize="3554">
     <description>Provides class sap.ui.dt.plugin.CutPaste.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
+      <module name="sap/ui/dt/OverlayRegistry.js"/>
       <module name="sap/ui/dt/OverlayUtil.js"/>
       <module name="sap/ui/dt/Plugin.js"/>
       <module name="sap/ui/dt/plugin/ElementMover.js"/>
@@ -369,7 +370,7 @@
       <module name="sap/ui/dt/Plugin.js"/>
     </requires>
   </module>
-  <module name="sap/ui/dt/plugin/TabHandling.js" size="3258" compressedSize="1616">
+  <module name="sap/ui/dt/plugin/TabHandling.js" size="3145" compressedSize="1610">
     <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
     <requires>
       <module name="jquery.sap.global.js"/>

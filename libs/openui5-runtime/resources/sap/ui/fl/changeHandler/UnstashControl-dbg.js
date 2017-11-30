@@ -5,15 +5,17 @@
  */
 
 sap.ui.define([
-	'jquery.sap.global', './Base'
-], function(jQuery, Base) {
+	"jquery.sap.global"
+], function(
+	jQuery
+) {
 	"use strict";
 
 	/**
 	 * Change handler for unstashing of a control.
 	 * @alias sap.ui.fl.changeHandler.UnstashControl
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.27.0
 	 */
 	var UnstashControl = { };
@@ -31,15 +33,43 @@ sap.ui.define([
 		var mContent = oChange.getContent();
 		var oModifier = mPropertyBag.modifier;
 
+		oChange.setRevertData({
+			originalValue: mPropertyBag.modifier.getStashed(oControl)
+		});
+
 		oModifier.setStashed(oControl, false);
 
 		if (mContent.parentAggregationName){
-			//old way including move, new way will have seperate move change
+			//old way including move, new way will have separate move change
 			var sTargetAggregation = mContent.parentAggregationName;
 			var oTargetParent = oModifier.getParent(oControl);
 			oModifier.removeAggregation(oTargetParent, sTargetAggregation, oControl);
-			oModifier.insertAggregation(oTargetParent, sTargetAggregation, oControl, mContent.index);
+			oModifier.insertAggregation(oTargetParent, sTargetAggregation, oControl, mContent.index, mPropertyBag.view);
 		}
+		return true;
+	};
+
+	/**
+	 * Reverts previously applied change
+	 *
+	 * @param {sap.ui.fl.Change} oChange change object with instructions to be applied on the control map
+	 * @param {sap.ui.core.Control} oControl control that matches the change selector for applying the change
+	 * @param {object} mPropertyBag
+	 * @param {object} mPropertyBag.modifier - modifier for the controls
+	 * @return {boolean} true - if change has been reverted
+	 * @public
+	 */
+	UnstashControl.revertChange = function(oChange, oControl, mPropertyBag) {
+		var mRevertData = oChange.getRevertData();
+
+		if (mRevertData) {
+			mPropertyBag.modifier.setStashed(oControl, mRevertData.originalValue);
+			oChange.resetRevertData();
+		} else {
+			jQuery.sap.log.error("Attempt to revert an unapplied change.");
+			return false;
+		}
+
 		return true;
 	};
 

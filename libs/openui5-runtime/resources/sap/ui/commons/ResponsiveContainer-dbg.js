@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -130,7 +130,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	};
 
 	/**
-	 * Resize handling
+	 * Resize handling.
+	 * @param {jQuery.Event} oEvent The fired event
 	 */
 	ResponsiveContainer.prototype.onresize = function(oEvent) {
 		var oRange = this.findMatchingRange(),

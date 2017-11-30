@@ -21,7 +21,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 	 * The SegmentedButton provides a group of multiple buttons. Only one button can be active. The behaviour is more ore less like a radio button group.
 	 * @extends sap.ui.core.Control
 	 * @implements sap.ui.commons.ToolbarItem, sap.ui.core.IFormContent
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -112,6 +112,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 	};
 	/**
 	 * @private
+	 * @param {jQuery.Event} oEvent The fired event
 	 */
 	SegmentedButton.prototype._buttonSelected = function(oEvent) {
 		var oOldButtonSelection = sap.ui.getCore().byId(this.getSelectedButton()),
@@ -124,6 +125,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 	};
 	/**
 	 * @private
+	 * @param {boolean} bAddDelegate Whether a delegate is attached
 	 */
 	SegmentedButton.prototype._setItemNavigation = function(bAddDelegate) {
 		var oButton,

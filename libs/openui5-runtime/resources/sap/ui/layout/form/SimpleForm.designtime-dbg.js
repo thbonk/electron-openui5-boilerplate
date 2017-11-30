@@ -5,7 +5,7 @@
  */
 
 // Provides the Design Time Metadata for the sap.ui.layout.form.SimpleForm control
-sap.ui.define([], function() {
+sap.ui.define(["sap/ui/fl/changeHandler/ChangeHandlerMediator"], function(ChangeHandlerMediator) {
 	"use strict";
 
 	var fnHasContent = function(oFormContainer) {
@@ -132,6 +132,17 @@ sap.ui.define([], function() {
 				actions : {
 					move : {
 						changeType : "moveSimpleFormField"
+					},
+					addODataProperty : function (oFormContainer) {
+						var mChangeHandlerSettings = ChangeHandlerMediator.getAddODataFieldWithLabelSettings(oFormContainer);
+
+						if (mChangeHandlerSettings){
+							return {
+								changeType: "addSimpleFormField",
+								changeOnRelevantContainer : true,
+								changeHandlerSettings : mChangeHandlerSettings
+							};
+						}
 					}
 				}
 			}

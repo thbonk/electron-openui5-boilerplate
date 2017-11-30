@@ -6,8 +6,11 @@
 
 // Provides class sap.ui.dt.plugin.CutPaste.
 sap.ui.define([
-	'sap/ui/dt/Plugin', 'sap/ui/dt/plugin/ElementMover', 'sap/ui/dt/OverlayUtil'
-], function(Plugin, ElementMover, OverlayUtil) {
+	'sap/ui/dt/Plugin',
+	'sap/ui/dt/plugin/ElementMover',
+	'sap/ui/dt/OverlayUtil',
+	'sap/ui/dt/OverlayRegistry'
+], function(Plugin, ElementMover, OverlayUtil, OverlayRegistry) {
 	"use strict";
 
 	/**
@@ -18,7 +21,7 @@ sap.ui.define([
 	 * @class The CutPaste enables Cut & Paste functionality for the overlays based on aggregation types
 	 * @extends sap.ui.dt.Plugin"
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -114,7 +117,9 @@ sap.ui.define([
 			oEvent.stopPropagation();
 		} else if ((oEvent.keyCode === jQuery.sap.KeyCodes.V) && (oEvent.shiftKey === false) && (oEvent.altKey === false) && (bCtrlKey === true)) {
 			// CTRL+V
-			this.paste(oOverlay);
+			if (this.getElementMover().getMovedOverlay()) {
+				this.paste(oOverlay);
+			}
 			oEvent.stopPropagation();
 		} else if (oEvent.keyCode === jQuery.sap.KeyCodes.ESCAPE) {
 			// ESC
@@ -146,24 +151,28 @@ sap.ui.define([
 		if (!oCutOverlay) {
 			return false;
 		}
-		if (!this._isForSameElement(oCutOverlay, oTargetOverlay)) {
 
+		var bResult = false;
+		if (!this._isForSameElement(oCutOverlay, oTargetOverlay)) {
 			var oTargetZoneAggregation = this._getTargetZoneAggregation(oTargetOverlay);
 			if (oTargetZoneAggregation) {
 				this.getElementMover().insertInto(oCutOverlay, oTargetZoneAggregation);
-				return true;
+				bResult = true;
 			} else if (OverlayUtil.isInTargetZoneAggregation(oTargetOverlay)) {
 				this.getElementMover().repositionOn(oCutOverlay, oTargetOverlay);
-				return true;
-			} else {
-				return false;
+				bResult = true;
 			}
 		}
 
 		// focus get invalidated, see BCP 1580061207
-		setTimeout(function(){
-			oCutOverlay.focus();
-		},0);
+		if (bResult) {
+			oCutOverlay.setSelected(true);
+			setTimeout(function () {
+				oCutOverlay.focus();
+			}, 0);
+		}
+
+		return bResult;
 	};
 
 	/**

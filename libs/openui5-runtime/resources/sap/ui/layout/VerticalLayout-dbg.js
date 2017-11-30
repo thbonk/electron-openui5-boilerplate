@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/EnabledP
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -59,8 +59,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/EnabledP
 
 	/**
 	 * Sets the width of the Vertical Layout without rerendering of the whole control, and everything inside it.
-	 * @param {sap.ui.core.CSSSize} width
-	 * @returns {VerticalLayout}
+	 * @param {sap.ui.core.CSSSize} width The new width
+	 * @returns {sap.ui.layout.VerticalLayout} This pointer for chaining
 	 */
 	VerticalLayout.prototype.setWidth = function (width) {
 		this.setProperty("width", width, true);
@@ -73,6 +73,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/EnabledP
 	/**
 	 * @see sap.ui.core.Control#getAccessibilityInfo
 	 * @protected
+	 * @returns {object} An object with the accessibilty infos for this control
 	 */
 	VerticalLayout.prototype.getAccessibilityInfo = function() {
 		return {children: this.getContent()};

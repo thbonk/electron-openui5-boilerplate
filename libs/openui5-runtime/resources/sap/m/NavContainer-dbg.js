@@ -26,7 +26,7 @@ sap.ui.define([
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -46,12 +46,12 @@ sap.ui.define([
 				 *
 				 * <b>Note:</b>  The following scenarios are possible, depending on where the focus
 				 * was before navigation to a new page:
-				 * <ul><li>If <code>autoFocus<code> is set to <code>true<code> and the focus was
+				 * <ul><li>If <code>autoFocus</code> is set to <code>true</code> and the focus was
 				 * inside the current page, the focus will be moved automatically on the new page.</li>
-				 * <li>If <code>autoFocus<code> is set to <code>false<code> and the focus was inside
+				 * <li>If <code>autoFocus</code> is set to <code>false</code> and the focus was inside
 				 * the current page, the focus will disappear.
 				 * <li>If the focus was outside the current page, after the navigation it will remain
-				 * unchanged regardless of what is set to the <code>autoFocus<code> property.</li></ul>
+				 * unchanged regardless of what is set to the <code>autoFocus</code> property.</li></ul>
 				 *
 				 * @since 1.30
 				 */
@@ -230,6 +230,11 @@ sap.ui.define([
 			return bUseAnimations ? iDelay : 0;
 		};
 
+	var fnIsPageParentActive = function(oPage) {
+		var oParent = oPage && oPage.getParent();
+		return oParent && oParent.isActive();
+	};
+
 	NavContainer.prototype.init = function () {
 		this._pageStack = [];
 		this._aQueue = [];
@@ -375,7 +380,7 @@ sap.ui.define([
 		if (this._pageStack.length === 0) {
 			var page = this._getActualInitialPage(); // TODO: with bookmarking / deep linking this is the initial, but not the "home"/root page
 			if (page) {
-				this._pageStack.push({id: page.getId(), mode: "initial", data: data || {}});
+				this._pageStack.push({id: page.getId(), isInitial: true, data: data || {}});
 			}
 		}
 		return this._pageStack;
@@ -464,10 +469,10 @@ sap.ui.define([
 		var stack = this._ensurePageStackInitialized();
 		if (this._pageStack.length > 0) {
 			var index = stack.length - 1;
-			var pageInfo = {id: pageId, mode: transitionName, data: data};
+			var pageInfo = {id: pageId, transition: transitionName, data: data};
 			if (index === 0) {
-				pageInfo.mode = "initial";
-				delete stack[stack.length - 1].mode;
+				pageInfo.isInitial = true;
+				delete stack[stack.length - 1].isInitial;
 			}
 			stack.splice(index, 0, pageInfo);
 		} else {
@@ -640,6 +645,7 @@ sap.ui.define([
 		transitionName = transitionName || this.getDefaultTransitionName();
 		oTransitionParameters = oTransitionParameters || {};
 		data = data || {};
+		var oFromPageInfo = {id: pageId, transition: transitionName, data: data};
 
 		// make sure the initial page is on the stack
 		this._ensurePageStackInitialized(data);
@@ -666,6 +672,12 @@ sap.ui.define([
 			if (bFromQueue) {
 				this._dequeueNavigation();
 			}
+
+			// In an application when the first page is loaded its transition is not set and we set it here.
+			if (this._pageStack.length === 1) {
+				this._pageStack[0].transition = oFromPageInfo.transition;
+			}
+
 			return this;
 		}
 
@@ -722,7 +734,7 @@ sap.ui.define([
 				oToPage._handleEvent(oEvent);
 
 
-				this._pageStack.push({id: pageId, mode: transitionName, data: data}); // this actually causes/is the navigation
+				this._pageStack.push(oFromPageInfo); // this actually causes/is the navigation
 				jQuery.sap.log.info(this.toString() + ": navigating to page '" + pageId + "': " + oToPage.toString());
 				this._mVisitedPages[pageId] = true;
 
@@ -879,7 +891,7 @@ sap.ui.define([
 			// there is no place to go back
 
 			// but then the assumption is that the only page on the stack is the initial one and has not been navigated to. Check this:
-			if (this._pageStack.length === 1 && this._pageStack[0].mode != "initial") {
+			if (this._pageStack.length === 1 && !this._pageStack[0].isInitial) {
 				throw new Error("Initial page not found on the stack. How did this happen?");
 			}
 			return this;
@@ -891,7 +903,7 @@ sap.ui.define([
 			}
 
 			var oFromPageInfo = this._pageStack[this._pageStack.length - 1];
-			var mode = oFromPageInfo.mode;
+			var transition = oFromPageInfo.transition;
 			var oFromPage = this.getPage(oFromPageInfo.id);
 			var oToPage;
 			var oToPageData;
@@ -988,14 +1000,14 @@ sap.ui.define([
 					return this;
 				}
 
-				var oTransition = NavContainer.transitions[mode] || NavContainer.transitions["slide"];
+				var oTransition = NavContainer.transitions[transition] || NavContainer.transitions["slide"];
 
 				// Track proper invocation of the callback  TODO: only do this during development?
 				var iCompleted = this._iTransitionsCompleted;
 				var that = this;
 				window.setTimeout(function () {
 					if (that && (that._iTransitionsCompleted < iCompleted + 1)) {
-						jQuery.sap.log.warning("Transition '" + mode + "' 'back' was triggered five seconds ago, but has not yet invoked the end-of-transition callback.");
+						jQuery.sap.log.warning("Transition '" + transition + "' 'back' was triggered five seconds ago, but has not yet invoked the end-of-transition callback.");
 					}
 				}, fnGetDelay(5000));
 
@@ -1089,8 +1101,15 @@ sap.ui.define([
 							} else {
 								// the second transition now also finished => clean up the style classes
 								bTransitionEndPending = false;
-								oToPage.removeStyleClass("sapMNavItemSliding").removeStyleClass("sapMNavItemCenter");
-								oFromPage.removeStyleClass("sapMNavItemSliding").addStyleClass("sapMNavItemHidden").removeStyleClass("sapMNavItemLeft");
+
+								// update classes only of the active pages
+								if (fnIsPageParentActive(oToPage)) {
+									oToPage.removeStyleClass("sapMNavItemSliding").removeStyleClass("sapMNavItemCenter");
+								}
+
+								if (fnIsPageParentActive(oFromPage)) {
+									oFromPage.removeStyleClass("sapMNavItemSliding").addStyleClass("sapMNavItemHidden").removeStyleClass("sapMNavItemLeft");
+								}
 
 								// notify the NavContainer that the animation is complete
 								fCallback();
@@ -1136,8 +1155,15 @@ sap.ui.define([
 						} else {
 							// the second transition now also finished => clean up the style classes
 							bTransitionEndPending = false;
-							oToPage.removeStyleClass("sapMNavItemSliding").removeStyleClass("sapMNavItemCenter");
-							oFromPage.removeStyleClass("sapMNavItemSliding").addStyleClass("sapMNavItemHidden").removeStyleClass("sapMNavItemRight");
+
+							// update classes only of the active pages
+							if (fnIsPageParentActive(oToPage)) {
+								oToPage.removeStyleClass("sapMNavItemSliding").removeStyleClass("sapMNavItemCenter");
+							}
+
+							if (fnIsPageParentActive(oFromPage)) {
+								oFromPage.removeStyleClass("sapMNavItemSliding").addStyleClass("sapMNavItemHidden").removeStyleClass("sapMNavItemRight");
+							}
 
 							// notify the NavContainer that the animation is complete
 							fCallback();
@@ -1157,6 +1183,7 @@ sap.ui.define([
 							}, fnGetDelay(50));
 						}, 0);
 					}
+
 
 					// set the new style classes that represent the end state (and thus start the transition)
 					oToPage.addStyleClass("sapMNavItemSliding").addStyleClass("sapMNavItemCenter").removeStyleClass("sapMNavItemLeft"); // transition from left position to normal/center position starts now
@@ -1226,8 +1253,15 @@ sap.ui.define([
 						jQuery(this).unbind("webkitTransitionEnd transitionend");
 						// clean up the style classes
 						bTransitionEndPending = false;
-						oFromPage.addStyleClass("sapMNavItemHidden");
-						oToPage.removeStyleClass("sapMNavItemFading").removeStyleClass("sapMNavItemOpaque");
+
+						// update classes only of the active pages
+						if (fnIsPageParentActive(oFromPage)) {
+							oFromPage.addStyleClass("sapMNavItemHidden");
+						}
+
+						if (fnIsPageParentActive(oToPage)) {
+							oToPage.removeStyleClass("sapMNavItemFading").removeStyleClass("sapMNavItemOpaque");
+						}
 
 						// notify the NavContainer that the animation is complete
 						fCallback();
@@ -1262,8 +1296,12 @@ sap.ui.define([
 						jQuery(this).unbind("webkitTransitionEnd transitionend");
 						// clean up the style classes
 						bTransitionEndPending = false;
-						oFromPage.removeStyleClass("sapMNavItemFading").addStyleClass("sapMNavItemHidden"); // TODO: destroy HTML?
-						oFromPage.removeStyleClass("sapMNavItemTransparent");
+
+						// update classes only of the active pages
+						if (fnIsPageParentActive(oFromPage)) {
+							oFromPage.removeStyleClass("sapMNavItemFading").addStyleClass("sapMNavItemHidden"); // TODO: destroy HTML?
+							oFromPage.removeStyleClass("sapMNavItemTransparent");
+						}
 
 						// notify the NavContainer that the animation is complete
 						fCallback();
@@ -1341,8 +1379,16 @@ sap.ui.define([
 							} else {
 								// the second transition now also finished => clean up the style classes
 								bTransitionEndPending = false;
-								oToPage.removeStyleClass("sapMNavItemFlipping");
-								oFromPage.removeStyleClass("sapMNavItemFlipping").addStyleClass("sapMNavItemHidden").removeStyleClass("sapMNavItemFlipPrevious");
+
+								// update classes only of the active pages
+								if (fnIsPageParentActive(oToPage)) {
+									oToPage.removeStyleClass("sapMNavItemFlipping");
+								}
+
+								if (fnIsPageParentActive(oFromPage)) {
+									oFromPage.removeStyleClass("sapMNavItemFlipping").addStyleClass("sapMNavItemHidden").removeStyleClass("sapMNavItemFlipPrevious");
+								}
+
 								that.$().removeClass("sapMNavFlip");
 
 								// notify the NavContainer that the animation is complete
@@ -1391,8 +1437,16 @@ sap.ui.define([
 						} else {
 							// the second transition now also finished => clean up the style classes
 							bTransitionEndPending = false;
-							oToPage.removeStyleClass("sapMNavItemFlipping");
-							oFromPage.removeStyleClass("sapMNavItemFlipping").addStyleClass("sapMNavItemHidden").removeStyleClass("sapMNavItemFlipNext");
+
+							// update classes only of the active pages
+							if (fnIsPageParentActive(oToPage)) {
+								oToPage.removeStyleClass("sapMNavItemFlipping");
+							}
+
+							if (fnIsPageParentActive(oFromPage)) {
+								oFromPage.removeStyleClass("sapMNavItemFlipping").addStyleClass("sapMNavItemHidden").removeStyleClass("sapMNavItemFlipNext");
+							}
+
 							that.$().removeClass("sapMNavFlip");
 
 							// notify the NavContainer that the animation is complete
@@ -1452,8 +1506,16 @@ sap.ui.define([
 							} else {
 								// the second transition now also finished => clean up the style classes
 								bTransitionEndPending = false;
-								oToPage.removeStyleClass("sapMNavItemDooring").removeStyleClass("sapMNavItemDoorInNext");
-								oFromPage.removeStyleClass("sapMNavItemDooring").addStyleClass("sapMNavItemHidden").removeStyleClass("sapMNavItemDoorInPrevious");
+
+								// update classes only of the active pages
+								if (fnIsPageParentActive(oToPage)) {
+									oToPage.removeStyleClass("sapMNavItemDooring").removeStyleClass("sapMNavItemDoorInNext");
+								}
+
+								if (fnIsPageParentActive(oFromPage)) {
+									oFromPage.removeStyleClass("sapMNavItemDooring").addStyleClass("sapMNavItemHidden").removeStyleClass("sapMNavItemDoorInPrevious");
+								}
+
 								that.$().removeClass("sapMNavDoor");
 
 								// notify the NavContainer that the animation is complete
@@ -1502,8 +1564,16 @@ sap.ui.define([
 						} else {
 							// the second transition now also finished =>  clean up the style classes
 							bTransitionEndPending = false;
-							oToPage.removeStyleClass("sapMNavItemDooring").removeStyleClass("sapMNavItemDoorOutNext");
-							oFromPage.removeStyleClass("sapMNavItemDooring").addStyleClass("sapMNavItemHidden").removeStyleClass("sapMNavItemDoorOutPrevious");
+
+							// update classes only of the active pages
+							if (fnIsPageParentActive(oToPage)) {
+								oToPage.removeStyleClass("sapMNavItemDooring").removeStyleClass("sapMNavItemDoorOutNext");
+							}
+
+							if (fnIsPageParentActive(oFromPage)) {
+								oFromPage.removeStyleClass("sapMNavItemDooring").addStyleClass("sapMNavItemHidden").removeStyleClass("sapMNavItemDoorOutPrevious");
+							}
+
 							that.$().removeClass("sapMNavDoor");
 
 							// notify the NavContainer that the animation is complete

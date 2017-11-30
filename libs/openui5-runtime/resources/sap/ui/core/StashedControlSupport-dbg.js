@@ -116,7 +116,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/Control'
 		 * @private
 		 */
 		StashedControlSupport.mixInto = function(fnClass, bDefaultValue /*=true*/) {
-			jQuery.sap.assert(!fnClass.getMetadata().hasProperty("stashed"), "StashedControlSupport: fnClass already has property 'active', sideeffects possible", fnClass.getMetadata().getName());
+			jQuery.sap.assert(!fnClass.getMetadata().hasProperty("stashed"), "StashedControlSupport: fnClass already has property 'stashed', sideeffects possible", fnClass.getMetadata().getName());
 			jQuery.sap.assert(!fnClass.prototype.setStashed, "StashedControlSupport: fnClass already has method 'setStashed', sideeffects possible", fnClass.getMetadata().getName());
 			mixInto(fnClass, bDefaultValue);
 		};
@@ -214,7 +214,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/Control'
 		 *
 		 * @name sap.ui.core.StashedControlSupport.getStashedControlIds
 		 * @param {string} [sParentId] if set only StashedControls for a specific parent are returned
-		 * @return {Control[]} array with the the StashedControls
+		 * @return {Control[]} array with the StashedControls
 		 *
 		 * @private
 		 */

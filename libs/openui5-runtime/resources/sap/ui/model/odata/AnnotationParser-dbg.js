@@ -101,7 +101,7 @@ var AnnotationParser =  {
 		for (var i = 0; i < aSpecialCases.length; ++i) {
 			var sSpecialCase = aSpecialCases[i];
 
-			mTargetAnnotations[sSpecialCase] = mTargetAnnotations[sSpecialCase] || {}; // Make sure the the target namespace exists
+			mTargetAnnotations[sSpecialCase] = mTargetAnnotations[sSpecialCase] || {}; // Make sure the target namespace exists
 			for (sTarget in mSourceAnnotations[sSpecialCase]) {
 				for (sTerm in mSourceAnnotations[sSpecialCase][sTarget]) {
 					// Now merge every term
@@ -627,11 +627,16 @@ var AnnotationParser =  {
 	 * @private
 	 */
 	enrichFromPropertyValueAttributes: function(mAttributes, oNode) {
-		var mIgnoredAttributes = { "Property" : true, "Term": true, "Qualifier": true };
+		var mIgnoredAttributes = {
+				"Property" : true,
+				"Qualifier": true,
+				"Term": true,
+				"xmlns" : true
+			};
 
 		for (var i = 0; i < oNode.attributes.length; i += 1) {
-			if (!mIgnoredAttributes[oNode.attributes[i].name]) {
-				var sName = oNode.attributes[i].name;
+			var sName = oNode.attributes[i].name;
+			if (!mIgnoredAttributes[sName] && (sName.indexOf("xmlns:") !== 0)) {
 				var sValue = oNode.attributes[i].value;
 
 				// Special case: EnumMember can contain a space separated list of properties that must all have their
@@ -757,7 +762,7 @@ var AnnotationParser =  {
 					vPropertyValue = aPropertyValues;
 				}
 			} else {
-				var oCollectionNodes = xPath.selectNodes("./d:Collection/d:AnnotationPath | ./d:Collection/d:PropertyPath", oDocumentNode);
+				var oCollectionNodes = xPath.selectNodes("./d:Collection/d:AnnotationPath | ./d:Collection/d:NavigationPropertyPath | ./d:Collection/d:PropertyPath", oDocumentNode);
 
 				if (oCollectionNodes.length > 0) {
 					vPropertyValue = AnnotationParser._getTextValues(oCollectionNodes);
@@ -802,11 +807,13 @@ var AnnotationParser =  {
 								vPropertyValue[sNodeName] = vValue;
 							}
 						}
-					} else if (oDocumentNode.nodeName in mTextNodeWhitelist) {
-						vPropertyValue = AnnotationParser._getTextValue(oDocumentNode);
-					}
 
-					AnnotationParser.enrichFromPropertyValueAttributes(vPropertyValue, oDocumentNode);
+						AnnotationParser.enrichFromPropertyValueAttributes(vPropertyValue, oDocumentNode);
+					} else if (oDocumentNode.nodeName in mTextNodeWhitelist) {
+						vPropertyValue = AnnotationParser._getTextValue(oDocumentNode); // string
+					} else { // e.g. <Term Name="..." Type="...">
+						AnnotationParser.enrichFromPropertyValueAttributes(vPropertyValue, oDocumentNode);
+					}
 				}
 			}
 
@@ -849,6 +856,19 @@ var AnnotationParser =  {
 		var oAnnotationNodes = xPath.selectNodes("./d:Annotation", oParentElement);
 		var oPropertyValueNodes = xPath.selectNodes("./d:PropertyValue", oParentElement);
 
+		function getAssertText(oParentElement, sWhat, sName) {
+			var	oAnnotationTarget,
+				oAnnotationTerm = oParentElement;
+
+			while (oAnnotationTerm.localName !== "Annotation") {
+				oAnnotationTerm = oAnnotationTerm.parentElement;
+			}
+			oAnnotationTarget = oAnnotationTerm.parentElement;
+
+			return (sWhat + " '" + sName + "' is defined twice; "
+				+ "Annotation Target = " + oAnnotationTarget.getAttribute("Target")
+				+ ", Term = " + oAnnotationTerm.getAttribute("Term"));
+		}
 
 		if (oAnnotationNodes.length === 0 && oPropertyValueNodes.length === 0) {
 			mProperties = AnnotationParser.getPropertyValue(oParentElement);
@@ -860,10 +880,7 @@ var AnnotationParser =  {
 				// The following function definition inside the loop will be removed in non-debug builds.
 				/* eslint-disable no-loop-func */
 				jQuery.sap.assert(!mProperties[sTerm], function () {
-					return (
-						"Record contains values that overwrite previous ones; this is not allowed." +
-						" Element: " + xPath.getPath(oParentElement)
-					);
+					return getAssertText(oParentElement, "Annotation", sTerm);
 				});
 				/* eslint-enable no-loop-func */
 
@@ -877,10 +894,7 @@ var AnnotationParser =  {
 				// The following function definition inside the loop will be removed in non-debug builds.
 				/* eslint-disable no-loop-func */
 				jQuery.sap.assert(!mProperties[sPropertyName], function () {
-					return (
-						"Record contains values that overwrite previous ones; this is not allowed." +
-						" Element: " + xPath.getPath(oParentElement)
-					);
+					return getAssertText(oParentElement, "Property", sPropertyName);
 				});
 				/* eslint-enable no-loop-func */
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <library  version="2.0" name="sap.ui.codeeditor">
-  <module name="sap/ui/codeeditor/CodeEditor.js" size="10405" compressedSize="4367">
+  <module name="sap/ui/codeeditor/CodeEditor.js" size="10614" compressedSize="4406">
     <description>global ace</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -10,7 +10,7 @@
       <module name="sap/ui/core/Control.js"/>
     </requires>
   </module>
-  <module name="sap/ui/codeeditor/library-preload.js" size="5783">
+  <module name="sap/ui/codeeditor/library-preload.js" size="5822">
     <requires>
       <module name="jquery.sap.global.js"/>
       <module name="sap/ui/codeeditor/js/ace/ace.js"/>

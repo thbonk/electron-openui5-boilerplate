@@ -74,7 +74,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/ResizeHa
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @public
@@ -172,6 +172,24 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/ResizeHa
 
 		DynamicSideContent.prototype.init = function () {
 			this._bSuppressInitialFireBreakPointChange = true;
+		};
+
+		/**
+		 * Sets the sideContentVisibility property.
+		 * @param {sap.ui.layout.SideContentVisibility} sVisibility Determines on which breakpoints the side content is visible.
+		 * @param {boolean} bSuppressVisualUpdate Determines if the visual state is updated
+		 * @returns {sap.ui.layout.DynamicSideContent} this pointer for chaining
+		 * @override
+		 * @public
+		 */
+		DynamicSideContent.prototype.setSideContentVisibility = function (sVisibility, bSuppressVisualUpdate) {
+			this.setProperty("sideContentVisibility", sVisibility, true);
+
+			if (!bSuppressVisualUpdate && this.$().length) {
+				this._setResizeData(this.getCurrentBreakpoint());
+				this._changeGridState();
+			}
+			return this;
 		};
 
 		/**

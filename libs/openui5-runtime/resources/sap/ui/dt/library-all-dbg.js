@@ -25,7 +25,7 @@ function(
 	 * Utility functionality for DOM
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @private
 	 * @static
@@ -290,16 +290,16 @@ function(
 
 			// pseudo elements can't be inserted via js, so we should create a real elements,
 			// which copy pseudo styling
-			var oAfterElement = jQuery("<span></span>");
+			var oPseudoElement = jQuery("<span></span>");
 			if (sPseudoElement === ":after") {
-				oAfterElement.appendTo(oDest);
+				oPseudoElement.appendTo(oDest);
 			} else {
-				oAfterElement.prependTo(oDest);
+				oPseudoElement.prependTo(oDest);
 			}
 
-			oAfterElement.text(sContent.replace(/\"/g, ""));
-			DOMUtil._copyStylesTo(mStyles, oAfterElement.get(0));
-			oAfterElement.css("display", "inline");
+			oPseudoElement.text(sContent.replace(/(^['"])|(['"]$)/g, ""));
+			DOMUtil._copyStylesTo(mStyles, oPseudoElement.get(0));
+			oPseudoElement.css("display", "inline");
 		}
 	};
 
@@ -399,7 +399,7 @@ sap.ui.define("sap/ui/dt/ElementUtil",['jquery.sap.global'],
 			 * @class Utility functionality to work with élements, e.g. iterate through aggregations, find parents, ...
 			 *
 			 * @author SAP SE
-			 * @version 1.48.5
+			 * @version 1.50.6
 			 *
 			 * @private
 			 * @static
@@ -928,7 +928,7 @@ sap.ui.define("sap/ui/dt/ManagedObjectObserver",[
 	 * @class The ManagedObjectObserver observes changes of a ManagedObject and propagates them via events.
 	 * @extends sap.ui.base.ManagedObject
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @constructor
 	 * @private
 	 * @since 1.30
@@ -1014,7 +1014,7 @@ sap.ui.define("sap/ui/dt/ManagedObjectObserver",[
 	};
 
 	/**
-	 * Starts observing the target object. Override this method in classes wich extend ManagedObjectObserver.
+	 * Starts observing the target object. Override this method in classes which extend ManagedObjectObserver.
 	 *
 	 * @param {sap.ui.base.ManagedObject} oTarget The target to observe
 	 * @protected
@@ -1409,9 +1409,8 @@ sap.ui.define("sap/ui/dt/ManagedObjectObserver",[
 	};
 
 	/**
-	 * Stops observing the target object. Override this method in classes wich extend ManagedObjectObserver.
+	 * Stops observing the target object. Override this method in classes which extend ManagedObjectObserver.
 	 *
-	 * @param {sap.ui.base.ManagedObject} oTarget The target to unobserve
 	 * @protected
 	 */
 	ManagedObjectObserver.prototype.unobserve = function() {
@@ -1483,7 +1482,7 @@ sap.ui.define("sap/ui/dt/ManagedObjectObserver",[
 	 * @return {sap.ui.base.ManagedObject} The instance of the associated target to observe.
 	 */
 	ManagedObjectObserver.prototype.getTargetInstance = function() {
-		return sap.ui.getCore().byId(this.getTarget());
+		return ElementUtil.getElementInstance(this.getTarget());
 	};
 
 	return ManagedObjectObserver;
@@ -1513,7 +1512,7 @@ function(ManagedObject, ElementUtil) {
 	 * Static registry for Overlays
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @private
 	 * @static
@@ -1589,8 +1588,15 @@ if ( !jQuery.sap.isDeclared('sap.ui.dt.OverlayUtil') ) {
 jQuery.sap.declare('sap.ui.dt.OverlayUtil'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
 sap.ui.define("sap/ui/dt/OverlayUtil",[
-	'jquery.sap.global', 'sap/ui/dt/OverlayRegistry', 'sap/ui/dt/ElementUtil'
-], function(jQuery, OverlayRegistry, ElementUtil) {
+	'jquery.sap.global',
+	'sap/ui/dt/OverlayRegistry',
+	'sap/ui/dt/ElementUtil'
+],
+function(
+	jQuery,
+	OverlayRegistry,
+	ElementUtil
+) {
 	"use strict";
 
 	/**
@@ -1598,7 +1604,7 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	 *
 	 * @class Utility functionality to work with overlays
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @private
 	 * @static
 	 * @since 1.30
@@ -1609,7 +1615,10 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	var OverlayUtil = {};
 
 	/**
-	 *
+	 * Check if the overlay is in target zone aggregation.
+	 * @param  {sap.ui.dt.ElementOverlay}  oElementOverlay The overlay to be checked
+	 * @return {boolean}                   Returns true if overlay is in target zone
+	 * @private
 	 */
 	OverlayUtil.isInTargetZoneAggregation = function(oElementOverlay) {
 		var oAggregationOverlay = oElementOverlay.getParent();
@@ -1617,7 +1626,13 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	};
 
 	/**
-	 * Returns an object with public parent, aggregation in public parent and direct index
+	 * Returns an object with public parent, aggregation in public parent and direct index.
+	 * @param  {sap.ui.dt.ElementOverlay} oElementOverlay The overlay to get the information from
+	 * @return {object}
+	 *         {object.parent}            The overlay parent element
+	 *         {object.aggregation}       The parent aggregation
+	 *         {object.index}             Position of the parent element in the aggregation
+	 * @private
 	 */
 	OverlayUtil.getParentInformation = function(oElementOverlay) {
 		var oParentOverlay = oElementOverlay.getParentElementOverlay();
@@ -1645,7 +1660,10 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	};
 
 	/**
-	 *
+	 * Get the closest overlay to an element (moving up the tree).
+	 * @param  {sap.ui.core.Element} oElement The element to be checked
+	 * @return {sap.ui.dt.ElementOverlay} Returns the overlay that was found first
+	 * @private
 	 */
 	OverlayUtil.getClosestOverlayFor = function(oElement) {
 		if (!oElement) {
@@ -1663,7 +1681,10 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	};
 
 	/**
-	 *
+	 * Get the Overlay geometry.
+	 * @param  {array}  aGeometry Array with the element geometries
+	 * @return {object} Returns geometry information: size (width, height), position (left, top) and visibility
+	 * @private
 	 */
 	OverlayUtil.getGeometry = function(aGeometry) {
 		var minLeft, maxRight, minTop, maxBottom;
@@ -1703,7 +1724,11 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	};
 
 	/**
-	 *
+	 * Get the closest overlay to an overlay (moving up the tree) for a particular element type.
+	 * @param  {string} sType The element type being searched
+	 * @param  {sap.ui.dt.ElementOverlay} oOverlay The source overlay
+	 * @return {sap.ui.dt.ElementOverlay} Returns the overlay for that element type that was found first
+	 * @private
 	 */
 	OverlayUtil.getClosestOverlayForType = function(sType, oOverlay) {
 		while (oOverlay && !ElementUtil.isInstanceOf(oOverlay.getElementInstance(), sType)) {
@@ -1714,11 +1739,14 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	};
 
 	/**
-	 *
+	 * Get the closest overlay (moving up the tree) that is scrollable.
+	 * @param  {sap.ui.dt.ElementOverlay} oOverlay The source overlay
+	 * @return {sap.ui.dt.ElementOverlay} Returns the scrollable overlay that was found first
+	 * @private
 	 */
 	OverlayUtil.getClosestScrollable = function(oOverlay) {
 		if (!oOverlay) {
-			return;
+			return undefined;
 		}
 
 		oOverlay = oOverlay.getParent();
@@ -1731,11 +1759,11 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 
 	/**
 	 * Returns first descendant of given ElementOverlay which fulfills
-	 * the given condition. Recursive function
+	 * the given condition. Recursive function.
 	 *
 	 * @param {sap.ui.dt.ElementOverlay} oOverlay - Source overlay object
 	 * @param {function} fnCondition - condition to search
-	 * @returns {sap.ui.dt.ElementOverlay} overlay which fulfills the condition otherwise it returns 'undefined'
+	 * @returns {sap.ui.dt.ElementOverlay} Returns the overlay which fulfills the condition, otherwise it returns 'undefined'
 	 * @private
 	 */
 	OverlayUtil.getFirstDescendantByCondition = function(oOverlay, fnCondition) {
@@ -1757,10 +1785,10 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	};
 
 	/**
-	 * Returns all overlay children as ElementOverlay
+	 * Returns all overlay children as ElementOverlay.
 	 *
 	 * @param {sap.ui.dt.ElementOverlay} oOverlay - Source overlay object
-	 * @returns {array} array of child overlays {sap.ui.dt.ElementOverlay}
+	 * @returns {array} Returns an array of child overlays {sap.ui.dt.ElementOverlay}
 	 * @private
 	 */
 	OverlayUtil.getAllChildOverlays = function(oOverlay) {
@@ -1779,10 +1807,10 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	};
 
 	/**
-	 * Returns first child overlay
+	 * Returns first child overlay.
 	 *
 	 * @param {sap.ui.dt.ElementOverlay} oOverlay - Source overlay object
-	 * @returns {sap.ui.dt.ElementOverlay} first child overlays
+	 * @returns {sap.ui.dt.ElementOverlay} Returns the first child overlay
 	 * @private
 	 */
 	OverlayUtil.getFirstChildOverlay = function(oOverlay) {
@@ -1794,10 +1822,10 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	};
 
 	/**
-	 * Returns last child overlay
+	 * Returns last child overlay.
 	 *
 	 * @param {sap.ui.dt.ElementOverlay} oOverlay - Source overlay object
-	 * @returns {sap.ui.dt.ElementOverlay} last child overlays
+	 * @returns {sap.ui.dt.ElementOverlay} Returns the last child overlay
 	 * @private
 	 */
 	OverlayUtil.getLastChildOverlay = function(oOverlay) {
@@ -1809,11 +1837,14 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	};
 
 	/**
-	 *
+	 * Returns next sibling overlay (going down the tree).
+	 * @param  {sap.ui.dt.ElementOverlay} oOverlay The source overlay
+	 * @return {sap.ui.dt.ElementOverlay} Returns the next sibling overlay
+	 * @private
 	 */
 	OverlayUtil.getNextSiblingOverlay = function(oOverlay) {
 		if (!oOverlay) {
-			return;
+			return undefined;
 		}
 
 		var oParentAggregationOverlay = oOverlay.getParentAggregationOverlay();
@@ -1838,11 +1869,14 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	};
 
 	/**
-	 *
+	 * Returns previous sibling overlay (going up the tree).
+	 * @param  {sap.ui.dt.ElementOverlay} oOverlay The source overlay
+	 * @return {sap.ui.dt.ElementOverlay} Returns the previous sibling overlay
+	 * @private
 	 */
 	OverlayUtil.getPreviousSiblingOverlay = function(oOverlay) {
 		if (!oOverlay) {
-			return;
+			return undefined;
 		}
 
 		var oParentAggregationOverlay = oOverlay.getParentAggregationOverlay();
@@ -1867,11 +1901,14 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	};
 
 	/**
-	 *
+	 * Get next overlay (look first in children, then next siblings).
+	 * @param  {sap.ui.dt.Overlay} oOverlay The source overlay
+	 * @return {sap.ui.dt.Overlay} Returns the overlay that was found first
+	 * @private
 	 */
 	OverlayUtil.getNextOverlay = function(oOverlay) {
 		if (!oOverlay) {
-			return;
+			return undefined;
 		}
 
 		var oFirstChildOverlay = this.getFirstChildOverlay(oOverlay);
@@ -1893,16 +1930,18 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	};
 
 	/**
-	 *
+	 * Get next overlay (look first in parent, then previous siblings).
+	 * @param  {sap.ui.dt.Overlay} oOverlay The source overlay
+	 * @return {sap.ui.dt.Overlay} Returns the overlay that was found first
 	 */
 	OverlayUtil.getPreviousOverlay = function(oOverlay) {
 		if (!oOverlay) {
-			return;
+			return undefined;
 		}
 
 		var oParentAggregationOverlay = oOverlay.getParentAggregationOverlay();
 		if (!oParentAggregationOverlay) {
-			return;
+			return undefined;
 		}
 
 		var oPreviousSiblingOverlay = this.getPreviousSiblingOverlay(oOverlay);
@@ -1920,7 +1959,9 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	};
 
 	/**
-	 *
+	 * Returns the root overlay of an overlay.
+	 * @param  {sap.ui.dt.Overlay} oOverlay The source overlay
+	 * @return {sap.ui.dt.Overlay} Returns the root overlay
 	 */
 	OverlayUtil.getRootOverlay = function(oOverlay) {
 		var oParentOverlay = oOverlay;
@@ -1933,7 +1974,10 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	};
 
 	/**
-	 *
+	 * Applies a function to every element in an overlay's element tree.
+	 * @param  {sap.ui.dt.ElementOverlay} oElementOverlay The source overlay
+	 * @param  {function} fnCallback The function to be applied
+	 * @private
 	 */
 	OverlayUtil.iterateOverlayElementTree = function(oElementOverlay, fnCallback) {
 		fnCallback(oElementOverlay);
@@ -1945,6 +1989,13 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 		}, this);
 	};
 
+	/**
+	 * Applies a function to every 'aggregation-like' children (e.g. associations).
+	 * @param  {sap.ui.dt.ElementOverlay} oElementOverlay  The source overlay
+	 * @param  {string} sAggregationName The name of the aggregation
+	 * @param  {function} fnCallback The function to be applied
+	 * @private
+	 */
 	OverlayUtil.iterateOverAggregationLikeChildren = function(oElementOverlay, sAggregationName, fnCallback) {
 		var oElement = oElementOverlay.getElementInstance();
 		var vChildren;
@@ -1957,7 +2008,10 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	};
 
 	/**
-	 *
+	 * Applies a function to every overlay in the tree (going down the tree).
+	 * @param  {sap.ui.dt.Overlay} oOverlay The source overlay
+	 * @param  {function} fnCallback The function to be applied
+	 * @private
 	 */
 	OverlayUtil.iterateOverlayTree = function(oOverlay, fnCallback) {
 		fnCallback(oOverlay);
@@ -1969,7 +2023,10 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 
 
 	/**
-	 *
+	 * Checks if a DOM node is part of an overlay container.
+	 * @param  {any}  oNode The node to be checked
+	 * @return {boolean} Returns true if the node is part of an overlay container
+	 * @private
 	 */
 	OverlayUtil.isInOverlayContainer = function(oNode) {
 		if (oNode && jQuery(oNode).closest(".sapUiDtOverlay, #overlay-container").length) {
@@ -1978,7 +2035,10 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	};
 
 	/**
-	 *
+	 * Returns the closest overlay to a given node.
+	 * @param  {any} oNode The source node
+	 * @return {sap.ui.dt.Overlay} Returns the closest overlay
+	 * @private
 	 */
 	OverlayUtil.getClosestOverlayForNode = function(oNode) {
 		var oElement = ElementUtil.getClosestElementForNode(oNode);
@@ -2017,7 +2077,7 @@ function(ManagedObject) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -2217,7 +2277,7 @@ function(jQuery) {
 	 * Utility functionality to work with élements, e.g. iterate through aggregations, find parents, ...
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @private
 	 * @static
@@ -2274,6 +2334,34 @@ function(jQuery) {
 	 */
 	RenderingUtil._renderChildren = function(oRm, oOverlay) {
 		var aChildrenOverlays = oOverlay.getChildren();
+		if (oOverlay._aScrollContainers) {
+			oOverlay._aScrollContainers.forEach(function(oScrollContainer, iIndex) {
+				oRm.write("<div");
+				oRm.addClass("sapUiDtOverlayScrollContainer");
+				oRm.writeClasses();
+				oRm.write("data-sap-ui-dt-scrollContainerIndex='" + iIndex + "'");
+				oRm.write(">");
+
+				if (oScrollContainer.aggregations) {
+					oScrollContainer.aggregations.forEach(function(sAggregationName) {
+						var oAggregationOverlay = oOverlay.getAggregationOverlay(sAggregationName);
+						oRm.renderControl(oAggregationOverlay);
+						aChildrenOverlays.splice(aChildrenOverlays.indexOf(oAggregationOverlay), 1);
+					});
+				}
+				oRm.write("</div>");
+			});
+		}
+
+		aChildrenOverlays.forEach(function(oChildOverlay) {
+			oRm.renderControl(oChildOverlay);
+		});
+	};
+
+	/**
+	 */
+	RenderingUtil._rerenderControls = function(oRm, oOverlay) {
+		var aChildrenOverlays = oOverlay.getChildren();
 		aChildrenOverlays.forEach(function(oChildOverlay) {
 			oRm.renderControl(oChildOverlay);
 		});
@@ -2282,9 +2370,9 @@ function(jQuery) {
 	/**
 	 */
 	RenderingUtil._triggerOnAfterRenderingWithoutRendering = function(oRm, oOverlay) {
-		// to trigger after rendering without renfering we need to write something in a renderManager buffer
+		// to trigger after rendering without rendering we need to write something in a renderManager buffer
 		oRm.write("");
-		this._renderChildren(oRm, oOverlay);
+		this._rerenderControls(oRm, oOverlay);
 	};
 
 	return RenderingUtil;
@@ -2318,14 +2406,15 @@ function(jQuery) {
 	 * @namespace
 	 * @name sap.ui.dt
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
+	 * @experimental This class is experimental and provides only limited functionality. Also the API might be changed in future.
 	 * @private
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.dt",
-		version: "1.48.5",
+		version: "1.50.6",
 		dependencies : ["sap.ui.core"],
 		types: [
 			"sap.ui.dt.SelectionMode"
@@ -2393,7 +2482,7 @@ function(Plugin, DOMUtil, OverlayUtil, ElementUtil) {
 	 * @extends sap.ui.dt.plugin.Plugin
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -3213,7 +3302,7 @@ sap.ui.define("sap/ui/dt/plugin/ElementMover",['sap/ui/base/ManagedObject', 'sap
 	 * @class The ElementMover enables movement of UI5 elements based on aggregation types, which can be used by drag and
 	 *        drop or cut and paste behavior.
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -3496,7 +3585,7 @@ function(Plugin) {
 	 * @extends sap.ui.dt.Plugin
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -3582,7 +3671,7 @@ function(jQuery, ElementUtil, OverlayRegistry) {
 	 * Utility functionality for Element tests
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @private
 	 * @static
@@ -3709,7 +3798,7 @@ function(jQuery, ManagedObject, ElementTest, ChangeRegistry) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -3898,7 +3987,7 @@ function(jQuery, ManagedObject, ElementEnablementTest2) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -4029,7 +4118,7 @@ function(jQuery, ManagedObject) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -4322,7 +4411,7 @@ function(jQuery, ManagedObject) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -4445,7 +4534,7 @@ sap.ui.define("sap/ui/dt/test/report/Statistic",['jquery.sap.global', 'sap/ui/co
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -4545,7 +4634,7 @@ sap.ui.define("sap/ui/dt/test/report/StatisticRenderer",['jquery.sap.global'],
 
 	/**
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @namespace
 	 */
 	var StatisticRenderer = {
@@ -4619,7 +4708,7 @@ sap.ui.define("sap/ui/dt/test/report/Table",['jquery.sap.global', 'sap/ui/core/C
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -4858,7 +4947,7 @@ sap.ui.define("sap/ui/dt/test/report/TableRenderer",['jquery.sap.global'],
 
 	/**
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @namespace
 	 */
 	var TableRenderer = {
@@ -4908,7 +4997,7 @@ sap.ui.define("sap/ui/dt/AggregationOverlayRenderer",['sap/ui/dt/RenderingUtil']
 
 	/**
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @namespace
 	 */
 	var AggregationOverlayRenderer = {
@@ -4952,7 +5041,7 @@ sap.ui.define("sap/ui/dt/ContextMenuControl",[
 	 * @class Context - Menu for Design time
 	 * @extends sap.ui.unified.Menu
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -4977,6 +5066,7 @@ sap.ui.define("sap/ui/dt/ContextMenuControl",[
 	 */
 	ContextMenuControl.prototype.init = function() {
 		Menu.prototype.init.apply(this, arguments);
+		this.addStyleClass("sapUiDtContextMenu");
 		this._fnOnKeyDown = this._onKeyDown.bind(this);
 		jQuery(document).keydown(this._fnOnKeyDown);
 		this.attachBrowserEvent("contextmenu", this._onContextMenu, this);
@@ -5126,7 +5216,7 @@ function(jQuery, ManagedObjectObserver) {
 	 * @extends sap.ui.dt.ManagedObjectObserver
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -5240,7 +5330,7 @@ function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -5418,7 +5508,7 @@ function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
 
 	/**
 	 * Returns all available triggers from designtime metadata
-	 * @return {array.<Object>} array of available triggers
+	 * @return {Array.<Object>} array of available triggers
 	 * @public
 	 */
 	DesignTimeMetadata.prototype.getTriggers = function() {
@@ -5452,7 +5542,7 @@ sap.ui.define("sap/ui/dt/ElementOverlayRenderer",['sap/ui/dt/RenderingUtil'],
 
 	/**
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @namespace
 	 */
 	var OverlayRenderer = {
@@ -5500,7 +5590,7 @@ sap.ui.define("sap/ui/dt/MutationObserver",[
 	 * @class The MutationObserver observes changes of a ManagedObject and propagates them via events.
 	 * @extends sap.ui.base.ManagedObject
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @constructor
 	 * @private
 	 * @since 1.30
@@ -5550,6 +5640,7 @@ sap.ui.define("sap/ui/dt/MutationObserver",[
 		jQuery(window).on("resize", this._fnFireDomChanged);
 
 		window.addEventListener("scroll", this._onScroll, true);
+		this._aIgnoredMutations = [];
 	};
 
 	/**
@@ -5566,6 +5657,17 @@ sap.ui.define("sap/ui/dt/MutationObserver",[
 		jQuery(window).off("resize", this._fnFireDomChanged);
 
 		window.removeEventListener("scroll", this._onScroll, true);
+	};
+
+	/**
+	 * Ignores a Mutation once
+	 *
+	 * @param {object} mParams
+	 * @param {object} mParams.target domNode of the target
+	 * @param {object} mParams.type type of the mutation
+	 */
+	MutationObserver.prototype.ignoreOnce = function(mParams) {
+		this._aIgnoredMutations.push(mParams);
 	};
 
 	/**
@@ -5589,18 +5691,38 @@ sap.ui.define("sap/ui/dt/MutationObserver",[
 						oTarget = oMutation.target.parentNode;
 					}
 
-					// filter out all mutation in overlays
-					if (!OverlayUtil.isInOverlayContainer(oTarget)) {
-						aTargetNodes.push(oTarget);
+					// TODO: ignore all RTA dom elements (dialogs, context menus, toolbars etc.)
+					var bIsFromRTA = OverlayUtil.isInOverlayContainer(oTarget)
+						|| jQuery(oTarget).closest(".sapUiDtContextMenu").length > 0
+						|| jQuery(oTarget).closest(".sapUiRtaToolbar").length > 0;
 
-						// define closest element to notify it's overlay about the dom mutation
-						var oOverlay = OverlayUtil.getClosestOverlayForNode(oTarget);
-						var sElementId = oOverlay ? oOverlay.getElementInstance().getId() : undefined;
-						if (sElementId) {
-							aElementIds.push(sElementId);
+					var bRelevantNode = jQuery.contains(document, oTarget)
+						&& oTarget.id !== "sap-ui-static"
+						&& jQuery(oTarget).closest("#sap-ui-preserve").length === 0;
+
+					if (bRelevantNode && !bIsFromRTA) {
+						var bIgnore = this._aIgnoredMutations.some(function(oIgnoredMutation, iIndex, aSource) {
+							if (oIgnoredMutation.target === oMutation.target
+									&& (oIgnoredMutation.type ? oIgnoredMutation.type === oMutation.type : true)) {
+								aSource.splice(iIndex, 1);
+								return true;
+							}
+						});
+
+
+						if (!bIgnore) {
+							aTargetNodes.push(oTarget);
+
+							// define closest element to notify it's overlay about the dom mutation
+							var oOverlay = OverlayUtil.getClosestOverlayForNode(oTarget);
+							var sElementId = oOverlay ? oOverlay.getElementInstance().getId() : undefined;
+							if (sElementId) {
+								aElementIds.push(sElementId);
+							}
 						}
 					}
-				});
+
+				}.bind(this));
 
 				if (aTargetNodes.length) {
 					this.fireDomChanged({
@@ -5694,7 +5816,7 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -5731,14 +5853,6 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 				focusable : {
 					type : "boolean",
 					defaultValue : false
-				},
-
-				/**
-				 * Whether the Overlay is enabled
-				 */
-				enabled: {
-					type: "boolean",
-					defaultValue: true
 				}
 			},
 			associations : {
@@ -5784,13 +5898,6 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 			}
 		}
 	});
-
-	/**
-	 * Returns children of this overlay
-	 * @return {sap.ui.dt.Overlay[]} overlays that are logical children of this overlay
-	 * @protected
-	 */
-	//Overlay.prototype.getChildren = function() {};
 
 	/**
 	 * Creates and/or returns an overlay container element, where all Overlays should be rendered (initially)
@@ -5856,13 +5963,46 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	 * @protected
 	 */
 	Overlay.prototype.exit = function() {
-		this._detachDomRefScrollHandler();
+		var oElementDomRef =  this._mGeometry ? this._mGeometry.domRef : null;
+		if (oElementDomRef) {
+			this._detachDomRefScrollHandler(oElementDomRef);
+		}
+
+		if (this._aScrollContainers) {
+			this._aScrollContainers.forEach(function(oScrollContainer, iIndex) {
+				if (this.getElementInstance()) {
+					var $scrollContainerAssociatedDomRef = this.getDesignTimeMetadata().getAssociatedDomRef(this.getElementInstance(), oScrollContainer.domRef);
+					if ($scrollContainerAssociatedDomRef && $scrollContainerAssociatedDomRef.length) {
+						var oScrollContainerAssociatedDomRef = $scrollContainerAssociatedDomRef.get(0);
+						this._detachDomRefScrollHandler(oScrollContainerAssociatedDomRef);
+					}
+				}
+				window.cancelAnimationFrame(oScrollContainer._iSyncScrollWithDomRef);
+			}.bind(this));
+		}
+
+		this._restoreVisibility();
 
 		delete this._oDomRef;
 		delete this._bVisible;
 		window.clearTimeout(this._iCloneDomTimeout);
-		window.clearTimeout(this._iSyncScrollWithDomRef);
+		window.cancelAnimationFrame(this._iSyncScrollWithDomRef);
 		this.fireDestroyed();
+	};
+
+	/**
+	 * Restore the visibility of the element which was set to "hidden" before DomRef cloning
+	 * @private
+	 */
+	Overlay.prototype._restoreVisibility = function(){
+		if (this._oCloneDomRefVisibility){
+			sap.ui.dt.Overlay.getMutationObserver().ignoreOnce({
+				target: jQuery(this._oCloneDomRefVisibility.domRef).get(0),
+				type: "attributes"
+			});
+			jQuery(this._oCloneDomRefVisibility.domRef).css("visibility", this._oCloneDomRefVisibility.visibility);
+			delete this._oCloneDomRefVisibility;
+		}
 	};
 
 	/**
@@ -5879,6 +6019,14 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	 * @protected
 	 */
 	Overlay.prototype.onAfterRendering = function() {
+		if (this._aScrollContainers && !this._oDomRef) {
+			this._aScrollContainers.forEach(function(oScrollContainer, iIndex) {
+				if (!oScrollContainer.overlayDomRef) {
+					oScrollContainer.overlayDomRef = this.$().find('> .sapUiDtOverlayChildren > [data-sap-ui-dt-scrollContainerIndex="' + iIndex + '"]');
+				}
+			}.bind(this));
+		}
+
 		this._oDomRef = this.getDomRef();
 
 		if (this._oDomRef) {
@@ -5961,27 +6109,10 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	 */
 	Overlay.prototype.applyStyles = function() {
 
-		if (!this.getEnabled()) {
-			return;
-		}
-
-		var fnDeleteDummyContainer = function() {
-			if (this._oDummyScrollContainer) {
-				this._oDummyScrollContainer.remove();
-				delete this._oDummyScrollContainer;
-				if (this.getParent() && this.getParent().$) {
-					var $parent = this.getParent().$();
-					$parent.removeClass("sapUiDtOverlayWithScrollBar");
-					$parent.removeClass("sapUiDtOverlayWithScrollBarVertical");
-					$parent.removeClass("sapUiDtOverlayWithScrollBarHorizontal");
-				}
-			}
-		}.bind(this);
-
 		// invalidate cached geometry
 		delete this._mGeometry;
 
-		if (!this.getDomRef()) {
+		if (!this._oDomRef) {
 			return;
 		}
 
@@ -5993,78 +6124,31 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 		var oGeometry = this.getGeometry();
 
 		if (oGeometry && oGeometry.visible) {
+			this._ensureDomOrder();
 			var $overlay = this.$();
-			var iScrollingWidth = DOMUtil.getScrollbarWidth();
-			var mSize = oGeometry.size;
 
-			// ensure visibility
-			$overlay.css("display", "block");
-
-			var oOverlayParent = this.getParent();
-
-			var iParentScrollTop = (oOverlayParent && oOverlayParent instanceof Overlay) ? oOverlayParent.$().scrollTop() : null;
-			var iParentScrollLeft = (oOverlayParent && oOverlayParent instanceof Overlay) ? oOverlayParent.$().scrollLeft() : null;
-			var mParentOffset = (oOverlayParent && oOverlayParent instanceof Overlay) ? oOverlayParent.$().offset() : null;
-
-			if (mParentOffset && jQuery('html').attr('dir') === 'rtl' && DOMUtil.hasVerticalScrollBar(oOverlayParent.getDomRef())) {
-				mParentOffset.left += iScrollingWidth;
-			}
-
-			var mPosition = DOMUtil.getOffsetFromParent(oGeometry.position, mParentOffset, iParentScrollTop, iParentScrollLeft);
-
-			// OVERLAY SIZE
-			$overlay.css("width", mSize.width + "px");
-			$overlay.css("height", mSize.height + "px");
-			$overlay.css("top", mPosition.top + "px");
-			$overlay.css("left", mPosition.left + "px");
+			this._setOverlaySize($overlay, oGeometry, this.getParent());
 
 			if (oGeometry.domRef) {
-				var iZIndex = DOMUtil.getZIndex(oGeometry.domRef);
-				if (iZIndex) {
-					$overlay.css("z-index", iZIndex);
-				}
-
-				// OVERFLOW & SCROLLING
-				var oOverflows = DOMUtil.getOverflows(oGeometry.domRef);
-				if (oOverflows) {
-					if (oOverflows.overflowX) {
-						$overlay.css("overflow-x", oOverflows.overflowX);
-					}
-					if (oOverflows.overflowY) {
-						$overlay.css("overflow-y", oOverflows.overflowY);
-					}
-					var iScrollHeight = oGeometry.domRef.scrollHeight;
-					var iScrollWidth = oGeometry.domRef.scrollWidth;
-					// Math.ceil is needed because iScrollHeight is an integer value, mSize not. To compare we should have an integer value for mSize too.
-					// example: iScrollHeight = 24px, mSize.height = 23.98375. Both should be the same.
-					if (iScrollHeight > Math.ceil(mSize.height) || iScrollWidth > Math.ceil(mSize.width)) {
-						if (!this._oDummyScrollContainer) {
-							this._oDummyScrollContainer = jQuery("<div class='sapUiDtDummyScrollContainer' style='height: " + iScrollHeight + "px; width: " + iScrollWidth + "px;'></div>");
-
-							if (oOverlayParent.$ && DOMUtil.hasVerticalScrollBar(oGeometry.domRef)) {
-								oOverlayParent.$().addClass("sapUiDtOverlayWithScrollBar");
-								oOverlayParent.$().addClass("sapUiDtOverlayWithScrollBarVertical");
-							}
-							if (oOverlayParent.$ && DOMUtil.hasHorizontalScrollBar(oGeometry.domRef)) {
-								oOverlayParent.$().addClass("sapUiDtOverlayWithScrollBar");
-								oOverlayParent.$().addClass("sapUiDtOverlayWithScrollBarHorizontal");
-							}
-							this.$().append(this._oDummyScrollContainer);
-						} else {
-							this._oDummyScrollContainer.css({
-								"height": iScrollHeight,
-								"width" : iScrollWidth
-							});
-						}
-					} else {
-						fnDeleteDummyContainer();
-					}
-					this._attachDomRefScrollHandler();
-
-					this._syncScrollWithDomRef();
-				}
-
+				this._handleOverflowScroll(oGeometry, $overlay, this.getParent());
 				this._cloneDomRef(oGeometry.domRef);
+			}
+
+			if (this._aScrollContainers && this._aScrollContainers.length) {
+				this._aScrollContainers.forEach(function(oScrollContainer, iIndex) {
+					if (this.getDesignTimeMetadata().getAssociatedDomRef(this.getElementInstance(), oScrollContainer.domRef)) {
+						var oScrollContainerDomRef = this.getDesignTimeMetadata().getAssociatedDomRef(this.getElementInstance(), oScrollContainer.domRef).get(0);
+						this._setOverlaySize(oScrollContainer.overlayDomRef, DOMUtil.getGeometry(oScrollContainerDomRef), this);
+						//sync scroll events from control to scroll container
+						this._handleOverflowScroll(DOMUtil.getGeometry(oScrollContainerDomRef), oScrollContainer.overlayDomRef, this);
+						// sync scroll events from scroll container to control
+						this._attachDomRefScrollHandler(oScrollContainer.overlayDomRef, oScrollContainerDomRef);
+					} else {
+						this._deleteDummyContainer(oScrollContainer.overlayDomRef);
+						oScrollContainer.scrollEvents = false;
+						oScrollContainer.overlayDomRef.css("display", "none");
+					}
+				}.bind(this));
 			}
 
 			this.getChildren().forEach(function(oChild) {
@@ -6072,7 +6156,6 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 			});
 
 		} else {
-			fnDeleteDummyContainer();
 			this.$().css("display", "none");
 		}
 	};
@@ -6080,15 +6163,119 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	/**
 	 * @private
 	 */
-	Overlay.prototype._attachDomRefScrollHandler = function() {
-		this._detachDomRefScrollHandler();
+	Overlay.prototype._setOverlaySize = function($overlay, oGeometry, oOverlayParent) {
+		// ensure visibility
+		$overlay.css("display", "block");
+		var $overlayParentDomRef = (oOverlayParent && oOverlayParent instanceof Overlay) ? oOverlayParent.$() : null;
 
-		var oGeometry = this.getGeometry();
-		var oDomRef = oGeometry ? oGeometry.domRef : null;
+		if (oOverlayParent._aScrollContainers && $overlay.attr("class") !== "sapUiDtOverlayScrollContainer") {
+
+			var iScrollContainerIndex = this._getScrollContainerIndex(oOverlayParent);
+
+			if (iScrollContainerIndex > -1) {
+				var $scrollContainer = oOverlayParent.$().find('> .sapUiDtOverlayChildren > [data-sap-ui-dt-scrollContainerIndex="' + iScrollContainerIndex + '"]');
+				$overlayParentDomRef = $scrollContainer;
+			}
+		}
+
+		var iScrollingWidth = DOMUtil.getScrollbarWidth();
+		var mSize = oGeometry.size;
+
+		var iParentScrollTop = $overlayParentDomRef ? $overlayParentDomRef.scrollTop() : null;
+		var iParentScrollLeft = $overlayParentDomRef ? $overlayParentDomRef.scrollLeft() : null;
+		var mParentOffset = $overlayParentDomRef ? $overlayParentDomRef.offset() : null;
+
+		if (mParentOffset && jQuery('html').attr('dir') === 'rtl' && DOMUtil.hasVerticalScrollBar(oOverlayParent.getDomRef())) {
+			mParentOffset.left += iScrollingWidth;
+		}
+
+		var mPosition = DOMUtil.getOffsetFromParent(oGeometry.position, mParentOffset, iParentScrollTop, iParentScrollLeft);
+
+		// OVERLAY SIZE
+		$overlay.css("width", mSize.width + "px");
+		$overlay.css("height", mSize.height + "px");
+		$overlay.css("top", mPosition.top + "px");
+		$overlay.css("left", mPosition.left + "px");
+	};
+
+	/**
+	 * @private
+	 */
+	Overlay.prototype._deleteDummyContainer = function($overlay) {
+		if ($overlay.find("> .sapUiDtDummyScrollContainer").length > 0) {
+				$overlay.find("> .sapUiDtDummyScrollContainer").remove();
+				if (this.getParent() && this.getParent().$) {
+					var $parent = this.getParent().$();
+					$parent.removeClass("sapUiDtOverlayWithScrollBar");
+					$parent.removeClass("sapUiDtOverlayWithScrollBarVertical");
+					$parent.removeClass("sapUiDtOverlayWithScrollBarHorizontal");
+				}
+			}
+	};
+
+	/**
+	 * Handle overflow from controls and sync with overlay
+	 * @private
+	 */
+	Overlay.prototype._handleOverflowScroll = function(oGeometry, $overlayDomRef, oOverlayParent) {
+		var $originalDomRef = oGeometry.domRef;
+		var mSize = oGeometry.size;
+		var iZIndex = DOMUtil.getZIndex($originalDomRef);
+		if (iZIndex) {
+			$overlayDomRef.css("z-index", iZIndex);
+		}
+
+		// OVERFLOW & SCROLLING
+		var oOverflows = DOMUtil.getOverflows($originalDomRef);
+		if (oOverflows) {
+			if (oOverflows.overflowX) {
+				$overlayDomRef.css("overflow-x", oOverflows.overflowX);
+			}
+			if (oOverflows.overflowY) {
+				$overlayDomRef.css("overflow-y", oOverflows.overflowY);
+			}
+			var iScrollHeight = $originalDomRef.scrollHeight;
+			var iScrollWidth = $originalDomRef.scrollWidth;
+			// Math.ceil is needed because iScrollHeight is an integer value, mSize not. To compare we should have an integer value for mSize too.
+			// example: iScrollHeight = 24px, mSize.height = 23.98375. Both should be the same.
+			if (iScrollHeight > Math.ceil(mSize.height) || iScrollWidth > Math.ceil(mSize.width)) {
+				var oDummyScrollContainer = $overlayDomRef.find("> .sapUiDtDummyScrollContainer");
+				if (!oDummyScrollContainer.length) {
+					oDummyScrollContainer = jQuery("<div class='sapUiDtDummyScrollContainer' style='height: " + iScrollHeight + "px; width: " + iScrollWidth + "px;'></div>");
+					if (oOverlayParent.$ && DOMUtil.hasVerticalScrollBar(oGeometry.domRef)) {
+						oOverlayParent.$().addClass("sapUiDtOverlayWithScrollBar");
+						oOverlayParent.$().addClass("sapUiDtOverlayWithScrollBarVertical");
+					}
+					if (oOverlayParent.$ && DOMUtil.hasHorizontalScrollBar(oGeometry.domRef)) {
+						oOverlayParent.$().addClass("sapUiDtOverlayWithScrollBar");
+						oOverlayParent.$().addClass("sapUiDtOverlayWithScrollBarHorizontal");
+					}
+					$overlayDomRef.append(oDummyScrollContainer);
+				} else {
+					oDummyScrollContainer.css({
+						"height": iScrollHeight,
+						"width" : iScrollWidth
+					});
+				}
+			} else {
+				this._deleteDummyContainer($overlayDomRef);
+			}
+
+			this._attachDomRefScrollHandler(oGeometry.domRef, $overlayDomRef);
+
+			this._syncScrollWithDomRef(oGeometry.domRef, $overlayDomRef);
+		}
+	};
+
+	/**
+	 * Sync scroll events from controls domRef with overlay
+	 * @private
+	 */
+	Overlay.prototype._attachDomRefScrollHandler = function(oDomRef, $overlayDomRef) {
+
+		this._detachDomRefScrollHandler(oDomRef);
 		if (oDomRef) {
-			this._oDomRefWithScrollHandler = oDomRef;
-
-			jQuery(this._oDomRefWithScrollHandler).on("scroll", this._domRefScrollHandler);
+			jQuery(oDomRef).on("scroll", null, [oDomRef, $overlayDomRef], this._domRefScrollHandler);
 		}
 	};
 
@@ -6097,30 +6284,46 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	 * @private
 	 */
 	Overlay.prototype._detachDomRefScrollHandler = function(oDomRef) {
-		if (this._oDomRefWithScrollHandler) {
-			jQuery(this._oDomRefWithScrollHandler).off("scroll", this._domRefScrollHandler);
-			delete this._oDomRefWithScrollHandler;
+		if (oDomRef) {
+			jQuery(oDomRef).off("scroll", this._domRefScrollHandler);
 		}
 	};
 
 	/**
 	 * @private
 	 */
-	Overlay.prototype._onSyncScrollWithDomRef = function() {
-		window.clearTimeout(this._iSyncScrollWithDomRef);
+	Overlay.prototype._onSyncScrollWithDomRef = function(oEvent) {
+		var oSourceDomRef = oEvent.data[0];
+		var $targetDomRef = oEvent.data[1];
+		var oScrollContainer;
+		var sScrollContainerIndex = jQuery($targetDomRef).attr("data-sap-ui-dt-scrollcontainerindex") || jQuery(oSourceDomRef).attr("data-sap-ui-dt-scrollcontainerindex");
+
+		if (sScrollContainerIndex) {
+			oScrollContainer = this._aScrollContainers[sScrollContainerIndex];
+		} else {
+			oScrollContainer = this;
+		}
+
+		window.cancelAnimationFrame(oScrollContainer._iSyncScrollWithDomRef);
 		// timeout needed so that scroll wheel in chrome windows works fast
-		this._iSyncScrollWithDomRef = window.setTimeout(function() {
-			this._syncScrollWithDomRef();
-			delete this._iSyncScrollWithDomRef;
-		}.bind(this), 0);
+		oScrollContainer._iSyncScrollWithDomRef = window.requestAnimationFrame(function() {
+			this._syncScrollWithDomRef(oSourceDomRef, $targetDomRef);
+			delete oScrollContainer._iSyncScrollWithDomRef;
+		}.bind(this));
 	};
 
 	/**
 	 * @private
 	 */
-	Overlay.prototype._syncScrollWithDomRef = function() {
-		DOMUtil.syncScroll(this._oDomRefWithScrollHandler, this.$());
+	Overlay.prototype._syncScrollWithDomRef = function(oDomRef, oOverlayDomRef) {
+		DOMUtil.syncScroll(oDomRef, oOverlayDomRef);
 	};
+
+	/**
+	 * @private
+	 * @returns index of the scroll container containing this aggregation, -1 if scroll container exist, but this aggregation is not included, undefined if no scroll container exist
+	 */
+	Overlay.prototype._getScrollContainerIndex = function(oOverlayParent, oOverlay) {};
 
 	/**
 	 * Returns an object, which describes the DOM geometry of the element associated with this overlay or null if it can't be found
@@ -6180,9 +6383,21 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 						$clonedDom.empty();
 					}
 
+					this._restoreVisibility();
+
 					//TODO: disable update
 					DOMUtil.cloneDOMAndStyles(oDomRef, $clonedDom);
-				};
+
+					this._oCloneDomRefVisibility = {
+						domRef: jQuery(oDomRef),
+						visibility: jQuery(oDomRef).css("visibility")
+					};
+					sap.ui.dt.Overlay.getMutationObserver().ignoreOnce({
+						target: jQuery(oDomRef).get(0),
+						type: "attributes"
+					});
+					jQuery(oDomRef).css("visibility", "hidden");
+				}.bind(this);
 
 				if (!this._bClonedDom) {
 					this._bClonedDom = true;
@@ -6190,7 +6405,7 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 				} else {
 					window.clearTimeout(this._iCloneDomTimeout);
 					// cloneDom is expensive, therefore the call is delayed
-					this._iCloneDomTimeout = window.setTimeout(fnCloneDom, 250);
+					this._iCloneDomTimeout = window.setTimeout(fnCloneDom, 0);
 				}
 			}
 		} else {
@@ -6202,13 +6417,17 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	 * @private
 	 */
 	Overlay.prototype._updateDom = function() {
+		var bApplyStyles;
+		if (!document.getElementById(this.getId()) && document.getElementById(this.getParent().getId())) {
+			bApplyStyles = true;
+		}
+
 		if (this.isRoot()) {
 			this._ensureIsInOverlayContainer();
-
 			// apply styles propagated from root overlays to all their children
 			this.applyStyles();
-		} else {
-			this._ensureDomOrder();
+		} else if (bApplyStyles) {
+			this.applyStyles();
 		}
 	};
 
@@ -6218,39 +6437,57 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	Overlay.prototype._ensureDomOrder = function() {
 		var $this = this.$();
 
-		var oParent = this.getParent();
-		var $parentDomRef = oParent.$();
-		var $parentContainer = $parentDomRef.find(">.sapUiDtOverlayChildren");
-
-		var bIsDomOrderCorrect;
-
-		var $PreviousChildWithDom;
-
-		var aChildren = oParent.getChildren();
-		var iPreviousChildWithDomIndex = aChildren.indexOf(this) - 1;
-		while (iPreviousChildWithDomIndex >= 0) {
-			$PreviousChildWithDom = aChildren[iPreviousChildWithDomIndex].$();
-			if ($PreviousChildWithDom.length) {
-				break;
-			}
-			iPreviousChildWithDomIndex--;
+		var oParentOverlay = this.getParent();
+		if (!oParentOverlay || !oParentOverlay.$) {
+			return;
 		}
 
-		// if our dom is already after out previous sibling
-		if ($PreviousChildWithDom && $PreviousChildWithDom.length) {
-			bIsDomOrderCorrect = $this.prev().get(0) === $PreviousChildWithDom.get(0);
+		var $parentDomRef = oParentOverlay.$();
+		var $parentContainer = $parentDomRef.find(">.sapUiDtOverlayChildren");
+		var aSiblingOverlays = oParentOverlay.getChildren();
+
+		var iScrollContainerIndex = this._getScrollContainerIndex(oParentOverlay);
+		if (iScrollContainerIndex > -1) {
+			//there are scroll containers and it contains the current aggregation overlay
+			$parentContainer = $parentContainer.find('> [data-sap-ui-dt-scrollContainerIndex="' + iScrollContainerIndex + '"]');
+			aSiblingOverlays = aSiblingOverlays.filter(function(oSibling) {
+				return oParentOverlay._aScrollContainers[iScrollContainerIndex].aggregations.indexOf(oSibling.getAggregationName()) > -1;
+			});
+		}
+
+		var bIsDomOrderCorrect;
+		var iPreviousScrollContainerIndex;
+		var $PreviousSiblingWithDom;
+		var iPreviousSiblingWithDomIndex = aSiblingOverlays.indexOf(this) - 1;
+		while (iPreviousSiblingWithDomIndex >= 0) {
+			iPreviousScrollContainerIndex = this._getScrollContainerIndex(oParentOverlay, aSiblingOverlays[iPreviousSiblingWithDomIndex]);
+
+			if (iPreviousScrollContainerIndex > -1) {
+				$PreviousSiblingWithDom = jQuery($parentContainer.children()[iPreviousSiblingWithDomIndex]);
+			} else {
+				$PreviousSiblingWithDom = aSiblingOverlays[iPreviousSiblingWithDomIndex].$();
+			}
+
+			if ($PreviousSiblingWithDom.length) {
+				break;
+			}
+			iPreviousSiblingWithDomIndex--;
+		}
+
+		// if our dom is already after our previous sibling
+		if ($PreviousSiblingWithDom && $PreviousSiblingWithDom.length) {
+			bIsDomOrderCorrect = $this.prev().get(0) === $PreviousSiblingWithDom.get(0);
 		// .. or first in parent container
 		} else {
 			bIsDomOrderCorrect = $parentContainer.children().index($this) === 0;
 		}
 
 		if (!bIsDomOrderCorrect) {
-			if ($PreviousChildWithDom && $PreviousChildWithDom.length) {
-				$PreviousChildWithDom.after($this);
+			if ($PreviousSiblingWithDom && $PreviousSiblingWithDom.length) {
+				$PreviousSiblingWithDom.after($this);
 			} else {
 				$parentContainer.prepend($this);
 			}
-			oParent.applyStyles();
 		}
 	};
 
@@ -6286,7 +6523,12 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	 * @public
 	 */
 	Overlay.prototype.setVisible = function(bVisible) {
+		bVisible = !!bVisible;
+
 		if (this.getVisible() !== bVisible) {
+			if (!bVisible) {
+				this._restoreVisibility();
+			}
 			this.setProperty("visible", bVisible);
 			this._bVisible = bVisible;
 			this.fireVisibleChanged({visible : bVisible});
@@ -6312,7 +6554,6 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 			return this.getProperty("visible");
 		}
 	};
-
 
 	/**
 	 * Returns if the Overlay is visible
@@ -6370,7 +6611,7 @@ function(ManagedObject) {
 	 * @extends sap.ui.dt.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -6506,7 +6747,7 @@ sap.ui.define("sap/ui/dt/plugin/ContextMenu",[
 	 * @class The ContextMenu registers event handler to open the context menu. Menu entries can dynamically be added
 	 * @extends sap.ui.dt.Plugin
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -6523,6 +6764,9 @@ sap.ui.define("sap/ui/dt/plugin/ContextMenu",[
 			properties: {
 				contextElement : {
 					type : "object"
+				},
+				styleClass: {
+					type: "string"
 				}
 			},
 			associations: {},
@@ -6590,6 +6834,7 @@ sap.ui.define("sap/ui/dt/plugin/ContextMenu",[
 		this.setContextElement(oTargetOverlay.getElementInstance());
 
 		this._oContextMenuControl = new ContextMenuControl();
+		this._oContextMenuControl.addStyleClass(this.getStyleClass());
 		this._oContextMenuControl.setMenuItems(this._aMenuItems, oTargetOverlay);
 		this._oContextMenuControl.setOverlayDomRef(oTargetOverlay);
 		this._oContextMenuControl.attachItemSelect(this._onItemSelected, this);
@@ -6701,7 +6946,7 @@ sap.ui.define("sap/ui/dt/plugin/ControlDragDrop",['sap/ui/dt/plugin/DragDrop', '
 	 * @class The ControlDragDrop enables D&D functionality for the overlays based on aggregation types
 	 * @extends sap.ui.dt.plugin.DragDrop"
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @constructor
 	 * @private
 	 * @since 1.30
@@ -6850,8 +7095,11 @@ if ( !jQuery.sap.isDeclared('sap.ui.dt.plugin.CutPaste') ) {
 // Provides class sap.ui.dt.plugin.CutPaste.
 jQuery.sap.declare('sap.ui.dt.plugin.CutPaste'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 sap.ui.define("sap/ui/dt/plugin/CutPaste",[
-	'sap/ui/dt/Plugin', 'sap/ui/dt/plugin/ElementMover', 'sap/ui/dt/OverlayUtil'
-], function(Plugin, ElementMover, OverlayUtil) {
+	'sap/ui/dt/Plugin',
+	'sap/ui/dt/plugin/ElementMover',
+	'sap/ui/dt/OverlayUtil',
+	'sap/ui/dt/OverlayRegistry'
+], function(Plugin, ElementMover, OverlayUtil, OverlayRegistry) {
 	"use strict";
 
 	/**
@@ -6862,7 +7110,7 @@ sap.ui.define("sap/ui/dt/plugin/CutPaste",[
 	 * @class The CutPaste enables Cut & Paste functionality for the overlays based on aggregation types
 	 * @extends sap.ui.dt.Plugin"
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -6958,7 +7206,9 @@ sap.ui.define("sap/ui/dt/plugin/CutPaste",[
 			oEvent.stopPropagation();
 		} else if ((oEvent.keyCode === jQuery.sap.KeyCodes.V) && (oEvent.shiftKey === false) && (oEvent.altKey === false) && (bCtrlKey === true)) {
 			// CTRL+V
-			this.paste(oOverlay);
+			if (this.getElementMover().getMovedOverlay()) {
+				this.paste(oOverlay);
+			}
 			oEvent.stopPropagation();
 		} else if (oEvent.keyCode === jQuery.sap.KeyCodes.ESCAPE) {
 			// ESC
@@ -6990,24 +7240,28 @@ sap.ui.define("sap/ui/dt/plugin/CutPaste",[
 		if (!oCutOverlay) {
 			return false;
 		}
-		if (!this._isForSameElement(oCutOverlay, oTargetOverlay)) {
 
+		var bResult = false;
+		if (!this._isForSameElement(oCutOverlay, oTargetOverlay)) {
 			var oTargetZoneAggregation = this._getTargetZoneAggregation(oTargetOverlay);
 			if (oTargetZoneAggregation) {
 				this.getElementMover().insertInto(oCutOverlay, oTargetZoneAggregation);
-				return true;
+				bResult = true;
 			} else if (OverlayUtil.isInTargetZoneAggregation(oTargetOverlay)) {
 				this.getElementMover().repositionOn(oCutOverlay, oTargetOverlay);
-				return true;
-			} else {
-				return false;
+				bResult = true;
 			}
 		}
 
 		// focus get invalidated, see BCP 1580061207
-		setTimeout(function(){
-			oCutOverlay.focus();
-		},0);
+		if (bResult) {
+			oCutOverlay.setSelected(true);
+			setTimeout(function () {
+				oCutOverlay.focus();
+			}, 0);
+		}
+
+		return bResult;
 	};
 
 	/**
@@ -7076,7 +7330,7 @@ sap.ui.define("sap/ui/dt/plugin/TabHandling",[
 	 * @class The TabHandling plugin adjusts the tabindex for the elements.
 	 * @extends sap.ui.dt.Plugin
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @constructor
 	 * @private
 	 * @since 1.38
@@ -7099,7 +7353,7 @@ sap.ui.define("sap/ui/dt/plugin/TabHandling",[
 
 	TabHandling.prototype.registerElementOverlay = function(oOverlay) {
 		if (oOverlay.isRoot()) {
-			this._removeTabIndex();
+			this.removeTabIndex();
 		}
 	};
 
@@ -7111,7 +7365,7 @@ sap.ui.define("sap/ui/dt/plugin/TabHandling",[
 	 */
 	TabHandling.prototype.deregisterElementOverlay = function(oOverlay) {
 		if (oOverlay.isRoot()) {
-			this._restoreTabIndex();
+			this.restoreTabIndex();
 		}
 	};
 
@@ -7125,17 +7379,14 @@ sap.ui.define("sap/ui/dt/plugin/TabHandling",[
 		} else {
 			this._oMutationObserver.detachDomChanged(this._onDomChanged, this);
 			delete this._oMutationObserver;
-			this._restoreTabIndex();
+			this.restoreTabIndex();
 		}
 	};
 
 	/**
 	 * Traverse the whole DOM tree and set tab indices to -1 for all elements
-	 *
-	 * @param {sap.ui.core.Element} oRootDom object of the root DOM element
-	 * @private
 	 */
-	TabHandling.prototype._removeTabIndex = function() {
+	TabHandling.prototype.removeTabIndex = function() {
 		var oDesignTime = this.getDesignTime();
 		var aRootElements = oDesignTime.getRootElements();
 		aRootElements.forEach(function(sRootElement) {
@@ -7149,10 +7400,8 @@ sap.ui.define("sap/ui/dt/plugin/TabHandling",[
 
 	/**
 	 * Restore the tab indices of all elements of the DOM tree
-	 *
-	 * @private
 	 */
-	TabHandling.prototype._restoreTabIndex = function() {
+	TabHandling.prototype.restoreTabIndex = function() {
 		jQuery("[data-sap-ui-dt-tabindex]").each(function(iIndex, oNode) {
 			oNode.setAttribute("tabIndex", oNode.getAttribute("data-sap-ui-dt-tabindex"));
 			oNode.removeAttribute("data-sap-ui-dt-tabindex");
@@ -7164,7 +7413,7 @@ sap.ui.define("sap/ui/dt/plugin/TabHandling",[
 	 */
 	TabHandling.prototype._onDomChanged = function() {
 		if (this.getDesignTime().getEnabled()) {
-			this._removeTabIndex();
+			this.removeTabIndex();
 		}
 	};
 
@@ -7201,7 +7450,7 @@ function (jQuery, DesignTimeMetadata) {
 	 * @extends sap.ui.core.DesignTimeMetadata
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -7292,7 +7541,7 @@ function(jQuery, Overlay) {
 	 * @extends sap.ui.core.Overlay
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -7413,6 +7662,28 @@ function(jQuery, Overlay) {
 		return this.getAggregation("children") || [];
 	};
 
+	/**
+	 * @inheritDoc
+	 */
+	AggregationOverlay.prototype._getScrollContainerIndex = function(oOverlayParent, oOverlay) {
+		var iScrollContainerIndex;
+		oOverlay = oOverlay || this;
+		if (oOverlayParent._aScrollContainers) {
+			iScrollContainerIndex = -1;
+			oOverlayParent._aScrollContainers.some(function(oScrollContainer, iIndex) {
+				if (oScrollContainer.aggregations) {
+					return oScrollContainer.aggregations.some(function(sAggregationName) {
+						if (oOverlay.getAggregationName() === sAggregationName) {
+							iScrollContainerIndex = iIndex;
+							return true;
+						}
+					});
+				}
+			});
+		}
+		return iScrollContainerIndex;
+	};
+
 	return AggregationOverlay;
 }, /* bExport= */ true);
 
@@ -7447,7 +7718,7 @@ function(jQuery, DesignTimeMetadata, AggregationDesignTimeMetadata) {
 	 * @extends sap.ui.core.DesignTimeMetadata
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -7641,6 +7912,15 @@ function(jQuery, DesignTimeMetadata, AggregationDesignTimeMetadata) {
 		}
 	};
 
+	/**
+	 * Returns the scroll containers or an empty array
+	 *
+	 * @return {array} scrollContainers or empty array
+	 * @public
+	 */
+	ElementDesignTimeMetadata.prototype.getScrollContainers = function() {
+		return this.getData().scrollContainers || [];
+	};
 
 	return ElementDesignTimeMetadata;
 }, /* bExport= */ true);
@@ -7682,7 +7962,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -7850,12 +8130,12 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @override
 	 */
 	ElementOverlay.prototype.applyStyles = function() {
-		Overlay.prototype.applyStyles.apply(this, arguments);
-
 		var oGeometry = this.getGeometry();
 		if (oGeometry && oGeometry.visible) {
 			this._sortAggregationOverlaysInDomOrder();
 		}
+
+		Overlay.prototype.applyStyles.apply(this, arguments);
 	};
 
 	/**
@@ -8064,6 +8344,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 		var oReturn = this.setAggregation("designTimeMetadata", oDesignTimeMetadata);
 
 		if (this.getElementInstance()) {
+			this._aScrollContainers = this.getDesignTimeMetadata().getScrollContainers();
 			this._renderAndCreateAggregation();
 		}
 
@@ -8139,7 +8420,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	/**
 	 * Sets whether the ElementOverlay is selected and toggles corresponding css class
 	 * @param {boolean} bSelected if the ElementOverlay is selected
-	 * @param {boolean} bSuppressEvent (internal use only) supress firing "selectionChange" event
+	 * @param {boolean} bSuppressEvent (internal use only) suppress firing "selectionChange" event
 	 * @returns {sap.ui.dt.ElementOverlay} returns this
 	 * @public
 	 */
@@ -8199,12 +8480,10 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @public
 	 */
 	ElementOverlay.prototype.sync = function() {
-		if (this.isVisible()) {
-			var aAggregationOverlays = this.getAggregationOverlays();
-			aAggregationOverlays.forEach(function(oAggregationOverlay) {
-				this._syncAggregationOverlay(oAggregationOverlay);
-			}, this);
-		}
+		var aAggregationOverlays = this.getAggregationOverlays();
+		aAggregationOverlays.forEach(function(oAggregationOverlay) {
+			this._syncAggregationOverlay(oAggregationOverlay);
+		}, this);
 	};
 
 	ElementOverlay.prototype._getParentRelevantContainerPropagation = function() {
@@ -8434,15 +8713,6 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 		}
 	};
 
-	/**
-	 * @param {boolean} bVisible visible attribute
-	 * @protected
-	 */
-	ElementOverlay.prototype.setVisible = function(bVisible) {
-		Overlay.prototype.setVisible.apply(this, arguments);
-
-		this.sync();
-	};
 
 	/**
 	 * @param {string} sAggregationName name of the aggregation
@@ -8463,19 +8733,16 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 */
 	ElementOverlay.prototype._onElementModified = function(oEvent) {
 		var oParams = oEvent.getParameters();
-
 		var sAggregationName = oEvent.getParameters().name;
 		if (sAggregationName) {
 			var oAggregationOverlay = this.getAggregationOverlay(sAggregationName);
 			// private aggregations are also skipped
-			var bAggregationOverlayVisible = oAggregationOverlay && oAggregationOverlay.isVisible();
-			if (bAggregationOverlayVisible) {
+			if (oAggregationOverlay) {
 				this.fireElementModified(oParams);
 			}
 		} else if (oEvent.getParameters().type === "setParent") {
 			this.fireElementModified(oParams);
 		}
-
 		this.invalidate();
 	};
 
@@ -8491,6 +8758,8 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 			if (this._mGeometry && !this._mGeometry.visible) {
 				delete this._mGeometry;
 				this.invalidate();
+			} else if (!this._mGeometry) {
+				this.sync();
 			}
 		}
 
@@ -8623,14 +8892,17 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 
 	/**
 	 * Returns the relevant container element for this overlay. As default the overlay parent element is returned
+	 * @param {boolean} bForParent if true, the relevant container overlay is the overlay itself, if no relevant container is propagated in the designtime
 	 * @return {sap.ui.core.Element} Relevant container element
 	 * @public
 	 */
-	ElementOverlay.prototype.getRelevantContainer = function() {
+	ElementOverlay.prototype.getRelevantContainer = function(bForParent) {
 		var oDesignTimeMetadata = this.getDesignTimeMetadata();
 		if (oDesignTimeMetadata &&
 			oDesignTimeMetadata.getData().relevantContainer) {
 			return oDesignTimeMetadata.getData().relevantContainer;
+		} else if (bForParent) {
+			return this.getElementInstance();
 		}
 		// setting the default value to direct parent
 		var oParentOverlay = this.getParentElementOverlay();
@@ -8677,7 +8949,7 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -9011,7 +9283,6 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 
 	/**
 	 * Removes all root elements from the DesignTime and destroys overlays for them and theire public descendants
-	 * @param {string|sap.ui.core.Element} element or elemet's id
 	 * @return {sap.ui.dt.DesignTime} this
 	 * @protected
 	 */
@@ -9282,7 +9553,9 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 		var oElementOverlay = OverlayRegistry.getOverlay(oElement);
 		if (oElementOverlay) {
 			OverlayUtil.iterateOverlayElementTree(oElementOverlay, function(oChildOverlay) {
-				aElementOverlays.push(oChildOverlay);
+				if (oChildOverlay.getDesignTimeMetadata()) {
+					aElementOverlays.push(oChildOverlay);
+				}
 			});
 		}
 
@@ -9298,9 +9571,9 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 		$OverlayContainer[bValue ? 'show' : 'hide']();
 
 		this.getElementOverlays().forEach(function (oOverlay) {
-			oOverlay.setEnabled(bValue);
+			oOverlay.setVisible(bValue);
 			oOverlay.getChildren().forEach(function (oOverlayChild) {
-				oOverlayChild.setEnabled(bValue);
+				oOverlayChild.setVisible(bValue);
 			});
 		});
 
@@ -9342,7 +9615,7 @@ function(jQuery, Test, DesignTime, ElementTest) {
 	 * @extends sap.ui.dt.test.Test
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -9645,7 +9918,7 @@ function(jQuery, Test, ElementEnablementTest) {
 	 * @extends sap.ui.dt.test.Test
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private

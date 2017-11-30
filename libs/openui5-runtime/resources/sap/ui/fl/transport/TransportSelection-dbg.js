@@ -11,7 +11,7 @@ sap.ui.define([	"jquery.sap.global", "sap/ui/fl/Utils", "sap/ui/fl/transport/Tra
 	 * @alias sap.ui.fl.transport.TransportSelection
 	 * @constructor
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @since 1.38.0
 	 * Helper object to select an ABAP transport for an LREP object. This is not a generic utility to select a transport request, but part
 	 *        of the SmartVariant control.
@@ -44,7 +44,7 @@ sap.ui.define([	"jquery.sap.global", "sap/ui/fl/Utils", "sap/ui/fl/transport/Tra
 	 * @param {object} oControl Control instance
 	 * @public
 	 */
-	TransportSelection.prototype.selectTransport = function(oObjectInfo, fOkay, fError, bCompactMode, oControl) {
+	TransportSelection.prototype.selectTransport = function(oObjectInfo, fOkay, fError, bCompactMode, oControl, sStyleClass) {
 		var that = this;
 
 		if (oObjectInfo) {
@@ -62,12 +62,12 @@ sap.ui.define([	"jquery.sap.global", "sap/ui/fl/Utils", "sap/ui/fl/transport/Tra
 						fOkay(that._createEventObject(oObjectInfo, oTransport));
 						//ATO is not enabled, use CTS instead
 					} else {
-						that._selectTransport(oObjectInfo, fOkay, fError, bCompactMode);
+						that._selectTransport(oObjectInfo, fOkay, fError, bCompactMode, sStyleClass);
 					}
 				});
 			// do not have the required info to check for ATO or not CUSTOMER layer - use CTS
 			} else {
-				that._selectTransport(oObjectInfo, fOkay, fError, bCompactMode);
+				that._selectTransport(oObjectInfo, fOkay, fError, bCompactMode, sStyleClass);
 			}
 		}
 	};
@@ -84,7 +84,7 @@ sap.ui.define([	"jquery.sap.global", "sap/ui/fl/Utils", "sap/ui/fl/transport/Tra
 	 * @param {boolean} bCompactMode flag indicating whether the transport dialog should be opened in compact mode.
 	 * @private
 	 */
-	TransportSelection.prototype._selectTransport = function(oObjectInfo, fOkay, fError, bCompactMode) {
+	TransportSelection.prototype._selectTransport = function(oObjectInfo, fOkay, fError, bCompactMode, sStyleClass) {
 		var that = this;
 
 		if (oObjectInfo) {
@@ -97,7 +97,7 @@ sap.ui.define([	"jquery.sap.global", "sap/ui/fl/Utils", "sap/ui/fl/transport/Tra
 						pkg: oObjectInfo.package,
 						transports: oGetTransportsResult.transports,
 						lrepObject: that._toLREPObject(oObjectInfo)
-					}, fOkay, fError, bCompactMode);
+					}, fOkay, fError, bCompactMode, sStyleClass);
 				} else {
 					oTransport = that._getTransport(oGetTransportsResult);
 					fOkay(that._createEventObject(oObjectInfo, oTransport));
@@ -167,10 +167,11 @@ sap.ui.define([	"jquery.sap.global", "sap/ui/fl/Utils", "sap/ui/fl/transport/Tra
 	 * @returns {sap.ui.fl.transport.TransportDialog} the dialog.
 	 * @private
 	 */
-	TransportSelection.prototype._openDialog = function(oConfig, fOkay, fError, bCompactMode) {
+	TransportSelection.prototype._openDialog = function(oConfig, fOkay, fError, bCompactMode, sStyleClass) {
 		var oDialog = new TransportDialog(oConfig);
 		oDialog.attachOk(fOkay);
 		oDialog.attachCancel(fError);
+		oDialog.addStyleClass(sStyleClass);
 
 		// toggle compact style.
 		if (bCompactMode) {
@@ -311,7 +312,7 @@ sap.ui.define([	"jquery.sap.global", "sap/ui/fl/Utils", "sap/ui/fl/transport/Tra
 	 * @returns {Promise} promise that resolves
 	 * @public
 	 */
-	TransportSelection.prototype.openTransportSelection = function(oChange, oControl) {
+	TransportSelection.prototype.openTransportSelection = function(oChange, oControl, sStyleClass) {
 
 		var that = this;
 
@@ -346,7 +347,7 @@ sap.ui.define([	"jquery.sap.global", "sap/ui/fl/Utils", "sap/ui/fl/transport/Tra
 				oObject.type = oChange.getDefinition().fileType;
 			}
 
-			that.selectTransport(oObject, fnOkay, fnError, false, oControl);
+			that.selectTransport(oObject, fnOkay, fnError, false, oControl, sStyleClass);
 		});
 	};
 

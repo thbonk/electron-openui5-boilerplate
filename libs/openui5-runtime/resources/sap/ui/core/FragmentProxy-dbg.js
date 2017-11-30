@@ -21,22 +21,12 @@ sap.ui.define([
 	var aControlledMethods = ["getParent", "setParent", "_getPropertiesToPropagate", "destroy"];
 
 	/**
-	 * see e.g. LabelEnablement
-	 *
-	 * @private
-	 */
-	function lazyInstanceof (o, sModule) {
-		var FNClass = sap.ui.require(sModule);
-		return typeof FNClass === "function" && (o instanceof FNClass);
-	}
-
-	/**
 	 * Unregisters the special methods needed to proxy forwarding from the given element
-	 * @param oForwardedControl {sap.ui.core.Element} the forwarded instance to unregister
+	 * @param {sap.ui.core.Element} oForwardedControl the forwarded instance to unregister
 	 *
 	 * @private
 	 */
-	function unregisterForwardedElement (oForwardedControl) {
+	function unregisterForwardedElement(oForwardedControl) {
 		if (oForwardedControl._mProxyMethods) {
 			aControlledMethods.map(function (sMethod) {
 				oForwardedControl[sMethod] = oForwardedControl._mProxyMethods[sMethod];
@@ -48,13 +38,12 @@ sap.ui.define([
 	/**
 	 * Registers methods to forward a given control from a control root object to its current parent
 	 *
-	 * @param {sap.ui.core.Control} oRootControl the original parent of the control
-	 * @param {sap.ui.core.Control} oCurrentParent the current parent, where the forwarded element was added
+	 * @param {sap.ui.core.Control} oNewParent the new (and current) parent, where the forwarded element was added
 	 * @param {sap.ui.core.Control} oForwardedControl the forwarded control instance
 	 *
 	 * @private
 	 */
-	function registerForwardedElement (oRootControl, oCurrentParent, oForwardedControl) {
+	function registerForwardedElement(oNewParent, oForwardedControl) {
 		// store the original local methods
 		if (!oForwardedControl._mProxyMethods) {
 			oForwardedControl._mProxyMethods = {};
@@ -66,7 +55,7 @@ sap.ui.define([
 		// overwriting the getParent to return the actual rendering parent
 		// eventing will use this parent to bubble the event
 		oForwardedControl.getParent = function () {
-			return oCurrentParent;
+			return oNewParent;
 		};
 
 		// overwriting the setParent to remove the special handling
@@ -84,13 +73,41 @@ sap.ui.define([
 			this.destroy.apply(this, arguments);
 		};
 
-		// overwriting _getPropertiesToPropagate to return the model contect of the APIParent
+		// overwriting _getPropertiesToPropagate to filter out specifics from oNewParent
 		oForwardedControl._getPropertiesToPropagate = function () {
-			// proxy should only propagate the models of its parent fragment control
-			if (lazyInstanceof(oRootControl, "sap.ui.core.FragmentControl")) {
-				return oRootControl._getPropertiesToPropagate();
+
+			var oProps = sap.ui.base.ManagedObject.prototype._getPropertiesToPropagate.apply(this, arguments);
+
+			// Since oNewParent is intrinsic to the FragmentControl we
+			// do not wish to propagate anything which is exclusive
+			// to oNewParent (e.g. its ManagedObjectModel).
+			// Therefore, we now manipulate oProps
+
+			// === models ===
+			var oOwnModelsOfNewParent = oNewParent.oModels;
+			var oModelsToPropagate = {};
+			var oModels = oProps.oModels;
+			for (var oModelName in oModels) {
+				if (!oModels.hasOwnProperty(oModelName)) {
+					continue;
+				}
+				if (!oOwnModelsOfNewParent[oModelName]) {
+					oModelsToPropagate[oModelName] = oModels[oModelName];
+				}
 			}
-			return this.getParent()._getPropertiesToPropagate();
+			oProps.oModels = oModelsToPropagate;
+
+			// === bindingContexts ===
+			var oBindingContextsToPropagate = {};
+			//var oBindingContexts = oProps.oBindingContexts;
+			for (var oModelName in oModelsToPropagate) {
+				oBindingContextsToPropagate[oModelName] = oProps.oBindingContexts[oModelName];
+			}
+			oProps.oBindingContexts = oBindingContextsToPropagate;
+
+			// TODO: should we do anything to the aPropagationListeners ?
+
+			return oProps;
 		};
 	}
 
@@ -101,7 +118,7 @@ sap.ui.define([
 	 *
 	 * @private
 	 */
-	function updateModelContext () {
+	function updateModelContext() {
 		// this is the managed object
 		var oParent = this.getParent();
 		if (oParent) {
@@ -113,7 +130,7 @@ sap.ui.define([
 			}
 			if (oBinding) {
 				// overwriting the getter for the aggregation of the parent instance to return the
-				// instances from the corresponding fragement control aggregation
+				// instances from the corresponding fragment control aggregation
 				// as the list binding uses filter and sort, the binding contexts are used here
 				if (!oParent[oAggregation._sGetter].fnOriginalGetter) {
 					var fnOriginalGetter = oParent[oAggregation._sGetter];
@@ -123,7 +140,7 @@ sap.ui.define([
 							var aContexts = oBinding.getContexts();
 							for (var i = 0; i < aContexts.length; i++) {
 								var oObject = aContexts[i].getProperty();
-								registerForwardedElement(oBinding.getModel().getRootObject(), this, oObject);
+								registerForwardedElement(this, oObject);
 								aResult.push(oObject);
 							}
 
@@ -146,7 +163,7 @@ sap.ui.define([
 	 *   &lt;/my:List&gt
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @since 1.48.0
 	 * @alias sap.ui.core.FragmentProxy
 	 * @experimental
@@ -156,12 +173,13 @@ sap.ui.define([
 		/* @lends sap.ui.core.FragmentProxy.prototype */
 		{
 			constructor: function (sId, mSettings) {
-				if (!mSettings) {
+				if (!mSettings && sId && typeof sId === "object") {
 					mSettings = sId;
 					sId = ManagedObject.getMetadata().uid();
 				}
+				mSettings = mSettings || {};
 				if (mSettings.ref) {
-					return new SingleFragmentProxy(sId, {ref: mSettings.ref});
+					return new SingleFragmentProxy(sId, { ref: mSettings.ref });
 				} else {
 					if (!mSettings.type) {
 						mSettings.type = "sap.ui.core.Control";
@@ -254,7 +272,7 @@ sap.ui.define([
 				return;
 			}
 			if (oContent && !oContent._bIsBeingDestroyed) {
-				registerForwardedElement(oBinding.getModel().getRootObject(), this.getParent(), oContent);
+				registerForwardedElement(this.getParent(), oContent);
 				if (oContent.getParent()) {
 					// single aggregation proxies need to invalidate the parent
 					oContent.getParent().invalidate();

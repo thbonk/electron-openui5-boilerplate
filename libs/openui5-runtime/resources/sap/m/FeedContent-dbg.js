@@ -18,7 +18,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control','sap/m/T
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @since 1.34
 	 *
 	 * @public
@@ -80,12 +80,8 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control','sap/m/T
 	});
 
 	/* --- Lifecycle Handling --- */
-
-	/**
-	 * Init function for the control
-	 */
 	FeedContent.prototype.init = function() {
-		this._oContentText = new sap.m.Text(this.getId() + "-content-text", {
+		this._oContentText = new Text(this.getId() + "-content-text", {
 			maxLines : 2
 		});
 		this._oContentText.cacheLineHeight = false;
@@ -127,7 +123,6 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control','sap/m/T
 
 	/**
 	 * Returns the Alttext
-	 *
 	 * @returns {String} The AltText text
 	 */
 	FeedContent.prototype.getAltText = function() {
@@ -155,16 +150,10 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control','sap/m/T
 		return sAltText;
 	};
 
-	/**
-	 * Returns the Tooltip as String
-	 *
-	 * @returns {String} The Tooltip text
-	 */
-	FeedContent.prototype.getTooltip_AsString = function() {
+	FeedContent.prototype.getTooltip_AsString = function() { //eslint-disable-line
 		var oTooltip = this.getTooltip();
 		var sTooltip = this.getAltText();
 		if (typeof oTooltip === "string" || oTooltip instanceof String) {
-			// TODO Nov. 2015: needs to be checked with ACC. Issue will be addresses via BLI.
 			sTooltip = oTooltip.split("{AltText}").join(sTooltip).split("((AltText))").join(sTooltip);
 			return sTooltip;
 		}
@@ -175,12 +164,6 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control','sap/m/T
 		}
 	};
 
-	/**
-	 * Sets the ContentText
-	 *
-	 * @param {String} text The ContentType text
-	 * @returns {sap.m.FeedContent} Reference to this in order to allow method chaining
-	 */
 	FeedContent.prototype.setContentText = function(text) {
 		this._oContentText.setText(text);
 		return this;
@@ -190,7 +173,6 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control','sap/m/T
 
 	/**
 	 * Handler for tap event
-	 *
 	 * @param {sap.ui.base.Event} oEvent which was triggered
 	 */
 	FeedContent.prototype.ontap = function(oEvent) {
@@ -202,8 +184,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control','sap/m/T
 
 	/**
 	 * Handler for keydown event
-	 *
-	 * @param {sap.ui.base.Event} oEvent which was triggered
+	 * @param {jQuery.Event} oEvent which was triggered
 	 */
 	FeedContent.prototype.onkeydown = function(oEvent) {
 		if (oEvent.which === jQuery.sap.KeyCodes.ENTER || oEvent.which === jQuery.sap.KeyCodes.SPACE) {
@@ -212,19 +193,6 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control','sap/m/T
 		}
 	};
 
-	/**
-	 * Attaches an event handler to the event with the given identifier for the current control
-	 *
-	 * @param {string} eventId The identifier of the event to listen for
-	 * @param {object} [data] An object that will be passed to the handler along with the event object when the event is triggered
-	 * @param {function} functionToCall The handler function to call when the event occurs.
-	 * This function will be called in the context of the oListener instance (if present) or on the event provider instance.
-	 * The event object (sap.ui.base.Event) is provided as first argument of the handler.
-	 * Handlers must not change the content of the event. The second argument is the specified oData instance (if present).
-	 * @param {object} [listener] The object that wants to be notified when the event occurs (this context within the handler function).
-	 * If it is not specified, the handler function is called in the context of the event provider.
-	 * @returns {sap.m.FeedContent} Reference to this in order to allow method chaining
-	 */
 	FeedContent.prototype.attachEvent = function(eventId, data, functionToCall, listener) {
 		sap.ui.core.Control.prototype.attachEvent.call(this, eventId, data, functionToCall, listener);
 		if (this.hasListeners("press")) {
@@ -233,15 +201,6 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control','sap/m/T
 		return this;
 	};
 
-	/**
-	 * Removes a previously attached event handler from the event with the given identifier for the current control.
-	 * The passed parameters must match those used for registration with #attachEvent beforehand.
-	 *
-	 * @param {string} eventId The identifier of the event to detach from
-	 * @param {function} functionToCall The handler function to detach from the event
-	 * @param {object} [listener] The object that wanted to be notified when the event occurred
-	 * @returns {sap.m.FeedContent} Reference to this in order to allow method chaining
-	 */
 	FeedContent.prototype.detachEvent = function(eventId, functionToCall, listener) {
 		sap.ui.core.Control.prototype.detachEvent.call(this, eventId, functionToCall, listener);
 		if (!this.hasListeners("press")) {
@@ -251,4 +210,4 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control','sap/m/T
 	};
 
 	return FeedContent;
-}, /* bExport= */ true);
+});

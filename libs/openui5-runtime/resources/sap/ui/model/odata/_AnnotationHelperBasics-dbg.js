@@ -16,10 +16,11 @@ sap.ui.define([
 		// path to entity set ("/dataServices/schema/<i>/entityContainer/<j>/entitySet/<k>")
 		rEntitySetPath
 			= /^(\/dataServices\/schema\/\d+\/entityContainer\/\d+\/entitySet\/\d+)(?:\/|$)/,
-		// path to entity type ("/dataServices/schema/<i>/entityType/<j>")
-		rEntityTypePath = /^(\/dataServices\/schema\/\d+\/entityType\/\d+)(?:\/|$)/,
 		aPerformanceCategories = [sAnnotationHelper],
 		sPerformanceFollowPath = sAnnotationHelper + "/followPath",
+		// path to complex or entity type ("/dataServices/schema/<i>/complexType/<j>" or
+		// "/dataServices/schema/<i>/entityType/<j>")
+		rTypePath = /^(\/dataServices\/schema\/\d+\/(?:complex|entity)Type\/\d+)(?:\/|$)/,
 		mUi5TypeForEdmType = {
 			"Edm.Boolean" : "sap.ui.model.odata.type.Boolean",
 			"Edm.Byte" : "sap.ui.model.odata.type.Byte",
@@ -127,7 +128,7 @@ sap.ui.define([
 		 *
 		 * @param {sap.ui.core.util.XMLPreprocessor.IContext|sap.ui.model.Context} oInterface
 		 *   the callback interface related to the current formatter call; the path must be within
-		 *   an entity type!
+		 *   a complex or entity type!
 		 * @param {object} oRawValue
 		 *   the raw value from the meta model, e.g. <code>{AnnotationPath :
 		 *   "ToSupplier/@com.sap.vocabularies.Communication.v1.Address"}</code> or <code>
@@ -155,7 +156,6 @@ sap.ui.define([
 			var oAssociationEnd,
 				sPath,
 				sContextPath,
-				oEntity,
 				iIndexOfAt,
 				oModel = oInterface.getModel(),
 				aParts,
@@ -166,7 +166,8 @@ sap.ui.define([
 					navigationProperties : [],
 					resolvedPath : undefined
 				},
-				sSegment;
+				sSegment,
+				oType;
 
 			jQuery.sap.measure.average(sPerformanceFollowPath, "", aPerformanceCategories);
 			sPath = Basics.getPath(oRawValue);
@@ -189,12 +190,12 @@ sap.ui.define([
 //					sSegment = sSegment.slice(0, iIndexOfAt);
 				}
 
-				oEntity = oModel.getObject(sContextPath);
-				oAssociationEnd = oModel.getODataAssociationEnd(oEntity, sSegment);
+				oType = oModel.getObject(sContextPath);
+				oAssociationEnd = oModel.getODataAssociationEnd(oType, sSegment);
 				if (oAssociationEnd) {
 					// navigation property
 					oResult.associationSetEnd
-						= oModel.getODataAssociationSetEnd(oEntity, sSegment);
+						= oModel.getODataAssociationSetEnd(oType, sSegment);
 					oResult.navigationProperties.push(sSegment);
 					if (oResult.isMultiple) {
 						oResult.navigationAfterMultiple = true;
@@ -206,7 +207,7 @@ sap.ui.define([
 				}
 
 				// structural properties or some unsupported case
-				sContextPath = oModel.getODataProperty(oEntity, aParts, true);
+				sContextPath = oModel.getODataProperty(oType, aParts, true);
 			}
 
 			oResult.resolvedPath = sContextPath;
@@ -250,7 +251,7 @@ sap.ui.define([
 		 *
 		 * @param {sap.ui.core.util.XMLPreprocessor.IContext|sap.ui.model.Context} oInterface
 		 *   the callback interface related to the current formatter call; the path must be within
-		 *   an entity type!
+		 *   a complex or entity type!
 		 * @param {string} sPath
 		 *   the path (just to see if it's empty)
 		 * @returns {string}
@@ -258,11 +259,11 @@ sap.ui.define([
 		 */
 		getStartingPoint : function (oInterface, sPath) {
 			var oEntity,
-				aMatches = rEntityTypePath.exec(oInterface.getPath()),
+				aMatches = rTypePath.exec(oInterface.getPath()),
 				oModel;
 
 			if (aMatches) {
-				return aMatches[1]; // start at entity type
+				return aMatches[1]; // start at complex or entity type
 			}
 
 			aMatches = rEntitySetPath.exec(oInterface.getPath());

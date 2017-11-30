@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', './Control', './Popup', './library'],
 	 * @class
 	 * Abstract class that can be extended in order to implement any extended tooltip. For example, RichTooltip Control is based on it. It provides the opening/closing behavior and the main "text" property.
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -107,7 +107,7 @@ sap.ui.define(['jquery.sap.global', './Control', './Popup', './library'],
 
 	/**
 	 * When a control that has a Tooltip gets the focus, this method is called.
-	 * @param {jQuery.EventObject} oEvent The event that occurred on the Control that has extended Tooltip.
+	 * @param {jQuery.Event} oEvent The event that occurred on the Control that has extended Tooltip.
 	 * @private
 	 */
 	TooltipBase.prototype.onfocusin = function(oEvent) {
@@ -140,7 +140,7 @@ sap.ui.define(['jquery.sap.global', './Control', './Popup', './library'],
 
 	/**
 	 * When a control that has a Tooltip looses the focus, this method is called.
-	 * @param {jQuery.EventObject} oEvent The event that occurred on the extended Tooltip.
+	 * @param {jQuery.Event} oEvent The event that occurred on the extended Tooltip.
 	 * @private
 	 */
 	TooltipBase.prototype.onfocusout = function(oEvent) {
@@ -184,7 +184,7 @@ sap.ui.define(['jquery.sap.global', './Control', './Popup', './library'],
 
 	/**
 	* Handle the mouseover event of a Control that has a Tooltip.
-	* @param {jQuery.EventObject} oEvent - The event that occurred on the Control.
+	* @param {jQuery.Event} oEvent - The event that occurred on the Control.
 	* @private
 	 */
 	TooltipBase.prototype.onmouseover = function(oEvent) {
@@ -259,7 +259,7 @@ sap.ui.define(['jquery.sap.global', './Control', './Popup', './library'],
 
 	/**
 	 * Handle the mouseout event  of a Control that has a Tooltip.
-	 * @param {jQuery.EventObject} oEvent Event that occurred on the Control that has extended Tooltip.
+	 * @param {jQuery.Event} oEvent Event that occurred on the Control that has extended Tooltip.
 	 * @private
 	 */
 	TooltipBase.prototype.onmouseout = function(oEvent) {

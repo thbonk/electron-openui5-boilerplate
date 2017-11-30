@@ -31,7 +31,7 @@ sap.ui.define([
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -75,18 +75,31 @@ sap.ui.define([
 	/*************************************** Framework lifecycle events ******************************************/
 
 	Breadcrumbs.prototype.onBeforeRendering = function () {
+		this.bRenderingPhase = true;
+
+		if (this._sResizeListenerId) {
+			ResizeHandler.deregister(this._sResizeListenerId);
+			this._sResizeListenerId = null;
+		}
+
 		if (this._bControlsInfoCached) {
 			this._updateSelect(true);
 		}
 	};
 
 	Breadcrumbs.prototype.onAfterRendering = function () {
+		if (!this._sResizeListenerId) {
+			this._sResizeListenerId = ResizeHandler.register(this, this._handleScreenResize.bind(this));
+		}
+
 		if (!this._bControlsInfoCached) {
 			this._updateSelect(true);
 			return;
 		}
 
 		this._configureKeyboardHandling();
+
+		this.bRenderingPhase = false;
 	};
 
 	Breadcrumbs.prototype.onThemeChanged = function () {
@@ -120,7 +133,8 @@ sap.ui.define([
 				forceSelection: false,
 				autoAdjustWidth: true,
 				icon: IconPool.getIconURI("slim-arrow-down"),
-				type: sap.m.SelectType.IconOnly
+				type: sap.m.SelectType.IconOnly,
+				tooltip: Breadcrumbs._getResourceBundle().getText("BREADCRUMB_SELECT_TOOLTIP")
 			})));
 		}
 		return this.getAggregation("_select");
@@ -313,7 +327,7 @@ sap.ui.define([
 
 		oSelect.setVisible(!!oControlsDistribution.aControlsForSelect.length);
 
-		if (!this._sResizeListenerId) {
+		if (!this._sResizeListenerId && !this.bRenderingPhase) {
 			this._sResizeListenerId = ResizeHandler.register(this, this._handleScreenResize.bind(this));
 		}
 	};

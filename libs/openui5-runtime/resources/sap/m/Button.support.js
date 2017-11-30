@@ -3,4 +3,74 @@
  * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(["jquery.sap.global","sap/ui/support/library"],function(q,S){"use strict";var C=S.Categories,a=S.Severity,A=S.Audiences;var r=[];function c(R){r.push(R);}c({id:"onlyIconButtonNeedsTooltip",audiences:[A.Control],categories:[C.Usability],enabled:true,minversion:"1.28",title:"Button: Consists of only an icon, needs a tooltip",description:"A button without text needs a tooltip, so that the user knows what the button does",resolution:"Add a value to the tooltip property of the button",resolutionurls:[{text:"SAP Fiori Design Guidelines: Button",href:"https://experience.sap.com/fiori-design-web/button/#guidelines"}],check:function(i,o,s){s.getElementsByClassName("sap.m.Button").forEach(function(e){if(!q.isEmptyObject(e.getProperty("icon"))&&q.isEmptyObject(e.getProperty("text"))&&q.isEmptyObject(e.getProperty("tooltip"))){var E=e.getId(),b=e.getMetadata().getElementName();i.addIssue({severity:a.Medium,details:"Button '"+b+"' ("+E+") consists of only an icon but has no tooltip",context:{id:E}});}});}});return{addRulesToRuleset:function(R){q.each(r,function(i,o){R.addRule(o);});}};},true);
+/**
+ * Defines support rules of the Button control of sap.m library.
+ */
+sap.ui.define(["jquery.sap.global", "sap/ui/support/library"],
+	function(jQuery, SupportLib) {
+	"use strict";
+
+	// shortcuts
+	var Categories = SupportLib.Categories, // Accessibility, Performance, Memory, ...
+		Severity = SupportLib.Severity,	// Hint, Warning, Error
+		Audiences = SupportLib.Audiences; // Control, Internal, Application
+
+
+	var aRules = [];
+
+	function createRule(oRuleDef) {
+		aRules.push(oRuleDef);
+	}
+
+
+	//**********************************************************
+	// Rule Definitions
+	//**********************************************************
+
+	/**
+	 *Checks, if a button consisting of only an icon has a tooltip (design guideline)
+	 */
+	createRule({
+		id : "onlyIconButtonNeedsTooltip",
+		audiences: [Audiences.Control],
+		categories: [Categories.Usability],
+		enabled: true,
+		minversion: "1.28",
+		title: "Button: Consists of only an icon, needs a tooltip",
+		description: "A button without text needs a tooltip, so that the user knows what the button does",
+		resolution: "Add a value to the tooltip property of the button",
+		resolutionurls: [{
+			text: "SAP Fiori Design Guidelines: Button",
+			href: "https://experience.sap.com/fiori-design-web/button/#guidelines"
+		}],
+		check: function (oIssueManager, oCoreFacade, oScope) {
+			oScope.getElementsByClassName("sap.m.Button")
+				.forEach(function(oElement) {
+					if (!jQuery.isEmptyObject(oElement.getProperty("icon"))
+						&& jQuery.isEmptyObject(oElement.getProperty("text"))
+						&& jQuery.isEmptyObject(oElement.getAggregation("tooltip"))) {
+
+						var sElementId = oElement.getId(),
+							sElementName = oElement.getMetadata().getElementName();
+
+						oIssueManager.addIssue({
+							severity: Severity.Medium,
+							details: "Button '" + sElementName + "' (" + sElementId + ") consists of only an icon but has no tooltip",
+							context: {
+								id: sElementId
+							}
+						});
+					}
+				});
+		}
+	});
+
+	return {
+		addRulesToRuleset: function(oRuleset) {
+			jQuery.each(aRules, function(idx, oRuleDef){
+				oRuleset.addRule(oRuleDef);
+			});
+		}
+	};
+
+}, true);

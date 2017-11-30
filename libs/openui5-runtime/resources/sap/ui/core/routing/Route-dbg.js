@@ -226,7 +226,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider', 'sap/ui/core/ro
 			 * @param {object} [oData] The object, that should be passed along with the event-object when firing the event.
 			 * @param {function} fnFunction The function to call, when the event occurs. This function will be called on the
 			 *            oListener-instance (if present) or in a 'static way'.
-			 * @param {object} [oListener] Object on which to call the given function. If empty, this Model is used.
+			 * @param {object} [oListener] Object on which to call the given function. If empty, this route is used.
 			 *
 			 * @return {sap.ui.core.routing.Route} <code>this</code> to allow method chaining
 			 * @public
@@ -283,7 +283,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider', 'sap/ui/core/ro
 			 * @param {object} [oData] The object, that should be passed along with the event-object when firing the event.
 			 * @param {function} fnFunction The function to call, when the event occurs. This function will be called on the
 			 *            oListener-instance (if present) or in a 'static way'.
-			 * @param {object} [oListener] Object on which to call the given function. If empty, this Model is used.
+			 * @param {object} [oListener] Object on which to call the given function. If empty, this route is used.
 			 *
 			 * @return {sap.ui.core.routing.Route} <code>this</code> to allow method chaining
 			 * @public
@@ -344,7 +344,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider', 'sap/ui/core/ro
 			 * @param {object} [oData] The object, that should be passed along with the event-object when firing the event.
 			 * @param {function} fnFunction The function to call, when the event occurs. This function will be called on the
 			 *            oListener-instance (if present) or in a 'static way'.
-			 * @param {object} [oListener] Object on which to call the given function. If empty, this Model is used.
+			 * @param {object} [oListener] Object on which to call the given function. If empty, this route is used.
 			 *
 			 * @return {sap.ui.core.routing.Route} <code>this</code> to allow method chaining
 			 * @public

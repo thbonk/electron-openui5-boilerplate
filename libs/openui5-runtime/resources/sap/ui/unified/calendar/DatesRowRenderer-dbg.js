@@ -38,9 +38,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', 'sap/ui/unified/cale
 	};
 
 	/**
-	 * @param {sap.ui.core.RenderManager} oRm the RenderManager that can be used for writing to the render output buffer
-	 * @param {sap.ui.unified.calendar.DatesRow} oDatesRow
-	 * @param {sap.ui.unified.calendar.CalendarDate} oDate
+	 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer
+	 * @param {sap.ui.unified.calendar.DatesRow} oDatesRow The row which will be rendered
+	 * @param {sap.ui.unified.calendar.CalendarDate} oDate The date in context
 	 */
 	DatesRowRenderer.renderHeader = function(oRm, oDatesRow, oDate){
 
@@ -66,10 +66,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', 'sap/ui/unified/cale
 	};
 
 	/**
-	 * @param {sap.ui.core.RenderManager} oRm the RenderManager that can be used for writing to the render output buffer
-	 * @param {sap.ui.unified.calendar.DatesRow} oDatesRow
-	 * @param {sap.ui.core.LocaleDate} oLocaleData
-	 * @param {sap.ui.unified.calendar.CalendarDate} oDate
+	 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer
+	 * @param {sap.ui.unified.calendar.DatesRow} oDatesRow The row which will be rendered
+	 * @param {sap.ui.core.LocaleData} oLocaleData The local date in context
+	 * @param {sap.ui.unified.calendar.CalendarDate} oDate The date in context
 	 */
 	DatesRowRenderer.renderHeaderLine = function(oRm, oDatesRow, oLocaleData, oDate){
 
@@ -102,10 +102,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', 'sap/ui/unified/cale
 
 	};
 	/**
-	 * @param {sap.ui.core.RenderManager} oRm the RenderManager that can be used for writing to the render output buffer
-	 * @param {sap.ui.unified.calendar.DatesRow} oDatesRow
-	 * @param {sap.ui.core.LocaleDate} oLocaleData
-	 * @param {sap.ui.unified.calendar.CalendarDate} oDate
+	 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer
+	 * @param {sap.ui.unified.calendar.DatesRow} oDatesRow The row which will be rendered
+	 * @param {sap.ui.unified.calendar.CalendarDate} oDate The date in context
 	 */
 	DatesRowRenderer.renderDays = function(oRm, oDatesRow, oDate){
 

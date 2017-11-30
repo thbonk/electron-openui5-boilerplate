@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <library  version="2.0" name="sap.ui.ux3">
-  <module name="sap/ui/ux3/ActionBar.js" size="52833" compressedSize="21631">
+  <module name="sap/ui/ux3/ActionBar.js" size="53068" compressedSize="21631">
     <description>Provides control sap.ui.ux3.ActionBar.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -24,7 +24,7 @@
       <module name="sap/ui/ux3/library.js"/>
     </requires>
   </module>
-  <module name="sap/ui/ux3/CollectionInspector.js" size="19020" compressedSize="8870">
+  <module name="sap/ui/ux3/CollectionInspector.js" size="18920" compressedSize="8870">
     <description>Provides control sap.ui.ux3.CollectionInspector.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -39,7 +39,7 @@
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/ui/ux3/DataSet.js" size="20935" compressedSize="11385">
+  <module name="sap/ui/ux3/DataSet.js" size="20817" compressedSize="11385">
     <description>Provides control sap.ui.ux3.DataSet.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -63,7 +63,7 @@
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/ui/ux3/DataSetSimpleView.js" size="15028" compressedSize="7015">
+  <module name="sap/ui/ux3/DataSetSimpleView.js" size="14995" compressedSize="7015">
     <description>Provides control sap.ui.ux3.DataSetSimpleView.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -240,7 +240,7 @@
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/ui/ux3/NavigationBar.js" size="28577" compressedSize="11885">
+  <module name="sap/ui/ux3/NavigationBar.js" size="28598" compressedSize="11885">
     <description>Provides control sap.ui.ux3.NavigationBar.</description>
     <requires>
       <module name="jquery.sap.dom.js"/>
@@ -291,7 +291,7 @@
       <module name="sap/ui/ux3/library.js"/>
     </requires>
   </module>
-  <module name="sap/ui/ux3/Overlay.js" size="10489" compressedSize="4580">
+  <module name="sap/ui/ux3/Overlay.js" size="10513" compressedSize="4580">
     <description>Provides control sap.ui.ux3.Overlay.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -339,7 +339,7 @@
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/ui/ux3/QuickView.js" size="14025" compressedSize="6374">
+  <module name="sap/ui/ux3/QuickView.js" size="14019" compressedSize="6374">
     <description>Provides control sap.ui.ux3.QuickView.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -370,7 +370,7 @@
       <module name="sap/ui/ux3/library.js"/>
     </requires>
   </module>
-  <module name="sap/ui/ux3/ShellColorPicker.js" size="10606" compressedSize="6041">
+  <module name="sap/ui/ux3/ShellColorPicker.js" size="10615" compressedSize="6041">
     <description>Provides the class sap.ui.ux3.ShellColorPicker</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -445,7 +445,7 @@
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/ui/ux3/ToolPopup.js" size="63843" compressedSize="15876">
+  <module name="sap/ui/ux3/ToolPopup.js" size="63896" compressedSize="15876">
     <description>Provides control sap.ui.ux3.ToolPopup.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -705,7 +705,7 @@
   </module>
   <module name="sap/ui/ux3/messagebundle_iw.properties" size="14908">
   </module>
-  <module name="sap/ui/ux3/messagebundle_ja.properties" size="13216">
+  <module name="sap/ui/ux3/messagebundle_ja.properties" size="13234">
   </module>
   <module name="sap/ui/ux3/messagebundle_kk.properties" size="18462">
   </module>

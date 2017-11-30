@@ -76,6 +76,10 @@
 /* Belize High Contrast White theme        */
 /* ======================================= */
 
+.sapUiLoSplitter {
+	background-color: @sapUiHcStandardBackground;
+}
+
 .sapUiLoSplitterOverlay > .sapUiLoSplitterOverlayBar {
 	background-color: @sapUiGlobalBackgroundColor;
 }
@@ -83,6 +87,7 @@
 .sapUiLoSplitter > .sapUiLoSplitterBar:focus {
 	outline: 2px dotted @sapUiContentFocusColor;
 	outline-offset: -2px;
+	background-color:  @sapUiHcStandardBackground;
 }
 
 .sapUiLoSplitterH > .sapUiLoSplitterBar > .sapUiIcon.sapUiLoSplitterBarIcon::before,

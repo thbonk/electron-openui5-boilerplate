@@ -10,9 +10,8 @@ sap.ui.define([
 	"sap/m/Text",
 	"sap/m/Button",
 	"sap/ui/fl/support/apps/contentbrowser/lrepConnector/LRepConnector",
-	"sap/ui/fl/support/apps/contentbrowser/utils/HtmlEscapeUtils",
 	"sap/ui/fl/support/apps/contentbrowser/utils/DataUtils"
-], function (Controller, Dialog, Text, Button, LRepConnector, HtmlEscapeUtils, DataUtils) {
+], function (Controller, Dialog, Text, Button, LRepConnector, DataUtils) {
 	"use strict";
 
 	/**
@@ -21,7 +20,7 @@ sap.ui.define([
 	 * @constructor
 	 * @alias sap.ui.fl.support.apps.contentbrowser.controller.ContentDetails
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.45
 	 */
 	return Controller.extend("sap.ui.fl.support.apps.contentbrowser.controller.ContentDetails", {
@@ -54,7 +53,7 @@ sap.ui.define([
 		 * Handler if a route was matched;
 		 * Obtains information about layer, namespace, filename, and file type from the route's arguments, and then requests content from Layered Repository.
 		 * @param {Object} oRouteMatch - route object which is specified in the router and matched via regexp
-		 * @returns {Promise} - <code>LRepConnector<code> "getContent" promise
+		 * @returns {Promise} - <code>LRepConnector</code> "getContent" promise
 		 * @private
 		 */
 		_onRouteMatched: function (oRouteMatch) {
@@ -63,7 +62,7 @@ sap.ui.define([
 
 			var oModelData = {};
 			oModelData.layer = mRouteArguments.layer;
-			oModelData.namespace = HtmlEscapeUtils.unescapeSlashes(mRouteArguments.namespace);
+			oModelData.namespace = decodeURIComponent(mRouteArguments.namespace);
 			oModelData.fileName = mRouteArguments.fileName;
 			oModelData.fileType = mRouteArguments.fileType;
 
@@ -89,8 +88,8 @@ sap.ui.define([
 		 * @param {Object} oModelData - model data of current page
 		 * @param {Object} oPage - current page used to set display busy mode on/off
 		 * @param {Object} sContentSuffix - content suffix for sending the metadata request
-		 * @param {Object} oData - data which is received from <code>LRepConnector<code> "getContent" promise
-		 * @returns {Promise} - <code>LRepConnector<code> "getContent" promise
+		 * @param {Object} oData - data which is received from <code>LRepConnector</code> "getContent" promise
+		 * @returns {Promise} - <code>LRepConnector</code> "getContent" promise
 		 * @private
 		 */
 		_onContentReceived: function (oModelData, oPage, sContentSuffix, oData) {
@@ -114,7 +113,7 @@ sap.ui.define([
 		 * Sets the received data to the current content model, updates the icon tab bar, and releases the busy mode of the current page.
 		 * @param {Object} oModelData - model data of current page
 		 * @param {Object} oPage - current page used to set display busy mode on/off
-		 * @param {Object} oMetadata - metadata which is received from <code>LRepConnector<code> "getContent" promise
+		 * @param {Object} oMetadata - metadata which is received from <code>LRepConnector</code> "getContent" promise
 		 * @private
 		 */
 		_onContentMetadataReceived: function (oModelData, oPage, oMetadata) {
@@ -130,6 +129,91 @@ sap.ui.define([
 				}
 			}
 			oPage.setBusy(false);
+		},
+
+		/**
+		 * Navigates to Edit mode of content.
+		 * @public
+		 */
+		onEditClicked: function () {
+			var oSelectedContentModel = this.getView().getModel("selectedContent");
+			var oContentData = oSelectedContentModel.getData();
+			var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
+
+			oRouter.navTo("ContentDetailsEdit", {
+				"layer": oContentData.layer,
+				"namespace": encodeURIComponent(oContentData.namespace),
+				"fileName": oContentData.fileName,
+				"fileType": oContentData.fileType
+			});
+		},
+
+		/**
+		 * Handles the deletion button;
+		 * The function displays a confirmation dialog. On confirmation, the deletion of the displayed content is triggered.
+		 * @public
+		 */
+		onDeleteClicked: function () {
+			var that = this;
+
+			var oDialog = new Dialog({
+				title: "{i18n>confirmDeletionTitle}",
+				type: "Message",
+				content: new Text({text: "{i18n>questionFileDeletion}"}),
+				beginButton: new Button({
+					text: "{i18n>confirm}",
+					type: sap.m.ButtonType.Reject,
+					press: function () {
+						that._deleteFile();
+						oDialog.close();
+					}
+				}),
+				endButton: new Button({
+					text: "{i18n>cancel}",
+					press: function () {
+						oDialog.close();
+					}
+				}),
+				afterClose: function () {
+					oDialog.destroy();
+				}
+			});
+
+			this.getView().addDependent(oDialog);
+
+			oDialog.open();
+		},
+
+		/**
+		 * Handler if a deletion was confirmed.
+		 * @returns {Promise} - <code>LRepConnector</code> "deleteFile" promise
+		 * @private
+		 */
+		_deleteFile: function () {
+			var oSelectedContentModel = this.getView().getModel("selectedContent");
+			var oContentData = oSelectedContentModel.getData();
+			var sSelectedLayer = oContentData.layer;
+			var sContentLayer = "";
+
+			oContentData.metadata.some(function (mMetadata) {
+				if (mMetadata.name === "layer") {
+					sContentLayer = mMetadata.value;
+					return true;
+				}
+			});
+
+			var sNamespace = oContentData.namespace;
+			var sFileName = oContentData.fileName;
+			var sFileType = oContentData.fileType;
+
+			var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
+
+			return LRepConnector.deleteFile(sContentLayer, sNamespace, sFileName, sFileType).then(function () {
+				oRouter.navTo("LayerContentMaster", {
+					"layer": sSelectedLayer,
+					"namespace": encodeURIComponent(sNamespace)
+				});
+			});
 		}
 	});
 });

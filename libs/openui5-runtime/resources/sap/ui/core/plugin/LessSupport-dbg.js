@@ -32,7 +32,7 @@
 			 *        feature - DO NOT USE IN PRODUCTIVE SCENARIOS!!
 			 *
 			 * @author Peter Muessig
-			 * @version 1.48.5
+			 * @version 1.50.6
 			 * @private
 			 * @alias sap.ui.core.plugin.LessSupport
 			 */
@@ -151,7 +151,6 @@
 
 			/**
 			 * Will be invoked by <code>sap.ui.core.Core</code> to notify the plugin to start
-			 * @param {sap.ui.core.Core} oCore reference to the Core
 			 * @public
 			 */
 			LessSupport.prototype.stopPlugin = function() {

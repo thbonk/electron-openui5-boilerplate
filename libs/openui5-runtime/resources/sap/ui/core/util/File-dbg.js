@@ -14,7 +14,7 @@ sap.ui.define(['jquery.sap.global'],
 	 *
 	 * @class Utility class to handle files
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @static
 	 *
 	 * @public
@@ -45,8 +45,8 @@ sap.ui.define(['jquery.sap.global'],
 		 * @param {string} sFileExtension file extension
 		 * @param {string} sMimeType file mime-type
 		 * @param {string} sCharset file charset
-		 * @param {boolean} [bByteOrderMark] Whether to prepend an unicode byte order mark (only applies for utf-8 charset).
-		 *                                   Default is <code>false</code> except when <code>sFileExtension</code> = <code>csv/code> it is <code>true</code> (compatibility reasons).
+		 * @param {boolean} [bByteOrderMark] Whether to prepend a unicode byte order mark (only applies for utf-8 charset).
+		 *                                   Default is <code>false</code> except when <code>sFileExtension</code> = <code>csv</code> it is <code>true</code> (compatibility reasons).
 		 *
 		 * @public
 		 */

@@ -5,9 +5,17 @@
  */
 
 // Provides control sap.m.FlexBox.
-sap.ui.define(['jquery.sap.global', './FlexBoxStylingHelper', './FlexItemData', './FlexDirection', './FlexRendertype', './library', 'sap/ui/core/Control'],
-	function(jQuery, FlexBoxStylingHelper, FlexItemData, FlexDirection, FlexRendertype, library, Control) {
-	"use strict";
+sap.ui.define(['jquery.sap.global', './FlexBoxStylingHelper', './FlexItemData', './library', 'sap/ui/core/Control'],
+	function(jQuery, FlexBoxStylingHelper, FlexItemData, library, Control) {
+	    "use strict";
+
+
+
+	// shortcut for sap.m.FlexRendertype
+	var FlexRendertype = library.FlexRendertype;
+
+	// shortcut for sap.m.FlexDirection
+	var FlexDirection = library.FlexDirection;
 
 
 
@@ -25,7 +33,7 @@ sap.ui.define(['jquery.sap.global', './FlexBoxStylingHelper', './FlexItemData', 
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public

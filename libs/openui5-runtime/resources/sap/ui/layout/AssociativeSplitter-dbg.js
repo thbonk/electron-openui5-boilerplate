@@ -20,7 +20,7 @@ sap.ui.define(['./Splitter', './SplitterRenderer'],
 	 * @extends sap.ui.layout.Splitter
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -217,6 +217,11 @@ sap.ui.define(['./Splitter', './SplitterRenderer'],
 		var iSplitBarCircle = parseInt(oJEv.target.parentElement.id.substr((sId + "-splitbar-").length), 10);
 		var iBar = (iSplitBar + 1) ? iSplitBar : iSplitBarCircle;
 		var $Bar = jQuery(oJEv.target);
+		// on tablet in landscape mode the target is the bar's icon
+		// calculations should be executed with the bar's size instead
+		if ($Bar.attr("class") === "sapUiLoSplitterBarIcon") {
+			$Bar = $Bar.parent();
+		}
 		var mCalcSizes = this.getCalculatedSizes();
 		var iBarSize = this._bHorizontal ?  $Bar.innerWidth() : $Bar.innerHeight();
 

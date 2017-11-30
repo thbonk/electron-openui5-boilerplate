@@ -19,7 +19,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSliderRe
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @private
@@ -273,7 +273,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSliderRe
 			return this;
 		};
 
-		/**
+		/*
 		 * Sets the slider isCyclic property.
 		 * @param {boolean} bValue If the slider is cyclic or not
 		 * @returns {*} this
@@ -519,8 +519,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSliderRe
 
 		/**
 		 * Updates the visibility of the slider's items based on the step and the selected value.
-		 * @param iNewValue The new selected value of the slider
-		 * @param iStep The precision step used for the slider
+		 * @param {int} iNewValue The new selected value of the slider
+		 * @param {int} iStep The precision step used for the slider
 		 * @private
 		 */
 		TimePickerSlider.prototype._updateStepAndValue = function(iNewValue, iStep) {
@@ -551,7 +551,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSliderRe
 		/**
 		 * Updates the margins of a slider.
 		 * Covers the cases where the slider is constrained to show an exact number of items.
-		 * @param bIsExpand If we update margins due to expand
+		 * @param {boolean} bIsExpand If we update margins due to expand
 		 * @private
 		 */
 		TimePickerSlider.prototype._updateMargins = function(bIsExpand) {
@@ -604,7 +604,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSliderRe
 		/**
 		 * Updates the parts of the layout that depend on the slider's height.
 		 * We call this method when the height changes - like at expand/collapse.
-		 * @param bIsExpand If we update due to expand
+		 * @param {boolean} bIsExpand If we update due to expand
 		 * @private
 		 */
 		TimePickerSlider.prototype._updateDynamicLayout = function (bIsExpand) {
@@ -633,7 +633,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSliderRe
 		 * Animates slider scrolling.
 		 *
 		 * @private
-		 * @param iSpeed {number} Animating speed
+		 * @param {number} iSpeed Animating speed
 		 */
 		TimePickerSlider.prototype._animateScroll = function(iSpeed) {
 			var $Container = this._getSliderContainerDomRef(),
@@ -686,7 +686,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSliderRe
 					$Container.animate({ scrollTop: iSnapScrollTop}, SCROLL_ANIMATION_DURATION, 'linear', function() {
 						$Container.clearQueue();
 						that._animatingSnap = false;
-						that._scrollerSnapped(that._iSelectedIndex);
+						//make sure the DOM is still visible
+						if ($Container.css("visibility") === "visible") {
+							that._scrollerSnapped(that._iSelectedIndex);
+						}
 					});
 				}
 			}, frameFrequencyMs);
@@ -842,11 +845,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSliderRe
 		/**
 		 * Handles the cycle effect of the slider's list items.
 		 *
-		 * @param iContainerHeight {number} Height of the slider container
-		 * @param iContentHeight {number} Height of the slider content
-		 * @param iTop {number} Current top position
-		 * @param fDragMargin {number} Remaining scroll limit
-		 * @param iContentRepeatNumber {number} Content repetition counter
+		 * @param {number} iContainerHeight Height of the slider container
+		 * @param {number} iContentHeight Height of the slider content
+		 * @param {number} iTop Current top position
+		 * @param {number} fDragMargin Remaining scroll limit
+		 * @param {number} iContentRepeatNumber Content repetition counter
 		 * @returns {number} Newly calculated top position
 		 * @private
 		 */
@@ -869,7 +872,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSliderRe
 		/**
 		 * Calculates the index of the snapped element and selects it.
 		 *
-		 * @param iCurrentItem {number} Index of the selected item
+		 * @param {number} iCurrentItem Index of the selected item
 		 * @private
 		 */
 		TimePickerSlider.prototype._scrollerSnapped = function(iCurrentItem) {
@@ -917,7 +920,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSliderRe
 				return;
 			}
 
-			sAriaLabel = fnFindKeyByText.call(this, sSelectedItemText);
+			sAriaLabel = sSelectedItemText;
+			if (sAriaLabel && sAriaLabel.length > 1 && sAriaLabel.indexOf('0') === 0) {
+				//If the label contains digits (hours, minutes, seconds), we must remove any leading zeros because they
+				//are invalid in the context of what will be read out by the screen readers.
+				//Values like AM/PM are not changed.
+				sAriaLabel = sAriaLabel.substring(1);
+			}
 
 			$aItems.eq(this._iSelectedItemIndex).addClass("sapMTimePickerItemSelected");
 			//WAI-ARIA region
@@ -1003,7 +1012,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSliderRe
 		/**
 		 * Helper function which enables selecting a slider item with an index offset.
 		 *
-		 * @param iIndexOffset {number} The index offset to be scrolled to
+		 * @param {number} iIndexOffset The index offset to be scrolled to
 		 * @private
 		 */
 		TimePickerSlider.prototype._offsetValue = function(iIndexOffset) {
@@ -1033,7 +1042,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSliderRe
 			$Slider.animate({ scrollTop: iSnapScrollTop}, SCROLL_ANIMATION_DURATION, 'linear', function() {
 				$Slider.clearQueue();
 				oThat._animatingSnap = false;
-				oThat._scrollerSnapped(iSelIndex);
+				//make sure the DOM is still visible
+				if ($Slider.css("visibility") === "visible") {
+					oThat._scrollerSnapped(iSelIndex);
+				}
 			});
 		};
 
@@ -1140,7 +1152,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSliderRe
 
 		/**
 		 * Default onTouchStart handler.
-		 * @param oEvent {jQuery.Event} Event object
+		 * @param {jQuery.Event} oEvent  Event object
 		 */
 		var onTouchStart = function (oEvent) {
 			var iPageY = oEvent.touches && oEvent.touches.length ? oEvent.touches[0].pageY : oEvent.pageY;
@@ -1159,7 +1171,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSliderRe
 
 		/**
 		 * Default onTouchMove handler.
-		 * @param oEvent {jQuery.Event} Event object
+		 * @param {jQuery.Event} oEvent  Event object
 		 */
 		var onTouchMove = function (oEvent) {
 			var iPageY = oEvent.touches && oEvent.touches.length ? oEvent.touches[0].pageY : oEvent.pageY;
@@ -1187,7 +1199,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSliderRe
 
 		/**
 		 * Default onTouchEnd handler.
-		 * @param oEvent {jQuery.Event} Event object
+		 * @param {jQuery.Event} oEvent  Event object
 		 */
 		var onTouchEnd = function (oEvent) {
 			var iPageY = oEvent.changedTouches && oEvent.changedTouches.length ? oEvent.changedTouches[0].pageY : oEvent.pageY;
@@ -1265,6 +1277,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSliderRe
 
 		/**
 		 * Gets only the visible items.
+		 * @returns {sap.m.TimePickerSlider} the visible sap.m.TimePickerSlider items
 		 * @private
 		 */
 		TimePickerSlider.prototype._getVisibleItems = function() {

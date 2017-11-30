@@ -23,7 +23,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -75,7 +75,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			 * Specifies the element's text directionality with enumerated options (RTL or LTR). By default, the control inherits text direction from the DOM.
 			 * @since 1.28.0
 			 */
-			textDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : sap.ui.core.TextDirection.Inherit}
+			textDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : sap.ui.core.TextDirection.Inherit},
+
+			/**
+			 * Determines whether the control is in display-only state where the control has different visualization and cannot be focused.
+			 * @since 1.50
+			 */
+			displayOnly : {type : "boolean", group : "Behavior", defaultValue : false}
 		}
 	}});
 
@@ -112,6 +118,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 			fAnimationDuration = bUseAnimations ? Math.abs(fPercentDiff) * 20 : 0;
 			$progressBar = this.$("bar");
+			// Stop currently running animation and start new one.
+			// In case of multiple setPercentValue calls all animations will run and it will take some time until the last value is animated,
+			// which is the one, actually valuable.
+			$progressBar.stop();
 			$progressBar.animate({
 				"flex-basis" : fPercentValue + "%"
 			}, fAnimationDuration, "linear", function() {
@@ -137,6 +147,15 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		$textRight.text(sDisplayValue);
 		this.$().attr("aria-valuetext", this._getAriaValueText({sText: sDisplayValue}));
 
+		return this;
+	};
+
+	ProgressIndicator.prototype.setDisplayOnly = function(bDisplayOnly) {
+		// change of value without re-rendering
+		this.setProperty("displayOnly", bDisplayOnly, true);
+		if (this.getDomRef()) {
+			this.$().toggleClass("sapMPIDisplayOnly", bDisplayOnly);
+		}
 		return this;
 	};
 

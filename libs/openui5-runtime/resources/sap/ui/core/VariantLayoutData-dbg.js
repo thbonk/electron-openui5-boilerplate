@@ -20,7 +20,7 @@ sap.ui.define(['./LayoutData', './library'],
 	 * @class
 	 * Allows to add multiple LayoutData to one control in case that an easy switch of layouts (e.g. in a Form) is needed.
 	 * @extends sap.ui.core.LayoutData
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public

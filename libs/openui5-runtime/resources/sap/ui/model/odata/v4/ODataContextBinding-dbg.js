@@ -82,7 +82,7 @@ sap.ui.define([
 	 * @mixes sap.ui.model.odata.v4.ODataParentBinding
 	 * @public
 	 * @since 1.37.0
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @borrows sap.ui.model.odata.v4.ODataBinding#hasPendingChanges as #hasPendingChanges
 	 * @borrows sap.ui.model.odata.v4.ODataBinding#isInitial as #isInitial
@@ -369,8 +369,8 @@ sap.ui.define([
 	 * @private
 	 */
 	ODataContextBinding.prototype.doCreateCache = function (sResourcePath, mQueryOptions) {
-		return _Cache.createSingle(this.oModel.oRequestor, sResourcePath, mQueryOptions,
-			this.oModel.bAutoExpandSelect);
+		return _Cache.createSingle(this.oModel.oRequestor, sResourcePath,
+			this.fetchType.bind(this), mQueryOptions, this.oModel.bAutoExpandSelect);
 	};
 
 	/**
@@ -424,7 +424,6 @@ sap.ui.define([
 		 */
 		function createCacheAndRequest(oOperationMetadata, sPathPrefix) {
 			var oCache,
-				sETag,
 				iIndex,
 				aOperationParameters,
 				sOperationPath,
@@ -437,16 +436,21 @@ sap.ui.define([
 			if (that.oOperation.bAction) {
 				// Recreate the cache, because the query options might have changed
 				oCache = _Cache.createSingle(that.oModel.oRequestor,
-					(sPathPrefix + that.sPath).slice(1, -5), mQueryOptions,
-					that.oModel.bAutoExpandSelect, true);
+					(sPathPrefix + that.sPath).slice(1, -5), that.fetchType.bind(that),
+					mQueryOptions, that.oModel.bAutoExpandSelect, true);
 				if (that.bRelative && that.oContext.getBinding) {
-					// @odata.etag is not added to path to avoid "failed to drill-down" in cache
-					// if no ETag is available
+					// do not access @odata.etag directly to avoid "failed to drill-down" in cache
+					// if it is not available
 					iIndex = that.sPath.lastIndexOf("/");
-					sETag = that.oContext.getObject(
-						iIndex >= 0 ? that.sPath.slice(0, iIndex) : "")["@odata.etag"];
+					oPromise = that.oContext
+						.fetchValue(iIndex >= 0 ? that.sPath.slice(0, iIndex) : "")
+						.then(function (oEntity) { return oEntity["@odata.etag"]; });
+				} else {
+					oPromise = _SyncPromise.resolve(); // no parent cache -> no ETag
 				}
-				oPromise = oCache.post(sGroupId, that.oOperation.mParameters, sETag);
+				oPromise = oPromise.then(function (sETag) {
+					return oCache.post(sGroupId, that.oOperation.mParameters, sETag);
+				});
 			} else {
 				// the function must always recreate the cache because the parameters influence the
 				// resource path
@@ -468,8 +472,8 @@ sap.ui.define([
 				}
 				sOperationPath = (sPathPrefix + that.sPath.replace("...", aParameters.join(',')))
 					.slice(1);
-				oCache = _Cache.createSingle(that.oModel.oRequestor, sOperationPath, mQueryOptions,
-					that.oModel.bAutoExpandSelect);
+				oCache = _Cache.createSingle(that.oModel.oRequestor, sOperationPath,
+					that.fetchType.bind(that), mQueryOptions, that.oModel.bAutoExpandSelect);
 				oPromise = oCache.fetchValue(sGroupId);
 			}
 			that.oCachePromise = _SyncPromise.resolve(oCache);
@@ -514,41 +518,11 @@ sap.ui.define([
 	};
 
 	/**
-	 * Requests the value for the given absolute path; the value is requested from this binding's
-	 * cache or from its context in case it has no cache or the cache does not contain data for
-	 * this path.
-	 *
-	 * @param {string} sPath
-	 *   An absolute path including the binding path
-	 * @returns {SyncPromise}
-	 *   A promise on the outcome of the cache's <code>read</code> call
-	 *
-	 * @private
-	 */
-	ODataContextBinding.prototype.fetchAbsoluteValue = function (sPath) {
-		var that = this;
-
-		return this.oCachePromise.then(function (oCache) {
-			var sResolvedPath;
-
-			if (oCache) {
-				sResolvedPath = that.oModel.resolve(that.sPath, that.oContext);
-				if (sPath === sResolvedPath || sPath.lastIndexOf(sResolvedPath + "/") === 0) {
-					return that.fetchValue(sPath.slice(sResolvedPath.length + 1));
-				}
-			}
-			if (that.oContext && that.oContext.fetchAbsoluteValue) {
-				return that.oContext.fetchAbsoluteValue(sPath);
-			}
-		});
-	};
-
-	/**
 	 * Requests the value for the given path; the value is requested from this binding's
 	 * cache or from its context in case it has no cache.
 	 *
-	 * @param {string} [sPath]
-	 *   Some relative path
+	 * @param {string} sPath
+	 *   Some absolute path
 	 * @param {sap.ui.model.odata.v4.ODataPropertyBinding} [oListener]
 	 *   A property binding which registers itself as listener at the cache
 	 * @returns {SyncPromise}
@@ -561,30 +535,34 @@ sap.ui.define([
 
 		return this.oCachePromise.then(function (oCache) {
 			var bDataRequested = false,
-				sGroupId;
+				sGroupId,
+				sRelativePath;
 
 			if (oCache) {
-				sGroupId = that.sRefreshGroupId || that.getGroupId();
-				that.sRefreshGroupId = undefined;
-				return oCache.fetchValue(sGroupId, sPath, function () {
-					bDataRequested = true;
-					that.fireDataRequested();
-				}, oListener).then(function (vValue) {
-					if (bDataRequested) {
-						that.fireDataReceived();
-					}
-					return vValue;
-				}, function (oError) {
-					if (bDataRequested) {
-						that.oModel.reportError("Failed to read path " + that.sPath, sClassName,
-							oError);
-						that.fireDataReceived(oError.canceled ? undefined : {error : oError});
-					}
-					throw oError;
-				});
+				sRelativePath = that.getRelativePath(sPath);
+				if (sRelativePath !== undefined) {
+					sGroupId = that.sRefreshGroupId || that.getGroupId();
+					that.sRefreshGroupId = undefined;
+					return oCache.fetchValue(sGroupId, sRelativePath, function () {
+						bDataRequested = true;
+						that.fireDataRequested();
+					}, oListener).then(function (vValue) {
+						if (bDataRequested) {
+							that.fireDataReceived();
+						}
+						return vValue;
+					}, function (oError) {
+						if (bDataRequested) {
+							that.oModel.reportError("Failed to read path " + that.sPath, sClassName,
+								oError);
+							that.fireDataReceived(oError.canceled ? undefined : {error : oError});
+						}
+						throw oError;
+					});
+				}
 			}
-			if (that.oContext && that.oContext.fetchValue) {
-				return that.oContext.fetchValue(_Helper.buildPath(that.sPath, sPath), oListener);
+			if (!that.oOperation && that.oContext && that.oContext.fetchValue) {
+				return that.oContext.fetchValue(sPath, oListener);
 			}
 		});
 	};

@@ -7,9 +7,12 @@
 sap.ui.define([
 	'./SemanticButton',
 	'./SemanticControl',
-	'sap/m/ButtonType'
-], function(SemanticButton, SemanticControl, ButtonType) {
+	'sap/m/library'
+], function(SemanticButton, SemanticControl, mobileLibrary) {
 	"use strict";
+
+	// shortcut for sap.m.ButtonType
+	var ButtonType = mobileLibrary.ButtonType;
 
 	/**
 	* Constructor for a new <code>SemanticToggleButton</code>.
@@ -20,11 +23,11 @@ sap.ui.define([
 	* @class
 	* A base class for the {@link sap.f.semantic.FavoriteAction} and {@link sap.f.semantic.FlagAction}.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	* @abstract
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public

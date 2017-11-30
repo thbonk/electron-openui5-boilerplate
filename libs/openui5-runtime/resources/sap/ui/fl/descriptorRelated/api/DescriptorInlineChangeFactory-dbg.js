@@ -18,7 +18,7 @@ sap.ui.define(["sap/ui/fl/descriptorRelated/internal/Utils"
 	 * @constructor
 	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorInlineChange
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @private
 	 * @sap-restricted
 	 */
@@ -49,7 +49,7 @@ sap.ui.define(["sap/ui/fl/descriptorRelated/internal/Utils"
 	 * @namespace
 	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorInlineChangeFactory
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @private
 	 * @sap-restricted
 	 */
@@ -58,13 +58,14 @@ sap.ui.define(["sap/ui/fl/descriptorRelated/internal/Utils"
 
 	DescriptorInlineChangeFactory.getDescriptorChangeTypes = function(){
 		return ["appdescr_ovp_addNewCard","appdescr_ovp_removeCard",
-		        "appdescr_app_addNewInbound", "appdescr_app_changeInbound", "appdescr_app_removeInbound",
+		        "appdescr_app_addNewInbound", "appdescr_app_changeInbound", "appdescr_app_removeInbound", "appdescr_app_removeAllInboundsExceptOne",
 		        "appdescr_app_addNewOutbound", "appdescr_app_changeOutbound", "appdescr_app_removeOutbound",
 		        "appdescr_app_addNewDataSource", "appdescr_app_changeDataSource", "appdescr_app_removeDataSource",
 		        "appdescr_app_addAnnotationsToOData", "appdescr_app_addTechnicalAttributes", "appdescr_app_removeTechnicalAttributes",
 		        "appdescr_app_setTitle", "appdescr_app_setSubTitle", "appdescr_app_setShortTitle", "appdescr_app_setDescription",
 		        "appdescr_app_setDestination", "appdescr_app_setKeywords", "appdescr_ui5_addNewModel", "appdescr_ui5_replaceComponentUsage",
-		        "appdescr_smb_addNamespace", "appdescr_smb_changeNamespace", "appdescr_ui_generic_app_setMainPage", "appdescr_ui_setIcon"];
+		        "appdescr_smb_addNamespace", "appdescr_smb_changeNamespace", "appdescr_ui_generic_app_setMainPage", "appdescr_ui_setIcon",
+		        "appdescr_ui5_addLibraries", "appdescr_flp_setFccApp"];
 	};
 
 	DescriptorInlineChangeFactory.createNew = function(sChangeType,mParameters,mTexts) {
@@ -189,11 +190,27 @@ sap.ui.define(["sap/ui/fl/descriptorRelated/internal/Utils"
 	};
 
 	/**
+	 * Creates an inline change of change type appdescr_app_removeAllInboundsExceptOne
+	 *
+	 * @param {object} mParameters parameters of the change type
+	 * @param {string} mParameters.inboundId the id of the inbound that should be preserved
+	 *
+	 * @return {Promise} resolving when creating the descriptor inline change was successful (without backend access)
+	 *
+	 * @private
+	 * @sap-restricted
+	 */
+	DescriptorInlineChangeFactory.create_app_removeAllInboundsExceptOne = function(mParameters) {
+		Utils.checkParameterAndType(mParameters, "inboundId", "string");
+		return this._createDescriptorInlineChange('appdescr_app_removeAllInboundsExceptOne', mParameters);
+	};
+
+	/**
 	 * Creates an inline change of change type appdescr_app_changeInbound
 	 *
 	 * @param {object} mParameters parameters of the change type
 	 * @param {string} mParameters.inboundId the id of the inbound to be changed
-	 * @param {object} mParameters.entityPropertyChange
+	 * @param {object} mParameters.entityPropertyChange - the entity property change
 	 * @param {object} mParameters.entityPropertyChange.propertyPath - the property path inside the inbound
 	 * @param {object} mParameters.entityPropertyChange.operation - the operation (INSERT, UPDATE, UPSERT, DELETE)
 	 * @param {object} mParameters.entityPropertyChange.propertyValue - the new property value
@@ -250,7 +267,7 @@ sap.ui.define(["sap/ui/fl/descriptorRelated/internal/Utils"
 	 *
 	 * @param {object} mParameters parameters of the change type
 	 * @param {string} mParameters.outboundId the id of the outbound to be changed
-	 * @param {object} mParameters.entityPropertyChange
+	 * @param {object} mParameters.entityPropertyChange - the entity property change
 	 * @param {object} mParameters.entityPropertyChange.propertyPath - the property path inside the outbound
 	 * @param {object} mParameters.entityPropertyChange.operation - the operation (INSERT, UPDATE, UPSERT, DELETE)
 	 * @param {object} mParameters.entityPropertyChange.propertyValue - the new property value
@@ -306,7 +323,7 @@ sap.ui.define(["sap/ui/fl/descriptorRelated/internal/Utils"
 	 *
 	 * @param {object} mParameters parameters of the change type
 	 * @param {string} mParameters.dataSourceId the id of the data source to be changed
-	 * @param {object} mParameters.entityPropertyChange
+	 * @param {object} mParameters.entityPropertyChange - the entity property change
 	 * @param {object} mParameters.entityPropertyChange.propertyPath - the property path inside the data source
 	 * @param {object} mParameters.entityPropertyChange.operation - the operation (INSERT, UPDATE, UPSERT, DELETE)
 	 * @param {object} mParameters.entityPropertyChange.propertyValue - the new property value
@@ -589,6 +606,22 @@ sap.ui.define(["sap/ui/fl/descriptorRelated/internal/Utils"
 	};
 
 	/**
+	 * Creates an inline change of change type appdescr_ui5_addLibraries
+	 *
+	 * @param {object} mParameters parameters of the change type
+	 * @param {object} mParameters.libraries library to be added
+	 *
+	 * @return {Promise} resolving when creating the descriptor inline change was successful (without backend access)
+	 *
+	 * @private
+	 * @sap-restricted
+	 */
+	DescriptorInlineChangeFactory.create_ui5_addLibraries = function(mParameters) {
+		Utils.checkParameterAndType(mParameters, "libraries", "object");
+		return this._createDescriptorInlineChange('appdescr_ui5_addLibraries', mParameters);
+	};
+
+	/**
 	 * Creates an inline change of change type appdescr_smb_addNamespace
 	 *
 	 * @param {object} mParameters parameters of the change type
@@ -653,6 +686,21 @@ sap.ui.define(["sap/ui/fl/descriptorRelated/internal/Utils"
 		return this._createDescriptorInlineChange('appdescr_ui_setIcon', mParameters);
 	};
 
+	/**
+	 * Creates an inline change of change type appdescr_flp_setFccApp
+	 *
+	 * @param {object} mParameters parameters of the change type
+	 * @param {object} mParameters.fccApp the fccApp string
+	 *
+	 * @return {Promise} resolving when creating the descriptor inline change was successful (without backend access)
+	 *
+	 * @private
+	 * @sap-restricted
+	 */
+	DescriptorInlineChangeFactory.create_flp_setFccApp = function(mParameters) {
+		Utils.checkParameterAndType(mParameters, "fccApp", "string");
+		return this._createDescriptorInlineChange('appdescr_flp_setFccApp', mParameters);
+	};
 
 	return DescriptorInlineChangeFactory;
 

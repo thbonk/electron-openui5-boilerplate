@@ -25,7 +25,7 @@ function(jQuery, Overlay) {
 	 * @extends sap.ui.core.Overlay
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -144,6 +144,28 @@ function(jQuery, Overlay) {
 	 */
 	AggregationOverlay.prototype.getChildren = function() {
 		return this.getAggregation("children") || [];
+	};
+
+	/**
+	 * @inheritDoc
+	 */
+	AggregationOverlay.prototype._getScrollContainerIndex = function(oOverlayParent, oOverlay) {
+		var iScrollContainerIndex;
+		oOverlay = oOverlay || this;
+		if (oOverlayParent._aScrollContainers) {
+			iScrollContainerIndex = -1;
+			oOverlayParent._aScrollContainers.some(function(oScrollContainer, iIndex) {
+				if (oScrollContainer.aggregations) {
+					return oScrollContainer.aggregations.some(function(sAggregationName) {
+						if (oOverlay.getAggregationName() === sAggregationName) {
+							iScrollContainerIndex = iIndex;
+							return true;
+						}
+					});
+				}
+			});
+		}
+		return iScrollContainerIndex;
 	};
 
 	return AggregationOverlay;

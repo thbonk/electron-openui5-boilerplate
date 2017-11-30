@@ -67,7 +67,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 		*
 		* @implements sap.ui.core.PopupInterface
 		* @author SAP SE
-		* @version 1.48.5
+		* @version 1.50.6
 		*
 		* @constructor
 		* @public
@@ -631,7 +631,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 		/**
 		 * Event handler for the focusin event.
 		 * If it occurs on the focus handler elements at the beginning of the dialog, the focus is set to the end, and vice versa.
-		 * @param {jQuery.EventObject} oEvent The event object
+		 * @param {jQuery.Event} oEvent The event object
 		 * @private
 		 */
 		Dialog.prototype.onfocusin = function (oEvent) {
@@ -677,7 +677,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 		 * Event handler for the escape key pressed event.
 		 * If it occurs and the developer hasn't defined the escapeHandler property, the Dialog is immediately closed.
 		 * Else the escapeHandler is executed and the developer may prevent the closing of the Dialog.
-		 * @param {jQuery.EventObject} oEvent The event object
+		 * @param {jQuery.Event} oEvent The event object
 		 * @private
 		 */
 		Dialog.prototype.onsapescape = function(oEvent) {
@@ -726,7 +726,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 		 *
 		 * @param {Object} $Ref
 		 * @param {number} iRealDuration
-		 * @param fnOpened
+		 * @param {function} fnOpened
 		 * @private
 		 */
 		Dialog.prototype._openAnimation = function ($Ref, iRealDuration, fnOpened) {
@@ -740,7 +740,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 		 *
 		 * @param {Object} $Ref
 		 * @param {number} iRealDuration
-		 * @param fnClose
+		 * @param {function} fnClose
 		 * @private
 		 */
 		Dialog.prototype._closeAnimation = function ($Ref, iRealDuration, fnClose) {
@@ -930,6 +930,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 			if (!this._header) {
 				// set parent of header to detect changes on title
 				this._header = new Bar(this.getId() + "-header").addStyleClass("sapMDialogTitle");
+				this._header._setRootAccessibilityRole("heading");
 				this.setAggregation("_header", this._header, false);
 			}
 		};
@@ -1249,7 +1250,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 		Dialog.prototype._registerResizeHandler = function () {
 			var _$srollSontent = this.$("scroll");
 
-			//The content have to have explicit size so the scroll will work when the user's content is larger then the available space.
+			//The content have to have explicit size so the scroll will work when the user's content is larger than the available space.
 			//This can be removed and the layout change to flex when the support for IE9 is dropped
 			this._resizeListenerId = ResizeHandler.register(_$srollSontent.get(0), jQuery.proxy(this._onResize, this));
 			Device.resize.attachHandler(this._onResize, this);
@@ -1271,7 +1272,6 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 
 		/**
 		 *
-		 * @param oScrollDomRef
 		 * @private
 		 */
 		Dialog.prototype._registerContentResizeHandler = function() {
@@ -1719,6 +1719,27 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 					}
 				};
 
+				function mouseUpHandler() {
+					var $dialog = that.$(),
+						$dialogContent = that.$('cont'),
+						dialogHeight,
+						dialogBordersHeight;
+
+					$w.off("mouseup mousemove");
+
+					if (bResize) {
+						that._$dialog.removeClass('sapMDialogResizing');
+
+						// Take the height from the styles attribute of the DOM element not from the calculated height.
+						// max-height is taken into account if we use calculated height and a wrong value is set for the dialog content's height.
+						// If no value is set for the height style fall back to calculated height.
+						// * Calculated height is the value taken by $dialog.height().
+						dialogHeight = parseInt($dialog[0].style.height, 10) || parseInt($dialog.height(), 10);
+						dialogBordersHeight = parseInt($dialog.css("border-top-width"), 10) + parseInt($dialog.css("border-bottom-width"), 10);
+						$dialogContent.height(dialogHeight + dialogBordersHeight);
+					}
+				}
+
 				if ((isHeaderClicked(e.target) && this.getDraggable()) || bResize) {
 					that._bDisableRepositioning = true;
 
@@ -1741,6 +1762,12 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 
 				if (isHeaderClicked(e.target) && this.getDraggable()) {
 					$w.on("mousemove", function (event) {
+
+						if (event.buttons === 0) {
+							mouseUpHandler();
+							return;
+						}
+
 						fnMouseMoveHandler(function () {
 							that._bDisableRepositioning = true;
 
@@ -1803,26 +1830,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 					return;
 				}
 
-				$w.on("mouseup", function () {
-					var $dialog = that.$(),
-						$dialogContent = that.$('cont'),
-						dialogHeight,
-						dialogBordersHeight;
-
-					$w.off("mouseup mousemove");
-
-					if (bResize) {
-						that._$dialog.removeClass('sapMDialogResizing');
-
-						// Take the height from the styles attribute of the DOM element not from the calculated height.
-						// max-height is taken into account if we use calculated height and a wrong value is set for the dialog content's height.
-						// If no value is set for the height style fall back to calculated height.
-						// * Calculated height is the value taken by $dialog.height().
-						dialogHeight = parseInt($dialog[0].style.height, 10) || parseInt($dialog.height(), 10);
-						dialogBordersHeight = parseInt($dialog.css("border-top-width"), 10) + parseInt($dialog.css("border-bottom-width"), 10);
-						$dialogContent.height(dialogHeight + dialogBordersHeight);
-					}
-				});
+				$w.on("mouseup", mouseUpHandler);
 
 				e.preventDefault();
 				e.stopPropagation();

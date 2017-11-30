@@ -404,15 +404,17 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FilterType', 'sap/ui/model/Lis
 	 * Check whether expanded list data is available and can be used
 	 *
 	 * @private
+	 * @param {boolean} bSkipReloadNeeded Don't check whether reload of expanded data is needed
 	 * @return {boolean} Whether expanded data is available and will be used
 	 */
-	ODataListBinding.prototype.checkExpandedList = function() {
+	ODataListBinding.prototype.checkExpandedList = function(bSkipReloadNeeded) {
 		// if nested list is already available and no filters or sorters are set, use the data and don't send additional requests
 		// $expand loads all associated entities, no paging parameters possible, so we can safely assume all data is available
 		var bResolves = !!this.oModel.resolve(this.sPath, this.oContext),
 			oRef = this.oModel._getObject(this.sPath, this.oContext);
 
-		if (!bResolves || oRef === undefined) {
+		if (!bResolves || oRef === undefined ||
+		    (this.sOperationMode === OperationMode.Server && (this.aApplicationFilters.length > 0 || this.aFilters.length > 0 || this.aSorters.length > 0))) {
 			this.bUseExpandedList = false;
 			this.aExpandRefs = undefined;
 			return false;
@@ -421,7 +423,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FilterType', 'sap/ui/model/Lis
 			this.aExpandRefs = oRef;
 			if (Array.isArray(oRef)) {
 				// For performance, only check first and last entry, whether reload is needed
-				if (this.oModel._isReloadNeeded("/" + oRef[0]) || this.oModel._isReloadNeeded("/" + oRef[oRef.length - 1])) {
+				if (!bSkipReloadNeeded && (this.oModel._isReloadNeeded("/" + oRef[0], this.mParameters) || this.oModel._isReloadNeeded("/" + oRef[oRef.length - 1], this.mParameters))) {
 					this.bUseExpandedList = false;
 					this.aExpandRefs = undefined;
 					return false;
@@ -470,7 +472,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FilterType', 'sap/ui/model/Lis
 	ODataListBinding.prototype.useClientMode = function() {
 		return (this.sOperationMode === OperationMode.Client ||
 			this.sOperationMode === OperationMode.Auto && !this.bThresholdRejected ||
-			this.bUseExpandedList);
+			this.sOperationMode !== OperationMode.Server && this.bUseExpandedList);
 	};
 
 	/**
@@ -499,7 +501,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FilterType', 'sap/ui/model/Lis
 		// create the request url
 		// $skip/$top and are excluded for OperationMode.Client and Auto if the threshold was sufficient
 		var aParams = [];
-		if (this.sRangeParams && (!this.useClientMode() || !this.bLengthFinal)) {
+		if (this.sRangeParams && !this.useClientMode()) {
 			aParams.push(this.sRangeParams);
 		}
 		if (this.sSortParams) {
@@ -550,57 +552,61 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FilterType', 'sap/ui/model/Lis
 				}
 			}
 
-
-			if (oData.results.length > 0) {
-				// Collecting contexts, after the $inlinecount was evaluated, so we do not have to clear it again when
-				// the Auto modes initial threshold <> count check failed.
-				jQuery.each(oData.results, function(i, entry) {
-					that.aKeys[iStartIndex + i] = that.oModel._getKey(entry);
-				});
-
-				// if we got data and the results + startindex is larger than the
-				// length we just apply this value to the length
-				if (that.iLength < iStartIndex + oData.results.length) {
-					that.iLength = iStartIndex + oData.results.length;
-					that.bLengthFinal = false;
-				}
-
-				// if less entries are returned than have been requested
-				// set length accordingly
-				if (!oData.__next && (oData.results.length < iLength || iLength === undefined)) {
-					that.iLength = iStartIndex + oData.results.length;
-					that.bLengthFinal = true;
-				}
-
-			} else {
-				// In fault tolerance mode, if an empty array and next link is returned,
-				// finalize the length accordingly
-				if (that.bFaultTolerant && oData.__next) {
-					that.iLength = iStartIndex;
-					that.bLengthFinal = true;
-				}
-
-				// check if there are any results at all...
-				if (iStartIndex === 0) {
-					that.iLength = 0;
-					that.bLengthFinal = true;
-				}
-
-				// if next requested page has no results, and startindex = actual length
-				// we could set lengthFinal true as we know the length.
-				if (iStartIndex === that.iLength) {
-					that.bLengthFinal = true;
-				}
-			}
-
-			// For clientside sorting filtering store all keys separately and set length to final
 			if (that.useClientMode()) {
+				// For clients mode, store all keys separately and set length to final
+				that.aKeys = [];
+				jQuery.each(oData.results, function(i, entry) {
+					that.aKeys[i] = that.oModel._getKey(entry);
+				});
 				that.updateExpandedList(that.aKeys);
 				that.aAllKeys = that.aKeys.slice();
 				that.iLength = that.aKeys.length;
 				that.bLengthFinal = true;
 				that.applyFilter();
 				that.applySort();
+			} else {
+				// For server mode, update data and or length dependent on the current result
+				if (oData.results.length > 0) {
+					// Collecting contexts, after the $inlinecount was evaluated, so we do not have to clear it again when
+					// the Auto modes initial threshold <> count check failed.
+					jQuery.each(oData.results, function(i, entry) {
+						that.aKeys[iStartIndex + i] = that.oModel._getKey(entry);
+					});
+
+					// if we got data and the results + startindex is larger than the
+					// length we just apply this value to the length
+					if (that.iLength < iStartIndex + oData.results.length) {
+						that.iLength = iStartIndex + oData.results.length;
+						that.bLengthFinal = false;
+					}
+
+					// if less entries are returned than have been requested
+					// set length accordingly
+					if (!oData.__next && (oData.results.length < iLength || iLength === undefined)) {
+						that.iLength = iStartIndex + oData.results.length;
+						that.bLengthFinal = true;
+					}
+				} else {
+					// In fault tolerance mode, if an empty array and next link is returned,
+					// finalize the length accordingly
+					if (that.bFaultTolerant && oData.__next) {
+						that.iLength = iStartIndex;
+						that.bLengthFinal = true;
+					}
+
+					// check if there are any results at all...
+					if (iStartIndex === 0) {
+						that.iLength = 0;
+						that.aKeys = [];
+						that.bLengthFinal = true;
+					}
+
+					// if next requested page has no results, and startindex = actual length
+					// we could set lengthFinal true as we know the length.
+					if (iStartIndex === that.iLength) {
+						that.bLengthFinal = true;
+					}
+				}
 			}
 
 			delete that.mRequestHandles[sGuid];
@@ -882,29 +888,24 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FilterType', 'sap/ui/model/Lis
 				bChangeDetected = false,
 				oCurrentData,
 				that = this,
-				oRef,
-				bRefChanged;
+				aOldRefs;
 
 		if (this.bSuspended && !this.bIgnoreSuspend && !bForceUpdate) {
 			return false;
 		}
 		this.bIgnoreSuspend = false;
 
+		// Don't update while request is pending
+		if (this.bPendingRequest) {
+			return;
+		}
+
 		if (!bForceUpdate && !this.bNeedsUpdate) {
 
-			// check if data in listbinding contains data loaded via expand
-			// if yes and there was a change detected we:
-			// - set the new keys
-			// - trigger clientside filter/sorter
-			oRef = this.oModel._getObject(this.sPath, this.oContext);
-			bRefChanged = Array.isArray(oRef) && !jQuery.sap.equal(oRef, this.aExpandRefs);
-			this.aExpandRefs = oRef;
-			if (bRefChanged) {
-				this.aAllKeys = oRef;
-				this.iLength = oRef.length;
-				this.bLengthFinal = true;
-				this.applyFilter();
-				this.applySort();
+			// check if expanded data has been changed
+			aOldRefs = this.aExpandRefs;
+			this.checkExpandedList(true);
+			if (!jQuery.sap.equal(aOldRefs, this.aExpandRefs)) {
 				bChangeDetected = true;
 			} else if (mChangedEntities) {
 				jQuery.each(this.aKeys, function(i, sKey) {
@@ -1050,8 +1051,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FilterType', 'sap/ui/model/Lis
 		}
 
 		if (!this.bInitial) {
+			this.addComparators(aSorters);
 			if (this.useClientMode()) {
-				this.addSortComparators(aSorters, this.oEntityType);
 				// apply clientside sorters only if data is available
 				if (this.aAllKeys) {
 					// If no sorters are defined, restore initial sort order by calling applyFilter
@@ -1084,23 +1085,28 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FilterType', 'sap/ui/model/Lis
 	};
 
 	/**
-	 * Sets the comparator for each sorter in the sorters array according to the
-	 * Edm type of the sort property.
+	 * Sets the comparator for each sorter/filter in the array according to the
+	 * Edm type of the sort/filter property.
 	 * @private
 	 */
-	ODataListBinding.prototype.addSortComparators = function(aSorters, oEntityType) {
-		var oPropertyMetadata, sType;
+	ODataListBinding.prototype.addComparators = function(aEntries) {
+		var oPropertyMetadata, sType,
+			oEntityType = this.oEntityType,
+			that = this;
 
 		if (!oEntityType) {
-			jQuery.sap.log.warning("Cannot determine sort comparators, as entitytype of the collection is unkown!");
+			jQuery.sap.log.warning("Cannot determine sort/filter comparators, as entitytype of the collection is unkown!");
 			return;
 		}
-		jQuery.each(aSorters, function(i, oSorter) {
-			if (!oSorter.fnCompare) {
-				oPropertyMetadata = this.oModel.oMetadata._getPropertyMetadata(oEntityType, oSorter.sPath);
+		aEntries.forEach(function(oEntry) {
+			// Recurse to nested filters
+			if (oEntry.aFilters) {
+				that.addComparators(oEntry.aFilters);
+			} else if (!oEntry.fnCompare) {
+				oPropertyMetadata = this.oModel.oMetadata._getPropertyMetadata(oEntityType, oEntry.sPath);
 				sType = oPropertyMetadata && oPropertyMetadata.type;
-				jQuery.sap.assert(oPropertyMetadata, "PropertyType for property " + oSorter.sPath + " of EntityType " + oEntityType.name + " not found!");
-				oSorter.fnCompare = ODataUtils.getComparator(sType);
+				jQuery.sap.assert(oPropertyMetadata, "PropertyType for property " + oEntry.sPath + " of EntityType " + oEntityType.name + " not found!");
+				oEntry.fnCompare = ODataUtils.getComparator(sType);
 			}
 		}.bind(this));
 	};
@@ -1172,6 +1178,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FilterType', 'sap/ui/model/Lis
 		}
 
 		if (!this.bInitial) {
+			this.addComparators(this.aFilters);
+			this.addComparators(this.aApplicationFilters);
 
 			if (this.useClientMode()) {
 				// apply clientside filters/sorters only if data is available
@@ -1237,6 +1245,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FilterType', 'sap/ui/model/Lis
 			return;
 		}
 		this.oEntityType = this._getEntityType();
+		this.addComparators(this.aSorters);
+		this.addComparators(this.aFilters);
+		this.addComparators(this.aApplicationFilters);
 		if (!this.useClientMode()) {
 			this.createSortParams(this.aSorters);
 			this.createFilterParams(this.aFilters.concat(this.aApplicationFilters));

@@ -5,9 +5,12 @@
  */
 
 // Provides control sap.m.OverflowToolbarLayoutData.
-sap.ui.define(['sap/m/ToolbarLayoutData', 'sap/m/OverflowToolbarPriority'],
-	function(ToolbarLayoutData, OverflowToolbarPriority) {
+sap.ui.define(['sap/m/ToolbarLayoutData', 'sap/m/library'],
+	function(ToolbarLayoutData, library) {
 	"use strict";
+
+	// shortcut for sap.m.OverflowToolbarPriority
+	var OverflowToolbarPriority = library.OverflowToolbarPriority;
 
 	/**
 	 * Constructor for a new <code>OverflowToolbarLayoutData</code>.
@@ -19,7 +22,7 @@ sap.ui.define(['sap/m/ToolbarLayoutData', 'sap/m/OverflowToolbarPriority'],
 	 * Holds layout data for the {@link sap.m.OverflowToolbar} items.
 	 * @extends sap.m.ToolbarLayoutData
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public

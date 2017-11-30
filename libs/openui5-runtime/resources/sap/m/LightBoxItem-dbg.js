@@ -22,7 +22,7 @@ sap.ui.define([
          * @extends sap.ui.core.Element
          *
          * @author SAP SE
-         * @version 1.48.5
+         * @version 1.50.6
          *
          * @constructor
          * @public
@@ -114,7 +114,7 @@ sap.ui.define([
         /**
          * Sets the state of the image. Possible values are "LOADING", "LOADED" and "ERROR"
          * @private
-         * @param sImageState
+         * @param {sap.m.LightBoxLoadingStates} sImageState
          */
         LightBoxItem.prototype._setImageState = function (sImageState) {
             if (sImageState !== this._imageState) {

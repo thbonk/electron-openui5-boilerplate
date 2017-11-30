@@ -31,7 +31,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ClientModel', 'sap/ui/model/Co
 	 * @extends sap.ui.model.ClientModel
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @param {object} oData either the URL where to load the JSON from or a JS object
 	 * @param {boolean} bObserve whether to observe the JSON data for property changes (experimental)
@@ -149,7 +149,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ClientModel', 'sap/ui/model/Co
 	 * Serializes the current JSON data of the model into a string.
 	 * Note: May not work in Internet Explorer 8 because of lacking JSON support (works only if IE 8 mode is enabled)
 	 *
-	 * @return {string} sJSON the JSON data serialized as string
+	 * @return {string} the JSON data serialized as string
 	 * @public
 	 */
 	JSONModel.prototype.getJSON = function(){
@@ -317,9 +317,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ClientModel', 'sap/ui/model/Co
 	* Returns the value for the property with the given <code>sPropertyName</code>
 	*
 	* @param {string} sPath the path to the property
-	* @param {object} [oContext=null] the context which will be used to retrieve the property
-	* @type any
-	* @return the value of the property
+	* @param {sap.ui.model.Context} [oContext=null] the context which will be used to retrieve the property
+	* @return {any} the value of the property
 	* @public
 	*/
 	JSONModel.prototype.getProperty = function(sPath, oContext) {
@@ -329,7 +328,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ClientModel', 'sap/ui/model/Co
 
 	/**
 	 * @param {string} sPath
-	 * @param {object} [oContext]
+	 * @param {object|sap.ui.model.Context} [oContext]
 	 * @returns {any} the node of the specified path/context
 	 */
 	JSONModel.prototype._getObject = function (sPath, oContext) {

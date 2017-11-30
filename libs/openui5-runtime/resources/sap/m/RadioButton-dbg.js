@@ -45,7 +45,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @implements sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -318,7 +318,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 		var oNextItem = this._getNextFocusItem(sPosition);
 		oNextItem.focus();
-		bSelect && oNextItem.setSelected(true);
+		if (bSelect && !oNextItem.getSelected()) {
+			oNextItem.setSelected(true);
+
+			setTimeout(function() {
+				oNextItem.fireSelect({selected: true});
+			}, 0);
+		}
 	};
 
 	/**

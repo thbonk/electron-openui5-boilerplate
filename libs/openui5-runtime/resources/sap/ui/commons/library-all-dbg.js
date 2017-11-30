@@ -391,7 +391,7 @@ sap.ui.define("sap/ui/commons/ButtonRenderer",['jquery.sap.global'],
 
 	/**
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @namespace
 	 */
 	var ButtonRenderer = {
@@ -530,6 +530,7 @@ sap.ui.define("sap/ui/commons/ButtonRenderer",['jquery.sap.global'],
 
 	/**
 	 * Function called by button control on mouse down event.
+	 * @param {sap.ui.commons.Button} oButton The button to be rendered
 	 */
 	ButtonRenderer.onactive = function(oButton) {
 		oButton.$().addClass("sapUiBtnAct").removeClass("sapUiBtnStd");
@@ -538,6 +539,7 @@ sap.ui.define("sap/ui/commons/ButtonRenderer",['jquery.sap.global'],
 
 	/**
 	 * Function called by button control on mouse up event.
+	 * @param {sap.ui.commons.Button} oButton The button to be rendered
 	 */
 	ButtonRenderer.ondeactive = function(oButton) {
 		oButton.$().addClass("sapUiBtnStd").removeClass("sapUiBtnAct");
@@ -546,6 +548,7 @@ sap.ui.define("sap/ui/commons/ButtonRenderer",['jquery.sap.global'],
 
 	/**
 	 * Function called by button control on blur.
+	 * @param {sap.ui.commons.Button} oButton The button to be rendered
 	 */
 	ButtonRenderer.onblur = function(oButton) {
 		oButton.$().removeClass("sapUiBtnFoc");
@@ -557,6 +560,7 @@ sap.ui.define("sap/ui/commons/ButtonRenderer",['jquery.sap.global'],
 
 	/**
 	 * Function called by button control on focus.
+	 * @param {sap.ui.commons.Button} oButton The button to be rendered
 	 */
 	ButtonRenderer.onfocus = function(oButton) {
 		oButton.$().addClass("sapUiBtnFoc");
@@ -564,7 +568,8 @@ sap.ui.define("sap/ui/commons/ButtonRenderer",['jquery.sap.global'],
 	};
 
 	/**
-	 * Function called when mouse leaves button
+	 * Function called when mouse leaves button.
+	 * @param {sap.ui.commons.Button} oButton The button to be rendered
 	 */
 	ButtonRenderer.onmouseout = function(oButton) {
 		oButton.$().removeClass("sapUiBtnAct");
@@ -573,7 +578,8 @@ sap.ui.define("sap/ui/commons/ButtonRenderer",['jquery.sap.global'],
 	};
 
 	/**
-	 * Function called when mouse enters button
+	 * Function called when mouse enters button.
+	 * @param {sap.ui.commons.Button} oButton The button to be rendered
 	 * @private
 	 */
 	ButtonRenderer.onmouseover = function(oButton) {
@@ -581,7 +587,10 @@ sap.ui.define("sap/ui/commons/ButtonRenderer",['jquery.sap.global'],
 	};
 
 	/**
-	 * Returns the icon URI for the given button state
+	 * Returns the icon URI for the given button state.
+	 * @param {sap.ui.commons.Button} oButton The button to be rendered
+	 * @param {string} sState The state of the button
+	 * @returns {Object} The icon of the button according to the state of the button
 	 * @private
 	 */
 	ButtonRenderer._getIconForState = function(oButton, sState) {
@@ -616,7 +625,10 @@ sap.ui.define("sap/ui/commons/ButtonRenderer",['jquery.sap.global'],
 	};
 
 	/**
-	 * HTML for icon as image
+	 * HTML for icon as image.
+	 * @param {sap.ui.core.RenderManager} oRenderManager The RenderManager that can be used for writing to the render output buffer
+	 * @param {sap.ui.commons.Button} oButton The button to be rendered
+	 * @param {boolean} bImageOnly Whether the button has only image or it has text too
 	 */
 	ButtonRenderer.writeImgHtml = function(oRenderManager, oButton, bImageOnly) {
 		var rm = oRenderManager,
@@ -645,7 +657,9 @@ sap.ui.define("sap/ui/commons/ButtonRenderer",['jquery.sap.global'],
 	};
 
 	/**
-	 * HTML for icon as icon font
+	 * HTML for icon as icon font.
+	 * @param {sap.ui.core.RenderManager} oRenderManager The RenderManager that can be used for writing to the render output buffer
+	 * @param {sap.ui.commons.Button} oButton The button to be rendered
 	 */
 	ButtonRenderer.writeIconHtml = function(oRenderManager, oButton) {
 
@@ -684,8 +698,8 @@ sap.ui.define("sap/ui/commons/ButtonRenderer",['jquery.sap.global'],
 	/**
 	*
 	* @private
-	* @param oButton
-	* @returns {object} icon attributes
+	* @param {sap.ui.commons.Button} oButton The button to be rendered
+	* @returns {Object} Icon attributes
 	*/
 	function buildIconAttributes(oButton) {
 		var oAttributes = {},
@@ -2214,7 +2228,7 @@ sap.ui.define("sap/ui/commons/ListBoxRenderer",['jquery.sap.global', 'sap/ui/cor
 	 * ListBox Renderer
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @namespace
 	 */
 	var ListBoxRenderer = {
@@ -2771,7 +2785,7 @@ sap.ui.define("sap/ui/commons/MenuItemBase",['jquery.sap.global'],
 	 * @extends sap.ui.unified.MenuItemBase
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @since 1.0.0
 	 *
 	 * @deprecated Since version 1.21.0.
@@ -4171,13 +4185,13 @@ sap.ui.define("sap/ui/commons/RatingIndicatorRenderer",['jquery.sap.global'],
 
 		if (sType == "selected") {
 			sIcon = oRating.getIconSelected();
-			sParam = "sapUiRatingSymbolSelected";
+			sParam = "_sap_ui_commons_RatingIndicator_SymbolSelected";
 		} else if (sType == "unselected") {
 			sIcon = oRating.getIconUnselected();
-			sParam = "sapUiRatingSymbolUnselected";
+			sParam = "_sap_ui_commons_RatingIndicator_SymbolUnselected";
 		} else {
 			sIcon = oRating.getIconHovered();
-			sParam = "sapUiRatingSymbolHovered";
+			sParam = "_sap_ui_commons_RatingIndicator_SymbolHovered";
 		}
 
 		if (!sIcon) {
@@ -4217,10 +4231,8 @@ sap.ui.define("sap/ui/commons/ResponsiveContainerRenderer",['jquery.sap.global']
 	/**
 	 * Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
 	 *
-	 * @param {sap.ui.core.RenderManager}
-	 *          oRenderManager the RenderManager that can be used for writing to the Render-Output-Buffer
-	 * @param {sap.ui.core.Control}
-	 *          oRating an object representation of the control that should be rendered
+	 * @param {sap.ui.core.RenderManager} oRenderManager The RenderManager that can be used for writing to the Render-Output-Buffer
+	 * @param {sap.ui.core.Control} oContainer An object representation of the control that should be rendered
 	 */
 	ResponsiveContainerRenderer.render = function(oRenderManager, oContainer) {
 		var oRM = oRenderManager,
@@ -5164,7 +5176,7 @@ sap.ui.define("sap/ui/commons/RoadMapRenderer",['jquery.sap.global'],
 	};
 
 
-	//Refreshs teh delimiters according to the current scroll state
+	//Refreshs the delimiters according to the current scroll state
 	var updateDelimiters = function(oRoadMap){
 		var iRTLFactor = getRTLFactor();
 
@@ -5407,7 +5419,7 @@ sap.ui.define("sap/ui/commons/SegmentedButton",['jquery.sap.global', 'sap/ui/cor
 	 * The SegmentedButton provides a group of multiple buttons. Only one button can be active. The behaviour is more ore less like a radio button group.
 	 * @extends sap.ui.core.Control
 	 * @implements sap.ui.commons.ToolbarItem, sap.ui.core.IFormContent
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -5498,6 +5510,7 @@ sap.ui.define("sap/ui/commons/SegmentedButton",['jquery.sap.global', 'sap/ui/cor
 	};
 	/**
 	 * @private
+	 * @param {jQuery.Event} oEvent The fired event
 	 */
 	SegmentedButton.prototype._buttonSelected = function(oEvent) {
 		var oOldButtonSelection = sap.ui.getCore().byId(this.getSelectedButton()),
@@ -5510,6 +5523,7 @@ sap.ui.define("sap/ui/commons/SegmentedButton",['jquery.sap.global', 'sap/ui/cor
 	};
 	/**
 	 * @private
+	 * @param {boolean} bAddDelegate Whether a delegate is attached
 	 */
 	SegmentedButton.prototype._setItemNavigation = function(bAddDelegate) {
 		var oButton,
@@ -6352,7 +6366,7 @@ sap.ui.define("sap/ui/commons/TextFieldRenderer",['jquery.sap.global', 'sap/ui/c
 	 * TextField Renderer
 	 * @namespace
 	 * @author SAP
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @since 0.9.0
 	 */
 	var TextFieldRenderer = {};
@@ -7003,10 +7017,8 @@ sap.ui.define("sap/ui/commons/ToggleButtonRenderer",['jquery.sap.global', './But
 	/**
 	 * Hint: "renderButtonAttributes" is a reserved/hard-coded Button extending function!
 	 *       It is used to allow extensions to display content after the actual button content.
-	 * @param {sap.ui.core.RenderManager}
-	 *            rm the RenderManager currently rendering this control
-	 * @param {sap.ui.commons.ToggleButton}
-	 *            oToggleButton the ToggleButton that should be rendered
+	 * @param {sap.ui.core.RenderManager} rm The RenderManager currently rendering this control
+	 * @param {sap.ui.commons.ToggleButton} oToggleButton The ToggleButton that should be rendered
 	 * @private
 	 */
 	ToggleButtonRenderer.renderButtonAttributes = function(rm, oToggleButton) {
@@ -7022,6 +7034,7 @@ sap.ui.define("sap/ui/commons/ToggleButtonRenderer",['jquery.sap.global', './But
 
 	/**
 	 * Function called by ToggleButton control to enable Pressed state.
+	 * @param {sap.ui.commons.ToggleButton} oToggleButton The button which is pressed
 	 */
 	ToggleButtonRenderer.onactivePressed = function(oToggleButton) {
 		oToggleButton.$().addClass("sapUiToggleBtnPressed").attr('aria-pressed', true);
@@ -7029,6 +7042,7 @@ sap.ui.define("sap/ui/commons/ToggleButtonRenderer",['jquery.sap.global', './But
 
 	/**
 	 * Function called by button control to disable Pressed state.
+	 * @param {sap.ui.commons.ToggleButton} oToggleButton The button which is pressed
 	 */
 	ToggleButtonRenderer.ondeactivePressed = function(oToggleButton) {
 		oToggleButton.$().removeClass("sapUiToggleBtnPressed").attr('aria-pressed', false);
@@ -7036,13 +7050,17 @@ sap.ui.define("sap/ui/commons/ToggleButtonRenderer",['jquery.sap.global', './But
 
 	/**
 	 * Function called by button control to update image based on state.
+	 * @param {sap.ui.commons.ToggleButton} oToggleButton The button which image will be updated
 	 */
 	ToggleButtonRenderer.updateImage = function(oToggleButton) {
 		oToggleButton.$("img").attr('src', this._getIconForState(oToggleButton, "base"));
 	};
 
 	/**
-	 * Returns the icon URI for the given button state
+	 * Returns the icon URI for the given button state.
+	 * @param {sap.ui.commons.ToggleButton} oButton The button which icon is asked
+	 * @param {string} sState The state of the button
+	 * @returns {Object} The icon URI
 	 * @private
 	 */
 	ToggleButtonRenderer._getIconForState = function(oButton, sState) {
@@ -7136,7 +7154,7 @@ function(jQuery) {
 
 		var sInnerDiv = "<div class='sapUiTbInner' id='" + oToolbar.getId() + "-inner" + "'>";
 		if (bHasRightItems) {
-            rm.write("<div class='sapUiTbCont sapUiTbContLeft'>" + sInnerDiv);
+			rm.write("<div class='sapUiTbCont sapUiTbContLeft'>" + sInnerDiv);
 		} else {
 			rm.write("<div class='sapUiTbCont'>" + sInnerDiv);
 		}
@@ -7214,7 +7232,7 @@ function(jQuery) {
 	/**
 	 * Fills the overflow popup with the currently invisible toolbar items.
 	 *
-	 * @param {sap.ui.commons.Toolbar} oToolbar
+	 * @param {sap.ui.commons.Toolbar} oToolbar The toolbar to be filled
 	 * @private
 	 */
 	ToolbarRenderer.fillOverflowPopup = function(oToolbar) {
@@ -7260,7 +7278,8 @@ function(jQuery) {
 	/**
 	 * Creates the overflow popup inside the static area, but does not fill its contents (=no items).
 	 *
-	 * @param {sap.ui.commons.Toolbar} oToolbar
+	 * @param {sap.ui.commons.Toolbar} oToolbar The toolbar which popup will be created
+	 * @returns {Object} The object that holds the popup
 	 * @private
 	 */
 	ToolbarRenderer.initOverflowPopup = function(oToolbar) {
@@ -7276,16 +7295,16 @@ function(jQuery) {
 	/**
 	 * Either move the items from the overflow popup to the toolbar or just remove them from the DOM.
 	 *
-	 * @param {sap.ui.commons.Toolbar} oToolbar
+	 * @param {sap.ui.commons.Toolbar} oToolbar The toolbar which popup items will be rearranged
 	 * @param {boolean} [bMoveItems=true] move popup items to the toolbar DOM or remove them completely
 	 * @private
 	 */
 	ToolbarRenderer.emptyOverflowPopup = function(oToolbar, bMoveItems) {
 		var oPopupHolder    = oToolbar.getDomRef("pu"),
-		    oDomRef         = oToolbar.getDomRef(),
-		    oContext        = null,
-		    sMethod         = '',
-		    aAdditionalArgs = [];
+			oDomRef         = oToolbar.getDomRef(),
+			oContext        = null,
+			sMethod         = '',
+			aAdditionalArgs = [];
 
 		if (bMoveItems === undefined) {
 			// by default the items are moved from the popup to the toolbar
@@ -7327,7 +7346,7 @@ function(jQuery) {
 	 * Returns the area in which the overflow popup should be rendered.
 	 *
 	 * @param {sap.ui.commons.Toolbar} oToolbar The Toolbar whose popup area is requested
-	 *
+	 * @returns {object} The popup area
 	 * @private
 	 */
 	ToolbarRenderer.getPopupArea = function(oToolbar) {
@@ -7474,9 +7493,11 @@ sap.ui.define("sap/ui/commons/TreeRenderer",['jquery.sap.global'],
 	/**
 	 * Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
 	 *
-	 * @param {sap.ui.core.RenderManager} oRenderManager the RenderManager that can be used for writing to the Render-Output-Buffer
-	 * @param {sap.ui.core.Control} oNode an object representation of the control that should be rendered
-	 * @param {int} iLevel the hierarchical level value of the node
+	 * @param {sap.ui.core.RenderManager} oRenderManager The RenderManager that can be used for writing to the Render-Output-Buffer
+	 * @param {sap.ui.core.Control} oNode An object representation of the control that should be rendered
+	 * @param {int} iLevel The hierarchical level value of the node
+	 * @param {int} iSize The size of the set
+	 * @param {int} iPos The position of the node in the set
 	 */
 	TreeRenderer.renderNode = function(oRenderManager, oNode, iLevel, iSize, iPos){
 		// convenience variable
@@ -8220,14 +8241,12 @@ sap.ui.define("sap/ui/commons/layout/BorderLayoutRenderer",['jquery.sap.global',
 
 	(function() {
 		/**
-		 * Renders the HTML for the given control, using the provided
+		 * Renders the HTML for the given control, using the provided.
 		 * {@link sap.ui.core.RenderManager}.
 		 *
-		 * @param {sap.ui.core.RenderManager}
-		 *            oRenderManager the RenderManager that can be used for writing
+		 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing
 		 *            to the Render-Output-Buffer
-		 * @param {sap.ui.core.Control}
-		 *            oControl an object representation of the control that should
+		 * @param {sap.ui.core.Control} oControl An object representation of the control that should
 		 *            be rendered
 		 */
 		BorderLayoutRenderer.render = function(oRm, oControl) {
@@ -9198,14 +9217,14 @@ sap.ui.define("sap/ui/commons/library",['jquery.sap.global', 'sap/ui/base/DataTy
 	 * @namespace
 	 * @name sap.ui.commons
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @public
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.commons",
-		version: "1.48.5",
+		version: "1.50.6",
 		dependencies : ["sap.ui.core","sap.ui.layout","sap.ui.unified"],
 		types: [
 			"sap.ui.commons.ButtonStyle",
@@ -10506,7 +10525,7 @@ sap.ui.define("sap/ui/commons/Accordion",['jquery.sap.global', './library', 'sap
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -11413,7 +11432,7 @@ sap.ui.define("sap/ui/commons/AccordionSection",['jquery.sap.global', './library
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -11757,7 +11776,7 @@ sap.ui.define("sap/ui/commons/Area",['jquery.sap.global', './library', 'sap/ui/c
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -11850,7 +11869,7 @@ sap.ui.define("sap/ui/commons/Button",['jquery.sap.global', './library', 'sap/ui
 	 * @implements sap.ui.commons.ToolbarItem, sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -11975,7 +11994,7 @@ sap.ui.define("sap/ui/commons/Button",['jquery.sap.global', './library', 'sap/ui
 	/**
 	 * Function is called when button is clicked.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The event fired
 	 * @private
 	 */
 	Button.prototype.onclick = function(oEvent) {
@@ -11988,9 +12007,9 @@ sap.ui.define("sap/ui/commons/Button",['jquery.sap.global', './library', 'sap/ui
 	};
 
 	/**
-	 * Handles the sapenter event does not bubble
+	 * Handles the sapenter event does not bubble.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The event fired
 	 * @private
 	 */
 	Button.prototype.onsapenter = function(oEvent) {
@@ -12001,7 +12020,7 @@ sap.ui.define("sap/ui/commons/Button",['jquery.sap.global', './library', 'sap/ui
 	 * Function is called when mouse key is clicked down. The button style classes
 	 * are replaced then.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The event fired
 	 * @private
 	 */
 	Button.prototype.onmousedown = function(oEvent) {
@@ -12022,7 +12041,7 @@ sap.ui.define("sap/ui/commons/Button",['jquery.sap.global', './library', 'sap/ui
 		// webkit && firefox on mac does not focus a Button on click, it even unfocuses it onmousedown!
 		if (bFocus && (!!sap.ui.Device.browser.webkit || (!!sap.ui.Device.browser.firefox && navigator.platform.indexOf("Mac") === 0))) {
 			if (sap.ui.Device.browser.mobile && !!sap.ui.Device.browser.webkit) {
-				//In mobile Webkit Browsers (IPad) the focus must be set immediately to ensure that a focusout happens whereever the
+				//In mobile Webkit Browsers (IPad) the focus must be set immediately to ensure that a focusout happens wherever the
 				//focus currently is. The deleayedCall below is still needed due to the reason described above. (CSN 2536817 2012)
 				this.focus();
 			}
@@ -12035,7 +12054,7 @@ sap.ui.define("sap/ui/commons/Button",['jquery.sap.global', './library', 'sap/ui
 	/**
 	 * When mouse key is up again, reset the background images to normal.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The event fired
 	 * @private
 	 */
 	Button.prototype.onmouseup = function(oEvent) {
@@ -12047,7 +12066,7 @@ sap.ui.define("sap/ui/commons/Button",['jquery.sap.global', './library', 'sap/ui
 	/**
 	 * When mouse is going out of the control, reset the background images to normal.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The event fired
 	 * @private
 	 */
 	Button.prototype.onmouseout = function(oEvent) {
@@ -12059,7 +12078,7 @@ sap.ui.define("sap/ui/commons/Button",['jquery.sap.global', './library', 'sap/ui
 	/**
 	 * When mouse is going over the control a hover effect is done.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The event fired
 	 * @private
 	 */
 	Button.prototype.onmouseover = function(oEvent) {
@@ -12071,7 +12090,7 @@ sap.ui.define("sap/ui/commons/Button",['jquery.sap.global', './library', 'sap/ui
 	/**
 	 * When the button looses the focus, this method is called.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The event fired
 	 * @private
 	 */
 	Button.prototype.onfocusout = function(oEvent) {
@@ -12083,7 +12102,7 @@ sap.ui.define("sap/ui/commons/Button",['jquery.sap.global', './library', 'sap/ui
 	/**
 	 * When the button gets the focus, this method is called.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The event fired
 	 * @private
 	 */
 	Button.prototype.onfocusin = function(oEvent) {
@@ -12157,6 +12176,7 @@ sap.ui.define("sap/ui/commons/Button",['jquery.sap.global', './library', 'sap/ui
 
 	/**
 	 * @see sap.ui.core.Control#getAccessibilityInfo
+	 * @returns {Object} Current accessibility state of the control.
 	 * @protected
 	 */
 	Button.prototype.getAccessibilityInfo = function() {
@@ -12184,6 +12204,7 @@ sap.ui.define("sap/ui/commons/Button",['jquery.sap.global', './library', 'sap/ui
 
 }; // end of sap/ui/commons/Button.js
 if ( !jQuery.sap.isDeclared('sap.ui.commons.CalloutBase') ) {
+
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
  * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
@@ -12211,7 +12232,7 @@ sap.ui.define("sap/ui/commons/CalloutBase",['jquery.sap.global', './library', 's
 	 * @extends sap.ui.core.TooltipBase
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -12672,7 +12693,7 @@ sap.ui.define("sap/ui/commons/CalloutBase",['jquery.sap.global', './library', 's
 	 * Organize a local tab chain inside of a callout.
 	 * If it occurs on the focus handler elements at the beginning of the callout,
 	 * the focus is set to the end, and vice versa.
-	 * @param {jQuery.EventObject} oEvent The event object
+	 * @param {jQuery.Event} oEvent The event object
 	 * @private
 	 */
 	CalloutBase.prototype.onfocusin = function(oEvent){
@@ -12696,7 +12717,7 @@ sap.ui.define("sap/ui/commons/CalloutBase",['jquery.sap.global', './library', 's
 	/**
 	 * When a control that has a Callout looses the focus to the Callout contents,
 	 * do not close it. Override the onfocusout event handler of TooltipBalse.
-	 * @param {jQuery.EventObject} the event indication that the focus is lost
+	 * @param {jQuery.Event} the event indication that the focus is lost
 	 * @private
 	 */
 	CalloutBase.prototype.onfocusout = function(oEvent) {
@@ -12705,7 +12726,7 @@ sap.ui.define("sap/ui/commons/CalloutBase",['jquery.sap.global', './library', 's
 
 	/**
 	* Handle the mouseover event: do not close if a child control has a simple tooltip
-	* @param {jQuery.EventObject} oEvent The event that occurred in the callout
+	* @param {jQuery.Event} oEvent The event that occurred in the callout
 	* @private
 	 */
 	CalloutBase.prototype.onmouseover = function(oEvent) {
@@ -12724,7 +12745,7 @@ sap.ui.define("sap/ui/commons/CalloutBase",['jquery.sap.global', './library', 's
 	/**
 	 * Handle the mouseout event of a Callout. Override the default TooltipBase behavior when
 	 * the mouse pointer is over some other popup on the screen
-	 * @param {jQuery.EventObject} oEvent mouseout Event.
+	 * @param {jQuery.Event} oEvent mouseout Event.
 	 * @private
 	 */
 	CalloutBase.prototype.onmouseout = function(oEvent) {
@@ -12737,7 +12758,7 @@ sap.ui.define("sap/ui/commons/CalloutBase",['jquery.sap.global', './library', 's
 
 	/**
 	 * Always close Callout when the user clicks on the parent control.
-	 * @param {jQuery.EventObject} the event
+	 * @param {jQuery.Event} the event
 	 * @private
 	 */
 	CalloutBase.prototype.onmousedown = function(oEvent) {
@@ -12751,7 +12772,7 @@ sap.ui.define("sap/ui/commons/CalloutBase",['jquery.sap.global', './library', 's
 
 	/**
 	 * Handles the outer event of the popup.
-	 * @param {sap.ui.core.Event} oControlEvent The event
+	 * @param {sap.ui.base.Event} oControlEvent The event
 	 * @private
 	 */
 	CalloutBase.prototype.onAnyEvent = function(oEvent){
@@ -12858,7 +12879,7 @@ sap.ui.define("sap/ui/commons/Carousel",['jquery.sap.global', './library', 'sap/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -13678,7 +13699,7 @@ sap.ui.define("sap/ui/commons/CheckBox",['jquery.sap.global', './library', 'sap/
 	 * @implements sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -13897,7 +13918,7 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -14173,7 +14194,7 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 		 *
 		 * @namespace
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @public
@@ -14529,7 +14550,7 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 		/**
 		 * Handle the click event happening on the dialog instance.
 		 *
-		 * @param {jQuery.EventObject} oEvent The event object
+		 * @param {jQuery.Event} oEvent The event object
 		 * @private
 		 */
 		Dialog.prototype.onclick = function (oEvent) {
@@ -14737,7 +14758,7 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 		/**
 		 * Handles the sapescape event, triggers closing of the window.
 		 *
-		 * @param {jQuery.EventObject} oEvent The event object
+		 * @param {jQuery.Event} oEvent The event object
 		 * @private
 		 */
 		Dialog.prototype.onsapescape = function (oEvent) {
@@ -14750,7 +14771,7 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 		/**
 		 * Handles the sapenter event, triggers the default button of the dialog.
 		 *
-		 * @param {jQuery.EventObject} oEvent The event object
+		 * @param {jQuery.Event} oEvent The event object
 		 * @private
 		 */
 		Dialog.prototype.onsapenter = function (oEvent) {
@@ -14775,7 +14796,7 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 		 * Event handler for the focusin event.
 		 *
 		 * If it occurs on the focus handler elements at the beginning of the dialog, the focus is set to the end, and vice versa.
-		 * @param {jQuery.EventObject} oEvent The event object
+		 * @param {jQuery.Event} oEvent The event object
 		 * @private
 		 */
 		Dialog.prototype.onfocusin = function (oEvent) {
@@ -14796,7 +14817,6 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 		/**
 		 * Restores the focus to the dialog after it has been moved or resized.
 		 *
-		 * @param {jQuery.EventObject} oEvent The event object
 		 * @private
 		 */
 		Dialog.prototype.restoreFocus = function () {
@@ -14811,7 +14831,7 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 		/**
 		 * Handles or cancels the selectstart event when occuring in parts of the dialog.
 		 *
-		 * @param {jQuery.EventObject} oEvent The event object
+		 * @param {jQuery.Event} oEvent The event object
 		 * @private
 		 */
 		Dialog.prototype.onselectstart = function (oEvent) {
@@ -14945,7 +14965,7 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 		 * Handles the dragstart event.
 		 * In case of resize currently ongoing, this cancels the dragstart.
 		 *
-		 * @param {sap.ui.core.BrowserEvent} oEvent The forwarded browser event
+		 * @param {jQuery.Event} oEvent The forwarded browser event
 		 * @private
 		 */
 		Dialog.prototype.ondragstart = function (oEvent) {
@@ -14958,7 +14978,7 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 		/**
 		 * Initializes drag and move capabilities.
 		 *
-		 * @param {jQuery.EventObject} oEvent The event object
+		 * @param {jQuery.Event} oEvent The event object
 		 * @private
 		 */
 		Dialog.prototype.onmousedown = function (oEvent) {
@@ -15053,7 +15073,7 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 		 * Handles the move event taking the current dragMode into account.
 		 * Also stops propagation of the event.
 		 *
-		 * @param {DOMEvent} event The event raised by the browser.
+		 * @param {jQuery.Event} event The event raised by the browser.
 		 * @returns {boolean}
 		 * @private
 		 */
@@ -15135,7 +15155,7 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 		/**
 		 * Handle mouseup event.
 		 * This does the cleanup after drag and move handling.
-		 * @param {jQuery.EventObject} oEvent The event object
+		 * @param {jQuery.Event} oEvent The event object
 		 * @private
 		 */
 		Dialog.prototype.handleMouseUp = function (oEvent) {
@@ -15223,10 +15243,10 @@ sap.ui.define("sap/ui/commons/DropdownBoxRenderer",['jquery.sap.global', './Comb
 	var DropdownBoxRenderer = sap.ui.core.Renderer.extend(ComboBoxRenderer);
 
 	/**
-	 * Renders additional HTML for the DropdownBox to the TextField before the INPUT element (sets the icon)
+	 * Renders additional HTML for the DropdownBox to the TextField before the INPUT element (sets the icon).
 	 *
-	 * @param {sap.ui.fw.RenderManager} oRenderManager the RenderManager that can be used for writing to the Render-Output-Buffer
-	 * @param {sap.ui.fw.Control} oDdb an object representation of the control that should be rendered
+	 * @param {sap.ui.core.RenderManager} rm The RenderManager that can be used for writing to the Render-Output-Buffer
+	 * @param {sap.ui.core.Control} oDdb An object representation of the control that should be rendered
 	 */
 	DropdownBoxRenderer.renderOuterContentBefore = function(rm, oDdb){
 
@@ -15235,10 +15255,10 @@ sap.ui.define("sap/ui/commons/DropdownBoxRenderer",['jquery.sap.global', './Comb
 	};
 
 	/**
-	 * Renders additional HTML for the DropdownBox to the TextField after the INPUT element (sets the select box)
+	 * Renders additional HTML for the DropdownBox to the TextField after the INPUT element (sets the select box).
 	 *
-	 * @param {sap.ui.fw.RenderManager} oRenderManager the RenderManager that can be used for writing to the Render-Output-Buffer
-	 * @param {sap.ui.fw.Control} oDdb an object representation of the control that should be rendered
+	 * @param {sap.ui.core.RenderManager} rm The RenderManager that can be used for writing to the Render-Output-Buffer
+	 * @param {sap.ui.core.Control} oDdb An object representation of the control that should be rendered
 	 */
 	DropdownBoxRenderer.renderOuterContent = function(rm, oDdb){
 
@@ -15251,10 +15271,10 @@ sap.ui.define("sap/ui/commons/DropdownBoxRenderer",['jquery.sap.global', './Comb
 	};
 
 	/**
-	 * Used to set the tabindex of the dropdownbox to -1
+	 * Used to set the tabindex of the dropdownbox to -1.
 	 *
-	 * @param {sap.ui.fw.RenderManager} oRenderManager the RenderManager that can be used for writing to the Render-Output-Buffer
-	 * @param {sap.ui.fw.Control} oDdb an object representation of the control that should be rendered
+	 * @param {sap.ui.core.RenderManager} rm The RenderManager that can be used for writing to the Render-Output-Buffer
+	 * @param {sap.ui.core.Control} oDdb An object representation of the control that should be rendered
 	 */
 	DropdownBoxRenderer.renderTextFieldEnabled = function(rm, oDdb) {
 
@@ -15343,7 +15363,7 @@ sap.ui.define("sap/ui/commons/FileUploader",['jquery.sap.global', './library', '
 	 * @extends sap.ui.unified.FileUploader
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -15396,7 +15416,7 @@ sap.ui.define("sap/ui/commons/FileUploaderParameter",['jquery.sap.global', './li
 	 * @extends sap.ui.unified.FileUploaderParameter
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -15448,7 +15468,7 @@ sap.ui.define("sap/ui/commons/FormattedTextView",['jquery.sap.global', './librar
 		 * @class
 		 * The FormattedTextView control allows the usage of a limited set of HTML tags for display.
 		 * @extends sap.ui.core.Control
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @public
@@ -15713,7 +15733,7 @@ sap.ui.define("sap/ui/commons/HorizontalDivider",['jquery.sap.global', './librar
 	 * @class
 	 * Divides the screen in visual areas.
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -15779,7 +15799,7 @@ sap.ui.define("sap/ui/commons/Image",['jquery.sap.global', './library', 'sap/ui/
 	 * @implements sap.ui.commons.ToolbarItem,sap.ui.commons.FormattedTextViewControl, sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -15896,7 +15916,7 @@ sap.ui.define("sap/ui/commons/ImageMap",['jquery.sap.global', './library', 'sap/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -16079,7 +16099,7 @@ sap.ui.define("sap/ui/commons/Label",['jquery.sap.global', './library', 'sap/ui/
 	 * @implements sap.ui.commons.ToolbarItem, sap.ui.core.Label
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -16287,7 +16307,7 @@ sap.ui.define("sap/ui/commons/Link",['jquery.sap.global', './library', 'sap/ui/c
 	 * @implements sap.ui.commons.ToolbarItem,sap.ui.commons.FormattedTextViewControl, sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -16473,7 +16493,7 @@ sap.ui.define("sap/ui/commons/ListBox",['jquery.sap.global', './library', 'sap/u
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -17610,7 +17630,7 @@ sap.ui.define("sap/ui/commons/ListBox",['jquery.sap.global', './library', 'sap/u
 	/*
 	 * Implementation of API method setItems.
 	 * Semantically belonging to "items" aggregation but not part of generated method set.
-	 * @param bNoItemsChanged not in official API, only needed in DropdownBox TypeAhead
+	 * @param {boolean} bNoItemsChanged not in official API, only needed in DropdownBox TypeAhead
 	 */
 
 	/**
@@ -17861,7 +17881,7 @@ sap.ui.define("sap/ui/commons/Menu",['jquery.sap.global', './MenuItemBase', './l
 	 * @extends sap.ui.unified.Menu
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @since 1.0.0
 	 *
 	 * @constructor
@@ -17910,7 +17930,7 @@ sap.ui.define("sap/ui/commons/MenuButton",['jquery.sap.global', './Button', './M
 	 * Common button control that opens a menu when clicked by the user. The control provides an API for configuring the docking position
 	 * of the menu.
 	 * @extends sap.ui.commons.Button
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -17973,7 +17993,7 @@ sap.ui.define("sap/ui/commons/MenuButton",['jquery.sap.global', './Button', './M
 	/**
 	 * Function is called when button is clicked.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The fired event
 	 * @private
 	 */
 	MenuButton.prototype.onclick = function(oEvent) {
@@ -17995,7 +18015,7 @@ sap.ui.define("sap/ui/commons/MenuButton",['jquery.sap.global', './Button', './M
 	/**
 	 * Function is called when mouse key is clicked down.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The fired event
 	 * @private
 	 */
 	MenuButton.prototype.onmousedown = function(oEvent) {
@@ -18007,7 +18027,7 @@ sap.ui.define("sap/ui/commons/MenuButton",['jquery.sap.global', './Button', './M
 	/**
 	 * Function is called when mouse leaves the control.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The fired event
 	 * @private
 	 */
 	MenuButton.prototype.onmouseout = function(oEvent) {
@@ -18023,7 +18043,7 @@ sap.ui.define("sap/ui/commons/MenuButton",['jquery.sap.global', './Button', './M
 	/**
 	 * Function is called when enter key is pressed.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The fired event
 	 * @private
 	 */
 	MenuButton.prototype.onsapenter = function(oEvent){
@@ -18034,7 +18054,7 @@ sap.ui.define("sap/ui/commons/MenuButton",['jquery.sap.global', './Button', './M
 	/**
 	 * Function is called when space key is pressed.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The fired event
 	 * @private
 	 */
 	MenuButton.prototype.onsapspace = function(oEvent){
@@ -18045,7 +18065,7 @@ sap.ui.define("sap/ui/commons/MenuButton",['jquery.sap.global', './Button', './M
 	/**
 	 * Function is called when down key is pressed with a modifier key.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The fired event
 	 * @private
 	 */
 	//Requested by UX, see CSN 0120061532 0001379793 2011
@@ -18066,7 +18086,7 @@ sap.ui.define("sap/ui/commons/MenuButton",['jquery.sap.global', './Button', './M
 
 	/**
 	 * Setter for the aggregated <code>menu</code>.
-	 * @param {sap.ui.unified.Menu} oMenu
+	 * @param {sap.ui.unified.Menu} oMenu The menu to be set to the menu aggregation
 	 * @return {sap.ui.commons.MenuButton} <code>this</code> to allow method chaining
 	 * @public
 	 */
@@ -18210,7 +18230,7 @@ sap.ui.define("sap/ui/commons/MenuItem",['jquery.sap.global', './MenuItemBase', 
 	 * @extends sap.ui.unified.MenuItem
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @since 1.0.0
 	 *
 	 * @constructor
@@ -18262,7 +18282,7 @@ sap.ui.define("sap/ui/commons/MenuTextFieldItem",['jquery.sap.global', './MenuIt
 	 * @extends sap.ui.unified.MenuTextFieldItem
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -18310,7 +18330,7 @@ sap.ui.define("sap/ui/commons/Message",['jquery.sap.global', './Dialog', './libr
 	 * @class
 	 * Creates the "Message"s to be supplied to the "MessageBar" Control.
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -18606,7 +18626,7 @@ sap.ui.define("sap/ui/commons/MessageList",['jquery.sap.global', './library', 's
 	 * @class
 	 * Instantiated by the "MessageBar" Control if the user requests to generate the corresponding "MessageList".
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -18824,7 +18844,7 @@ sap.ui.define("sap/ui/commons/MessageToast",['jquery.sap.global', './library', '
 	 * @class
 	 * Responsible for displaying the new incoming messages, one at the time, on top of the MessageBar.
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -19083,7 +19103,7 @@ sap.ui.define("sap/ui/commons/Paginator",['jquery.sap.global', './library', 'sap
 	 * @class
 	 * Provides navigation between pages within a list of numbered pages.
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -19427,7 +19447,7 @@ sap.ui.define("sap/ui/commons/Paginator",['jquery.sap.global', './library', 'sap
 	Paginator.prototype._handleSelect = function(oEvent) {
 		if (oEvent && oEvent.target) {
 
-			// Supress triggering beforeunload in IE
+			// suppress triggering beforeunload in IE
 			oEvent.preventDefault();
 
 			// go up one node if unnamed element is the source
@@ -19525,7 +19545,7 @@ sap.ui.define("sap/ui/commons/Panel",['jquery.sap.global', './library', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -19998,7 +20018,7 @@ sap.ui.define("sap/ui/commons/Panel",['jquery.sap.global', './library', 'sap/ui/
 	/**
 	 * Internal method for applying a (non-)"collapsed" state to the rendered HTML
 	 *
-	 * @param bCollapsed whether the Panel should be collapsed or not
+	 * @param {boolean} bCollapsed whether the Panel should be collapsed or not
 	 * @private
 	 */
 	Panel.prototype._setCollapsedState = function(bCollapsed) {
@@ -20057,7 +20077,7 @@ sap.ui.define("sap/ui/commons/Panel",['jquery.sap.global', './library', 'sap/ui/
 	 * Returns "true" for absolute and relative sizes, returns "false" if "null", "inherit" or "auto" is given.
 	 *
 	 * @static
-	 * @param sCssSize a css size string (must be a valid CSS size, or null)
+	 * @param {string} sCssSize a css size string (must be a valid CSS size, or null)
 	 * @private
 	 */
 	Panel._isSizeSet = function(sCssSize) {
@@ -20403,7 +20423,7 @@ sap.ui.define("sap/ui/commons/ProgressIndicator",['jquery.sap.global', './librar
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -20718,7 +20738,7 @@ sap.ui.define("sap/ui/commons/RadioButton",['jquery.sap.global', './library', 's
 	 * @implements sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -21037,7 +21057,7 @@ sap.ui.define("sap/ui/commons/RadioButtonGroup",['jquery.sap.global', './library
 	 *
 	 * @extends sap.ui.core.Control
 	 * @implements sap.ui.core.IFormContent
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -21832,7 +21852,7 @@ sap.ui.define("sap/ui/commons/RatingIndicator",['jquery.sap.global', './library'
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -22342,7 +22362,7 @@ sap.ui.define("sap/ui/commons/ResponsiveContainer",['jquery.sap.global', './libr
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -22450,7 +22470,8 @@ sap.ui.define("sap/ui/commons/ResponsiveContainer",['jquery.sap.global', './libr
 	};
 
 	/**
-	 * Resize handling
+	 * Resize handling.
+	 * @param {jQuery.Event} oEvent The fired event
 	 */
 	ResponsiveContainer.prototype.onresize = function(oEvent) {
 		var oRange = this.findMatchingRange(),
@@ -22549,7 +22570,7 @@ sap.ui.define("sap/ui/commons/ResponsiveContainerRange",['jquery.sap.global', '.
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -22622,7 +22643,7 @@ sap.ui.define("sap/ui/commons/RichTooltip",['jquery.sap.global', './library', 's
 	 * @extends sap.ui.core.TooltipBase
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -22739,8 +22760,7 @@ sap.ui.define("sap/ui/commons/RichTooltip",['jquery.sap.global', './library', 's
 	 * should be used for rendering
 	 *
 	 * @override
-	 * @param sText
-	 *            {string} the text that should be shown
+	 * @param {string} sText the text that should be shown
 	 */
 	RichTooltip.prototype.setText = function(sText) {
 		if (!!sText) {
@@ -22843,7 +22863,7 @@ sap.ui.define("sap/ui/commons/RoadMap",['jquery.sap.global', './library', 'sap/u
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -23378,7 +23398,7 @@ sap.ui.define("sap/ui/commons/RoadMapStep",['jquery.sap.global', './library', 's
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -23648,7 +23668,7 @@ sap.ui.define("sap/ui/commons/RowRepeater",['jquery.sap.global', './library', 's
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -25199,7 +25219,7 @@ sap.ui.define("sap/ui/commons/RowRepeaterFilter",['jquery.sap.global', './librar
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -25269,7 +25289,7 @@ sap.ui.define("sap/ui/commons/RowRepeaterSorter",['jquery.sap.global', './librar
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -25337,7 +25357,7 @@ sap.ui.define("sap/ui/commons/SearchProvider",['jquery.sap.global', './library',
 	 * @class
 	 * A SearchProvider which can be attached to a Search Field.
 	 * @extends sap.ui.core.search.OpenSearchProvider
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -25404,7 +25424,7 @@ sap.ui.define("sap/ui/commons/Slider",['jquery.sap.global', './library', 'sap/ui
 	 * @implements sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -25884,7 +25904,7 @@ sap.ui.define("sap/ui/commons/Slider",['jquery.sap.global', './library', 'sap/ui
 	/**
 	 * Function is called when Slider is moved
 	 *
-	 * @param {DOM.Event} event The event object
+	 * @param {jQuery.Event} event The event object
 	 * @returns {boolean} return value for event
 	 * @private
 	 */
@@ -25993,7 +26013,7 @@ sap.ui.define("sap/ui/commons/Slider",['jquery.sap.global', './library', 'sap/ui
 	/**
 	 * Handles all events that occur outside the Popup and
 	 * dispatches it to the onOuterEvent
-	 * @param {jQuery.EventObject} oEvent The event object of the ui.core framework
+	 * @param {jQuery.Event} oEvent The event object of the ui.core framework
 	 * @private
 	 */
 	Slider.prototype.onAnyEvent = function (oEvent) {
@@ -26651,7 +26671,7 @@ sap.ui.define("sap/ui/commons/Slider",['jquery.sap.global', './library', 'sap/ui
 	/* Overwrite of generated function - no new JS-doc.
 	 * Property setter for the enabled state
 	 *
-	 * @param bEnabled Whether the Slider should be ednabled, or not (disabled)
+	 * @param {boolean} bEnabled Whether the Slider should be ednabled, or not (disabled)
 	 * @return {sap.ui.commons.Slider} <code>this</code> to allow method chaining
 	 * @public
 	 */
@@ -26692,7 +26712,7 @@ sap.ui.define("sap/ui/commons/Slider",['jquery.sap.global', './library', 'sap/ui
 	/* Overwrite of generated function - no new JS-doc.
 	 * Property setter for the totalUnits state
 	 *
-	 * @param iTotalUnits Number of the units (tick-spaces)
+	 * @param {int} iTotalUnits Number of the units (tick-spaces)
 	 * @return {sap.ui.commons.Slider} <code>this</code> to allow method chaining
 	 * @public
 	 */
@@ -26710,7 +26730,7 @@ sap.ui.define("sap/ui/commons/Slider",['jquery.sap.global', './library', 'sap/ui
 	 * Property setter for the value
 	 * A new rendering is not necessary, only the grip must be moved.
 	 *
-	 * @param fValue
+	 * @param {float} fValue
 	 * @return {sap.ui.commons.Slider} <code>this</code> to allow method chaining
 	 * @public
 	 */
@@ -26753,7 +26773,7 @@ sap.ui.define("sap/ui/commons/Slider",['jquery.sap.global', './library', 'sap/ui
 	/*
 	 * fires the change event. The liveChange event must be fired too if the change event is fired.
 	 *
-	 * @param bNoLiveChange fire no LiveChange event
+	 * @param {boolean} bNoLiveChange fire no LiveChange event
 	 * @private
 	 */
 	Slider.prototype.handleFireChange = function(bNoLiveChange) {
@@ -27059,7 +27079,7 @@ sap.ui.define("sap/ui/commons/Splitter",['jquery.sap.global', './library', 'sap/
 	 * @class
 	 * Allows to split the screen into two areas. Make sure that the container for the splitter has an absolute height or set an absolute height for the splitter using the height property. Otherwise the height of the splitter is calculated by the height of its contents.
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -27765,7 +27785,7 @@ sap.ui.define("sap/ui/commons/Tab",['jquery.sap.global', './Panel', './library']
 	 * @extends sap.ui.commons.Panel
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -27920,7 +27940,7 @@ sap.ui.define("sap/ui/commons/Tab",['jquery.sap.global', './Panel', './library']
 	 * If the selected Tab should be disabled, re-rendering is needed as selected tabs can not be disabled.
 	 * If no Tab is selected (because all tabs have been disabled before) also re-rendering is needed.
 	 *
-	 * @param bEnabled Whether the Tab should be enabled or not
+	 * @param {boolean} bEnabled Whether the Tab should be enabled or not
 	 * @return {sap.ui.commons.Tab} <code>this</code> to allow method chaining
 	 * @public
 	 */
@@ -27966,7 +27986,7 @@ sap.ui.define("sap/ui/commons/Tab",['jquery.sap.global', './Panel', './library']
 	/*
 	 * Sets content padding.
 	 *
-	 * @param bPadding whether the Panel should have padding
+	 * @param {boolean} bPadding Whether the Panel should have padding
 	 * @returns {sap.ui.commons.Tab} <code>this</code> to allow method chaining
 	 * @public
 	 */
@@ -28023,7 +28043,7 @@ sap.ui.define("sap/ui/commons/TabStrip",['jquery.sap.global', './library', 'sap/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -29386,7 +29406,7 @@ sap.ui.define("sap/ui/commons/TextField",['jquery.sap.global', './library', 'sap
 	 * @implements sap.ui.commons.ToolbarItem, sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -29811,6 +29831,23 @@ sap.ui.define("sap/ui/commons/TextField",['jquery.sap.global', './library', 'sap
 
 	};
 
+	if (sap.ui.Device.browser.internet_explorer) {
+		//In IE pasting of strings with line endings cutoffs the text after the 1st line ending, so make sure line endings are removed
+		TextField.prototype.onpaste = function(oEvent) {
+			var clipboardData,
+				pastedData,
+				modifiedData;
+
+			clipboardData = oEvent.clipboardData || window.clipboardData;
+			pastedData = clipboardData.getData('Text');
+
+			if (pastedData) {
+				modifiedData = pastedData.replace(/(?:\r\n|\r|\n)/g, ' ').replace(/\s+$/, "");
+				clipboardData.setData("Text", modifiedData);
+			}
+		};
+	}
+
 	TextField.prototype._realOninput = function(oEvent) {
 
 		if (sap.ui.Device.browser.internet_explorer) {
@@ -29889,7 +29926,7 @@ sap.ui.define("sap/ui/commons/TextField",['jquery.sap.global', './library', 'sap
 	/* Overwrite of generated function - no new JS-doc.
 	 * Property setter for the editable state
 	 *
-	 * @param bEditable
+	 * @param {boolean} bEditable
 	 * @return {sap.ui.commons.TextField} <code>this</code> to allow method chaining
 	 * @public
 	 */
@@ -29911,7 +29948,7 @@ sap.ui.define("sap/ui/commons/TextField",['jquery.sap.global', './library', 'sap
 	/* Overwrite of generated function - no new JS-doc.
 	 * Property setter for the enabled state
 	 *
-	 * @param bEnabled
+	 * @param {boolean} bEnabled
 	 * @return {sap.ui.commons.TextField} <code>this</code> to allow method chaining
 	 * @public
 	 */
@@ -29933,7 +29970,7 @@ sap.ui.define("sap/ui/commons/TextField",['jquery.sap.global', './library', 'sap
 	/* Overwrite of generated function - no new JS-doc.
 	 * Property setter for the Required-State
 	 *
-	 * @param bRequired:
+	 * @param {boolean} bRequired:
 	 * @return {sap.ui.commons.TextField} <code>this</code> to allow method chaining
 	 * @public
 	 */
@@ -29961,7 +29998,7 @@ sap.ui.define("sap/ui/commons/TextField",['jquery.sap.global', './library', 'sap
 	/* Overwrite of generated function - no new JS-doc.
 	 * Property setter for the Design
 	 *
-	 * @param sDesign:
+	 * @param {sap.ui.core.Design} sDesign:
 	 * @return {sap.ui.commons.TextField} <code>this</code> to allow method chaining
 	 * @public
 	 */
@@ -29986,7 +30023,7 @@ sap.ui.define("sap/ui/commons/TextField",['jquery.sap.global', './library', 'sap
 	/* Overwrite of generated function - no new JS-doc.
 	 * Property setter for the Value
 	 *
-	 * @param sValue:
+	 * @param {string} sValue:
 	 * @return {sap.ui.commons.TextField} <code>this</code> to allow method chaining
 	 * @public
 	 */
@@ -30202,6 +30239,7 @@ sap.ui.define("sap/ui/commons/TextField",['jquery.sap.global', './library', 'sap
 
 	/**
 	 * @see sap.ui.core.Control#getAccessibilityInfo
+	 * @returns {Object} Current accessibility state of the control
 	 * @protected
 	 */
 	TextField.prototype.getAccessibilityInfo = function() {
@@ -30248,7 +30286,7 @@ sap.ui.define("sap/ui/commons/TextView",['jquery.sap.global', './library', 'sap/
 	 * @implements sap.ui.commons.ToolbarItem, sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -30391,7 +30429,7 @@ sap.ui.define("sap/ui/commons/Title",['jquery.sap.global', './library', 'sap/ui/
 	 * @extends sap.ui.core.Title
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -30467,7 +30505,7 @@ sap.ui.define("sap/ui/commons/ToggleButton",['jquery.sap.global', './Button'],
 	 * @extends sap.ui.commons.Button
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -30490,7 +30528,7 @@ sap.ui.define("sap/ui/commons/ToggleButton",['jquery.sap.global', './Button'],
 	/**
 	 * Function is called when ToggleButton is clicked.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The fired event
 	 * @private
 	 */
 	ToggleButton.prototype.onclick = function(oEvent) {
@@ -30533,6 +30571,7 @@ sap.ui.define("sap/ui/commons/ToggleButton",['jquery.sap.global', './Button'],
 
 	/**
 	 * @see sap.ui.core.Control#getAccessibilityInfo
+	 * @returns {Object} Current accessibility state of the control
 	 * @protected
 	 */
 	ToggleButton.prototype.getAccessibilityInfo = function() {
@@ -30580,7 +30619,7 @@ sap.ui.define("sap/ui/commons/Toolbar",['jquery.sap.global', './library', 'sap/u
 		 * @implements sap.ui.core.Toolbar
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @public
@@ -30648,7 +30687,7 @@ sap.ui.define("sap/ui/commons/Toolbar",['jquery.sap.global', './library', 'sap/u
 			this.oOverflowDomRef = null;
 			//reference to the overflow content
 			this._oOverflowPopup = null;
-		    this.sOriginalStylePropertyWidth = null;
+			this.sOriginalStylePropertyWidth = null;
 			this.bHasRightItems = false;
 			this._bRendering = false;
 
@@ -30718,7 +30757,7 @@ sap.ui.define("sap/ui/commons/Toolbar",['jquery.sap.global', './library', 'sap/u
 		/**
 		 * Handle the space event on the menu open button.
 		 *
-		 * @param {jQuery.EventObject} oEvent The forwarded browser event
+		 * @param {jQuery.Event} oEvent The forwarded browser event
 		 * @private
 		 */
 		Toolbar.prototype._handleKeyDown = function (oEvent) {
@@ -30759,7 +30798,7 @@ sap.ui.define("sap/ui/commons/Toolbar",['jquery.sap.global', './library', 'sap/u
 		 * in order to re-initialize item navigation
 		 * with the currently visible items. Update the visibility of the overflow button.
 		 *
-		 * @param bClearTabStops Whether the tab indices of all toolbar items should be set to -1
+		 * @param {boolean} bClearTabStops Whether the tab indices of all toolbar items should be set to -1
 		 * @private
 		 */
 		Toolbar.prototype.updateAfterResize = function (bClearTabStops) {
@@ -30854,8 +30893,8 @@ sap.ui.define("sap/ui/commons/Toolbar",['jquery.sap.global', './library', 'sap/u
 		 * ItemNavigation handles Tabindexes. But if TabStop is on now invisible item set it to last
 		 * visible one.
 		 *
-		 * @param iAllItemsBeforeBreak The number of currently visible toolbar items
-		 * @param bClearTabStops Whether the tab indices of all toolbar items should be set to -1
+		 * @param {int} iAllItemsBeforeBreak The number of currently visible toolbar items
+		 * @param {boolean} bClearTabStops Whether the tab indices of all toolbar items should be set to -1
 		 * @private
 		 */
 		Toolbar.prototype.updateItemNavigation = function (iAllItemsBeforeBreak, bClearTabStops) {
@@ -30902,9 +30941,9 @@ sap.ui.define("sap/ui/commons/Toolbar",['jquery.sap.global', './library', 'sap/u
 		 * Returns the number of toolbar items that are currently visible (i.e. not hidden due to overflow mechanism).
 		 * If the toolbar has not been rendered yet, value "0" is returned.
 		 * Requirement here is that every control has exactly one root HTML element.
-		 * @param bIncludeItemsWithAPIPropertyVisibleFalse if true the items with property "visible"=false will be also
-		 * included, although they may not be hidden due to the overflow mechanism.
-		 * @return The number of toolbar items that are currently visible (i.e. not hidden due to overflow mechanism).
+		 * @param {boolean} bIncludeItemsWithAPIPropertyVisibleFalse If true the items with property "visible"=false will be also
+		 * included, although they may not be hidden due to the overflow mechanism
+		 * @return {int} The number of toolbar items that are currently visible (i.e. not hidden due to overflow mechanism)
 		 * @private
 		 */
 		Toolbar.prototype.getVisibleItemInfo = function (bIncludeItemsWithAPIPropertyVisibleFalse) {
@@ -30997,7 +31036,7 @@ sap.ui.define("sap/ui/commons/Toolbar",['jquery.sap.global', './library', 'sap/u
 		/**
 		 * Modifies the visibility of the overflow button
 		 *
-		 * @param bOverflow whether the overflow button should be displayed
+		 * @param {boolean} bOverflow whether the overflow button should be displayed
 		 * @private
 		 */
 		Toolbar.prototype.updateOverflowIcon = function (bOverflow) {
@@ -31009,7 +31048,7 @@ sap.ui.define("sap/ui/commons/Toolbar",['jquery.sap.global', './library', 'sap/u
 		/**
 		 * Handle the click event on the menu open button.
 		 *
-		 * @param {jQuery.EventObject} oEvent The forwarded browser event
+		 * @param {jQuery.Event} oEvent The forwarded browser event
 		 * @private
 		 */
 		Toolbar.prototype.onclick = function (oEvent) {
@@ -31024,7 +31063,7 @@ sap.ui.define("sap/ui/commons/Toolbar",['jquery.sap.global', './library', 'sap/u
 		/**
 		 * Handle the arrow down event on the menu open button. This opens the popup, if closed.
 		 *
-		 * @param {jQuery.EventObject} oEvent The forwarded browser event
+		 * @param {jQuery.Event} oEvent The forwarded browser event
 		 * @private
 		 */
 		Toolbar.prototype.onsapdown = function (oEvent) {
@@ -31042,7 +31081,7 @@ sap.ui.define("sap/ui/commons/Toolbar",['jquery.sap.global', './library', 'sap/u
 		/**
 		 * Handle the arrow up event on the menu open button. This closes the popup, if open.
 		 *
-		 * @param {jQuery.EventObject} oEvent The forwarded browser event
+		 * @param {jQuery.Event} oEvent The forwarded browser event
 		 * @private
 		 */
 		Toolbar.prototype.onsapup = function (oEvent) {
@@ -31128,7 +31167,7 @@ sap.ui.define("sap/ui/commons/Toolbar",['jquery.sap.global', './library', 'sap/u
 
 		/**
 		 * Closes the overflow popup.
-		 *
+		 * @param {boolean} bResetFocus Whether the focus must be reset
 		 * @private
 		 */
 		Toolbar.prototype.closePopup = function (bResetFocus) {
@@ -31161,6 +31200,7 @@ sap.ui.define("sap/ui/commons/Toolbar",['jquery.sap.global', './library', 'sap/u
 		/**
 		 * Prepares the given oCtrl for usage in a toolbar.
 		 * @param {sap.ui.core.Control} oCtrl The control instance whose focus info should be re-directed
+		 * @returns {sap.ui.core.Control} The control instance which focus info is prepared
 		 * @private
 		 */
 		Toolbar.prototype.prepareFocusInfoRedirect = function (oCtrl) {
@@ -31185,8 +31225,9 @@ sap.ui.define("sap/ui/commons/Toolbar",['jquery.sap.global', './library', 'sap/u
 		};
 
 		/**
-		 * Cleans up the given oCtrl after usage in a toolbar. Will be used in remove* functions
+		 * Cleans up the given oCtrl after usage in a toolbar. Will be used in remove* functions.
 		 * @param {sap.ui.core.Control} oCtrl The control instance that should be reset to standard focus info
+		 * @returns {sap.ui.core.Control} oCtrl The control instance that is reset to standard focus info
 		 * @private
 		 */
 		Toolbar.prototype.cleanupFocusInfoRedirect = function (oCtrl) {
@@ -31359,7 +31400,7 @@ sap.ui.define("sap/ui/commons/Toolbar",['jquery.sap.global', './library', 'sap/u
 			/**
 			 * Called by the Popup, required to simulate a control inside the Popup when there is only some HTML.
 			 * The root of this HTML is returned here.
-			 *
+			 * @returns {Object} The root of the HTML
 			 * @private
 			 */
 			getDomRef: function () {
@@ -31383,7 +31424,7 @@ sap.ui.define("sap/ui/commons/Toolbar",['jquery.sap.global', './library', 'sap/u
 			/**
 			 * Handle the onsapescape event on the overflow popup, this closes the popup
 			 *
-			 * @param {jQuery.EventObject} oEvent The forwarded browser event
+			 * @param {jQuery.Event} oEvent The forwarded browser event
 			 * @private
 			 */
 			onsapescape: function (oEvent) {
@@ -31393,7 +31434,7 @@ sap.ui.define("sap/ui/commons/Toolbar",['jquery.sap.global', './library', 'sap/u
 			/**
 			 * Handle the tab key event on the overflow popup, this closes the popup
 			 *
-			 * @param {jQuery.EventObject} oEvent the forwarded browser event
+			 * @param {jQuery.Event} oEvent the forwarded browser event
 			 * @private
 			 */
 			// Should ideally advance to the next tab position but currently only focuses the overflow button again.
@@ -31406,7 +31447,7 @@ sap.ui.define("sap/ui/commons/Toolbar",['jquery.sap.global', './library', 'sap/u
 			/**
 			 * Handle the tab back key event on the overflow popup, this closes the popup
 			 *
-			 * @param {jQuery.EventObject} oEvent The forwarded browser event
+			 * @param {jQuery.Event} oEvent The forwarded browser event
 			 * @private
 			 */
 			// Should ideally advance to the next tab position but currently only focuses the overflow button again.
@@ -31460,7 +31501,6 @@ sap.ui.define("sap/ui/commons/Toolbar",['jquery.sap.global', './library', 'sap/u
 		/**
 		 * Handles the right side resize event.
 		 *
-		 * @param {jQuery.Event}  oEvent Event object
 		 * @private
 		 */
 		Toolbar.prototype.onrightsideresize = function () {
@@ -31537,9 +31577,9 @@ sap.ui.define("sap/ui/commons/Toolbar",['jquery.sap.global', './library', 'sap/u
 		}
 
 		/**
-		 * Checks whether a given dom element is the overflow button
-		 * @param oElement the element to check
-		 * @returns {boolean} whether the given oElement is the overflow button
+		 * Checks whether a given dom element is the overflow button.
+		 * @param {Object} oElement The element to be check
+		 * @returns {boolean} Whether the given oElement is the overflow button
 		 */
 		function isOverflowButton(oElement) {
 			var sOverflowId = this.getId() + "-mn";
@@ -31551,8 +31591,8 @@ sap.ui.define("sap/ui/commons/Toolbar",['jquery.sap.global', './library', 'sap/u
 		 * property's visibility(i.e. visibility is not false).
 		 * "Second row" items are the items which are not shown in the parent container due to css overflow:hidden, i.e.
 		 * overflowing items.
-		 * @param oLastVisibleItem the last visible item just before the first item that goes into the overflow (second row)
-		 * @returns {number}
+		 * @param {Object} oLastVisibleItem The last visible item just before the first item that goes into the overflow (second row)
+		 * @returns {int} The number of items that are not hidden due to overflow
 		 * @private
 		 */
 		function getCountOfVisibleItemsWithVisibilityTrue(oLastVisibleItem) {
@@ -31617,7 +31657,7 @@ sap.ui.define("sap/ui/commons/ToolbarSeparator",['jquery.sap.global', './library
 	 * @implements sap.ui.commons.ToolbarItem
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -31680,7 +31720,7 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	 * @class
 	 * Simple tree to display item in a hierarchical way
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -31860,9 +31900,9 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	***********************************************************************************/
 
 	/**
-	 * Expands all nodes in the tree
+	 * Expands all nodes in the tree.
 	 *
-	 * @type void
+	 * @type {void}
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -31876,9 +31916,9 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 
 
 	/**
-	 * Collapses all nodes in the tree
+	 * Collapses all nodes in the tree.
 	 *
-	 * @type void
+	 * @type {void}
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -31896,10 +31936,10 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	* KEYBOARD NAVIGATION
 	***********************************************************************************/
 	/**
-	* DOWN key behavior
-	* Opens the section or activates the UI element on DOWN key
+	* DOWN key behavior.
+	* Opens the section or activates the UI element on DOWN key.
 	* @private
-	* @param oEvent Browser event
+	* @param {Object} oEvent Browser event
 	*/
 	Tree.prototype.onsapdown = function(oEvent){
 		this.moveFocus(false);
@@ -31907,10 +31947,10 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	};
 
 	/**
-	* UP key behavior
-	* Opens the section or activates the UI element on UP key
+	* UP key behavior.
+	* Opens the section or activates the UI element on UP key.
 	* @private
-	* @param oEvent Browser event
+	* @param {Object} oEvent Browser event
 	*/
 	Tree.prototype.onsapup = function(oEvent){
 		this.moveFocus(true);
@@ -31918,7 +31958,7 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	};
 
 	/**
-	 * The general HOME key event of the tree
+	 * The general HOME key event of the tree.
 	 * @private
 	 * @param {jQuery.Event} oEvent The saphome event object
 	 */
@@ -31928,7 +31968,7 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	};
 
 	/**
-	 * The general CTRL+HOME key event of the tree
+	 * The general CTRL+HOME key event of the tree.
 	 * @private
 	 * @param {jQuery.Event} oEvent The saphome event object
 	 */
@@ -31938,7 +31978,7 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	};
 
 	/**
-	 * The general END key event of the tree
+	 * The general END key event of the tree.
 	 * @private
 	 * @param {jQuery.Event} oEvent The sapend event object
 	 */
@@ -31948,7 +31988,7 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	};
 
 	/**
-	 * The general CTRL+END key event of the tree
+	 * The general CTRL+END key event of the tree.
 	 * @private
 	 * @param {jQuery.Event} oEvent The sapend event object
 	 */
@@ -31958,7 +31998,7 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	};
 
 	/**
-	 * The numpad STAR(*) key event of the tree
+	 * The numpad STAR(*) key event of the tree.
 	 * @private
 	 * @param {jQuery.Event} oEvent The sapcollapseall event object
 	 */
@@ -31978,8 +32018,9 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	***********************************************************************************/
 
 	/**
-	 * Determine the icon prefix for the embedded button icons
+	 * Determine the icon prefix for the embedded button icons.
 	 * @private
+	 * @returns {string} The icon path prefix
 	 */
 	Tree.prototype.getIconPrefix = function() {
 		var sIconPrefix = "themes/" + sap.ui.getCore().getConfiguration().getTheme() + "/";
@@ -31992,9 +32033,9 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 		return sap.ui.resource("sap.ui.commons", sIconPrefix);
 	};
 
-	/**Returns the first Sibling tree node based on DOM Tree node provided
-	 * @param oDomNode The DOM Tree node from which calculate the first sibling
-	 * @returns The first sibling tree node
+	/**Returns the first Sibling tree node based on DOM Tree node provided.
+	 * @param {Object} oDomNode The DOM Tree node from which calculate the first sibling
+	 * @returns {Object} The first sibling tree node
 	 * @private
 	*/
 	Tree.prototype.getFirstSibling = function(oDomNode) {
@@ -32006,9 +32047,9 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 		return null;
 	};
 
-	/**Returns the last Sibling tree node based on DOM Tree node provided
-	 * @param oDomNode The DOM Tree node from which calculate the last sibling
-	 * @returns The last sibling tree node
+	/** Returns the last Sibling tree node based on DOM Tree node provided.
+	 * @param {Object} oDomNode The DOM Tree node from which calculate the last sibling
+	 * @returns {Object} The last sibling tree node
 	 * @private
 	*/
 	Tree.prototype.getLastSibling = function(oDomNode) {
@@ -32020,8 +32061,8 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 		return null;
 	};
 
-	/**Returns the first tree node of the tree. Children of collapsed nodes (hidden) are not considered.
-	 * @returns The first tree node
+	/** Returns the first tree node of the tree. Children of collapsed nodes (hidden) are not considered.
+	 * @returns {Object} The first tree node
 	 * @private
 	*/
 	Tree.prototype.getFirst = function() {
@@ -32033,8 +32074,8 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 		return null;
 	};
 
-	/**Returns the last tree node of the tree. Children of collapsed nodes (hidden) are not considered.
-	 * @returns The last tree node
+	/** Returns the last tree node of the tree. Children of collapsed nodes (hidden) are not considered.
+	 * @returns {Object} The last tree node
 	 * @private
 	*/
 	Tree.prototype.getLast = function() {
@@ -32053,7 +32094,7 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 
 	/**
 	 * Move the focus by one position, either UP or DOWN depending of "bMoveUp"
-	 * @param bMoveUp When true the focus is move up. Otherwise, it's moved down
+	 * @param {boolean} bMoveUp When true the focus is move up. Otherwise, it's moved down
 	 * @private
 	 */
 	Tree.prototype.moveFocus = function(bMoveUp){
@@ -32113,8 +32154,8 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 
 	};
 
-	/**Places the focus on the node corresponding to given DOM Tree Node
-	 * @param oDomTargetNode The DOM Tree Node corresponding to the node to focus
+	/**Places the focus on the node corresponding to given DOM Tree Node.
+	 * @param {Object} oDomTargetNode The DOM Tree Node corresponding to the node to focus
 	 * @private
 	 */
 	Tree.prototype.placeFocus = function(oDomTargetNode){
@@ -32257,16 +32298,20 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	};
 
 	/**
-	 * override this method on Element.js and return true if tree binding
+	 * Overrides this method on ManagedObject.js and return true if tree binding.
 	 * @private
+	 * @param {string} sName The aggregation to bind (e.g. nodes for a tree managed object)
+	 * @return {boolean} Whether tree binding should be used or list binding. Default is false. Override method to change this behavior.
+	 * @override
 	 */
 	Tree.prototype.isTreeBinding = function(sName) {
 		return (sName == "nodes");
 	};
 
 	/**
-	 * override element updateAggregation method with this one and update the tree node bindings
+	 * Overrides element updateAggregation method with this one and update the tree node bindings.
 	 * @private
+	 * @param {string} sReason The reason for updating
 	 */
 	Tree.prototype.updateNodes = function(sReason) {
 		var aNodes,
@@ -32303,8 +32348,8 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 
 	/**
 	 * Clones a flat object removing a key/value pair from the old one
-	 * @param oObject {object} The object from which the key shall be removed
-	 * @param sKeyToRemove {string} Key to be removed from the object
+	 * @param {object} oObject The object from which the key shall be removed
+	 * @param {string} sKeyToRemove Key to be removed from the object
 	 * @returns {object} The new object without the removed key
 	 * @private
 	 */
@@ -32322,10 +32367,11 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	};
 
 	/**
-	 * Determine the binding context of the given node (dependent on the model name used
-	 * for the nodes binding)
+	 * Determines the binding context of the given node (dependent on the model name used
+	 * for the nodes binding).
 	 *
-	 * @param {sap.ui.commons.TreeNode} oNode
+	 * @param {sap.ui.commons.TreeNode} oNode The node whose binding context will be determined
+	 * @returns {sap.ui.model.Context} The binding context of the node
 	 * @private
 	 */
 	Tree.prototype.getNodeContext = function(oNode) {
@@ -32335,9 +32381,10 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	};
 
 	/**
-	 * Returns the node with the given context, or null if no such node currently exists
+	 * Returns the node with the given context, or null if no such node currently exists.
 	 *
-	 * @param {sap.ui.model.Context} oContext the context of the node to be retrieved
+	 * @param {sap.ui.model.Context} oContext The context of the node to be retrieved
+	 * @returns {sap.ui.commons.TreeNode} The found tree node
 	 * @public
 	 * @since 1.19
 	 */
@@ -32353,12 +32400,19 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	};
 
 	/**
+	 * A function which matches a node.
+	 *
+	 * @callback functionCallback
+	 * @param {sap.ui.commons.Tree|sap.ui.commons.TreeNode} oNode The node to be matched
+	 */
+
+	/**
 	 * Search through all existing nodes and return the first node which matches using
 	 * the given matching function
 	 *
-	 * @param {function} fnMatch the matching function
-	 * @param {sap.ui.commons.Tree|sap.ui.commons.TreeNode} oNode the node to check
-	 * @returns The found node
+	 * @param {sap.ui.commons.Tree|sap.ui.commons.TreeNode} oNode The node to check
+	 * @param {functionCallback} fnMatch The matching function
+	 * @returns {sap.ui.commons.TreeNode} The found node
 	 * @private
 	 */
 	Tree.prototype.findNode = function(oNode, fnMatch) {
@@ -32385,8 +32439,8 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 		}
 	};
 
-	/**Returns the selected node in the tree. If not selection, returns false.
-	 * @returns The selected node
+	/** Returns the selected node in the tree. If not selection, returns null.
+	 * @returns {sap.ui.commons.TreeNode} The selected node
 	 * @private
 	 */
 	Tree.prototype.getSelection = function(){
@@ -32396,10 +32450,13 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 		return null;
 	};
 
-	/**Sets the selected node reference of the Tree
+	/** Sets the selected node reference of the Tree.
 	 * @private
+	 * @param {sap.ui.commons.TreeNode} oNode The node to be selected
+	 * @param {boolean} bSuppressEvent Whether the event is suppressed
+	 * @param {string} sType The tree type
 	 */
-	Tree.prototype.setSelection = function(oNode, bSuppressEvent, sType, bDeselectOtherNodes){
+	Tree.prototype.setSelection = function(oNode, bSuppressEvent, sType){
 		var bDoSelect = true;
 		if (!bSuppressEvent) {
 			bDoSelect = this.fireSelect({node: oNode, nodeContext: this.getNodeContext(oNode)});
@@ -32459,7 +32516,7 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	/**
 	 * Add's node context to the internal mSelectedContexts object.
 	 * Taking care if TreeSelectionMode === Multi to not duplicate the node context in mSelectedContexts.
-	 * @param oContext The binding context of the node
+	 * @param {Object} oContext The binding context of the node
 	 * @private
 	 */
 	Tree.prototype._addSelectedNodeContext = function (oContext) {
@@ -32717,7 +32774,7 @@ sap.ui.define("sap/ui/commons/TreeNode",['jquery.sap.global', './library', 'sap/
 	 * @class
 	 * Tree node element
 	 * @extends sap.ui.core.Element
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -32917,7 +32974,6 @@ sap.ui.define("sap/ui/commons/TreeNode",['jquery.sap.global', './library', 'sap/
 	/**
 	 * Select the node, and if any, deselects the previously selected node
 	 * @param {boolean} bSuppressEvent
-	 * @param {boolean} bDeselectOtherNodes
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -32988,14 +33044,15 @@ sap.ui.define("sap/ui/commons/TreeNode",['jquery.sap.global', './library', 'sap/
 	};
 
 	/**
-	 * Private getter for child nodes without creating a copy of the nodes array
+	 * Private getter for child nodes without creating a copy of the nodes array.
+	 * @returns {sap.ui.commons.TreeNode[]} The child nodes
 	 */
 	TreeNode.prototype._getNodes = function() {
 		return this.mAggregations.nodes || [];
 	};
 
-	/**Returns true if the node has a selected child node, which is not visible
-	 * @returns True if the node has such child node
+	/** Returns true if the node has a selected child node, which is not visible.
+	 * @returns {boolean} True if the node has such child node
 	 * @private
 	 */
 	TreeNode.prototype.hasSelectedHiddenChild = function(){
@@ -33149,10 +33206,10 @@ sap.ui.define("sap/ui/commons/TreeNode",['jquery.sap.global', './library', 'sap/
 	};
 
 	/**
-	* LEFT key behavior
-	* Opens the section or activates the UI element on LEFT key
+	* LEFT key behavior.
+	* Opens the section or activates the UI element on LEFT key.
 	* @private
-	* @param oEvent Browser event
+	* @param {Object} oEvent Browser event
 	*/
 	TreeNode.prototype.onsapleft = function(oEvent){
 		if (sap.ui.getCore().getConfiguration().getRTL()) {
@@ -33164,10 +33221,10 @@ sap.ui.define("sap/ui/commons/TreeNode",['jquery.sap.global', './library', 'sap/
 	};
 
 	/**
-	* RIGHT key behavior
-	* Opens the section or activates the UI element on RIGHT key
+	* RIGHT key behavior.
+	* Opens the section or activates the UI element on RIGHT key.
 	* @private
-	* @param oEvent Browser event
+	* @param {Object} oEvent Browser event
 	*/
 	TreeNode.prototype.onsapright = function(oEvent){
 		if (sap.ui.getCore().getConfiguration().getRTL()) {
@@ -33208,7 +33265,7 @@ sap.ui.define("sap/ui/commons/TreeNode",['jquery.sap.global', './library', 'sap/
 	//***********************************************************************************
 
 	/** Returns the parent tree control. Not necessarily the direct parent if the node is a subnode.
-	 * @returns The parent tree control
+	 * @returns {sap.ui.commons.Tree} The parent tree control
 	 * @private
 	 */
 	TreeNode.prototype.getTree = function() {
@@ -33221,7 +33278,7 @@ sap.ui.define("sap/ui/commons/TreeNode",['jquery.sap.global', './library', 'sap/
 	};
 
 	/** Returns true if the node has any subnodes.
-	 * @returns True if the node has any subnode
+	 * @returns {boolean} True if the node has any subnode
 	 * @private
 	 */
 	TreeNode.prototype.hasChildren = function(){
@@ -33233,7 +33290,7 @@ sap.ui.define("sap/ui/commons/TreeNode",['jquery.sap.global', './library', 'sap/
 	};
 
 	/** Returns true if the node is visible(parent and all grand parent expanded).
-	 * @returns True if the node is visible
+	 * @returns {boolean} True if the node is visible
 	 * @private
 	 */
 	TreeNode.prototype.isVisible = function(){
@@ -33252,7 +33309,6 @@ sap.ui.define("sap/ui/commons/TreeNode",['jquery.sap.global', './library', 'sap/
 	 * In case the selected node is not visible, change the scroll position of the
 	 * tree to get it into view.
 	 *
-	 * @return {sap.ui.commons.TreeNode} <code>this</code> to allow method chaining
 	 * @private
 	 */
 	TreeNode.prototype.scrollIntoView = function() {
@@ -33344,7 +33400,7 @@ sap.ui.define("sap/ui/commons/TriStateCheckBox",['jquery.sap.global', './library
 	 * TriStateCheckBox to reflect mixed state for checkboxes. The control can display three states, namely checked, unchecked and mixed. However, mixed state cannot be directly reached by user interaction on the particular control.
 	 * It can be only set by the control's public toggle function, to make a behaviour possible which is e.g. required in checkbox trees.
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -33526,7 +33582,7 @@ sap.ui.define("sap/ui/commons/ValueHelpField",['jquery.sap.global', './TextField
 	 * @extends sap.ui.commons.TextField
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -33716,7 +33772,7 @@ sap.ui.define("sap/ui/commons/form/Form",['jquery.sap.global', 'sap/ui/commons/l
 	 * @extends sap.ui.layout.form.Form
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -33797,7 +33853,7 @@ sap.ui.define("sap/ui/commons/form/FormContainer",['jquery.sap.global', 'sap/ui/
 	 * @extends sap.ui.layout.form.FormContainer
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -33878,7 +33934,7 @@ sap.ui.define("sap/ui/commons/form/FormElement",['jquery.sap.global', 'sap/ui/co
 	 * @extends sap.ui.layout.form.FormElement
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -33959,7 +34015,7 @@ sap.ui.define("sap/ui/commons/form/FormLayout",['jquery.sap.global', 'sap/ui/com
 	 * @extends sap.ui.layout.form.FormLayout
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -34014,7 +34070,7 @@ sap.ui.define("sap/ui/commons/form/GridContainerData",['jquery.sap.global', 'sap
 	 * @extends sap.ui.layout.form.GridContainerData
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -34072,7 +34128,7 @@ sap.ui.define("sap/ui/commons/form/GridElementData",['jquery.sap.global', 'sap/u
 	 * @extends sap.ui.layout.form.GridElementData
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -34131,7 +34187,7 @@ sap.ui.define("sap/ui/commons/form/GridLayout",['jquery.sap.global', 'sap/ui/com
 	 * @extends sap.ui.layout.form.GridLayout
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -34184,7 +34240,7 @@ sap.ui.define("sap/ui/commons/form/ResponsiveLayout",['jquery.sap.global', 'sap/
 	 * @extends sap.ui.layout.form.ResponsiveLayout
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -34235,7 +34291,7 @@ sap.ui.define("sap/ui/commons/form/SimpleForm",['jquery.sap.global', 'sap/ui/com
 	 * @class
 	 * Use the SimpleForm to create a form based on title, label and fields that are stacked in the content aggregation. Add Title to start a new FormContainer(Group). Add Label to start a new row in the container. Add Input/Display controls as needed. Use LayoutData to influence the layout for special cases in the Input/Display controls.
 	 * @extends sap.ui.layout.form.SimpleForm
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -34316,7 +34372,7 @@ sap.ui.define("sap/ui/commons/layout/BorderLayout",['jquery.sap.global', 'sap/ui
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -34431,9 +34487,10 @@ sap.ui.define("sap/ui/commons/layout/BorderLayout",['jquery.sap.global', 'sap/ui
 	/**
 	 * Returns the area of the given type. If the area does not exist, it will be created when create is set to true.
 	 *
-	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} oAreaId
-	 * @param {boolean} bCreate
-	 * @type sap.ui.commons.layout.BorderLayoutAreaTypes
+	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} sAreaId The aria ID
+	 * @param {boolean} bCreate Whether the aria must be created
+	 * @returns {sap.ui.commons.layout.BorderLayoutArea} The aria
+	 *
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -34445,11 +34502,12 @@ sap.ui.define("sap/ui/commons/layout/BorderLayout",['jquery.sap.global', 'sap/ui
 	/**
 	 * Creates the specified area and adds the given controls to it. Returns the created area.
 	 *
-	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} oAreaId
+	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} sAreaId
 	 *         Specifies which area will be created. If the area is already available, the method call is ignored.
-	 * @param {sap.ui.core.Control} oControls
+	 * @param {sap.ui.core.Control} oContent
 	 *         Any number of controls can be submitted to be added to the newly created area; where each control is submitted as one argument.
-	 * @type sap.ui.commons.layout.BorderLayoutArea
+	 * @returns {sap.ui.commons.layout.BorderLayoutArea} The created aria
+	 *
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -34461,9 +34519,10 @@ sap.ui.define("sap/ui/commons/layout/BorderLayout",['jquery.sap.global', 'sap/ui
 	/**
 	 * Returns the object of the specified area. If the area does not exist, the area will be created and returned.
 	 *
-	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} oAreaId
+	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} sAreaId
 	 *         Specifies the area whose object will be returned.
-	 * @type sap.ui.commons.layout.BorderLayoutArea
+	 * @returns {sap.ui.commons.layout.BorderLayoutArea} The aria
+	 * @type {sap.ui.commons.layout.BorderLayoutArea}
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -34473,11 +34532,12 @@ sap.ui.define("sap/ui/commons/layout/BorderLayout",['jquery.sap.global', 'sap/ui
 
 
 	/**
-	 * Returns a JSON-like object that contains all property values of the requested area
+	 * Returns a JSON-like object that contains all property values of the requested area.
 	 *
-	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} oAreaId
+	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} sAreaId
 	 *         Specifies the area whose data will be returned
-	 * @type object
+	 * @returns {object} The aria data
+	 *
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -34495,13 +34555,14 @@ sap.ui.define("sap/ui/commons/layout/BorderLayout",['jquery.sap.global', 'sap/ui
 
 
 	/**
-	 * Sets the properties of the specified area with the given values
+	 * Sets the properties of the specified area with the given values.
 	 *
-	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} oAreaId
+	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} sAreaId
 	 *         Specifies the area whose properties will be set
 	 * @param {object} oData
 	 *         JSON-like object that contains the values to be set
-	 * @type void
+	 * @returns {sap.ui.commons.layout.BorderLayout} <code>this</code> to allow method chaining
+	 *
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -34512,13 +34573,12 @@ sap.ui.define("sap/ui/commons/layout/BorderLayout",['jquery.sap.global', 'sap/ui
 
 
 	/**
-	 * Adds controls to the specified area
+	 * Adds controls to the specified area.
 	 *
-	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} oAreaId
+	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} sAreaId
 	 *         Specifies the area where controls will be added
-	 * @param {sap.ui.core.Control} oControls
-	 *         N controls can be submitted to be added. Each control is submitted as one argument.
-	 * @type void
+	 * @returns {sap.ui.commons.layout.BorderLayout} <code>this</code> to allow method chaining
+	 *
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -34536,14 +34596,13 @@ sap.ui.define("sap/ui/commons/layout/BorderLayout",['jquery.sap.global', 'sap/ui
 	/**
 	 * Inserts controls to an area at a given index.
 	 *
-	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} oAreaId
+	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} sAreaId
 	 *         Specifies the area where the controls shall be inserted.
 	 * @param {int} iIndex
 	 *         Specifies the index where the controls shall be added. For a negative value of iIndex, the content is inserted at
 	 *         position '0'; for a value greater than the current size of the aggregation, the content is inserted at the last position.
-	 * @param {sap.ui.core.Control} oControl
-	 *         N controls can be submitted to be added. Each control is submitted as one argument.
-	 * @type void
+	 * @returns {sap.ui.commons.layout.BorderLayout} <code>this</code> to allow method chaining
+	 *
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -34559,18 +34618,19 @@ sap.ui.define("sap/ui/commons/layout/BorderLayout",['jquery.sap.global', 'sap/ui
 
 
 	/**
-	 * Removes the content with the given index from an area
+	 * Removes the content with the given index from an area.
 	 *
 	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} oAreaId
 	 *         Specifies the area whose content shall be removed
-	 * @param {int} iIndex
-	 *         Specifies the index of the control that shall be removed
-	 * @type void
+	 * @param {*} vElement The content to be removed
+	 *         Specifies the control that shall be removed
+	 * @returns {sap.ui.commons.layout.BorderLayout} <code>this</code> to allow method chaining
+	 *
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	BorderLayout.prototype.removeContent = function(sAreaId, vElement) {
-		var oArea = this.getAreaById(sAreaId);
+	BorderLayout.prototype.removeContent = function(oAreaId, vElement) {
+		var oArea = this.getAreaById(oAreaId);
 		if ( oArea ) {
 			oArea.removeContent(vElement);
 		}
@@ -34579,11 +34639,12 @@ sap.ui.define("sap/ui/commons/layout/BorderLayout",['jquery.sap.global', 'sap/ui
 
 
 	/**
-	 * Removes all content from an area
+	 * Removes all content from an area.
 	 *
-	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} oAreaId
+	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} sAreaId
 	 *         Specifies the area whose content shall be removed
-	 * @type void
+	 * @returns {sap.ui.commons.layout.BorderLayout} <code>this</code> to allow method chaining
+	 *
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -34597,11 +34658,12 @@ sap.ui.define("sap/ui/commons/layout/BorderLayout",['jquery.sap.global', 'sap/ui
 
 
 	/**
-	 * Returns all controls inside the specified area inside an array
+	 * Returns all controls inside the specified area inside an array.
 	 *
-	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} oAreaId
+	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} sAreaId
 	 *         Specifies the area whose content controls shall be returned.
-	 * @type sap.ui.core.Control[]
+	 * @returns {sap.ui.core.Control[]} The array with the content
+	 *
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -34612,15 +34674,13 @@ sap.ui.define("sap/ui/commons/layout/BorderLayout",['jquery.sap.global', 'sap/ui
 
 
 	/**
-	 * Determines the index of a given content control
+	 * Determines the index of a given content control.
 	 *
-	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} oAreaId
-	 *         Specifies the area that will be searched
-	 * @param {sap.ui.core.Control} oContent
-	 *         Specifies the control whose index will be searched
-	 * @type int
+	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} sAreaId Specifies the area that will be searched
+	 * @param {sap.ui.core.Control} oContent Specifies the control whose index will be searched
+	 * @returns {int} The index of the content
+	 *
 	 * @public
-	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	BorderLayout.prototype.indexOfContent = function(sAreaId, oContent) {
 		var oArea = this.getAreaById(sAreaId);
@@ -34629,11 +34689,12 @@ sap.ui.define("sap/ui/commons/layout/BorderLayout",['jquery.sap.global', 'sap/ui
 
 
 	/**
-	 * Destroys the content of the specified area
+	 * Destroys the content of the specified area.
 	 *
-	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} oAreaId
+	 * @param {sap.ui.commons.layout.BorderLayoutAreaTypes} sAreaId
 	 *         Specifies the area whose content will be destroyed
-	 * @type void
+	 * @returns {sap.ui.commons.layout.BorderLayout} <code>this</code> to allow method chaining
+	 *
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -34688,7 +34749,7 @@ sap.ui.define("sap/ui/commons/layout/BorderLayoutArea",['jquery.sap.global', 'sa
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -34802,7 +34863,7 @@ sap.ui.define("sap/ui/commons/layout/HorizontalLayout",['jquery.sap.global', 'sa
 	 * @extends sap.ui.layout.HorizontalLayout
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -34852,7 +34913,7 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayoutCell",['jquery.sap.global', 'sa
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -35032,7 +35093,7 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayoutRow",['jquery.sap.global', 'sap
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -35166,7 +35227,7 @@ sap.ui.define("sap/ui/commons/layout/PositionContainer",['jquery.sap.global', 's
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -35618,7 +35679,7 @@ sap.ui.define("sap/ui/commons/layout/ResponsiveFlowLayout",['jquery.sap.global',
 	 * @extends sap.ui.layout.ResponsiveFlowLayout
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -35669,7 +35730,7 @@ sap.ui.define("sap/ui/commons/layout/ResponsiveFlowLayoutData",['jquery.sap.glob
 	 * @extends sap.ui.layout.ResponsiveFlowLayoutData
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -35746,7 +35807,7 @@ sap.ui.define("sap/ui/commons/layout/VerticalLayout",['jquery.sap.global', 'sap/
 	 * @extends sap.ui.layout.VerticalLayout
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -35794,7 +35855,7 @@ sap.ui.define("sap/ui/commons/ApplicationHeader",['jquery.sap.global', './librar
 	 * @class
 	 * The application header control stands on the top of any application page. It consists of 4 areas: Logo area, Function area provided by application, Search area, Logout area.
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -36046,7 +36107,7 @@ sap.ui.define("sap/ui/commons/Callout",['jquery.sap.global', './CalloutBase', '.
 	 * @extends sap.ui.commons.CalloutBase
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -36106,7 +36167,7 @@ sap.ui.define("sap/ui/commons/ComboBox",['jquery.sap.global', './TextField', './
 	 * @implements sap.ui.commons.ToolbarItem
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -37916,7 +37977,7 @@ sap.ui.define("sap/ui/commons/DatePicker",['jquery.sap.global', './TextField', '
 	 * @extends sap.ui.commons.TextField
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -38400,6 +38461,7 @@ sap.ui.define("sap/ui/commons/DatePicker",['jquery.sap.global', './TextField', '
 
 		/**
 		 * @see sap.ui.core.Control#getAccessibilityInfo
+		 * @returns {Object} Current accessibility state of the control
 		 * @protected
 		 */
 		DatePicker.prototype.getAccessibilityInfo = function() {
@@ -38854,7 +38916,7 @@ sap.ui.define("sap/ui/commons/DropdownBox",['jquery.sap.global', './ComboBox', '
 	 * The control provides a field that allows end users to an entry out of a list of pre-defined items.
 	 * The choosable items can be provided in the form of a complete <code>ListBox</code>, single <code>ListItems</code>.
 	 * @extends sap.ui.commons.ComboBox
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -39544,7 +39606,7 @@ sap.ui.define("sap/ui/commons/DropdownBox",['jquery.sap.global', './ComboBox', '
 			iKeyCode = oEvent.keyCode,
 			oKC = jQuery.sap.KeyCodes;
 		if (( ComboBox._isHotKey(oEvent)
-			    || ( !!sap.ui.Device.browser.firefox && iKeyCode === oKC.HOME ) || // IE & webkit fires no keypress on HOME, but "$" has the same keyCode
+				|| ( !!sap.ui.Device.browser.firefox && iKeyCode === oKC.HOME ) || // IE & webkit fires no keypress on HOME, but "$" has the same keyCode
 				iKeyCode === oKC.F4 && oEvent.which === 0 ) /*this is the Firefox case and ensures 's' with same charCode is accepted*/
 				&& !(oEvent.ctrlKey && oEvent.which == 120)/*Ctrl+X*/ ) {
 			return;
@@ -39663,8 +39725,8 @@ sap.ui.define("sap/ui/commons/DropdownBox",['jquery.sap.global', './ComboBox', '
 	 * For IE selecting text by #setSelectedRange method (this is what function _doSelect does)
 	 * provokes focus, so this function makes sure we were not called because of "_doSelect" more than once.
 	 * Edge does not have such behavior.
-	 * @param iStart the 0-based start position for the selection
-	 * @param iEnd the 0-based end position for the selection
+	 * @param {int} iStart The 0-based start position for the selection
+	 * @param {int} iEnd The 0-based end position for the selection
 	 * @private
 	 */
 	DropdownBox.prototype._callDoSelectAfterFocusIn = function(iStart, iEnd) {
@@ -40593,7 +40655,7 @@ sap.ui.define("sap/ui/commons/InPlaceEdit",['jquery.sap.global', './TextField', 
 	 * @class
 	 * The InPlaceEdit is a functionality to have text in display mode that can be changed in place.
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -41186,6 +41248,7 @@ sap.ui.define("sap/ui/commons/InPlaceEdit",['jquery.sap.global', './TextField', 
 
 		/**
 		 * @see sap.ui.core.Control#getAccessibilityInfo
+		 * @returns {Object} Current accessibility state of the control.
 		 * @protected
 		 */
 		InPlaceEdit.prototype.getAccessibilityInfo = function() {
@@ -41382,8 +41445,8 @@ sap.ui.define("sap/ui/commons/InPlaceEdit",['jquery.sap.global', './TextField', 
 		function iconForUndoButton(oInPlaceEdit){
 
 			if (oInPlaceEdit._oUndoButton) {
-				var sIcon = Parameters._getThemeImage('sapUiIpeUndoImageURL');
-				var sIconHovered = Parameters._getThemeImage('sapUiIpeUndoImageDownURL');
+				var sIcon = Parameters._getThemeImage('_sap_ui_commons_InPlaceEdit_UndoImageURL');
+				var sIconHovered = Parameters._getThemeImage('_sap_ui_commons_InPlaceEdit_UndoImageDownURL');
 				if (!sIcon) {
 					sIcon = "sap-icon://decline";
 				}
@@ -41455,8 +41518,8 @@ sap.ui.define("sap/ui/commons/InPlaceEdit",['jquery.sap.global', './TextField', 
 		function iconForEditButton(oInPlaceEdit){
 
 			if (oInPlaceEdit._oEditButton) {
-				var sIcon = Parameters._getThemeImage('sapUiIpeEditImageURL');
-				var sIconHovered = Parameters._getThemeImage('sapUiIpeEditImageDownURL');
+				var sIcon = Parameters._getThemeImage('_sap_ui_commons_InPlaceEdit_EditImageURL');
+				var sIconHovered = Parameters._getThemeImage('_sap_ui_commons_InPlaceEdit_EditImageDownURL');
 				if (!sIcon) {
 					sIcon = "sap-icon://edit";
 				}
@@ -41587,7 +41650,7 @@ sap.ui.define("sap/ui/commons/MenuBar",['jquery.sap.global', './Menu', './MenuIt
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -42166,7 +42229,7 @@ sap.ui.define("sap/ui/commons/MessageBar",['jquery.sap.global', './library', 'sa
 	 * @class
 	 * Creates an instance of a MessageBar Control, for displaying messages.
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -42276,7 +42339,7 @@ sap.ui.define("sap/ui/commons/MessageBar",['jquery.sap.global', './library', 'sa
 	// **************************************************
 	/**
 	* Overwrites the native D&D, not to see the native ghost.
-	* @param {sap.ui.core.BrowserEvent} oEvent The forwarded browser event
+	* @param {jQuery.Event} oEvent The forwarded browser event
 	* @private
 	*/
 	MessageBar.prototype.ondragstart = function(oEvent){
@@ -42329,7 +42392,7 @@ sap.ui.define("sap/ui/commons/MessageBar",['jquery.sap.global', './library', 'sa
 
 	/**
 	 * Handles the move event.
-	 * @param {DOMEvent} event The event raised by the browser.
+	 * @param {jQuery.Event} event The event raised by the browser.
 	 * @private
 	 */
 	MessageBar.prototype.handleMove = function (event) {
@@ -43009,7 +43072,7 @@ sap.ui.define("sap/ui/commons/PasswordField",['jquery.sap.global', './TextField'
 	 * @extends sap.ui.commons.TextField
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -43079,7 +43142,7 @@ sap.ui.define("sap/ui/commons/RangeSlider",['jquery.sap.global', './Slider', './
 	 * @extends sap.ui.commons.Slider
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -43334,7 +43397,7 @@ sap.ui.define("sap/ui/commons/RangeSlider",['jquery.sap.global', './Slider', './
 	 * Overwrite of generated function - no new JS-doc. Property setter for the
 	 * value A new rendering is not necessary, only the grip must be moved.
 	 *
-	 * @param fValue
+	 * @param {float} fValue
 	 * @return {sap.ui.commons.Slider} <code>this</code> to allow method chaining
 	 * @public
 	 */
@@ -43390,7 +43453,8 @@ sap.ui.define("sap/ui/commons/RangeSlider",['jquery.sap.global', './Slider', './
 	 * Overwrite of generated function - no new JS-doc. Property setter for the
 	 * value A new rendering is not necessary, only the grip must be moved.
 	 *
-	 * @param fValue @return {sap.ui.commons.Slider} <code>this</code> to allow method chaining
+	 * @param {float} fValue
+	 * @return {sap.ui.commons.Slider} <code>this</code> to allow method chaining
 	 * @public
 	 */
 	RangeSlider.prototype.setValue2 = function(fValue) {
@@ -43553,7 +43617,7 @@ sap.ui.define("sap/ui/commons/RangeSlider",['jquery.sap.global', './Slider', './
 	/**
 	 * Function is called when Slider is moved
 	 *
-	 * @param {DOM.Event} event Event object
+	 * @param {jQuery.Event} event Event object
 	 * @private
 	 */
 	RangeSlider.prototype.handleMove = function(event) {
@@ -43586,7 +43650,7 @@ sap.ui.define("sap/ui/commons/RangeSlider",['jquery.sap.global', './Slider', './
 	 * fires the change event. The liveChange event must be fired too if the change
 	 * event is fired.
 	 *
-	 * @param bNoLiveChange fire no LiveChange event
+	 * @param {boolean} bNoLiveChange fire no LiveChange event
 	 * @private
 	 */
 	RangeSlider.prototype.handleFireChange = function(bNoLiveChange) {
@@ -44109,7 +44173,7 @@ sap.ui.define("sap/ui/commons/SearchField",['jquery.sap.global', './ComboBox', '
 	 * @implements sap.ui.commons.ToolbarItem
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -45125,7 +45189,7 @@ sap.ui.define("sap/ui/commons/TextArea",['jquery.sap.global', './TextField', './
 	 * @class
 	 * Control to enter or display multible row text.
 	 * @extends sap.ui.commons.TextField
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -45527,7 +45591,7 @@ sap.ui.define("sap/ui/commons/layout/AbsoluteLayout",['jquery.sap.global', './Po
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -46081,7 +46145,7 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayout",['jquery.sap.global', './Matr
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -46144,7 +46208,6 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayout",['jquery.sap.global', './Matr
 	 * "as is", or an arbitrary content control, which is wrapped with a new
 	 * (default) matrix layout cell first and then added to the row.
 	 *
-	 * @param {sap.ui.core.Control|sap.ui.commons.layout.MatrixLayoutCell|string} rowContent to add
 	 * @return {sap.ui.commons.layout.MatrixLayout} <code>this</code> to allow method chaining
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
@@ -46243,7 +46306,7 @@ sap.ui.define("sap/ui/commons/AutoComplete",['jquery.sap.global', './ComboBox', 
 	 * @implements sap.ui.commons.ToolbarItem
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -46709,7 +46772,7 @@ sap.ui.define("sap/ui/commons/MessageBox",['jquery.sap.global', 'sap/ui/core/lib
 		 *
 		 * @namespace
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 * @public
 		 * @since 0.8.8
 		 * @deprecated Since version 1.38. Instead, use the <code>sap.m.MessageBox</code> control.

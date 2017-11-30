@@ -27,7 +27,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer'],
 	IconTabBarSelectListRenderer.render = function(rm, control) {
 		var i,
 			item,
-			items = control.getItems(),
+			items = control.getVisibleItems(),
+			itemsCount = items.length,
 			iconTabHeader = control._iconTabHeader,
 			isTextOnly = true;
 
@@ -50,9 +51,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer'],
 
 		rm.write('>');
 
-		for (i = 0; i < items.length; i++) {
+		for (i = 0; i < itemsCount; i++) {
 			item = items[i];
-			item.renderInSelectList(rm, control);
+			item.renderInSelectList(rm, control, i, itemsCount);
 		}
 
 		rm.write('</ul>');

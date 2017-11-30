@@ -22,7 +22,7 @@ sap.ui.define(['./AnnotationParser', 'jquery.sap.global', 'sap/ui/Device', 'sap/
 	 *
 	 * @author SAP SE
 	 * @version
-	 * 1.48.5
+	 * 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -118,7 +118,7 @@ sap.ui.define(['./AnnotationParser', 'jquery.sap.global', 'sap/ui/Device', 'sap/
 	/**
 	 * Fire event loaded to attached listeners.
 	 *
-	 * @param {map} [mArguments] Map of arguments that will be given as parameters to teh event handler
+	 * @param {map} [mArguments] Map of arguments that will be given as parameters to the event handler
 	 * @return {sap.ui.model.odata.ODataAnnotations} <code>this</code> to allow method chaining
 	 * @protected
 	 */

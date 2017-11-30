@@ -22,7 +22,7 @@ sap.ui.define(['sap/ui/base/ManagedObject', './Control', './Component', './Core'
 	 * @class
 	 * Component Container
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -114,6 +114,22 @@ sap.ui.define(['sap/ui/base/ManagedObject', './Control', './Component', './Core'
 			 */
 			component : {type : "sap.ui.core.UIComponent", multiple : false}
 		},
+		events : {
+
+			/**
+			 * Fired when the component instance has been created by the
+			 * ComponentContainer.
+			 * @since 1.50
+			 */
+			componentCreated : {
+				parameters : {
+					/**
+					 * Reference to the created component instance
+					 */
+					component : "sap.ui.core.Component"
+				}
+			}
+		},
 		designTime : true
 	}});
 
@@ -143,7 +159,7 @@ sap.ui.define(['sap/ui/base/ManagedObject', './Control', './Component', './Core'
 			oComponent = oComponentContainer.getComponentInstance();
 			if (oComponent) {
 				oComponent.setContainer(oComponentContainer);
-				oComponentContainer.propagateProperties(true); //all models/listeners
+				oComponentContainer.propagateProperties(true); //propagate all
 			}
 		}
 	}
@@ -238,9 +254,17 @@ sap.ui.define(['sap/ui/base/ManagedObject', './Control', './Component', './Core'
 				oComponent.then(function(oComponent) {
 					// set the component and invalidate to ensure a re-rendering!
 					this.setComponent(oComponent);
+					// notify listeners that a new component instance has been created
+					this.fireComponentCreated({
+						component: oComponent
+					});
 				}.bind(this));
 			} else {
 				this.setComponent(oComponent, true);
+				// notify listeners that a new component instance has been created
+				this.fireComponentCreated({
+					component: oComponent
+				});
 			}
 		}
 

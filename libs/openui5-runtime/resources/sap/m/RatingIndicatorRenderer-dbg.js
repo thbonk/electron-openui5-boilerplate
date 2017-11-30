@@ -42,13 +42,19 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool'],
 	};
 
     RatingIndicatorRenderer.renderControlContainer = function (oRm, oControl, innerRenderer) {
+        var bEnabled = oControl.getEnabled(),
+            bDisplayOnly = oControl.getDisplayOnly();
         oRm.write("<div");
 
         oRm.writeControlData(oControl);
         oRm.addStyle("width", this._iWidth + "px");
         oRm.addStyle("height", this._iHeight + "px");
-        oControl.getEnabled() ? oRm.writeAttribute("tabindex", "0") : oRm.writeAttribute("tabindex", "-1");
-        oControl.getEnabled() ? oRm.addClass("sapMPointer") : oRm.addClass("sapMRIDisabled");
+        (bEnabled || !bDisplayOnly) ? oRm.writeAttribute("tabindex", "0") : oRm.writeAttribute("tabindex", "-1");
+        if (bEnabled && !bDisplayOnly) {
+            oRm.addClass("sapMPointer");
+        } else {
+            bEnabled ? oRm.addClass("sapMRIDisplayOnly") : oRm.addClass("sapMRIDisabled");
+        }
         oRm.addClass("sapMRI");
         oRm.addClass("sapUiRatingIndicator" + oControl._getIconSizeLabel(this._fIconSize));
         oRm.writeStyles();
@@ -133,7 +139,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool'],
         oRm.writeAttribute("style", "width: " + (this._iWidth - this._iSelectedWidth) + sIconSizeMeasure);
         oRm.write(">");
         oRm.write("<div class='sapMRIUnsel");
-        if (this._bUseGradient && oControl.getEnabled()) { // see the specification for read only rating indicator
+        if (this._bUseGradient && (oControl.getEnabled() || !oControl.getDisplayOnly())) { // see the specification for read only rating indicator
             oRm.write(" sapMRIGrd");
         }
         oRm.write("' id='" + oControl.getId() + "-unsel'>");
@@ -147,7 +153,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool'],
     };
 
     RatingIndicatorRenderer.renderHoverItems = function (oRm, oControl) {
-        if (oControl.getEnabled()) {
+        if (oControl.getEnabled() || !oControl.getDisplayOnly()) {
             oRm.write("<div class='sapMRIHov' id='" + oControl.getId() + "-hov'>");
 
             for (var i = 0; i < this._iSymbolCount; i++) {
@@ -206,7 +212,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool'],
     RatingIndicatorRenderer.getIconURI = function (sState, oControl) {
         var aHighContrastStyles = ["sap_hcb", "sap_belize_hcb", "sap_belize_hcw"];
         if (aHighContrastStyles.indexOf(sap.ui.getCore().getConfiguration().getTheme()) > -1) {
-            if (sState == "UNSELECTED" && oControl.getEnabled()) {
+            if (sState == "UNSELECTED" && (oControl.getEnabled() && !oControl.getDisplayOnly())) {
                 return IconPool.getIconURI("unfavorite");
             }
 

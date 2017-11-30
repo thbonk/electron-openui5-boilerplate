@@ -5,10 +5,14 @@
  */
 
 // Provides control sap.m.ListItemBase.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/IconPool', 'sap/ui/core/Icon'],
-	function(jQuery, library, Control, IconPool, Icon) {
+sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/IconPool', 'sap/ui/core/Icon', 'sap/m/Button'],
+	function(jQuery, library, Control, IconPool, Icon, Button) {
 	"use strict";
 
+
+
+	// shortcut for sap.m.ButtonType
+	var ButtonType = library.ButtonType;
 
 
 	/**
@@ -22,7 +26,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -106,7 +110,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	}});
 
 	ListItemBase.getAccessibilityText = function(oControl, bDetectEmpty) {
-		if (!oControl || !oControl.bOutput || !oControl.getVisible || !oControl.getVisible()) {
+		if (!oControl || !oControl.getVisible || !oControl.getVisible()) {
 			return "";
 		}
 
@@ -409,14 +413,16 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			return this._oDeleteControl;
 		}
 
-		this._oDeleteControl = new Icon({
+		this._oDeleteControl = new Button({
 			id: this.getId() + "-imgDel",
-			src: this.DeleteIconURI,
-			tooltip: sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("LIST_ITEM_DELETE"),
-			noTabStop: true
-		}).setParent(this, null, true).addStyleClass("sapMLIBIconDel").attachPress(function(oEvent) {
+			icon: this.DeleteIconURI,
+			type: ButtonType.Transparent,
+			tooltip: sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("LIST_ITEM_DELETE")
+		}).addStyleClass("sapMLIBIconDel sapMLIBSelectD").setParent(this, null, true).attachPress(function(oEvent) {
 			this.informList("Delete");
 		}, this);
+
+		this._oDeleteControl._bExcludeFromTabChain = true;
 
 		return this._oDeleteControl;
 	};
@@ -432,15 +438,17 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			return this._oDetailControl;
 		}
 
-		this._oDetailControl = new Icon({
+		this._oDetailControl = new Button({
 			id: this.getId() + "-imgDet",
-			src: this.DetailIconURI,
-			tooltip: sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("LIST_ITEM_EDIT"),
-			noTabStop: true
-		}).setParent(this, null, true).attachPress(function() {
+			icon: this.DetailIconURI,
+			type: ButtonType.Transparent,
+			tooltip: sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("LIST_ITEM_EDIT")
+		}).addStyleClass("sapMLIBType sapMLIBIconDet").setParent(this, null, true).attachPress(function() {
 			this.fireDetailTap();
 			this.fireDetailPress();
-		}, this).addStyleClass("sapMLIBType sapMLIBIconDet");
+		}, this);
+
+		this._oDetailControl._bExcludeFromTabChain = true;
 
 		return this._oDetailControl;
 	};
@@ -482,11 +490,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			groupName : this.getListProperty("id") + "_selectGroup",
 			activeHandling : false,
 			selected : this.getSelected()
-		}).setParent(this, null, true).setTabIndex(-1).attachSelect(function(oEvent) {
-			var bSelected = oEvent.getParameter("selected");
-			this.setSelected(bSelected);
-			this.informList("Select", bSelected);
-		}, this);
+		}).addStyleClass("sapMLIBSelectS").setParent(this, null, true).setTabIndex(-1).attachSelect(function(oEvent) {
+				var bSelected = oEvent.getParameter("selected");
+				this.setSelected(bSelected);
+				this.informList("Select", bSelected);
+			}, this);
 
 		return this._oSingleSelectControl;
 	};
@@ -506,7 +514,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			id : this.getId() + "-selectMulti",
 			activeHandling : false,
 			selected : this.getSelected()
-		}).setParent(this, null, true).setTabIndex(-1).attachSelect(function(oEvent) {
+		}).addStyleClass("sapMLIBSelectM").setParent(this, null, true).setTabIndex(-1).attachSelect(function(oEvent) {
 			var bSelected = oEvent.getParameter("selected");
 			this.setSelected(bSelected);
 			this.informList("Select", bSelected);
@@ -876,7 +884,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	ListItemBase.prototype._activeHandling = function($This) {
 		$This.toggleClass("sapMLIBActive", this._active);
 
-		if (this.isActionable()) {
+		if (sap.ui.Device.system.Desktop && this.isActionable()) {
 			$This.toggleClass("sapMLIBHoverable", !this._active);
 		}
 	};

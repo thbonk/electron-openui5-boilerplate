@@ -16,7 +16,7 @@
       <module name="sap/ui/layout/library.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/AssociativeSplitter.js" size="18566" compressedSize="8437">
+  <module name="sap/ui/layout/AssociativeSplitter.js" size="18779" compressedSize="8498">
     <description>Provides control sap.ui.layout.AssociativeSplitter.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -24,7 +24,7 @@
       <module name="sap/ui/layout/SplitterRenderer.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/BlockLayout.js" size="7026" compressedSize="2067">
+  <module name="sap/ui/layout/BlockLayout.js" size="7456" compressedSize="2337">
     <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -32,7 +32,7 @@
       <module name="sap/ui/layout/library.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/BlockLayoutCell.js" size="5817" compressedSize="1788">
+  <module name="sap/ui/layout/BlockLayoutCell.js" size="5127" compressedSize="1540">
     <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -41,7 +41,15 @@
       <module name="sap/ui/layout/library.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/BlockLayoutCellRenderer.js" size="4253" compressedSize="2257">
+  <module name="sap/ui/layout/BlockLayoutCellData.js" size="2879" compressedSize="960">
+    <description>Provides control sap.ui.layout.BlockLayoutCellData.</description>
+    <requires>
+      <module name="jquery.sap.global.js"/>
+      <module name="sap/ui/core/LayoutData.js"/>
+      <module name="sap/ui/layout/library.js"/>
+    </requires>
+  </module>
+  <module name="sap/ui/layout/BlockLayoutCellRenderer.js" size="3734" compressedSize="1953">
     <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -55,22 +63,23 @@
       <module name="sap/ui/layout/library.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/BlockLayoutRow.js" size="15591" compressedSize="6799">
-    <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
+  <module name="sap/ui/layout/BlockLayoutRow.js" size="15533" compressedSize="6443">
+    <description>@typedef {Object} sap.ui.layout.BlockRowColorSets @typedef {Object} sap.ui.layout.BlockLayoutRow</description>
     <requires>
       <module name="jquery.sap.global.js"/>
       <module name="sap/ui/core/Control.js"/>
+      <module name="sap/ui/layout/BlockLayoutCellData.js"/>
       <module name="sap/ui/layout/library.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/BlockLayoutRowRenderer.js" size="2248" compressedSize="1294">
+  <module name="sap/ui/layout/BlockLayoutRowRenderer.js" size="3173" compressedSize="1625">
     <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
       <module name="sap/ui/layout/library.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/DynamicSideContent.js" size="23758" compressedSize="9572">
+  <module name="sap/ui/layout/DynamicSideContent.js" size="24462" compressedSize="9784">
     <description>Provides control sap.ui.layout.DynamicSideContent.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -108,7 +117,7 @@
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/Grid.js" size="10445" compressedSize="5056">
+  <module name="sap/ui/layout/Grid.js" size="10717" compressedSize="5159">
     <description>Provides control sap.ui.layout.Grid.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -136,7 +145,7 @@
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/HorizontalLayout.js" size="1843" compressedSize="680">
+  <module name="sap/ui/layout/HorizontalLayout.js" size="1908" compressedSize="680">
     <description>Provides control sap.ui.layout.HorizontalLayout.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -150,7 +159,7 @@
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/PaneContainer.js" size="3594" compressedSize="1417">
+  <module name="sap/ui/layout/PaneContainer.js" size="4409" compressedSize="1705">
     <description>Provides control sap.ui.layout.PaneContainer.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -160,7 +169,7 @@
       <module name="sap/ui/layout/library.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/ResponsiveFlowLayout.js" size="22503" compressedSize="8402">
+  <module name="sap/ui/layout/ResponsiveFlowLayout.js" size="22709" compressedSize="8505">
     <description>Provides control sap.ui.layout.ResponsiveFlowLayout.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -185,7 +194,7 @@
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/ResponsiveSplitter.js" size="21734" compressedSize="11127">
+  <module name="sap/ui/layout/ResponsiveSplitter.js" size="23111" compressedSize="11125">
     <description>Provides control sap.ui.layout.ResponsiveSplitter.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -213,14 +222,14 @@
       <module name="sap/ui/core/IconPool.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/ResponsiveSplitterUtilities.js" size="1716" compressedSize="772">
+  <module name="sap/ui/layout/ResponsiveSplitterUtilities.js" size="1751" compressedSize="772">
     <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
       <module name="sap/ui/core/Control.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/SplitPane.js" size="2048" compressedSize="926">
+  <module name="sap/ui/layout/SplitPane.js" size="2522" compressedSize="926">
     <description>Provides control sap.ui.layout.SplitPane.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -228,7 +237,7 @@
       <module name="sap/ui/layout/library.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/Splitter.js" size="40959" compressedSize="14565">
+  <module name="sap/ui/layout/Splitter.js" size="40996" compressedSize="14557">
     <description>Provides control sap.ui.layout.Splitter.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -256,7 +265,7 @@
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/VerticalLayout.js" size="2585" compressedSize="947">
+  <module name="sap/ui/layout/VerticalLayout.js" size="2716" compressedSize="947">
     <description>Provides control sap.ui.layout.VerticalLayout.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -265,13 +274,13 @@
       <module name="sap/ui/layout/library.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/VerticalLayoutRenderer.js" size="1693" compressedSize="667">
+  <module name="sap/ui/layout/VerticalLayoutRenderer.js" size="1700" compressedSize="667">
     <description>Provides default renderer for control sap.ui.layout.VerticalLayout</description>
     <requires>
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/changeHandler/AddFormContainer.js" size="4115" compressedSize="1748">
+  <module name="sap/ui/layout/changeHandler/AddFormContainer.js" size="4306" compressedSize="1764">
     <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -280,7 +289,16 @@
       <module name="sap/ui/fl/changeHandler/JsControlTreeModifier.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/changeHandler/AddSimpleFormGroup.js" size="6111" compressedSize="2399">
+  <module name="sap/ui/layout/changeHandler/AddSimpleFormField.js" size="8066" compressedSize="2794">
+    <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
+    <requires>
+      <module name="jquery.sap.global.js"/>
+      <module name="sap/ui/fl/Utils.js"/>
+      <module name="sap/ui/fl/changeHandler/Base.js"/>
+      <module name="sap/ui/fl/changeHandler/ChangeHandlerMediator.js"/>
+    </requires>
+  </module>
+  <module name="sap/ui/layout/changeHandler/AddSimpleFormGroup.js" size="6147" compressedSize="2399">
     <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -289,14 +307,14 @@
       <module name="sap/ui/fl/changeHandler/JsControlTreeModifier.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/changeHandler/HideSimpleForm.js" size="5913" compressedSize="2171">
+  <module name="sap/ui/layout/changeHandler/HideSimpleForm.js" size="5919" compressedSize="2173">
     <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
       <module name="sap/ui/fl/changeHandler/JsControlTreeModifier.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/changeHandler/MoveSimpleForm.js" size="15797" compressedSize="5507">
+  <module name="sap/ui/layout/changeHandler/MoveSimpleForm.js" size="15902" compressedSize="5442">
     <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -304,7 +322,7 @@
       <module name="sap/ui/fl/changeHandler/JsControlTreeModifier.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/changeHandler/RenameFormContainer.js" size="3856" compressedSize="1415">
+  <module name="sap/ui/layout/changeHandler/RenameFormContainer.js" size="3849" compressedSize="1409">
     <description>global sap</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -322,7 +340,7 @@
       <module name="sap/ui/fl/changeHandler/JsControlTreeModifier.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/changeHandler/UnhideSimpleForm.js" size="4032" compressedSize="1518">
+  <module name="sap/ui/layout/changeHandler/UnhideSimpleForm.js" size="4026" compressedSize="1518">
     <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -350,10 +368,11 @@
       <module name="sap/ui/fl/changeHandler/BaseRename.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/flexibility/SimpleForm.flexibility.js" size="1015" compressedSize="664">
+  <module name="sap/ui/layout/flexibility/SimpleForm.flexibility.js" size="1140" compressedSize="738">
     <description>global sap</description>
     <requires>
       <module name="jquery.sap.global.js"/>
+      <module name="sap/ui/layout/changeHandler/AddSimpleFormField.js"/>
       <module name="sap/ui/layout/changeHandler/AddSimpleFormGroup.js"/>
       <module name="sap/ui/layout/changeHandler/HideSimpleForm.js"/>
       <module name="sap/ui/layout/changeHandler/MoveSimpleForm.js"/>
@@ -375,7 +394,7 @@
       <module name="sap/ui/layout/library.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/form/FormContainer.designtime.js" size="1671" compressedSize="941">
+  <module name="sap/ui/layout/form/FormContainer.designtime.js" size="1792" compressedSize="1048">
     <description>Provides the Design Time Metadata for the sap.ui.layout.form.FormContainer control</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -400,7 +419,7 @@
       <module name="sap/ui/layout/form/ResponsiveGridLayout.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/form/FormElement.js" size="10833" compressedSize="4537">
+  <module name="sap/ui/layout/form/FormElement.js" size="10960" compressedSize="4608">
     <description>Provides control sap.ui.layout.form.FormElement.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -409,7 +428,7 @@
       <module name="sap/ui/layout/library.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/form/FormLayout.js" size="27321" compressedSize="12421">
+  <module name="sap/ui/layout/form/FormLayout.js" size="27539" compressedSize="12465">
     <description>Provides control sap.ui.layout.form.FormLayout.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -418,7 +437,7 @@
       <module name="sap/ui/layout/library.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/form/FormLayoutRenderer.js" size="7244" compressedSize="3565">
+  <module name="sap/ui/layout/form/FormLayoutRenderer.js" size="7463" compressedSize="3664">
     <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -464,7 +483,7 @@
       <module name="sap/ui/layout/form/FormLayoutRenderer.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/form/ResponsiveGridLayout.js" size="42714" compressedSize="16748">
+  <module name="sap/ui/layout/form/ResponsiveGridLayout.js" size="43141" compressedSize="16966">
     <description>Provides control sap.ui.layout.form.ResponsiveGridLayout.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -482,7 +501,7 @@
       <module name="sap/ui/layout/form/FormLayoutRenderer.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/form/ResponsiveLayout.js" size="30039" compressedSize="10390">
+  <module name="sap/ui/layout/form/ResponsiveLayout.js" size="30479" compressedSize="10608">
     <description>Provides control sap.ui.layout.form.ResponsiveLayout.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -500,13 +519,14 @@
       <module name="sap/ui/layout/form/FormLayoutRenderer.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/form/SimpleForm.designtime.js" size="8788" compressedSize="4300">
+  <module name="sap/ui/layout/form/SimpleForm.designtime.js" size="9233" compressedSize="4526">
     <description>Provides the Design Time Metadata for the sap.ui.layout.form.SimpleForm control</description>
     <requires>
       <module name="jquery.sap.global.js"/>
+      <module name="sap/ui/fl/changeHandler/ChangeHandlerMediator.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/form/SimpleForm.js" size="55607" compressedSize="20560">
+  <module name="sap/ui/layout/form/SimpleForm.js" size="55794" compressedSize="20656">
     <description>Provides control sap.ui.layout.form.SimpleForm.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -531,7 +551,7 @@
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/library-preload.js" size="223642">
+  <module name="sap/ui/layout/library-preload.js" size="228674">
     <requires>
       <module name="jquery.sap.global.js"/>
       <module name="sap/ui/base/DataType.js"/>
@@ -550,6 +570,7 @@
       <module name="sap/ui/fl/Utils.js"/>
       <module name="sap/ui/fl/changeHandler/Base.js"/>
       <module name="sap/ui/fl/changeHandler/BaseRename.js"/>
+      <module name="sap/ui/fl/changeHandler/ChangeHandlerMediator.js"/>
       <module name="sap/ui/fl/changeHandler/JsControlTreeModifier.js"/>
     </requires>
     <includes>
@@ -558,6 +579,7 @@
       <module name="sap/ui/layout/AssociativeSplitter.js"/>
       <module name="sap/ui/layout/BlockLayout.js"/>
       <module name="sap/ui/layout/BlockLayoutCell.js"/>
+      <module name="sap/ui/layout/BlockLayoutCellData.js"/>
       <module name="sap/ui/layout/BlockLayoutCellRenderer.js"/>
       <module name="sap/ui/layout/BlockLayoutRenderer.js"/>
       <module name="sap/ui/layout/BlockLayoutRow.js"/>
@@ -589,6 +611,7 @@
       <module name="sap/ui/layout/VerticalLayout.js"/>
       <module name="sap/ui/layout/VerticalLayoutRenderer.js"/>
       <module name="sap/ui/layout/changeHandler/AddFormContainer.js"/>
+      <module name="sap/ui/layout/changeHandler/AddSimpleFormField.js"/>
       <module name="sap/ui/layout/changeHandler/AddSimpleFormGroup.js"/>
       <module name="sap/ui/layout/changeHandler/HideSimpleForm.js"/>
       <module name="sap/ui/layout/changeHandler/MoveSimpleForm.js"/>
@@ -643,6 +666,7 @@
       <module name="sap/ui/fl/Utils.js"/>
       <module name="sap/ui/fl/changeHandler/Base.js"/>
       <module name="sap/ui/fl/changeHandler/BaseRename.js"/>
+      <module name="sap/ui/fl/changeHandler/ChangeHandlerMediator.js"/>
       <module name="sap/ui/fl/changeHandler/JsControlTreeModifier.js"/>
     </requires>
     <includes>
@@ -651,6 +675,7 @@
       <module name="sap/ui/layout/AssociativeSplitter.js"/>
       <module name="sap/ui/layout/BlockLayout.js"/>
       <module name="sap/ui/layout/BlockLayoutCell.js"/>
+      <module name="sap/ui/layout/BlockLayoutCellData.js"/>
       <module name="sap/ui/layout/BlockLayoutCellRenderer.js"/>
       <module name="sap/ui/layout/BlockLayoutRenderer.js"/>
       <module name="sap/ui/layout/BlockLayoutRow.js"/>
@@ -682,6 +707,7 @@
       <module name="sap/ui/layout/VerticalLayout.js"/>
       <module name="sap/ui/layout/VerticalLayoutRenderer.js"/>
       <module name="sap/ui/layout/changeHandler/AddFormContainer.js"/>
+      <module name="sap/ui/layout/changeHandler/AddSimpleFormField.js"/>
       <module name="sap/ui/layout/changeHandler/AddSimpleFormGroup.js"/>
       <module name="sap/ui/layout/changeHandler/HideSimpleForm.js"/>
       <module name="sap/ui/layout/changeHandler/MoveSimpleForm.js"/>

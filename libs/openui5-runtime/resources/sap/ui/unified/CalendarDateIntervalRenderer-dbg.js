@@ -15,7 +15,19 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './CalendarRenderer'
 	 */
 	var CalendarDateIntervalRenderer = Renderer.extend(CalendarRenderer);
 
-	CalendarDateIntervalRenderer.addAttributes = function(oRm, oCal){
+	CalendarDateIntervalRenderer.renderCalContentOverlay = function() {
+	// we don't need the ContentOverlay in CalendarDateInterval case
+	};
+
+	CalendarDateIntervalRenderer.renderCalContentAndArrowsOverlay = function(oRm, oCal, sId) {
+
+		if (oCal.getPickerPopup()) {
+			oRm.write("<div id=\"" + sId + "-contentOver\" class=\"sapUiCalContentOver\" style=\"display:none;\"></div>");
+		}
+
+	};
+
+	CalendarDateIntervalRenderer.addAttributes = function(oRm, oCal) {
 
 		oRm.addClass("sapUiCalInt");
 		oRm.addClass("sapUiCalDateInt");

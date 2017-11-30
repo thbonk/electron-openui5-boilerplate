@@ -22,7 +22,7 @@ sap.ui.define([
 	 * @class
 	 * @constructor
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.27.0
 	 */
 	var XmlPreprocessorImpl = function(){
@@ -43,7 +43,7 @@ sap.ui.define([
 	XmlPreprocessorImpl.process = function(oView, mProperties){
 		try {
 			if (!mProperties || mProperties.sync) {
-				Utils.log.warning("Flexibility feature for applying changes on an XML view is only available for " +
+				jQuery.sap.log.warning("Flexibility feature for applying changes on an XML view is only available for " +
 					"asynchronous views; merge is be done later on the JS controls.");
 				return (oView);
 			}
@@ -76,7 +76,7 @@ sap.ui.define([
 				});
 			}, function () {
 				Utils.log.warning("Error happens when getting flex cache key! flexibility XML view preprocessing is skipped. " +
-					"The processing will be done later on the JS controls.");
+				"The processing will be done later on the JS controls.");
 				return Promise.resolve(oView);
 			});
 		} catch (error) {

@@ -16,6 +16,13 @@
 			"name": "controller/ContentDetails.controller.js"
 		},
 		{
+			"name": "controller/ContentDetailsEdit-dbg.controller.js",
+			"isDebug": true
+		},
+		{
+			"name": "controller/ContentDetailsEdit.controller.js"
+		},
+		{
 			"name": "controller/LayerContentMaster-dbg.controller.js",
 			"isDebug": true
 		},
@@ -63,14 +70,10 @@
 			"name": "utils/ErrorUtils.js"
 		},
 		{
-			"name": "utils/HtmlEscapeUtils-dbg.js",
-			"isDebug": true
-		},
-		{
-			"name": "utils/HtmlEscapeUtils.js"
-		},
-		{
 			"name": "view/ContentDetails.view.xml"
+		},
+		{
+			"name": "view/ContentDetailsEdit.view.xml"
 		},
 		{
 			"name": "view/EmptyDetails.view.xml"

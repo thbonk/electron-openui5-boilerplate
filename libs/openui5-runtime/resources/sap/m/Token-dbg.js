@@ -30,7 +30,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Token
 	 * Tokens can only be used with the Tokenizer as a container.
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -280,6 +280,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Token
 	 */
 	Token.prototype.ontap = function(oEvent) {
 		if (oEvent.target.id == this._deleteIcon.getId()){
+			oEvent.setMark("tokenDeletePress", true);
 			return;
 		}
 		this._onTokenPress(oEvent);
@@ -304,7 +305,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Token
 	 * Function is called on keyboard backspace, deletes token
 	 *
 	 * @private
-	 * @param {jQuery.event}
+	 * @param {jQuery.Event}
 	 *          oEvent
 	 */
 	Token.prototype.onsapbackspace = function(oEvent) {
@@ -315,7 +316,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Token
 	 * Function is called on keyboard delete, deletes token
 	 *
 	 * @private
-	 * @param {jQuery.event}
+	 * @param {jQuery.Event}
 	 *          oEvent
 	 */
 	Token.prototype.onsapdelete = function(oEvent) {
@@ -339,7 +340,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Token
 	/**
 	 * Function is called on keyboard space, select/deselect token
 	 * @private
-	 * @param {jQuery.event}
+	 * @param {jQuery.Event}
 	 *          oEvent
 	 */
 	Token.prototype.onsapspace = function(oEvent) {

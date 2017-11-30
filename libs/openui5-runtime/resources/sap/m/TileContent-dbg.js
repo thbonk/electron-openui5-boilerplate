@@ -18,7 +18,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @since 1.34
 	 *
 	 * @public
@@ -54,7 +54,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 				/**
 				 * The frame type: 1x1 or 2x1.
 				 */
-				"frameType" : {type : "sap.m.FrameType", group : "Appearance", defaultValue : sap.m.FrameType.Auto}
+				"frameType" : {type : "sap.m.FrameType", group : "Appearance", defaultValue : "Auto"}
 			},
 			defaultAggregation : "content",
 			aggregations : {
@@ -174,7 +174,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 		return sAltText;
 	};
 
-	TileContent.prototype.getTooltip_AsString = function() {
+	TileContent.prototype.getTooltip_AsString = function() { //eslint-disable-line
 		var sTooltip = this.getTooltip();
 		var sAltText = "";
 		if (typeof sTooltip === "string" || sTooltip instanceof String) {
@@ -207,4 +207,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	};
 
 	return TileContent;
-}, /* bExport= */true);
+});

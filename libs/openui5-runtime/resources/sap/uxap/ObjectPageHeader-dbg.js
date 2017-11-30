@@ -156,13 +156,22 @@ sap.ui.define([
 
 				/**
 				 *
-				 * Internal aggregation for the BreadCrumbs in the header.
+				 * Internal aggregation for the legacy breadCrumbsLinks.
 				 */
 				_breadCrumbs: {type: "sap.m.Breadcrumbs", multiple: false, visibility: "hidden"},
 
 				/**
 				 *
+				 * The breadcrumbs displayed in the <code>ObjectPageHeader</code>.
+				 * If this aggregation is set, the <code>breadCrumbsLinks</code> aggregation is omitted.
+				 * @since 1.50
+				 */
+				breadcrumbs: {type: "sap.m.Breadcrumbs", multiple: false, singularName: "breadcrumb"},
+
+				/**
+				 *
 				 * A list of all the active link elements in the BreadCrumbs control.
+				 * @deprecated as of version 1.50, use the <code>breadcrumbs</code> aggregation instead.
 				 */
 				breadCrumbsLinks: {type: "sap.m.Link", multiple: true, singularName: "breadCrumbLink"},
 
@@ -572,6 +581,14 @@ sap.ui.define([
 							}
 						}
 					};
+
+					oAction.setVisible = function (bVisible) {
+						oAction._setInternalVisible(bVisible, true);
+						Button.prototype.setVisible.call(this, bVisible);
+
+						oAction.getParent()._adaptOverflow();
+					};
+
 					oAction.onAfterRendering = function () {
 						if (!this._getInternalVisible()) {
 							this.$().hide();
@@ -887,6 +904,19 @@ sap.ui.define([
 		});
 
 		return iWidthSum;
+	};
+
+	/**
+	 * Determines whether to render the <code>breadcrumbs</code> or the <code>breadCrumbsLinks</code> aggregation.
+	 * If <code>breadcrumbs</code> is set, the <code>breadCrumbsLinks</code> is omitted.
+	 * @private
+	 */
+	ObjectPageHeader.prototype._getBreadcrumbsAggregation = function () {
+		var oBreadCrumbs = this.getBreadcrumbs(),
+		oBreadCrumbsLegacy = this._lazyLoadInternalAggregation('_breadCrumbs', true);
+
+		return oBreadCrumbs
+			|| ((oBreadCrumbsLegacy && oBreadCrumbsLegacy.getLinks().length) ? oBreadCrumbsLegacy : null);
 	};
 
 	/*************************************************************************************/

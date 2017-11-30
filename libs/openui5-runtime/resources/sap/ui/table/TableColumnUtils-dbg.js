@@ -15,7 +15,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/Device', './l
 		 * Note: Do not access the function of this helper directly but via <code>sap.ui.table.TableUtils.Column...</code>
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 * @namespace
 		 * @name sap.ui.table.TableColumnUtils
 		 * @private
@@ -174,7 +174,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/Device', './l
 			 * @param {string} sColumnId ID of the column for which the Span-parent shall be found
 			 * @param {int} [iLevel] level where the parent is looked up
 			 *
-			 * @returns {{column: sap.ui.table.Column, level: int}[]|undefined} Array of column information
+			 * @returns {Array.<{column: sap.ui.table.Column, level: int}>|undefined} Array of column information
 			 * @private
 			 */
 			getParentSpannedColumns : function(oTable, sColumnId, iLevel) {
@@ -201,7 +201,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/Device', './l
 			 * @param {string} sColumnId ID of the column for which the Span-parent shall be found
 			 * @param {int} [iLevel] level where the parent is looked up
 			 *
-			 * @returns {{column: sap.ui.table.Column, level: int}[]|undefined} Array of column information
+			 * @returns {Array.<{column: sap.ui.table.Column, level: int}>|undefined} Array of column information
 			 * @private
 			 */
 			getChildrenSpannedColumns : function(oTable, sColumnId, iLevel) {
@@ -517,7 +517,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/Device', './l
 			/**
 			 * Returns the minimal possible column width in pixels.
 			 *
-			 * @returns {integer} The minimal possible column width in pixels
+			 * @returns {int} The minimal possible column width in pixels
 			 * @private
 			 */
 			getMinColumnWidth: function() {
@@ -544,7 +544,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/Device', './l
 			 * and execution of the default action is prevented in the event handler.
 			 *
 			 * @param {sap.ui.table.Table} oTable Instance of the table.
-			 * @param {int} iColumnIndex The index of a column. Must the the index of a visible column.
+			 * @param {int} iColumnIndex The index of a column. Must the index of a visible column.
 			 * @param {int} iWidth The width in pixel to set the column or column span to. Must be greater than 0.
 			 * @param {boolean} [bFireEvent=true] Whether the ColumnResize event should be fired. The event will be fired for every resized column.
 			 * @param {int} [iColumnSpan=1] The span of columns to resize beginning from <code>iColumnIndex</code>.

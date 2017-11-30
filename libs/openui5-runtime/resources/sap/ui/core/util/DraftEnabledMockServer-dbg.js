@@ -3,7 +3,7 @@
  * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(["jquery.sap.global", "sap/ui/Device", "sap/ui/core/util/MockServer"], function(jQuery, Device, MockServer) {
+sap.ui.define(["jquery.sap.global", "sap/ui/Device", "sap/ui/core/util/MockServer", "jquery.sap.sjax"], function(jQuery, Device, MockServer/*, jQuerySapSjax*/) {
 	"use strict";
 	return {
 

@@ -1,56 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Library name="sap.ui.core" xmlns="http://www.sap.com/ui5/ide/templates/xmlview">
-<Template name="sap.ui.core.ComponentContainer" alias="ComponentContainer,Container">
-	<jsTemplate><![CDATA[new sap.ui.core.ComponentContainer({
-	id: "${id}", // sap.ui.core.ID
-	busy: false, // boolean
-	busyIndicatorDelay: 1000, // int
-	visible: true, // boolean
-	fieldGroupIds: [], // string[], since 1.31
-	name: undefined, // string
-	url: undefined, // sap.ui.core.URI
-	async: false, // boolean
-	handleValidation: false, // boolean
-	settings: undefined, // object
-	propagateModel: false, // boolean
-	width: undefined, // sap.ui.core.CSSSize
-	height: undefined, // sap.ui.core.CSSSize
-	lifecycle: sap.ui.core.ComponentLifecycle.Legacy, // sap.ui.core.ComponentLifecycle
-	autoPrefixId: false, // boolean
-	usage: undefined, // string
-	tooltip: undefined, // sap.ui.core.TooltipBase
-	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Element, since 1.19
-	component: undefined, // sap.ui.core.UIComponent
-	validateFieldGroup: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this]
-})
-]]></jsTemplate>
-	<xmlTemplate><![CDATA[<ComponentContainer xmlns="sap.ui.core"
-	id="${id}"
-	busy="false"
-	busyIndicatorDelay="1000"
-	visible="true"
-	fieldGroupIds=""
-	name=""
-	url=""
-	async="false"
-	handleValidation="false"
-	settings=""
-	propagateModel="false"
-	width=""
-	height=""
-	lifecycle="Legacy"
-	autoPrefixId="false"
-	usage=""
-	component=""
-	validateFieldGroup="">
-		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
-</ComponentContainer>
-]]></xmlTemplate>
-</Template>
 <Template name="sap.ui.core.Control" alias="Control">
 	<jsTemplate><![CDATA[new sap.ui.core.Control({
 	id: "${id}", // sap.ui.core.ID

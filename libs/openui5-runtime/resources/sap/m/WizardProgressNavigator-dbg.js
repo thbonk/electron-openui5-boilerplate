@@ -21,7 +21,7 @@ function (library, Control, ResizeHandler, ItemNavigation, Device, jQuery) {
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -229,7 +229,6 @@ function (library, Control, ResizeHandler, ItemNavigation, Device, jQuery) {
 
 	/**
 	 * Moves the selection backwards by one step.
-	 * @param {boolean} suppressEvent - Suppress the stepChanged event.
 	 * @returns {sap.m.WizardProgressNavigator} Pointer to the control instance for chaining.
 	 * @public
 	 */
@@ -245,7 +244,6 @@ function (library, Control, ResizeHandler, ItemNavigation, Device, jQuery) {
 
 	/**
 	 * Moves the selection forwards by one step.
-	 * @param {boolean} suppressEvent - Suppress the stepChanged event.
 	 * @returns {sap.m.WizardProgressNavigator} Pointer to the control instance for chaining.
 	 * @public
 	 */
@@ -650,6 +648,7 @@ function (library, Control, ResizeHandler, ItemNavigation, Device, jQuery) {
 				enabled: this._activeStep >= (i + 1),
 				press: function (stepNumber) {
 					this._moveToStep(stepNumber);
+					this.fireStepChanged({	current: stepNumber});
 				}.bind(this, i + 1)
 			}));
 		}

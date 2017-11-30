@@ -3,8 +3,8 @@
     {
       "name" : "sap/f/Avatar.js",
       "description" : "Provides control sap.f.Avatar.",
-      "size" : 10222,
-      "compressedSize" : 3957,
+      "size" : 10549,
+      "compressedSize" : 3956,
       "required" : ["jquery.sap.global.js", "sap/f/library.js", "sap/ui/core/Control.js", "sap/ui/core/IconPool.js"],
       "includes" : []
     },
@@ -17,19 +17,35 @@
       "includes" : []
     },
     {
+      "name" : "sap/f/DynamicPage.designtime.js",
+      "description" : "Provides the Design Time Metadata for the sap.f.DynamicPage control",
+      "size" : 879,
+      "compressedSize" : 636,
+      "required" : ["jquery.sap.global.js"],
+      "includes" : []
+    },
+    {
       "name" : "sap/f/DynamicPage.js",
       "description" : "Provides control sap.f.DynamicPage.",
-      "size" : 45773,
-      "compressedSize" : 19101,
+      "size" : 45758,
+      "compressedSize" : 19122,
       "required" : ["jquery.sap.global.js", "sap/f/library.js", "sap/ui/Device.js", "sap/ui/core/Control.js", "sap/ui/core/ResizeHandler.js", "sap/ui/core/ScrollBar.js", "sap/ui/core/delegate/ScrollEnablement.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/f/DynamicPageHeader.designtime.js",
+      "description" : "Provides the Design Time Metadata for the sap.f.DynamicPageHeader control",
+      "size" : 755,
+      "compressedSize" : 528,
+      "required" : ["jquery.sap.global.js"],
       "includes" : []
     },
     {
       "name" : "sap/f/DynamicPageHeader.js",
       "description" : "Provides control sap.f.DynamicPageHeader.",
-      "size" : 7465,
-      "compressedSize" : 2681,
-      "required" : ["jquery.sap.global.js", "sap/f/library.js", "sap/m/ButtonType.js", "sap/m/ToggleButton.js", "sap/ui/core/Control.js", "sap/ui/core/InvisibleText.js"],
+      "size" : 7577,
+      "compressedSize" : 2713,
+      "required" : ["jquery.sap.global.js", "sap/f/library.js", "sap/m/ToggleButton.js", "sap/m/library.js", "sap/ui/core/Control.js", "sap/ui/core/InvisibleText.js"],
       "includes" : []
     },
     {
@@ -49,27 +65,35 @@
       "includes" : []
     },
     {
+      "name" : "sap/f/DynamicPageTitle.designtime.js",
+      "description" : "Provides the Design Time Metadata for the sap.f.DynamicPageTitle control",
+      "size" : 1512,
+      "compressedSize" : 978,
+      "required" : ["jquery.sap.global.js"],
+      "includes" : []
+    },
+    {
       "name" : "sap/f/DynamicPageTitle.js",
       "description" : "Provides control sap.f.DynamicPageTitle.",
-      "size" : 9228,
-      "compressedSize" : 3369,
+      "size" : 12420,
+      "compressedSize" : 4925,
       "required" : ["jquery.sap.global.js", "sap/f/library.js", "sap/m/OverflowToolbar.js", "sap/ui/core/Control.js"],
       "includes" : []
     },
     {
       "name" : "sap/f/DynamicPageTitleRenderer.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 3720,
-      "compressedSize" : 2030,
+      "size" : 4873,
+      "compressedSize" : 2659,
       "required" : ["jquery.sap.global.js"],
       "includes" : []
     },
     {
       "name" : "sap/f/FlexibleColumnLayout.js",
       "description" : "Provides control sap.f.FlexibleColumnLayout.",
-      "size" : 67821,
-      "compressedSize" : 18905,
-      "required" : ["jquery.sap.global.js", "sap/f/LayoutType.js", "sap/f/library.js", "sap/m/Button.js", "sap/m/NavContainer.js", "sap/ui/Device.js", "sap/ui/core/Control.js", "sap/ui/core/InvisibleText.js", "sap/ui/core/ResizeHandler.js"],
+      "size" : 68020,
+      "compressedSize" : 18945,
+      "required" : ["jquery.sap.global.js", "sap/f/library.js", "sap/m/Button.js", "sap/m/NavContainer.js", "sap/ui/Device.js", "sap/ui/core/Control.js", "sap/ui/core/InvisibleText.js", "sap/ui/core/ResizeHandler.js"],
       "includes" : []
     },
     {
@@ -83,28 +107,36 @@
     {
       "name" : "sap/f/FlexibleColumnLayoutSemanticHelper.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 16877,
-      "compressedSize" : 4295,
-      "required" : ["jquery.sap.global.js", "sap/f/FlexibleColumnLayout.js", "sap/f/LayoutType.js", "sap/f/library.js"],
+      "size" : 19727,
+      "compressedSize" : 4882,
+      "required" : ["jquery.sap.global.js", "sap/f/FlexibleColumnLayout.js", "sap/f/library.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/f/flexibility/DynamicPageTitle.flexibility.js",
+      "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
+      "size" : 710,
+      "compressedSize" : 527,
+      "required" : ["jquery.sap.global.js", "sap/m/changeHandler/CombineButtons.js", "sap/m/changeHandler/SplitMenuButton.js"],
       "includes" : []
     },
     {
       "name" : "sap/f/library-preload.js",
-      "size" : 113374,
-      "required" : ["jquery.sap.global.js", "sap/f/LayoutType.js", "sap/m/ActionSheet.js", "sap/m/Button.js", "sap/m/ButtonType.js", "sap/m/InstanceManager.js", "sap/m/NavContainer.js", "sap/m/OverflowToolbar.js", "sap/m/OverflowToolbarButton.js", "sap/m/OverflowToolbarLayoutData.js", "sap/m/OverflowToolbarPriority.js", "sap/m/ToggleButton.js", "sap/m/ToolbarSeparator.js", "sap/m/ToolbarSpacer.js", "sap/m/library.js", "sap/ui/Device.js", "sap/ui/base/EventProvider.js", "sap/ui/base/ManagedObject.js", "sap/ui/base/Metadata.js", "sap/ui/base/Object.js", "sap/ui/core/Control.js", "sap/ui/core/CustomData.js", "sap/ui/core/Element.js", "sap/ui/core/IconPool.js", "sap/ui/core/InvisibleText.js", "sap/ui/core/ResizeHandler.js", "sap/ui/core/ScrollBar.js", "sap/ui/core/delegate/ScrollEnablement.js", "sap/ui/core/library.js", "sap/ui/core/routing/History.js", "sap/ui/core/routing/Router.js", "sap/ui/core/routing/Target.js", "sap/ui/core/routing/Targets.js"],
-      "includes" : ["sap/f/Avatar.js", "sap/f/AvatarRenderer.js", "sap/f/DynamicPage.js", "sap/f/DynamicPageHeader.js", "sap/f/DynamicPageHeaderRenderer.js", "sap/f/DynamicPageRenderer.js", "sap/f/DynamicPageTitle.js", "sap/f/DynamicPageTitleRenderer.js", "sap/f/FlexibleColumnLayout.js", "sap/f/FlexibleColumnLayoutRenderer.js", "sap/f/FlexibleColumnLayoutSemanticHelper.js", "sap/f/library.js", "sap/f/manifest.json", "sap/f/routing/Router.js", "sap/f/routing/Target.js", "sap/f/routing/TargetHandler.js", "sap/f/routing/Targets.js", "sap/f/routing/async/Target.js", "sap/f/routing/async/Targets.js", "sap/f/semantic/AddAction.js", "sap/f/semantic/CloseAction.js", "sap/f/semantic/CopyAction.js", "sap/f/semantic/DeleteAction.js", "sap/f/semantic/DiscussInJamAction.js", "sap/f/semantic/ExitFullScreenAction.js", "sap/f/semantic/FavoriteAction.js", "sap/f/semantic/FlagAction.js", "sap/f/semantic/FooterMainAction.js", "sap/f/semantic/FullScreenAction.js", "sap/f/semantic/MainAction.js", "sap/f/semantic/MessagesIndicator.js", "sap/f/semantic/NegativeAction.js", "sap/f/semantic/PositiveAction.js", "sap/f/semantic/PrintAction.js", "sap/f/semantic/SemanticButton.js", "sap/f/semantic/SemanticConfiguration.js", "sap/f/semantic/SemanticContainer.js", "sap/f/semantic/SemanticControl.js", "sap/f/semantic/SemanticFooter.js", "sap/f/semantic/SemanticPage.js", "sap/f/semantic/SemanticPageRenderer.js", "sap/f/semantic/SemanticShareMenu.js", "sap/f/semantic/SemanticTitle.js", "sap/f/semantic/SemanticToggleButton.js", "sap/f/semantic/SendEmailAction.js", "sap/f/semantic/SendMessageAction.js", "sap/f/semantic/ShareInJamAction.js", "sap/f/semantic/TitleMainAction.js"]
+      "size" : 119510,
+      "required" : ["jquery.sap.global.js", "sap/m/ActionSheet.js", "sap/m/Button.js", "sap/m/InstanceManager.js", "sap/m/NavContainer.js", "sap/m/OverflowToolbar.js", "sap/m/OverflowToolbarButton.js", "sap/m/OverflowToolbarLayoutData.js", "sap/m/ToggleButton.js", "sap/m/ToolbarSeparator.js", "sap/m/ToolbarSpacer.js", "sap/m/changeHandler/CombineButtons.js", "sap/m/changeHandler/SplitMenuButton.js", "sap/m/library.js", "sap/ui/Device.js", "sap/ui/base/EventProvider.js", "sap/ui/base/ManagedObject.js", "sap/ui/base/Metadata.js", "sap/ui/base/Object.js", "sap/ui/core/Control.js", "sap/ui/core/CustomData.js", "sap/ui/core/Element.js", "sap/ui/core/IconPool.js", "sap/ui/core/InvisibleText.js", "sap/ui/core/ResizeHandler.js", "sap/ui/core/ScrollBar.js", "sap/ui/core/delegate/ScrollEnablement.js", "sap/ui/core/library.js", "sap/ui/core/routing/History.js", "sap/ui/core/routing/Router.js", "sap/ui/core/routing/Target.js", "sap/ui/core/routing/Targets.js"],
+      "includes" : ["sap/f/Avatar.js", "sap/f/AvatarRenderer.js", "sap/f/DynamicPage.designtime.js", "sap/f/DynamicPage.js", "sap/f/DynamicPageHeader.designtime.js", "sap/f/DynamicPageHeader.js", "sap/f/DynamicPageHeaderRenderer.js", "sap/f/DynamicPageRenderer.js", "sap/f/DynamicPageTitle.designtime.js", "sap/f/DynamicPageTitle.js", "sap/f/DynamicPageTitleRenderer.js", "sap/f/FlexibleColumnLayout.js", "sap/f/FlexibleColumnLayoutRenderer.js", "sap/f/FlexibleColumnLayoutSemanticHelper.js", "sap/f/flexibility/DynamicPageTitle.flexibility.js", "sap/f/library.js", "sap/f/manifest.json", "sap/f/routing/Router.js", "sap/f/routing/Target.js", "sap/f/routing/TargetHandler.js", "sap/f/routing/Targets.js", "sap/f/routing/async/Target.js", "sap/f/routing/async/Targets.js", "sap/f/semantic/AddAction.js", "sap/f/semantic/CloseAction.js", "sap/f/semantic/CopyAction.js", "sap/f/semantic/DeleteAction.js", "sap/f/semantic/DiscussInJamAction.js", "sap/f/semantic/EditAction.js", "sap/f/semantic/ExitFullScreenAction.js", "sap/f/semantic/FavoriteAction.js", "sap/f/semantic/FlagAction.js", "sap/f/semantic/FooterMainAction.js", "sap/f/semantic/FullScreenAction.js", "sap/f/semantic/MainAction.js", "sap/f/semantic/MessagesIndicator.js", "sap/f/semantic/NegativeAction.js", "sap/f/semantic/PositiveAction.js", "sap/f/semantic/PrintAction.js", "sap/f/semantic/SemanticButton.js", "sap/f/semantic/SemanticConfiguration.js", "sap/f/semantic/SemanticContainer.js", "sap/f/semantic/SemanticControl.js", "sap/f/semantic/SemanticFooter.js", "sap/f/semantic/SemanticPage.js", "sap/f/semantic/SemanticPageRenderer.js", "sap/f/semantic/SemanticShareMenu.js", "sap/f/semantic/SemanticTitle.js", "sap/f/semantic/SemanticToggleButton.js", "sap/f/semantic/SendEmailAction.js", "sap/f/semantic/SendMessageAction.js", "sap/f/semantic/ShareInJamAction.js", "sap/f/semantic/TitleMainAction.js"]
     },
     {
       "name" : "sap/f/library-preload.json",
       "size" : 0,
-      "required" : ["jquery.sap.global.js", "sap/f/LayoutType.js", "sap/m/ActionSheet.js", "sap/m/Button.js", "sap/m/ButtonType.js", "sap/m/InstanceManager.js", "sap/m/NavContainer.js", "sap/m/OverflowToolbar.js", "sap/m/OverflowToolbarButton.js", "sap/m/OverflowToolbarLayoutData.js", "sap/m/OverflowToolbarPriority.js", "sap/m/ToggleButton.js", "sap/m/ToolbarSeparator.js", "sap/m/ToolbarSpacer.js", "sap/m/library-preload.json", "sap/m/library.js", "sap/ui/Device.js", "sap/ui/base/EventProvider.js", "sap/ui/base/ManagedObject.js", "sap/ui/base/Metadata.js", "sap/ui/base/Object.js", "sap/ui/core/Control.js", "sap/ui/core/CustomData.js", "sap/ui/core/Element.js", "sap/ui/core/IconPool.js", "sap/ui/core/InvisibleText.js", "sap/ui/core/ResizeHandler.js", "sap/ui/core/ScrollBar.js", "sap/ui/core/delegate/ScrollEnablement.js", "sap/ui/core/library-preload.json", "sap/ui/core/library.js", "sap/ui/core/routing/History.js", "sap/ui/core/routing/Router.js", "sap/ui/core/routing/Target.js", "sap/ui/core/routing/Targets.js"],
-      "includes" : ["sap/f/Avatar.js", "sap/f/AvatarRenderer.js", "sap/f/DynamicPage.js", "sap/f/DynamicPageHeader.js", "sap/f/DynamicPageHeaderRenderer.js", "sap/f/DynamicPageRenderer.js", "sap/f/DynamicPageTitle.js", "sap/f/DynamicPageTitleRenderer.js", "sap/f/FlexibleColumnLayout.js", "sap/f/FlexibleColumnLayoutRenderer.js", "sap/f/FlexibleColumnLayoutSemanticHelper.js", "sap/f/library.js", "sap/f/manifest.json", "sap/f/routing/Router.js", "sap/f/routing/Target.js", "sap/f/routing/TargetHandler.js", "sap/f/routing/Targets.js", "sap/f/routing/async/Target.js", "sap/f/routing/async/Targets.js", "sap/f/semantic/AddAction.js", "sap/f/semantic/CloseAction.js", "sap/f/semantic/CopyAction.js", "sap/f/semantic/DeleteAction.js", "sap/f/semantic/DiscussInJamAction.js", "sap/f/semantic/ExitFullScreenAction.js", "sap/f/semantic/FavoriteAction.js", "sap/f/semantic/FlagAction.js", "sap/f/semantic/FooterMainAction.js", "sap/f/semantic/FullScreenAction.js", "sap/f/semantic/MainAction.js", "sap/f/semantic/MessagesIndicator.js", "sap/f/semantic/NegativeAction.js", "sap/f/semantic/PositiveAction.js", "sap/f/semantic/PrintAction.js", "sap/f/semantic/SemanticButton.js", "sap/f/semantic/SemanticConfiguration.js", "sap/f/semantic/SemanticContainer.js", "sap/f/semantic/SemanticControl.js", "sap/f/semantic/SemanticFooter.js", "sap/f/semantic/SemanticPage.js", "sap/f/semantic/SemanticPageRenderer.js", "sap/f/semantic/SemanticShareMenu.js", "sap/f/semantic/SemanticTitle.js", "sap/f/semantic/SemanticToggleButton.js", "sap/f/semantic/SendEmailAction.js", "sap/f/semantic/SendMessageAction.js", "sap/f/semantic/ShareInJamAction.js", "sap/f/semantic/TitleMainAction.js"]
+      "required" : ["jquery.sap.global.js", "sap/m/ActionSheet.js", "sap/m/Button.js", "sap/m/InstanceManager.js", "sap/m/NavContainer.js", "sap/m/OverflowToolbar.js", "sap/m/OverflowToolbarButton.js", "sap/m/OverflowToolbarLayoutData.js", "sap/m/ToggleButton.js", "sap/m/ToolbarSeparator.js", "sap/m/ToolbarSpacer.js", "sap/m/changeHandler/CombineButtons.js", "sap/m/changeHandler/SplitMenuButton.js", "sap/m/library-preload.json", "sap/m/library.js", "sap/ui/Device.js", "sap/ui/base/EventProvider.js", "sap/ui/base/ManagedObject.js", "sap/ui/base/Metadata.js", "sap/ui/base/Object.js", "sap/ui/core/Control.js", "sap/ui/core/CustomData.js", "sap/ui/core/Element.js", "sap/ui/core/IconPool.js", "sap/ui/core/InvisibleText.js", "sap/ui/core/ResizeHandler.js", "sap/ui/core/ScrollBar.js", "sap/ui/core/delegate/ScrollEnablement.js", "sap/ui/core/library-preload.json", "sap/ui/core/library.js", "sap/ui/core/routing/History.js", "sap/ui/core/routing/Router.js", "sap/ui/core/routing/Target.js", "sap/ui/core/routing/Targets.js"],
+      "includes" : ["sap/f/Avatar.js", "sap/f/AvatarRenderer.js", "sap/f/DynamicPage.designtime.js", "sap/f/DynamicPage.js", "sap/f/DynamicPageHeader.designtime.js", "sap/f/DynamicPageHeader.js", "sap/f/DynamicPageHeaderRenderer.js", "sap/f/DynamicPageRenderer.js", "sap/f/DynamicPageTitle.designtime.js", "sap/f/DynamicPageTitle.js", "sap/f/DynamicPageTitleRenderer.js", "sap/f/FlexibleColumnLayout.js", "sap/f/FlexibleColumnLayoutRenderer.js", "sap/f/FlexibleColumnLayoutSemanticHelper.js", "sap/f/flexibility/DynamicPageTitle.flexibility.js", "sap/f/library.js", "sap/f/manifest.json", "sap/f/routing/Router.js", "sap/f/routing/Target.js", "sap/f/routing/TargetHandler.js", "sap/f/routing/Targets.js", "sap/f/routing/async/Target.js", "sap/f/routing/async/Targets.js", "sap/f/semantic/AddAction.js", "sap/f/semantic/CloseAction.js", "sap/f/semantic/CopyAction.js", "sap/f/semantic/DeleteAction.js", "sap/f/semantic/DiscussInJamAction.js", "sap/f/semantic/EditAction.js", "sap/f/semantic/ExitFullScreenAction.js", "sap/f/semantic/FavoriteAction.js", "sap/f/semantic/FlagAction.js", "sap/f/semantic/FooterMainAction.js", "sap/f/semantic/FullScreenAction.js", "sap/f/semantic/MainAction.js", "sap/f/semantic/MessagesIndicator.js", "sap/f/semantic/NegativeAction.js", "sap/f/semantic/PositiveAction.js", "sap/f/semantic/PrintAction.js", "sap/f/semantic/SemanticButton.js", "sap/f/semantic/SemanticConfiguration.js", "sap/f/semantic/SemanticContainer.js", "sap/f/semantic/SemanticControl.js", "sap/f/semantic/SemanticFooter.js", "sap/f/semantic/SemanticPage.js", "sap/f/semantic/SemanticPageRenderer.js", "sap/f/semantic/SemanticShareMenu.js", "sap/f/semantic/SemanticTitle.js", "sap/f/semantic/SemanticToggleButton.js", "sap/f/semantic/SendEmailAction.js", "sap/f/semantic/SendMessageAction.js", "sap/f/semantic/ShareInJamAction.js", "sap/f/semantic/TitleMainAction.js"]
     },
     {
       "name" : "sap/f/library.js",
       "description" : "Initialization Code and shared classes of library sap.f.",
-      "size" : 8844,
-      "compressedSize" : 2162,
+      "size" : 9940,
+      "compressedSize" : 2475,
       "required" : ["jquery.sap.global.js", "sap/m/library.js", "sap/ui/core/library.js"],
       "includes" : []
     },
@@ -116,253 +148,253 @@
     },
     {
       "name" : "sap/f/messagebundle.properties",
-      "size" : 3331,
+      "size" : 3797,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_ar.properties",
-      "size" : 4555,
+      "size" : 5207,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_bg.properties",
-      "size" : 5309,
+      "size" : 6113,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_ca.properties",
-      "size" : 3210,
+      "size" : 3639,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_cs.properties",
-      "size" : 3383,
+      "size" : 3817,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_da.properties",
-      "size" : 3120,
+      "size" : 3499,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_de.properties",
-      "size" : 3161,
+      "size" : 3564,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_el.properties",
-      "size" : 5141,
+      "size" : 5950,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_en.properties",
-      "size" : 3083,
+      "size" : 3461,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_en_US_sappsd.properties",
-      "size" : 5830,
+      "size" : 6735,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_en_US_saptrc.properties",
-      "size" : 3773,
+      "size" : 4271,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_es.properties",
-      "size" : 3163,
+      "size" : 3587,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_et.properties",
-      "size" : 3199,
+      "size" : 3611,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_fi.properties",
-      "size" : 3210,
+      "size" : 3654,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_fr.properties",
-      "size" : 3252,
-      "required" : [],
-      "includes" : []
-    },
-    {
-      "name" : "sap/f/messagebundle_hi.properties",
-      "size" : 5111,
-      "required" : [],
-      "includes" : []
-    },
-    {
-      "name" : "sap/f/messagebundle_hr.properties",
-      "size" : 3246,
-      "required" : [],
-      "includes" : []
-    },
-    {
-      "name" : "sap/f/messagebundle_hu.properties",
-      "size" : 3464,
-      "required" : [],
-      "includes" : []
-    },
-    {
-      "name" : "sap/f/messagebundle_it.properties",
-      "size" : 3144,
-      "required" : [],
-      "includes" : []
-    },
-    {
-      "name" : "sap/f/messagebundle_iw.properties",
-      "size" : 4246,
-      "required" : [],
-      "includes" : []
-    },
-    {
-      "name" : "sap/f/messagebundle_ja.properties",
       "size" : 3678,
       "required" : [],
       "includes" : []
     },
     {
+      "name" : "sap/f/messagebundle_hi.properties",
+      "size" : 5752,
+      "required" : [],
+      "includes" : []
+    },
+    {
+      "name" : "sap/f/messagebundle_hr.properties",
+      "size" : 3648,
+      "required" : [],
+      "includes" : []
+    },
+    {
+      "name" : "sap/f/messagebundle_hu.properties",
+      "size" : 3918,
+      "required" : [],
+      "includes" : []
+    },
+    {
+      "name" : "sap/f/messagebundle_it.properties",
+      "size" : 3449,
+      "required" : [],
+      "includes" : []
+    },
+    {
+      "name" : "sap/f/messagebundle_iw.properties",
+      "size" : 4712,
+      "required" : [],
+      "includes" : []
+    },
+    {
+      "name" : "sap/f/messagebundle_ja.properties",
+      "size" : 4173,
+      "required" : [],
+      "includes" : []
+    },
+    {
       "name" : "sap/f/messagebundle_kk.properties",
-      "size" : 4941,
+      "size" : 5721,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_ko.properties",
-      "size" : 3512,
+      "size" : 3955,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_lt.properties",
-      "size" : 3430,
+      "size" : 3881,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_lv.properties",
-      "size" : 3375,
+      "size" : 3792,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_ms.properties",
-      "size" : 3129,
+      "size" : 3525,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_nl.properties",
-      "size" : 3159,
+      "size" : 3465,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_no.properties",
-      "size" : 3110,
+      "size" : 3508,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_pl.properties",
-      "size" : 3355,
+      "size" : 3810,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_pt.properties",
-      "size" : 3176,
+      "size" : 3616,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_ro.properties",
-      "size" : 3320,
+      "size" : 3729,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_ru.properties",
-      "size" : 5327,
+      "size" : 5863,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_sh.properties",
-      "size" : 3281,
+      "size" : 3676,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_sk.properties",
-      "size" : 3466,
+      "size" : 3920,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_sl.properties",
-      "size" : 3275,
+      "size" : 3662,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_sv.properties",
-      "size" : 3170,
+      "size" : 3561,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_th.properties",
-      "size" : 4740,
+      "size" : 5371,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_tr.properties",
-      "size" : 3410,
+      "size" : 3904,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_uk.properties",
-      "size" : 5574,
+      "size" : 6346,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_vi.properties",
-      "size" : 3821,
+      "size" : 4348,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_zh_CN.properties",
-      "size" : 3410,
+      "size" : 3814,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/f/messagebundle_zh_TW.properties",
-      "size" : 3416,
+      "size" : 3857,
       "required" : [],
       "includes" : []
     },
@@ -417,7 +449,7 @@
     {
       "name" : "sap/f/semantic/AddAction.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 1160,
+      "size" : 1147,
       "compressedSize" : 349,
       "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticButton.js"],
       "includes" : []
@@ -425,7 +457,7 @@
     {
       "name" : "sap/f/semantic/CloseAction.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 1161,
+      "size" : 1148,
       "compressedSize" : 338,
       "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticButton.js"],
       "includes" : []
@@ -433,7 +465,7 @@
     {
       "name" : "sap/f/semantic/CopyAction.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 1154,
+      "size" : 1141,
       "compressedSize" : 337,
       "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticButton.js"],
       "includes" : []
@@ -441,7 +473,7 @@
     {
       "name" : "sap/f/semantic/DeleteAction.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 1182,
+      "size" : 1169,
       "compressedSize" : 352,
       "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticButton.js"],
       "includes" : []
@@ -449,15 +481,23 @@
     {
       "name" : "sap/f/semantic/DiscussInJamAction.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 1245,
+      "size" : 1232,
       "compressedSize" : 358,
+      "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticButton.js"],
+      "includes" : []
+    },
+    {
+      "name" : "sap/f/semantic/EditAction.js",
+      "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
+      "size" : 1139,
+      "compressedSize" : 337,
       "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticButton.js"],
       "includes" : []
     },
     {
       "name" : "sap/f/semantic/ExitFullScreenAction.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 1224,
+      "size" : 1211,
       "compressedSize" : 347,
       "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticButton.js"],
       "includes" : []
@@ -465,7 +505,7 @@
     {
       "name" : "sap/f/semantic/FavoriteAction.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 1201,
+      "size" : 1188,
       "compressedSize" : 347,
       "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticToggleButton.js"],
       "includes" : []
@@ -473,7 +513,7 @@
     {
       "name" : "sap/f/semantic/FlagAction.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 1173,
+      "size" : 1160,
       "compressedSize" : 343,
       "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticToggleButton.js"],
       "includes" : []
@@ -481,7 +521,7 @@
     {
       "name" : "sap/f/semantic/FooterMainAction.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 1187,
+      "size" : 1174,
       "compressedSize" : 339,
       "required" : ["jquery.sap.global.js", "sap/f/semantic/MainAction.js"],
       "includes" : []
@@ -489,7 +529,7 @@
     {
       "name" : "sap/f/semantic/FullScreenAction.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 1196,
+      "size" : 1183,
       "compressedSize" : 343,
       "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticButton.js"],
       "includes" : []
@@ -497,7 +537,7 @@
     {
       "name" : "sap/f/semantic/MainAction.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 1270,
+      "size" : 1257,
       "compressedSize" : 416,
       "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticButton.js"],
       "includes" : []
@@ -505,7 +545,7 @@
     {
       "name" : "sap/f/semantic/MessagesIndicator.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 1205,
+      "size" : 1192,
       "compressedSize" : 344,
       "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticButton.js"],
       "includes" : []
@@ -513,7 +553,7 @@
     {
       "name" : "sap/f/semantic/NegativeAction.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 1394,
+      "size" : 1381,
       "compressedSize" : 419,
       "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticButton.js"],
       "includes" : []
@@ -521,7 +561,7 @@
     {
       "name" : "sap/f/semantic/PositiveAction.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 1394,
+      "size" : 1381,
       "compressedSize" : 419,
       "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticButton.js"],
       "includes" : []
@@ -529,7 +569,7 @@
     {
       "name" : "sap/f/semantic/PrintAction.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 1198,
+      "size" : 1185,
       "compressedSize" : 351,
       "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticButton.js"],
       "includes" : []
@@ -537,7 +577,7 @@
     {
       "name" : "sap/f/semantic/SemanticButton.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 2546,
+      "size" : 2533,
       "compressedSize" : 1050,
       "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticConfiguration.js", "sap/f/semantic/SemanticControl.js", "sap/m/Button.js", "sap/m/OverflowToolbarButton.js"],
       "includes" : []
@@ -545,16 +585,16 @@
     {
       "name" : "sap/f/semantic/SemanticConfiguration.js",
       "description" : "Provides a private class <code>sap.f.semantic.SemanticConfiguration</code>.",
-      "size" : 11985,
-      "compressedSize" : 6177,
-      "required" : ["jquery.sap.global.js", "sap/m/ButtonType.js", "sap/m/OverflowToolbarLayoutData.js", "sap/m/OverflowToolbarPriority.js", "sap/ui/base/Metadata.js", "sap/ui/core/IconPool.js"],
+      "size" : 12813,
+      "compressedSize" : 6553,
+      "required" : ["jquery.sap.global.js", "sap/m/OverflowToolbarLayoutData.js", "sap/m/library.js", "sap/ui/base/Metadata.js", "sap/ui/core/IconPool.js"],
       "includes" : []
     },
     {
       "name" : "sap/f/semantic/SemanticContainer.js",
       "description" : "Provides a private class <code>sap.f.semantic.SemanticContainer</code>.",
-      "size" : 4509,
-      "compressedSize" : 1537,
+      "size" : 4977,
+      "compressedSize" : 1678,
       "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticConfiguration.js", "sap/m/ToolbarSpacer.js", "sap/ui/base/Metadata.js", "sap/ui/core/CustomData.js"],
       "includes" : []
     },
@@ -569,16 +609,16 @@
     {
       "name" : "sap/f/semantic/SemanticFooter.js",
       "description" : "Provides a private class <code>sap.f.semantic.SemanticFooter</code>.",
-      "size" : 9550,
-      "compressedSize" : 4235,
-      "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticConfiguration.js", "sap/f/semantic/SemanticContainer.js", "sap/m/ButtonType.js", "sap/m/ToolbarSpacer.js"],
+      "size" : 9690,
+      "compressedSize" : 4286,
+      "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticConfiguration.js", "sap/f/semantic/SemanticContainer.js", "sap/m/ToolbarSpacer.js", "sap/m/library.js"],
       "includes" : []
     },
     {
       "name" : "sap/f/semantic/SemanticPage.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 31604,
-      "compressedSize" : 11643,
+      "size" : 31855,
+      "compressedSize" : 11704,
       "required" : ["jquery.sap.global.js", "sap/f/DynamicPage.js", "sap/f/DynamicPageHeader.js", "sap/f/DynamicPageTitle.js", "sap/f/library.js", "sap/f/semantic/SemanticConfiguration.js", "sap/f/semantic/SemanticFooter.js", "sap/f/semantic/SemanticShareMenu.js", "sap/f/semantic/SemanticTitle.js", "sap/m/ActionSheet.js", "sap/m/OverflowToolbar.js", "sap/ui/base/ManagedObject.js", "sap/ui/core/Control.js"],
       "includes" : []
     },
@@ -593,31 +633,31 @@
     {
       "name" : "sap/f/semantic/SemanticShareMenu.js",
       "description" : "Provides a private class <code>sap.f.semantic.SemanticShareMenu</code>.",
-      "size" : 10336,
-      "compressedSize" : 4713,
-      "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticConfiguration.js", "sap/f/semantic/SemanticContainer.js", "sap/m/Button.js", "sap/m/ButtonType.js", "sap/m/OverflowToolbarButton.js", "sap/m/OverflowToolbarLayoutData.js", "sap/ui/base/EventProvider.js", "sap/ui/core/IconPool.js"],
+      "size" : 10358,
+      "compressedSize" : 4729,
+      "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticConfiguration.js", "sap/f/semantic/SemanticContainer.js", "sap/m/Button.js", "sap/m/OverflowToolbarButton.js", "sap/m/OverflowToolbarLayoutData.js", "sap/m/library.js", "sap/ui/base/EventProvider.js", "sap/ui/core/IconPool.js"],
       "includes" : []
     },
     {
       "name" : "sap/f/semantic/SemanticTitle.js",
       "description" : "Provides a private class <code>sap.f.semantic.SemanticTitle</code>.",
-      "size" : 18623,
-      "compressedSize" : 7814,
-      "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticConfiguration.js", "sap/f/semantic/SemanticContainer.js", "sap/m/ButtonType.js", "sap/m/ToolbarSeparator.js", "sap/m/ToolbarSpacer.js"],
+      "size" : 18703,
+      "compressedSize" : 7830,
+      "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticConfiguration.js", "sap/f/semantic/SemanticContainer.js", "sap/m/ToolbarSeparator.js", "sap/m/ToolbarSpacer.js", "sap/m/library.js"],
       "includes" : []
     },
     {
       "name" : "sap/f/semantic/SemanticToggleButton.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 3443,
-      "compressedSize" : 1174,
-      "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticButton.js", "sap/f/semantic/SemanticControl.js", "sap/m/ButtonType.js"],
+      "size" : 3509,
+      "compressedSize" : 1190,
+      "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticButton.js", "sap/f/semantic/SemanticControl.js", "sap/m/library.js"],
       "includes" : []
     },
     {
       "name" : "sap/f/semantic/SendEmailAction.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 1225,
+      "size" : 1212,
       "compressedSize" : 355,
       "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticButton.js"],
       "includes" : []
@@ -625,7 +665,7 @@
     {
       "name" : "sap/f/semantic/SendMessageAction.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 1239,
+      "size" : 1226,
       "compressedSize" : 357,
       "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticButton.js"],
       "includes" : []
@@ -633,7 +673,7 @@
     {
       "name" : "sap/f/semantic/ShareInJamAction.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 1232,
+      "size" : 1219,
       "compressedSize" : 356,
       "required" : ["jquery.sap.global.js", "sap/f/semantic/SemanticButton.js"],
       "includes" : []
@@ -641,7 +681,7 @@
     {
       "name" : "sap/f/semantic/TitleMainAction.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 1178,
+      "size" : 1165,
       "compressedSize" : 338,
       "required" : ["jquery.sap.global.js", "sap/f/semantic/MainAction.js"],
       "includes" : []

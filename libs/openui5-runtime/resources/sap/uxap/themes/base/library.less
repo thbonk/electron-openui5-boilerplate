@@ -22,12 +22,11 @@ Common Compact/Cozy
 
 .sapUxAPAnchorBar {
 	height: 3rem;
-	margin-bottom: 0.125rem;
 }
 
 .sapUxAPAnchorBar.sapMTB {
 	padding-left: 0;
-	box-shadow: @sapUiShadowHeader;
+	box-shadow: inset 0 -0.125rem @sapUiObjectHeaderBorderColor;
 }
 
 /* M, L or splitview paddings */
@@ -289,6 +288,10 @@ html .sapUiContainer-Medium .sapUxAPAnchorBar.sapUxAPAnchorBarScrollLeft .anchor
 	overflow: visible;
 }
 
+html[dir=rtl] .sapMPopover.sapUxAPAnchorBarPopover button.sapMBtn > .sapMBtnInner > .sapMBtnContent {
+	text-align: right;
+}
+
 /**********************************
 COZY
 **********************************/
@@ -523,14 +526,14 @@ Compact
 			left: 0;
 		}
 	}
-}
 
-html.sap-desktop .sapUxAPHierarchicalSelect.sapMSlt:focus:not(.sapMSltExpanded):not(.sapMSltDisabled):not(.sapMSltState) {
-	outline: none;
+	&.sapMSltHoverable.sapMSltIconOnly.sapMSltPressed.sapMSlt:focus > .sapMSltIcon {
+		outline: none;
+	}
 }
 
 .sapUiSizeCompact .sapUxAPHierarchicalSelect.sapMSlt {
-	height: 2.5rem;
+	height: 2rem;
 	margin-top: 0;
 	margin-bottom: 0;
 }
@@ -628,6 +631,43 @@ html .sapUiContainer-Wide .sapUxAPHierarchicalSelect.sapMSltIconOnly {
 		height: 3rem;
 		border: none;
 		padding-left: 1rem;
+	}
+
+	.sapUiSizeCompact .sapUxAPHierarchicalSelect .sapMSltLabel {
+		padding-bottom: 0.3rem;
+	}
+
+	.sapUiSizeCompact .sapMSlt.sapUxAPHierarchicalSelect {
+		height: 2rem;
+	}
+}
+
+/* IE and Edge ignores outline-offset. Use an overlay: */
+html[data-sap-ui-browser^="ie"].sap-desktop,
+html[data-sap-ui-browser^="ed"].sap-desktop {
+	.sapMSlt.sapUxAPHierarchicalSelect:focus  > .sapMSltArrow {
+		box-shadow: none;
+	}
+
+	.sapUxAPHierarchicalSelect.sapMSltHoverable.sapMSltIconOnly.sapMSlt:not(.sapMSltPressed):focus {
+		&:before {
+			border: none;
+		}
+		> .sapMSltIcon {
+			outline: none;
+			position: relative;
+		}
+		> .sapMSltIcon:after {
+			content: " ";
+			box-sizing: border-box;
+			width: 100%;
+			height: 100%;
+			position: absolute;
+			left: 0;
+			top: 0;
+			border: 1px dashed @sapUiContentFocusColor;
+			pointer-events: none;
+		}
 	}
 }
 
@@ -1163,6 +1203,7 @@ html[dir=rtl] .sapUxAPObjectPageHeaderMarks .sapMObjStatusMarker .sapUiIcon:firs
 		> .sapMPI {
 			display: -webkit-inline-flex;
 			display: inline-flex;
+			margin-top: 0.25rem;
 		}
 
 		.sapMPI {
@@ -1200,6 +1241,10 @@ html[dir=rtl] .sapUxAPObjectPageHeaderMarks .sapMObjStatusMarker .sapUiIcon:firs
 	.sapUiMedia-Std-Tablet & .sapUxAPObjectPageHeaderLayoutHiddenM,
 	.sapUiMedia-Std-Phone & .sapUxAPObjectPageHeaderLayoutHiddenS {
 		display: none;
+	}
+
+	.sapUxAPObjectPageHeaderObjectImage.sapMImgFocusable {
+		margin-top: 1px;
 	}
 }
 
@@ -1380,6 +1425,7 @@ html .sapUiContainer-Medium {
     flex-direction: column;
 	isolation: isolate;
 	z-index: 0;
+	white-space: normal; // BCP: 1780382804
 }
 
 body > .sapUxAPObjectPageLayout,
@@ -1520,7 +1566,6 @@ html[data-sap-ui-animation='on'] .sapUxAPObjectPageLayout {
 	}
 	@keyframes bounceShow {
 		0% {
-			-webkit-transform: translateY(100%);
 			transform: translateY(100%);
 			opacity: 0;
 		}
@@ -1542,12 +1587,10 @@ html[data-sap-ui-animation='on'] .sapUxAPObjectPageLayout {
 	}
 	@keyframes bounceHide {
 		0% {
-			-webkit-transform: translateY(-5%);
 			transform: translateY(-5%);
 			opacity: 1;
 		}
 		100% {
-			-webkit-transform: translateY(100%);
 			transform: translateY(100%);
 			opacity: 0;
 		}
@@ -1818,6 +1861,12 @@ html .sapUiContainer-Medium .sapUxAPObjectPageSubSectionHeader {
 	margin-bottom: 0;
 }
 
+.sapUxAPBlockContainer {
+	.sapUiFormResGrid>.sapUiFormTitle {
+		padding: 0;
+	}
+}
+
 .sapUxAPBlockContainerDesktop {
 	padding: 1rem 2rem 3rem 2rem;
 	.sapUiFormResGrid > div {
@@ -1847,8 +1896,8 @@ html .sapUiContainer-Medium .sapUxAPObjectPageSubSectionHeader {
 	padding-top: 1rem;
 }
 
-.sapUiMedia-Std-Desktop .sapMSplitContainer:not(.sapMSplitContainerHideMode) .sapMSplitContainerDetail,
-.sapUiMedia-Std-Phone .sapMSplitContainer:not(.sapMSplitContainerHideMode) {
+.sapUiMedia-Std-Desktop .sapMSplitContainer:not(.sapMSplitContainerHideMode) .sapMSplitContainerDetail .sapUxAPObjectPageSubSection,
+.sapUiMedia-Std-Phone .sapMSplitContainer:not(.sapMSplitContainerHideMode) .sapUxAPObjectPageSubSection {
 	.sapUiRespGrid.sapUiRespGridHSpace1 {
 		padding: 0 0;
 	}

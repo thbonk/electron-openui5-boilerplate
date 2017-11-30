@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './SelectList', './
 		 * @implements sap.ui.core.IFormContent
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @public
@@ -583,8 +583,7 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './SelectList', './
 				}
 			}
 
-			// remove the active and expanded states of the field
-			this.removeStyleClass(CSS_CLASS + "Pressed");
+			// remove the expanded states of the field
 			this.removeStyleClass(CSS_CLASS + "Expanded");
 		};
 
@@ -593,11 +592,17 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './SelectList', './
 		 *
 		 */
 		Select.prototype.onAfterClose = function(oControlEvent) {
-			var oDomRef = this.getFocusDomRef();
+			var oDomRef = this.getFocusDomRef(),
+				CSS_CLASS = this.getRenderer().CSS_CLASS,
+				sPressedCSSClass = CSS_CLASS + "Pressed";
 
 			if (oDomRef) {
 				oDomRef.setAttribute("aria-expanded", "false");
+				oDomRef.removeAttribute("aria-activedescendant");
 			}
+
+			// Remove the active state
+			this.removeStyleClass(sPressedCSSClass);
 		};
 
 		/**
@@ -1983,6 +1988,7 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './SelectList', './
 
 			this.setSelection(vItem);
 			this.setValue(this._getSelectedItemText(vItem));
+			this._oSelectionOnFocus = vItem;
 			return this;
 		};
 
@@ -2007,6 +2013,7 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './SelectList', './
 
 			this.setSelection(vItem);
 			this.setValue(this._getSelectedItemText());
+			this._oSelectionOnFocus = sap.ui.getCore().byId(vItem);
 			return this;
 		};
 
@@ -2049,6 +2056,7 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './SelectList', './
 
 				this.setSelection(oItem);
 				this.setValue(this._getSelectedItemText(oItem));
+				this._oSelectionOnFocus = oItem;
 				return this;
 			}
 

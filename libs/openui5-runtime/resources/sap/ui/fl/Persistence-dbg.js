@@ -17,7 +17,7 @@ sap.ui.define([
 	 * @param {string} [sStableIdPropertyName='id'] the stable id
 	 * @alias sap.ui.fl.Persistence
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.25.0
 	 */
 	var Persistence = function(oControl, sStableIdPropertyName) {
@@ -243,6 +243,7 @@ sap.ui.define([
 			if (bNoFilter === true && oChangeContent.fileType === 'change' || that._sStableId === value) {
 				oChange = new Change(oChangeContent);
 				oChange.attachEvent(Change.events.markForDeletion, that._onDeleteChange.bind(that));
+				oChange.setState(Change.states.PERSISTED);
 				sChangeId = oChange.getId();
 				if (oChange.isValid()) {
 					if (that._oChanges[sChangeId] && oChange.isVariant()) {

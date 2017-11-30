@@ -9,18 +9,21 @@
  */
 sap.ui.define([
 	"jquery.sap.global",
-	"sap/m/ButtonType",
+	"sap/m/library",
 	"sap/m/ToolbarSeparator",
 	"sap/m/ToolbarSpacer",
 	"./SemanticConfiguration",
 	"./SemanticContainer"
 ], function(jQuery,
-			ButtonType,
+			mobileLibrary,
 			ToolbarSeparator,
 			ToolBarSpacer,
 			SemanticConfiguration,
 			SemanticContainer) {
 	"use strict";
+
+	// shortcut for sap.m.ButtonType
+	var ButtonType = mobileLibrary.ButtonType;
 
 	/**
 	 * Constructor for a <code>sap.f.semantic.SemanticTitle</code>.
@@ -336,7 +339,7 @@ sap.ui.define([
 	* Determines the insert index of the <code>sap.f.semantic.MainAction</code>,
 	* that is about to be added in the <code>titleText</code> area.
 	*
-	* <b>Note:<b> The <code>MainAction</code> should always be the first title action,
+	* <b>Note:</b> The <code>MainAction</code> should always be the first title action,
 	* based on the semantic order requirements and it is defined in <code>SemanticConfiguration</code> as well.
 	*
 	* @private

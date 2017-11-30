@@ -25,7 +25,7 @@ function(jQuery, DesignTimeMetadata, AggregationDesignTimeMetadata) {
 	 * @extends sap.ui.core.DesignTimeMetadata
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -219,6 +219,15 @@ function(jQuery, DesignTimeMetadata, AggregationDesignTimeMetadata) {
 		}
 	};
 
+	/**
+	 * Returns the scroll containers or an empty array
+	 *
+	 * @return {array} scrollContainers or empty array
+	 * @public
+	 */
+	ElementDesignTimeMetadata.prototype.getScrollContainers = function() {
+		return this.getData().scrollContainers || [];
+	};
 
 	return ElementDesignTimeMetadata;
 }, /* bExport= */ true);

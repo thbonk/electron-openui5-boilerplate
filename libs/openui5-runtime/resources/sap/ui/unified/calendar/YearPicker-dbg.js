@@ -6,8 +6,8 @@
 
 //Provides control sap.ui.unified.Calendar.
 sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate/ItemNavigation',
-               'sap/ui/model/type/Date', 'sap/ui/unified/calendar/CalendarUtils', 'sap/ui/unified/calendar/CalendarDate', 'sap/ui/core/date/UniversalDate', 'sap/ui/unified/library'],
-               function(jQuery, Control, ItemNavigation, Date1, CalendarUtils, CalendarDate, UniversalDate, library) {
+		'sap/ui/model/type/Date', 'sap/ui/unified/calendar/CalendarUtils', 'sap/ui/unified/calendar/CalendarDate', 'sap/ui/core/date/UniversalDate', 'sap/ui/unified/library'],
+	function(jQuery, Control, ItemNavigation, Date1, CalendarUtils, CalendarDate, UniversalDate, library) {
 	"use strict";
 
 	/*
@@ -25,7 +25,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 	 * renders a YearPicker with ItemNavigation
 	 * This is used inside the calendar. Not for stand alone usage
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -126,7 +126,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 		return this;
 
 	};
-	/**
+	/*
 	 * Sets a date.
 	 * @param {Date} oDate a JavaScript date
 	 * @return {sap.ui.unified.YearPicker} <code>this</code> for method chaining
@@ -161,7 +161,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 	};
 
 	/**
-	* @return {sap.ui.unified.calendar.CalendarDate}
+	* @return {sap.ui.unified.calendar.CalendarDate} The date, representing the year
 	* @private
 	*/
 	YearPicker.prototype._getDate = function(){
@@ -276,8 +276,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 	};
 
 	/**
-	* @param {sap.ui.unified.calendar.CalendarDate} oDate
-	* @return {sap.ui.unified.calendar.CalendarDate}
+	* @param {sap.ui.unified.calendar.CalendarDate} oDate The date to be checked whether it is outside min and max date
+	* @return {sap.ui.unified.calendar.CalendarDate} The checked date or min or max date if the checked one is outside
 	* @private
 	*/
 	YearPicker.prototype._checkFirstDate = function(oDate){
@@ -301,7 +301,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 	};
 
 	/**
-	* @param {sap.ui.unified.calendar.CalendarDate} oDate
+	* @param {sap.ui.unified.calendar.CalendarDate} oDate The date do be checked
+	* @returns {boolean} Whether the date is enabled
 	* @private
 	*/
 	YearPicker.prototype._checkDateEnabled = function(oDate){

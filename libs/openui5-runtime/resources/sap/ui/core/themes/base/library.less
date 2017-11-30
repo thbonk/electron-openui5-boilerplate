@@ -10,7 +10,9 @@
 
 @import "global.less";
 /* START "shared.less" */
-/* Shared CSS for 'base' theme */
+/* ====================== */
+/* Shared CSS Base theme  */
+/* ====================== */
 
 .sapUiThemeDesignerCustomCssCheck() when(@sapUiThemeDesignerCustomCss = true){
 	content: 'true';
@@ -324,6 +326,11 @@ link[id^="sap-ui-theme-"]::after,
 
 
 /* START "BlindLayer.less" */
+/* ======================================= */
+/* CSS for control sap.ui.core/BlindLayer  */
+/* Base theme                              */
+/* ======================================= */
+
 .sapUiBliLy {
 	position: absolute;
 	display: inline-block;
@@ -340,10 +347,14 @@ link[id^="sap-ui-theme-"]::after,
 	width: 100%;
 	height: 100%;
 }
-
 /* END "BlindLayer.less" */
 
 /* START "BusyIndicator.less" */
+/* ========================================== */
+/* CSS for control sap.ui.core/BusyIndicator  */
+/* Base theme                                 */
+/* ========================================== */
+
 .sapUiBusy {
 	background-image: url(img/Busy.gif);
 	display: block;
@@ -361,12 +372,13 @@ link[id^="sap-ui-theme-"]::after,
 /* END "BusyIndicator.less" */
 
 /* START "Icon.less" */
-
-/* ============================================= */
-/* CSS for control sap.ui.core/Icon.control      */
-/* ============================================= */
+/* ================================= */
+/* CSS for control sap.ui.core/Icon  */
+/* Base theme                        */
+/* ================================= */
 
 .sapUiIcon {
+	position: relative;
 	cursor: default;
 	text-align: center;
 	display: inline-block;
@@ -377,14 +389,37 @@ link[id^="sap-ui-theme-"]::after,
 	cursor: pointer;
 }
 
-.sapUiIcon:focus {
+html:not([data-sap-ui-browser^="ie"]):not([data-sap-ui-browser^="ed"]) .sapUiIcon:focus {
 	outline-width: 1px;
 	outline-style: dashed;
 	/* keep the outline within the area of the icon */
 	outline-offset: -1px;
 }
 
-.sapUiIcon:before {
+/*
+ * IE 11 and Edge (version < 15) don't support outline-offset.
+ * The outline is implemented using the ::after pseudo element.
+ *
+ * Edge 15 is already released but can't be upgraded automatically,
+ * therefore the approach is still used for all Edge versions.
+ */
+html[data-sap-ui-browser^="ie"], html[data-sap-ui-browser^="ed"] {
+	.sapUiIcon:focus {
+		outline: none;
+	}
+	.sapUiIcon:focus::after {
+		content: "";
+		position: absolute;
+		top: 0px;
+		bottom: 0px;
+		left: 0px;
+		right: 0px;
+		border-width: 1px;
+		border-style: dashed;
+	}
+}
+
+.sapUiIcon::before {
 	content: attr(data-sap-ui-icon-content);
 	speak: none;
 	font-weight: normal;
@@ -401,7 +436,7 @@ link[id^="sap-ui-theme-"]::after,
  *  3. Custom CSS style should be set on the root DOM and not the pesudo element.
  */
 html[dir=rtl] .sapUiIconMirrorInRTL:not(.sapUiIconSuppressMirrorInRTL) {
-	&:before, &:after /* some controls render the icon using 'after' pesudo element */ {
+	&::before, &::after /* some controls render the icon using 'after' pesudo element */ {
 		transform: scale(-1,1);
 		-webkit-transform: scale(-1,1); /* Safari and Chrome */
 		display: inline-block; /* pesudo element has display: inline by default and can't apply the transform css style for RTL mode*/
@@ -415,22 +450,26 @@ html[dir=rtl] .sapUiIconMirrorInRTL:not(.sapUiIconSuppressMirrorInRTL) {
 .sapUiIconColorDefault {
 	color: @sapUiContentIconColor;
 }
-
 /* END "Icon.less" */
 
 /* START "LocalBusyIndicator.less" */
-@sapUiLocalBusyIndicatorBG: fade(@sapBackgroundColor, 72%);
-@sapUiLocalBusyIndicatorBG_IE: @sapBackgroundColor;
+/* =============================================== */
+/* CSS for control sap.ui.core/LocalBusyIndicator  */
+/* Base theme                                      */
+/* =============================================== */
 
-@sapUiLocalBusyIndicatorColor: @sapBrandColor;
+@_sap_ui_core_LocalBusyIndicator_Background: fade(@sapBackgroundColor, 72%);
+@_sap_ui_core_LocalBusyIndicator_BackgroundIE: @sapBackgroundColor;
 
-@sapUiLocalBusyIndicatorBorderRadius: 100%;
+@_sap_ui_core_LocalBusyIndicator_Color: @sapBrandColor;
 
-@sapUiLocalBusyIndicatorSizeMedium: 1rem;
-@sapUiLocalBusyIndicatorSizeBig: 2rem;
+@_sap_ui_core_LocalBusyIndicator_BorderRadius: 100%;
+
+@_sap_ui_core_LocalBusyIndicator_SizeMedium: 1rem;
+@_sap_ui_core_LocalBusyIndicator_SizeBig: 2rem;
 
 .sapUiLocalBusyIndicator {
-	background-color: @sapUiLocalBusyIndicatorBG;
+	background-color: @_sap_ui_core_LocalBusyIndicator_Background;
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -453,12 +492,12 @@ html[dir=rtl] .sapUiIconMirrorInRTL:not(.sapUiIconSuppressMirrorInRTL) {
 
 /* Class for medium sized indicator in control overlay */
 .sapUiLocalBusyIndicatorSizeMedium {
-	font-size: @sapUiLocalBusyIndicatorSizeMedium;
+	font-size: @_sap_ui_core_LocalBusyIndicator_SizeMedium;
 }
 
 /* Class for fullscreen block overlay */
 .sapUiLocalBusyIndicatorSizeBig {
-	font-size: @sapUiLocalBusyIndicatorSizeBig;
+	font-size: @_sap_ui_core_LocalBusyIndicator_SizeBig;
 	background-color: transparent;
 
 }
@@ -475,7 +514,7 @@ html[dir=rtl] .sapUiIconMirrorInRTL:not(.sapUiIconSuppressMirrorInRTL) {
 .sapUiLocalBusyIndicatorAnimation > div {
 	width: 1em;
 	height: 1em;
-	border-radius: @sapUiLocalBusyIndicatorBorderRadius;
+	border-radius: @_sap_ui_core_LocalBusyIndicator_BorderRadius;
 	display: block;
 	float: left;
 	margin: 0px;
@@ -496,17 +535,17 @@ html[dir=rtl] .sapUiIconMirrorInRTL:not(.sapUiIconSuppressMirrorInRTL) {
 	left: 0;
 	width: 100%;
 	height: 100%;
-	border-radius: @sapUiLocalBusyIndicatorBorderRadius;
+	border-radius: @_sap_ui_core_LocalBusyIndicator_BorderRadius;
 }
 
 /* Background animation element */
 .sapUiLocalBusyIndicatorAnimation > div::before {
-	background: fade(@sapUiLocalBusyIndicatorColor, 100%);
+	background: fade(@_sap_ui_core_LocalBusyIndicator_Color, 100%);
 }
 
 /* Shadow animation element */
 .sapUiLocalBusyIndicatorAnimation > div::after {
-	box-shadow: inset 0px 0px 2px 1px fade(@sapUiLocalBusyIndicatorColor, 80%);
+	box-shadow: inset 0px 0px 2px 1px fade(@_sap_ui_core_LocalBusyIndicator_Color, 80%);
 }
 
 /* Animations Starting Classes */
@@ -660,7 +699,6 @@ html[dir=rtl] .sapUiIconMirrorInRTL:not(.sapUiIconSuppressMirrorInRTL) {
 
 @keyframes sapUiBusyAnimationSmallShadow { .mixin-small-shadow-animation-frames; }
 @-webkit-keyframes sapUiBusyAnimationSmallShadow { .mixin-small-shadow-animation-frames; }
-
 /* END "LocalBusyIndicator.less" */
 
 /* START "media.less" */
@@ -668,7 +706,7 @@ html[dir=rtl] .sapUiIconMirrorInRTL:not(.sapUiIconSuppressMirrorInRTL) {
 
 Usage:
 
-@media (@sapUiMediaQuery_Std_Desktop) {
+@media (@_sap_ui_core_media_StdDesktop) {
       .test {
             width: 50em;
       }
@@ -678,28 +716,28 @@ Usage:
 
 
 /* see sap.ui.Device.media.RANGESETS.SAP_STANDARD*/
-@sapUiMediaQuery_Std_Desktop:  ~"screen and (min-width : 1024px)";
-@sapUiMediaQuery_Std_Tablet:  ~"screen and (min-width : 600px) and (max-width : 1023px)";
-@sapUiMediaQuery_Std_Phone:  ~"screen and (max-width : 599px)";
+@_sap_ui_core_media_StdDesktop:  ~"screen and (min-width : 1024px)";
+@_sap_ui_core_media_StdTablet:  ~"screen and (min-width : 600px) and (max-width : 1023px)";
+@_sap_ui_core_media_StdPhone:  ~"screen and (max-width : 599px)";
 
 /* see sap.ui.Device.media.RANGESETS.SAP_3STEPS*/
-@sapUiMediaQuery_3Step_L:  ~"screen and (min-width : 960px)";
-@sapUiMediaQuery_3Step_M:  ~"screen and (min-width : 520px) and (max-width : 959px)";
-@sapUiMediaQuery_3Step_S:  ~"screen and (max-width : 519px)";
+@_sap_ui_core_media_3StepL:  ~"screen and (min-width : 960px)";
+@_sap_ui_core_media_3StepM:  ~"screen and (min-width : 520px) and (max-width : 959px)";
+@_sap_ui_core_media_3StepS:  ~"screen and (max-width : 519px)";
 
 /* see sap.ui.Device.media.RANGESETS.SAP_4STEPS*/
-@sapUiMediaQuery_4Step_XL:  ~"screen and (min-width : 960px)";
-@sapUiMediaQuery_4Step_L:  ~"screen and (min-width : 760px) and (max-width : 959px)";
-@sapUiMediaQuery_4Step_M:  ~"screen and (min-width : 520px) and (max-width : 759px)";
-@sapUiMediaQuery_4Step_S:  ~"screen and (max-width : 519px)";
+@_sap_ui_core_media_4StepXL:  ~"screen and (min-width : 960px)";
+@_sap_ui_core_media_4StepL:  ~"screen and (min-width : 760px) and (max-width : 959px)";
+@_sap_ui_core_media_4StepM:  ~"screen and (min-width : 520px) and (max-width : 759px)";
+@_sap_ui_core_media_4StepS:  ~"screen and (max-width : 519px)";
 
 /* see sap.ui.Device.media.RANGESETS.SAP_6STEPS*/
-@sapUiMediaQuery_6Step_XXL:  ~"screen and (min-width : 960px)";
-@sapUiMediaQuery_6Step_XL:  ~"screen and (min-width : 768px) and (max-width : 959px)";
-@sapUiMediaQuery_6Step_L:  ~"screen and (min-width : 541px) and (max-width : 767px)";
-@sapUiMediaQuery_6Step_M:  ~"screen and (min-width : 400px) and (max-width : 540px)";
-@sapUiMediaQuery_6Step_S:  ~"screen and (min-width : 241px) and (max-width : 399px)";
-@sapUiMediaQuery_6Step_XS:  ~"screen and (max-width : 240px)";
+@_sap_ui_core_media_6StepXXL:  ~"screen and (min-width : 960px)";
+@_sap_ui_core_media_6StepXL:  ~"screen and (min-width : 768px) and (max-width : 959px)";
+@_sap_ui_core_media_6StepL:  ~"screen and (min-width : 541px) and (max-width : 767px)";
+@_sap_ui_core_media_6StepM:  ~"screen and (min-width : 400px) and (max-width : 540px)";
+@_sap_ui_core_media_6StepS:  ~"screen and (min-width : 241px) and (max-width : 399px)";
+@_sap_ui_core_media_6StepXS:  ~"screen and (max-width : 240px)";
 /* END "media.less" */
 
 /* START "parameterClasses.less" */
@@ -789,10 +827,10 @@ Usage:
 /* END "parameterClasses.less" */
 
 /* START "ScrollBar.less" */
-
-/* ============================================= */
-/* CSS for control sap.ui.core/ScrollBar.control */
-/* ============================================= */
+/* ====================================== */
+/* CSS for control sap.ui.core/ScrollBar  */
+/* Base theme                             */
+/* ====================================== */
 
 .sapUiScrollBarTouch {
 	-webkit-overflow-scrolling: auto;
@@ -980,10 +1018,11 @@ Usage:
 /* END "TechnicalInfo.less" */
 
 /* START "View.less" */
+/* ================================= */
+/* CSS for control sap.ui.core/View  */
+/* Base theme                        */
+/* ================================= */
 
-/* ========================================= */
-/* CSS for control sap.ui.core/View.control  */
-/* ========================================= */
 .sapUiView {
 	display: inline-block;
 }

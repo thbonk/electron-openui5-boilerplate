@@ -623,6 +623,7 @@
 			"module": "sap/ui/dt/plugin/CutPaste.js",
 			"isDebug": true,
 			"required": [
+				"sap/ui/dt/OverlayRegistry.js",
 				"sap/ui/dt/OverlayUtil.js",
 				"sap/ui/dt/Plugin.js",
 				"sap/ui/dt/plugin/ElementMover.js"
@@ -632,6 +633,7 @@
 			"name": "plugin/CutPaste.js",
 			"module": "sap/ui/dt/plugin/CutPaste.js",
 			"required": [
+				"sap/ui/dt/OverlayRegistry.js",
 				"sap/ui/dt/OverlayUtil.js",
 				"sap/ui/dt/Plugin.js",
 				"sap/ui/dt/plugin/ElementMover.js"

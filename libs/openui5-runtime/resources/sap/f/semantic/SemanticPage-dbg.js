@@ -53,7 +53,7 @@ sap.ui.define([
 	* <ul>Text actions:
 	* <li>The main semantic text action - <code>titleMainAction</code></li>
 	* <li>Any custom text actions - <code>titleCustomTextActions</code></li>
-	* <li>The semantic text actions - <code>addAction</code>, <code>deleteAction</code>, and <code>copyAction</code></li></ul>
+	* <li>The semantic text actions - <code>editAction</code>, <code>deleteAction</code>, <code>copyAction</code> and <code>addAction</code></li></ul>
 	*
 	* <ul>Icon actions:
 	* <li>Any custom icon actions - <code>titleCustomIconActions</code></li>
@@ -90,7 +90,7 @@ sap.ui.define([
 	* @extends sap.ui.core.Control
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -132,7 +132,7 @@ sap.ui.define([
 				preserveHeaderStateOnScroll: {type: "boolean", group: "Behavior", defaultValue: false},
 
 				/**
-				* Determines whether the the user can switch between the expanded/collapsed states of the
+				* Determines whether the user can switch between the expanded/collapsed states of the
 				* header by clicking on the title.
 				*
 				* If set to <code>false</code>, the title is not clickable and the application
@@ -178,9 +178,10 @@ sap.ui.define([
 				titleMainAction: {type: "sap.f.semantic.TitleMainAction", multiple: false},
 
 				/**
-				* A semantic-specific button which is placed in the <code>TextActions</code> area of the <code>SemanticPage</code> title.
-				*/
-				addAction: {type: "sap.f.semantic.AddAction", multiple: false},
+				 * A semantic-specific button which is placed in the <code>TextActions</code> area of the <code>SemanticPage</code> title.
+				 * @since 1.50
+				 */
+				editAction: {type: "sap.f.semantic.EditAction", multiple: false},
 
 				/**
 				* A semantic-specific button which is placed in the <code>TextActions</code> area of the <code>SemanticPage</code> title.
@@ -191,6 +192,11 @@ sap.ui.define([
 				* A semantic-specific button which is placed in the <code>TextActions</code> area of the <code>SemanticPage</code> title.
 				*/
 				copyAction: {type: "sap.f.semantic.CopyAction", multiple: false},
+
+				/**
+				 * A semantic-specific button which is placed in the <code>TextActions</code> area of the <code>SemanticPage</code> title.
+				 */
+				addAction: {type: "sap.f.semantic.AddAction", multiple: false},
 
 				/**
 				* A semantic-specific button which is placed in the <code>IconActions</code> area of the <code>SemanticPage</code> title.
@@ -307,7 +313,7 @@ sap.ui.define([
 
 				/**
 				* The <code>customShareActions</code> are placed in the <code>ShareMenu</code> area of the
-				* <code>SemanticPage</code> title, right after the the semantic actions.
+				* <code>SemanticPage</code> title, right after the semantic actions.
 				*/
 				customShareActions: {type: "sap.m.Button", multiple: true},
 

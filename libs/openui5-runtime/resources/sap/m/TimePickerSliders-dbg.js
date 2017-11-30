@@ -19,7 +19,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSlidersR
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @private
@@ -83,7 +83,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSlidersR
 		 * @public
 		 */
 		TimePickerSliders.prototype.init = function () {
-			//ToDo: //ToDo: This is inconsistent with the parent locale (if set). Add 'localeID' property to this control which will read its parent 'localeID' property
 			var oLocale = sap.ui.getCore().getConfiguration().getFormatSettings().getFormatLocale(),
 				aPeriods = sap.ui.core.LocaleData.getInstance(oLocale).getDayPeriods("abbreviated");
 
@@ -117,6 +116,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSlidersR
 		 *
 		 * @param {string} sId The ID of the TimePicker control that owns this sliders
 		 * @returns {sap.m.TimePickerSliders} this instance, used for chaining
+		 * @public
 		 */
 		TimePickerSliders.prototype.setInvokedBy = function(sId) {
 			var oLocale,
@@ -169,7 +169,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSlidersR
 		/**
 		 * Sets the time format.
 		 *
-		 * @param sFormat {string} New display format
+		 * @param {string} sFormat New display format
 		 * @returns {sap.m.TimePickerSliders} this instance, used for chaining
 		 * @public
 		 */
@@ -189,12 +189,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSlidersR
 
 		/**
 		 * Sets the minutes slider step.
-		 * @param iValue The step used to generate values for the minutes slider
-		 * @returns {*} this
+		 * @param {int} value The step used to generate values for the minutes slider
+		 * @returns {sap.m.TimePickerSliders} <code>this</code> to allow method chaining
 		 * @public
 		 */
-		TimePickerSliders.prototype.setMinutesStep = function(iValue) {
-			this.setProperty("minutesStep", iValue, true);
+		TimePickerSliders.prototype.setMinutesStep = function(value) {
+			this.setProperty("minutesStep", value, true);
 			var aColumns = this.getAggregation("_columns");
 
 			if (aColumns) {
@@ -208,12 +208,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSlidersR
 
 		/**
 		 * Sets the seconds slider step.
-		 * @param iValue The step used to generate values for the seconds slider
-		 * @returns {*} this
+		 * @param {int} value The step used to generate values for the seconds slider
+		 * @returns {sap.m.TimePickerSliders} <code>this</code> to allow method chaining
 		 * @public
 		 */
-		TimePickerSliders.prototype.setSecondsStep = function(iValue) {
-			this.setProperty("secondsStep", iValue, true);
+		TimePickerSliders.prototype.setSecondsStep = function(value) {
+			this.setProperty("secondsStep", value, true);
 			var aColumns = this.getAggregation("_columns");
 
 			if (aColumns) {
@@ -273,7 +273,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSlidersR
 		/**
 		 * Sets the values of the slider controls, given a JavaScript date object.
 		 *
-		 * @param oDate {Object} The date to use as a setting, if not provided the current date will be used
+		 * @param {Object} oDate The date to use as a setting, if not provided the current date will be used
 		 * @public
 		 */
 		TimePickerSliders.prototype.setTimeValues = function (oDate) {
@@ -454,6 +454,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSlidersR
 		 *
 		 * @param {number} iFrom Starting number
 		 * @param {number} iTo Ending number
+		 * @param {int} iStep The step used for the slider
 		 * @param {number} bLeadingZeroes Whether to add leading zeroes to number values
 		 * @returns {array} Array of key/value pairs
 		 * @private
@@ -569,7 +570,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSlidersR
 
 			/**
 			 * Default expanded handler
-			 * @param oEvent {jQuery.Event} Event object
+			 * @param {jQuery.Event} oEvent  Event object
 			 */
 			function onSliderExpanded(oEvent) {
 				var aSliders = this.getAggregation("_columns");

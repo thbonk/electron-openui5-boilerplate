@@ -597,8 +597,8 @@
 			"isDebug": true,
 			"required": [
 				"jquery.sap.global.js",
-				"sap/ui/core/ValueState.js",
-				"sap/ui/core/ValueStateSupport.js"
+				"sap/ui/core/ValueStateSupport.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -606,8 +606,8 @@
 			"module": "sap/m/CheckBoxRenderer.js",
 			"required": [
 				"jquery.sap.global.js",
-				"sap/ui/core/ValueState.js",
-				"sap/ui/core/ValueStateSupport.js"
+				"sap/ui/core/ValueStateSupport.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -999,10 +999,12 @@
 			"isDebug": true,
 			"required": [
 				"jquery.sap.global.js",
+				"sap/m/DateTimeField.js",
 				"sap/m/InputBase.js",
 				"sap/m/library.js",
 				"sap/ui/Device.js",
 				"sap/ui/core/date/UniversalDate.js",
+				"sap/ui/model/odata/type/ODataType.js",
 				"sap/ui/model/type/Date.js"
 			],
 			"condRequired": [
@@ -1029,10 +1031,12 @@
 			"module": "sap/m/DatePicker.js",
 			"required": [
 				"jquery.sap.global.js",
+				"sap/m/DateTimeField.js",
 				"sap/m/InputBase.js",
 				"sap/m/library.js",
 				"sap/ui/Device.js",
 				"sap/ui/core/date/UniversalDate.js",
+				"sap/ui/model/odata/type/ODataType.js",
 				"sap/ui/model/type/Date.js"
 			],
 			"condRequired": [
@@ -1104,6 +1108,48 @@
 			]
 		},
 		{
+			"name": "DateTimeField-dbg.js",
+			"module": "sap/m/DateTimeField.js",
+			"isDebug": true,
+			"required": [
+				"jquery.sap.global.js",
+				"sap/m/InputBase.js",
+				"sap/ui/model/odata/type/ODataType.js",
+				"sap/ui/model/type/Date.js"
+			]
+		},
+		{
+			"name": "DateTimeField.control",
+			"designtime": true
+		},
+		{
+			"name": "DateTimeField.js",
+			"module": "sap/m/DateTimeField.js",
+			"required": [
+				"jquery.sap.global.js",
+				"sap/m/InputBase.js",
+				"sap/ui/model/odata/type/ODataType.js",
+				"sap/ui/model/type/Date.js"
+			]
+		},
+		{
+			"name": "DateTimeFieldRenderer-dbg.js",
+			"module": "sap/m/DateTimeFieldRenderer.js",
+			"isDebug": true,
+			"required": [
+				"sap/m/InputBaseRenderer.js",
+				"sap/ui/core/Renderer.js"
+			]
+		},
+		{
+			"name": "DateTimeFieldRenderer.js",
+			"module": "sap/m/DateTimeFieldRenderer.js",
+			"required": [
+				"sap/m/InputBaseRenderer.js",
+				"sap/ui/core/Renderer.js"
+			]
+		},
+		{
 			"name": "DateTimeInput-dbg.js",
 			"module": "sap/m/DateTimeInput.js",
 			"isDebug": true,
@@ -1111,7 +1157,10 @@
 				"jquery.sap.global.js",
 				"sap/m/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/model/type/Date.js"
+				"sap/ui/model/odata/type/ODataType.js",
+				"sap/ui/model/type/Date.js",
+				"sap/ui/model/type/DateTime.js",
+				"sap/ui/model/type/Time.js"
 			],
 			"condRequired": [
 				"sap/m/DatePicker.js",
@@ -1130,7 +1179,10 @@
 				"jquery.sap.global.js",
 				"sap/m/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/model/type/Date.js"
+				"sap/ui/model/odata/type/ODataType.js",
+				"sap/ui/model/type/Date.js",
+				"sap/ui/model/type/DateTime.js",
+				"sap/ui/model/type/Time.js"
 			],
 			"condRequired": [
 				"sap/m/DatePicker.js",
@@ -1387,6 +1439,7 @@
 				"sap/m/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/IconPool.js",
+				"sap/ui/core/InvisibleText.js",
 				"sap/ui/core/delegate/ItemNavigation.js"
 			]
 		},
@@ -1403,6 +1456,7 @@
 				"sap/m/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/IconPool.js",
+				"sap/ui/core/InvisibleText.js",
 				"sap/ui/core/delegate/ItemNavigation.js"
 			]
 		},
@@ -1553,6 +1607,8 @@
 			"isDebug": true,
 			"required": [
 				"jquery.sap.global.js",
+				"sap/m/Button.js",
+				"sap/m/TextArea.js",
 				"sap/m/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/HTML.js",
@@ -1568,6 +1624,8 @@
 			"module": "sap/m/FeedInput.js",
 			"required": [
 				"jquery.sap.global.js",
+				"sap/m/Button.js",
+				"sap/m/TextArea.js",
 				"sap/m/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/HTML.js",
@@ -1645,7 +1703,9 @@
 			"isDebug": true,
 			"required": [
 				"jquery.sap.global.js",
+				"sap/ui/Device.js",
 				"sap/ui/base/EventProvider.js",
+				"sap/ui/base/ManagedObjectObserver.js",
 				"sap/ui/base/Object.js"
 			]
 		},
@@ -1654,7 +1714,9 @@
 			"module": "sap/m/Fiori20Adapter.js",
 			"required": [
 				"jquery.sap.global.js",
+				"sap/ui/Device.js",
 				"sap/ui/base/EventProvider.js",
+				"sap/ui/base/ManagedObjectObserver.js",
 				"sap/ui/base/Object.js"
 			]
 		},
@@ -1677,9 +1739,7 @@
 			"required": [
 				"jquery.sap.global.js",
 				"sap/m/FlexBoxStylingHelper.js",
-				"sap/m/FlexDirection.js",
 				"sap/m/FlexItemData.js",
-				"sap/m/FlexRendertype.js",
 				"sap/m/library.js",
 				"sap/ui/core/Control.js"
 			]
@@ -1704,9 +1764,7 @@
 			"required": [
 				"jquery.sap.global.js",
 				"sap/m/FlexBoxStylingHelper.js",
-				"sap/m/FlexDirection.js",
 				"sap/m/FlexItemData.js",
-				"sap/m/FlexRendertype.js",
 				"sap/m/library.js",
 				"sap/ui/core/Control.js"
 			]
@@ -1909,8 +1967,7 @@
 			"isDebug": true,
 			"required": [
 				"sap/m/GenericTileRenderer.js",
-				"sap/m/GenericTileScope.js",
-				"sap/m/LoadState.js"
+				"sap/m/library.js"
 			]
 		},
 		{
@@ -1918,8 +1975,7 @@
 			"module": "sap/m/GenericTileLineModeRenderer.js",
 			"required": [
 				"sap/m/GenericTileRenderer.js",
-				"sap/m/GenericTileScope.js",
-				"sap/m/LoadState.js"
+				"sap/m/library.js"
 			]
 		},
 		{
@@ -1931,16 +1987,14 @@
 			"module": "sap/m/GenericTileRenderer.js",
 			"isDebug": true,
 			"required": [
-				"sap/m/GenericTileScope.js",
-				"sap/m/LoadState.js"
+				"sap/m/library.js"
 			]
 		},
 		{
 			"name": "GenericTileRenderer.js",
 			"module": "sap/m/GenericTileRenderer.js",
 			"required": [
-				"sap/m/GenericTileScope.js",
-				"sap/m/LoadState.js"
+				"sap/m/library.js"
 			]
 		},
 		{
@@ -2101,9 +2155,9 @@
 				"sap/ui/base/ManagedObject.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/Icon.js",
-				"sap/ui/core/Orientation.js",
 				"sap/ui/core/delegate/ItemNavigation.js",
-				"sap/ui/core/delegate/ScrollEnablement.js"
+				"sap/ui/core/delegate/ScrollEnablement.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -2120,9 +2174,9 @@
 				"sap/ui/base/ManagedObject.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/Icon.js",
-				"sap/ui/core/Orientation.js",
 				"sap/ui/core/delegate/ItemNavigation.js",
-				"sap/ui/core/delegate/ScrollEnablement.js"
+				"sap/ui/core/delegate/ScrollEnablement.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -2131,7 +2185,7 @@
 			"isDebug": true,
 			"required": [
 				"jquery.sap.global.js",
-				"sap/ui/core/Orientation.js"
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -2139,7 +2193,7 @@
 			"module": "sap/m/HeaderContainerRenderer.js",
 			"required": [
 				"jquery.sap.global.js",
-				"sap/ui/core/Orientation.js"
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -2969,6 +3023,7 @@
 			"isDebug": true,
 			"required": [
 				"jquery.sap.global.js",
+				"sap/m/Button.js",
 				"sap/m/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/Icon.js",
@@ -2994,6 +3049,7 @@
 			"module": "sap/m/ListItemBase.js",
 			"required": [
 				"jquery.sap.global.js",
+				"sap/m/Button.js",
 				"sap/m/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/Icon.js",
@@ -3065,14 +3121,30 @@
 			"designtime": true
 		},
 		{
+			"name": "MaskEnabler-dbg.js",
+			"module": "sap/m/MaskEnabler.js",
+			"isDebug": true,
+			"required": [
+				"sap/m/InputBase.js",
+				"sap/ui/core/Control.js"
+			]
+		},
+		{
+			"name": "MaskEnabler.js",
+			"module": "sap/m/MaskEnabler.js",
+			"required": [
+				"sap/m/InputBase.js",
+				"sap/ui/core/Control.js"
+			]
+		},
+		{
 			"name": "MaskInput-dbg.js",
 			"module": "sap/m/MaskInput.js",
 			"isDebug": true,
 			"required": [
 				"jquery.sap.global.js",
 				"sap/m/InputBase.js",
-				"sap/m/MaskInputRule.js",
-				"sap/ui/core/Control.js"
+				"sap/m/MaskEnabler.js"
 			]
 		},
 		{
@@ -3085,8 +3157,7 @@
 			"required": [
 				"jquery.sap.global.js",
 				"sap/m/InputBase.js",
-				"sap/m/MaskInputRule.js",
-				"sap/ui/core/Control.js"
+				"sap/m/MaskEnabler.js"
 			]
 		},
 		{
@@ -3397,12 +3468,10 @@
 				"sap/m/Button.js",
 				"sap/m/Link.js",
 				"sap/m/List.js",
-				"sap/m/ListType.js",
 				"sap/m/MessagePopoverItem.js",
 				"sap/m/MessageView.js",
 				"sap/m/NavContainer.js",
 				"sap/m/Page.js",
-				"sap/m/PlacementType.js",
 				"sap/m/Popover.js",
 				"sap/m/ResponsivePopover.js",
 				"sap/m/SegmentedButton.js",
@@ -3410,7 +3479,6 @@
 				"sap/m/Text.js",
 				"sap/m/Toolbar.js",
 				"sap/m/ToolbarSpacer.js",
-				"sap/m/library.js",
 				"sap/m/semantic/SemanticPage.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/HTML.js",
@@ -3431,12 +3499,10 @@
 				"sap/m/Button.js",
 				"sap/m/Link.js",
 				"sap/m/List.js",
-				"sap/m/ListType.js",
 				"sap/m/MessagePopoverItem.js",
 				"sap/m/MessageView.js",
 				"sap/m/NavContainer.js",
 				"sap/m/Page.js",
-				"sap/m/PlacementType.js",
 				"sap/m/Popover.js",
 				"sap/m/ResponsivePopover.js",
 				"sap/m/SegmentedButton.js",
@@ -3444,7 +3510,6 @@
 				"sap/m/Text.js",
 				"sap/m/Toolbar.js",
 				"sap/m/ToolbarSpacer.js",
-				"sap/m/library.js",
 				"sap/m/semantic/SemanticPage.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/HTML.js",
@@ -3496,6 +3561,7 @@
 			"isDebug": true,
 			"required": [
 				"jquery.sap.global.js",
+				"sap/m/FormattedText.js",
 				"sap/m/Link.js",
 				"sap/m/MessageStripUtilities.js",
 				"sap/m/Text.js",
@@ -3512,6 +3578,7 @@
 			"module": "sap/m/MessageStrip.js",
 			"required": [
 				"jquery.sap.global.js",
+				"sap/m/FormattedText.js",
 				"sap/m/Link.js",
 				"sap/m/MessageStripUtilities.js",
 				"sap/m/Text.js",
@@ -3573,7 +3640,6 @@
 				"sap/m/GroupHeaderListItem.js",
 				"sap/m/Link.js",
 				"sap/m/List.js",
-				"sap/m/ListType.js",
 				"sap/m/MessageItem.js",
 				"sap/m/NavContainer.js",
 				"sap/m/Page.js",
@@ -3583,6 +3649,7 @@
 				"sap/m/Text.js",
 				"sap/m/Toolbar.js",
 				"sap/m/ToolbarSpacer.js",
+				"sap/m/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/HTML.js",
 				"sap/ui/core/Icon.js",
@@ -3607,7 +3674,6 @@
 				"sap/m/GroupHeaderListItem.js",
 				"sap/m/Link.js",
 				"sap/m/List.js",
-				"sap/m/ListType.js",
 				"sap/m/MessageItem.js",
 				"sap/m/NavContainer.js",
 				"sap/m/Page.js",
@@ -3617,6 +3683,7 @@
 				"sap/m/Text.js",
 				"sap/m/Toolbar.js",
 				"sap/m/ToolbarSpacer.js",
+				"sap/m/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/HTML.js",
 				"sap/ui/core/Icon.js",
@@ -3806,6 +3873,7 @@
 				"jquery.sap.global.js",
 				"sap/m/Text.js",
 				"sap/m/library.js",
+				"sap/ui/Device.js",
 				"sap/ui/core/Control.js"
 			]
 		},
@@ -3820,6 +3888,7 @@
 				"jquery.sap.global.js",
 				"sap/m/Text.js",
 				"sap/m/library.js",
+				"sap/ui/Device.js",
 				"sap/ui/core/Control.js"
 			]
 		},
@@ -3945,11 +4014,9 @@
 			"isDebug": true,
 			"required": [
 				"jquery.sap.global.js",
-				"sap/m/Text.js",
+				"sap/m/Image.js",
 				"sap/m/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/HTML.js",
-				"sap/ui/core/Icon.js",
 				"sap/ui/core/IconPool.js"
 			]
 		},
@@ -3962,22 +4029,26 @@
 			"module": "sap/m/NumericContent.js",
 			"required": [
 				"jquery.sap.global.js",
-				"sap/m/Text.js",
+				"sap/m/Image.js",
 				"sap/m/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/HTML.js",
-				"sap/ui/core/Icon.js",
 				"sap/ui/core/IconPool.js"
 			]
 		},
 		{
 			"name": "NumericContentRenderer-dbg.js",
 			"module": "sap/m/NumericContentRenderer.js",
-			"isDebug": true
+			"isDebug": true,
+			"required": [
+				"sap/m/library.js"
+			]
 		},
 		{
 			"name": "NumericContentRenderer.js",
-			"module": "sap/m/NumericContentRenderer.js"
+			"module": "sap/m/NumericContentRenderer.js",
+			"required": [
+				"sap/m/library.js"
+			]
 		},
 		{
 			"name": "ObjectAttribute-dbg.js",
@@ -4320,7 +4391,6 @@
 				"sap/m/OverflowToolbarAssociativePopover.js",
 				"sap/m/OverflowToolbarAssociativePopoverControls.js",
 				"sap/m/OverflowToolbarLayoutData.js",
-				"sap/m/OverflowToolbarPriority.js",
 				"sap/m/SearchField.js",
 				"sap/m/ToggleButton.js",
 				"sap/m/Toolbar.js",
@@ -4342,7 +4412,6 @@
 				"sap/m/OverflowToolbarAssociativePopover.js",
 				"sap/m/OverflowToolbarAssociativePopoverControls.js",
 				"sap/m/OverflowToolbarLayoutData.js",
-				"sap/m/OverflowToolbarPriority.js",
 				"sap/m/SearchField.js",
 				"sap/m/ToggleButton.js",
 				"sap/m/Toolbar.js",
@@ -4422,8 +4491,8 @@
 			"module": "sap/m/OverflowToolbarLayoutData.js",
 			"isDebug": true,
 			"required": [
-				"sap/m/OverflowToolbarPriority.js",
-				"sap/m/ToolbarLayoutData.js"
+				"sap/m/ToolbarLayoutData.js",
+				"sap/m/library.js"
 			]
 		},
 		{
@@ -4434,8 +4503,8 @@
 			"name": "OverflowToolbarLayoutData.js",
 			"module": "sap/m/OverflowToolbarLayoutData.js",
 			"required": [
-				"sap/m/OverflowToolbarPriority.js",
-				"sap/m/ToolbarLayoutData.js"
+				"sap/m/ToolbarLayoutData.js",
+				"sap/m/library.js"
 			]
 		},
 		{
@@ -4457,56 +4526,6 @@
 			"required": [
 				"sap/m/ToolbarRenderer.js",
 				"sap/ui/core/Renderer.js"
-			]
-		},
-		{
-			"name": "P13nChartSelectionItem-dbg.js",
-			"module": "sap/m/P13nChartSelectionItem.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js",
-				"sap/m/P13nSelectionItem.js",
-				"sap/m/library.js"
-			]
-		},
-		{
-			"name": "P13nChartSelectionItem.js",
-			"module": "sap/m/P13nChartSelectionItem.js",
-			"required": [
-				"jquery.sap.global.js",
-				"sap/m/P13nSelectionItem.js",
-				"sap/m/library.js"
-			]
-		},
-		{
-			"name": "P13nChartSelectionPanel-dbg.js",
-			"module": "sap/m/P13nChartSelectionPanel.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js",
-				"sap/m/ColumnListItem.js",
-				"sap/m/P13nChartSelectionItem.js",
-				"sap/m/P13nSelectionPanel.js",
-				"sap/m/SearchField.js",
-				"sap/m/Table.js",
-				"sap/m/library.js",
-				"sap/ui/core/Control.js",
-				"sap/ui/model/json/JSONModel.js"
-			]
-		},
-		{
-			"name": "P13nChartSelectionPanel.js",
-			"module": "sap/m/P13nChartSelectionPanel.js",
-			"required": [
-				"jquery.sap.global.js",
-				"sap/m/ColumnListItem.js",
-				"sap/m/P13nChartSelectionItem.js",
-				"sap/m/P13nSelectionPanel.js",
-				"sap/m/SearchField.js",
-				"sap/m/Table.js",
-				"sap/m/library.js",
-				"sap/ui/core/Control.js",
-				"sap/ui/model/json/JSONModel.js"
 			]
 		},
 		{
@@ -4544,7 +4563,9 @@
 				"sap/m/SearchField.js",
 				"sap/m/Table.js",
 				"sap/m/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/model/ChangeReason.js",
+				"sap/ui/model/json/JSONModel.js"
 			]
 		},
 		{
@@ -4562,7 +4583,9 @@
 				"sap/m/SearchField.js",
 				"sap/m/Table.js",
 				"sap/m/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/model/ChangeReason.js",
+				"sap/ui/model/json/JSONModel.js"
 			]
 		},
 		{
@@ -4606,14 +4629,13 @@
 			"isDebug": true,
 			"required": [
 				"jquery.sap.global.js",
-				"sap/m/ButtonType.js",
 				"sap/m/Dialog.js",
 				"sap/m/DialogRenderer.js",
 				"sap/m/IconTabBar.js",
 				"sap/m/IconTabFilter.js",
 				"sap/m/library.js",
 				"sap/ui/core/EnabledPropagator.js",
-				"sap/ui/core/MessageType.js"
+				"sap/ui/core/library.js"
 			],
 			"condRequired": [
 				"sap/m/MessageBox.js"
@@ -4628,14 +4650,13 @@
 			"module": "sap/m/P13nDialog.js",
 			"required": [
 				"jquery.sap.global.js",
-				"sap/m/ButtonType.js",
 				"sap/m/Dialog.js",
 				"sap/m/DialogRenderer.js",
 				"sap/m/IconTabBar.js",
 				"sap/m/IconTabFilter.js",
 				"sap/m/library.js",
 				"sap/ui/core/EnabledPropagator.js",
-				"sap/ui/core/MessageType.js"
+				"sap/ui/core/library.js"
 			],
 			"condRequired": [
 				"sap/m/MessageBox.js"
@@ -4677,6 +4698,7 @@
 				"sap/m/Table.js",
 				"sap/m/library.js",
 				"sap/ui/core/Control.js",
+				"sap/ui/model/ChangeReason.js",
 				"sap/ui/model/json/JSONModel.js"
 			]
 		},
@@ -4696,6 +4718,7 @@
 				"sap/m/Table.js",
 				"sap/m/library.js",
 				"sap/ui/core/Control.js",
+				"sap/ui/model/ChangeReason.js",
 				"sap/ui/model/json/JSONModel.js"
 			]
 		},
@@ -5003,16 +5026,15 @@
 			"required": [
 				"jquery.sap.global.js",
 				"sap/m/Button.js",
-				"sap/m/ButtonType.js",
 				"sap/m/Dialog.js",
 				"sap/m/Link.js",
 				"sap/m/MessagePage.js",
 				"sap/m/OverflowToolbar.js",
 				"sap/m/OverflowToolbarButton.js",
 				"sap/m/OverflowToolbarLayoutData.js",
-				"sap/m/OverflowToolbarPriority.js",
 				"sap/m/Title.js",
-				"sap/m/ToolbarSpacer.js"
+				"sap/m/ToolbarSpacer.js",
+				"sap/m/library.js"
 			]
 		},
 		{
@@ -5021,16 +5043,15 @@
 			"required": [
 				"jquery.sap.global.js",
 				"sap/m/Button.js",
-				"sap/m/ButtonType.js",
 				"sap/m/Dialog.js",
 				"sap/m/Link.js",
 				"sap/m/MessagePage.js",
 				"sap/m/OverflowToolbar.js",
 				"sap/m/OverflowToolbarButton.js",
 				"sap/m/OverflowToolbarLayoutData.js",
-				"sap/m/OverflowToolbarPriority.js",
 				"sap/m/Title.js",
-				"sap/m/ToolbarSpacer.js"
+				"sap/m/ToolbarSpacer.js",
+				"sap/m/library.js"
 			]
 		},
 		{
@@ -5058,6 +5079,7 @@
 				"sap/m/Button.js",
 				"sap/m/Title.js",
 				"sap/m/library.js",
+				"sap/ui/core/AccessibleLandmarkRole.js",
 				"sap/ui/core/ContextMenuSupport.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/delegate/ScrollEnablement.js"
@@ -5086,6 +5108,7 @@
 				"sap/m/Button.js",
 				"sap/m/Title.js",
 				"sap/m/library.js",
+				"sap/ui/core/AccessibleLandmarkRole.js",
 				"sap/ui/core/ContextMenuSupport.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/delegate/ScrollEnablement.js"
@@ -5270,6 +5293,54 @@
 				"sap/ui/unified/calendar/CalendarDate.js",
 				"sap/ui/unified/calendar/CalendarUtils.js",
 				"sap/ui/unified/library.js"
+			]
+		},
+		{
+			"name": "PlanningCalendarBuiltInView.type",
+			"designtime": true
+		},
+		{
+			"name": "PlanningCalendarLegend-dbg.js",
+			"module": "sap/m/PlanningCalendarLegend.js",
+			"isDebug": true,
+			"required": [
+				"jquery.sap.global.js",
+				"sap/m/library.js",
+				"sap/ui/core/Control.js",
+				"sap/ui/unified/CalendarLegend.js"
+			]
+		},
+		{
+			"name": "PlanningCalendarLegend.control",
+			"designtime": true
+		},
+		{
+			"name": "PlanningCalendarLegend.js",
+			"module": "sap/m/PlanningCalendarLegend.js",
+			"required": [
+				"jquery.sap.global.js",
+				"sap/m/library.js",
+				"sap/ui/core/Control.js",
+				"sap/ui/unified/CalendarLegend.js"
+			]
+		},
+		{
+			"name": "PlanningCalendarLegendRenderer-dbg.js",
+			"module": "sap/m/PlanningCalendarLegendRenderer.js",
+			"isDebug": true,
+			"required": [
+				"jquery.sap.global.js",
+				"sap/ui/core/Renderer.js",
+				"sap/ui/unified/CalendarLegendRenderer.js"
+			]
+		},
+		{
+			"name": "PlanningCalendarLegendRenderer.js",
+			"module": "sap/m/PlanningCalendarLegendRenderer.js",
+			"required": [
+				"jquery.sap.global.js",
+				"sap/ui/core/Renderer.js",
+				"sap/ui/unified/CalendarLegendRenderer.js"
 			]
 		},
 		{
@@ -5509,7 +5580,6 @@
 				"sap/m/Button.js",
 				"sap/m/NavContainer.js",
 				"sap/m/Page.js",
-				"sap/m/PlacementType.js",
 				"sap/m/QuickViewBase.js",
 				"sap/m/ResponsivePopover.js",
 				"sap/m/library.js",
@@ -5530,7 +5600,6 @@
 				"sap/m/Button.js",
 				"sap/m/NavContainer.js",
 				"sap/m/Page.js",
-				"sap/m/PlacementType.js",
 				"sap/m/QuickViewBase.js",
 				"sap/m/ResponsivePopover.js",
 				"sap/m/library.js",
@@ -5639,7 +5708,6 @@
 			"required": [
 				"jquery.sap.global.js",
 				"sap/m/Link.js",
-				"sap/m/QuickViewGroupElementType.js",
 				"sap/m/Text.js",
 				"sap/m/library.js",
 				"sap/ui/core/CustomData.js",
@@ -5656,7 +5724,6 @@
 			"required": [
 				"jquery.sap.global.js",
 				"sap/m/Link.js",
-				"sap/m/QuickViewGroupElementType.js",
 				"sap/m/Text.js",
 				"sap/m/library.js",
 				"sap/ui/core/CustomData.js",
@@ -5675,13 +5742,11 @@
 				"jquery.sap.global.js",
 				"sap/m/Bar.js",
 				"sap/m/Button.js",
-				"sap/m/ButtonType.js",
 				"sap/m/HBox.js",
 				"sap/m/Image.js",
 				"sap/m/Label.js",
 				"sap/m/Link.js",
 				"sap/m/Page.js",
-				"sap/m/QuickViewGroupElementType.js",
 				"sap/m/Text.js",
 				"sap/m/Title.js",
 				"sap/m/library.js",
@@ -5690,11 +5755,11 @@
 				"sap/ui/core/Icon.js",
 				"sap/ui/core/IconPool.js",
 				"sap/ui/core/Title.js",
-				"sap/ui/core/TitleLevel.js",
+				"sap/ui/core/library.js",
 				"sap/ui/layout/HorizontalLayout.js",
 				"sap/ui/layout/VerticalLayout.js",
 				"sap/ui/layout/form/SimpleForm.js",
-				"sap/ui/layout/form/SimpleFormLayout.js"
+				"sap/ui/layout/library.js"
 			]
 		},
 		{
@@ -5708,13 +5773,11 @@
 				"jquery.sap.global.js",
 				"sap/m/Bar.js",
 				"sap/m/Button.js",
-				"sap/m/ButtonType.js",
 				"sap/m/HBox.js",
 				"sap/m/Image.js",
 				"sap/m/Label.js",
 				"sap/m/Link.js",
 				"sap/m/Page.js",
-				"sap/m/QuickViewGroupElementType.js",
 				"sap/m/Text.js",
 				"sap/m/Title.js",
 				"sap/m/library.js",
@@ -5723,11 +5786,11 @@
 				"sap/ui/core/Icon.js",
 				"sap/ui/core/IconPool.js",
 				"sap/ui/core/Title.js",
-				"sap/ui/core/TitleLevel.js",
+				"sap/ui/core/library.js",
 				"sap/ui/layout/HorizontalLayout.js",
 				"sap/ui/layout/VerticalLayout.js",
 				"sap/ui/layout/form/SimpleForm.js",
-				"sap/ui/layout/form/SimpleFormLayout.js"
+				"sap/ui/layout/library.js"
 			]
 		},
 		{
@@ -6362,7 +6425,8 @@
 				"sap/m/library.js",
 				"sap/ui/Device.js",
 				"sap/ui/base/Interface.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/library.js"
 			],
 			"condRequired": [
 				"sap/m/List.js",
@@ -6387,7 +6451,8 @@
 				"sap/m/library.js",
 				"sap/ui/Device.js",
 				"sap/ui/base/Interface.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/library.js"
 			],
 			"condRequired": [
 				"sap/m/List.js",
@@ -6447,7 +6512,6 @@
 			"isDebug": true,
 			"required": [
 				"jquery.sap.global.js",
-				"sap/ui/base/Interface.js",
 				"sap/ui/core/Element.js"
 			]
 		},
@@ -6456,7 +6520,6 @@
 			"module": "sap/m/SelectionDetailsItemLine.js",
 			"required": [
 				"jquery.sap.global.js",
-				"sap/ui/base/Interface.js",
 				"sap/ui/core/Element.js"
 			]
 		},
@@ -6554,7 +6617,9 @@
 				"jquery.sap.global.js",
 				"sap/m/GenericTile.js",
 				"sap/m/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/Device.js",
+				"sap/ui/core/Control.js",
+				"sap/ui/core/Icon.js"
 			]
 		},
 		{
@@ -6568,7 +6633,9 @@
 				"jquery.sap.global.js",
 				"sap/m/GenericTile.js",
 				"sap/m/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/Device.js",
+				"sap/ui/core/Control.js",
+				"sap/ui/core/Icon.js"
 			]
 		},
 		{
@@ -6576,14 +6643,16 @@
 			"module": "sap/m/SlideTileRenderer.js",
 			"isDebug": true,
 			"required": [
-				"sap/m/GenericTileScope.js"
+				"jquery.sap.global.js",
+				"sap/m/library.js"
 			]
 		},
 		{
 			"name": "SlideTileRenderer.js",
 			"module": "sap/m/SlideTileRenderer.js",
 			"required": [
-				"sap/m/GenericTileScope.js"
+				"jquery.sap.global.js",
+				"sap/m/library.js"
 			]
 		},
 		{
@@ -7192,13 +7261,15 @@
 			"required": [
 				"jquery.sap.global.js",
 				"sap/m/AccButton.js",
+				"sap/m/Select.js",
+				"sap/m/SelectList.js",
 				"sap/m/TabStripItem.js",
-				"sap/m/TabStripSelect.js",
 				"sap/ui/Device.js",
 				"sap/ui/base/ManagedObject.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/IconPool.js",
 				"sap/ui/core/InvisibleText.js",
+				"sap/ui/core/Renderer.js",
 				"sap/ui/core/delegate/ItemNavigation.js",
 				"sap/ui/core/delegate/ScrollEnablement.js"
 			]
@@ -7209,13 +7280,15 @@
 			"required": [
 				"jquery.sap.global.js",
 				"sap/m/AccButton.js",
+				"sap/m/Select.js",
+				"sap/m/SelectList.js",
 				"sap/m/TabStripItem.js",
-				"sap/m/TabStripSelect.js",
 				"sap/ui/Device.js",
 				"sap/ui/base/ManagedObject.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/IconPool.js",
 				"sap/ui/core/InvisibleText.js",
+				"sap/ui/core/Renderer.js",
 				"sap/ui/core/delegate/ItemNavigation.js",
 				"sap/ui/core/delegate/ScrollEnablement.js"
 			]
@@ -7262,112 +7335,6 @@
 				"jquery.sap.global.js",
 				"sap/m/TabStrip.js",
 				"sap/m/TabStripItem.js"
-			]
-		},
-		{
-			"name": "TabStripSelect-dbg.js",
-			"module": "sap/m/TabStripSelect.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js",
-				"sap/m/Popover.js",
-				"sap/m/Select.js",
-				"sap/m/TabStripItem.js",
-				"sap/m/TabStripSelectList.js",
-				"sap/m/library.js",
-				"sap/ui/core/Control.js",
-				"sap/ui/core/EnabledPropagator.js",
-				"sap/ui/core/IconPool.js"
-			]
-		},
-		{
-			"name": "TabStripSelect.js",
-			"module": "sap/m/TabStripSelect.js",
-			"required": [
-				"jquery.sap.global.js",
-				"sap/m/Popover.js",
-				"sap/m/Select.js",
-				"sap/m/TabStripItem.js",
-				"sap/m/TabStripSelectList.js",
-				"sap/m/library.js",
-				"sap/ui/core/Control.js",
-				"sap/ui/core/EnabledPropagator.js",
-				"sap/ui/core/IconPool.js"
-			]
-		},
-		{
-			"name": "TabStripSelectList-dbg.js",
-			"module": "sap/m/TabStripSelectList.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js",
-				"sap/m/SelectList.js",
-				"sap/m/TabStripItem.js",
-				"sap/m/library.js",
-				"sap/ui/core/Control.js"
-			]
-		},
-		{
-			"name": "TabStripSelectList.control",
-			"designtime": true
-		},
-		{
-			"name": "TabStripSelectList.js",
-			"module": "sap/m/TabStripSelectList.js",
-			"required": [
-				"jquery.sap.global.js",
-				"sap/m/SelectList.js",
-				"sap/m/TabStripItem.js",
-				"sap/m/library.js",
-				"sap/ui/core/Control.js"
-			]
-		},
-		{
-			"name": "TabStripSelectListRenderer-dbg.js",
-			"module": "sap/m/TabStripSelectListRenderer.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js",
-				"sap/m/SelectListRenderer.js",
-				"sap/m/TabStripItem.js",
-				"sap/m/TabStripSelectList.js",
-				"sap/ui/core/Renderer.js"
-			]
-		},
-		{
-			"name": "TabStripSelectListRenderer.js",
-			"module": "sap/m/TabStripSelectListRenderer.js",
-			"required": [
-				"jquery.sap.global.js",
-				"sap/m/SelectListRenderer.js",
-				"sap/m/TabStripItem.js",
-				"sap/m/TabStripSelectList.js",
-				"sap/ui/core/Renderer.js"
-			]
-		},
-		{
-			"name": "TabStripSelectRenderer-dbg.js",
-			"module": "sap/m/TabStripSelectRenderer.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js",
-				"sap/m/SelectRenderer.js",
-				"sap/m/TabStripItem.js",
-				"sap/m/TabStripSelect.js",
-				"sap/ui/core/Renderer.js",
-				"sap/ui/core/ValueStateSupport.js"
-			]
-		},
-		{
-			"name": "TabStripSelectRenderer.js",
-			"module": "sap/m/TabStripSelectRenderer.js",
-			"required": [
-				"jquery.sap.global.js",
-				"sap/m/SelectRenderer.js",
-				"sap/m/TabStripItem.js",
-				"sap/m/TabStripSelect.js",
-				"sap/ui/core/Renderer.js",
-				"sap/ui/core/ValueStateSupport.js"
 			]
 		},
 		{
@@ -7759,13 +7726,15 @@
 			"isDebug": true,
 			"required": [
 				"jquery.sap.global.js",
+				"sap/m/DateTimeField.js",
 				"sap/m/InputBase.js",
-				"sap/m/MaskInput.js",
+				"sap/m/MaskEnabler.js",
 				"sap/m/MaskInputRule.js",
 				"sap/m/ResponsivePopover.js",
 				"sap/m/TimePickerSliders.js",
 				"sap/ui/core/EnabledPropagator.js",
 				"sap/ui/core/IconPool.js",
+				"sap/ui/core/InvisibleText.js",
 				"sap/ui/model/odata/type/Time.js",
 				"sap/ui/model/type/Time.js"
 			]
@@ -7775,13 +7744,15 @@
 			"module": "sap/m/TimePicker.js",
 			"required": [
 				"jquery.sap.global.js",
+				"sap/m/DateTimeField.js",
 				"sap/m/InputBase.js",
-				"sap/m/MaskInput.js",
+				"sap/m/MaskEnabler.js",
 				"sap/m/MaskInputRule.js",
 				"sap/m/ResponsivePopover.js",
 				"sap/m/TimePickerSliders.js",
 				"sap/ui/core/EnabledPropagator.js",
 				"sap/ui/core/IconPool.js",
+				"sap/ui/core/InvisibleText.js",
 				"sap/ui/model/odata/type/Time.js",
 				"sap/ui/model/type/Time.js"
 			]
@@ -8345,6 +8316,7 @@
 				"sap/m/CustomListItemRenderer.js",
 				"sap/m/Dialog.js",
 				"sap/m/DialogRenderer.js",
+				"sap/m/Image.js",
 				"sap/m/Link.js",
 				"sap/m/LinkRenderer.js",
 				"sap/m/List.js",
@@ -8364,6 +8336,7 @@
 				"sap/ui/core/HTML.js",
 				"sap/ui/core/HTMLRenderer.js",
 				"sap/ui/core/Icon.js",
+				"sap/ui/core/IconPool.js",
 				"sap/ui/core/ResizeHandler.js",
 				"sap/ui/core/format/FileSizeFormat.js",
 				"sap/ui/unified/FileUploader.js",
@@ -8384,6 +8357,7 @@
 				"sap/m/CustomListItemRenderer.js",
 				"sap/m/Dialog.js",
 				"sap/m/DialogRenderer.js",
+				"sap/m/Image.js",
 				"sap/m/Link.js",
 				"sap/m/LinkRenderer.js",
 				"sap/m/List.js",
@@ -8403,6 +8377,7 @@
 				"sap/ui/core/HTML.js",
 				"sap/ui/core/HTMLRenderer.js",
 				"sap/ui/core/Icon.js",
+				"sap/ui/core/IconPool.js",
 				"sap/ui/core/ResizeHandler.js",
 				"sap/ui/core/format/FileSizeFormat.js",
 				"sap/ui/unified/FileUploader.js",
@@ -8416,9 +8391,8 @@
 			"required": [
 				"jquery.sap.global.js",
 				"sap/m/ObjectAttribute.js",
-				"sap/m/ObjectMarker.js",
-				"sap/m/ObjectStatus.js",
 				"sap/m/library.js",
+				"sap/ui/Device.js",
 				"sap/ui/core/Element.js",
 				"sap/ui/core/util/File.js"
 			]
@@ -8433,9 +8407,8 @@
 			"required": [
 				"jquery.sap.global.js",
 				"sap/m/ObjectAttribute.js",
-				"sap/m/ObjectMarker.js",
-				"sap/m/ObjectStatus.js",
 				"sap/m/library.js",
+				"sap/ui/Device.js",
 				"sap/ui/core/Element.js",
 				"sap/ui/core/util/File.js"
 			]
@@ -8469,9 +8442,7 @@
 			"isDebug": true,
 			"required": [
 				"jquery.sap.global.js",
-				"sap/m/ListItemBaseRenderer.js",
-				"sap/m/ListRenderer.js",
-				"sap/ui/core/Renderer.js"
+				"sap/m/ListItemBaseRenderer.js"
 			]
 		},
 		{
@@ -8479,9 +8450,7 @@
 			"module": "sap/m/UploadCollectionRenderer.js",
 			"required": [
 				"jquery.sap.global.js",
-				"sap/m/ListItemBaseRenderer.js",
-				"sap/m/ListRenderer.js",
-				"sap/ui/core/Renderer.js"
+				"sap/m/ListItemBaseRenderer.js"
 			]
 		},
 		{
@@ -9080,6 +9049,8 @@
 			"module": "sap/m/flexibility/Page.flexibility.js",
 			"isDebug": true,
 			"required": [
+				"sap/m/changeHandler/CombineButtons.js",
+				"sap/m/changeHandler/SplitMenuButton.js",
 				"sap/ui/fl/changeHandler/BaseRename.js"
 			]
 		},
@@ -9087,6 +9058,8 @@
 			"name": "flexibility/Page.flexibility.js",
 			"module": "sap/m/flexibility/Page.flexibility.js",
 			"required": [
+				"sap/m/changeHandler/CombineButtons.js",
+				"sap/m/changeHandler/SplitMenuButton.js",
 				"sap/ui/fl/changeHandler/BaseRename.js"
 			]
 		},
@@ -9248,15 +9221,6 @@
 				"jquery.sap.global.js",
 				"jquery.sap.mobile.js",
 				"jquery.sap.xml.js",
-				"sap/m/ButtonType.js",
-				"sap/m/FlexDirection.js",
-				"sap/m/FlexRendertype.js",
-				"sap/m/GenericTileScope.js",
-				"sap/m/ListType.js",
-				"sap/m/LoadState.js",
-				"sap/m/OverflowToolbarPriority.js",
-				"sap/m/PlacementType.js",
-				"sap/m/QuickViewGroupElementType.js",
 				"sap/ui/Device.js",
 				"sap/ui/base/DataType.js",
 				"sap/ui/base/EventProvider.js",
@@ -9283,15 +9247,11 @@
 				"sap/ui/core/LayoutData.js",
 				"sap/ui/core/ListItem.js",
 				"sap/ui/core/LocaleData.js",
-				"sap/ui/core/MessageType.js",
-				"sap/ui/core/Orientation.js",
 				"sap/ui/core/Popup.js",
 				"sap/ui/core/RenderManager.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/core/ResizeHandler.js",
 				"sap/ui/core/Title.js",
-				"sap/ui/core/TitleLevel.js",
-				"sap/ui/core/ValueState.js",
 				"sap/ui/core/ValueStateSupport.js",
 				"sap/ui/core/date/UniversalDate.js",
 				"sap/ui/core/delegate/ItemNavigation.js",
@@ -9312,18 +9272,23 @@
 				"sap/ui/layout/HorizontalLayout.js",
 				"sap/ui/layout/VerticalLayout.js",
 				"sap/ui/layout/form/SimpleForm.js",
-				"sap/ui/layout/form/SimpleFormLayout.js",
+				"sap/ui/layout/library.js",
+				"sap/ui/model/ChangeReason.js",
 				"sap/ui/model/ClientTreeBinding.js",
 				"sap/ui/model/ClientTreeBindingAdapter.js",
 				"sap/ui/model/TreeBindingCompatibilityAdapter.js",
 				"sap/ui/model/json/JSONModel.js",
 				"sap/ui/model/odata/ODataTreeBinding.js",
+				"sap/ui/model/odata/type/ODataType.js",
 				"sap/ui/model/odata/type/Time.js",
 				"sap/ui/model/odata/v2/ODataTreeBinding.js",
 				"sap/ui/model/type/Date.js",
+				"sap/ui/model/type/DateTime.js",
 				"sap/ui/model/type/Time.js",
 				"sap/ui/thirdparty/mobify-carousel.js",
 				"sap/ui/unified/CalendarDateInterval.js",
+				"sap/ui/unified/CalendarLegend.js",
+				"sap/ui/unified/CalendarLegendRenderer.js",
 				"sap/ui/unified/CalendarOneMonthInterval.js",
 				"sap/ui/unified/CalendarRow.js",
 				"sap/ui/unified/CalendarWeekInterval.js",
@@ -9394,6 +9359,8 @@
 				"sap/m/DatePickerRenderer.js",
 				"sap/m/DateRangeSelection.js",
 				"sap/m/DateRangeSelectionRenderer.js",
+				"sap/m/DateTimeField.js",
+				"sap/m/DateTimeFieldRenderer.js",
 				"sap/m/DateTimeInput.js",
 				"sap/m/DateTimeInputRenderer.js",
 				"sap/m/DateTimePicker.js",
@@ -9478,6 +9445,7 @@
 				"sap/m/ListItemBase.js",
 				"sap/m/ListItemBaseRenderer.js",
 				"sap/m/ListRenderer.js",
+				"sap/m/MaskEnabler.js",
 				"sap/m/MaskInput.js",
 				"sap/m/MaskInputRenderer.js",
 				"sap/m/MaskInputRule.js",
@@ -9538,8 +9506,6 @@
 				"sap/m/OverflowToolbarButton.js",
 				"sap/m/OverflowToolbarLayoutData.js",
 				"sap/m/OverflowToolbarRenderer.js",
-				"sap/m/P13nChartSelectionItem.js",
-				"sap/m/P13nChartSelectionPanel.js",
 				"sap/m/P13nColumnsItem.js",
 				"sap/m/P13nColumnsPanel.js",
 				"sap/m/P13nConditionPanel.js",
@@ -9569,6 +9535,8 @@
 				"sap/m/Panel.js",
 				"sap/m/PanelRenderer.js",
 				"sap/m/PlanningCalendar.js",
+				"sap/m/PlanningCalendarLegend.js",
+				"sap/m/PlanningCalendarLegendRenderer.js",
 				"sap/m/PlanningCalendarRenderer.js",
 				"sap/m/PlanningCalendarRow.js",
 				"sap/m/PlanningCalendarView.js",
@@ -9656,10 +9624,6 @@
 				"sap/m/TabStrip.js",
 				"sap/m/TabStripItem.js",
 				"sap/m/TabStripRenderer.js",
-				"sap/m/TabStripSelect.js",
-				"sap/m/TabStripSelectList.js",
-				"sap/m/TabStripSelectListRenderer.js",
-				"sap/m/TabStripSelectRenderer.js",
 				"sap/m/Table.designtime.js",
 				"sap/m/Table.js",
 				"sap/m/TablePersoController.js",
@@ -9817,15 +9781,6 @@
 				"jquery.sap.global.js",
 				"jquery.sap.mobile.js",
 				"jquery.sap.xml.js",
-				"sap/m/ButtonType.js",
-				"sap/m/FlexDirection.js",
-				"sap/m/FlexRendertype.js",
-				"sap/m/GenericTileScope.js",
-				"sap/m/ListType.js",
-				"sap/m/LoadState.js",
-				"sap/m/OverflowToolbarPriority.js",
-				"sap/m/PlacementType.js",
-				"sap/m/QuickViewGroupElementType.js",
 				"sap/ui/Device.js",
 				"sap/ui/base/DataType.js",
 				"sap/ui/base/EventProvider.js",
@@ -9852,15 +9807,11 @@
 				"sap/ui/core/LayoutData.js",
 				"sap/ui/core/ListItem.js",
 				"sap/ui/core/LocaleData.js",
-				"sap/ui/core/MessageType.js",
-				"sap/ui/core/Orientation.js",
 				"sap/ui/core/Popup.js",
 				"sap/ui/core/RenderManager.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/core/ResizeHandler.js",
 				"sap/ui/core/Title.js",
-				"sap/ui/core/TitleLevel.js",
-				"sap/ui/core/ValueState.js",
 				"sap/ui/core/ValueStateSupport.js",
 				"sap/ui/core/date/UniversalDate.js",
 				"sap/ui/core/delegate/ItemNavigation.js",
@@ -9882,18 +9833,23 @@
 				"sap/ui/layout/HorizontalLayout.js",
 				"sap/ui/layout/VerticalLayout.js",
 				"sap/ui/layout/form/SimpleForm.js",
-				"sap/ui/layout/form/SimpleFormLayout.js",
+				"sap/ui/layout/library.js",
+				"sap/ui/model/ChangeReason.js",
 				"sap/ui/model/ClientTreeBinding.js",
 				"sap/ui/model/ClientTreeBindingAdapter.js",
 				"sap/ui/model/TreeBindingCompatibilityAdapter.js",
 				"sap/ui/model/json/JSONModel.js",
 				"sap/ui/model/odata/ODataTreeBinding.js",
+				"sap/ui/model/odata/type/ODataType.js",
 				"sap/ui/model/odata/type/Time.js",
 				"sap/ui/model/odata/v2/ODataTreeBinding.js",
 				"sap/ui/model/type/Date.js",
+				"sap/ui/model/type/DateTime.js",
 				"sap/ui/model/type/Time.js",
 				"sap/ui/thirdparty/mobify-carousel.js",
 				"sap/ui/unified/CalendarDateInterval.js",
+				"sap/ui/unified/CalendarLegend.js",
+				"sap/ui/unified/CalendarLegendRenderer.js",
 				"sap/ui/unified/CalendarOneMonthInterval.js",
 				"sap/ui/unified/CalendarRow.js",
 				"sap/ui/unified/CalendarWeekInterval.js",
@@ -9964,6 +9920,8 @@
 				"sap/m/DatePickerRenderer.js",
 				"sap/m/DateRangeSelection.js",
 				"sap/m/DateRangeSelectionRenderer.js",
+				"sap/m/DateTimeField.js",
+				"sap/m/DateTimeFieldRenderer.js",
 				"sap/m/DateTimeInput.js",
 				"sap/m/DateTimeInputRenderer.js",
 				"sap/m/DateTimePicker.js",
@@ -10048,6 +10006,7 @@
 				"sap/m/ListItemBase.js",
 				"sap/m/ListItemBaseRenderer.js",
 				"sap/m/ListRenderer.js",
+				"sap/m/MaskEnabler.js",
 				"sap/m/MaskInput.js",
 				"sap/m/MaskInputRenderer.js",
 				"sap/m/MaskInputRule.js",
@@ -10108,8 +10067,6 @@
 				"sap/m/OverflowToolbarButton.js",
 				"sap/m/OverflowToolbarLayoutData.js",
 				"sap/m/OverflowToolbarRenderer.js",
-				"sap/m/P13nChartSelectionItem.js",
-				"sap/m/P13nChartSelectionPanel.js",
 				"sap/m/P13nColumnsItem.js",
 				"sap/m/P13nColumnsPanel.js",
 				"sap/m/P13nConditionPanel.js",
@@ -10139,6 +10096,8 @@
 				"sap/m/Panel.js",
 				"sap/m/PanelRenderer.js",
 				"sap/m/PlanningCalendar.js",
+				"sap/m/PlanningCalendarLegend.js",
+				"sap/m/PlanningCalendarLegendRenderer.js",
 				"sap/m/PlanningCalendarRenderer.js",
 				"sap/m/PlanningCalendarRow.js",
 				"sap/m/PlanningCalendarView.js",
@@ -10226,10 +10185,6 @@
 				"sap/m/TabStrip.js",
 				"sap/m/TabStripItem.js",
 				"sap/m/TabStripRenderer.js",
-				"sap/m/TabStripSelect.js",
-				"sap/m/TabStripSelectList.js",
-				"sap/m/TabStripSelectListRenderer.js",
-				"sap/m/TabStripSelectRenderer.js",
 				"sap/m/Table.designtime.js",
 				"sap/m/Table.js",
 				"sap/m/TablePersoController.js",
@@ -11434,7 +11389,6 @@
 				"sap/m/semantic/SemanticConfiguration.js",
 				"sap/ui/base/ManagedObject.js",
 				"sap/ui/base/ManagedObjectObserver.js",
-				"sap/ui/core/AccessibleLandmarkRole.js",
 				"sap/ui/core/CustomData.js"
 			]
 		},
@@ -11471,7 +11425,6 @@
 				"sap/m/semantic/SemanticConfiguration.js",
 				"sap/ui/base/ManagedObject.js",
 				"sap/ui/base/ManagedObjectObserver.js",
-				"sap/ui/core/AccessibleLandmarkRole.js",
 				"sap/ui/core/CustomData.js"
 			]
 		},
@@ -11514,7 +11467,7 @@
 			"module": "sap/m/semantic/SemanticToggleButton.js",
 			"isDebug": true,
 			"required": [
-				"sap/m/ButtonType.js",
+				"sap/m/library.js",
 				"sap/m/semantic/SemanticButton.js",
 				"sap/m/semantic/SemanticControl.js",
 				"sap/ui/base/ManagedObject.js"
@@ -11528,7 +11481,7 @@
 			"name": "semantic/SemanticToggleButton.js",
 			"module": "sap/m/semantic/SemanticToggleButton.js",
 			"required": [
-				"sap/m/ButtonType.js",
+				"sap/m/library.js",
 				"sap/m/semantic/SemanticButton.js",
 				"sap/m/semantic/SemanticControl.js",
 				"sap/ui/base/ManagedObject.js"
@@ -11600,6 +11553,7 @@
 				"sap/m/Button.js",
 				"sap/m/OverflowToolbarButton.js",
 				"sap/m/OverflowToolbarLayoutData.js",
+				"sap/ui/base/ManagedObjectObserver.js",
 				"sap/ui/base/Metadata.js",
 				"sap/ui/core/IconPool.js"
 			]
@@ -11612,6 +11566,7 @@
 				"sap/m/Button.js",
 				"sap/m/OverflowToolbarButton.js",
 				"sap/m/OverflowToolbarLayoutData.js",
+				"sap/ui/base/ManagedObjectObserver.js",
 				"sap/ui/base/Metadata.js",
 				"sap/ui/core/IconPool.js"
 			]
@@ -12112,6 +12067,11 @@
 			"theme": "base"
 		},
 		{
+			"name": "themes/base/PlanningCalendarLegend.less",
+			"designtime": true,
+			"theme": "base"
+		},
+		{
 			"name": "themes/base/Popover.less",
 			"designtime": true,
 			"theme": "base"
@@ -12263,16 +12223,6 @@
 		},
 		{
 			"name": "themes/base/TabStrip.less",
-			"designtime": true,
-			"theme": "base"
-		},
-		{
-			"name": "themes/base/TabStripSelect.less",
-			"designtime": true,
-			"theme": "base"
-		},
-		{
-			"name": "themes/base/TabStripSelectList.less",
 			"designtime": true,
 			"theme": "base"
 		},
@@ -12469,11 +12419,6 @@
 		},
 		{
 			"name": "themes/sap_hcb/CheckBox.less",
-			"designtime": true,
-			"theme": "sap_hcb"
-		},
-		{
-			"name": "themes/sap_hcb/ColumnListItem.less",
 			"designtime": true,
 			"theme": "sap_hcb"
 		},

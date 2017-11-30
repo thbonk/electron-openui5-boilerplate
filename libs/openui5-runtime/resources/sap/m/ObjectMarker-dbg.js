@@ -32,7 +32,7 @@ sap.ui.define(['jquery.sap.global', "sap/ui/core/Control", 'sap/ui/core/Renderer
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -269,7 +269,7 @@ sap.ui.define(['jquery.sap.global', "sap/ui/core/Control", 'sap/ui/core/Renderer
 		this._cleanup();
 	};
 
-	/**
+	/*
 	 * Intercepts <code>attachPress</code> to be able to re-render.
 	 * If <code>press</code> event is attached and the control is rendered as text, than the control will be
 	 * re-rendered as link.
@@ -291,7 +291,7 @@ sap.ui.define(['jquery.sap.global', "sap/ui/core/Control", 'sap/ui/core/Renderer
 		return this;
 	};
 
-	/**
+	/*
 	 * Intercepts <code>detachPress</code> to be able to re-render.
 	 * If <code>press</code> event is detached and the control is rendered as a link, than the control will be
 	 * re-rendered as a text.
@@ -381,7 +381,10 @@ sap.ui.define(['jquery.sap.global', "sap/ui/core/Control", 'sap/ui/core/Renderer
 	/**
 	 * Gets the marker text.
 	 *
-	 * @returns {String}, concatenated from type and additionalInfo text
+	 * @param {object} oType The object type
+	 * @param {string} sType The string type
+	 * @param {string} sAdditionalInfo The additional information
+	 * @returns {String} concatenated from type and additionalInfo text
 	 * @private
 	 */
 	ObjectMarker.prototype._getMarkerText = function (oType, sType, sAdditionalInfo) {
@@ -442,7 +445,7 @@ sap.ui.define(['jquery.sap.global', "sap/ui/core/Control", 'sap/ui/core/Renderer
 
 	/**
 	 * Returns the inner control.
-	 *
+	 * @returns {object} The inner control
 	 * @private
 	 */
 	ObjectMarker.prototype._getInnerControl = function () {
@@ -460,7 +463,7 @@ sap.ui.define(['jquery.sap.global', "sap/ui/core/Control", 'sap/ui/core/Renderer
 	/**
 	 * Returns an inner control: <code>sap.m.Text</code> if <code>ObjectMarker</code> is non-interactive or
 	 * <code>sap.m.Link</code> - if interactive.
-	 *
+	 * @returns {object} The inner control
 	 * @private
 	 */
 	ObjectMarker.prototype._createInnerControl = function () {

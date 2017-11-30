@@ -13,7 +13,7 @@ sap.ui.define([
 		 * Change handler for adding a simple form group.
 		 * @alias sap.ui.layout.changeHandler.AddSimpleFormGroup
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 * @experimental Since 1.27.0
 		 */
 		var AddSimpleFormGroup = {};
@@ -37,7 +37,7 @@ sap.ui.define([
 			var oResult;
 			var iCurrentGroupIndex = -1;
 
-			// Empty simpleform case, when the title is null
+			// Empty simpleform case, when there are no elements inside the single formContainer
 			if (iGroupIndex === 0) {
 				return iGroupIndex;
 			}

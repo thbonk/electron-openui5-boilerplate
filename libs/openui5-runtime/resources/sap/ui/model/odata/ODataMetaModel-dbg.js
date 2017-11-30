@@ -127,7 +127,9 @@ sap.ui.define([
 	 * <li>"body", "from", "received", "sender" and "subject" (mapped to V4 annotation
 	 * <code>com.sap.vocabularies.Communication.v1.Message</code>);</li>
 	 * <li>"completed", "due", "percent-complete" and "priority" (mapped to V4 annotation
-	 * <code>com.sap.vocabularies.Communication.v1.Task</code>).</li>
+	 * <code>com.sap.vocabularies.Communication.v1.Task</code>);</li>
+	 * <li>"year", "yearmonth", "yearmonthday" (mapped to the corresponding V4 annotation
+	 * <code>com.sap.vocabularies.Common.v1.IsCalendar(Year|YearMonth|Date)</code>).</li>
 	 * </ul>
 	 * </ul>
 	 * For example:
@@ -172,7 +174,7 @@ sap.ui.define([
 	 * {@link #loaded loaded} has been resolved!
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @alias sap.ui.model.odata.ODataMetaModel
 	 * @extends sap.ui.model.MetaModel
 	 * @public
@@ -190,9 +192,9 @@ sap.ui.define([
 					}
 					jQuery.sap.measure.average(sPerformanceLoad, "", aPerformanceCategories);
 					oData = JSON.parse(JSON.stringify(oMetadata.getServiceMetadata()));
-					Utils.merge(oAnnotations ? oAnnotations.getAnnotationsData() : {}, oData);
 					that.oModel = new JSONModel(oData);
 					that.oModel.setDefaultBindingMode(that.sDefaultBindingMode);
+					Utils.merge(oAnnotations ? oAnnotations.getAnnotationsData() : {}, oData, that);
 					jQuery.sap.measure.end(sPerformanceLoad);
 				}
 

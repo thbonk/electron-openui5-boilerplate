@@ -23,7 +23,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -496,7 +496,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	/**
 	 * Internal method for applying a (non-)"collapsed" state to the rendered HTML
 	 *
-	 * @param bCollapsed whether the Panel should be collapsed or not
+	 * @param {boolean} bCollapsed whether the Panel should be collapsed or not
 	 * @private
 	 */
 	Panel.prototype._setCollapsedState = function(bCollapsed) {
@@ -555,7 +555,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * Returns "true" for absolute and relative sizes, returns "false" if "null", "inherit" or "auto" is given.
 	 *
 	 * @static
-	 * @param sCssSize a css size string (must be a valid CSS size, or null)
+	 * @param {string} sCssSize a css size string (must be a valid CSS size, or null)
 	 * @private
 	 */
 	Panel._isSizeSet = function(sCssSize) {

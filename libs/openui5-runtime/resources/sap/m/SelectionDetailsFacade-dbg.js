@@ -6,14 +6,14 @@
 /**
  * Describes the public facade of the {@link sap.m.SelectionDetails} control.
  * @name sap.m.SelectionDetailsFacade
- * @class The public facade of the {@link sap.m.SelectionDetails} control
+ * @class The public facade of the {@link sap.m.SelectionDetails} control.
  * @extends sap.ui.base.Interface
  * @since 1.48.0
  * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
  * @alias sap.m.SelectionDetailsFacade
  * @public
  * @author SAP SE
- * @version 1.48.5
+ * @version 1.50.6
  * @borrows sap.ui.core.Element#addCustomData as addCustomData
  * @borrows sap.ui.core.Element#getCustomData as getCustomData
  * @borrows sap.ui.core.Element#indexOfCustomData as indexOfCustomData
@@ -40,16 +40,16 @@
  * @borrows sap.m.SelectionDetails#removeAllActionGroups as removeAllActionGroups
  */
 /**
- * Describes the public facade of the {@link SelectionDetailsItems} element.
+ * Describes the public facade of the {@link sap.m.SelectionDetailsItem} element.
  * @name sap.m.SelectionDetailsItemFacade
- * @class The public facade of the {@link SelectionDetailsItems} element
+ * @class The public facade of the {@link sap.m.SelectionDetailsItem} element.
  * @extends sap.ui.base.Interface
  * @since 1.48.0
  * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
  * @alias sap.m.SelectionDetailsItemFacade
  * @public
  * @author SAP SE
- * @version 1.48.5
+ * @version 1.50.6
  * @borrows sap.ui.core.Element#addCustomData as addCustomData
  * @borrows sap.ui.core.Element#getCustomData as getCustomData
  * @borrows sap.ui.core.Element#indexOfCustomData as indexOfCustomData

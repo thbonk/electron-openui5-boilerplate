@@ -4,8 +4,8 @@
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/GenericTile'],
-	function(jQuery, library, Control, GenericTile) {
+sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/GenericTile', 'sap/ui/Device', 'sap/ui/core/Icon' ],
+	function(jQuery, library, Control, GenericTile, Device, Icon) {
 	"use strict";
 
 	/**
@@ -18,7 +18,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/G
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @since 1.34
 	 *
 	 * @public
@@ -40,7 +40,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/G
 			 * Changes the visualization in order to enable additional actions with the SlideTile control.
 			 * @since 1.46.0
 			 */
-			"scope": { type: "sap.m.GenericTileScope", group: "Misc", defaultValue: sap.m.GenericTileScope.Display }
+			"scope": { type: "sap.m.GenericTileScope", group: "Misc", defaultValue: "Display" }
 		},
 		defaultAggregation : "tiles",
 		aggregations : {
@@ -89,7 +89,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/G
 	 */
 	SlideTile.prototype.init = function() {
 		this._oRb = sap.ui.getCore().getLibraryResourceBundle("sap.m");
-		this.setAggregation("_pausePlayIcon", new sap.ui.core.Icon({
+		this.setAggregation("_pausePlayIcon", new Icon({
 			id: this.getId() + "-pause-play-icon",
 			src: "sap-icon://media-pause",
 			color: "#ffffff",
@@ -273,7 +273,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/G
 			if (this.hasStyleClass("sapMSTIconPressed")) {
 				this._toggleAnimation();
 				this.removeStyleClass("sapMSTIconPressed");
-			} else if (sap.ui.Device.system.desktop) {
+			} else if (Device.system.desktop) {
 				oEvent.preventDefault();
 				this.getTiles()[this._iCurrentTile].firePress();
 			}
@@ -330,6 +330,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/G
 	 * Checks if the focus is inside of SlideTile
 	 *
 	 * @private
+	 * @returns {boolean} True if focus is inside of SlideTile
 	 */
 	SlideTile.prototype._isFocusInsideST = function() {
 		return this.$()[0] === document.activeElement || this.$().find(document.activeElement).length;
@@ -412,7 +413,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/G
 	 * Scrolls to the tile with given index
 	 *
 	 * @private
-	 * @param {int} index of the tile in the tiles aggregation
+	 * @param {int} tileIndex Index of the tile in the tiles aggregation
 	 */
 	SlideTile.prototype._scrollToTile = function(tileIndex) {
 		if (tileIndex >= 0) {
@@ -549,7 +550,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/G
 	 * Changes the size to given size
 	 *
 	 * @private
-	 * @param {int} tileIndex of the element in the tiles aggregation
+	 * @param {int} tileIndex Index of the element in the tiles aggregation
 	 */
 	SlideTile.prototype._changeSizeTo = function(tileIndex) {
 		var oTile = this.getTiles()[tileIndex];
@@ -572,7 +573,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/G
 	 * Returns the index of the previous tile based on the current index
 	 *
 	 * @private
-	 * @param {int} tileIndex of the element in the tiles aggregation
+	 * @param {int} tileIndex Index of the element in the tiles aggregation
 	 * @returns {int} Index of the previous tile
 	 */
 	SlideTile.prototype._getPreviousTileIndex = function(tileIndex) {
@@ -587,7 +588,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/G
 	 * Returns the index of the next tile based on the current index
 	 *
 	 * @private
-	 * @param {int} tileIndex of the element in the tiles aggregation
+	 * @param {int} tileIndex Index of the element in the tiles aggregation
 	 * @returns {int} Index of the next tile
 	 */
 	SlideTile.prototype._getNextTileIndex = function(tileIndex) {
@@ -648,8 +649,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/G
 	/**
 	 * Checks if the given tile has NewsContent
 	 *
-	 * @param {int} index of the tile in the tiles aggregation
-	 * @returns {boolean} true when the tile has NewsContent, otherwise false
+	 * @param {int} tileIndex Index of the tile in the tiles aggregation
+	 * @returns {boolean} True when the tile has NewsContent, otherwise false
 	 * @private
 	 */
 	SlideTile.prototype._hasNewsContent = function(tileIndex) {
@@ -671,4 +672,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/G
 	SlideTile.prototype._getEventParams = GenericTile.prototype._getEventParams;
 
 	return SlideTile;
-}, /* bExport= */ true);
+});

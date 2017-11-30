@@ -31,7 +31,7 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -365,7 +365,6 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 
 	/**
 	 * Removes all root elements from the DesignTime and destroys overlays for them and theire public descendants
-	 * @param {string|sap.ui.core.Element} element or elemet's id
 	 * @return {sap.ui.dt.DesignTime} this
 	 * @protected
 	 */
@@ -636,7 +635,9 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 		var oElementOverlay = OverlayRegistry.getOverlay(oElement);
 		if (oElementOverlay) {
 			OverlayUtil.iterateOverlayElementTree(oElementOverlay, function(oChildOverlay) {
-				aElementOverlays.push(oChildOverlay);
+				if (oChildOverlay.getDesignTimeMetadata()) {
+					aElementOverlays.push(oChildOverlay);
+				}
 			});
 		}
 
@@ -652,9 +653,9 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 		$OverlayContainer[bValue ? 'show' : 'hide']();
 
 		this.getElementOverlays().forEach(function (oOverlay) {
-			oOverlay.setEnabled(bValue);
+			oOverlay.setVisible(bValue);
 			oOverlay.getChildren().forEach(function (oOverlayChild) {
-				oOverlayChild.setEnabled(bValue);
+				oOverlayChild.setVisible(bValue);
 			});
 		});
 

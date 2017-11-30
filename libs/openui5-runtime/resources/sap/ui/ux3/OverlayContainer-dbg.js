@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', './Overlay', './library'],
 	 * @extends sap.ui.ux3.Overlay
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public

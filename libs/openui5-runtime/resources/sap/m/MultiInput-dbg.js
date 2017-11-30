@@ -34,6 +34,7 @@ sap.ui.define(['jquery.sap.global', './Input', './Tokenizer', './Token', './libr
 	* </ul>
 	* <h4>When not to use:</h4>
 	* <ul>
+	* <li> Do not use multi-line inputs in tables and forms.</li>
 	* <li> When you need to select only one value.</li>
 	* <li> When you want the user to select from a predefined set of options. Use {@link sap.m.MultiComboBox} instead.</li>
 	* </ul>
@@ -60,7 +61,7 @@ sap.ui.define(['jquery.sap.global', './Input', './Tokenizer', './Token', './libr
 	* @extends sap.m.Input
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -78,6 +79,7 @@ sap.ui.define(['jquery.sap.global', './Input', './Tokenizer', './Token', './libr
 				 * In multi-line display mode, all tokens can be fully viewed and easily edited in the MultiInput.
 				 * The default value is false.
 				 * <b>Note:</b> This property does not take effect on smartphones or when the editable property is set to false.
+				 * <b>Caution:</b> Do not enable multi-line mode in tables and forms.
 				 * @since 1.28
 				 */
 				enableMultiLineMode: {type: "boolean", group: "Behavior", defaultValue: false},
@@ -152,24 +154,27 @@ sap.ui.define(['jquery.sap.global', './Input', './Tokenizer', './Token', './libr
 				 * Fired when the tokens aggregation changed (add / remove token)
 				 */
 				tokenUpdate: {
-					/**
-					 * Type of tokenChange event.
-					 * There are two TokenUpdate types: "added", "removed"
-					 * Use Tokenizer.TokenUpdateType.Added for "added" and Tokenizer.TokenUpdateType.Removed for "removed".
-					 */
-					type: {type: "string"},
+					allowPreventDefault : true,
+					parameters: {
+						/**
+						 * Type of tokenChange event.
+						 * There are two TokenUpdate types: "added", "removed"
+						 * Use Tokenizer.TokenUpdateType.Added for "added" and Tokenizer.TokenUpdateType.Removed for "removed".
+						 */
+						type: {type: "string"},
 
-					/**
-					 * The array of tokens that are added.
-					 * This parameter is used when tokenUpdate type is "added".
-					 */
-					addedTokens: {type: "sap.m.Token[]"},
+						/**
+						 * The array of tokens that are added.
+						 * This parameter is used when tokenUpdate type is "added".
+						 */
+						addedTokens: {type: "sap.m.Token[]"},
 
-					/**
-					 * The array of tokens that are removed.
-					 * This parameter is used when tokenUpdate type is "removed".
-					 */
-					removedTokens: {type: "sap.m.Token[]"}
+						/**
+						 * The array of tokens that are removed.
+						 * This parameter is used when tokenUpdate type is "removed".
+						 */
+						removedTokens: {type: "sap.m.Token[]"}
+					}
 				}
 			}
 		}
@@ -198,6 +203,11 @@ sap.ui.define(['jquery.sap.global', './Input', './Tokenizer', './Token', './libr
 		this.attachSuggestionItemSelected(this._onSuggestionItemSelected, this);
 
 		this.attachLiveChange(this._onLiveChange, this);
+
+		this.attachValueHelpRequest(function () {
+			// Register the click on value help.
+			this._bValueHelpOpen = true;
+		}, this);
 
 		if (sap.ui.getCore().getConfiguration().getAccessibility()) {
 			// create an ARIA announcement and remember its ID for later use in the renderer:
@@ -241,8 +251,13 @@ sap.ui.define(['jquery.sap.global', './Input', './Tokenizer', './Token', './libr
 	};
 
 	MultiInput.prototype._onTokenUpdate = function (args) {
-		this.fireTokenUpdate(args.getParameters());
-		this.invalidate();
+		var eventResult = this.fireTokenUpdate(args.getParameters());
+
+		if (!eventResult) {
+			args.preventDefault();
+		} else {
+			this.invalidate();
+		}
 	};
 
 	MultiInput.prototype._onSuggestionItemSelected = function (eventArgs) {
@@ -251,7 +266,8 @@ sap.ui.define(['jquery.sap.global', './Input', './Tokenizer', './Token', './libr
 			that = this,
 			iOldLength = this._tokenizer.getTokens().length; //length of tokens before validating
 
-		if (this.getMaxTokens() && iOldLength >= this.getMaxTokens()) {
+		// Tokenizer is "full" or ValueHelp is open.
+		if (this.getMaxTokens() && iOldLength >= this.getMaxTokens() || this._bValueHelpOpen) {
 			return;
 		}
 
@@ -630,7 +646,7 @@ sap.ui.define(['jquery.sap.global', './Input', './Tokenizer', './Token', './libr
 	 * @private
 	 */
 	MultiInput.prototype.onAfterRendering = function () {
-		this._tokenizer._doScrollToEnd();
+		this._tokenizer.scrollToEnd();
 		Input.prototype.onAfterRendering.apply(this, arguments);
 	};
 
@@ -695,7 +711,7 @@ sap.ui.define(['jquery.sap.global', './Input', './Tokenizer', './Token', './libr
 	 * Function is called on keyboard backspace, if cursor is in front of a token, token gets selected and deleted
 	 *
 	 * @private
-	 * @param {jQuery.event}
+	 * @param {jQuery.Event}
 	 *          oEvent
 	 */
 	MultiInput.prototype.onsapbackspace = function (oEvent) {
@@ -714,7 +730,7 @@ sap.ui.define(['jquery.sap.global', './Input', './Tokenizer', './Token', './libr
 	 * Function is called on delete keyboard input, deletes selected tokens
 	 *
 	 * @private
-	 * @param {jQuery.event}
+	 * @param {jQuery.Event}
 	 *          oEvent
 	 */
 	MultiInput.prototype.onsapdelete = function (oEvent) {
@@ -961,7 +977,7 @@ sap.ui.define(['jquery.sap.global', './Input', './Tokenizer', './Token', './libr
 	 * Function is called on keyboard enter, if possible, adds entered text as new token
 	 *
 	 * @private
-	 * @param {jQuery.event}
+	 * @param {jQuery.Event}
 	 *          oEvent
 	 */
 	MultiInput.prototype.onsapenter = function (oEvent) {
@@ -1025,7 +1041,9 @@ sap.ui.define(['jquery.sap.global', './Input', './Tokenizer', './Token', './libr
 
 		Input.prototype.onsapfocusleave.apply(this, arguments);
 
-		if (this._bIsValidating) { // an asynchronous validation is running, no need to trigger validation again
+		// an asynchronous validation is running, no need to trigger validation again
+		// OR the ValueHelp is triggered. either ways- no need for validation
+		if (this._bIsValidating || this._bValueHelpOpen) {
 			return;
 		}
 
@@ -1078,13 +1096,19 @@ sap.ui.define(['jquery.sap.global', './Input', './Tokenizer', './Token', './libr
 	 * @param {jQuery.Event} oEvent
 	 */
 	MultiInput.prototype.ontap = function (oEvent) {
+
 		//deselect tokens when focus is on text field
 		if (document.activeElement === this._$input[0]
 			|| document.activeElement === this._tokenizer.getDomRef()) {
 			this._tokenizer.selectAllTokens(false);
 		}
 
+		if (oEvent && oEvent.isMarked("tokenDeletePress")) {
+			return;
+		}
+
 		Input.prototype.ontap.apply(this, arguments);
+
 	};
 
 	MultiInput.prototype._onclick = function (oEvent) {
@@ -1099,6 +1123,7 @@ sap.ui.define(['jquery.sap.global', './Input', './Tokenizer', './Token', './libr
 	 * @param {jQuery.Event} oEvent
 	 */
 	MultiInput.prototype.onfocusin = function (oEvent) {
+		this._bValueHelpOpen = false; //This means the ValueHelp is closed and the focus is back. So, reset that var
 
 		if (this.getEditable() && this.getEnableMultiLineMode() && (!oEvent.target.classList.contains("sapMInputValHelp") && !oEvent.target.classList.contains("sapMInputValHelpInner"))) {
 			this.openMultiLine();

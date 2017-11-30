@@ -358,7 +358,7 @@
 			"required": [
 				"jquery.sap.global.js",
 				"sap/ui/core/Element.js",
-				"sap/ui/core/MessageType.js",
+				"sap/ui/core/library.js",
 				"sap/ui/table/TableUtils.js",
 				"sap/ui/table/library.js"
 			]
@@ -373,7 +373,7 @@
 			"required": [
 				"jquery.sap.global.js",
 				"sap/ui/core/Element.js",
-				"sap/ui/core/MessageType.js",
+				"sap/ui/core/library.js",
 				"sap/ui/table/TableUtils.js",
 				"sap/ui/table/library.js"
 			]
@@ -406,6 +406,7 @@
 				"sap/ui/core/ScrollBar.js",
 				"sap/ui/core/delegate/ItemNavigation.js",
 				"sap/ui/core/theming/Parameters.js",
+				"sap/ui/model/BindingMode.js",
 				"sap/ui/model/ChangeReason.js",
 				"sap/ui/model/Context.js",
 				"sap/ui/model/Filter.js",
@@ -455,6 +456,7 @@
 				"sap/ui/core/ScrollBar.js",
 				"sap/ui/core/delegate/ItemNavigation.js",
 				"sap/ui/core/theming/Parameters.js",
+				"sap/ui/model/BindingMode.js",
 				"sap/ui/model/ChangeReason.js",
 				"sap/ui/model/Context.js",
 				"sap/ui/model/Filter.js",
@@ -538,6 +540,23 @@
 				"sap/ui/Device.js",
 				"sap/ui/core/Element.js",
 				"sap/ui/table/library.js"
+			]
+		},
+		{
+			"name": "TableDragDropExtension-dbg.js",
+			"module": "sap/ui/table/TableDragDropExtension.js",
+			"isDebug": true,
+			"required": [
+				"jquery.sap.global.js",
+				"sap/ui/table/TableExtension.js"
+			]
+		},
+		{
+			"name": "TableDragDropExtension.js",
+			"module": "sap/ui/table/TableDragDropExtension.js",
+			"required": [
+				"jquery.sap.global.js",
+				"sap/ui/table/TableExtension.js"
 			]
 		},
 		{
@@ -780,8 +799,8 @@
 				"jquery.sap.global.js",
 				"sap/ui/Device.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/MessageType.js",
 				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/core/library.js",
 				"sap/ui/model/ChangeReason.js",
 				"sap/ui/table/TableColumnUtils.js",
 				"sap/ui/table/TableGrouping.js",
@@ -796,8 +815,8 @@
 				"jquery.sap.global.js",
 				"sap/ui/Device.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/MessageType.js",
 				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/core/library.js",
 				"sap/ui/model/ChangeReason.js",
 				"sap/ui/table/TableColumnUtils.js",
 				"sap/ui/table/TableGrouping.js",
@@ -894,7 +913,6 @@
 				"sap/ui/core/Element.js",
 				"sap/ui/core/Icon.js",
 				"sap/ui/core/IconPool.js",
-				"sap/ui/core/MessageType.js",
 				"sap/ui/core/Popup.js",
 				"sap/ui/core/RenderManager.js",
 				"sap/ui/core/Renderer.js",
@@ -903,6 +921,7 @@
 				"sap/ui/core/delegate/ItemNavigation.js",
 				"sap/ui/core/library.js",
 				"sap/ui/core/theming/Parameters.js",
+				"sap/ui/model/BindingMode.js",
 				"sap/ui/model/ChangeReason.js",
 				"sap/ui/model/ClientTreeBindingAdapter.js",
 				"sap/ui/model/Context.js",
@@ -952,6 +971,7 @@
 				"sap/ui/table/TableAccExtension.js",
 				"sap/ui/table/TableAccRenderExtension.js",
 				"sap/ui/table/TableColumnUtils.js",
+				"sap/ui/table/TableDragDropExtension.js",
 				"sap/ui/table/TableExtension.js",
 				"sap/ui/table/TableGrouping.js",
 				"sap/ui/table/TableKeyboardDelegate2.js",
@@ -989,7 +1009,6 @@
 				"sap/ui/core/Element.js",
 				"sap/ui/core/Icon.js",
 				"sap/ui/core/IconPool.js",
-				"sap/ui/core/MessageType.js",
 				"sap/ui/core/Popup.js",
 				"sap/ui/core/RenderManager.js",
 				"sap/ui/core/Renderer.js",
@@ -999,6 +1018,7 @@
 				"sap/ui/core/library-preload.json",
 				"sap/ui/core/library.js",
 				"sap/ui/core/theming/Parameters.js",
+				"sap/ui/model/BindingMode.js",
 				"sap/ui/model/ChangeReason.js",
 				"sap/ui/model/ClientTreeBindingAdapter.js",
 				"sap/ui/model/Context.js",
@@ -1049,6 +1069,7 @@
 				"sap/ui/table/TableAccExtension.js",
 				"sap/ui/table/TableAccRenderExtension.js",
 				"sap/ui/table/TableColumnUtils.js",
+				"sap/ui/table/TableDragDropExtension.js",
 				"sap/ui/table/TableExtension.js",
 				"sap/ui/table/TableGrouping.js",
 				"sap/ui/table/TableKeyboardDelegate2.js",

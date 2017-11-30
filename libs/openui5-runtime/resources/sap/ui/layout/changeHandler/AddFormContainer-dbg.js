@@ -13,7 +13,7 @@ sap.ui.define([
 		 * Change handler for adding a form group.
 		 * @alias sap.ui.layout.changeHandler.AddFormContainer
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 * @experimental Since 1.48.0
 		 */
 		var AddGroup = { };
@@ -30,17 +30,22 @@ sap.ui.define([
 		AddGroup.applyChange = function(oChange, oForm, mPropertyBag) {
 			var oModifier = mPropertyBag.modifier,
 				oAppComponent = mPropertyBag.appComponent,
-				oView = FlexUtils.getViewForControl(oForm),
+				oView = mPropertyBag.view,
 				oChangeDefinition = oChange.getDefinition();
 
 			if (oChangeDefinition.texts && oChangeDefinition.texts.groupLabel && oChangeDefinition.texts.groupLabel.value && oChangeDefinition.content && oChangeDefinition.content.group && (oChangeDefinition.content.group.selector || oChangeDefinition.content.group.id)) {
 				var sTitleText = oChangeDefinition.texts.groupLabel.value,
 					iInsertIndex = oChangeDefinition.content.group.index,
-					oTitle = oModifier.createControl("sap.ui.core.Title", oAppComponent, oView, oView.createId(jQuery.sap.uid())),
-					oGroup = oModifier.createControl("sap.ui.layout.form.FormContainer", oAppComponent, oView, oChangeDefinition.content.group.selector || oChangeDefinition.content.group.id);
+					mNewGroupSelector = oChangeDefinition.content.group.selector || { id : oChangeDefinition.content.group.id },
+					mNewTitleSelector = jQuery.extend({}, mNewGroupSelector);
+
+				mNewTitleSelector.id = mNewTitleSelector.id + "--title"; //same as FormRenderer does it
+
+				var oTitle = oModifier.createControl("sap.ui.core.Title", oAppComponent, oView, mNewTitleSelector),
+					oGroup = oModifier.createControl("sap.ui.layout.form.FormContainer", oAppComponent, oView, mNewGroupSelector);
 
 				oModifier.setProperty(oTitle, "text", sTitleText);
-				oModifier.insertAggregation(oGroup, "title", oTitle);
+				oModifier.insertAggregation(oGroup, "title", oTitle, 0, oView);
 				oModifier.insertAggregation(oForm, "formContainers", oGroup, iInsertIndex, oView);
 
 			} else {

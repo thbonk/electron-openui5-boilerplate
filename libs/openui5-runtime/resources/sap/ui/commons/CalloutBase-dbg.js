@@ -1,3 +1,4 @@
+
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
  * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
@@ -22,7 +23,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/TooltipBase'],
 	 * @extends sap.ui.core.TooltipBase
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -483,7 +484,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/TooltipBase'],
 	 * Organize a local tab chain inside of a callout.
 	 * If it occurs on the focus handler elements at the beginning of the callout,
 	 * the focus is set to the end, and vice versa.
-	 * @param {jQuery.EventObject} oEvent The event object
+	 * @param {jQuery.Event} oEvent The event object
 	 * @private
 	 */
 	CalloutBase.prototype.onfocusin = function(oEvent){
@@ -507,7 +508,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/TooltipBase'],
 	/**
 	 * When a control that has a Callout looses the focus to the Callout contents,
 	 * do not close it. Override the onfocusout event handler of TooltipBalse.
-	 * @param {jQuery.EventObject} the event indication that the focus is lost
+	 * @param {jQuery.Event} the event indication that the focus is lost
 	 * @private
 	 */
 	CalloutBase.prototype.onfocusout = function(oEvent) {
@@ -516,7 +517,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/TooltipBase'],
 
 	/**
 	* Handle the mouseover event: do not close if a child control has a simple tooltip
-	* @param {jQuery.EventObject} oEvent The event that occurred in the callout
+	* @param {jQuery.Event} oEvent The event that occurred in the callout
 	* @private
 	 */
 	CalloutBase.prototype.onmouseover = function(oEvent) {
@@ -535,7 +536,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/TooltipBase'],
 	/**
 	 * Handle the mouseout event of a Callout. Override the default TooltipBase behavior when
 	 * the mouse pointer is over some other popup on the screen
-	 * @param {jQuery.EventObject} oEvent mouseout Event.
+	 * @param {jQuery.Event} oEvent mouseout Event.
 	 * @private
 	 */
 	CalloutBase.prototype.onmouseout = function(oEvent) {
@@ -548,7 +549,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/TooltipBase'],
 
 	/**
 	 * Always close Callout when the user clicks on the parent control.
-	 * @param {jQuery.EventObject} the event
+	 * @param {jQuery.Event} the event
 	 * @private
 	 */
 	CalloutBase.prototype.onmousedown = function(oEvent) {
@@ -562,7 +563,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/TooltipBase'],
 
 	/**
 	 * Handles the outer event of the popup.
-	 * @param {sap.ui.core.Event} oControlEvent The event
+	 * @param {sap.ui.base.Event} oControlEvent The event
 	 * @private
 	 */
 	CalloutBase.prototype.onAnyEvent = function(oEvent){

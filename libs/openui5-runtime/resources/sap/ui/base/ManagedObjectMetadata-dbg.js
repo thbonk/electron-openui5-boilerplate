@@ -55,7 +55,7 @@ sap.ui.define(['jquery.sap.global', './DataType', './Metadata'],
 	 *
 	 *
 	 * @author Frank Weigel
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @since 0.8.6
 	 * @alias sap.ui.base.ManagedObjectMetadata
 	 * @public
@@ -133,6 +133,8 @@ sap.ui.define(['jquery.sap.global', './DataType', './Metadata'],
 		this.name = name;
 		this.type = info.type || 'any';
 		this.visibility = info.visibility || 'public';
+		this.defaultValue = info.defaultValue;
+		this.appData = remainder(this, info);
 		this._oParent = oClass;
 		this._sUID = "special:" + name;
 		this._iKind = Kind.SPECIAL_SETTING;

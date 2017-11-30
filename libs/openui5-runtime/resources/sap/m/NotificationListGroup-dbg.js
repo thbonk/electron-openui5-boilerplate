@@ -16,11 +16,18 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
-	 * The NotificationListItemGroup control is used for grouping NotificationListItems of the same type.
+	 * The NotificationListItemGroup control is used for grouping {@link sap.m.NotificationListItem notification items} of the same type.
+	 * <h4>Behavior</h4>
+	 * The group handles specific behavior for different usecases:
+	 * <ul>
+	 * <li><code>autoPriority</code> - sets the group priority to the highest priority of an item in the group.</li>
+	 * <li><code>enableCollapseButtonWhenEmpty</code> - displays a collapse button for an empty group.</li>
+	 * <li><code>showEmptyGroup</code> - determines if the header/footer of an empty group is displayed.</li>
+	 * </ul>
 	 * @extends sap.m.NotificationListBase
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -264,7 +271,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 	 * @private
 	 */
 	NotificationListGroup.prototype._getVisibleItemsCount = function () {
-		/** @type [sap.m.NotificationListItem] */
+		/** @type {sap.m.NotificationListItem[]} */
 		var items = this.getItems();
 		var result = 0;
 

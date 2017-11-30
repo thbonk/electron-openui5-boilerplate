@@ -3,31 +3,31 @@
     {
       "name" : "sap/tnt/NavigationList.js",
       "description" : "Provides control sap.tnt.NavigationList",
-      "size" : 6710,
-      "compressedSize" : 3479,
+      "size" : 6775,
+      "compressedSize" : 3516,
       "required" : ["jquery.sap.global.js", "sap/m/Popover.js", "sap/tnt/library.js", "sap/ui/core/Control.js", "sap/ui/core/InvisibleText.js", "sap/ui/core/delegate/ItemNavigation.js"],
       "includes" : []
     },
     {
       "name" : "sap/tnt/NavigationListItem.js",
       "description" : "Provides control sap.tnt.NavigationListItem.",
-      "size" : 16750,
-      "compressedSize" : 9137,
+      "size" : 16904,
+      "compressedSize" : 9078,
       "required" : ["jquery.sap.global.js", "sap/tnt/NavigationList.js", "sap/tnt/library.js", "sap/ui/core/Icon.js", "sap/ui/core/IconPool.js", "sap/ui/core/Item.js", "sap/ui/core/Renderer.js"],
       "includes" : []
     },
     {
       "name" : "sap/tnt/NavigationListRenderer.js",
       "description" : "Provides the default renderer for control sap.tnt.NavigationList",
-      "size" : 1588,
-      "compressedSize" : 683,
+      "size" : 1620,
+      "compressedSize" : 691,
       "required" : ["jquery.sap.global.js", "sap/ui/core/Renderer.js"],
       "includes" : []
     },
     {
       "name" : "sap/tnt/SideNavigation.js",
       "description" : "Provides control sap.t.SideNavigation.",
-      "size" : 9729,
+      "size" : 9683,
       "compressedSize" : 5087,
       "required" : ["jquery.sap.global.js", "sap/tnt/library.js", "sap/ui/core/Control.js", "sap/ui/core/Icon.js", "sap/ui/core/ResizeHandler.js", "sap/ui/core/delegate/ScrollEnablement.js"],
       "includes" : []
@@ -43,7 +43,7 @@
     {
       "name" : "sap/tnt/ToolHeader.js",
       "description" : "Provides control sap.tnt.ToolHeader",
-      "size" : 4070,
+      "size" : 4420,
       "compressedSize" : 1757,
       "required" : ["jquery.sap.global.js", "sap/m/OverflowToolbar.js", "sap/m/OverflowToolbarAssociativePopover.js", "sap/tnt/library.js", "sap/ui/core/Control.js"],
       "includes" : []
@@ -67,7 +67,7 @@
     {
       "name" : "sap/tnt/ToolPage.js",
       "description" : "Provides control sap.t.ToolPage.",
-      "size" : 5140,
+      "size" : 5518,
       "compressedSize" : 2453,
       "required" : ["jquery.sap.global.js", "sap/tnt/library.js", "sap/ui/Device.js", "sap/ui/core/Control.js", "sap/ui/core/ResizeHandler.js"],
       "includes" : []
@@ -82,7 +82,7 @@
     },
     {
       "name" : "sap/tnt/library-preload.js",
-      "size" : 27809,
+      "size" : 27795,
       "required" : ["jquery.sap.global.js", "sap/m/BarInPageEnabler.js", "sap/m/OverflowToolbar.js", "sap/m/OverflowToolbarAssociativePopover.js", "sap/m/OverflowToolbarRenderer.js", "sap/m/Popover.js", "sap/m/library.js", "sap/ui/Device.js", "sap/ui/core/Control.js", "sap/ui/core/Icon.js", "sap/ui/core/IconPool.js", "sap/ui/core/InvisibleText.js", "sap/ui/core/Item.js", "sap/ui/core/Renderer.js", "sap/ui/core/ResizeHandler.js", "sap/ui/core/delegate/ItemNavigation.js", "sap/ui/core/delegate/ScrollEnablement.js", "sap/ui/core/library.js"],
       "includes" : ["sap/tnt/NavigationList.js", "sap/tnt/NavigationListItem.js", "sap/tnt/NavigationListRenderer.js", "sap/tnt/SideNavigation.js", "sap/tnt/SideNavigationRenderer.js", "sap/tnt/ToolHeader.js", "sap/tnt/ToolHeaderRenderer.js", "sap/tnt/ToolHeaderUtilitySeparator.js", "sap/tnt/ToolPage.js", "sap/tnt/ToolPageRenderer.js", "sap/tnt/library.js", "sap/tnt/manifest.json"]
     },

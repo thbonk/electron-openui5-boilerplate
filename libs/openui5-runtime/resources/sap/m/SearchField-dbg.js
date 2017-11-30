@@ -45,7 +45,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	* @extends sap.ui.core.Control
 	* @implements sap.ui.core.IFormContent
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -424,8 +424,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			this._inputElement.focus();
 		}
 
-		// if the input is on focus and user taps again on it
-		if (this.getEnabled() && oEvent.target.tagName == "INPUT" && document.activeElement === oEvent.target) {
+		// on phone if the input is on focus and user taps again on it
+		if (sap.ui.Device.system.phone &&
+			this.getEnabled() &&
+			oEvent.target.tagName == "INPUT" &&
+			document.activeElement === oEvent.target &&
+			!suggestionsOn(this)) {
 			this.onFocus(oEvent);
 		}
 	};

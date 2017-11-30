@@ -3,9 +3,12 @@
  * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Orientation'],
-	function(jQuery, Orientation) {
+sap.ui.define(['jquery.sap.global', 'sap/ui/core/library'],
+	function(jQuery, coreLibrary) {
 	"use strict";
+
+	// shortcut for sap.ui.core.Orientation
+	var Orientation = coreLibrary.Orientation;
 
 	/**
 	 * HeaderContainer Renderer.

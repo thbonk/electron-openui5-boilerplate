@@ -18,12 +18,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './StandardListItem',
 	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
-	 * Row in the @link sap.m.PlanningCalendar}.
+	 * Row in the {@link sap.m.PlanningCalendar}.
 	 *
 	 * This element holds the data of one row in the @link sap.m.PlanningCalendar}. Once the header information (e.g. person information)
 	 * is assigned, the appointments are assigned.
 	 * @extends sap.ui.core.Element
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -433,8 +433,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './StandardListItem',
 
 	/**
 	 * Clone from the passed DateRange and sets the foreign key to the source DateRange, that is used for cloning
-	 * @param {sap.ui.unified.DateRange} oSource
-	 * @returns {sap.ui.unified.DateRange}
+	 * @param {sap.ui.unified.DateRange} oSource The date range to be copied
+	 * @returns {sap.ui.unified.DateRange} The copied date range
 	 * @private
 	 */
 	PlanningCalendarRow.prototype._buildCalendarRowDateRange = function (oSource) {

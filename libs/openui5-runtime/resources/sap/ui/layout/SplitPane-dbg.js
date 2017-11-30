@@ -16,12 +16,18 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element'],
 	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
-	 * SplitPane is a container of a single control.
-	 * Could be used as an aggregation of a PaneContainer.
+	 * SplitPane is a container of a single control in a responsive splitter.
+	 * Could be used as an aggregation of a {@link sap.ui.layout.PaneContainer PaneContainer}.
+	 *
+	 * The behavior of the Split Panes is handled by the following properties:
+	 * <ul>
+	 * <li><code>requiredParentWidth</code> - determines the minimum width of the parent container (in pixels). When it is reached, the pane will be hidden from the screen.</li>
+	 * <li><code>demandPane</code> - determines if the pane is reachable via the pagination bar after it has been hidden from the screen.</li>
+	 * </ul
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public

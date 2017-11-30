@@ -25,7 +25,7 @@ function(jQuery, Element, coreLibrary, Popup, RenderManager, Filter, FilterOpera
 	 * @class
 	 * The column allows you to define column specific properties that will be applied when rendering the table.
 	 * @extends sap.ui.core.Element
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -64,7 +64,7 @@ function(jQuery, Element, coreLibrary, Popup, RenderManager, Filter, FilterOpera
 			 * original width. If all columns are set to not be flexible, an extra "dummy" column will be
 			 * created at the end of the table.
 			 * @deprecated As of version 1.44 this property has no effect. Use the property <code>minWidth</code> in combination with the property
-			 *     <code>width="auto"</code> instead.
+			 * <code>width="auto"</code> instead.
 			 */
 			flexible : {type : "boolean", group : "Behavior", defaultValue : true},
 
@@ -236,9 +236,12 @@ function(jQuery, Element, coreLibrary, Popup, RenderManager, Filter, FilterOpera
 			/**
 			 * Template (cell renderer) of this column. A template is decoupled from the column. Each time
 			 * the template's properties or aggregations have been changed, the template has to be applied again via
-			 * <code>setTemplate</code> for the changes to take effect. The default template depends on the libraries loaded.
+			 * <code>setTemplate</code> for the changes to take effect.
+			 * If a string is defined, a default text control will be created with its text property bound to the value of the string. The default
+			 * template depends on the libraries loaded.
+			 * If there is no template, the column will not be rendered in the table.
 			 */
-			template : {type : "sap.ui.core.Control", multiple : false},
+			template : {type : "sap.ui.core.Control", altTypes : ["string"], multiple : false},
 
 			/**
 			 * The menu used by the column. By default the {@link sap.ui.table.ColumnMenu} is used.
@@ -681,12 +684,17 @@ function(jQuery, Element, coreLibrary, Popup, RenderManager, Filter, FilterOpera
 
 				var oBinding = oTable.getBinding("rows");
 				if (oBinding) {
+					// For the AnalyticalTable with an AnalyticalColumn.
+					if (this._updateTableAnalyticalInfo) {
+						// The analytical info must be updated before sorting via the binding. The request will still be correct, but the binding
+						// will create its internal data structure based on the analytical info. We also do not need to get the contexts right
+						// now (therefore "true" is passed"), this will be done later in refreshRows.
+						this._updateTableAnalyticalInfo(true);
+					}
+
 					// sort the binding
 					oBinding.sort(aSorters);
 
-					if (this._afterSort) {
-						this._afterSort();
-					}
 				} else {
 					jQuery.sap.log.warning("Sorting not performed because no binding present", this);
 				}
@@ -704,7 +712,12 @@ function(jQuery, Element, coreLibrary, Popup, RenderManager, Filter, FilterOpera
 			return;
 		}
 
-		this.$().find(".sapUiTableColCell")
+		this.$()
+			.parents(".sapUiTableCHT")
+			.find('td[data-sap-ui-colindex="' + this.getIndex() + '"]') // all td cells in this column header
+			.filter(":not([colspan]):visible") // only visible without a colspan
+			.first()
+			.find(".sapUiTableColCell")
 			.toggleClass("sapUiTableColSF", bSorted || bFiltered)
 			.toggleClass("sapUiTableColFiltered", bFiltered)
 			.toggleClass("sapUiTableColSorted", bSorted)
@@ -877,12 +890,12 @@ function(jQuery, Element, coreLibrary, Popup, RenderManager, Filter, FilterOpera
 	};
 
 	/**
-	 * Returns whether the column should be rendered or not.
-	 * @return {boolean} true, if the column should be rendered
+	 * Returns whether the column should be rendered.
+	 * @return {boolean} Returns <code>true</code>, if the column should be rendered
 	 * @protected
 	 */
 	Column.prototype.shouldRender = function() {
-		return this.getVisible() && !this.getGrouped();
+		return this.getVisible() && !this.getGrouped() && this.getTemplate() != null;
 	};
 
 	Column.PROPERTIES_FOR_ROW_INVALIDATION = {visible: true, flexible: true, headerSpan: true};

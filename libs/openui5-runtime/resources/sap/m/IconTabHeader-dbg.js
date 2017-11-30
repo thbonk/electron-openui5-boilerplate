@@ -25,7 +25,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -163,7 +163,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 */
 	IconTabHeader.prototype.isTouchScrollingDisabled = function () {
 		return this.getShowOverflowSelectList() &&
-			!sap.ui.Device.system.desktop &&
 			this.getParent().getMetadata().getName() == 'sap.tnt.ToolHeader';
 	};
 
@@ -566,7 +565,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 		if (this.oSelectedItem &&
 			this.oSelectedItem.getVisible() &&
-			(bIsParentIconTabBar && oParent.getExpandable() || this.oSelectedItem !== oItem)) {
+			(!bAPIchange && bIsParentIconTabBar && oParent.getExpandable() || this.oSelectedItem !== oItem)) {
 			this.oSelectedItem.$()
 					.removeClass("sapMITBSelected")
 					.attr('aria-selected', false)
@@ -659,6 +658,27 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			}
 		}
 		return this;
+	};
+
+	/**
+	 * Returns all the visible tab filters.
+	 *
+	 * @private
+	 */
+	IconTabHeader.prototype.getVisibleTabFilters = function() {
+		var aItems = this.getTabFilters(),
+			aVisibleItems = [],
+			oItem;
+
+		for (var i = 0; i < aItems.length; i++) {
+			oItem = aItems[i];
+
+			if (oItem.getVisible()) {
+				aVisibleItems.push(oItem);
+			}
+		}
+
+		return aVisibleItems;
 	};
 
 	/**
@@ -981,7 +1001,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	/**
 	 * Gets the icon of the requested arrow (left/right).
 	 * @private
-	 * @param sName Left or right
+	 * @param {string} sName Left or right
 	 * @returns Icon of the requested arrow
 	 */
 	IconTabHeader.prototype._getScrollingArrow = function(sName) {
@@ -1183,8 +1203,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	/*
 	 * Scrolls the items if possible, using an animation.
 	 *
-	 * @param iDelta How far to scroll
-	 * @param iDuration How long to scroll (ms)
+	 * @param {int} iDelta How far to scroll
+	 * @param {int} iDuration How long to scroll (ms)
 	 * @private
 	 */
 	IconTabHeader.prototype._scroll = function(iDelta, iDuration) {
@@ -1244,8 +1264,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 		if (this.oSelectedItem && this._bCheckIfIntoView) {
 			this._scrollIntoView(this.oSelectedItem, 0);
-			this._bCheckIfIntoView = false;
+
+			if (!this._isTouchScrollingDisabled) {
+				this._bCheckIfIntoView = false;
+			}
 		}
+
+		this._setTabsVisibility();
 	};
 
 	/**
@@ -1318,8 +1343,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			iContainerWidth = this.$("scrollContainer").width(),
 			$head = this.$('head'),
 			iHeadPaddingWidth = $head.innerWidth() - $head.width(),
-			iItemWidth = $tab.outerWidth(),
-			iItemPosLeft = $tab.position().left - iHeadPaddingWidth / 2;
+			leftMargin = $tab.css('margin-left'),
+			iItemWidth = $tab.outerWidth() + parseFloat(leftMargin),
+			iItemPosLeft = Math.ceil($tab.position().left - iHeadPaddingWidth / 2);
 
 		if (iItemPosLeft - iScrollLeft < 0 ||
 			(!skipRightSide && (iItemPosLeft + iItemWidth - iScrollLeft > iContainerWidth))) {
@@ -1479,7 +1505,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	/**
 	 * Handles the touch cancel event.
 	 *
-	 * @param {jQuery.EventObject} oEvent The event object
+	 * @param {jQuery.Event} oEvent The event object
 	 * @private
 	 */
 	IconTabHeader.prototype.ontouchcancel = IconTabHeader.prototype.ontouchend;

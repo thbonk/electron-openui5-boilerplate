@@ -4,28 +4,27 @@
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(["sap/ui/fl/RegistrationDelegator"
-	],
-	function(RegistrationDelegator) {
+sap.ui.define([
+	"sap/ui/fl/RegistrationDelegator"
+], function(RegistrationDelegator) {
 	"use strict";
 
 	/**
 	 * SAPUI5 library for UI Flexibility and Descriptor Changes and Descriptor Variants.
-	 *
 	 * @namespace
 	 * @name sap.ui.fl
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @private
 	 * @sap-restricted
-	 *
 	 */
 
 	sap.ui.getCore().initLibrary({
-		name:"sap.ui.fl",
-		version:"1.48.5",
-		dependencies:["sap.ui.core","sap.m"],
-		noLibraryCSS: true,
+		name: "sap.ui.fl",
+		version: "1.50.6",
+		dependencies: [
+			"sap.ui.core", "sap.m"
+		],
 		extensions: {
 			"sap.ui.support": {
 				diagnosticPlugins: [
@@ -39,4 +38,4 @@ sap.ui.define(["sap/ui/fl/RegistrationDelegator"
 
 	return sap.ui.fl;
 
-}, /* bExport= */ true);
+}, /* bExport= */true);

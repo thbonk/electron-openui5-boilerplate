@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 		 * @class
 		 * ObjectListItem is a display control that provides summary information about an object as a list item. The ObjectListItem title is the key identifier of the object. Additional text and icons can be used to further distinguish it from other objects. Attributes and statuses can be used to provide additional meaning about the object to the user.
 		 * @extends sap.m.ListItemBase
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @public
@@ -220,7 +220,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 
 		/**
 		 * @private
-		 * @returns {boolean}
+		 * @returns {boolean} If the sap.m.ObjectListItem has attributes
 		 */
 		ObjectListItem.prototype._hasAttributes = function() {
 			var attributes = this.getAttributes();
@@ -236,7 +236,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 
 		/**
 		 * @private
-		 * @returns {boolean}
+		 * @returns {boolean} If the sap.m.ObjectListItem has status
 		 */
 		ObjectListItem.prototype._hasStatus = function() {
 			return ((this.getFirstStatus() && !this.getFirstStatus()._isEmpty())
@@ -245,7 +245,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 
 		/**
 		 * @private
-		 * @returns {boolean}
+		 * @returns {boolean} If the sap.m.ObjectListItem has bottom content
 		 */
 		ObjectListItem.prototype._hasBottomContent = function() {
 
@@ -254,7 +254,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 
 		/**
 		 * @private
-		 * @returns {Array}
+		 * @returns {Array} The visible attributes of the control
 		 */
 		ObjectListItem.prototype._getVisibleAttributes = function() {
 
@@ -272,7 +272,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 
 		/**
 		 * @private
-		 * @returns {Array}
+		 * @returns {Array} The visible markers of the control
 		 */
 		ObjectListItem.prototype._getVisibleMarkers = function() {
 
@@ -290,7 +290,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 
 		/**
 		 * Lazy loads ObjectListItem's image.
-		 *
+		 * @returns {object} The image control
 		 * @private
 		 */
 		ObjectListItem.prototype._getImageControl = function() {
@@ -347,9 +347,9 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 			}
 		};
 
-		/**
+		/*
 		 * Sets the <code>number</code> property of the control.
-		 * @param sNumber {string} <code>Number</code> showed in <code>ObjectListItem</code>
+		 * @param {string} sNumber <code>Number</code> showed in <code>ObjectListItem</code>
 		 * @override
 		 * @returns {sap.m.ObjectListItem} this pointer for chaining
 		 */
@@ -362,9 +362,9 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 			return this;
 		};
 
-		/**
+		/*
 		 * Sets the <code>numberUnit</code> property of the control.
-		 * @param sNumberUnit {string} <code>NumberUnit</code> showed in <code>ObjectListItem</code>
+		 * @param {string} sNumberUnit <code>NumberUnit</code> showed in <code>ObjectListItem</code>
 		 * @override
 		 * @returns {sap.m.ObjectListItem} this pointer for chaining
 		 */
@@ -377,9 +377,9 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 			return this;
 		};
 
-		/**
+		/*
 		 * Sets the <code>numberTextDirection</code> property of the control.
-		 * @param oTextDirection {sap.ui.core.TextDirection} The text direction of the internal <code>ObjectNumber</code>
+		 * @param {sap.ui.core.TextDirection} oTextDirection The text direction of the internal <code>ObjectNumber</code>
 		 * @override
 		 * @returns {sap.m.ObjectListItem} this pointer for chaining
 		 */
@@ -392,9 +392,9 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 			return this;
 		};
 
-		/**
+		/*
 		 * Sets the <code>numberState</code> property of the control.
-		 * @param oValueState {sap.ui.core.ValueState} The <code>valueState</code> of the internal <code>ObjectNumber</code>
+		 * @param {sap.ui.core.ValueState} oValueState The <code>valueState</code> of the internal <code>ObjectNumber</code>
 		 * @override
 		 * @returns {sap.m.ObjectListItem} this pointer for chaining
 		 */
@@ -510,7 +510,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 
 		/**
 		 * @private
-		 * @returns Title text control
+		 * @returns {sap.m.ObjectListItem} Title text control
 		 */
 		ObjectListItem.prototype._getTitleText = function() {
 

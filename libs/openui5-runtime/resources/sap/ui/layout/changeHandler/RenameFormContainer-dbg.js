@@ -16,7 +16,7 @@ sap.ui.define([
 	 *
 	 * @alias sap.ui.layout.changeHandler.RenameFormContainer
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @since 1.48
 	 * @private
 	 * @experimental Since 1.48. This class is experimental and provides only limited functionality. Also the API might be changed in future.
@@ -49,7 +49,7 @@ sap.ui.define([
 			var sValue = oChangeDefinition.texts.formText.value;
 
 			if (typeof oTitle === "string") {
-				oModifier.insertAggregation(oRenamedElement, "title", sValue);
+				oModifier.setProperty(oRenamedElement, "title", sValue);
 			} else {
 				oModifier.setProperty(oTitle, "text", sValue);
 			}

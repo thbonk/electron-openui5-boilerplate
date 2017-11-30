@@ -11,7 +11,7 @@ sap.ui.define(['jquery.sap.global'],
 
 	/**
 	 * Some private variable used for creation of (pseudo-)unique ids.
-	 * @type integer
+	 * @type int
 	 * @private
 	 */
 	var iIdCounter = 0;
@@ -117,7 +117,7 @@ sap.ui.define(['jquery.sap.global'],
 	 * Use {@link jQuery.sap.getUriParameters} to create an instance of jQuery.sap.util.UriParameters.
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @since 0.9.0
 	 * @name jQuery.sap.util.UriParameters
 	 * @public

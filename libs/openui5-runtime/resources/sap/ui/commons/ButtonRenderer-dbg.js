@@ -12,7 +12,7 @@ sap.ui.define(['jquery.sap.global'],
 
 	/**
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @namespace
 	 */
 	var ButtonRenderer = {
@@ -151,6 +151,7 @@ sap.ui.define(['jquery.sap.global'],
 
 	/**
 	 * Function called by button control on mouse down event.
+	 * @param {sap.ui.commons.Button} oButton The button to be rendered
 	 */
 	ButtonRenderer.onactive = function(oButton) {
 		oButton.$().addClass("sapUiBtnAct").removeClass("sapUiBtnStd");
@@ -159,6 +160,7 @@ sap.ui.define(['jquery.sap.global'],
 
 	/**
 	 * Function called by button control on mouse up event.
+	 * @param {sap.ui.commons.Button} oButton The button to be rendered
 	 */
 	ButtonRenderer.ondeactive = function(oButton) {
 		oButton.$().addClass("sapUiBtnStd").removeClass("sapUiBtnAct");
@@ -167,6 +169,7 @@ sap.ui.define(['jquery.sap.global'],
 
 	/**
 	 * Function called by button control on blur.
+	 * @param {sap.ui.commons.Button} oButton The button to be rendered
 	 */
 	ButtonRenderer.onblur = function(oButton) {
 		oButton.$().removeClass("sapUiBtnFoc");
@@ -178,6 +181,7 @@ sap.ui.define(['jquery.sap.global'],
 
 	/**
 	 * Function called by button control on focus.
+	 * @param {sap.ui.commons.Button} oButton The button to be rendered
 	 */
 	ButtonRenderer.onfocus = function(oButton) {
 		oButton.$().addClass("sapUiBtnFoc");
@@ -185,7 +189,8 @@ sap.ui.define(['jquery.sap.global'],
 	};
 
 	/**
-	 * Function called when mouse leaves button
+	 * Function called when mouse leaves button.
+	 * @param {sap.ui.commons.Button} oButton The button to be rendered
 	 */
 	ButtonRenderer.onmouseout = function(oButton) {
 		oButton.$().removeClass("sapUiBtnAct");
@@ -194,7 +199,8 @@ sap.ui.define(['jquery.sap.global'],
 	};
 
 	/**
-	 * Function called when mouse enters button
+	 * Function called when mouse enters button.
+	 * @param {sap.ui.commons.Button} oButton The button to be rendered
 	 * @private
 	 */
 	ButtonRenderer.onmouseover = function(oButton) {
@@ -202,7 +208,10 @@ sap.ui.define(['jquery.sap.global'],
 	};
 
 	/**
-	 * Returns the icon URI for the given button state
+	 * Returns the icon URI for the given button state.
+	 * @param {sap.ui.commons.Button} oButton The button to be rendered
+	 * @param {string} sState The state of the button
+	 * @returns {Object} The icon of the button according to the state of the button
 	 * @private
 	 */
 	ButtonRenderer._getIconForState = function(oButton, sState) {
@@ -237,7 +246,10 @@ sap.ui.define(['jquery.sap.global'],
 	};
 
 	/**
-	 * HTML for icon as image
+	 * HTML for icon as image.
+	 * @param {sap.ui.core.RenderManager} oRenderManager The RenderManager that can be used for writing to the render output buffer
+	 * @param {sap.ui.commons.Button} oButton The button to be rendered
+	 * @param {boolean} bImageOnly Whether the button has only image or it has text too
 	 */
 	ButtonRenderer.writeImgHtml = function(oRenderManager, oButton, bImageOnly) {
 		var rm = oRenderManager,
@@ -266,7 +278,9 @@ sap.ui.define(['jquery.sap.global'],
 	};
 
 	/**
-	 * HTML for icon as icon font
+	 * HTML for icon as icon font.
+	 * @param {sap.ui.core.RenderManager} oRenderManager The RenderManager that can be used for writing to the render output buffer
+	 * @param {sap.ui.commons.Button} oButton The button to be rendered
 	 */
 	ButtonRenderer.writeIconHtml = function(oRenderManager, oButton) {
 
@@ -305,8 +319,8 @@ sap.ui.define(['jquery.sap.global'],
 	/**
 	*
 	* @private
-	* @param oButton
-	* @returns {object} icon attributes
+	* @param {sap.ui.commons.Button} oButton The button to be rendered
+	* @returns {Object} Icon attributes
 	*/
 	function buildIconAttributes(oButton) {
 		var oAttributes = {},

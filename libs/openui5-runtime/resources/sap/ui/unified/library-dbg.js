@@ -19,14 +19,14 @@ sap.ui.define(['jquery.sap.global',
 	 * @namespace
 	 * @name sap.ui.unified
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @public
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.unified",
-		version: "1.48.5",
+		version: "1.50.6",
 		dependencies : ["sap.ui.core"],
 		types: [
 			"sap.ui.unified.CalendarDayType",
@@ -155,8 +155,111 @@ sap.ui.define(['jquery.sap.global',
 		 * The semantic meaning must be defined by the app. It can be displayed in a legend.
 		 * @public
 		 */
-		Type10 : "Type10"
+		Type10 : "Type10",
 
+		/**
+		 * The semantic meaning must be defined by the app. It can be displayed in a legend.
+		 * @public
+		 * @since 1.50
+		 */
+		Type11 : "Type11",
+
+		/**
+		 * The semantic meaning must be defined by the app. It can be displayed in a legend.
+		 * @public
+		 * @since 1.50
+		 */
+		Type12 : "Type12",
+
+		/**
+		 * The semantic meaning must be defined by the app. It can be displayed in a legend.
+		 * @public
+		 * @since 1.50
+		 */
+		Type13 : "Type13",
+
+		/**
+		 * The semantic meaning must be defined by the app. It can be displayed in a legend.
+		 * @public
+		 * @since 1.50
+		 */
+		Type14 : "Type14",
+
+		/**
+		 * The semantic meaning must be defined by the app. It can be displayed in a legend.
+		 * @public
+		 * @since 1.50
+		 */
+		Type15 : "Type15",
+
+		/**
+		 * The semantic meaning must be defined by the app. It can be displayed in a legend.
+		 * @public
+		 * @since 1.50
+		 */
+		Type16 : "Type16",
+
+		/**
+		 * The semantic meaning must be defined by the app. It can be displayed in a legend.
+		 * @public
+		 * @since 1.50
+		 */
+		Type17 : "Type17",
+
+		/**
+		 * The semantic meaning must be defined by the app. It can be displayed in a legend.
+		 * @public
+		 * @since 1.50
+		 */
+		Type18 : "Type18",
+
+		/**
+		 * The semantic meaning must be defined by the app. It can be displayed in a legend.
+		 * @public
+		 * @since 1.50
+		 */
+		Type19 : "Type19",
+
+		/**
+		 * The semantic meaning must be defined by the app. It can be displayed in a legend.
+		 * @public
+		 * @since 1.50
+		 */
+		Type20 : "Type20"
+
+	};
+
+	/**
+	 * Standard day types visualized in a {@link sap.m.PlanningCalendarLegend}, which correspond to days in a {@link sap.ui.unified.Calendar}.
+	 * @enum {string}
+	 * @public
+	 * @since 1.50
+	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 */
+	sap.ui.unified.StandardCalendarLegendItem = {
+		/**
+		 * Type used for visualization of the current date.
+         * @public
+		 */
+		Today: "Today",
+
+		/**
+		 * Type used for visualization of the regular work days.
+         * @public
+		 */
+		WorkingDay: "WorkingDay",
+
+		/**
+		 * Type used for visualization of the non-working days.
+         * @public
+		 */
+		NonWorkingDay: "NonWorkingDay",
+
+		/**
+		 * Type used for visualization of the currently selected day.
+         * @public
+		 */
+		Selected: "Selected"
 	};
 
 	/**

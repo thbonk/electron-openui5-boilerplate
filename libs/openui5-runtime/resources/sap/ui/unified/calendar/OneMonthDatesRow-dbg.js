@@ -28,7 +28,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/DatesRow', 'sap/ui/
 	 * Other usages are not supported.
 	 *
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -122,7 +122,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/DatesRow', 'sap/ui/
 
 	/**
 	 * Handles [HOME] key to focus the 1st day of the month regardless any dates from other months
-	 * @param oEvent the event
+	 * @param {Object} oEvent the event
 	 */
 	OneMonthDatesRow.prototype.onsaphome = function(oEvent) {
 		var oCalStartDate = CalendarDate.fromLocalJSDate(this.getStartDate());
@@ -138,7 +138,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/DatesRow', 'sap/ui/
 
 	/**
 	 * Handles [END] key to focus the last day of the month regardless any dates from other months
-	 * @param oEvent the event
+	 * @param {Object} oEvent the event
 	 */
 	OneMonthDatesRow.prototype.onsapend = function (oEvent) {
 		var oStartDate = this.getStartDate(),

@@ -18,7 +18,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Core', 'sap/ui/core/tmpl/Templa
 	 * @author Peter Muessig
 	 * @public
 	 * @since 1.15.0
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @alias sap.ui.core.plugin.TemplatingSupport
 	 */
 	var TemplatingSupport = function() {
@@ -40,7 +40,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Core', 'sap/ui/core/tmpl/Templa
 
 	/**
 	 * Will be invoked by <code>sap.ui.core.Core</code> to notify the plugin to start
-	 * @param {sap.ui.core.Core} oCore reference to the Core
 	 * @public
 	 */
 	TemplatingSupport.prototype.stopPlugin = function() {

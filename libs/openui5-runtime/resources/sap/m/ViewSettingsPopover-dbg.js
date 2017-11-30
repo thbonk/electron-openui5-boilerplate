@@ -36,7 +36,7 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @private
@@ -249,7 +249,9 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		 * @param {object} oControl Instance of the control that triggered the opening
 		 */
 		ViewSettingsPopover.prototype.openBy = function (oControl) {
-			this._getPopover(oControl).openBy(oControl);
+			var oPopover = this._getPopover(oControl);
+
+			oPopover.openBy(oControl);
 			if (sap.ui.Device.system.phone) {
 				this._showContentFor(this._determinePageToOpen());
 			} else {
@@ -263,6 +265,10 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 			// if only one tab is present, directly show it's content
 			if (this._getSegmentedButton().getItems() && this._getSegmentedButton().getItems().length === 1) {
 				this._showContentFor(this._determinePageToOpen());
+			}
+
+			if (oPopover.getAriaLabelledBy() && oPopover.getAriaLabelledBy().indexOf(this._getPopoverAriaLabel()) === -1) {
+				oPopover.addAriaLabelledBy(this._getPopoverAriaLabel());
 			}
 		};
 
@@ -360,6 +366,9 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		 * @private
 		 */
 		ViewSettingsPopover.prototype._showContentFor = function (sPageId, oParentItem, bDisableSlideEffect) {
+			var oPopoverAriaLabelledBy = sap.ui.getCore().byId(this._getPopoverAriaLabel()),
+				sAriaText;
+
 			this._getPopover().setContentHeight('300px');
 			this._getPopover().setContentWidth('300px');
 
@@ -370,15 +379,16 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 			this._addPageContents(sPageId);
 
 			if (sPageId === this._tabMap['filterDetail']) {
-				this._updateTitleText(this._getText('VIEWSETTINGS_TITLE_FILTERBY') + oParentItem.getTitle(), true);
+				sAriaText = this._updateTitleText(this._getText('VIEWSETTINGS_TITLE_FILTERBY') + oParentItem.getTitle(), true);
 				this._goToDetailsPage(oParentItem, bDisableSlideEffect);
 			} else {
-				this._updateTitleText(sPageId);
+				sAriaText = this._updateTitleText(sPageId);
 				if (sPageId === this._tabMap['filter']) {
 					this._updateFilterListItemsCount();
 				}
 				this._goToMainPage();
 			}
+			oPopoverAriaLabelledBy.setText(sAriaText);
 			this._getSegmentedButton().setSelectedKey(sPageId); // make sure segmented button is always in sync
 			this._currentPageId = sPageId;
 		};
@@ -386,7 +396,8 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		/**
 		 * Updates the text of the title aggregation.
 		 * @param {string} sText String to be shown as new title
-		 * @param {boolean} bSkipTranslate Weather to translate a key ot displayed a string directly
+		 * @param {boolean} bSkipTranslate Whether to translate a key ot displayed a string directly
+		 * @returns {string} the computed title text
 		 * @private
 		 */
 		ViewSettingsPopover.prototype._updateTitleText = function (sText, bSkipTranslate) {
@@ -407,11 +418,12 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 			} else {
 				this._getTitle().setText(sString);
 			}
+			return sString;
 		};
 
 		/**
 		 * Goes to the details page.
-		 * @param {object} oParentItem
+		 * @param {Object} oParentItem The parent item
 		 * @param {boolean} bDisableSlideEffect Flag enabling or disabling the slide animation on pages navigation
 		 * @private
 		 */
@@ -833,8 +845,9 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 
 		/**
 		 * Creates "select all" checkbox.
-		 * @param {array} aFilterSubItems
-		 * @param {object} oFilterDetailList
+		 * @param {array} aFilterSubItems The filter sub-items
+		 * @param {Object} oFilterDetailList The filter details list
+		 * @returns {sap.m.CheckBox} The created checkBox
 		 * @private
 		 */
 		ViewSettingsPopover.prototype._getSelectAllCheckbox = function (aFilterSubItems, oFilterDetailList) {
@@ -1074,7 +1087,7 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 
 		/**
 		 * Gets <code>LabelledBy</code> association or create label and return its ID
-		 * @returns {string}
+		 * @returns {sap.ui.core.InvisibleText} The created label
 		 * @private
 		 */
 		ViewSettingsPopover.prototype._getPopoverAriaLabel = function () {
@@ -1091,7 +1104,7 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		/**
 		 * Determine if a string is actually a name of one of the items aggregations.
 		 * @param {string} sAggregationName Suggested name of aggregation
-		 * @returns {boolean}
+		 * @returns {boolean} Whether a string is actually a name of one of the items aggregations
 		 * @private
 		 */
 		ViewSettingsPopover.prototype._isItemsAggregation = function (sAggregationName) {
@@ -1109,9 +1122,9 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		/**
 		 * Adds an entity <code>oObject</code> to the aggregation identified by <code>sAggregationName</code>.
 		 *
-		 * @param sAggregationName {string} The name of the aggregation where the new entity is to be added
-		 * @param oObject {any} The value of the aggregation to be added
-		 * @param bSuppressInvalidate {boolean} Whether to suppress invalidation
+		 * @param {string} sAggregationName The name of the aggregation where the new entity is to be added
+		 * @param {any} oObject The value of the aggregation to be added
+		 * @param {boolean} bSuppressInvalidate Whether to suppress invalidation
 		 * @returns {sap.m.ViewSettingsPopover} <code>this</code> pointer for chaining
 		 * @override
 		 */
@@ -1126,10 +1139,10 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		/**
 		 * Inserts an entity to the aggregation named <code>sAggregationName</code> at position <code>iIndex</code>.
 		 *
-		 * @param sAggregationName {string} The name of the aggregation
-		 * @param oObject {any} The value of the aggregation to be inserted
-		 * @param iIndex {int} Where to insert
-		 * @param bSuppressInvalidate {boolean} Whether to suppress invalidation
+		 * @param {string} sAggregationName The name of the aggregation
+		 * @param {any} oObject The value of the aggregation to be inserted
+		 * @param {int} iIndex Where to insert
+		 * @param {boolean} bSuppressInvalidate Whether to suppress invalidation
 		 * @returns {sap.m.ViewSettingsPopover} <code>this</code> pointer for chaining
 		 * @override
 		 */
@@ -1144,9 +1157,9 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		/**
 		 * Removes an entity from the aggregation named <code>sAggregationName</code>.
 		 *
-		 * @param sAggregationName {string} The name of the aggregation
-		 * @param oObject {any} The value of aggregation to be removed
-		 * @param bSuppressInvalidate {boolean} Whether to suppress invalidation
+		 * @param {string} sAggregationName The name of the aggregation
+		 * @param {any} oObject The value of aggregation to be removed
+		 * @param {boolean} bSuppressInvalidate Whether to suppress invalidation
 		 * @returns {sap.m.ViewSettingsPopover} <code>this</code> pointer for chaining
 		 * @override
 		 */
@@ -1163,8 +1176,8 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		/**
 		 * Removes all objects from the aggregation named <code>sAggregationName</code>.
 		 *
-		 * @param sAggregationName {string} The name of aggregation
-		 * @param bSuppressInvalidate {boolean} Whether to suppress invalidation
+		 * @param {string} sAggregationName The name of aggregation
+		 * @param {boolean} bSuppressInvalidate Whether to suppress invalidation
 		 * @returns {sap.m.ViewSettingsPopover} <code>this</code> pointer for chaining
 		 * @override
 		 */
@@ -1179,8 +1192,8 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		/**
 		 * Destroys all the entities in the aggregation named <code>sAggregationName</code>.
 		 *
-		 * @param sAggregationName {string} The name of aggregation
-		 * @param bSuppressInvalidate {boolean} Whether to suppress invalidation
+		 * @param {string} sAggregationName The name of aggregation
+		 * @param {boolean} bSuppressInvalidate Whether to suppress invalidation
 		 * @returns {sap.m.ViewSettingsPopover} <code>this</code> pointer for chaining
 		 * @override
 		 */
@@ -1196,8 +1209,8 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		/**
 		 * Ensures proper handling of <code>ViewSettingsPopover</code> <code>items</code> aggregation> and proxies to the list <code>items</code> aggregation.
 		 *
-		 * @param aArgs {array}
-		 * @param bIsAdding {boolean}
+		 * @param {array} aArgs
+		 * @param {boolean} bIsAdding
 		 * @returns {sap.m.ViewSettingsPopover} <code>this</code> instance for chaining
 		 */
 		ViewSettingsPopover.prototype._handleItemsAggregation = function (aArgs, bIsAdding) {
@@ -1225,10 +1238,10 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		/**
 		 * Ensures proper handling of <code>ViewSettingsPopover</code> <code>items</code> aggregation and proxies to the List <code>items</code> aggregation.
 		 *
-		 * @param aArgs {array}
-		 * @param bIsAdding {boolean}
-		 * @param sFunctionName {string}
-		 * @param oObject {object}
+		 * @param {array} aArgs
+		 * @param {boolean} bIsAdding
+		 * @param {string} sFunctionName
+		 * @param {object} oObject
 		 * @returns {*}
 		 */
 		ViewSettingsPopover.prototype._handleListItemsAggregation = function (aArgs, bIsAdding, sFunctionName, oObject) {
@@ -1334,7 +1347,7 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		/**
 		 * Attaches any previously added event handlers.
 		 *
-		 * @param oObject {object} The <code>ViewSettingsItem</code> instance on which events will be detached/attached
+		 * @param {object} oObject The <code>ViewSettingsItem</code> instance on which events will be detached/attached
 		 * @private
 		 */
 		ViewSettingsPopover.prototype._attachItemEventListeners = function (oObject) {
@@ -1353,7 +1366,7 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		/**
 		 * Handles ViewSettingsItem property change
 		 *
-		 * @param {object} oEvent
+		 * @param {Object} oEvent The fired event
 		 * @private
 		 */
 		ViewSettingsPopover.prototype._handleViewSettingsItemPropertyChanged = function (oEvent) {
@@ -1373,7 +1386,7 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		/**
 		 * Handles FilterDetailItem aggregation change to redraw its corresponding list item
 		 *
-		 * @param {object} oEvent
+		 * @param {Object} oEvent The fired event
 		 * @private
 		 */
 		ViewSettingsPopover.prototype._handleFilterDetailItemsAggregationChange = function (oEvent) {
@@ -1389,7 +1402,7 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		/**
 		 * Detaches any previously added event handlers.
 		 *
-		 * @param oObject {object} The <code>ViewSettingsItem</code> instance on which events will be detached/attached.
+		 * @param {object} oObject The <code>ViewSettingsItem</code> instance on which events will be detached/attached.
 		 * @private
 		 */
 		ViewSettingsPopover.prototype._detachItemEventListeners = function (oObject) {
@@ -1399,10 +1412,10 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		/**
 		 * Ensures proper <code>ViewSettingsItem</code> inheritance in context of List.
 		 *
-		 * @param {object} oViewSettingsItem
-		 * @param {string} sType
-		 * @param {boolean} bHasDetailsPage
-		 * @returns {sap.ui.core.Element}
+		 * @param {object} oViewSettingsItem The sap.m.ViewSettingsItem to be inherit
+		 * @param {string} sType Its type
+		 * @param {boolean} bHasDetailsPage Whether it has details page
+		 * @returns {sap.ui.core.Element} The created list item
 		 */
 		ViewSettingsPopover.prototype._createListItemFromViewSettingsItem = function (oViewSettingsItem, sType, bHasDetailsPage) {
 			var oListItem,
@@ -1438,7 +1451,7 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		/**
 		 * Finds the correct <code>ViewSettingsItem</code> in context of <code>ViewSettingsPopover</code> by a given <code>StandardListItem</code> instance.
 		 *
-		 * @param oListItem {sap.m.ViewSettingsItem} The <code>ViewSettingsItem</code> instance which analogue is to be found
+		 * @param {sap.m.ViewSettingsItem} oListItem The <code>ViewSettingsItem</code> instance which analogue is to be found
 		 * @returns {sap.m.ViewSettingsItem} The <code>ViewSettingsItem</code> in context of List found (if any)
 		 */
 		ViewSettingsPopover.prototype._findViewSettingsItemFromListItem = function (oListItem) {
@@ -1452,7 +1465,7 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		/**
 		 * Finds the correct <code>ViewSettingsItem</code> in context of List by a given <code>ViewSettingsItem</code> instance.
 		 *
-		 * @param oViewSettingsItem {sap.m.ViewSettingsItem} The <code>ViewSettingsItem</code> instance which analogue is to be found
+		 * @param {sap.m.ViewSettingsItem} oViewSettingsItem The <code>ViewSettingsItem</code> instance which analogue is to be found
 		 * @returns {sap.m.ViewSettingsItem} The <code>ViewSettingsItem</code> in context of List found (if any)
 		 */
 		ViewSettingsPopover.prototype._findListItemFromViewSettingsItem = function (oViewSettingsItem) {

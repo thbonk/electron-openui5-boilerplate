@@ -4,8 +4,12 @@
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(["sap/m/GenericTileScope"], function(GenericTileScope) {
+sap.ui.define([ 'jquery.sap.global', './library'],
+	function(jQuery, library) {
 	"use strict";
+
+	// shortcut for sap.m.GenericTileScope
+	var GenericTileScope = library.GenericTileScope;
 
 	/**
 	 * SlideTile renderer.

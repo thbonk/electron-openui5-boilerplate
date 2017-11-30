@@ -18,7 +18,7 @@ sap.ui.define("sap/ui/fl/EventHistory",function () {
 	 * @alias sap.ui.fl.EventHistory
 	 * @experimental Since 1.47.0
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 */
 	var EventHistory = function () {
 	};
@@ -50,7 +50,7 @@ sap.ui.define("sap/ui/fl/EventHistory",function () {
 	 *
 	 * @param {string} sChannelId The channel of the event
 	 * @param {string} sEventId The identifier of the event
-	 * @param {map} The parameter map carried by the event
+	 * @param {map} mParameters The parameter map carried by the event
 	 *
 	 * @public
 	 */
@@ -108,7 +108,7 @@ sap.ui.define("sap/ui/fl/FakeLrepLocalStorage",[], function() {
 	 * @class
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @private
 	 * @static
@@ -292,7 +292,7 @@ sap.ui.define("sap/ui/fl/Preprocessor",[
 	 * @class
 	 * @constructor
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.27.0
 	 * @implements sap.ui.core.mvc.View.Preprocessor
 	 */
@@ -334,7 +334,7 @@ sap.ui.define("sap/ui/fl/Utils",[
 	 * @namespace
 	 * @alias sap.ui.fl.Utils
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.25.0
 	 */
 	var Utils = {
@@ -344,6 +344,7 @@ sap.ui.define("sap/ui/fl/Utils",[
 		_sTopLayer : aLayers[aLayers.length - 1],
 		_sMaxLayer : aLayers[aLayers.length - 1],
 		DEFAULT_APP_VERSION : "DEFAULT_APP_VERSION",
+		APP_ID_AT_DESIGN_TIME : "sap.ui.fl",
 		/**
 		 * log object exposes available log functions
 		 *
@@ -634,7 +635,7 @@ sap.ui.define("sap/ui/fl/Utils",[
 		 * Determines whether a layer is higher than the max layer.
 		 *
 		 * @param {String} sLayer - Layer name to be evaluated
-		 * @returns {boolean} <code>true<code> if input layer is higher than max layer, otherwise <code>false<code>
+		 * @returns {boolean} <code>true</code> if input layer is higher than max layer, otherwise <code>false</code>
 		 * @public
 		 * @function
 		 * @name sap.ui.fl.Utils.isOverMaxLayer
@@ -646,7 +647,7 @@ sap.ui.define("sap/ui/fl/Utils",[
 		/**
 		 * Determines if filtering of changes based on layer is required.
 		 *
-		 * @returns {boolean} <code>true<code> if the top layer is also the max layer, otherwise <code>false<code>
+		 * @returns {boolean} <code>true</code> if the top layer is also the max layer, otherwise <code>false</code>
 		 * @public
 		 * @function
 		 * @name sap.ui.fl.Utils.isLayerFilteringRequired
@@ -1199,7 +1200,11 @@ sap.ui.define("sap/ui/fl/Utils",[
 					}
 				}
 				if (oManifest.getEntry("sap.app") && oManifest.getEntry("sap.app").id) {
-					return oManifest.getEntry("sap.app").id + ".Component";
+					var sAppId = oManifest.getEntry("sap.app").id;
+					if (sAppId === Utils.APP_ID_AT_DESIGN_TIME && oManifest.getComponentName) {
+						sAppId = oManifest.getComponentName();
+					}
+					return sAppId + ".Component";
 				}
 			}
 			this.log.warning("No Manifest received.");
@@ -1229,16 +1234,45 @@ sap.ui.define("sap/ui/fl/Utils",[
 		/**
 		 * Returns whether provided layer is a customer dependent layer
 		 *
+		 * @param {string} sLayerName - layer name
 		 * @returns {boolean} true if provided layer is customer dependent layer else false
 		 * @public
 		 */
 		isCustomerDependentLayer : function(sLayerName) {
 			return (["CUSTOMER", "CUSTOMER_BASE"].indexOf(sLayerName) > -1);
+		},
+
+		/**
+		 * Execute the passed asynchronous functions serialized - one after the other
+		 *
+		 * @param {array.<function>} aPromiseQueue - List of asynchronous functions that returns promises
+		 * @returns {Promise} Empty resolved promise when all passed promises inside functions have been executed
+		 */
+		execPromiseQueueSequentially : function(aPromiseQueue) {
+			if (aPromiseQueue.length === 0) {
+				return Promise.resolve();
+			}
+			var fnPromise = aPromiseQueue.shift();
+			if (typeof fnPromise === "function") {
+				return fnPromise()
+
+				.catch(function(e) {
+					this.log.error("Changes could not be applied. Merge error detected. " + e);
+				}.bind(this))
+
+				.then(function() {
+					return this.execPromiseQueueSequentially(aPromiseQueue);
+				}.bind(this));
+
+			} else {
+				this.log.error("Changes could not be applied, promise not wrapped inside function.");
+				return this.execPromiseQueueSequentially(aPromiseQueue);
+			}
 		}
+
 	};
 	return Utils;
 }, true);
-
 }; // end of sap/ui/fl/Utils.js
 if ( !jQuery.sap.isDeclared('sap.ui.fl.changeHandler.Base') ) {
 /*!
@@ -1248,21 +1282,18 @@ if ( !jQuery.sap.isDeclared('sap.ui.fl.changeHandler.Base') ) {
  */
 
 jQuery.sap.declare('sap.ui.fl.changeHandler.Base'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-sap.ui.define("sap/ui/fl/changeHandler/Base",[
-	"sap/ui/fl/Utils", "jquery.sap.global"
-], function(Utils, $) {
+sap.ui.define("sap/ui/fl/changeHandler/Base",function() {
 	"use strict";
 
 	/**
 	 * Base functionality for all change handler which provides some reuse methods
 	 * @alias sap.ui.fl.changeHandler.Base
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.27.0
 	 *
 	 */
-	var Base = { };
+	var Base = {};
 
 	/**
 	 * Sets a text in a change.
@@ -1297,98 +1328,125 @@ if ( !jQuery.sap.isDeclared('sap.ui.fl.changeHandler.BaseRename') ) {
  */
 
 jQuery.sap.declare('sap.ui.fl.changeHandler.BaseRename'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
 sap.ui.define("sap/ui/fl/changeHandler/BaseRename",[
-	"jquery.sap.global", "./Base", "sap/ui/fl/Utils"
-    ], function(jQuery, Base, Utils) {
-		"use strict";
+	"./Base", "sap/ui/fl/Utils"
+], function(
+	Base,
+	Utils
+) {
+	"use strict";
+
+	/**
+	 * Base Change Handler for Rename
+	 *
+	 * @constructor
+	 * @alias sap.ui.fl.changeHandler.BaseRename
+	 * @author SAP SE
+	 * @version 1.50.6
+	 * @experimental Since 1.46
+	 */
+	var BaseRename = {
 
 		/**
-		 * Base Change Handler for Rename
-		 *
-		 * @constructor
-		 * @alias sap.ui.fl.changeHandler.BaseRename
-		 * @author SAP SE
-		 * @version 1.48.5
-		 * @experimental Since 1.46
+		 * Returns an instance of the rename change handler
+		 * @param  {object} mRenameSettings The settings required for the rename action
+		 *                  mRenameSettings.propertyName The property from the control to be renamed (e.g. "label")
+		 *                  mRenameSettings.changePropertyName Only use if you have to have migration changeHandler: Property name in change (for LRep; e.g. "fieldLabel")
+		 *                  mRenameSettings.translationTextType The translation text type in change (e.g. "XFLD")
+		 * @return {any} the rename change handler object
 		 */
-		var BaseRename = {
+		createRenameChangeHandler: function(mRenameSettings) {
 
-			/**
-			 * Returns an instance of the rename change handler
-			 * @param  {object} mRenameSettings The settings required for the rename action
-			 *                  mRenameSettings.propertyName The property from the control to be renamed (e.g. "label")
-			 *                  mRenameSettings.changePropertyName Only use if you have to have migration changeHandler: Property name in change (for LRep; e.g. "fieldLabel")
-			 *                  mRenameSettings.translationTextType The translation text type in change (e.g. "XFLD")
-			 * @return {any} the rename change handler object
-			 */
-			createRenameChangeHandler: function(mRenameSettings) {
+			mRenameSettings.changePropertyName = mRenameSettings.changePropertyName || "newText";
 
-				mRenameSettings.changePropertyName = mRenameSettings.changePropertyName || "newText";
+			return {
 
-				return {
+				/**
+				 * Renames a control.
+				 *
+				 * @param {sap.ui.fl.Change} oChange change wrapper object with instructions to be applied on the control map
+				 * @param {sap.ui.core.Control} oControl Control that matches the change selector for applying the change
+				 * @param {object} mPropertyBag property bag
+				 * @param {object} mPropertyBag.modifier modifier for the controls
+				 * @returns {boolean} true if successful
+				 * @public
+				 */
+				applyChange : function(oChange, oControl, mPropertyBag) {
+					var oModifier = mPropertyBag.modifier;
+					var sPropertyName = mRenameSettings.propertyName;
+					var oChangeDefinition = oChange.getDefinition();
+					var sText = oChangeDefinition.texts[mRenameSettings.changePropertyName];
+					var sValue = sText.value;
 
-					/**
-					 * Renames a control.
-					 *
-					 * @param {sap.ui.fl.Change} oChange change wrapper object with instructions to be applied on the control map
-					 * @param {sap.ui.core.Control} oControl Control that matches the change selector for applying the change
-					 * @param {object} mPropertyBag property bag
-					 * @param {object} mPropertyBag.modifier modifier for the controls
-					 * @returns {boolean} true if successful
-					 * @public
-					 */
-					applyChange : function(oChange, oControl, mPropertyBag) {
+					if (oChangeDefinition.texts && sText && typeof (sValue) === "string") {
+						oChange.setRevertData(oModifier.getProperty(oControl, sPropertyName));
+
+						// The value can be a binding - e.g. for translatable values in WebIde
+						if (Utils.isBinding(sValue)) {
+							oModifier.setPropertyBinding(oControl, sPropertyName, sValue);
+						} else {
+							oModifier.setProperty(oControl, sPropertyName, sValue);
+						}
+						return true;
+
+					} else {
+						Utils.log.error("Change does not contain sufficient information to be applied: [" + oChangeDefinition.layer + "]" + oChangeDefinition.namespace + "/" + oChangeDefinition.fileName + "." + oChangeDefinition.fileType);
+						//however subsequent changes should be applied
+					}
+				},
+
+				/**
+				 * Reverts a Rename Change
+				 *
+				 * @param {sap.ui.fl.Change} oChange change wrapper object with instructions to be applied on the control map
+				 * @param {sap.ui.core.Control} oControl Control that matches the change selector for applying the change
+				 * @param {object} mPropertyBag property bag
+				 * @param {object} mPropertyBag.modifier modifier for the controls
+				 * @returns {boolean} true if successful
+				 * @public
+				 */
+				revertChange : function(oChange, oControl, mPropertyBag) {
+					var sOldText = oChange.getRevertData();
+					if (sOldText || sOldText === "") {
 						var oModifier = mPropertyBag.modifier;
 						var sPropertyName = mRenameSettings.propertyName;
-						var oChangeDefinition = oChange.getDefinition();
-						var sText = oChangeDefinition.texts[mRenameSettings.changePropertyName];
-						var sValue = sText.value;
+						oModifier.setProperty(oControl, sPropertyName, sOldText);
 
-						if (oChangeDefinition.texts && sText && typeof (sValue) === "string") {
-
-							// The value can be a binding - e.g. for translatable values in WebIde
-							if (Utils.isBinding(sValue)) {
-								oModifier.setPropertyBinding(oControl, sPropertyName, sValue);
-							} else {
-								oModifier.setProperty(oControl, sPropertyName, sValue);
-							}
-							return true;
-
-						} else {
-							Utils.log.error("Change does not contain sufficient information to be applied: [" + oChangeDefinition.layer + "]" + oChangeDefinition.namespace + "/" + oChangeDefinition.fileName + "." + oChangeDefinition.fileType);
-							//however subsequent changes should be applied
-						}
-					},
-
-					/**
-					 * Completes the change by adding change handler specific content
-					 *
-					 * @param {sap.ui.fl.Change} oChange change wrapper object to be completed
-					 * @param {object} mSpecificChangeInfo with attribute (e.g. textLabel) to be included in the change
-					 * @public
-					 */
-					completeChangeContent : function(oChange, mSpecificChangeInfo, mPropertyBag) {
-						var oChangeDefinition = oChange.getDefinition();
-						var sChangePropertyName = mRenameSettings.changePropertyName;
-						var sTranslationTextType = mRenameSettings.translationTextType;
-
-						var oControlToBeRenamed = mPropertyBag.modifier.bySelector(oChange.getSelector(), mPropertyBag.appComponent);
-						oChangeDefinition.content.originalControlType = mPropertyBag.modifier.getControlType(oControlToBeRenamed);
-
-						if (typeof (mSpecificChangeInfo.value) === "string") {
-							Base.setTextInChange(oChangeDefinition, sChangePropertyName, mSpecificChangeInfo.value, sTranslationTextType);
-						} else {
-							throw new Error("oSpecificChangeInfo.value attribute required");
-						}
+						oChange.resetRevertData();
+						return true;
+					} else {
+						Utils.log.error("Change doesn't contain sufficient information to be reverted. Most Likely the Change didn't go through applyChange.");
 					}
+				},
 
-				};
-			}
-		};
+				/**
+				 * Completes the change by adding change handler specific content
+				 *
+				 * @param {sap.ui.fl.Change} oChange change wrapper object to be completed
+				 * @param {object} mSpecificChangeInfo with attribute (e.g. textLabel) to be included in the change
+				 * @public
+				 */
+				completeChangeContent : function(oChange, mSpecificChangeInfo, mPropertyBag) {
+					var oChangeDefinition = oChange.getDefinition();
+					var sChangePropertyName = mRenameSettings.changePropertyName;
+					var sTranslationTextType = mRenameSettings.translationTextType;
 
-		return BaseRename;
-	},
+					var oControlToBeRenamed = mPropertyBag.modifier.bySelector(oChange.getSelector(), mPropertyBag.appComponent);
+					oChangeDefinition.content.originalControlType = mPropertyBag.modifier.getControlType(oControlToBeRenamed);
+
+					if (typeof (mSpecificChangeInfo.value) === "string") {
+						Base.setTextInChange(oChangeDefinition, sChangePropertyName, mSpecificChangeInfo.value, sTranslationTextType);
+					} else {
+						throw new Error("oSpecificChangeInfo.value attribute required");
+					}
+				}
+
+			};
+		}
+	};
+
+	return BaseRename;
+},
 /* bExport= */true);
 }; // end of sap/ui/fl/changeHandler/BaseRename.js
 if ( !jQuery.sap.isDeclared('sap.ui.fl.changeHandler.BaseTreeModifier') ) {
@@ -1413,8 +1471,8 @@ sap.ui.define("sap/ui/fl/changeHandler/BaseTreeModifier",["sap/ui/fl/Utils", "sa
 		* @param {boolean} oSelector.isLocalId - true if the id within the selector is a local id or a global id
 		* @param {sap.ui.core.UIComponent} oAppComponent
 		* @param {object} mAdditionalSelectorInformation additional mapped data which is added to the selector
-		* @param {Node} oView - only for xml processing: the xml node of the view
-		* @returns {sap.ui.core.Control} - control targeted within the selector
+		* @param {Element} oView - For XML processing only: XML node of the view
+		* @returns {sap.ui.core.Control|Element} - Control targeted within the selector
 		* @throws {Exception} oException - in case no control could be determined an error is thrown
 		* @public
 		*/
@@ -1474,7 +1532,7 @@ sap.ui.define("sap/ui/fl/changeHandler/BaseTreeModifier",["sap/ui/fl/Utils", "sa
 		/** Function for determining the selector later used to apply a change for a given control.
 		 * The function differs between local ids generated starting with 1.40 and the global ids generated in previous versions.
 		 *
-		 * @param {sap.ui.core.Control | string} vControl - sapui5 control or id string for which the selector should be determined
+		 * @param {sap.ui.core.Control | string} vControl - control or id string for which the selector should be determined
 		 * @param {object} mAdditionalSelectorInformation additional mapped data which is added to the selector
 		 * @param {sap.ui.core.Component} (optional) oAppComponent application component, needed only if vControl is a string or XML Node
 		 * @returns {object} - oSelector
@@ -1527,6 +1585,206 @@ sap.ui.define("sap/ui/fl/changeHandler/BaseTreeModifier",["sap/ui/fl/Utils", "sa
 
 
 }; // end of sap/ui/fl/changeHandler/BaseTreeModifier.js
+if ( !jQuery.sap.isDeclared('sap.ui.fl.changeHandler.ChangeHandlerMediator') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+jQuery.sap.declare('sap.ui.fl.changeHandler.ChangeHandlerMediator'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+sap.ui.define("sap/ui/fl/changeHandler/ChangeHandlerMediator",[
+	"jquery.sap.global"
+], function(
+	jQuery
+) {
+	"use strict";
+
+	/**
+	 * Change Handler Mediator to manage the requirements for the change handlers
+	 *
+	 * @alias sap.ui.fl.changeHandler.ChangeHandlerMediator
+	 *
+	 * @private
+	 * @author SAP SE
+	 * @version 1.50.6
+	 *
+	 * @experimental Since 1.49.0 This class is experimental and provides only limited functionality. Also the API might be
+	 *               changed in future.
+	 *
+	 */
+	var ChangeHandlerMediator = { };
+
+	/**
+	 * Array of relevant change handlers settings
+	 * Initialize with the required entries for AddODataField
+	 */
+	ChangeHandlerMediator._aChangeHandlerSettings = [];
+
+	["addODataField", "addODataFieldWithLabel"].forEach(function (sScenario) {
+		["2.0", "1.0"].forEach(function (sVersion) {
+			ChangeHandlerMediator._aChangeHandlerSettings.push({
+				key: {
+					"scenario": sScenario,
+					"oDataServiceVersion": sVersion
+				},
+				content: {
+					"requiredLibraries": {
+						"sap.ui.comp": {
+							"minVersion": "1.48",
+							"lazy": false
+						}
+					}
+				},
+				scenarioInitialized: false
+			});
+		});
+	});
+
+	/**
+	 * Add change handler settings to the mediated list
+	 * @param {Object} mKey Collection of keys
+	 * @param {string} mKey.scenario The scenario name
+	 * @param {Object} mSettings The relevant settings for the change handler
+	 */
+	ChangeHandlerMediator.addChangeHandlerSettings = function(mKey, mSettings) {
+		var mNewChangeHandlerSettings;
+
+		if (!(mKey && mSettings)){
+			throw new Error('New entry in ChangeHandlerMediator requires a key and settings');
+		}
+
+		mNewChangeHandlerSettings = {
+			key : mKey,
+			content : mSettings,
+			scenarioInitialized : false
+		};
+
+		var mExistingChangeHandlerSettings = this.getChangeHandlerSettings(mKey, true);
+		var iIndex = this._aChangeHandlerSettings.indexOf(mExistingChangeHandlerSettings);
+
+		// If entry already exists, extend existing content and set initialized to false
+		if (iIndex > -1) {
+			jQuery.extend(this._aChangeHandlerSettings[iIndex].content,
+				mNewChangeHandlerSettings.content);
+			this._aChangeHandlerSettings[iIndex].scenarioInitialized = false;
+		} else {
+			this._aChangeHandlerSettings.push(mNewChangeHandlerSettings);
+			this._createChangeHandlerSettingsGetter(mNewChangeHandlerSettings);
+		}
+	};
+
+	/**
+	 * Retrieves change handler settings from the mediated list
+	 * @param  {Object} mKey Collection of keys
+	 * @param  {boolean} bSkipInitialization If true, the scenario should not be initialized
+	 * @return {Object}        The change handler settings
+	 */
+	ChangeHandlerMediator.getChangeHandlerSettings = function(mKey, bSkipInitialization){
+		var aKeys = Object.keys(mKey);
+		var mFoundChangeHandlerSettings;
+
+		if (aKeys.length > 0) {
+			mFoundChangeHandlerSettings = this._aChangeHandlerSettings.filter(function(oEntry, iIndex){
+				var aExistingKeys = Object.keys(oEntry.key);
+				if (aExistingKeys.length === aKeys.length) {
+					var aMatchingKeys = aKeys.filter(function(sKey){
+						if (oEntry.key[sKey] === mKey[sKey]){
+							return true;
+						}
+					});
+					// Only return the object with the exact matching keys
+					if (aMatchingKeys.length === aKeys.length){
+						return true;
+					}
+				}
+			})[0];
+
+			// Try to initialize the corresponding scenario
+			if (!bSkipInitialization && mFoundChangeHandlerSettings
+					&& !mFoundChangeHandlerSettings.scenarioInitialized) {
+				mFoundChangeHandlerSettings.scenarioInitialized
+					= this._initializeScenario(mFoundChangeHandlerSettings);
+			}
+		}
+
+		if (bSkipInitialization ||
+			(mFoundChangeHandlerSettings && mFoundChangeHandlerSettings.scenarioInitialized)){
+			return mFoundChangeHandlerSettings;
+		}
+	};
+
+	/**
+	 * Initializes a scenario that is required by the application
+	 * (e.g. for AddODataField -> load the required libraries)
+	 * @param  {Object} mFoundChangeHandlerSettings The Change Handler Settings for the scenario
+	 * @return {boolean} true if properly initialized
+	 */
+	ChangeHandlerMediator._initializeScenario = function(mFoundChangeHandlerSettings){
+		var sLibraryName;
+		if (mFoundChangeHandlerSettings.content.requiredLibraries){
+			try {
+				var aLibraries = Object.keys(mFoundChangeHandlerSettings.content.requiredLibraries);
+				aLibraries.forEach(function(sLibrary){
+					sLibraryName = sLibrary;
+					sap.ui.getCore().loadLibrary(sLibrary);
+				});
+				var iIndex = this._aChangeHandlerSettings.indexOf(mFoundChangeHandlerSettings);
+				// Update the entry on the array
+				this._aChangeHandlerSettings[iIndex].scenarioInitialized = true;
+				return true;
+			} catch (e){
+				jQuery.sap.log.warning("Required library not available: " + sLibraryName + " - "
+					+ mFoundChangeHandlerSettings.key.scenario + " could not be initialized");
+				return false;
+			}
+		}
+	};
+
+	ChangeHandlerMediator._createChangeHandlerSettingsGetter = function(mChangeHandlerSettings){
+		var sGetterName = 'get' + jQuery.sap.charToUpperCase(mChangeHandlerSettings.key.scenario) + 'Settings';
+		if (!ChangeHandlerMediator[sGetterName]) {
+			/**
+			 * Retrieves the settings for the specified scenario, getting the oData
+			 * service version from the control and ensures that a create function is
+			 * available for the change handler
+			 * @param  {sap.ui.core.Control} oControl The control for the scenario
+			 * @return {Object} The Change Handler Settings for the scenario
+			 */
+			ChangeHandlerMediator[sGetterName] = function(oControl){
+				var sODataServiceVersion;
+				var mFoundChangeHandlerSettings;
+
+				try {
+					sODataServiceVersion = oControl.getModel().getMetaModel().getProperty("/dataServices/dataServiceVersion");
+				} catch (e) {
+					jQuery.sap.log.warning("Data service version could not be retrieved");
+				}
+
+				mFoundChangeHandlerSettings = this.getChangeHandlerSettings({
+					"scenario" : mChangeHandlerSettings.key.scenario,
+					"oDataServiceVersion" : sODataServiceVersion
+				});
+
+				// Without a create function, the settings should not be returned
+				if (mFoundChangeHandlerSettings &&
+					mFoundChangeHandlerSettings.content &&
+					mFoundChangeHandlerSettings.content.createFunction){
+					return mFoundChangeHandlerSettings;
+				}
+			};
+		}
+	};
+
+	// Create getters
+	ChangeHandlerMediator._aChangeHandlerSettings.forEach(function (mChangeHandlerSettings) {
+		ChangeHandlerMediator._createChangeHandlerSettingsGetter(mChangeHandlerSettings);
+	});
+
+	return ChangeHandlerMediator;
+}, /* bExport= */true);
+}; // end of sap/ui/fl/changeHandler/ChangeHandlerMediator.js
 if ( !jQuery.sap.isDeclared('sap.ui.fl.changeHandler.HideControl') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -1537,31 +1795,62 @@ if ( !jQuery.sap.isDeclared('sap.ui.fl.changeHandler.HideControl') ) {
 jQuery.sap.declare('sap.ui.fl.changeHandler.HideControl'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
 sap.ui.define("sap/ui/fl/changeHandler/HideControl",[
-	'jquery.sap.global', './Base'
-], function(jQuery, Base) {
+	"jquery.sap.global"
+], function(
+	jQuery
+) {
 	"use strict";
 
 	/**
 	 * Change handler for hiding of a control.
 	 * @alias sap.ui.fl.changeHandler.HideControl
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.27.0
 	 */
-	var HideControl = { };
+	var HideControl = {};
 
 	/**
 	 * Hides a control.
 	 *
 	 * @param {sap.ui.fl.Change} oChange change object with instructions to be applied on the control map
 	 * @param {sap.ui.core.Control} oControl control that matches the change selector for applying the change
+	 * @param {object} mPropertyBag - map of properties
 	 * @param {object} mPropertyBag.modifier - modifier for the controls
-	 * @param {object} mPropertyBag	- map of properties
 	 * @return {boolean} true - if change could be applied
 	 * @public
 	 */
 	HideControl.applyChange = function(oChange, oControl, mPropertyBag) {
+		oChange.setRevertData({
+			originalValue: mPropertyBag.modifier.getVisible(oControl)
+		});
+
 		mPropertyBag.modifier.setVisible(oControl, false);
+		return true;
+	};
+
+
+	/**
+	 * Reverts previously applied change
+	 *
+	 * @param {sap.ui.fl.Change} oChange change object with instructions to be applied on the control map
+	 * @param {sap.ui.core.Control} oControl control that matches the change selector for applying the change
+	 * @param {object} mPropertyBag	- map of properties
+	 * @param {object} mPropertyBag.modifier - modifier for the controls
+	 * @return {boolean} true - if change has been reverted
+	 * @public
+	 */
+	HideControl.revertChange = function(oChange, oControl, mPropertyBag) {
+		var mRevertData = oChange.getRevertData();
+
+		if (mRevertData) {
+			mPropertyBag.modifier.setVisible(oControl, mRevertData.originalValue);
+			oChange.resetRevertData();
+		} else {
+			jQuery.sap.log.error("Attempt to revert an unapplied change.");
+			return false;
+		}
+
 		return true;
 	};
 
@@ -1573,7 +1862,6 @@ sap.ui.define("sap/ui/fl/changeHandler/HideControl",[
 	 * @public
 	 */
 	HideControl.completeChangeContent = function(oChange, oSpecificChangeInfo) {
-
 	};
 
 	return HideControl;
@@ -1625,15 +1913,23 @@ sap.ui.define("sap/ui/fl/changeHandler/JsControlTreeModifier",["sap/ui/fl/change
 				}
 			},
 
-			bindProperty: function (oControl, sPropertyName, mBindingInfos) {
-				oControl.bindProperty(sPropertyName, mBindingInfos);
+			getStashed: function (oControl) {
+				if (oControl.getStashed) {
+					return oControl.getStashed();
+				} else {
+					throw new Error("Provided control instance has no getStashed method");
+				}
+			},
+
+			bindProperty: function (oControl, sPropertyName, vBindingInfos) {
+				oControl.bindProperty(sPropertyName, vBindingInfos);
 			},
 
 			/**
 			 * Unbind a property
 			 * The value should not be reset to default when unbinding (bSuppressReset = true)
 			 * @param  {sap.ui.core.Control} oControl  The control containing the property
-			 * @param  {String} sPropertyName  The property to be unbound
+			 * @param  {string} sPropertyName  The property to be unbound
 			 */
 			unbindProperty: function (oControl, sPropertyName) {
 				if (oControl) {
@@ -1660,12 +1956,18 @@ sap.ui.define("sap/ui/fl/changeHandler/JsControlTreeModifier",["sap/ui/fl/change
 			},
 
 			setPropertyBinding: function (oControl, sPropertyName, oPropertyBinding) {
+				this.unbindProperty(oControl, sPropertyName);
 				var mSettings = {};
 				mSettings[sPropertyName] = oPropertyBinding;
 				oControl.applySettings(mSettings);
 			},
 
-			createControl: function (sClassName, oAppComponent, oView, oSelector) {
+			getPropertyBinding: function (oControl, sPropertyName) {
+				return oControl.getBindingInfo(sPropertyName);
+
+			},
+
+			createControl: function (sClassName, oAppComponent, oView, oSelector, mSettings) {
 				if (this.bySelector(oSelector, oAppComponent)) {
 					throw new Error("Can't create a control with duplicated id " + oSelector);
 				}
@@ -1673,12 +1975,12 @@ sap.ui.define("sap/ui/fl/changeHandler/JsControlTreeModifier",["sap/ui/fl/change
 				jQuery.sap.require(sClassName); //ensure class is there
 				var ClassObject = jQuery.sap.getObject(sClassName);
 				var sId = this.getControlIdBySelector(oSelector, oAppComponent);
-				return new ClassObject(sId);
+				return new ClassObject(sId, mSettings);
 			},
 
 			/** SUBSTITUTION UNTIL SmartForm has adopted to the bySelector
 			 *
-			 * @param sId
+			 * @param {sap.ui.core.ID} sId
 			 * @returns {*|Node}
 			 */
 			byId: function (sId) {
@@ -1688,8 +1990,8 @@ sap.ui.define("sap/ui/fl/changeHandler/JsControlTreeModifier",["sap/ui/fl/change
 			/**
 			 * Returns the control for the given id. Undefined if control cannot be found.
 			 *
-			 * @param {string} sId control id
-			 * @returns {sap.ui.core.Control} Control
+			 * @param {sap.ui.core.ID} sId Control id
+			 * @returns {sap.ui.core.Element} Control
 			 * @private
 			 */
 			_byId: function (sId) {
@@ -1706,6 +2008,10 @@ sap.ui.define("sap/ui/fl/changeHandler/JsControlTreeModifier",["sap/ui/fl/change
 
 			getControlType: function (oControl) {
 				return Utils.getControlType(oControl);
+			},
+
+			getAllAggregations: function (oParent) {
+				return oParent.getMetadata().getAllAggregations();
 			},
 
 			/**
@@ -1767,7 +2073,7 @@ sap.ui.define("sap/ui/fl/changeHandler/JsControlTreeModifier",["sap/ui/fl/change
 			 * Removes the object from the aggregation of the given control
 			 *
 			 * @param {sap.ui.core.Control}
-			 *          oParent - the control for which the changes should be fetched
+			 *          oControl - the parent control for which the changes should be fetched
 			 * @param {string}
 			 *          sName - aggregation name
 			 * @param {object}
@@ -1801,6 +2107,27 @@ sap.ui.define("sap/ui/fl/changeHandler/JsControlTreeModifier",["sap/ui/fl/change
 						}
 					}
 				}
+			},
+
+			getBindingTemplate: function (oControl, sAggregationName) {
+				var oBinding = oControl.getBindingInfo(sAggregationName);
+				return oBinding && oBinding.template;
+			},
+
+			updateAggregation: function (oControl, sAggregationName) {
+				if (oControl) {
+					if (oControl.getMetadata) {
+						var oMetadata = oControl.getMetadata();
+						var oAggregations = oMetadata.getAllAggregations();
+						if (oAggregations) {
+							var oAggregation = oAggregations[sAggregationName];
+							if (oAggregation) {
+								oControl[oAggregation._sDestructor]();
+								oControl.updateAggregation(sAggregationName);
+							}
+						}
+					}
+				}
 			}
 		};
 
@@ -1824,223 +2151,317 @@ if ( !jQuery.sap.isDeclared('sap.ui.fl.changeHandler.MoveControls') ) {
 jQuery.sap.declare('sap.ui.fl.changeHandler.MoveControls'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
 sap.ui.define("sap/ui/fl/changeHandler/MoveControls",[
-	"jquery.sap.global", "./Base", "sap/ui/fl/Utils"
-    ], function(jQuery, Base, FlexUtils) {
-		"use strict";
+	"jquery.sap.global",
+	"./Base",
+	"sap/ui/fl/Utils"
+],
+function(
+	jQuery,
+	Base,
+	FlexUtils
+) {
+	"use strict";
 
-		/**
-		 * Change handler for moving of an element.
-		 *
-		 * @alias sap.ui.fl.changeHandler.MoveControls
-		 * @author SAP SE
-		 * @version 1.48.5
-		 * @experimental Since 1.46
-		 */
-		var MoveControls = { };
+	/**
+	 * Change handler for moving of an element.
+	 *
+	 * @alias sap.ui.fl.changeHandler.MoveControls
+	 * @author SAP SE
+	 * @version 1.50.6
+	 * @experimental Since 1.46
+	 */
+	var MoveControls = { };
 
-		MoveControls.CHANGE_TYPE = "moveControls";
+	MoveControls.CHANGE_TYPE = "moveControls";
 
-		// Defines object which contains constants used in the handler
-		MoveControls.SOURCE_ALIAS = "source";
-		MoveControls.TARGET_ALIAS = "target";
-		MoveControls.MOVED_ELEMENTS_ALIAS = "movedElements";
+	// Defines object which contains constants used in the handler
+	MoveControls.SOURCE_ALIAS = "source";
+	MoveControls.TARGET_ALIAS = "target";
+	MoveControls.MOVED_ELEMENTS_ALIAS = "movedElements";
 
-		MoveControls._checkConditions = function (oChange, oModifier, oView, oAppComponent) {
-			if (!oChange) {
-				throw new Error("No change instance");
-			}
 
-			var oChangeContent = oChange.getContent();
+	MoveControls._checkConditions = function (oChange, oModifier, oView, oAppComponent) {
+		if (!oChange) {
+			throw new Error("No change instance");
+		}
 
-			if (!oChangeContent || !oChangeContent.movedElements || oChangeContent.movedElements.length === 0) {
-				throw new Error("Change format invalid");
+		var oChangeContent = oChange.getContent();
+
+		if (!oChangeContent || !oChangeContent.movedElements || oChangeContent.movedElements.length === 0) {
+			throw new Error("Change format invalid");
+		}
+		if (!oChangeContent.source || !oChangeContent.source.selector) {
+			throw new Error("No source supplied for move");
+		}
+		if (!oChangeContent.target || !oChangeContent.target.selector) {
+			throw new Error("No target supplied for move");
+		}
+		if (!oModifier.bySelector(oChangeContent.source.selector, oAppComponent, oView)) {
+			throw new Error("Move source parent not found");
+		}
+		if (!oModifier.bySelector(oChangeContent.target.selector, oAppComponent, oView)) {
+			throw new Error("Move target parent not found");
+		}
+		if (!oChangeContent.source.selector.aggregation) {
+			throw new Error("No source aggregation supplied for move");
+		}
+		if (!oChangeContent.target.selector.aggregation) {
+			throw new Error("No target aggregation supplied for move");
+		}
+	};
+
+	MoveControls._getElementControlOrThrowError = function(mMovedElement, oModifier, oAppComponent, oView) {
+		if (!mMovedElement.selector && !mMovedElement.id) {
+			throw new Error("Change format invalid - moveElements element has no id attribute");
+		}
+		if (typeof mMovedElement.targetIndex !== "number") {
+			throw new Error("Missing targetIndex for element with id '" + mMovedElement.selector.id
+					+ "' in movedElements supplied");
+		}
+
+		return oModifier.bySelector(mMovedElement.selector || mMovedElement.id, oAppComponent, oView);
+	};
+
+	MoveControls._checkCompleteChangeContentConditions = function(mSpecificChangeInfo) {
+		if (!mSpecificChangeInfo.movedElements) {
+			throw new Error("mSpecificChangeInfo.movedElements attribute required");
+		}
+		if (mSpecificChangeInfo.movedElements.length === 0) {
+			throw new Error("MovedElements array is empty");
+		}
+
+		mSpecificChangeInfo.movedElements.forEach(function (mElement) {
+			if (!mElement.id) {
+				throw new Error("MovedControls element has no id attribute");
 			}
-			if (!oChangeContent.source || !oChangeContent.source.selector) {
-				throw new Error("No source supplied for move");
+			if (typeof (mElement.sourceIndex) !== "number") {
+				throw new Error("SourceIndex attribute at MovedElements element is no number");
 			}
-			if (!oChangeContent.target || !oChangeContent.target.selector) {
-				throw new Error("No target supplied for move");
+			if (typeof (mElement.targetIndex) !== "number") {
+				throw new Error("TargetIndex attribute at MovedElements element is no number");
 			}
-			if (!oModifier.bySelector(oChangeContent.source.selector, oAppComponent, oView)) {
-				throw new Error("Move source parent not found");
-			}
-			if (!oModifier.bySelector(oChangeContent.target.selector, oAppComponent, oView)) {
-				throw new Error("Move target parent not found");
-			}
-			if (!oChangeContent.source.selector.aggregation) {
-				throw new Error("No source aggregation supplied for move");
-			}
-			if (!oChangeContent.target.selector.aggregation) {
-				throw new Error("No target aggregation supplied for move");
-			}
+		});
+	};
+
+	MoveControls._getSpecificChangeInfo = function(oModifier, mSpecificChangeInfo, oAppComponent) {
+
+		delete mSpecificChangeInfo.source.publicAggregation;
+		delete mSpecificChangeInfo.target.publicAggregation;
+
+		var oSourceParent = mSpecificChangeInfo.source.parent || oModifier.bySelector(mSpecificChangeInfo.source.id, oAppComponent);
+		var oTargetParent = mSpecificChangeInfo.target.parent || oModifier.bySelector(mSpecificChangeInfo.target.id, oAppComponent);
+		var sSourceAggregation = mSpecificChangeInfo.source.aggregation;
+		var sTargetAggregation = mSpecificChangeInfo.target.aggregation;
+
+
+
+		var mAdditionalSourceInfo = {
+				aggregation: mSpecificChangeInfo.source.aggregation,
+				type: oModifier.getControlType(oSourceParent)
+			};
+
+		var mAdditionalTargetInfo = {
+			aggregation: mSpecificChangeInfo.target.aggregation,
+			type: oModifier.getControlType(oTargetParent)
 		};
 
-		MoveControls._getElementControlOrThrowError = function(mMovedElement, oModifier, oAppComponent, oView) {
-			if (!mMovedElement.selector && !mMovedElement.id) {
-				throw new Error("Change format invalid - moveElements element has no id attribute");
-			}
-			if (typeof mMovedElement.targetIndex !== "number") {
-				throw new Error("Missing targetIndex for element with id '" + mMovedElement.selector.id
-						+ "' in movedElements supplied");
-			}
-
-			return oModifier.bySelector(mMovedElement.selector || mMovedElement.id, oAppComponent, oView);
+		var mSpecificInfo = {
+			source : {
+				id : oSourceParent.getId(),
+				aggregation : sSourceAggregation,
+				type : mAdditionalSourceInfo.type,
+				selector : oModifier.getSelector(mSpecificChangeInfo.source.id, oAppComponent, mAdditionalSourceInfo)
+			},
+			target : {
+				id : oTargetParent.getId(),
+				aggregation : sTargetAggregation,
+				type : mAdditionalTargetInfo.type,
+				selector : oModifier.getSelector(mSpecificChangeInfo.target.id, oAppComponent, mAdditionalTargetInfo)
+			},
+			movedElements : mSpecificChangeInfo.movedElements
 		};
 
-		MoveControls._checkCompleteChangeContentConditions = function(mSpecificChangeInfo) {
-			if (!mSpecificChangeInfo.movedElements) {
-				throw new Error("mSpecificChangeInfo.movedElements attribute required");
-			}
-			if (mSpecificChangeInfo.movedElements.length === 0) {
-				throw new Error("MovedElements array is empty");
-			}
+		return mSpecificInfo;
+	};
 
-			mSpecificChangeInfo.movedElements.forEach(function (mElement) {
-				if (!mElement.id) {
-					throw new Error("MovedControls element has no id attribute");
-				}
-				if (typeof (mElement.sourceIndex) !== "number") {
-					throw new Error("SourceIndex attribute at MovedElements element is no number");
-				}
-				if (typeof (mElement.targetIndex) !== "number") {
-					throw new Error("TargetIndex attribute at MovedElements element is no number");
+	/**
+	 * Moves an element from one aggregation to another.
+	 *
+	 * @param {sap.ui.fl.Change} oChange change object with instructions to be applied on the control map
+	 * @param {sap.ui.core.Control} oRelevantContainer control that matches the change selector for applying the change, which is the source of the move
+	 * @param {object} mPropertyBag - map of properties
+	 * @param {object} mPropertyBag.view - xml node representing a ui5 view
+	 * @param {sap.ui.fl.changeHandler.BaseTreeModifier} mPropertyBag.modifier - modifier for the controls
+	 * @param {sap.ui.core.UIComponent} mPropertyBag.appComponent - appComopnent
+	 * @return {boolean} true - if change could be applied
+	 * @public
+	 * @function
+	 * @name sap.ui.fl.changeHandler.MoveControls#applyChange
+	 */
+	MoveControls.applyChange = function(oChange, oRelevantContainer, mPropertyBag) {
+		var oModifier = mPropertyBag.modifier;
+		var oView = mPropertyBag.view;
+		var oAppComponent = mPropertyBag.appComponent;
+
+		this._checkConditions(oChange, oModifier, oView, oAppComponent);
+
+		var oChangeContent = oChange.getContent();
+		var sSourceAggregation = oChangeContent.source.selector.aggregation;
+		var oTargetParent = oModifier.bySelector(oChangeContent.target.selector, oAppComponent, oView);
+		var sTargetAggregation = oChangeContent.target.selector.aggregation;
+
+		var aRevertData = [];
+		oChangeContent.movedElements.forEach(function(mMovedElement, iElementIndex) {
+			var oMovedElement = this._getElementControlOrThrowError(mMovedElement, oModifier, oAppComponent, oView);
+			if (!oMovedElement) {
+				FlexUtils.log.warning("Element to move not found");
+				return;
+			}
+			var oSourceParent = oModifier.getParent(oMovedElement);
+
+			var iInsertIndex = mMovedElement.targetIndex;
+
+			// save the current index, sourceParent and sourceAggregation for revert
+			var iIndex;
+			var mAllAggregations = oModifier.getAllAggregations(oSourceParent);
+			Object.keys(mAllAggregations).some(function(sKey) {
+				var aAggregation = oModifier.getAggregation(oSourceParent, sKey);
+				if (Array.isArray(aAggregation)) {
+					iIndex = aAggregation.indexOf(oMovedElement);
+					if (iIndex > -1) {
+						sSourceAggregation = sKey;
+						aRevertData.unshift({
+							index: iIndex,
+							aggregation: sKey,
+							sourceParent: oSourceParent
+						});
+						return true;
+					}
 				}
 			});
-		};
 
-		MoveControls._getSpecificChangeInfo = function(oModifier, mSpecificChangeInfo, oAppComponent) {
-
-			delete mSpecificChangeInfo.source.publicAggregation;
-			delete mSpecificChangeInfo.target.publicAggregation;
-
-			var oSourceParent = mSpecificChangeInfo.source.parent || oModifier.bySelector(mSpecificChangeInfo.source.id, oAppComponent);
-			var oTargetParent = mSpecificChangeInfo.target.parent || oModifier.bySelector(mSpecificChangeInfo.target.id, oAppComponent);
-			var sSourceAggregation = mSpecificChangeInfo.source.aggregation;
-			var sTargetAggregation = mSpecificChangeInfo.target.aggregation;
-
-
-
-			var mAdditionalSourceInfo = {
-					aggregation: mSpecificChangeInfo.source.aggregation,
-					type: oModifier.getControlType(oSourceParent)
-				};
-
-			var mAdditionalTargetInfo = {
-				aggregation: mSpecificChangeInfo.target.aggregation,
-				type: oModifier.getControlType(oTargetParent)
-			};
-
-			var mSpecificInfo = {
-				source : {
-					id : oSourceParent.getId(),
-					aggregation : sSourceAggregation,
-					type : mAdditionalSourceInfo.type,
-					selector : oModifier.getSelector(mSpecificChangeInfo.source.id, oAppComponent, mAdditionalSourceInfo)
-				},
-				target : {
-					id : oTargetParent.getId(),
-					aggregation : sTargetAggregation,
-					type : mAdditionalTargetInfo.type,
-					selector : oModifier.getSelector(mSpecificChangeInfo.target.id, oAppComponent, mAdditionalTargetInfo)
-				},
-				movedElements : mSpecificChangeInfo.movedElements
-			};
-
-			return mSpecificInfo;
-		};
-
-		/**
-		 * Moves an element from one aggregation to another.
-		 *
-		 * @param {sap.ui.fl.Change} oChange change object with instructions to be applied on the control map
-		 * @param {sap.ui.core.Control} oRelevantContainer control that matches the change selector for applying the change, which is the source of the move
-		 * @param {object} mPropertyBag - map of properties
-		 * @param {object} mPropertyBag.view - xml node representing a ui5 view
-		 * @param {sap.ui.fl.changeHandler.BaseTreeModifier} mPropertyBag.modifier - modifier for the controls
-		 * @param {sap.ui.core.UIComponent} mPropertyBag.appComponent - appComopnent
-		 * @return {boolean} true - if change could be applied
-		 * @public
-		 * @function
-		 * @name sap.ui.fl.changeHandler.MoveControls#applyChange
-		 */
-		MoveControls.applyChange = function(oChange, oRelevantContainer, mPropertyBag) {
-			var oModifier = mPropertyBag.modifier;
-			var oView = mPropertyBag.view;
-			var oAppComponent = mPropertyBag.appComponent;
-
-			this._checkConditions(oChange, oModifier, oView, oAppComponent);
-
-			var oChangeContent = oChange.getContent();
-			var oSourceParent = oModifier.bySelector(oChangeContent.source.selector, oAppComponent, oView);
-			var oTargetParent = oModifier.bySelector(oChangeContent.target.selector, oAppComponent, oView);
-			var sSourceAggregation = oChangeContent.source.selector.aggregation;
-			var sTargetAggregation = oChangeContent.target.selector.aggregation;
-
-			oChangeContent.movedElements.forEach(function(mMovedElement) {
-				var oMovedElement = this._getElementControlOrThrowError(mMovedElement, oModifier, oAppComponent, oView);
-
-				if (!oMovedElement) {
-					FlexUtils.log.warning("Element to move not found");
-					return;
-				}
-
-				oModifier.removeAggregation(oSourceParent, sSourceAggregation, oMovedElement, oView);
-				oModifier.insertAggregation(oTargetParent, sTargetAggregation, oMovedElement, mMovedElement.targetIndex);
-			}, this);
-
-			return true;
-		};
-
-		/**
-		 * Completes the change by adding change handler specific content.
-		 *
-		 * @param {sap.ui.fl.Change} oChange change object to be completed
-		 * @param {object} mSpecificChangeInfo as an empty object since no additional attributes are required for this operation
-		 * @param {object} mPropertyBag - map of properties
-		 * @param {sap.ui.core.UiComponent} mPropertyBag.appComponent component in which the change should be applied
-		 * @public
-		 * @function
-		 * @name sap.ui.fl.changeHandler.MoveControls#completeChangeContent
-		 */
-		MoveControls.completeChangeContent = function(oChange, mSpecificChangeInfo, mPropertyBag) {
-			this._checkCompleteChangeContentConditions(mSpecificChangeInfo);
-
-			var oModifier = mPropertyBag.modifier;
-			var oAppComponent = mPropertyBag.appComponent;
-			var mChangeData = oChange.getDefinition();
-
-			mSpecificChangeInfo = this._getSpecificChangeInfo(oModifier, mSpecificChangeInfo, oAppComponent);
-
-			mChangeData.changeType = MoveControls.CHANGE_TYPE;
-			mChangeData.content = {
-				movedElements : [],
-				source : {
-					selector : mSpecificChangeInfo.source.selector
-				},
-				target : {
-					selector : mSpecificChangeInfo.target.selector
-				}
-			};
-
-			mSpecificChangeInfo.movedElements.forEach(function(mElement) {
-				var oElement = mElement.element || oModifier.bySelector(mElement.id, oAppComponent);
-
-				mChangeData.content.movedElements.push({
-					selector: oModifier.getSelector(oElement, oAppComponent),
-					sourceIndex : mElement.sourceIndex,
-					targetIndex : mElement.targetIndex
+			// on XML, getAllAggregations doesn't work yet, so we have to take the (in specific circumstances wrong) data from the change.
+			if (!jQuery.isNumeric(iIndex)) {
+				aRevertData.unshift({
+					index: mMovedElement.sourceIndex,
+					aggregation: oChangeContent.source.selector.aggregation,
+					sourceParent: oSourceParent
 				});
-			});
+			}
 
-			oChange.addDependentControl(mSpecificChangeInfo.source.id, MoveControls.SOURCE_ALIAS, mPropertyBag);
-			oChange.addDependentControl(mSpecificChangeInfo.target.id, MoveControls.TARGET_ALIAS, mPropertyBag);
-			oChange.addDependentControl(mSpecificChangeInfo.movedElements.map(function (element) {
-				return element.id;
-			}), MoveControls.MOVED_ELEMENTS_ALIAS, mPropertyBag);
+			oModifier.removeAggregation(oSourceParent, sSourceAggregation, oMovedElement);
+			oModifier.insertAggregation(oTargetParent, sTargetAggregation, oMovedElement, iInsertIndex, oView);
+		}, this);
+
+		oChange.setRevertData(aRevertData);
+
+		return true;
+	};
+
+	/**
+	 * Reverts the Change MoveControls.
+	 *
+	 * @param {sap.ui.fl.Change} oChange change object with instructions to be applied on the control map
+	 * @param {sap.ui.core.Control} oRelevantContainer control that matches the change selector for applying the change, which is the source of the move
+	 * @param {object} mPropertyBag - map of properties
+	 * @param {object} mPropertyBag.view - xml node representing a ui5 view
+	 * @param {sap.ui.fl.changeHandler.BaseTreeModifier} mPropertyBag.modifier - modifier for the controls
+	 * @param {sap.ui.core.UIComponent} mPropertyBag.appComponent - appComopnent
+	 * @return {boolean} true - if change could be applied
+	 * @public
+	 * @function
+	 * @name sap.ui.fl.changeHandler.MoveControls#revertChange
+	 */
+	MoveControls.revertChange = function(oChange, oRelevantContainer, mPropertyBag) {
+		var oModifier = mPropertyBag.modifier;
+		var oView = mPropertyBag.view;
+		var oAppComponent = mPropertyBag.appComponent;
+
+		this._checkConditions(oChange, oModifier, oView, oAppComponent);
+
+		// we still have to set sourceParent and sourceAggregation initially from the change data,
+		// because for XML changes this data can't be stored in the revertData yet.
+		var oChangeContent = oChange.getContent();
+		var oSourceParent = oModifier.bySelector(oChangeContent.source.selector, oAppComponent, oView);
+		var sSourceAggregation = oChangeContent.source.selector.aggregation;
+		var oTargetParent = oModifier.bySelector(oChangeContent.target.selector, oAppComponent, oView);
+		var sTargetAggregation = oChangeContent.target.selector.aggregation;
+
+		var aRevertData = oChange.getRevertData();
+		oChange.getContent().movedElements.reverse();
+		oChangeContent.movedElements.forEach(function(mMovedElement, iElementIndex) {
+			var oMovedElement = this._getElementControlOrThrowError(mMovedElement, oModifier, oAppComponent, oView);
+			if (!oMovedElement) {
+				FlexUtils.log.warning("Element to move not found");
+				return;
+			}
+
+			var iInsertIndex = mMovedElement.sourceIndex;
+			if (aRevertData) {
+				oSourceParent = aRevertData[iElementIndex].sourceParent;
+				sSourceAggregation = aRevertData[iElementIndex].aggregation;
+				iInsertIndex = aRevertData[iElementIndex].index;
+			}
+
+			oModifier.removeAggregation(oTargetParent, sTargetAggregation, oMovedElement);
+			oModifier.insertAggregation(oSourceParent, sSourceAggregation, oMovedElement, iInsertIndex, oView);
+		}, this);
+
+		oChange.resetRevertData();
+
+		return true;
+	};
+
+	/**
+	 * Completes the change by adding change handler specific content.
+	 *
+	 * @param {sap.ui.fl.Change} oChange change object to be completed
+	 * @param {object} mSpecificChangeInfo as an empty object since no additional attributes are required for this operation
+	 * @param {object} mPropertyBag - map of properties
+	 * @param {sap.ui.core.UiComponent} mPropertyBag.appComponent component in which the change should be applied
+	 * @public
+	 * @function
+	 * @name sap.ui.fl.changeHandler.MoveControls#completeChangeContent
+	 */
+	MoveControls.completeChangeContent = function(oChange, mSpecificChangeInfo, mPropertyBag) {
+		this._checkCompleteChangeContentConditions(mSpecificChangeInfo);
+
+		var oModifier = mPropertyBag.modifier;
+		var oAppComponent = mPropertyBag.appComponent;
+		var mChangeData = oChange.getDefinition();
+
+		mSpecificChangeInfo = this._getSpecificChangeInfo(oModifier, mSpecificChangeInfo, oAppComponent);
+
+		mChangeData.changeType = MoveControls.CHANGE_TYPE;
+		mChangeData.content = {
+			movedElements : [],
+			source : {
+				selector : mSpecificChangeInfo.source.selector
+			},
+			target : {
+				selector : mSpecificChangeInfo.target.selector
+			}
 		};
 
-		return MoveControls;
-	},
+		mSpecificChangeInfo.movedElements.forEach(function(mElement) {
+			var oElement = mElement.element || oModifier.bySelector(mElement.id, oAppComponent);
+
+			mChangeData.content.movedElements.push({
+				selector: oModifier.getSelector(oElement, oAppComponent),
+				sourceIndex : mElement.sourceIndex,
+				targetIndex : mElement.targetIndex
+			});
+		});
+
+		oChange.addDependentControl(mSpecificChangeInfo.source.id, MoveControls.SOURCE_ALIAS, mPropertyBag);
+		oChange.addDependentControl(mSpecificChangeInfo.target.id, MoveControls.TARGET_ALIAS, mPropertyBag);
+		oChange.addDependentControl(mSpecificChangeInfo.movedElements.map(function (element) {
+			return element.id;
+		}), MoveControls.MOVED_ELEMENTS_ALIAS, mPropertyBag);
+	};
+
+	return MoveControls;
+},
 /* bExport= */true);
 
 }; // end of sap/ui/fl/changeHandler/MoveControls.js
@@ -2063,7 +2484,7 @@ sap.ui.define("sap/ui/fl/changeHandler/MoveElements",[
 		 *
 		 * @alias sap.ui.fl.changeHandler.MoveElements
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 * @experimental Since 1.34.0
 		 */
 		var MoveElements = { };
@@ -2140,8 +2561,8 @@ sap.ui.define("sap/ui/fl/changeHandler/MoveElements",[
 					return;
 				}
 
-				oModifier.removeAggregation(oSourceParent, sSourceAggregation, oMovedElement, oView);
-				oModifier.insertAggregation(oTargetParent, sTargetAggregation, oMovedElement, mMovedElement.targetIndex);
+				oModifier.removeAggregation(oSourceParent, sSourceAggregation, oMovedElement);
+				oModifier.insertAggregation(oTargetParent, sTargetAggregation, oMovedElement, mMovedElement.targetIndex, oView);
 			});
 
 			return true;
@@ -2201,7 +2622,15 @@ if ( !jQuery.sap.isDeclared('sap.ui.fl.changeHandler.PropertyBindingChange') ) {
 
 jQuery.sap.declare('sap.ui.fl.changeHandler.PropertyBindingChange'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-sap.ui.define("sap/ui/fl/changeHandler/PropertyBindingChange",["jquery.sap.global", "sap/ui/fl/changeHandler/Base", "sap/ui/fl/Utils"], function(jQuery, Base, FlexUtils) {
+sap.ui.define("sap/ui/fl/changeHandler/PropertyBindingChange",[
+	"jquery.sap.global",
+	"sap/ui/fl/changeHandler/Base",
+	"sap/ui/fl/Utils"
+], function(
+	jQuery,
+	Base,
+	FlexUtils
+) {
 	"use strict";
 
 	/**
@@ -2209,12 +2638,12 @@ sap.ui.define("sap/ui/fl/changeHandler/PropertyBindingChange",["jquery.sap.globa
 	 *
 	 * @alias sap.ui.fl.changeHandler.PropertyBindingChange
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @since 1.38
 	 * @private
 	 * @experimental Since 1.38. This class is experimental and provides only limited functionality. Also the API might be changed in future.
 	 */
-	var PropertyBindingChange = { };
+	var PropertyBindingChange = {};
 
 	/**
 	 * @param {object} oChange - change object with instructions to be applied on the control
@@ -2227,8 +2656,41 @@ sap.ui.define("sap/ui/fl/changeHandler/PropertyBindingChange",["jquery.sap.globa
 	PropertyBindingChange.applyChange = function(oChange, oControl, mPropertyBag) {
 		var oDef = oChange.getDefinition();
 		var sPropertyName = oDef.content.property;
-		var oPropertyBinding = oDef.content.newBinding;
-		mPropertyBag.modifier.setPropertyBinding(oControl, sPropertyName, oPropertyBinding);
+		var vPropertyValue = oDef.content.newBinding;
+		var oModifier = mPropertyBag.modifier;
+
+		oChange.setRevertData({
+			originalValue: oModifier.getPropertyBinding(oControl, sPropertyName)
+		});
+
+		oModifier.setPropertyBinding(oControl, sPropertyName, vPropertyValue);
+	};
+
+	/**
+	 * @param {object} oChange - change object with instructions to be applied on the control
+	 * @param {object} oControl - the control which has been determined by the selector id
+	 * @param {object} mPropertyBag
+	 * @param {object} mPropertyBag.modifier - modifier for the controls
+	 * @public
+	 * @name sap.ui.fl.changeHandler.PropertyBindingChange#revertChange
+	 */
+	PropertyBindingChange.revertChange = function(oChange, oControl, mPropertyBag) {
+		var mRevertData = oChange.getRevertData();
+
+		if (mRevertData) {
+			var oDef = oChange.getDefinition();
+			var sPropertyName = oDef.content.property;
+			var vPropertyValue = mRevertData.originalValue;
+			var oModifier = mPropertyBag.modifier;
+
+			oModifier.setPropertyBinding(oControl, sPropertyName, vPropertyValue);
+			oChange.resetRevertData();
+		} else {
+			jQuery.sap.log.error("Attempt to revert an unapplied change.");
+			return false;
+		}
+
+		return true;
 	};
 
 	/**
@@ -2241,19 +2703,12 @@ sap.ui.define("sap/ui/fl/changeHandler/PropertyBindingChange",["jquery.sap.globa
 	 * @name sap.ui.fl.changeHandler.PropertyBindingChange#completeChangeContent
 	 */
 	PropertyBindingChange.completeChangeContent = function(oChange, oSpecificChangeInfo) {
-
 		var oChangeJson = oChange.getDefinition();
-
 		if (oSpecificChangeInfo.content) {
-
 			oChangeJson.content = oSpecificChangeInfo.content;
-
 		} else {
-
 			throw new Error("oSpecificChangeInfo attribute required");
-
 		}
-
 	};
 
 	return PropertyBindingChange;
@@ -2267,11 +2722,17 @@ if ( !jQuery.sap.isDeclared('sap.ui.fl.changeHandler.PropertyChange') ) {
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-/*global sap */
-
 jQuery.sap.declare('sap.ui.fl.changeHandler.PropertyChange'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-sap.ui.define("sap/ui/fl/changeHandler/PropertyChange",["jquery.sap.global", "sap/ui/fl/changeHandler/Base", "sap/ui/fl/Utils"], function(jQuery, Base, FlexUtils) {
+sap.ui.define("sap/ui/fl/changeHandler/PropertyChange",[
+	"jquery.sap.global",
+	"sap/ui/fl/changeHandler/Base",
+	"sap/ui/fl/Utils"
+], function(
+	jQuery,
+	Base,
+	FlexUtils
+) {
 	"use strict";
 
 	/**
@@ -2279,12 +2740,24 @@ sap.ui.define("sap/ui/fl/changeHandler/PropertyChange",["jquery.sap.global", "sa
 	 *
 	 * @alias sap.ui.fl.changeHandler.PropertyChange
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @since 1.36
 	 * @private
 	 * @experimental Since 1.36. This class is experimental and provides only limited functionality. Also the API might be changed in future.
 	 */
-	var PropertyChange = { };
+	var PropertyChange = {};
+
+	function changeProperty(oControl, sPropertyName, vPropertyValue, oModifier) {
+		try {
+			if (FlexUtils.isBinding(vPropertyValue) || jQuery.isPlainObject(vPropertyValue)) {
+				oModifier.setPropertyBinding(oControl, sPropertyName, vPropertyValue);
+			} else {
+				oModifier.setProperty(oControl, sPropertyName, vPropertyValue);
+			}
+		} catch (ex) {
+			throw new Error("Applying property changes failed: " +  ex);
+		}
+	}
 
 	/**
 	 * Changes the properties on the given control
@@ -2297,20 +2770,45 @@ sap.ui.define("sap/ui/fl/changeHandler/PropertyChange",["jquery.sap.global", "sa
 	 * @name sap.ui.fl.changeHandler.PropertyChange#applyChange
 	 */
 	PropertyChange.applyChange = function(oChange, oControl, mPropertyBag) {
+		var oDef = oChange.getDefinition();
+		var sPropertyName = oDef.content.property;
+		var vPropertyValue = oDef.content.newValue;
+		var oModifier = mPropertyBag.modifier;
 
-		try {
+		oChange.setRevertData({
+			originalValue: oModifier.getPropertyBinding(oControl, sPropertyName) || oModifier.getProperty(oControl, sPropertyName)
+		});
+
+		changeProperty(oControl, sPropertyName, vPropertyValue, oModifier);
+	};
+
+	/**
+	 * Revert the properties value on the given control
+	 *
+	 * @param {object} oChange - change object with instructions to be applied on the control
+	 * @param {object} oControl - the control which has been determined by the selector id
+	 * @param {object} mPropertyBag
+	 * @param {object} mPropertyBag.modifier - modifier for the controls
+	 * @return {boolean} true - if change has been reverted
+	 * @public
+	 */
+	PropertyChange.revertChange = function(oChange, oControl, mPropertyBag) {
+		var mRevertData = oChange.getRevertData();
+
+		if (mRevertData) {
 			var oDef = oChange.getDefinition();
 			var sPropertyName = oDef.content.property;
-			var oPropertyValue = oDef.content.newValue;
-			if (FlexUtils.isBinding(oPropertyValue)) {
-				mPropertyBag.modifier.setPropertyBinding(oControl, sPropertyName, oPropertyValue);
-			} else {
-				mPropertyBag.modifier.setProperty(oControl, sPropertyName, oPropertyValue);
-			}
-		} catch (ex) {
-			throw new Error("Applying property changes failed: " +  ex);
+			var vPropertyValue = mRevertData.originalValue;
+			var oModifier = mPropertyBag.modifier;
+
+			changeProperty(oControl, sPropertyName, vPropertyValue, oModifier);
+			oChange.resetRevertData();
+		} else {
+			jQuery.sap.log.error("Attempt to revert an unapplied change.");
+			return false;
 		}
 
+		return true;
 	};
 
 	/**
@@ -2323,19 +2821,12 @@ sap.ui.define("sap/ui/fl/changeHandler/PropertyChange",["jquery.sap.global", "sa
 	 * @name sap.ui.fl.changeHandler.PropertyChange#completeChangeContent
 	 */
 	PropertyChange.completeChangeContent = function(oChange, oSpecificChangeInfo) {
-
 		var oChangeJson = oChange.getDefinition();
-
 		if (oSpecificChangeInfo.content) {
-
 			oChangeJson.content = oSpecificChangeInfo.content;
-
 		} else {
-
 			throw new Error("oSpecificChangeInfo attribute required");
-
 		}
-
 	};
 
 	return PropertyChange;
@@ -2352,32 +2843,61 @@ if ( !jQuery.sap.isDeclared('sap.ui.fl.changeHandler.StashControl') ) {
 jQuery.sap.declare('sap.ui.fl.changeHandler.StashControl'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
 sap.ui.define("sap/ui/fl/changeHandler/StashControl",[
-	'jquery.sap.global', './Base'
-], function(jQuery, Base) {
+	"jquery.sap.global"
+], function(
+	jQuery
+) {
 	"use strict";
 
 	/**
 	 * Change handler for stashing of a control.
 	 * @alias sap.ui.fl.changeHandler.StashControl
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.27.0
 	 */
-	var StashControl = { };
+	var StashControl = {};
 
 	/**
 	 * Stashes and hides a control.
 	 *
 	 * @param {sap.ui.fl.Change} oChange change object with instructions to be applied on the control map
 	 * @param {sap.ui.core.Control} oControl control that matches the change selector for applying the change
-	 * @param {object} mPropertyBag.modifier - modifier for the controls
 	 * @param {object} mPropertyBag	- map of properties
+	 * @param {object} mPropertyBag.modifier - modifier for the controls
 	 * @returns {boolean} true - if change could be applied
 	 * @public
 	 */
 	StashControl.applyChange = function(oChange, oControl, mPropertyBag) {
-		mPropertyBag.modifier.setVisible(oControl, false);
+		oChange.setRevertData({
+			originalValue: mPropertyBag.modifier.getStashed(oControl)
+		});
+
 		mPropertyBag.modifier.setStashed(oControl, true);
+		return true;
+	};
+
+	/**
+	 * Reverts previously applied change
+	 *
+	 * @param {sap.ui.fl.Change} oChange change object with instructions to be applied on the control map
+	 * @param {sap.ui.core.Control} oControl control that matches the change selector for applying the change
+	 * @param {object} mPropertyBag	- map of properties
+	 * @param {object} mPropertyBag.modifier - modifier for the controls
+	 * @returns {boolean} true - if change has been reverted
+	 * @public
+	 */
+	StashControl.revertChange = function(oChange, oControl, mPropertyBag) {
+		var mRevertData = oChange.getRevertData();
+
+		if (mRevertData) {
+			mPropertyBag.modifier.setStashed(oControl, mRevertData.originalValue);
+			oChange.resetRevertData();
+		} else {
+			jQuery.sap.log.error("Attempt to revert an unapplied change.");
+			return false;
+		}
+
 		return true;
 	};
 
@@ -2407,18 +2927,20 @@ if ( !jQuery.sap.isDeclared('sap.ui.fl.changeHandler.UnhideControl') ) {
 jQuery.sap.declare('sap.ui.fl.changeHandler.UnhideControl'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
 sap.ui.define("sap/ui/fl/changeHandler/UnhideControl",[
-	'jquery.sap.global', './Base'
-], function(jQuery, Base) {
+	"jquery.sap.global"
+], function(
+	jQuery
+) {
 	"use strict";
 
 	/**
 	 * Change handler for unhiding of a control.
 	 * @alias sap.ui.fl.changeHandler.UnhideControl
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.27.0
 	 */
-	var UnhideControl = { };
+	var UnhideControl = {};
 
 	/**
 	 * Unhides a control.
@@ -2427,10 +2949,39 @@ sap.ui.define("sap/ui/fl/changeHandler/UnhideControl",[
 	 * @param {sap.ui.core.Control} oControl control that matches the change selector for applying the change
 	 * @param {object} mPropertyBag
 	 * @param {object} mPropertyBag.modifier - modifier for the controls
+	 * @return {boolean} true - if change could be applied
 	 * @public
 	 */
 	UnhideControl.applyChange = function(oChange, oControl, mPropertyBag) {
+		oChange.setRevertData({
+			originalValue: mPropertyBag.modifier.getProperty(oControl, 'visible')
+		});
+
 		mPropertyBag.modifier.setVisible(oControl, true);
+		return true;
+	};
+
+	/**
+	 * Reverts previously applied change
+	 *
+	 * @param {sap.ui.fl.Change} oChange change object with instructions to be applied on the control map
+	 * @param {sap.ui.core.Control} oControl control that matches the change selector for applying the change
+	 * @param {object} mPropertyBag
+	 * @param {object} mPropertyBag.modifier - modifier for the controls
+	 * @return {boolean} true - if change has been reverted
+	 * @public
+	 */
+	UnhideControl.revertChange = function(oChange, oControl, mPropertyBag) {
+		var mRevertData = oChange.getRevertData();
+
+		if (mRevertData) {
+			mPropertyBag.modifier.setVisible(oControl, mRevertData.originalValue);
+			oChange.resetRevertData();
+		} else {
+			jQuery.sap.log.error("Attempt to revert an unapplied change.");
+			return false;
+		}
+
 		return true;
 	};
 
@@ -2442,13 +2993,6 @@ sap.ui.define("sap/ui/fl/changeHandler/UnhideControl",[
 	 * @public
 	 */
 	UnhideControl.completeChangeContent = function(oChange, oSpecificChangeInfo) {
-
-		var oChangeJson = oChange.getDefinition();
-
-		if (!oChangeJson.content) {
-			oChangeJson.content = {};
-		}
-
 	};
 
 	return UnhideControl;
@@ -2466,15 +3010,17 @@ if ( !jQuery.sap.isDeclared('sap.ui.fl.changeHandler.UnstashControl') ) {
 jQuery.sap.declare('sap.ui.fl.changeHandler.UnstashControl'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
 sap.ui.define("sap/ui/fl/changeHandler/UnstashControl",[
-	'jquery.sap.global', './Base'
-], function(jQuery, Base) {
+	"jquery.sap.global"
+], function(
+	jQuery
+) {
 	"use strict";
 
 	/**
 	 * Change handler for unstashing of a control.
 	 * @alias sap.ui.fl.changeHandler.UnstashControl
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.27.0
 	 */
 	var UnstashControl = { };
@@ -2492,15 +3038,43 @@ sap.ui.define("sap/ui/fl/changeHandler/UnstashControl",[
 		var mContent = oChange.getContent();
 		var oModifier = mPropertyBag.modifier;
 
+		oChange.setRevertData({
+			originalValue: mPropertyBag.modifier.getStashed(oControl)
+		});
+
 		oModifier.setStashed(oControl, false);
 
 		if (mContent.parentAggregationName){
-			//old way including move, new way will have seperate move change
+			//old way including move, new way will have separate move change
 			var sTargetAggregation = mContent.parentAggregationName;
 			var oTargetParent = oModifier.getParent(oControl);
 			oModifier.removeAggregation(oTargetParent, sTargetAggregation, oControl);
-			oModifier.insertAggregation(oTargetParent, sTargetAggregation, oControl, mContent.index);
+			oModifier.insertAggregation(oTargetParent, sTargetAggregation, oControl, mContent.index, mPropertyBag.view);
 		}
+		return true;
+	};
+
+	/**
+	 * Reverts previously applied change
+	 *
+	 * @param {sap.ui.fl.Change} oChange change object with instructions to be applied on the control map
+	 * @param {sap.ui.core.Control} oControl control that matches the change selector for applying the change
+	 * @param {object} mPropertyBag
+	 * @param {object} mPropertyBag.modifier - modifier for the controls
+	 * @return {boolean} true - if change has been reverted
+	 * @public
+	 */
+	UnstashControl.revertChange = function(oChange, oControl, mPropertyBag) {
+		var mRevertData = oChange.getRevertData();
+
+		if (mRevertData) {
+			mPropertyBag.modifier.setStashed(oControl, mRevertData.originalValue);
+			oChange.resetRevertData();
+		} else {
+			jQuery.sap.log.error("Attempt to revert an unapplied change.");
+			return false;
+		}
+
 		return true;
 	};
 
@@ -2535,7 +3109,8 @@ if ( !jQuery.sap.isDeclared('sap.ui.fl.changeHandler.XmlTreeModifier') ) {
  */
 
 jQuery.sap.declare('sap.ui.fl.changeHandler.XmlTreeModifier'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-sap.ui.define("sap/ui/fl/changeHandler/XmlTreeModifier",["sap/ui/fl/changeHandler/BaseTreeModifier"], function (BaseTreeModifier) {
+jQuery.sap.require('sap.ui.base.DataType'); // unlisted dependency retained
+sap.ui.define("sap/ui/fl/changeHandler/XmlTreeModifier",["sap/ui/fl/changeHandler/BaseTreeModifier", "sap/ui/base/DataType"], function (BaseTreeModifier, DataType) {
 
 		"use strict";
 
@@ -2543,8 +3118,12 @@ sap.ui.define("sap/ui/fl/changeHandler/XmlTreeModifier",["sap/ui/fl/changeHandle
 
 			targets: "xmlTree",
 
-			setVisible: function (oControl, oPropertyValue) {
-				this.setProperty(oControl, "visible", oPropertyValue);
+			setVisible: function (oControl, bVisible) {
+				if (bVisible) {
+					oControl.removeAttribute("visible");
+				} else {
+					this.setProperty(oControl, "visible", bVisible);
+				}
 			},
 
 			getVisible: function (oControl) {
@@ -2555,8 +3134,12 @@ sap.ui.define("sap/ui/fl/changeHandler/XmlTreeModifier",["sap/ui/fl/changeHandle
 				this.setProperty(oControl, "stashed", oPropertyValue);
 			},
 
-			bindProperty: function (oControl, sPropertyName, sBindingPath) {
-				oControl.setAttribute(sPropertyName, "{" + sBindingPath + "}");
+			getStashed: function (oControl) {
+				return this.getProperty(oControl, "stashed");
+			},
+
+			bindProperty: function (oControl, sPropertyName, vBindingInfos) {
+				oControl.setAttribute(sPropertyName, "{" + vBindingInfos + "}");
 			},
 
 			setProperty: function (oControl, sPropertyName, oPropertyValue) {
@@ -2564,19 +3147,61 @@ sap.ui.define("sap/ui/fl/changeHandler/XmlTreeModifier",["sap/ui/fl/changeHandle
 			},
 
 			getProperty: function (oControl, sPropertyName) {
-				return oControl.getAttribute(sPropertyName);
+				var oPropertyInfo = this._getControlMetadata(oControl).getProperty(sPropertyName);
+				var vPropertyValue = oControl.getAttribute(sPropertyName);
+				if (oPropertyInfo) { //not a property like aggregation
+					var oType = oPropertyInfo.getType();
+					if (vPropertyValue === null){
+						vPropertyValue = oPropertyInfo.getDefaultValue() || oType.getDefaultValue();
+					} else {
+						vPropertyValue = oType.parseValue(vPropertyValue);
+					}
+				}
+				return vPropertyValue;
 			},
 
 			setPropertyBinding: function (oControl, sPropertyName, oPropertyBinding) {
 				oControl.setAttribute(sPropertyName, oPropertyBinding);
 			},
 
-			createControl: function (sClassName, oAppComponent, oView, oSelector) {
+			getPropertyBinding: function (oControl, sPropertyName) {
+				return oControl.getAttribute(sPropertyName);
+			},
+
+			/**
+			 * Creates the control (as XML element or node)
+			 *
+			 * @param {string} sClassName Class name for the control (for example, <code>sap.m.Button</code>)
+			 * @param {sap.ui.core.UIComponent} [oAppComponent] - Needed to calculate the correct ID in case you provide an id
+			 * @param {Element} oView XML node of the view, required to create nodes and to find elements
+			 * @param {object} [oSelector] - Selector to calculate the ID for the control that is being created
+			 * @param {string} [oSelector.id] - Control ID targeted by the change
+			 * @param {boolean} [oSelector.isLocalId] - True if the ID within the selector is a local ID or a global ID
+			 * @param {object} [mSettings ] Further settings or properties for the control that is being created
+			 * @returns {Element} XML node of the control being created
+			 */
+			createControl: function (sClassName, oAppComponent, oView, oSelector, mSettings) {
+				var sId, sLocalName;
 				if (!this.bySelector(oSelector, oAppComponent, oView)) {
-					var oNewElementNode = oView.createElement(sClassName);
-					var sId = this.getControlIdBySelector(oSelector, oAppComponent);
+					var aClassNameParts = sClassName.split('.');
+					var sNamespaceURI = "";
+					if (aClassNameParts.length > 1) {
+						sLocalName = aClassNameParts.pop();
+						sNamespaceURI = aClassNameParts.join('.');
+					}
+
+					var oNewElementNode = oView.ownerDocument.createElementNS(sNamespaceURI, sLocalName);
+
+					sId = this.getControlIdBySelector(oSelector, oAppComponent);
 					if (sId) {
 						oNewElementNode.setAttribute("id", sId);
+					}
+					if (mSettings){
+						var oValue;
+						Object.keys(mSettings).forEach(function(sKey) {
+						    oValue = mSettings[sKey];
+						    oNewElementNode.setAttribute(sKey, oValue);
+						});
 					}
 					return oNewElementNode;
 				} else {
@@ -2584,41 +3209,30 @@ sap.ui.define("sap/ui/fl/changeHandler/XmlTreeModifier",["sap/ui/fl/changeHandle
 				}
 			},
 
-			/** SUBSTITUTION UNTIL SmartForm has adopted to the bySelector
-			 *
-			 * @param sId
-			 * @param oView
-			 * @returns {*|Node}
-			 */
-			byId: function (sId, oView) {
-				return this._byId(sId, oView);
-			},
-
 			/**
 			 * Returns the control for the given id. Undefined if control cannot be found.
 			 *
 			 * @param {string} sId control id
-			 * @param {Node} oView node of the view
-			 * @returns {Node} xml node of the Control
+			 * @param {Element} oView Node of the view
+			 * @returns {Element} XML node of the control
 			 * @private
 			 */
 			_byId: function (sId, oView) {
 
 				// If function defined and operational use getElementById(sId) of document or view to access control
-				// ... Note: oView.ownerDocument.getElementById(sId) may fail under IE 11.420 indicating "permission denied"
+				// ... Note: oView.ownerDocument.getElementById(sId) may fail under IE 11 indicating "permission denied"
 				if (oView) {
 					if (oView.ownerDocument && oView.ownerDocument.getElementById && oView.ownerDocument.getElementById(sId)) {
-						// oView.ownerDocument.getElementById(sId) fails under IE 11.420 indicating "permission denied"
 						return oView.ownerDocument.getElementById(sId);
-					} else if (oView.getElementById && oView.getElementById(sId)) {
-						return oView.getElementById(sId);
+					} else {
+						return oView.querySelector("[id='" + sId + "']");
 					}
-				}
 
-				// Use jQuery.find function to access control if getElementById(..) failed
-				var oNodes = jQuery(oView).find("#" + sId);
-				if (oNodes.length === 1) {
-					return oNodes[0];
+					// Use jQuery.find function to access control if getElementById(..) failed
+					var oNodes = jQuery.sap.byId(sId, oView);
+					if (oNodes.length === 1) {
+						return oNodes[0];
+					}
 				}
 			},
 
@@ -2636,9 +3250,9 @@ sap.ui.define("sap/ui/fl/changeHandler/XmlTreeModifier",["sap/ui/fl/changeHandle
 				return oParent;
 			},
 
-			_getLocalName: function (xmlNode) {
+			_getLocalName: function (xmlElement) {
 				// localName for standard browsers, baseName for IE, nodeName in the absence of namespaces
-				return xmlNode.localName || xmlNode.baseName || xmlNode.nodeName;
+				return xmlElement.localName || xmlElement.baseName || xmlElement.nodeName;
 			},
 
 			getControlType: function (oControl) {
@@ -2649,21 +3263,56 @@ sap.ui.define("sap/ui/fl/changeHandler/XmlTreeModifier",["sap/ui/fl/changeHandle
 				return sControlType;
 			},
 
-			getAggregation: function (oParent, sName) {
-				var oAggregationNode = this._findAggregationNode(oParent, sName);
-				//convert NodeList to Array
-				return Array.prototype.slice.call(this._children(oAggregationNode));
+			getAllAggregations: function (oControl) {
+				var oControlMetadata = this._getControlMetadata(oControl);
+				return oControlMetadata.getAllAggregations();
 			},
 
-			insertAggregation: function (oParent, sName, oObject, iIndex, oView, bNewParent, oAppComponent) {
-				var oAggregationNode = this._findAggregationNode(oParent, sName, oView, bNewParent, oAppComponent);
+			getAggregation: function (oParent, sName) {
+				var oAggregationNode = this._findAggregationNode(oParent, sName);
+				var bSingleValueAggregation = this._isSingleValueAggregation(oParent, sName);
+				if (!oAggregationNode){
+					if (bSingleValueAggregation && this._isAltTypeAggregation(oParent, sName)){
+						return this.getProperty(oParent, sName);
+					}
+					return bSingleValueAggregation ? undefined : [];
+				}
+				var aChildren = this._getControlsInAggregation(oParent, oAggregationNode);
+				if (bSingleValueAggregation){
+					return aChildren[0];
+				}
+				return aChildren;
+			},
+
+			/**
+			 * Insert the control (as XML element or node) into the specified aggregation;
+			 * if the aggregation node is not available in the current XML and is needed
+			 * because it's not the default aggregation, the aggregation node will be created automatically.
+			 *
+			 * @param {Element} oParent XML node or element of the control in which to insert <code>oObject</code>
+			 * @param {string} sName Aggregation name
+			 * @param {Element} oObject XML node or element of the control that will be inserted
+			 * @param {int} iIndex Index for <code>oObject</code> in the aggregation
+			 * @param {Element} oView xml node/element of the view - needed to potentially create (aggregation) nodes
+			 */
+			insertAggregation: function (oParent, sName, oObject, iIndex, oView) {
+				var oAggregationNode = this._findAggregationNode(oParent, sName);
+
+				if (!oAggregationNode) {
+					// named aggregation must have the same namespace as the parent
+					var sNamespaceURI = oParent.namespaceURI;
+					// no ids for aggregation nodes => no need pass id or component
+					oAggregationNode = this.createControl(sNamespaceURI + "." + sName, undefined, oView);
+					oParent.appendChild(oAggregationNode);
+				}
 
 				if (iIndex >= oAggregationNode.childElementCount) {
 					oAggregationNode.appendChild(oObject);
 				} else {
-					var oReferenceNode = this._children(oAggregationNode)[iIndex];
+					var oReferenceNode = this._getControlsInAggregation(oParent, oAggregationNode)[iIndex];
 					oAggregationNode.insertBefore(oObject, oReferenceNode);
 				}
+
 			},
 
 			/**
@@ -2676,43 +3325,74 @@ sap.ui.define("sap/ui/fl/changeHandler/XmlTreeModifier",["sap/ui/fl/changeHandle
 			 * @param {Node}
 			 *          oObject - aggregated object to be set
 			 */
-			removeAggregation: function (oParent, sName, oObject, oView) {
-				var oAggregationNode = this._findAggregationNode(oParent, sName, oView);
+			removeAggregation: function (oParent, sName, oObject) {
+				var oAggregationNode = this._findAggregationNode(oParent, sName);
 				oAggregationNode.removeChild(oObject);
 			},
 
-			removeAllAggregation: function (oControl, sName, oView) {
-				var oAggregationNode = this._findAggregationNode(oControl, sName, oView);
+			removeAllAggregation: function (oControl, sName) {
+				var oAggregationNode = this._findAggregationNode(oControl, sName);
 				if (oControl === oAggregationNode) {
-					var oChildren = this._children(oControl);
-					for (var i = 0; i < oChildren.length; i++) {
-						oControl.removeChild(oChildren[i]);
-					}
+					var aChildControls = this._getControlsInAggregation(oControl, oControl);
+					aChildControls.forEach(function(oChildControl){
+						oControl.removeChild(oChildControl);
+					});
 				} else {
 					oControl.removeChild(oAggregationNode);
 				}
 			},
 
-			_findAggregationNode: function (oParent, sName, oView, bNewParent, oAppComponent) {
+			_findAggregationNode: function (oParent, sName) {
 				var oAggregationNode;
-				if (bNewParent) {
-					oAggregationNode = this.createControl(sName, oAppComponent, oView);
-					oParent.appendChild(oAggregationNode);
-				} else {
-					var aChildren = this._children(oParent);
-					for (var i = 0; i < aChildren.length; i++) {
-						var oNode = aChildren[i];
-						if (oNode.localName === sName) {
-							oAggregationNode = oNode;
-							break;
-						}
-					}
-					if (!oAggregationNode) {
-						// expecting default aggregation
-						oAggregationNode = oParent;
+				var aChildren = this._children(oParent);
+				for (var i = 0; i < aChildren.length; i++) {
+					var oNode = aChildren[i];
+					if (oNode.localName === sName) {
+						oAggregationNode = oNode;
+						break;
 					}
 				}
+				if (!oAggregationNode && this._isDefaultAggregation(oParent, sName)) {
+					oAggregationNode = oParent;
+				}
 				return oAggregationNode;
+			},
+
+			_isDefaultAggregation: function(oParent, sAggregationName){
+				var oControlMetadata = this._getControlMetadata(oParent);
+				var oDefaultAggregation = oControlMetadata.getDefaultAggregation();
+				return oDefaultAggregation && sAggregationName === oDefaultAggregation.name;
+			},
+
+			_isNotNamedAggregationNode: function(oParent, oChildNode){
+				var mAllAggregatiosnMetadata = this.getAllAggregations(oParent);
+				var oAggregation = mAllAggregatiosnMetadata[oChildNode.localName];
+				return oParent.namespaceURI !== oChildNode.namespaceURI || !oAggregation; //same check as in XMLTemplateProcessor (handleChild)
+			},
+
+			_isSingleValueAggregation: function(oParent, sAggregationName){
+				var mAllAggregatiosnMetadata = this.getAllAggregations(oParent);
+				var oAggregationMetadata = mAllAggregatiosnMetadata[sAggregationName];
+				return !oAggregationMetadata.multiple;
+			},
+
+			_isAltTypeAggregation: function(oParent, sAggregationName){
+				var oControlMetadata = this._getControlMetadata(oParent);
+				var oAggregationMetadata = oControlMetadata.getAllAggregations()[sAggregationName];
+				return !!oAggregationMetadata.altTypes;
+			},
+
+			_getControlMetadata: function(oControl){
+				var sControlType = this.getControlType(oControl);
+				jQuery.sap.require(sControlType);
+				var ControlType = jQuery.sap.getObject(sControlType);
+				return ControlType.getMetadata();
+			},
+
+			_getControlsInAggregation: function(oParent, oAggregationNode){
+				//convert NodeList to Array
+				var aChildren = Array.prototype.slice.call(this._children(oAggregationNode));
+				return aChildren.filter(this._isNotNamedAggregationNode.bind(this, oParent));
 			},
 
 			_children: function (oParent) {
@@ -2728,6 +3408,18 @@ sap.ui.define("sap/ui/fl/changeHandler/XmlTreeModifier",["sap/ui/fl/changeHandle
 					}
 					return aChildren;
 				}
+			},
+
+			getBindingTemplate: function (oControl, sAggregationName) {
+				var oAggregationNode = this._findAggregationNode(oControl, sAggregationName);
+				if (oAggregationNode && oAggregationNode.childNodes.length === 1) {
+					return oAggregationNode.childNodes[0];
+				}
+
+			},
+
+			updateAggregation: function (oControl, sAggregationName) {
+				/*only needed in JS case to indicate binding (template) has changed, in XML case binding has not been created yet (see managed object)*/
 			}
 		};
 
@@ -2739,7 +3431,6 @@ sap.ui.define("sap/ui/fl/changeHandler/XmlTreeModifier",["sap/ui/fl/changeHandle
 		);
 	},
 	/* bExport= */true);
-
 }; // end of sap/ui/fl/changeHandler/XmlTreeModifier.js
 if ( !jQuery.sap.isDeclared('sap.ui.fl.context.BaseContextProvider') ) {
 /*!
@@ -2763,7 +3454,7 @@ sap.ui.define("sap/ui/fl/context/BaseContextProvider",['sap/ui/base/ManagedObjec
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -2840,7 +3531,7 @@ sap.ui.define("sap/ui/fl/context/Context",['sap/ui/base/ManagedObject'], functio
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -3053,7 +3744,7 @@ sap.ui.define("sap/ui/fl/context/DeviceContextProvider",["sap/ui/fl/context/Base
 	 * @extends sap.ui.fl.context.BaseContextProvider
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -3113,7 +3804,7 @@ sap.ui.define("sap/ui/fl/core/FlexVisualizer",[
 	 * @alias sap.ui.fl.core.FlexVisualizer
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.27.0
 	 *
 	 */
@@ -3233,7 +3924,7 @@ sap.ui.define("sap/ui/fl/fieldExt/Access",["jquery.sap.storage"], function(Stora
 	 * @alias sap.ui.fl.fieldExt.Access
 	 * @experimental Since 1.25.0
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 */
 	var Access = {};
 
@@ -3720,7 +4411,7 @@ sap.ui.define("sap/ui/fl/registry/ChangeRegistryItem",[
 	 * @alias sap.ui.fl.registry.ChangeRegistryItem
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.27.0
 	 *
 	 */
@@ -3835,7 +4526,7 @@ sap.ui.define("sap/ui/fl/registry/ChangeTypeMetadata",[
 	 * @alias sap.ui.fl.registry.ChangeTypeMetadata
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.27.0
 	 *
 	 */
@@ -3963,7 +4654,7 @@ sap.ui.define("sap/ui/fl/registry/SimpleChanges",[
 	 * @alias sap.ui.fl.registry.SimpleChanges
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.27.0
 	 *
 	 */
@@ -4007,6 +4698,171 @@ sap.ui.define("sap/ui/fl/registry/SimpleChanges",[
 }, true);
 
 }; // end of sap/ui/fl/registry/SimpleChanges.js
+if ( !jQuery.sap.isDeclared('sap.ui.fl.variants.VariantManagement.designtime') ) {
+/*
+ * ! UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+// Provides the Design Time Metadata for the sap.ui.fl.variants.VariantManagement control.
+jQuery.sap.declare('sap.ui.fl.variants.VariantManagement.designtime'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+sap.ui.define("sap/ui/fl/variants/VariantManagement.designtime",[], function() {
+	"use strict";
+	return {
+		annotations: {},
+		properties: {
+			showExecuteOnSelection: {
+				ignore: false
+			},
+			showShare: {
+				ignore: false
+			},
+			showSetAsDefault: {
+				ignore: false
+			},
+			showFavorites: {
+				ignore: false
+			},
+// variantManagementKey: {
+// ignore: false
+// },
+			industrySolutionMode: {
+				ignore: false
+			},
+			vendorLayer: {
+				ignore: false
+			},
+			manualVariantKey: {
+				ignore: false
+			},
+			showSave: {
+				ignore: false
+			},
+			showSaveAs: {
+				ignore: false
+			},
+			showManage: {
+				ignore: false
+			}
+		},
+		customData: {}
+	};
+}, /* bExport= */false);
+
+}; // end of sap/ui/fl/variants/VariantManagement.designtime.js
+if ( !jQuery.sap.isDeclared('sap.ui.fl.variants.VariantModel') ) {
+/*
+ * ! UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+jQuery.sap.declare('sap.ui.fl.variants.VariantModel'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.model.json.JSONModel'); // unlisted dependency retained
+sap.ui.define("sap/ui/fl/variants/VariantModel",[
+	"jquery.sap.global", "sap/ui/model/json/JSONModel", "sap/ui/fl/Utils"
+], function(jQuery, JSONModel, Utils) {
+	"use strict";
+
+	/**
+	 * Constructor for a new sap.ui.fl.variants.VariantModel model.
+	 * @class Variant Model implementation for JSON format
+	 * @extends sap.ui.model.json.JSONModel
+	 * @author SAP SE
+	 * @version 1.50.6
+	 * @param {object} oData either the URL where to load the JSON from or a JS object
+	 * @param {object} oFlexController the FlexController instance for the component which uses the variant model
+	 * @param {object} oComponent Component instance that is currently loading
+	 * @param {boolean} bObserve whether to observe the JSON data for property changes (experimental)
+	 * @constructor
+	 * @public
+	 * @since 1.50
+	 * @alias sap.ui.fl.variants.VariantModel
+	 * @experimental Since 1.50. This class is experimental and provides only limited functionality. Also the API might be changed in future.
+	 */
+	var VariantModel = JSONModel.extend("sap.ui.fl.variants.VariantModel", /** @lends sap.ui.fl.variants.VariantModel.prototype */
+	{
+		constructor: function(oData, oFlexController, oComponent, bObserve) {
+			this.pSequentialImportCompleted = Promise.resolve();
+			JSONModel.apply(this, arguments);
+
+			this.bObserve = bObserve;
+			this.oFlexController = oFlexController;
+			this.oComponent = oComponent;
+
+			if (oData && typeof oData == "object") {
+
+				Object.keys(oData).forEach(function(sKey) {
+					oData[sKey].modified = false;
+					oData[sKey].variants.forEach(function(oVariant) {
+						if (!oData[sKey].currentVariant && (oVariant.key === oData[sKey].defaultVariant)) {
+							oData[sKey].currentVariant = oVariant.key;
+						}
+
+						oVariant.toBeDeleted = false;
+						oVariant.originalTitle = oVariant.title;
+
+						// TODO: decide favorites handling
+						// oVariant.originalFavorite = oVariant.favorite;
+
+						// TODO: decide about execute on selection flag
+						// oVariant.originalExecuteOnSelect = oVariant.executeOnSelect;
+
+						// TODO: decide about lifecycle information (shared variants)
+
+					});
+				});
+
+				this.setData(oData);
+			}
+		}
+	});
+
+	/**
+	 * Updates the storage of the current variant for a given variant management control
+	 * @param {String} sVariantMgmtRef The variant management Ref
+	 * @param {String} sNewVariantRef The newly selected variant Ref
+	 * @private
+	 */
+	VariantModel.prototype._updateCurrentVariant = function(sVariantMgmtRef, sNewVariantRef) {
+		this.switchToVariant(sVariantMgmtRef, sNewVariantRef);
+		this.oData[sVariantMgmtRef].currentVariant = sNewVariantRef;
+	};
+
+	/**
+	 * Returns the current variant for a given variant management control
+	 * @param {String} sVariantMgmtRef The variant management Ref
+	 * @returns {String} sVariantRef The current variant Ref
+	 * @public
+	 */
+	VariantModel.prototype.getCurrentVariantRef = function(sVariantMgmtRef) {
+		return this.oData[sVariantMgmtRef].currentVariant;
+	};
+
+	/**
+	 * Returns the variants for a given variant management Ref
+	 * @param {String} sVariantMgmtRef The variant management Ref
+	 * @param {String} sNewVariantRef The newly selected variant Ref
+	 * @returns {promise} Returns promise that resolves after reverting of old variants and applying of new variants is completed
+	 * @public
+	 */
+	VariantModel.prototype.switchToVariant = function(sVariantMgmtRef, sNewVariantRef) {
+		var sCurrentVariantRef = this.oData[sVariantMgmtRef].currentVariant;
+		var mChangesToBeSwitched = this.oFlexController._oChangePersistence.loadSwitchChangesMapForComponent(sVariantMgmtRef, sCurrentVariantRef, sNewVariantRef);
+
+		var oAppComponent = Utils.getAppComponentForControl(this.oComponent);
+
+		this.oFlexController.revertChangesOnControl(mChangesToBeSwitched.aRevert, oAppComponent);
+
+		this.oFlexController.applyVariantChanges(mChangesToBeSwitched.aNew, this.oComponent);
+	};
+
+	return VariantModel;
+}, true);
+
+}; // end of sap/ui/fl/variants/VariantModel.js
 if ( !jQuery.sap.isDeclared('sap.ui.fl.Cache') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -4026,7 +4882,7 @@ sap.ui.define("sap/ui/fl/Cache",["sap/ui/fl/Utils"], function (Utils) {
 	 * @alias sap.ui.fl.Cache
 	 * @experimental Since 1.25.0
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 */
 	var Cache = function () {
 	};
@@ -4108,7 +4964,8 @@ sap.ui.define("sap/ui/fl/Cache",["sap/ui/fl/Utils"], function (Utils) {
 			Cache._entries[sComponentName][sAppVersion] = {
 				file: {
 					changes: {
-						changes: []
+						changes: [],
+						contexts: []
 					}
 				}
 			};
@@ -4131,6 +4988,24 @@ sap.ui.define("sap/ui/fl/Cache",["sap/ui/fl/Utils"], function (Utils) {
 	};
 
 	/**
+	 * Deletes a single entry stored in the cache for a specific application component and application version.
+	 *
+	 * @param {string} sComponentName - Name of the application component
+	 * @param {string} sAppVersion - Current running version of application
+	 *
+	 * @private
+	 * @sap-restricted sap.ui.fl
+	 */
+	Cache._deleteEntry = function (sComponentName, sAppVersion) {
+		if (Cache._entries[sComponentName] && Cache._entries[sComponentName][sAppVersion]) {
+			delete Cache._entries[sComponentName][sAppVersion];
+		}
+		if (jQuery.isEmptyObject(Cache._entries[sComponentName])) {
+			delete Cache._entries[sComponentName];
+		}
+	};
+
+	/**
 	 * This method retrieves the changes for a given
 	 * component. It answers all subsequent calls with the same promise, which
 	 * will resolve with the same result. In the success case, it will keep the
@@ -4148,7 +5023,9 @@ sap.ui.define("sap/ui/fl/Cache",["sap/ui/fl/Utils"], function (Utils) {
 	 * @param {string} oComponent.appVersion - Current running version of application
 	 * @param {map} [mPropertyBag] - Contains additional data needed for reading changes
 	 * @param {object} [mPropertyBag.appDescriptor] - Manifest that belongs to actual component
-	 * @param {string} [mPropertyBag.siteId] - <code>sideId<code> that belongs to actual component
+	 * @param {string} [mPropertyBag.siteId] - <code>sideId</code> that belongs to actual component
+	 * @param {string} [mPropertyBag.cacheKey] - key to validate the client side stored cache entry
+	 * @param {string} [mPropertyBag.url] - address to which the request for change should be sent in case the data is not cached
 	 * @returns {Promise} resolves with the change file for the given component, either from cache or back end
 	 *
 	 * @public
@@ -4177,9 +5054,6 @@ sap.ui.define("sap/ui/fl/Cache",["sap/ui/fl/Utils"], function (Utils) {
 		}
 
 		var currentLoadChanges = oLrepConnector.loadChanges(oComponent, mPropertyBag).then(function (mChanges) {
-			if (oCacheEntry.file) {
-				Utils.log.error('sap.ui.fl.Cache: Cached changes for component ' + sComponentName + ' overwritten.');
-			}
 			if (mChanges && mChanges.changes && mChanges.changes.settings && mChanges.changes.settings.switchedOnBusinessFunctions) {
 				mChanges.changes.settings.switchedOnBusinessFunctions.forEach(function(sValue) {
 				Cache._switches[sValue] = true;
@@ -4188,7 +5062,7 @@ sap.ui.define("sap/ui/fl/Cache",["sap/ui/fl/Utils"], function (Utils) {
 			oCacheEntry.file = mChanges;
 			return oCacheEntry.file;
 		}, function (err) {
-			delete oCacheEntry.promise;
+			Cache._deleteEntry(sComponentName, sAppVersion);
 			throw err;
 		});
 
@@ -4308,7 +5182,7 @@ sap.ui.define("sap/ui/fl/LrepConnector",[
 	 * @private
 	 * @sap-restricted
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 */
 	var Connector = function(mParameters) {
 		this._initClientParam();
@@ -4323,7 +5197,7 @@ sap.ui.define("sap/ui/fl/LrepConnector",[
 		return new Connector(mParameters);
 	};
 
-	Connector.prototype.DEFAULT_CONTENT_TYPE = "application/json";
+	Connector.prototype.DEFAULT_CONTENT_TYPE = "application/json; charset=utf-8";
 	Connector.prototype._sClient = undefined;
 	Connector.prototype._sLanguage = undefined;
 	Connector.prototype._aSentRequestListeners = [];
@@ -4436,6 +5310,8 @@ sap.ui.define("sap/ui/fl/LrepConnector",[
 		var mOptions;
 		if (!sContentType) {
 			sContentType = this.DEFAULT_CONTENT_TYPE;
+		} else if (sContentType.indexOf("charset") === -1) {
+			sContentType += "; charset=utf-8";
 		}
 
 		mOptions = jQuery.extend(true, this._getDefaultHeader(), {
@@ -4451,7 +5327,7 @@ sap.ui.define("sap/ui/fl/LrepConnector",[
 			}
 		});
 
-		if (oData && mOptions.contentType === "application/json") {
+		if (oData && mOptions.contentType.indexOf("application/json") === 0) {
 			mOptions.dataType = "json";
 			if (typeof oData === "object") {
 				mOptions.data = JSON.stringify(oData);
@@ -4643,92 +5519,84 @@ sap.ui.define("sap/ui/fl/LrepConnector",[
 	 * @param {string} [oComponent.appVersion] - Current running version of application
 	 * @param {map} [mPropertyBag] - Contains additional data needed for reading changes
 	 * @param {object} [mPropertyBag.appDescriptor] - Manifest that belongs to actual component
-	 * @param {string} [mPropertyBag.siteId] - <code>sideId<code> that belongs to actual component
+	 * @param {string} [mPropertyBag.siteId] - <code>sideId</code> that belongs to actual component
 	 * @param {string} [mPropertyBag.layer] - Layer up to which changes shall be read (excluding the specified layer)
 	 * @param {string} [mPropertyBag.appVersion] - Version of application whose changes shall be read
+	 * @param {string} [mPropertyBag.url] - address to which the request for change should be sent in case the data is not cached
 	 *
-	 * @returns {Promise} Returns a Promise with the changes (changes, contexts, optional messagebundle), <code>componentClassName<code> and <code>etag<code> value
+	 * @returns {Promise} Returns a Promise with the changes (changes, contexts, optional messagebundle), <code>componentClassName</code> and <code>etag</code> value
 	 * @public
 	 */
 	Connector.prototype.loadChanges = function(oComponent, mPropertyBag) {
-		var sUri;
-		var mOptions = {};
 		var that = this;
-		var sComponentClassName = oComponent.name;
+		var mOptions = {};
+		var sComponentName = oComponent.name;
+		var sUrl = "/sap/bc/lrep/flex/data/";
+		mPropertyBag = mPropertyBag || {};
 
-		if (!sComponentClassName) {
+		if (!sComponentName) {
 			return Promise.reject(new Error("Component name not specified"));
 		}
 
-		sUri = "/sap/bc/lrep/flex/data/";
-
-		var sUpToLayer = "";
-
-		// fill header attribute: appDescriptor.id
-		if (mPropertyBag) {
-			var sCacheKey = mPropertyBag.cacheKey;
-
-			if (sCacheKey) {
+		if (mPropertyBag.url) {
+			sUrl = mPropertyBag.url;
+		} else {
+			if (mPropertyBag.cacheKey) {
 				mOptions.cache = true;
-				sUri += "~" + sCacheKey + "~/";
+				sUrl += "~" + mPropertyBag.cacheKey + "~/";
 			}
 
-			if (mPropertyBag.appDescriptor) {
-				if (mPropertyBag.appDescriptor["sap.app"]) {
-					if (!mOptions.headers) {
-						mOptions.headers = {};
-					}
+			sUrl += sComponentName;
+		}
 
-					mOptions.headers = {
-						"X-LRep-AppDescriptor-Id": mPropertyBag.appDescriptor["sap.app"].id
-					};
-				}
+		if (mPropertyBag.siteId) {
+			if (!mOptions.headers) {
+				mOptions.headers = {};
 			}
 
-			// fill header attribute: siteId
-			if (mPropertyBag.siteId) {
+			mOptions.headers = {
+				"X-LRep-Site-Id": mPropertyBag.siteId
+			};
+		}
+
+		if (mPropertyBag.layer) {
+			sUrl += "&upToLayerType=" + mPropertyBag.layer;
+		}
+
+		if (mPropertyBag.appDescriptor) {
+			if (mPropertyBag.appDescriptor["sap.app"]) {
 				if (!mOptions.headers) {
 					mOptions.headers = {};
 				}
 
 				mOptions.headers = {
-					"X-LRep-Site-Id": mPropertyBag.siteId
+					"X-LRep-AppDescriptor-Id": mPropertyBag.appDescriptor["sap.app"].id
 				};
 			}
-
-			// changes shall be read up to a specified layer type
-			if (mPropertyBag.layer) {
-				sUpToLayer = mPropertyBag.layer;
-			}
 		}
 
-		if (sComponentClassName) {
-			sUri += sComponentClassName;
-		}
 		if (this._sClient) {
-			sUri += "&sap-client=" + this._sClient;
+			sUrl += "&sap-client=" + this._sClient;
 		}
-		if (sUpToLayer) {
-			sUri += "&upToLayerType=" + sUpToLayer;
-		}
+
 		if (oComponent.appVersion && (oComponent.appVersion !== FlexUtils.DEFAULT_APP_VERSION)) {
-			sUri += "&appVersion=" + oComponent.appVersion;
+			sUrl += "&appVersion=" + oComponent.appVersion;
 		}
 
 		// Replace first & with ?
-		sUri = sUri.replace("&", "?");
+		sUrl = sUrl.replace("&", "?");
 
-		return this.send(sUri, undefined, undefined, mOptions)
+		return this.send(sUrl, undefined, undefined, mOptions)
 			.then(function(oResponse) {
 				return {
 					changes: oResponse.response,
-					componentClassName: sComponentClassName,
+					componentClassName: sComponentName,
 					etag: oResponse.etag
 				};
 			}, function(oError) {
 				if (oError.code === 404 || oError.code === 405) {
 					// load changes based old route, because new route is not implemented
-					return that._loadChangesBasedOnOldRoute(sComponentClassName);
+					return that._loadChangesBasedOnOldRoute(sComponentName);
 				} else {
 					throw (oError);
 				}
@@ -5148,7 +6016,7 @@ sap.ui.define("sap/ui/fl/context/ContextManager",["sap/ui/fl/LrepConnector", "sa
 	 * @alias sap.ui.fl.context.ContextManager
 	 * @since 1.38.0
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 */
 	var ContextManager;
 
@@ -5421,7 +6289,7 @@ sap.ui.define("sap/ui/fl/context/SwitchContextProvider",["sap/ui/fl/context/Base
 	 * @extends sap.ui.fl.context.BaseContextProvider
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @private
@@ -5483,7 +6351,7 @@ sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorInlineChangeFactory",["
 	 * @constructor
 	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorInlineChange
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @private
 	 * @sap-restricted
 	 */
@@ -5514,7 +6382,7 @@ sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorInlineChangeFactory",["
 	 * @namespace
 	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorInlineChangeFactory
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @private
 	 * @sap-restricted
 	 */
@@ -5523,13 +6391,14 @@ sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorInlineChangeFactory",["
 
 	DescriptorInlineChangeFactory.getDescriptorChangeTypes = function(){
 		return ["appdescr_ovp_addNewCard","appdescr_ovp_removeCard",
-		        "appdescr_app_addNewInbound", "appdescr_app_changeInbound", "appdescr_app_removeInbound",
+		        "appdescr_app_addNewInbound", "appdescr_app_changeInbound", "appdescr_app_removeInbound", "appdescr_app_removeAllInboundsExceptOne",
 		        "appdescr_app_addNewOutbound", "appdescr_app_changeOutbound", "appdescr_app_removeOutbound",
 		        "appdescr_app_addNewDataSource", "appdescr_app_changeDataSource", "appdescr_app_removeDataSource",
 		        "appdescr_app_addAnnotationsToOData", "appdescr_app_addTechnicalAttributes", "appdescr_app_removeTechnicalAttributes",
 		        "appdescr_app_setTitle", "appdescr_app_setSubTitle", "appdescr_app_setShortTitle", "appdescr_app_setDescription",
 		        "appdescr_app_setDestination", "appdescr_app_setKeywords", "appdescr_ui5_addNewModel", "appdescr_ui5_replaceComponentUsage",
-		        "appdescr_smb_addNamespace", "appdescr_smb_changeNamespace", "appdescr_ui_generic_app_setMainPage", "appdescr_ui_setIcon"];
+		        "appdescr_smb_addNamespace", "appdescr_smb_changeNamespace", "appdescr_ui_generic_app_setMainPage", "appdescr_ui_setIcon",
+		        "appdescr_ui5_addLibraries", "appdescr_flp_setFccApp"];
 	};
 
 	DescriptorInlineChangeFactory.createNew = function(sChangeType,mParameters,mTexts) {
@@ -5654,11 +6523,27 @@ sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorInlineChangeFactory",["
 	};
 
 	/**
+	 * Creates an inline change of change type appdescr_app_removeAllInboundsExceptOne
+	 *
+	 * @param {object} mParameters parameters of the change type
+	 * @param {string} mParameters.inboundId the id of the inbound that should be preserved
+	 *
+	 * @return {Promise} resolving when creating the descriptor inline change was successful (without backend access)
+	 *
+	 * @private
+	 * @sap-restricted
+	 */
+	DescriptorInlineChangeFactory.create_app_removeAllInboundsExceptOne = function(mParameters) {
+		Utils.checkParameterAndType(mParameters, "inboundId", "string");
+		return this._createDescriptorInlineChange('appdescr_app_removeAllInboundsExceptOne', mParameters);
+	};
+
+	/**
 	 * Creates an inline change of change type appdescr_app_changeInbound
 	 *
 	 * @param {object} mParameters parameters of the change type
 	 * @param {string} mParameters.inboundId the id of the inbound to be changed
-	 * @param {object} mParameters.entityPropertyChange
+	 * @param {object} mParameters.entityPropertyChange - the entity property change
 	 * @param {object} mParameters.entityPropertyChange.propertyPath - the property path inside the inbound
 	 * @param {object} mParameters.entityPropertyChange.operation - the operation (INSERT, UPDATE, UPSERT, DELETE)
 	 * @param {object} mParameters.entityPropertyChange.propertyValue - the new property value
@@ -5715,7 +6600,7 @@ sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorInlineChangeFactory",["
 	 *
 	 * @param {object} mParameters parameters of the change type
 	 * @param {string} mParameters.outboundId the id of the outbound to be changed
-	 * @param {object} mParameters.entityPropertyChange
+	 * @param {object} mParameters.entityPropertyChange - the entity property change
 	 * @param {object} mParameters.entityPropertyChange.propertyPath - the property path inside the outbound
 	 * @param {object} mParameters.entityPropertyChange.operation - the operation (INSERT, UPDATE, UPSERT, DELETE)
 	 * @param {object} mParameters.entityPropertyChange.propertyValue - the new property value
@@ -5771,7 +6656,7 @@ sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorInlineChangeFactory",["
 	 *
 	 * @param {object} mParameters parameters of the change type
 	 * @param {string} mParameters.dataSourceId the id of the data source to be changed
-	 * @param {object} mParameters.entityPropertyChange
+	 * @param {object} mParameters.entityPropertyChange - the entity property change
 	 * @param {object} mParameters.entityPropertyChange.propertyPath - the property path inside the data source
 	 * @param {object} mParameters.entityPropertyChange.operation - the operation (INSERT, UPDATE, UPSERT, DELETE)
 	 * @param {object} mParameters.entityPropertyChange.propertyValue - the new property value
@@ -6054,6 +6939,22 @@ sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorInlineChangeFactory",["
 	};
 
 	/**
+	 * Creates an inline change of change type appdescr_ui5_addLibraries
+	 *
+	 * @param {object} mParameters parameters of the change type
+	 * @param {object} mParameters.libraries library to be added
+	 *
+	 * @return {Promise} resolving when creating the descriptor inline change was successful (without backend access)
+	 *
+	 * @private
+	 * @sap-restricted
+	 */
+	DescriptorInlineChangeFactory.create_ui5_addLibraries = function(mParameters) {
+		Utils.checkParameterAndType(mParameters, "libraries", "object");
+		return this._createDescriptorInlineChange('appdescr_ui5_addLibraries', mParameters);
+	};
+
+	/**
 	 * Creates an inline change of change type appdescr_smb_addNamespace
 	 *
 	 * @param {object} mParameters parameters of the change type
@@ -6118,6 +7019,21 @@ sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorInlineChangeFactory",["
 		return this._createDescriptorInlineChange('appdescr_ui_setIcon', mParameters);
 	};
 
+	/**
+	 * Creates an inline change of change type appdescr_flp_setFccApp
+	 *
+	 * @param {object} mParameters parameters of the change type
+	 * @param {object} mParameters.fccApp the fccApp string
+	 *
+	 * @return {Promise} resolving when creating the descriptor inline change was successful (without backend access)
+	 *
+	 * @private
+	 * @sap-restricted
+	 */
+	DescriptorInlineChangeFactory.create_flp_setFccApp = function(mParameters) {
+		Utils.checkParameterAndType(mParameters, "fccApp", "string");
+		return this._createDescriptorInlineChange('appdescr_flp_setFccApp', mParameters);
+	};
 
 	return DescriptorInlineChangeFactory;
 
@@ -6467,6 +7383,20 @@ sap.ui.define("sap/ui/fl/registry/Settings",[
 	};
 
 	/**
+	 * Returns true if ATO is available in the back end.
+	 *
+	 * @returns {boolean} true if ATO is available.
+	 * @public
+	 */
+	Settings.prototype.isAtoAvailable = function() {
+		var bIsAtoAvailable = false;
+		if (this._oSettings.isAtoAvailable) {
+			bIsAtoAvailable = this._oSettings.isAtoAvailable;
+		}
+		return bIsAtoAvailable;
+	};
+
+	/**
 	 * Checks whether the current system is defined as a productive system.
 	 *
 	 * @public
@@ -6527,7 +7457,7 @@ sap.ui.define("sap/ui/fl/transport/Transports",[
 	 * @constructor
 	 * @alias sap.ui.fl.transport.Transports
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @since 1.38.0
 	 */
 	var Transports = function() {
@@ -6645,41 +7575,105 @@ if ( !jQuery.sap.isDeclared('sap.ui.fl.Change') ) {
  * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
+
 jQuery.sap.declare('sap.ui.fl.Change'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-jQuery.sap.require('sap.ui.base.EventProvider'); // unlisted dependency retained
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.base.ManagedObject'); // unlisted dependency retained
 sap.ui.define("sap/ui/fl/Change",[
-	"sap/ui/base/EventProvider", "sap/ui/fl/Utils", "sap/ui/fl/registry/Settings"
-], function (EventProvider, Utils, Settings) {
+	"jquery.sap.global",
+	"sap/ui/base/ManagedObject",
+	"sap/ui/fl/Utils",
+	"sap/ui/fl/registry/Settings"
+], function (
+	jQuery,
+	ManagedObject,
+	Utils,
+	Settings
+) {
 
 	"use strict";
 
 	/**
-	 * A change object based on the json data with dirty handling.
-	 * @constructor
-	 * @alias sap.ui.fl.Change
+	 * Flexibility change class. Stores change content and related information.
+	 *
 	 * @param {object} oFile - file content and admin data
-	 * @experimental Since 1.25.0
+	 *
+	 * @class Change class.
+	 * @extends sap.ui.base.ManagedObject
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
+	 * @alias sap.ui.fl.Change
+	 * @experimental Since 1.25.0
 	 */
-	var Change = function (oFile) {
-		EventProvider.apply(this);
-		if (typeof (oFile) !== "object") {
-			Utils.log.error("Constructor : sap.ui.fl.Change : oFile is not defined");
-		}
+	var Change = ManagedObject.extend("sap.ui.fl.Change", /** @lends sap.ui.fl.Change.prototype */
+	{
+		constructor : function(oFile){
+			ManagedObject.apply(this);
 
-		this._oDefinition = oFile;
-		this._oOriginDefinition = JSON.parse(JSON.stringify(oFile));
-		this._sRequest = '';
-		this._bIsDeleted = false;
-		this._bUserDependent = (oFile.layer === "USER");
+			if (!jQuery.isPlainObject(oFile)) {
+				Utils.log.error("Constructor : sap.ui.fl.Change : oFile is not defined");
+			}
+
+			this._oDefinition = oFile;
+			this._oOriginDefinition = jQuery.extend(true, {}, oFile);
+			this._sRequest = '';
+			this._bUserDependent = (oFile.layer === "USER");
+			this._vRevertData = null;
+			this.setState(Change.states.NEW);
+		},
+		metadata : {
+			properties : {
+				state : {
+					type: "string"
+				}
+			}
+		}
+	});
+
+	Change.states = {
+		NEW: "NEW",
+		PERSISTED : "NONE",
+		DELETED: "DELETE",
+		DIRTY: "UPDATE"
 	};
 
 	Change.events = {
 		markForDeletion: "markForDeletion"
 	};
 
-	Change.prototype = jQuery.sap.newObject(EventProvider.prototype);
+	Change.prototype.setState = function(sState) {
+		if (this._isValidState(sState)) {
+			this.setProperty("state", sState);
+		}
+		return this;
+	};
+
+	/**
+	 * Validates if the new state of change has a valid value
+	 * The new state value has to be in the <code>Change.states<code> list
+	 * Moving of state directly from <code>Change.states.NEW<code> to <code>Change.states.DIRTY<code> is not allowed.
+	 * @param {string} sState - value of target state
+	 * @returns {boolean} - new state is valid
+	 * @private
+	 */
+	Change.prototype._isValidState = function(sState) {
+		//new state have to be in the Change.states value list
+		var bStateFound = false;
+		Object.keys(Change.states).some(function(sKey){
+			if (Change.states[sKey] === sState) {
+				bStateFound = true;
+			}
+			return bStateFound;
+		});
+		if (!bStateFound) {
+			return false;
+		}
+		//change' state can not move from NEW to DIRTY directly
+		if ((this.getState() === Change.states.NEW) && (sState === Change.states.DIRTY)) {
+			return false;
+		}
+		return true;
+	};
 
 	/**
 	 * Returns if the change protocol is valid
@@ -6735,7 +7729,7 @@ sap.ui.define("sap/ui/fl/Change",[
 	};
 
 	/**
-	 * Returns the the original language in ISO 639-1 format
+	 * Returns the original language in ISO 639-1 format
 	 *
 	 * @returns {String} Original language
 	 *
@@ -6749,7 +7743,7 @@ sap.ui.define("sap/ui/fl/Change",[
 	};
 
 	/**
-	 * Returns the the context in which the change should be applied
+	 * Returns the context in which the change should be applied
 	 *
 	 * @returns {Object[]} context - List of objects determine the context
 	 * @returns {string} selector  - names the key of the context
@@ -6816,6 +7810,7 @@ sap.ui.define("sap/ui/fl/Change",[
 	 */
 	Change.prototype.setContent = function (oContent) {
 		this._oDefinition.content = oContent;
+		this.setState(Change.states.DIRTY);
 	};
 
 	/**
@@ -6876,6 +7871,7 @@ sap.ui.define("sap/ui/fl/Change",[
 		if (this._oDefinition.texts) {
 			if (this._oDefinition.texts[sTextId]) {
 				this._oDefinition.texts[sTextId].value = sNewText;
+				this.setState(Change.states.DIRTY);
 			}
 		}
 	};
@@ -6965,24 +7961,12 @@ sap.ui.define("sap/ui/fl/Change",[
 	};
 
 	/**
-	 * Mark the current change to be deleted persistently
+	 * Marks the current change to be deleted persistently
 	 *
 	 * @public
 	 */
 	Change.prototype.markForDeletion = function () {
-		this._bIsDeleted = true;
-	};
-
-	/**
-	 * Determines whether the change has to be updated on the back end
-	 * @returns {boolean} content of the change document has changed (change is in dirty state)
-	 * @private
-	 */
-	Change.prototype._isDirty = function () {
-		var sCurrentDefinition = JSON.stringify(this._oDefinition);
-		var sOriginDefinition = JSON.stringify(this._oOriginDefinition);
-
-		return (sCurrentDefinition !== sOriginDefinition);
+		this.setState(Change.states.DELETED);
 	};
 
 	/**
@@ -7057,14 +8041,7 @@ sap.ui.define("sap/ui/fl/Change",[
 	 * @public
 	 */
 	Change.prototype.getPendingAction = function () {
-		if (this._bIsDeleted) {
-			return "DELETE";
-		} else if (!this._oDefinition.creation) {
-			return "NEW";
-		} else if (this._isDirty() === true) {
-			return "UPDATE";
-		}
-		return "NONE";
+		return this.getState();
 	};
 
 	/**
@@ -7088,6 +8065,7 @@ sap.ui.define("sap/ui/fl/Change",[
 		if (sResponse) {
 			this._oDefinition = JSON.parse(sResponse);
 			this._oOriginDefinition = JSON.parse(sResponse);
+			this.setState(Change.states.PERSISTED);
 		}
 	};
 
@@ -7192,7 +8170,7 @@ sap.ui.define("sap/ui/fl/Change",[
 	};
 
 	/**
-	 * Returns all dependent global IDs, including the ID from selector of the changes.
+	 * Returns all dependent global IDs, including the ID from the selector of the change.
 	 *
 	 * @param {sap.ui.core.Component} oAppComponent - Application component, needed to translate the local ID into a global ID
 	 *
@@ -7218,7 +8196,7 @@ sap.ui.define("sap/ui/fl/Change",[
 				if (oDependentSelector.idIsLocal) {
 					sId = oAppComponent.createId(oDependentSelector.id);
 				}
-				if (aDependentIds.indexOf(sId) === -1) {
+				if (sId && aDependentIds.indexOf(sId) === -1) {
 					aDependentIds.push(sId);
 				}
 			});
@@ -7230,6 +8208,34 @@ sap.ui.define("sap/ui/fl/Change",[
 	};
 
 	/**
+	 * Returns list of IDs of controls which the change depends on, excluding the ID from the selector of the change.
+	 *
+	 * @param {sap.ui.core.Component} oAppComponent - Application component, needed to create a global ID from the local ID
+	 *
+	 * @returns {array} List of control IDs which the change depends on
+	 *
+	 * @public
+	 */
+	Change.prototype.getDependentControlIdList = function (oAppComponent) {
+		var sId;
+		var aDependentIds = this.getDependentIdList().concat();
+
+		if (aDependentIds.length > 0) {
+			var oSelector = this.getSelector();
+			sId = oSelector.id;
+			if (oSelector.idIsLocal) {
+				sId = oAppComponent.createId(oSelector.id);
+			}
+			var iIndex = aDependentIds.indexOf(sId);
+			if (iIndex > -1) {
+				aDependentIds.splice(iIndex, 1);
+			}
+		}
+
+		return aDependentIds;
+	};
+
+	/**
 	 * Returns the change key
 	 *
 	 * @returns {String} Change key of the file which is a unique concatenation of fileName, layer and namespace
@@ -7237,6 +8243,34 @@ sap.ui.define("sap/ui/fl/Change",[
 	 */
 	Change.prototype.getKey = function () {
 		return this._oDefinition.fileName + this._oDefinition.layer + this._oDefinition.namespace;
+	};
+
+	/**
+	 * Returns the revert specific data
+	 *
+	 * @returns {*} revert specific data
+	 * @public
+	 */
+	Change.prototype.getRevertData = function() {
+		return this._vRevertData;
+	};
+
+	/**
+	 * Sets the revert specific data
+	 *
+	 * @param {*} vData revert specific data
+	 * @public
+	 */
+	Change.prototype.setRevertData = function(vData) {
+		this._vRevertData = vData;
+	};
+
+	/**
+	 * Reset the revert specific data
+	 * @public
+	 */
+	Change.prototype.resetRevertData = function() {
+		this.setRevertData(null);
 	};
 
 	/**
@@ -7277,6 +8311,7 @@ sap.ui.define("sap/ui/fl/Change",[
 			reference: oPropertyBag.reference || "",
 			packageName: oPropertyBag.packageName || "",
 			content: oPropertyBag.content || {},
+			// TODO: Is an empty selector allowed?
 			selector: oPropertyBag.selector || {},
 			layer: oPropertyBag.layer || Utils.getCurrentLayer(oPropertyBag.isUserDependent),
 			texts: oPropertyBag.texts || {},
@@ -7302,783 +8337,6 @@ sap.ui.define("sap/ui/fl/Change",[
 }, true);
 
 }; // end of sap/ui/fl/Change.js
-if ( !jQuery.sap.isDeclared('sap.ui.fl.ChangePersistence') ) {
-/*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
- * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
- */
-
-jQuery.sap.declare('sap.ui.fl.ChangePersistence'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-sap.ui.define("sap/ui/fl/ChangePersistence",[
-	"sap/ui/fl/Change", "sap/ui/fl/Utils", "jquery.sap.global", "sap/ui/fl/LrepConnector", "sap/ui/fl/Cache", "sap/ui/fl/context/ContextManager", "sap/ui/fl/registry/Settings"
-], function(Change, Utils, $, LRepConnector, Cache, ContextManager, Settings) {
-	"use strict";
-
-	/**
-	 * Helper object to access a change from the back end. Access helper object for each change (and variant) which was fetched from the back end
-	 *
-	 * @constructor
-	 * @author SAP SE
-	 * @version 1.37.0-SNAPSHOT
-	 * @experimental Since 1.25.0
-	 * @param {object} oComponent - Component data to initiate <code>ChangePersistence<code> instance
-	 * @param {string} oComponent.name - Name of the component this instance is responsible for
-	 * @param {string} oComponent.appVersion - Version of application
-	 */
-	var ChangePersistence = function(oComponent) {
-		this._oComponent = oComponent;
-		//_mChanges contains:
-		// - mChanges: map of changes (selector id)
-		// - mDependencies: map of changes (change key) that need to be applied before any change. Used to check if a change can be applied. Format:
-		//		mDependencies: {
-		//			"fileNameChange2USERnamespace": {
-		//				"changeObject": oChange2,
-		//				"dependencies": ["fileNameChange1USERnamespace"]
-		//			},
-		//			"fileNameChange3USERnamespace": {
-		//				"changeObject": oChange3,
-		//				"dependencies": ["fileNameChange2USERnamespace"]
-		//			}
-		//		}
-		// - mDependentChangesOnMe: map of changes (change key) that cannot be applied before the change. Used to remove dependencies faster. Format:
-		//		mDependentChangesOnMe: {
-		//			"fileNameChange1USERnamespace": [oChange2],
-		//			"fileNameChange2USERnamespace": [oChange3]
-		//		}
-		this._mChanges = {
-			mChanges: {},
-			mDependencies: {},
-			mDependentChangesOnMe: {}
-		};
-
-		if (!this._oComponent || !this._oComponent.name) {
-			Utils.log.error("The Control does not belong to an SAPUI5 component. Personalization and changes for this control might not work as expected.");
-			throw new Error("Missing component name.");
-		}
-
-		this._oConnector = this._createLrepConnector();
-		this._aDirtyChanges = [];
-	};
-
-	ChangePersistence.NOTAG = "<NoTag>";
-
-	/**
-	 * Return the name of the SAPUI5 component. All changes are assigned to 1 SAPUI5 component. The SAPUI5 component also serves as authorization
-	 * object.
-	 *
-	 * @returns {String} component name
-	 * @public
-	 */
-	ChangePersistence.prototype.getComponentName = function() {
-		return this._oComponent.name;
-	};
-
-	/**
-	 * Creates a new instance of the LRepConnector
-	 *
-	 * @returns {sap.ui.fl.LrepConnector} LRep connector instance
-	 * @private
-	 */
-	ChangePersistence.prototype._createLrepConnector = function() {
-		return LRepConnector.createConnector();
-	};
-
-
-	ChangePersistence.prototype.getCacheKey = function() {
-		return Cache.getChangesFillingCache(this._oConnector, this._oComponent).then(function(oWrappedChangeFileContent) {
-			if (oWrappedChangeFileContent && oWrappedChangeFileContent.etag) {
-				return oWrappedChangeFileContent.etag;
-			}
-
-			return ChangePersistence.NOTAG;
-		});
-	};
-
-	/**
-	 * Verifies whether a change fulfils the preconditions.
-	 *
-	 * All changes need to be matched with current active contexts;
-	 * only changes whose <code>fileType<code> is 'change' and whose <code>changeType<code> is different from 'defaultVariant' are valid;
-	 * if <code>bIncludeVariants<code> parameter is true, the changes with 'variant' <code>fileType<code> or 'defaultVariant' <code>changeType<code> are also valid;
-	 * standard UI changes must have a selector <code>id<code>, smart variants must have a selector <code>persistencyKey<code>.
-	 *
-	 * @param {sap.ui.fl.context.Context[]} aActiveContexts - Array of current active contexts
-	 * @param {boolean} [bIncludeVariants] - Indicates that smart variants shall be included
-	 * @param {object} oChangeContent - Content of the change
-	 *
-	 * @returns {boolean} <code>true<code> if all the preconditions are fulfilled
-	 * @public
-	 */
-	ChangePersistence.prototype._preconditionsFulfilled = function(aActiveContexts, bIncludeVariants, oChangeContent) {
-
-		function _isValidFileType () {
-			return (oChangeContent.fileType === "change") || (oChangeContent.fileType === "variant" && bIncludeVariants);
-		}
-
-		function _isValidSelector () {
-			if (!oChangeContent.selector) {
-				return false;
-			}
-			if (!bIncludeVariants) {
-				if (!oChangeContent.selector.id) {
-					return false;
-				}
-			} else {
-				if ((oChangeContent.fileType === "variant") || (oChangeContent.changeType === "defaultVariant")){
-					return !!oChangeContent.selector.persistencyKey;
-				}
-				if ((oChangeContent.fileType === "change") && (oChangeContent.changeType !== "defaultVariant")) {
-					return !!oChangeContent.selector.id;
-				}
-			}
-			return true;
-		}
-
-		function _isValidContext () {
-			return ContextManager.doesContextMatch(oChangeContent, aActiveContexts);
-		}
-
-		if (_isValidFileType() && _isValidSelector() && _isValidContext()){
-				return true;
-		}
-		return false;
-	};
-
-	/**
-	 * Calls the back end asynchronously and fetches all changes for the component
-	 * New changes (dirty state) that are not yet saved to the back end won't be returned.
-	 * @param {map} mPropertyBag - Contains additional data needed for reading changes
-	 * @param {object} mPropertyBag.appDescriptor - Manifest that belongs to actual component
-	 * @param {string} mPropertyBag.siteId - ID of the site belonging to actual component
-	 * @param {string} [mPropertyBag.sCurrentLayer] - Specifies a single layer for loading changes. If this parameter is set, the max layer filtering is not applied
-	 * @param {boolean} [mPropertyBag.ignoreMaxLayerParameter] - Indicates that changes shall be loaded without layer filtering
-	 * @param {boolean} [mPropertyBag.includeVariants] - Indicates that smart variants shall be included
-	 * @see sap.ui.fl.Change
-	 * @returns {Promise} Resolving with an array of changes
-	 * @public
-	 */
-	ChangePersistence.prototype.getChangesForComponent = function(mPropertyBag) {
-		return Cache.getChangesFillingCache(this._oConnector, this._oComponent, mPropertyBag).then(function(oWrappedChangeFileContent) {
-			this._bHasLoadedChangesFromBackEnd = true;
-
-			if (oWrappedChangeFileContent.changes && oWrappedChangeFileContent.changes.settings){
-				Settings._storeInstance(oWrappedChangeFileContent.changes.settings);
-			}
-
-			if (!oWrappedChangeFileContent.changes || !oWrappedChangeFileContent.changes.changes) {
-				return [];
-			}
-
-			var aChanges = oWrappedChangeFileContent.changes.changes;
-			var sCurrentLayer = mPropertyBag && mPropertyBag.currentLayer;
-			if (sCurrentLayer) {
-				var aCurrentLayerChanges = [];
-				aChanges.forEach(function (oChange) {
-					if (oChange.layer === sCurrentLayer) {
-						aCurrentLayerChanges.push(oChange);
-					}
-				});
-				aChanges = aCurrentLayerChanges;
-			} else if (Utils.isLayerFilteringRequired() && !(mPropertyBag && mPropertyBag.ignoreMaxLayerParameter)) {
-				//If layer filtering required, excludes changes in higher layer than the max layer
-				var aFilteredChanges = [];
-				aChanges.forEach(function (oChange) {
-					if (!Utils.isOverMaxLayer(oChange.layer)) {
-						aFilteredChanges.push(oChange);
-					}
-				});
-				aChanges = aFilteredChanges;
-			}
-
-			var bIncludeVariants = mPropertyBag && mPropertyBag.includeVariants;
-
-			var aContextObjects = oWrappedChangeFileContent.changes.contexts || [];
-			return new Promise(function (resolve) {
-				ContextManager.getActiveContexts(aContextObjects).then(function (aActiveContexts) {
-					resolve(aChanges.filter(this._preconditionsFulfilled.bind(this, aActiveContexts, bIncludeVariants)).map(createChange));
-				}.bind(this));
-			}.bind(this));
-
-		}.bind(this));
-
-		function createChange(oChangeContent) {
-			return new Change(oChangeContent);
-		}
-	};
-
-	/**
-	 * @param {sap.ui.core.UIComponent} component containing the control for which the change should be added
-	 * @param {sap.ui.fl.Change} change which should be added into the mapping
-	 * @see sap.ui.fl.Change
-	 * @returns {map} mChanges - map with added change
-	 * @private
-	 */
-	ChangePersistence.prototype._addChangeIntoMap = function (oComponent, oChange) {
-		var oSelector = oChange.getSelector();
-		if (oSelector && oSelector.id) {
-			var sSelectorId = oSelector.id;
-			if (oSelector.idIsLocal) {
-				sSelectorId = oComponent.createId(sSelectorId);
-			}
-
-			this._addMapEntry(sSelectorId, oChange);
-
-			// add legacy change twice to ensure a different component ID on creation does not interfere
-			if (oSelector.idIsLocal === undefined && sSelectorId.indexOf("---") != -1) {
-				var sComponentPrefix = sSelectorId.split("---")[0];
-
-				// if the component prefix does not match the application component
-				// add the app component prefixed selector as well
-				if (sComponentPrefix !== oComponent.getId()) {
-					sSelectorId = sSelectorId.split("---")[1];
-					sSelectorId = oComponent.createId(sSelectorId);
-					this._addMapEntry(sSelectorId, oChange);
-				}
-			}
-		}
-
-		return this._mChanges;
-	};
-
-	/**
-	 *
-	 * @param {string} sSelectorId key in the mapping for which the entry should be written
-	 * @param {sap.ui.fl.Change} change which should be added into the mapping
-	 * @private
-	 */
-	ChangePersistence.prototype._addMapEntry = function (sSelectorId, oChange) {
-		if (!this._mChanges.mChanges[sSelectorId]) {
-			this._mChanges.mChanges[sSelectorId] = [];
-		}
-		this._mChanges.mChanges[sSelectorId].push(oChange);
-	};
-
-	ChangePersistence.prototype._addDependency = function (oDependentChange, oChange) {
-		if (!this._mChanges.mDependencies[oDependentChange.getKey()]) {
-			this._mChanges.mDependencies[oDependentChange.getKey()] = {
-				changeObject: oDependentChange,
-				dependencies: []
-			};
-		}
-		this._mChanges.mDependencies[oDependentChange.getKey()].dependencies.push(oChange.getKey());
-
-		if (!this._mChanges.mDependentChangesOnMe[oChange.getKey()]) {
-			this._mChanges.mDependentChangesOnMe[oChange.getKey()] = [];
-		}
-		this._mChanges.mDependentChangesOnMe[oChange.getKey()].push(oDependentChange.getKey());
-	};
-
-	/**
-	 * Calls the back end asynchronously and fetches all changes for the component
-	 * New changes (dirty state) that are not yet saved to the back end won't be returned.
-	 * @param {object} oComponent - Component instance used to prepare the IDs (e.g. local)
-	 * @param {map} mPropertyBag - Contains additional data needed for reading changes
-	 * @param {object} mPropertyBag.appDescriptor - Manifest belonging to actual component
-	 * @param {string} mPropertyBag.siteId - ID of the site belonging to actual component
-	 * @see sap.ui.fl.Change
-	 * @returns {Promise} Resolving with a getter for the changes map
-	 * @public
-	 */
-	ChangePersistence.prototype.loadChangesMapForComponent = function (oComponent, mPropertyBag) {
-		var that = this;
-		var oAppComponent = Utils.getAppComponentForControl(oComponent);
-
-		return this.getChangesForComponent(mPropertyBag).then(createChangeMap);
-
-		function createChangeMap(aChanges) {
-			//Since starting RTA does not recreate ChangePersistence instance, resets changes map is required to filter personalized changes
-			that._mChanges = {
-				mChanges: {},
-				mDependencies: {},
-				mDependentChangesOnMe: {}
-			};
-			aChanges.forEach(function (oChange, iIndex, aCopy) {
-				that._addChangeIntoMap(oComponent, oChange);
-
-				//create dependencies map
-				var aDependentIdList = oChange.getDependentIdList(oAppComponent);
-				var oPreviousChange;
-				var aPreviousDependentIdList;
-				var iDependentIndex;
-				var bFound;
-
-				for (var i = iIndex - 1; i >= 0; i--) {//loop over the changes
-					oPreviousChange = aCopy[i];
-					aPreviousDependentIdList = aCopy[i].getDependentIdList(oAppComponent);
-					bFound = false;
-					for (var j = 0; j < aDependentIdList.length && !bFound; j++) {
-						iDependentIndex = aPreviousDependentIdList.indexOf(aDependentIdList[j]);
-						if (iDependentIndex > -1) {
-							that._addDependency(oChange, oPreviousChange);
-							bFound = true;
-						}
-					}
-				}
-			});
-
-			return that.getChangesMapForComponent.bind(that);
-		}
-	};
-
-	/**
-	 * Getter for the private aggregation containing sap.ui.fl.Change objects mapped by their selector ids.
-	 * @return {map} mChanges mapping with changes sorted by their selector ids
-	 * @public
-	 */
-	ChangePersistence.prototype.getChangesMapForComponent = function () {
-		return this._mChanges;
-	};
-
-	/**
-	 * Gets the changes for the given view id. The complete view prefix has to match.
-	 *
-	 * Example:
-	 * Change has selector id:
-	 * view1--view2--controlId
-	 *
-	 * Will match for view:
-	 * view1--view2
-	 *
-	 * Will not match for view:
-	 * view1
-	 * view1--view2--view3
-	 *
-	 * @param {string} sViewId - the id of the view, changes should be retrieved for
-	 * @param {map} mPropertyBag - contains additional data that are needed for reading of changes
-	 * @param {object} mPropertyBag.appDescriptor - Manifest that belongs to actual component
-	 * @param {string} mPropertyBag.siteId - id of the site that belongs to actual component
-	 * @returns {Promise} resolving with an array of changes
-	 * @public
-	 */
-	ChangePersistence.prototype.getChangesForView = function(sViewId, mPropertyBag) {
-		var that = this;
-		return this.getChangesForComponent(mPropertyBag).then(function(aChanges) {
-			return aChanges.filter(changesHavingCorrectViewPrefix.bind(that));
-		});
-
-		function changesHavingCorrectViewPrefix(oChange) {
-			var sSelectorId = oChange.getSelector().id;
-			if (!sSelectorId || !mPropertyBag) {
-				return false;
-			}
-			var sSelectorIdViewPrefix = sSelectorId.slice(0, sSelectorId.lastIndexOf("--"));
-			var sViewId;
-
-			if (oChange.getSelector().idIsLocal) {
-				var oAppComponent = mPropertyBag.appComponent;
-				if (oAppComponent) {
-					sViewId = oAppComponent.getLocalId(mPropertyBag.viewId);
-				}
-			} else {
-				sViewId = mPropertyBag.viewId;
-			}
-
-			return sSelectorIdViewPrefix === sViewId;
-		}
-	};
-
-	/**
-	 * Adds a new change (could be variant as well) and returns the id of the new change.
-	 *
-	 * @param {object} vChange - The complete and finalized JSON object representation the file content of the change or a Change instance
-	 * @param {object} oComponent Component instance
-	 * @returns {sap.ui.fl.Change} the newly created change object
-	 * @public
-	 */
-	ChangePersistence.prototype.addChange = function(vChange, oComponent) {
-		var oNewChange;
-		if (vChange instanceof Change){
-			oNewChange = vChange;
-		}else {
-			oNewChange = new Change(vChange);
-		}
-		this._aDirtyChanges.push(oNewChange);
-		this._addChangeIntoMap(oComponent, oNewChange);
-
-		return oNewChange;
-	};
-
-	/**
-	 * Saves all dirty changes by calling the appropriate back-end method (create for new changes, deleteChange for deleted changes);
-	 * to ensure the correct order, the methods are called sequentially;
-	 * after a change was saved successfully, it is removed from the dirty changes and the cache is updated.
-	 *
-	 * @returns {Promise} resolving after all changes have been saved
-	 */
-	ChangePersistence.prototype.saveDirtyChanges = function() {
-		var aDirtyChangesClone = this._aDirtyChanges.slice(0);
-		var aDirtyChanges = this._aDirtyChanges;
-		var aRequests = this._getRequests(aDirtyChangesClone);
-		var aPendingActions = this._getPendingActions(aDirtyChangesClone);
-
-		if (aPendingActions.length === 1 && aRequests.length === 1 && aPendingActions[0] === "NEW") {
-			var sRequest = aRequests[0];
-			var aPreparedDirtyChangesBulk = this._prepareDirtyChanges(aDirtyChanges);
-			return this._oConnector.create(aPreparedDirtyChangesBulk, sRequest).then(this._massUpdateCacheAndDirtyState(aDirtyChanges, aDirtyChangesClone));
-		} else {
-			return aDirtyChangesClone.reduce(function (sequence, oDirtyChange) {
-				var saveAction = sequence.then(this._performSingleSaveAction(oDirtyChange).bind(this));
-				saveAction.then(this._updateCacheAndDirtyState(aDirtyChanges, oDirtyChange));
-
-				return saveAction;
-			}.bind(this), Promise.resolve());
-		}
-	};
-
-	ChangePersistence.prototype._performSingleSaveAction = function (oDirtyChange) {
-		return function() {
-			if (oDirtyChange.getPendingAction() === "NEW") {
-				return this._oConnector.create(oDirtyChange.getDefinition(), oDirtyChange.getRequest());
-			}
-
-			if (oDirtyChange.getPendingAction() === "DELETE") {
-				return this._oConnector.deleteChange({
-					sChangeName: oDirtyChange.getId(),
-					sLayer: oDirtyChange.getLayer(),
-					sNamespace: oDirtyChange.getNamespace(),
-					sChangelist: oDirtyChange.getRequest()
-				});
-			}
-		};
-	};
-
-	ChangePersistence.prototype._updateCacheAndDirtyState = function (aDirtyChanges, oDirtyChange) {
-		var that = this;
-
-		return function() {
-			if (oDirtyChange.getPendingAction() === "NEW") {
-				Cache.addChange(that._oComponent, oDirtyChange.getDefinition());
-			}
-
-			if (oDirtyChange.getPendingAction() === "DELETE") {
-				Cache.deleteChange(that._oComponent, oDirtyChange.getDefinition());
-			}
-
-			var iIndex = aDirtyChanges.indexOf(oDirtyChange);
-			if (iIndex > -1) {
-				aDirtyChanges.splice(iIndex, 1);
-			}
-		};
-	};
-
-	ChangePersistence.prototype._massUpdateCacheAndDirtyState = function (aDirtyChanges, aDirtyChangesClone) {
-		var that = this;
-
-		jQuery.each(aDirtyChangesClone, function (index, oDirtyChange) {
-			that._updateCacheAndDirtyState(aDirtyChanges, oDirtyChange)();
-		});
-	};
-
-	ChangePersistence.prototype._getRequests = function (aDirtyChanges) {
-		var aRequests = [];
-
-		jQuery.each(aDirtyChanges, function (index, oChange) {
-			var sRequest = oChange.getRequest();
-			if (aRequests.indexOf(sRequest) === -1) {
-				aRequests.push(sRequest);
-			}
-		});
-
-		return aRequests;
-	};
-
-	ChangePersistence.prototype._getPendingActions = function (aDirtyChanges) {
-		var aPendingActions = [];
-
-		jQuery.each(aDirtyChanges, function (index, oChange) {
-			var sPendingAction = oChange.getPendingAction();
-			if (aPendingActions.indexOf(sPendingAction) === -1) {
-				aPendingActions.push(sPendingAction);
-			}
-		});
-
-		return aPendingActions;
-	};
-
-	ChangePersistence.prototype._prepareDirtyChanges = function (aDirtyChanges) {
-		var aChanges = [];
-
-		jQuery.each(aDirtyChanges, function (index, oChange) {
-			aChanges.push(oChange.getDefinition());
-		});
-
-		return aChanges;
-	};
-
-	ChangePersistence.prototype.getDirtyChanges = function() {
-		return this._aDirtyChanges;
-	};
-
-	/**
-	 * Prepares a change to be deleted with the next call to
-	 * @see {ChangePersistence#saveDirtyChanges};
-	 *
-	 * If the given change is already in the dirty changes and
-	 * has pending action 'NEW' it will be removed, assuming,
-	 * it has just been created in the current session;
-	 *
-	 * Otherwise it will be marked for deletion.
-	 *
-	 * @param {sap.ui.fl.Change} oChange - the change to be deleted
-	 */
-	ChangePersistence.prototype.deleteChange = function(oChange) {
-		var nIndexInDirtyChanges = this._aDirtyChanges.indexOf(oChange);
-
-		if (nIndexInDirtyChanges > -1) {
-			if (oChange.getPendingAction() === "DELETE"){
-				return;
-			}
-			this._aDirtyChanges.splice(nIndexInDirtyChanges, 1);
-			this._deleteChangeInMap(oChange);
-			return;
-		}
-
-		oChange.markForDeletion();
-		this._aDirtyChanges.push(oChange);
-		this._deleteChangeInMap(oChange);
-	};
-
-	/**
-	 * Deletes a change object from the internal map.
-	 *
-	 * @param {sap.ui.fl.Change} oChange which has to be removed from the mapping
-	 * @private
-	 */
-	ChangePersistence.prototype._deleteChangeInMap = function (oChange) {
-		var that = this;
-
-		Object.keys(this._mChanges.mChanges).some(function (key) {
-			var aChanges = that._mChanges.mChanges[key];
-			var nIndexInMapElement = aChanges.indexOf(oChange);
-			if (nIndexInMapElement !== -1) {
-				aChanges.splice(nIndexInMapElement, 1);
-				return true;
-			}
-		});
-	};
-
-	return ChangePersistence;
-}, true);
-
-}; // end of sap/ui/fl/ChangePersistence.js
-if ( !jQuery.sap.isDeclared('sap.ui.fl.ChangePersistenceFactory') ) {
-/*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
- * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
- */
-
-jQuery.sap.declare('sap.ui.fl.ChangePersistenceFactory'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-jQuery.sap.require('sap.ui.core.Component'); // unlisted dependency retained
-sap.ui.define("sap/ui/fl/ChangePersistenceFactory",[
-	"jquery.sap.global", "sap/ui/core/Component", "sap/ui/fl/ChangePersistence", "sap/ui/fl/Utils"
-], function(jQuery, Component, ChangePersistence, Utils) {
-	"use strict";
-
-	/**
-	 * Factory to get or create a new instances of {sap.ui.fl.ChangePersistence}
-	 * @constructor
-	 * @alias sap.ui.fl.ChangePersistenceFactory
-	 * @experimental Since 1.27.0
-	 * @author SAP SE
-	 * @version 1.48.5
-	 */
-	var ChangePersistenceFactory = {};
-
-	ChangePersistenceFactory._instanceCache = {};
-
-	/**
-	 * Creates or returns an instance of the ChangePersistence
-	 * @param {String} sComponentName - Name of the component
-	 * @param {String} sAppVersion - Current running version of application
-	 * @returns {sap.ui.fl.ChangePersistence} <code>ChangePersistence<code> instance
-	 *
-	 * @public
-	 */
-	ChangePersistenceFactory.getChangePersistenceForComponent = function(sComponentName, sAppVersion) {
-		var oChangePersistence;
-		sAppVersion = sAppVersion || Utils.DEFAULT_APP_VERSION;
-		var oComponent = {
-			name : sComponentName,
-			appVersion : sAppVersion
-		};
-
-		if (!ChangePersistenceFactory._instanceCache[sComponentName]) {
-			ChangePersistenceFactory._instanceCache[sComponentName] = {};
-		}
-		oChangePersistence = ChangePersistenceFactory._instanceCache[sComponentName][sAppVersion];
-		if (!oChangePersistence) {
-			oChangePersistence = new ChangePersistence(oComponent);
-			ChangePersistenceFactory._instanceCache[sComponentName][sAppVersion] = oChangePersistence;
-		}
-
-		return oChangePersistence;
-	};
-
-	/**
-	 * Creates or returns an instance of the ChangePersistence for the component of the specified control.
-	 * The control needs to be embedded into a component.
-	 * @param {sap.ui.core.Control} oControl The control for example a SmartField, SmartGroup or View
-	 * @returns {sap.ui.fl.ChangePersistence} instance
-	 *
-	 * @public
-	 */
-	ChangePersistenceFactory.getChangePersistenceForControl = function(oControl) {
-		var sComponentId;
-		sComponentId = this._getComponentClassNameForControl(oControl);
-		var sAppVersion = Utils.getAppVersionFromManifest(Utils.getAppComponentForControl(oControl).getManifest());
-		return ChangePersistenceFactory.getChangePersistenceForComponent(sComponentId, sAppVersion);
-	};
-
-	/**
-	 * Returns the name of the component of the control
-	 * @param {sap.ui.core.Control} oControl Control
-	 * @returns {String} The name of the component. Undefined if no component was found
-	 *
-	 * @private
-	 */
-	ChangePersistenceFactory._getComponentClassNameForControl = function(oControl) {
-		return Utils.getComponentClassName(oControl);
-	};
-
-	/**
-	 * Registers the ChangePersistenceFactory._onLoadComponent to the Component loading functionality
-	 *
-	 * @since 1.38
-	 * @private
-	 */
-	ChangePersistenceFactory.registerLoadComponentEventHandler = function () {
-		Component._fnLoadComponentCallback = this._onLoadComponent.bind(this);
-	};
-
-	/**
-	 * Processing of the load component, shared by _onLoadComponent and _getChangesForComponentAfterInstantiation.
-	 *
-	 * @param {object} oConfig - copy of the configuration of loaded component
-	 * @param {object} oConfig.asyncHints - async hints passed from the app index to the core Component processing
-	 * @param {object} oManifest - Manifest of the component
-	 * @returns {object} Wrapper for oChangePersistence and oRequestOptions
-	 * @since 1.43
-	 * @private
-	 */
-	ChangePersistenceFactory._doLoadComponent = function (oConfig, oManifest) {
-		var oChangePersistenceWrapper = {oChangePersistence: {}, oRequestOptions: {}};
-		var sComponentName = Utils.getFlexReference(oManifest);
-		var sAppVersion = Utils.getAppVersionFromManifest(oManifest);
-		var sMaxLayer, oStartupParameters, oTechnicalParameters;
-
-		oStartupParameters = oConfig && oConfig.componentData && oConfig.componentData.startupParameters || {};
-		oTechnicalParameters = oConfig && oConfig.componentData && oConfig.componentData.technicalParameters;
-
-		if (oStartupParameters["sap-app-id"] && oStartupParameters["sap-app-id"].length === 1) {
-			// deprecated app variant id support with no caching
-			sComponentName = oStartupParameters["sap-app-id"][0];
-		} else {
-			if (oConfig) {
-				var aAsyncHints = oConfig.asyncHints;
-				if (aAsyncHints && aAsyncHints.requests && Array.isArray(aAsyncHints.requests)) {
-					var oFlAsyncHint = this._findFlAsyncHint(aAsyncHints.requests);
-					if (oFlAsyncHint && sComponentName === oFlAsyncHint.reference) {
-						oChangePersistenceWrapper.oRequestOptions.cacheKey = oFlAsyncHint.cachebusterToken || "<NO CHANGES>";
-					}
-				}
-			}
-		}
-		//Checks technicalParameters/startup (old) parameter for sap-ui-fl-max-layer value
-		var oMaxLayerParameters = oTechnicalParameters || oStartupParameters;
-		if (oMaxLayerParameters && oMaxLayerParameters["sap-ui-fl-max-layer"] && oMaxLayerParameters["sap-ui-fl-max-layer"].length === 1) {
-			sMaxLayer = oMaxLayerParameters["sap-ui-fl-max-layer"][0];
-		}
-		Utils.setMaxLayerParameter(sMaxLayer);
-
-		oChangePersistenceWrapper.oRequestOptions.siteId = Utils.getSiteIdByComponentData(oConfig.componentData);
-		oChangePersistenceWrapper.oChangePersistence = this.getChangePersistenceForComponent(sComponentName, sAppVersion);
-
-		return oChangePersistenceWrapper;
-	};
-
-	/**
-	 * Callback which is called within the early state of Component processing.
-	 * Already triggers the loading of the flexibility changes if the loaded manifest is an application variant.
-	 *
-	 * @param {object} oConfig - copy of the configuration of loaded component
-	 * @param {object} oConfig.asyncHints - async hints passed from the app index to the core Component processing
-	 * @param {object} oManifest - copy of the manifest of loaded component
-	 * @param {object} oManifest."sap.app"
-	 * @param {string} oManifest."sap.app".type - type of the component (i.e. "application").
-	 * The processing is only done for components of the type "application"
-	 * @since 1.38
-	 * @private
-	 */
-	ChangePersistenceFactory._onLoadComponent = function (oConfig, oManifest) {
-
-		// stop processing if the component is not of the type application
-		if (!Utils.isApplication(oManifest)) {
-			return;
-		}
-
-		var oChangePersistenceWrapper = this._doLoadComponent(oConfig, oManifest);
-
-		oChangePersistenceWrapper.oChangePersistence.getChangesForComponent(oChangePersistenceWrapper.oRequestOptions);
-	};
-
-	/**
-	 * Callback which is called within the early state of Component instantiation.
-	 *
-	 * @param {object} oConfig - copy of the configuration of loaded component
-	 * @param {object} oConfig.asyncHints - async hints passed from the app index to the core Component processing
-	 * @param {object} oManifest - copy of the manifest of loaded component
-	 * @param {object} oManifest."sap.app"
-	 * @param {string} oManifest."sap.app".type - type of the component (i.e. "application").
-	 * @param {object} oComponent Component instance
-	 * The processing is only done for components of the type "application"
-	 * @returns {Promise} Promise resolving after the changes are loaded with a getter to retrieve the mapped changes.
-	 * @since 1.43
-	 * @private
-	 */
-	ChangePersistenceFactory._getChangesForComponentAfterInstantiation = function (oConfig, oManifest, oComponent) {
-
-		// stop processing if the component is not of the type application
-		if (!Utils.isApplication(oManifest)) {
-			return Promise.resolve(function() {
-				return {
-					mChanges: {},
-					mDependencies: {},
-					mDependentChangesOnMe: {}
-				};
-			});
-		}
-
-		var oChangePersistenceWrapper = this._doLoadComponent(oConfig, oManifest);
-
-		return oChangePersistenceWrapper.oChangePersistence.loadChangesMapForComponent(oComponent, oChangePersistenceWrapper.oRequestOptions);
-	};
-
-	ChangePersistenceFactory._findFlAsyncHint = function (oAsyncHintRequest) {
-		var that = this;
-		var oFlAsyncHint;
-
-		jQuery.each(oAsyncHintRequest, function (nIndex, oAsyncHint) {
-			if (that._flAsyncHintMatches(oAsyncHint)) {
-				oFlAsyncHint = oAsyncHint;
-				return false; // break forEach
-			}
-		});
-
-		return oFlAsyncHint;
-	};
-
-	ChangePersistenceFactory._flAsyncHintMatches = function (oAsyncHintRequest) {
-		return oAsyncHintRequest.name === "sap.ui.fl.changes";
-	};
-
-	return ChangePersistenceFactory;
-}, true);
-
-}; // end of sap/ui/fl/ChangePersistenceFactory.js
 if ( !jQuery.sap.isDeclared('sap.ui.fl.DefaultVariant') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -8100,7 +8358,7 @@ sap.ui.define("sap/ui/fl/DefaultVariant",[
 	 * @alias sap.ui.fl.DefaultVariant
 	 * @author SAP SE
 	 *
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @experimental Since 1.25.0
 	 */
@@ -8205,7 +8463,9 @@ sap.ui.define("sap/ui/fl/DefaultVariant",[
 		var oNewsetChange = this.getNewestDefaultVariantChangeDeleteTheRest(mChanges);
 
 		if (oNewsetChange) {
-			oNewsetChange.getContent().defaultVariantName = sNewDefaultVariantId;
+			var oContent = oNewsetChange.getContent();
+			oContent.defaultVariantName = sNewDefaultVariantId;
+			oNewsetChange.setContent(oContent);
 		}
 
 		return oNewsetChange;
@@ -8262,433 +8522,6 @@ sap.ui.define("sap/ui/fl/DefaultVariant",[
 }, /* bExport= */true);
 
 }; // end of sap/ui/fl/DefaultVariant.js
-if ( !jQuery.sap.isDeclared('sap.ui.fl.FakeLrepConnector') ) {
-/*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
- * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
- */
-
-jQuery.sap.declare('sap.ui.fl.FakeLrepConnector'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-jQuery.sap.require('sap.ui.thirdparty.URI'); // unlisted dependency retained
-sap.ui.define("sap/ui/fl/FakeLrepConnector",[
-	"jquery.sap.global", "sap/ui/thirdparty/URI", "sap/ui/fl/Utils", "sap/ui/fl/LrepConnector", "sap/ui/fl/Cache", "sap/ui/fl/ChangePersistenceFactory"
-], function(jQuery, uri, FlexUtils, LrepConnector, Cache, ChangePersistenceFactory) {
-	"use strict";
-	var oLrepConnector = Object.create(LrepConnector.prototype);
-	FakeLrepConnector._oBackendInstances = {};
-
-	/**
-	 * Please use the @link {FakeLrepConnector#enableFakeConnector} function
-	 * to enable the FakeLrepConnector.
-	 *
-	 * Provides a fake implementation for the sap.ui.fl.LrepConnector
-	 * @param {String} sInitialComponentJsonPath - the relative path to a test-component-changes.json file
-	 *
-	 * @constructor
-	 * @alias sap.ui.fl.FakeLrepConnector
-	 * @experimental Since 1.27.0
-	 * @author SAP SE
-	 * @version 1.48.5
-	 */
-	function FakeLrepConnector(sInitialComponentJsonPath){
-		this.sInitialComponentJsonPath = sInitialComponentJsonPath;
-	}
-
-	for (var prop in oLrepConnector){
-		if (typeof oLrepConnector[prop] === 'function'){
-			/*eslint-disable noinspection, no-loop-func */
-			FakeLrepConnector.prototype[prop] = (function(prop){
-				return function() {
-					throw new Error('Method ' + prop + '() is not implemented in FakeLrepConnector.');
-				};
-			}(prop));
-			/*eslint-enable noinspection, no-loop-func */
-		}
-	}
-
-	FakeLrepConnector.prototype.loadChanges = function(sComponentClassName){
-		var initialComponentJsonPath = this.sInitialComponentJsonPath;
-
-		return new Promise(function(resolve, reject){
-			jQuery.getJSON(initialComponentJsonPath).done(function(oResponse){
-				var result = {
-					changes: oResponse,
-					componentClassName: sComponentClassName
-				};
-
-				resolve(result);
-			}).fail(function(error){
-				reject(error);
-			});
-		});
-	};
-
-	FakeLrepConnector.prototype.create = function(payload, changeList, isVariant){
-		// REVISE ensure old behavior for now, but check again for changes
-		if (!isVariant){
-			return Promise.resolve();
-		}
-
-		if (!payload.creation){
-			payload.creation = new Date().toISOString();
-		}
-
-		return Promise.resolve({
-			response: payload,
-			status: 'success'
-		});
-	};
-
-	FakeLrepConnector.prototype.update = function(payload, changeName, changelist, isVariant) {
-		// REVISE ensure old behavior for now, but check again for changes
-		if (!isVariant){
-			return Promise.resolve();
-		}
-
-		return Promise.resolve({
-			response: payload,
-			status: 'success'
-		});
-	};
-
-	FakeLrepConnector.prototype.deleteChange = function(params, isVariant){
-		// REVISE ensure old behavior for now, but check again for changes
-		if (!isVariant){
-			return Promise.resolve();
-		}
-
-		return Promise.resolve({
-			response: undefined,
-			status: 'nocontent'
-		});
-	};
-
-	FakeLrepConnector.prototype.send = function(sUri, sMethod, oData, mOptions){
-		return new Promise(function(resolve, reject){
-			handleGetTransports(sUri, sMethod, oData, mOptions, resolve, reject);
-			handleMakeChangesTransportable(sUri, sMethod, oData, mOptions, resolve, reject);
-		});
-	};
-
-	function handleMakeChangesTransportable(sUri, sMethod, oData, mOptions, resolve){
-		if (sUri.match(/^\/sap\/bc\/lrep\/actions\/make_changes_transportable\//) && sMethod === 'POST'){
-			resolve();
-		}
-	}
-
-	//REVISE Make response configurable
-	function handleGetTransports(sUri, sMethod, oData, mOptions, resolve, reject){
-		if (sUri.match(/^\/sap\/bc\/lrep\/actions\/gettransports\//)){
-			resolve({
-				response: {
-					"transports": [
-						{
-							"transportId": "U31K008488",
-							"description": "The Ultimate Transport",
-							"owner": "Fantasy Owner",
-							"locked": false
-						}
-					],
-					"localonly": false,
-					"errorCode": ""
-				}
-			});
-		}
-	}
-
-	/**
-	 * Enables fake LRep connector.
-	 *
-	 * If the <code>sAppComponentName<code> is provided, replaces the connector of corresponding @link {sap.ui.fl.ChangePersistence} by a fake one.
-	 * Otherwise, hooks into the @link {sap.ui.fl.LrepConnector.createConnector} factory function to enable the fake LRep connector. After enabling fake LRep connector,
-	 * the original connector can be restored by calling function @link {sap.ui.fl.FakeLrepConnector.disableFakeConnector}.
-	 *
-	 * @param {string} sInitialComponentJsonPath - Relative path to a test-component-changes.json file
-	 * @param {string} [sAppComponentName] - Name of application component to overwrite the existing LRep connector
-	 * @param {string} [sAppVersion] - Version of application to overwrite the existing LRep connector
-	 */
-	FakeLrepConnector.enableFakeConnector = function(sInitialComponentJsonPath, sAppComponentName, sAppVersion){
-
-		if (sAppComponentName && sAppVersion) {
-			var oChangePersistence = ChangePersistenceFactory.getChangePersistenceForComponent(sAppComponentName, sAppVersion);
-			if (!(oChangePersistence._oConnector instanceof FakeLrepConnector)){
-				Cache.clearEntry(sAppComponentName, sAppVersion);
-				if (!FakeLrepConnector._oBackendInstances[sAppComponentName]){
-					FakeLrepConnector._oBackendInstances[sAppComponentName] = {};
-				}
-				FakeLrepConnector._oBackendInstances[sAppComponentName][sAppVersion] = oChangePersistence._oConnector;
-				oChangePersistence._oConnector = new FakeLrepConnector(sInitialComponentJsonPath);
-			}
-			return;
-		}
-
-		Cache.clearEntries();
-
-		if (FakeLrepConnector.enableFakeConnector.original){
-			return;
-		}
-
-		FakeLrepConnector.enableFakeConnector.original = LrepConnector.createConnector;
-
-		LrepConnector.createConnector = function(){
-			if (!FakeLrepConnector._oFakeInstance){
-				FakeLrepConnector._oFakeInstance = new FakeLrepConnector(sInitialComponentJsonPath);
-			}
-			return FakeLrepConnector._oFakeInstance;
-		};
-	};
-
-	/**
-	 * If the <code>sAppComponentName<code> is provided, restores the connector of corresponding @link {sap.ui.fl.ChangePersistence} by the original instance.
-	 * Otherwise, restores the original @link {sap.ui.fl.LrepConnector.createConnector} factory function.
-	 *
-	 * @param {string} [sAppComponentName] - Name of application component to restore the original LRep connector
-	 * @param {string} [sAppVersion] - Version of application to restore the original LRep connector
-	 */
-	FakeLrepConnector.disableFakeConnector = function(sAppComponentName, sAppVersion){
-
-		if (sAppComponentName && sAppVersion) {
-			var oChangePersistence = ChangePersistenceFactory.getChangePersistenceForComponent(sAppComponentName, sAppVersion);
-			if (!(oChangePersistence._oConnector instanceof LrepConnector)) {
-				Cache.clearEntry(sAppComponentName, sAppVersion);
-				if (FakeLrepConnector._oBackendInstances[sAppComponentName] && FakeLrepConnector._oBackendInstances[sAppComponentName][sAppVersion]) {
-					oChangePersistence._oConnector = FakeLrepConnector._oBackendInstances[sAppComponentName][sAppVersion];
-					FakeLrepConnector._oBackendInstances[sAppComponentName][sAppVersion] = undefined;
-				}
-			}
-			return;
-		}
-
-		Cache.clearEntries();
-
-		if (FakeLrepConnector.enableFakeConnector.original){
-			LrepConnector.createConnector = FakeLrepConnector.enableFakeConnector.original;
-			FakeLrepConnector.enableFakeConnector.original = undefined;
-			FakeLrepConnector._oFakeInstance = undefined;
-		}
-	};
-
-	return FakeLrepConnector;
-
-}, true);
-
-}; // end of sap/ui/fl/FakeLrepConnector.js
-if ( !jQuery.sap.isDeclared('sap.ui.fl.FakeLrepConnectorLocalStorage') ) {
-/*
- * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
- * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
- */
-
-jQuery.sap.declare('sap.ui.fl.FakeLrepConnectorLocalStorage'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-sap.ui.define("sap/ui/fl/FakeLrepConnectorLocalStorage",[
-	"sap/ui/fl/FakeLrepLocalStorage",
-	"sap/ui/fl/FakeLrepConnector",
-	"sap/ui/fl/LrepConnector",
-	"sap/ui/fl/Cache",
-	"sap/ui/fl/ChangePersistenceFactory"
-	], function(
-	FakeLrepLocalStorage, FakeLrepConnector, LrepConnector, Cache, ChangePersistenceFactory) {
-	"use strict";
-
-	FakeLrepConnectorLocalStorage._oBackendInstances = {};
-
-	/**
-	 * Class for connecting to Fake LREP storing changes in localStorage
-	 *
-	 * @class
-	 *
-	 * @author SAP SE
-	 * @version 1.48.5
-	 *
-	 * @private
-	 * @static
-	 * @since 1.48
-	 * @alias sap.ui.fl.FakeLrepConnectorLocalStorage
-	 */
-	function FakeLrepConnectorLocalStorage(mSettings){
-		this.mSettings = jQuery.extend({
-			"isKeyUser": true,
-			"isAtoAvailable": false,
-			"isProductiveSystem": false
-		}, mSettings);
-	}
-
-	jQuery.extend(FakeLrepConnectorLocalStorage.prototype, FakeLrepConnector.prototype);
-
-	/**
-	 * Creates a Fake Lrep change in localStorage
-	 * @param  {Object|Array} vChangeDefinitions - single or multiple changeDefinitions
-	 * @returns {Promise} Returns a promise to the result of the request
-	 */
-	FakeLrepConnectorLocalStorage.prototype.create = function(vChangeDefinitions) {
-		var response;
-		if (Array.isArray(vChangeDefinitions)) {
-			response = vChangeDefinitions.map(function(mChangeDefinition) {
-				return this._saveChange(mChangeDefinition);
-			}.bind(this));
-		} else {
-			response = this._saveChange(vChangeDefinitions);
-		}
-
-		return Promise.resolve({
-			response: response,
-			status: 'success'
-		});
-	};
-
-	FakeLrepConnectorLocalStorage.prototype._saveChange = function(mChangeDefinition) {
-		if (!mChangeDefinition.creation){
-			mChangeDefinition.creation = new Date().toISOString();
-		}
-		FakeLrepLocalStorage.saveChange(mChangeDefinition.fileName, mChangeDefinition);
-		return mChangeDefinition;
-	};
-
-
-	FakeLrepConnectorLocalStorage.prototype.update = function(mChangeDefinition, sChangeName, aChangelist, bIsVariant) {
-		return Promise.resolve({
-			response: this._saveChange(mChangeDefinition),
-			status: 'success'
-		});
-	};
-
-	/**
-	 * Deletes a Fake Lrep change in localStorage
-	 * @param  {Object} oChange - the change Object
-	 * @returns {Promise} Returns a promise to the result of the request
-	 */
-	FakeLrepConnectorLocalStorage.prototype.deleteChange = function(oChange) {
-
-		FakeLrepLocalStorage.deleteChange(oChange.fileName);
-
-		return Promise.resolve({
-			response: undefined,
-			status: "nocontent"
-		});
-	};
-
-	/**
-	 * Deletes all Fake Lrep changes in localStorage
-	 * @returns {Promise} Returns a promise to the result of the request
-	 */
-	FakeLrepConnectorLocalStorage.prototype.deleteChanges = function() {
-
-		FakeLrepLocalStorage.deleteChanges();
-
-		return Promise.resolve({
-			response: undefined,
-			status: "nocontent"
-		});
-	};
-
-	/**
-	 * Loads the changes for the given Component class name
-	 * from the FakeLrepLocalStorage
-	 * and also loads the mandatory FakeLrepConnector.json file.
-	 * The settings are take from the JSON file, but changes are replaced with
-	 * the changes from the local storage.
-	 *
-	 * @param {String} sComponentClassName - Component class name
-	 * @returns {Promise} Returns a Promise with the changes and componentClassName
-	 * @public
-	 */
-	FakeLrepConnectorLocalStorage.prototype.loadChanges = function(sComponentClassName) {
-
-		var aChanges = FakeLrepLocalStorage.getChanges();
-
-		return new Promise(function(resolve, reject){
-			var result = {
-				changes: {
-					changes : aChanges,
-					settings : this.mSettings
-				},
-				componentClassName: sComponentClassName
-			};
-			resolve(result);
-		}.bind(this));
-
-	};
-
-	/**
-	 * Enables fake LRep connector.
-	 *
-	 * If the <code>sAppComponentName<code> is provided, replaces the connector of corresponding @link {sap.ui.fl.ChangePersistence} by a fake one.
-	 * Otherwise, hooks into the @link {sap.ui.fl.LrepConnector.createConnector} factory function to enable the fake LRep connector.After enabling fake LRep connector,
-	 * the original connector can be restored by calling function @link {sap.ui.fl.FakeLrepConnectorLocalStorage.disableFakeConnector}.
-	 *
-	 * @param {object} [mSettings] - map of FakeLrepConnector settings
-	 * @param {string} [sAppComponentName] - Name of application component to overwrite the existing LRep connector
-	 * @param {string} [sAppVersion] - Version of application to overwrite the existing LRep connector
-	 */
-	FakeLrepConnectorLocalStorage.enableFakeConnector = function(mSettings, sAppComponentName, sAppVersion){
-		mSettings = mSettings || {};
-
-		if (sAppComponentName && sAppVersion) {
-			var oChangePersistence = ChangePersistenceFactory.getChangePersistenceForComponent(sAppComponentName, sAppVersion);
-			if (!(oChangePersistence._oConnector instanceof FakeLrepConnectorLocalStorage)) {
-				Cache.clearEntry(sAppComponentName, sAppVersion);
-				if (!FakeLrepConnectorLocalStorage._oBackendInstances[sAppComponentName]){
-					FakeLrepConnectorLocalStorage._oBackendInstances[sAppComponentName] = {};
-				}
-				FakeLrepConnectorLocalStorage._oBackendInstances[sAppComponentName][sAppVersion] = oChangePersistence._oConnector;
-				oChangePersistence._oConnector = new FakeLrepConnectorLocalStorage(mSettings);
-			}
-			return;
-		}
-
-		Cache.clearEntries();
-
-		if (FakeLrepConnectorLocalStorage.enableFakeConnector.original){
-			return;
-		}
-
-		FakeLrepConnectorLocalStorage.enableFakeConnector.original = LrepConnector.createConnector;
-
-		LrepConnector.createConnector = function() {
-			if (!FakeLrepConnectorLocalStorage._oFakeInstance){
-				FakeLrepConnectorLocalStorage._oFakeInstance = new FakeLrepConnectorLocalStorage(mSettings);
-			}
-			return FakeLrepConnectorLocalStorage._oFakeInstance;
-		};
-	};
-
-	/**
-	 * If the <code>sAppComponentName<code> is provided, restores the connector of corresponding @link {sap.ui.fl.ChangePersistence} by the original instance.
-	 * Otherwise, restores the original @link {sap.ui.fl.LrepConnector.createConnector} factory function.
-	 *
-	 * @param {string} [sAppComponentName] - Name of application component to restore the original LRep connector
-	 * @param {string} [sAppVersion] - Version of application to restore the original LRep connector
-	 */
-	FakeLrepConnectorLocalStorage.disableFakeConnector = function(sAppComponentName, sAppVersion){
-
-		if (sAppComponentName && sAppVersion) {
-			var oChangePersistence = ChangePersistenceFactory.getChangePersistenceForComponent(sAppComponentName, sAppVersion);
-			if (!(oChangePersistence._oConnector instanceof LrepConnector)){
-				Cache.clearEntry(sAppComponentName, sAppVersion);
-				if (FakeLrepConnectorLocalStorage._oBackendInstances[sAppComponentName] && FakeLrepConnectorLocalStorage._oBackendInstances[sAppComponentName][sAppVersion]) {
-					oChangePersistence._oConnector = FakeLrepConnectorLocalStorage._oBackendInstances[sAppComponentName][sAppVersion];
-					FakeLrepConnectorLocalStorage._oBackendInstances[sAppComponentName][sAppVersion] = undefined;
-				}
-			}
-			return;
-		}
-
-		Cache.clearEntries();
-
-		if (FakeLrepConnectorLocalStorage.enableFakeConnector.original){
-			LrepConnector.createConnector = FakeLrepConnectorLocalStorage.enableFakeConnector.original;
-			FakeLrepConnectorLocalStorage.enableFakeConnector.original = undefined;
-			FakeLrepConnectorLocalStorage._oFakeInstance = undefined;
-		}
-	};
-
-	return FakeLrepConnectorLocalStorage;
-
-}, /* bExport= */ true);
-}; // end of sap/ui/fl/FakeLrepConnectorLocalStorage.js
 if ( !jQuery.sap.isDeclared('sap.ui.fl.StandardVariant') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -8710,7 +8543,7 @@ sap.ui.define("sap/ui/fl/StandardVariant",[
 	 * @alias sap.ui.fl.StandardVariant
 	 * @author SAP SE
 	 *
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @experimental Since 1.38.0
 	 */
@@ -8815,7 +8648,9 @@ sap.ui.define("sap/ui/fl/StandardVariant",[
 		var oNewsetChange = this.getNewestStandardVariantChangeDeleteTheRest(mChanges);
 
 		if (oNewsetChange) {
-			oNewsetChange.getContent().executeOnSelect = bNewExecuteOnSelect;
+			var oContent = oNewsetChange.getContent();
+			oContent.executeOnSelect = bNewExecuteOnSelect;
+			oNewsetChange.setContent(oContent);
 		}
 
 		return oNewsetChange;
@@ -8892,7 +8727,7 @@ sap.ui.define("sap/ui/fl/codeExt/CodeExtManager",[
 	 * @alias sap.ui.fl.codeExt.CodeExtManager
 	 * @since 1.40.0
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 */
 	var CodeExtManager;
 
@@ -9005,222 +8840,6 @@ sap.ui.define("sap/ui/fl/codeExt/CodeExtManager",[
 }, true);
 
 }; // end of sap/ui/fl/codeExt/CodeExtManager.js
-if ( !jQuery.sap.isDeclared('sap.ui.fl.descriptorRelated.api.DescriptorChangeFactory') ) {
-/*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
- * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
- */
-jQuery.sap.declare('sap.ui.fl.descriptorRelated.api.DescriptorChangeFactory'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorChangeFactory",[
-	"sap/ui/fl/ChangePersistenceFactory",
-	"sap/ui/fl/ChangePersistence",
-	"sap/ui/fl/Change",
-	"sap/ui/fl/descriptorRelated/internal/Utils",
-	"sap/ui/fl/registry/Settings",
-	"sap/ui/fl/Utils"
-], function(ChangePersistenceFactory, ChangePersistence, Change, Utils, Settings, FlexUtils) {
-	"use strict";
-
-	/**
-	 * Descriptor Related
-	 * @namespace
-	 * @name sap.ui.fl.descriptorRelated
-	 * @author SAP SE
-	 * @version 1.48.5
-	 * @private
-	 * @sap-restricted
-	 */
-
-	/**
-	 * Descriptor Related Apis
-	 * @namespace
-	 * @name sap.ui.fl.descriptorRelated.api
-	 * @author SAP SE
-	 * @version 1.48.5
-	 * @private
-	 * @sap-restricted
-	 */
-
-	/**
-	 * Descriptor Change
-	 *
-	 * @param {object} mChangeFile change file
-	 * @param {sap.ui.fl.descriptorRelated.api.DescriptorInlineChange} oInlineChange inline change object
-	 * @param {sap.ui.fl.registry.Settings} oSettings settings
-	 *
-	 * @constructor
-	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorChange
-	 * @author SAP SE
-	 * @version 1.48.5
-	 * @private
-	 * @sap-restricted
-	 */
-	var DescriptorChange = function(mChangeFile,oInlineChange,oSettings) { //so far, parameter correspond to inline change format
-		this._mChangeFile = mChangeFile;
-		this._mChangeFile.packageName = '$TMP';
-		this._oInlineChange = oInlineChange;
-		this._sTransportRequest = null;
-		this._oSettings = oSettings;
-	};
-
-	/**
-	 * Set transport request (for ABAP Backend)
-	 *
-	 * @param {string} sTransportRequest transport request
-	 *
-	 * @return {Promise} resolving when setting of transport request was successful
-	 *
-	 * @private
-	 * @sap-restricted
-	 */
-	DescriptorChange.prototype.setTransportRequest = function(sTransportRequest) {
-		try {
-			//partial check: length le 20, alphanumeric, upper case, no space not underscore - data element in ABAP: TRKORR, CHAR20
-			Utils.checkTransportRequest(sTransportRequest);
-		} catch (oError) {
-			return Promise.reject(oError);
-		}
-
-		this._sTransportRequest = sTransportRequest;
-		return Promise.resolve();
-	};
-
-	/**
-	 * Set package (for ABAP Backend)
-	 *
-	 * @param {string} sPackage package
-	 *
-	 * @return {Promise} resolving when setting of package was successful
-	 *
-	 * @private
-	 * @sap-restricted
-	 */
-	DescriptorChange.prototype.setPackage = function(sPackage) {
-		try {
-			//partial check: length le 30, alphanumeric, upper case, / for namespace, no space, no underscore - data element in ABAP: DEVCLASS, CHAR30
-			Utils.checkPackage(sPackage);
-		} catch (oError) {
-			return Promise.reject(oError);
-		}
-		this._mChangeFile.packageName = sPackage;
-		return Promise.resolve();
-	};
-
-	/**
-	 * Submits the descriptor change to the backend
-	 *
-	 * @return {Promise} resolving after all changes have been saved
-	 *
-	 * @private
-	 * @sap-restricted
-	 */
-	DescriptorChange.prototype.submit = function() {
-		// create persistence
-		var sComponentName = this._mChangeFile.reference;
-		//TODO: Add application version
-		var oChangePersistence = ChangePersistenceFactory.getChangePersistenceForComponent(sComponentName);
-
-		//add change to persistence
-		var oChange = this._getChangeToSubmit();
-		oChangePersistence.addChange(oChange);
-
-		//submit
-		return oChangePersistence.saveDirtyChanges();
-	};
-
-	DescriptorChange.prototype._getChangeToSubmit = function() {
-		//create Change
-		var oChange = new Change(this._getMap());
-
-		if ( this._sTransportRequest ) {
-			oChange.setRequest( this._sTransportRequest );
-		}  else if ( this._oSettings.isAtoEnabled() && FlexUtils.isCustomerDependentLayer(this._mChangeFile.layer) ) {
-			oChange.setRequest( 'ATO_NOTIFICATION' );
-		}
-		return oChange;
-	};
-
-	DescriptorChange.prototype._getMap = function() {
-		var mInlineChange = this._oInlineChange.getMap();
-
-		this._mChangeFile.content = mInlineChange.content;
-		this._mChangeFile.texts = mInlineChange.texts;
-		return this._mChangeFile;
-	};
-
-	/**
-	 * Returns a copy of the JSON object of the descriptor change
-	 *
-	 * @return {object} copy of JSON object of the descriptor change
-	 *
-	 * @private
-	 * @sap-restricted
-	 */
-	DescriptorChange.prototype.getJson = function() {
-		return jQuery.extend(true, {}, this._getMap());
-	};
-
-//Descriptor LREP Change Factory
-	/**
-	 * Factory for Descriptor Changes
-	 *
-	 * @constructor
-	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorChangeFactory
-	 * @author SAP SE
-	 * @version 1.48.5
-	 * @private
-	 * @sap-restricted
-	 */
-
-	var DescriptorChangeFactory = function() {};
-
-	/**
-	 * Creates a new descriptor change
-	 *
-	 * @param {string} sReference the descriptor id for which the change is created
-	 * @param {object} oInlineChange the inline change instance
-	 * @param {string} sLayer layer of the descriptor change
-	 *
-	 * @return {Promise} resolving the new Change instance
-	 *
-	 * @private
-	 * @sap-restricted
-	 */
-	DescriptorChangeFactory.prototype.createNew = function(sReference,oInlineChange,sLayer) {
-		var fSetHostingIdForTextKey = function(_oDescriptorInlineChange, sId){
-			//providing "hosting id" for appdescr_app_setTitle and similar
-			//"hosting id" is descriptor variant id
-			if ( _oDescriptorInlineChange["setHostingIdForTextKey"] ){
-				_oDescriptorInlineChange.setHostingIdForTextKey(sId);
-			}
-		};
-		fSetHostingIdForTextKey(oInlineChange,sReference);
-
-		var mPropertyBag = {};
-		mPropertyBag.changeType = oInlineChange._getChangeType();
-		mPropertyBag.componentName = sReference;
-		mPropertyBag.reference = sReference;
-
-		if (!sLayer){
-			//default to 'CUSTOMER'
-			mPropertyBag.layer = 'CUSTOMER';
-		} else {
-			if (sLayer != 'VENDOR' && sLayer != 'PARTNER' && !FlexUtils.isCustomerDependentLayer(sLayer)) {
-				throw new Error("Parameter \"layer\" needs to be 'VENDOR', 'PARTNER' or customer dependent");
-			}
-			mPropertyBag.layer = sLayer;
-		}
-
-		var mChangeFile = Change.createInitialFileContent(mPropertyBag );
-		return Settings.getInstance().then(function(oSettings) {
-			return Promise.resolve( new DescriptorChange(mChangeFile, oInlineChange, oSettings) );
-		});
-	};
-
-	return DescriptorChangeFactory;
-}, true);
-}; // end of sap/ui/fl/descriptorRelated/api/DescriptorChangeFactory.js
 if ( !jQuery.sap.isDeclared('sap.ui.fl.descriptorRelated.api.DescriptorVariantFactory') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -9252,7 +8871,7 @@ sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorVariantFactory",[
 	 * @constructor
 	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorVariant
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @private
 	 * @sap-restricted
 	 */
@@ -9271,6 +8890,9 @@ sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorVariantFactory",[
 			this._layer = mParameters.layer;
 			if ( typeof mParameters.isAppVariantRoot != undefined){
 				this._isAppVariantRoot = mParameters.isAppVariantRoot;
+			}
+			if ( typeof mParameters.referenceVersion != undefined){
+				this._referenceVersion = mParameters.referenceVersion;
 			}
 			this._mode = 'NEW';
 
@@ -9437,6 +9059,9 @@ sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorVariantFactory",[
 				if ( typeof this._isAppVariantRoot != undefined ) {
 					mResult.isAppVariantRoot = this._isAppVariantRoot;
 				}
+				if ( typeof this._referenceVersion != undefined ) {
+					mResult.referenceVersion = this._referenceVersion;
+				}
 				return mResult;
 
 			case 'FROM_EXISTING':
@@ -9457,7 +9082,7 @@ sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorVariantFactory",[
 	 * @namespace
 	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorVariantFactory
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @private
 	 * @sap-restricted
 	 */
@@ -9472,7 +9097,7 @@ sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorVariantFactory",[
 	/**
 	 * Creates a new descriptor variant
 	 *
-	 * @param {object} mParameters
+	 * @param {object} mParameters the parameters
 	 * @param {string} mParameters.reference the referenced descriptor or descriptor variant id
 	 * @param {string} mParameters.id the id for the descriptor variant id
 	 * @param {string} [mParameters.layer='CUSTOMER'] the layer for the descriptor variant
@@ -9591,7 +9216,7 @@ sap.ui.define("sap/ui/fl/registry/ChangeRegistry",[
 	 * @alias sap.ui.fl.registry.ChangeRegistry
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.27.0
 	 *
 	 */
@@ -10571,7 +10196,7 @@ sap.ui.define("sap/ui/fl/transport/TransportSelection",[	"jquery.sap.global", "s
 	 * @alias sap.ui.fl.transport.TransportSelection
 	 * @constructor
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @since 1.38.0
 	 * Helper object to select an ABAP transport for an LREP object. This is not a generic utility to select a transport request, but part
 	 *        of the SmartVariant control.
@@ -10604,7 +10229,7 @@ sap.ui.define("sap/ui/fl/transport/TransportSelection",[	"jquery.sap.global", "s
 	 * @param {object} oControl Control instance
 	 * @public
 	 */
-	TransportSelection.prototype.selectTransport = function(oObjectInfo, fOkay, fError, bCompactMode, oControl) {
+	TransportSelection.prototype.selectTransport = function(oObjectInfo, fOkay, fError, bCompactMode, oControl, sStyleClass) {
 		var that = this;
 
 		if (oObjectInfo) {
@@ -10622,12 +10247,12 @@ sap.ui.define("sap/ui/fl/transport/TransportSelection",[	"jquery.sap.global", "s
 						fOkay(that._createEventObject(oObjectInfo, oTransport));
 						//ATO is not enabled, use CTS instead
 					} else {
-						that._selectTransport(oObjectInfo, fOkay, fError, bCompactMode);
+						that._selectTransport(oObjectInfo, fOkay, fError, bCompactMode, sStyleClass);
 					}
 				});
 			// do not have the required info to check for ATO or not CUSTOMER layer - use CTS
 			} else {
-				that._selectTransport(oObjectInfo, fOkay, fError, bCompactMode);
+				that._selectTransport(oObjectInfo, fOkay, fError, bCompactMode, sStyleClass);
 			}
 		}
 	};
@@ -10644,7 +10269,7 @@ sap.ui.define("sap/ui/fl/transport/TransportSelection",[	"jquery.sap.global", "s
 	 * @param {boolean} bCompactMode flag indicating whether the transport dialog should be opened in compact mode.
 	 * @private
 	 */
-	TransportSelection.prototype._selectTransport = function(oObjectInfo, fOkay, fError, bCompactMode) {
+	TransportSelection.prototype._selectTransport = function(oObjectInfo, fOkay, fError, bCompactMode, sStyleClass) {
 		var that = this;
 
 		if (oObjectInfo) {
@@ -10657,7 +10282,7 @@ sap.ui.define("sap/ui/fl/transport/TransportSelection",[	"jquery.sap.global", "s
 						pkg: oObjectInfo.package,
 						transports: oGetTransportsResult.transports,
 						lrepObject: that._toLREPObject(oObjectInfo)
-					}, fOkay, fError, bCompactMode);
+					}, fOkay, fError, bCompactMode, sStyleClass);
 				} else {
 					oTransport = that._getTransport(oGetTransportsResult);
 					fOkay(that._createEventObject(oObjectInfo, oTransport));
@@ -10727,10 +10352,11 @@ sap.ui.define("sap/ui/fl/transport/TransportSelection",[	"jquery.sap.global", "s
 	 * @returns {sap.ui.fl.transport.TransportDialog} the dialog.
 	 * @private
 	 */
-	TransportSelection.prototype._openDialog = function(oConfig, fOkay, fError, bCompactMode) {
+	TransportSelection.prototype._openDialog = function(oConfig, fOkay, fError, bCompactMode, sStyleClass) {
 		var oDialog = new TransportDialog(oConfig);
 		oDialog.attachOk(fOkay);
 		oDialog.attachCancel(fError);
+		oDialog.addStyleClass(sStyleClass);
 
 		// toggle compact style.
 		if (bCompactMode) {
@@ -10871,7 +10497,7 @@ sap.ui.define("sap/ui/fl/transport/TransportSelection",[	"jquery.sap.global", "s
 	 * @returns {Promise} promise that resolves
 	 * @public
 	 */
-	TransportSelection.prototype.openTransportSelection = function(oChange, oControl) {
+	TransportSelection.prototype.openTransportSelection = function(oChange, oControl, sStyleClass) {
 
 		var that = this;
 
@@ -10906,7 +10532,7 @@ sap.ui.define("sap/ui/fl/transport/TransportSelection",[	"jquery.sap.global", "s
 				oObject.type = oChange.getDefinition().fileType;
 			}
 
-			that.selectTransport(oObject, fnOkay, fnError, false, oControl);
+			that.selectTransport(oObject, fnOkay, fnError, false, oControl, sStyleClass);
 		});
 	};
 
@@ -10914,6 +10540,3239 @@ sap.ui.define("sap/ui/fl/transport/TransportSelection",[	"jquery.sap.global", "s
 }, true);
 
 }; // end of sap/ui/fl/transport/TransportSelection.js
+if ( !jQuery.sap.isDeclared('sap.ui.fl.variants.VariantController') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+jQuery.sap.declare('sap.ui.fl.variants.VariantController'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+sap.ui.define("sap/ui/fl/variants/VariantController",[
+	"jquery.sap.global",
+	"sap/ui/fl/Utils",
+	"sap/ui/fl/Change"
+], function (jQuery, Utils, Change) {
+	"use strict";
+
+	/**
+	 * Helper object to handle variants and their changes
+	 *
+	 * @param {string} sComponentName - Component name the flexibility controller is responsible for
+	 * @param {string} sAppVersion - Current version of the application
+	 * @param {object} oChangeFileContent - Object containing file content from Lrep response
+	 * @constructor
+	 * @class
+	 * @alias sap.ui.fl.variants.VariantController
+	 * @experimental Since 1.50.0
+	 * @author SAP SE
+	 * @version 1.50.6
+	 */
+	var VariantController = function (sComponentName, sAppVersion, oChangeFileContent) {
+		this._sComponentName = sComponentName || "";
+		this._sAppVersion = sAppVersion || Utils.DEFAULT_APP_VERSION;
+		this._setChangeFileContent(oChangeFileContent);
+
+	};
+
+	/**
+	 * Returns the component name of the VariantController
+	 *
+	 * @returns {String} the name of the component
+	 * @public
+	 */
+	VariantController.prototype.getComponentName = function () {
+		return this._sComponentName;
+	};
+
+	/**
+	 * Returns the application version of the VariantController
+	 *
+	 * @returns {String} Application version
+	 * @public
+	 */
+	VariantController.prototype.getAppVersion = function () {
+		return this._sAppVersion;
+	};
+
+	VariantController.prototype._setChangeFileContent = function (oChangeFileContent) {
+		if (!oChangeFileContent || !oChangeFileContent.changes || !oChangeFileContent.changes.variantSection) {
+			this._mVariantManagement = {};
+		} else {
+			this._mVariantManagement = oChangeFileContent.changes.variantSection;
+		}
+	};
+
+	/**
+	 * Returns the variants for a given variant management id
+	 *
+	 * @param {String} sVariantManagementId The variant management id
+	 * @returns {Array} The array containing all variants of the variant management control
+	 * @public
+	 */
+	VariantController.prototype.getVariants = function (sVariantManagementId) {
+		var aVariants = [];
+
+		function compareVariants(variant1, variant2) {
+			if (variant1.title < variant2.title) {
+				return -1;
+			} else if (variant1.title > variant2.title) {
+				return 1;
+			} else {
+				return 0;
+			}
+		}
+
+		if (this._mVariantManagement[sVariantManagementId]) {
+			aVariants = this._mVariantManagement[sVariantManagementId].variants.sort(compareVariants);
+
+			var iIndex = -1;
+			aVariants.some(function(oVariant, index) {
+				if (oVariant.content.fileName === sVariantManagementId) {
+					iIndex = index;
+					return true;
+				}
+				return false;
+			});
+			if (iIndex > -1) {
+				var oStandardVariant = aVariants.splice(iIndex, 1)[0];
+				aVariants.splice(0, 0, oStandardVariant);
+			}
+		}
+
+		return aVariants;
+	};
+
+	/**
+	 * Gets the changes of a given variant
+	 *
+	 * @param {String} sVariantManagementId The variant management id
+	 * @param {String} sVariantId The id of the variant
+	 * @returns {Array} The array containing all changes of the variant
+	 * @public
+	 */
+	VariantController.prototype.getVariantChanges = function(sVariantManagementId, sVariantId) {
+		var sVarId = sVariantId || this._mVariantManagement[sVariantManagementId].defaultVariant;
+		var aVariants = this.getVariants(sVariantManagementId);
+		if (aVariants.length === 0) {
+			return aVariants;
+		} else {
+			var aFiltered = aVariants.filter(function(oVariant) {
+				if (oVariant.content.fileName === sVarId) {
+					return true;
+				}
+			});
+
+		 return aFiltered.reduce(function(aResult, oVariant) {
+			return aResult.concat(oVariant.changes);
+		 },[]);
+		}
+	};
+
+	/**
+	 * Loads the default changes of all variants
+	 *
+	 * @returns {Array} The array containing all changes of the default variants
+	 * @public
+	 */
+	VariantController.prototype.loadDefaultChanges = function() {
+		var sVarId;
+		var aDefaultChanges = [];
+		for (var sVarMgmtId in this._mVariantManagement) {
+			sVarId = this._mVariantManagement[sVarMgmtId].defaultVariant;
+			aDefaultChanges = aDefaultChanges.concat(this.getVariantChanges(sVarMgmtId, sVarId));
+		}
+
+		return aDefaultChanges;
+	};
+
+	/**
+	 * Returns the map with all changes to be reverted and applied when switching variants
+	 *
+	 * @param {String} sVariantManagementId The variant management id
+	 * @param {String} sCurrentVariant The id of the currently used variant
+	 * @param {String} sNewVariant The id of the newly selected variant
+	 * @param {Object} mChanges The changes inside the current changes map
+	 * @returns {Object} The map containing all changes to be reverted and all new changes
+	 * @public
+	 */
+	VariantController.prototype.getChangesForVariantSwitch = function(sVariantManagementId, sCurrentVariant, sNewVariant, mChanges) {
+		var aCurrentChangeKeys = this.getVariantChanges(sVariantManagementId, sCurrentVariant).map(function(oChangeContent) {
+			return new Change(oChangeContent).getKey();
+		});
+
+		var aCurrentVariantChanges = Object.keys(mChanges).reduce(function(aChanges, sControlId) {
+
+			var aCurrentFilteredChanges = [];
+			mChanges[sControlId].forEach(function(oChange) {
+				var iChangeIndex = aCurrentChangeKeys.indexOf(oChange.getKey());
+				if (iChangeIndex !== -1) {
+					aCurrentFilteredChanges.push(oChange);
+				}
+			});
+			return aChanges.concat(aCurrentFilteredChanges);
+
+		}, []);
+
+		var aNewChanges = this.getVariantChanges(sVariantManagementId, sNewVariant).map(function(oChangeContent) {
+			return new Change(oChangeContent);
+		});
+		var aRevertChanges = aCurrentVariantChanges.slice();
+		aCurrentVariantChanges.some(function(oChange) {
+			if (oChange.getKey() === aNewChanges[0].getKey()) {
+				aNewChanges.shift();
+				aRevertChanges.shift();
+			} else {
+				return true;
+			}
+		});
+
+		var mSwitches = {
+			aRevert : aRevertChanges.reverse(),
+			aNew : aNewChanges
+		};
+
+		return mSwitches;
+	};
+
+	/**
+	 * Creates the data for the variant model
+	 *
+	 * @returns {Object} oVariantData The JSON object for the Variant Model
+	 * @private
+	 */
+	VariantController.prototype._fillVariantModel = function() {
+		var oVariantData = {};
+		Object.keys(this._mVariantManagement).forEach(function(sKey) {
+			oVariantData[sKey] = {
+				defaultVariant : this._mVariantManagement[sKey].defaultVariant,
+				variants : []
+			};
+			this.getVariants(sKey).forEach(function(oVariant, index) {
+				oVariantData[sKey].variants[index] = {
+					key : oVariant.content.fileName,
+					title : oVariant.content.title,
+					author : oVariant.content.support.user,
+					layer : oVariant.content.layer,
+					readOnly : oVariant.content.fileName === sKey
+				};
+			});
+		}.bind(this));
+
+		return oVariantData;
+	};
+
+	return VariantController;
+}, true);
+
+}; // end of sap/ui/fl/variants/VariantController.js
+if ( !jQuery.sap.isDeclared('sap.ui.fl.variants.VariantManagement') ) {
+/*
+ * ! UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+// Provides control sap.ui.fl.variants.VariantManagement.
+jQuery.sap.declare('sap.ui.fl.variants.VariantManagement'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.model.Context'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.model.json.JSONModel'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.model.Filter'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.Device'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.core.TextAlign'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.core.InvisibleText'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.core.Control'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.core.ValueState'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.layout.HorizontalLayout'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.layout.Grid'); // unlisted dependency retained
+jQuery.sap.require('sap.m.SearchField'); // unlisted dependency retained
+jQuery.sap.require('sap.m.RadioButton'); // unlisted dependency retained
+jQuery.sap.require('sap.m.ScreenSize'); // unlisted dependency retained
+jQuery.sap.require('sap.m.PopinDisplay'); // unlisted dependency retained
+jQuery.sap.require('sap.m.ColumnListItem'); // unlisted dependency retained
+jQuery.sap.require('sap.m.Column'); // unlisted dependency retained
+jQuery.sap.require('sap.m.Text'); // unlisted dependency retained
+jQuery.sap.require('sap.m.Bar'); // unlisted dependency retained
+jQuery.sap.require('sap.m.Table'); // unlisted dependency retained
+jQuery.sap.require('sap.m.Page'); // unlisted dependency retained
+jQuery.sap.require('sap.m.PlacementType'); // unlisted dependency retained
+jQuery.sap.require('sap.m.ButtonType'); // unlisted dependency retained
+jQuery.sap.require('sap.m.Toolbar'); // unlisted dependency retained
+jQuery.sap.require('sap.m.ToolbarSpacer'); // unlisted dependency retained
+jQuery.sap.require('sap.m.Button'); // unlisted dependency retained
+jQuery.sap.require('sap.m.CheckBox'); // unlisted dependency retained
+jQuery.sap.require('sap.m.Dialog'); // unlisted dependency retained
+jQuery.sap.require('sap.m.Input'); // unlisted dependency retained
+jQuery.sap.require('sap.m.Label'); // unlisted dependency retained
+jQuery.sap.require('sap.m.ResponsivePopover'); // unlisted dependency retained
+jQuery.sap.require('sap.m.SelectList'); // unlisted dependency retained
+jQuery.sap.require('sap.m.ObjectIdentifier'); // unlisted dependency retained
+jQuery.sap.require('sap.m.OverflowToolbar'); // unlisted dependency retained
+jQuery.sap.require('sap.m.OverflowToolbarPriority'); // unlisted dependency retained
+jQuery.sap.require('sap.m.OverflowToolbarLayoutData'); // unlisted dependency retained
+sap.ui.define("sap/ui/fl/variants/VariantManagement",[
+	'jquery.sap.global', '../transport/TransportSelection', 'sap/ui/model/Context', 'sap/ui/model/json/JSONModel', 'sap/ui/model/Filter', 'sap/ui/Device', 'sap/ui/core/TextAlign', 'sap/ui/core/InvisibleText', 'sap/ui/core/Control', 'sap/ui/core/ValueState', 'sap/ui/layout/HorizontalLayout', 'sap/ui/layout/Grid', 'sap/m/SearchField', 'sap/m/RadioButton', 'sap/m/ScreenSize', 'sap/m/PopinDisplay', 'sap/m/ColumnListItem', 'sap/m/Column', 'sap/m/Text', 'sap/m/Bar', 'sap/m/Table', 'sap/m/Page', 'sap/m/PlacementType', 'sap/m/ButtonType', 'sap/m/Toolbar', 'sap/m/ToolbarSpacer', 'sap/m/Button', 'sap/m/CheckBox', 'sap/m/Dialog', 'sap/m/Input', 'sap/m/Label', 'sap/m/ResponsivePopover', 'sap/m/SelectList', 'sap/m/ObjectIdentifier', 'sap/m/OverflowToolbar', 'sap/m/OverflowToolbarPriority', 'sap/m/OverflowToolbarLayoutData', 'sap/ui/fl/Utils', '../changeHandler/BaseTreeModifier'
+], function(jQuery, TransportSelection, Context, JSONModel, Filter, Device, TextAlign, InvisibleText, Control, ValueState, HorizontalLayout, Grid, SearchField, RadioButton, ScreenSize, PopinDisplay, ColumnListItem, Column, Text, Bar, Table, Page, PlacementType, ButtonType, Toolbar, ToolbarSpacer, Button, CheckBox, Dialog, Input, Label, ResponsivePopover, SelectList, ObjectIdentifier, OverflowToolbar, OverflowToolbarPriority, OverflowToolbarLayoutData, flUtils, BaseTreeModifier) {
+	"use strict";
+
+	/**
+	 * Constructor for a new VariantManagement.
+	 * @param {string} [sId] ID for the new control, generated automatically if no ID is given
+	 * @param {object} [mSettings] Initial settings for the new control
+	 * @class The VariantManagement control can be used to manage variants, such as filter bar variants or table variants.
+	 * @extends sap.ui.core.Control
+	 * @constructor
+	 * @public
+	 * @since 1.50
+	 * @experimental Since 1.50. This class is experimental and provides only limited functionality. Also the API might be changed in future.
+	 * @alias sap.ui.fl.variants.VariantManagement
+	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
+	 */
+	var VariantManagement = Control.extend("sap.ui.fl.variants.VariantManagement", /** @lends sap.ui.fl.variants.VariantManagement.prototype */
+	{
+		metadata: {
+			library: "sap.ui.fl",
+			designTime: true,
+			properties: {
+
+				/**
+				 * Indicates that Execute on Selection is visible in the Save Variant and the Manage Variants dialogs.
+				 */
+				showExecuteOnSelection: {
+					type: "boolean",
+					group: "Misc",
+					defaultValue: false
+				},
+
+				/**
+				 * Indicates that Share is visible in the Save Variant and the Manage Variants dialogs. Share allows you to share variants with other
+				 * users.
+				 */
+				showShare: {
+					type: "boolean",
+					group: "Misc",
+					defaultValue: false
+				},
+
+				/**
+				 * Indicates that set as default is visible in the Save Variant and the Manage Variants dialogs.
+				 */
+				showSetAsDefault: {
+					type: "boolean",
+					group: "Misc",
+					defaultValue: true
+				},
+
+				/**
+				 * Indicates if favorites can be created.
+				 */
+				showFavorites: {
+					type: "boolean",
+					group: "Misc",
+					defaultValue: false
+				},
+
+				/**
+				 * If set to<code>true</code>, the scenario is an industry-specific solution.<br>
+				 * <b>Node:</b>This flag is only used internally in the app variant scenarios.
+				 */
+				industrySolutionMode: {
+					type: "boolean",
+					group: "Misc",
+					defaultValue: false
+				},
+
+				/**
+				 * Indicates if the vendor layer is active.<br>
+				 * <b>Node:</b>This flag is only used internally in the app variant scenarios.
+				 */
+				vendorLayer: {
+					type: "boolean",
+					group: "Misc",
+					defaultValue: false
+				},
+
+				/**
+				 * If set to<code>true</code>, the key for a vendor variant will be added manually.<br>
+				 * <b>Node:</b>This flag is only used internally in the app variant scenarios.
+				 */
+				manualVariantKey: {
+					type: "boolean",
+					group: "Misc",
+					defaultValue: false
+				},
+
+				/**
+				 * Determine the visibility of the 'Save' button in the variant list control.
+				 */
+				showSave: {
+					type: "boolean",
+					group: "Misc",
+					defaultValue: true
+				},
+
+				/**
+				 * Determine the visibility of the 'Save As' button in the variant list control.
+				 */
+				showSaveAs: {
+					type: "boolean",
+					group: "Misc",
+					defaultValue: true
+				},
+
+				/**
+				 * Determine the visibility of the 'Manage' button in the variant list control.
+				 */
+				showManage: {
+					type: "boolean",
+					group: "Misc",
+					defaultValue: true
+				}
+			},
+			associations: {
+
+				/**
+				 * Contains the controls, for which the variant management is responsible.
+				 */
+				"for": {
+					type: "sap.ui.core.Control",
+					multiple: true
+				}
+			},
+			events: {
+
+				/**
+				 * This event is fired when the Save Variant dialog is closed with OK for a variant.
+				 */
+				save: {
+					parameters: {
+						/**
+						 * The variant title
+						 */
+						name: {
+							type: "string"
+						},
+
+						/**
+						 * Indicates if an existing variant is overwritten or if a new variant is created
+						 */
+						overwrite: {
+							type: "boolean"
+						},
+
+						/**
+						 * The variant key
+						 */
+						key: {
+							type: "string"
+						},
+
+						/**
+						 * The Execute on Selection indicator
+						 */
+						execute: {
+							type: "boolean"
+						},
+
+						/**
+						 * The default variant indicator
+						 */
+						def: {
+							type: "boolean"
+						},
+
+						/**
+						 * The shared variant indicator
+						 */
+						global: {
+							type: "boolean"
+						},
+
+						/**
+						 * The package name
+						 */
+						lifecyclePackage: {
+							type: "string"
+						},
+
+						/**
+						 * The transport ID
+						 */
+						lifecycleTransportId: {
+							type: "string"
+						}
+					}
+				},
+
+				/**
+				 * This event is fired when users apply changes to variants in the Manage Variants dialog.
+				 */
+				manage: {}
+			}
+		},
+
+		/**
+		 * Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
+		 * @param {sap.ui.core.RenderManager} oRm the RenderManager that can be used for writing to the render output buffer
+		 * @param {sap.ui.core.Control} oControl an object representation of the control that should be rendered
+		 */
+		renderer: function(oRm, oControl) {
+			oRm.write("<div ");
+			oRm.writeControlData(oControl);
+			oRm.addClass("sapUiFlVarMngmt");
+			oRm.writeClasses();
+			oRm.write(">");
+			oRm.renderControl(oControl.oVariantLayout);
+			oRm.write("</div>");
+		}
+	});
+
+	VariantManagement.MODEL_NAME = "$FlexVariants";
+	VariantManagement.INNER_MODEL_NAME = "$sapUiFlVariants";
+	VariantManagement.MAX_NAME_LEN = 100;
+	VariantManagement.COLUMN_NAME_IDX = 1;
+
+	/*
+	 * Constructs and initializes the VariantManagement control.
+	 */
+	VariantManagement.prototype.init = function() {
+
+		this.attachModelContextChange(this._setModel, this);
+
+		this._oRb = sap.ui.getCore().getLibraryResourceBundle("sap.ui.fl");
+
+		this._createInnerModel();
+
+		var oVariantInvisibleText = new InvisibleText({
+			text: {
+				parts: [
+					{
+						path: 'currentVariant',
+						model: VariantManagement.MODEL_NAME
+					}, {
+						path: "modified",
+						model: VariantManagement.MODEL_NAME
+					}
+				],
+				formatter: function(sKey, bValue) {
+					var sText = this.getSelectedVariantText(sKey);
+					if (bValue) {
+						sText = this._oRb.getText("VARIANT_MANAGEMENT_MODIFIED", [
+							sText
+						]);
+					}
+					return sText;
+				}.bind(this)
+			}
+		});
+
+		var oVariantText = new Label(this.getId() + "-text", {
+			text: {
+				path: 'currentVariant',
+				model: VariantManagement.MODEL_NAME,
+				formatter: function(sKey) {
+					var sText = this.getSelectedVariantText(sKey);
+					return sText;
+				}.bind(this)
+			}
+		});
+
+		oVariantText.addStyleClass("sapUiFlVarMngmtText");
+		oVariantText.addStyleClass("sapMH4Style");
+
+		if (Device.system.phone) {
+			oVariantText.addStyleClass("sapUiFlVarMngmtTextMaxWidth");
+		}
+
+		var oVariantModifiedText = new Label(this.getId() + "-modified", {
+			text: "*",
+			visible: {
+				path: "modified",
+				model: VariantManagement.MODEL_NAME,
+				formatter: function(bValue) {
+					return (bValue === null || bValue === undefined) ? false : bValue;
+				}
+			}
+		});
+		oVariantModifiedText.setVisible(false);
+
+		oVariantModifiedText.addStyleClass("sapUiFlVarMngmtText");
+		oVariantModifiedText.addStyleClass("sapUiFlVarMngmtModified");
+		oVariantModifiedText.addStyleClass("sapMH4Style");
+
+		this.oVariantPopoverTrigger = new Button(this.getId() + "-trigger", {
+			type: ButtonType.Transparent,
+			icon: "sap-icon://arrow-down",
+			press: function() {
+				this._openVariantList();
+			}.bind(this),
+			tooltip: this._oRb.getText("VARIANT_MANAGEMENT_TRIGGER_TT")
+		});
+		this.oVariantPopoverTrigger.addStyleClass("sapUiFlVarMngmtTriggerBtn");
+		this.oVariantPopoverTrigger.addAriaLabelledBy(oVariantInvisibleText);
+
+		this.oVariantLayout = new HorizontalLayout({
+			content: [
+				oVariantText, oVariantModifiedText, this.oVariantPopoverTrigger, oVariantInvisibleText
+			]
+		});
+		this.oVariantLayout.addStyleClass("sapUiFlVarMngmtLayout");
+		this.addDependent(this.oVariantLayout);
+	};
+
+	VariantManagement.prototype._createInnerModel = function() {
+
+		var oModel = new JSONModel({
+			showManage: true,
+			showSave: true,
+			showSaveAs: true,
+			showExecuteOnSelection: false,
+			showShare: false,
+			showSetAsDefault: true,
+			showFavorites: false
+		});
+		this.setModel(oModel, VariantManagement.INNER_MODEL_NAME);
+
+		this._bindProperties();
+	};
+
+	VariantManagement.prototype._bindProperties = function() {
+		this.bindProperty("showManage", {
+			path: "/showManage",
+			model: VariantManagement.INNER_MODEL_NAME
+		});
+		this.bindProperty("showSave", {
+			path: "/showSave",
+			model: VariantManagement.INNER_MODEL_NAME
+		});
+		this.bindProperty("showSaveAs", {
+			path: "/showSaveAs",
+			model: VariantManagement.INNER_MODEL_NAME
+		});
+		this.bindProperty("showShare", {
+			path: "/showShare",
+			model: VariantManagement.INNER_MODEL_NAME
+		});
+		this.bindProperty("showExecuteOnSelection", {
+			path: "/showExecuteOnSelection",
+			model: VariantManagement.INNER_MODEL_NAME
+		});
+		this.bindProperty("showShare", {
+			path: "/showShare",
+			model: VariantManagement.INNER_MODEL_NAME
+		});
+		this.bindProperty("showSetAsDefault", {
+			path: "/showSetAsDefault",
+			model: VariantManagement.INNER_MODEL_NAME
+		});
+		this.bindProperty("showFavorites", {
+			path: "/showFavorites",
+			model: VariantManagement.INNER_MODEL_NAME
+		});
+	};
+
+	VariantManagement.prototype.setInitialDefaultVariantKey = function(sKey) {
+		this._sInitialDefaultVariantKey = sKey;
+	};
+	VariantManagement.prototype.getInitialDefaultVariantKey = function() {
+		return this._sInitialDefaultVariantKey;
+	};
+
+	VariantManagement.prototype.setDefaultVariantKey = function(sKey) {
+		var oModel = this.getModel(VariantManagement.MODEL_NAME);
+		if (oModel && this.oContext) {
+			oModel.setProperty(this.oContext + "/defaultVariant", sKey);
+		}
+	};
+	VariantManagement.prototype.getDefaultVariantKey = function() {
+		var oModel = this.getModel(VariantManagement.MODEL_NAME);
+		if (oModel && this.oContext) {
+			return oModel.getProperty(this.oContext + "/defaultVariant");
+		}
+
+		return null;
+	};
+
+	VariantManagement.prototype.setSelectedVariantKey = function(sKey) {
+		var oModel = this.getModel(VariantManagement.MODEL_NAME);
+		if (oModel && this.oContext) {
+			// oModel.setProperty(this.oContext + "/currentVariant", sKey);
+			var sLocalId = BaseTreeModifier.getSelector(this, flUtils.getComponentForControl(this)).id;
+			oModel._updateCurrentVariant(sLocalId, sKey);
+		}
+
+		return null;
+	};
+	VariantManagement.prototype.getSelectedVariantKey = function() {
+		var oModel = this.getModel(VariantManagement.MODEL_NAME);
+		if (oModel && this.oContext) {
+			return oModel.getProperty(this.oContext + "/currentVariant");
+		}
+
+		return null;
+	};
+
+	VariantManagement.prototype.setModified = function(bFlag) {
+		var oModel = this.getModel(VariantManagement.MODEL_NAME);
+		if (oModel && this.oContext) {
+			oModel.setProperty(this.oContext + "/modified", bFlag);
+		}
+	};
+	VariantManagement.prototype.getModified = function() {
+		var oModel = this.getModel(VariantManagement.MODEL_NAME);
+		if (oModel && this.oContext) {
+			return oModel.getProperty(this.oContext + "/modified");
+		}
+
+		return false;
+	};
+
+	VariantManagement.prototype.getSelectedVariantText = function(sKey) {
+		var oItem = this._getItemByKey(sKey);
+
+		if (oItem) {
+			return oItem.title;
+		}
+
+		return "";
+	};
+
+	VariantManagement.prototype.getStandardVariantKey = function() {
+		var aItems = this._getItems();
+		if (aItems && aItems[0]) {
+			return aItems[0].key;
+		}
+
+		return null;
+	};
+
+	VariantManagement.prototype._getItems = function() {
+		var aItems = [];
+		if (this.oContext && this.oContext.getObject()) {
+			aItems = this.oContext.getObject().variants;
+		}
+
+		return aItems;
+	};
+
+	VariantManagement.prototype._getItemByKey = function(sKey) {
+		var oItem = null, aItems = this._getItems();
+		aItems.some(function(oEntry) {
+			if (oEntry.key === sKey) {
+				oItem = oEntry;
+			}
+
+			return (oItem != null);
+		});
+
+		return oItem;
+	};
+
+	VariantManagement.prototype._setBindingContext = function() {
+
+		var oModel, sVariantKey;
+
+		if (!this.oContext) {
+			oModel = this.getModel(VariantManagement.MODEL_NAME);
+			sVariantKey = this.getId();
+			var sLocalId = BaseTreeModifier.getSelector(this, flUtils.getComponentForControl(this)).id;
+			if (oModel && sVariantKey) {
+				this.oContext = new Context(oModel, "/" + sLocalId);
+
+				this.setBindingContext(this.oContext, VariantManagement.MODEL_NAME);
+			}
+		}
+	};
+
+	VariantManagement.prototype._setModel = function() {
+		this._setBindingContext();
+	};
+
+// VARIANT LIST
+	VariantManagement.prototype._createVariantList = function() {
+
+		if (!this.oContext || this.oVariantPopOver) { // create only if context is available
+			return;
+		}
+
+		var oVariantManageBtn = new Button(this.getId() + "-manage", {
+			text: this._oRb.getText("VARIANT_MANAGEMENT_MANAGE"),
+			enabled: true,
+			press: function() {
+				this._openManagementDialog();
+			}.bind(this),
+			layoutData: new OverflowToolbarLayoutData({
+				priority: OverflowToolbarPriority.Low
+			}),
+			visible: {
+				path: "/showManage",
+				model: VariantManagement.INNER_MODEL_NAME
+			}
+		});
+
+		this.oVariantSaveBtn = new Button(this.getId() + "-mainsave", {
+			text: this._oRb.getText("VARIANT_MANAGEMENT_SAVE"),
+			press: function() {
+				this._handleVariantSave();
+			}.bind(this),
+			enabled: {
+				path: "modified",
+				model: VariantManagement.MODEL_NAME,
+				formatter: function(bValue) {
+					return bValue;
+				}
+			},
+			layoutData: new OverflowToolbarLayoutData({
+				priority: OverflowToolbarPriority.Low
+			}),
+			visible: {
+				path: "/showSave",
+				model: VariantManagement.INNER_MODEL_NAME
+			}
+		});
+
+		this.oVariantSaveAsBtn = new Button(this.getId() + "-saveas", {
+			text: this._oRb.getText("VARIANT_MANAGEMENT_SAVEAS"),
+			press: function() {
+				this._openSaveAsDialog();
+			}.bind(this),
+			layoutData: new OverflowToolbarLayoutData({
+				priority: OverflowToolbarPriority.Low
+			}),
+			visible: {
+				path: "/showSaveAs",
+				model: VariantManagement.INNER_MODEL_NAME
+			}
+		});
+
+		var oVariantList = new SelectList(this.getId() + "-list", {
+			selectedKey: {
+				path: "currentVariant",
+				model: VariantManagement.MODEL_NAME
+			},
+			itemPress: function(oEvent) {
+				var sSelectionKey = null;
+				if (oEvent && oEvent.getParameters()) {
+					var oItemPressed = oEvent.getParameters().item;
+					if (oItemPressed) {
+						sSelectionKey = oItemPressed.getKey();
+					}
+				}
+				if (sSelectionKey) {
+					// this.setModified(false);
+					this.setSelectedVariantKey(sSelectionKey);
+					this.oVariantPopOver.close();
+				}
+			}.bind(this)
+		});
+		oVariantList.setNoDataText(this._oRb.getText("VARIANT_MANAGEMENT_NODATA"));
+
+		this._oVariantList = oVariantList;
+
+		var oItemTemplate = new sap.ui.core.Item({
+			key: '{' + VariantManagement.MODEL_NAME + ">key}",
+			text: '{' + VariantManagement.MODEL_NAME + ">title}"
+		});
+
+		oVariantList.bindAggregation("items", {
+			path: "variants",
+			model: VariantManagement.MODEL_NAME,
+			template: oItemTemplate
+		});
+
+		if (this.getModified()) {
+			var oSelectedItem = this._getItemByKey(this.getSelectedVariantKey());
+			if (oSelectedItem) {
+				if (!oSelectedItem.readOnly || (this._isIndustrySolutionModeAndVendorLayer() && (this.getStandardVariantKey() === oSelectedItem.key))) {
+					this.oVariantSaveBtn.setEnabled(true);
+				}
+			}
+		}
+
+		var oSearchField = new SearchField(this.getId() + "-search");
+		oSearchField.attachLiveChange(function(oEvent) {
+			this._triggerSearch(oEvent, oVariantList);
+		}.bind(this));
+
+		this.oVariantSelectionPage = new Page(this.getId() + "-selpage", {
+			subHeader: new Toolbar({
+				content: [
+					oSearchField
+				]
+			}),
+			content: [
+				oVariantList
+			],
+			footer: new OverflowToolbar({
+				content: [
+					new ToolbarSpacer(this.getId() + "-spacer"), oVariantManageBtn, this.oVariantSaveBtn, this.oVariantSaveAsBtn
+				]
+			}),
+// showSubHeader: {
+// path: "/items",
+// model: VariantManagement.MODEL_NAME,
+// formatter: function() {
+// return this.getContent()[0].getItems().length > 9 ? true : false; // TODO: check for better way
+// }
+// },
+			showNavButton: false,
+			showHeader: false
+		});
+
+		this.oVariantPopOver = new ResponsivePopover(this.getId() + "-popover", {
+			title: this._oRb.getText("VARIANT_MANAGEMENT_VARIANTS"),
+			contentWidth: "400px",
+			placement: PlacementType.Bottom,
+			content: [
+				this.oVariantSelectionPage
+			],
+			afterOpen: function() {
+				this._setTriggerButtonIcon(false);
+			}.bind(this),
+			afterClose: function() {
+				this._setTriggerButtonIcon(true);
+			}.bind(this),
+			contentHeight: "300px"
+		});
+
+		this.oVariantPopOver.addStyleClass("sapUiFlVarMngmtPopover");
+		if (this.oVariantPopoverTrigger.$().closest(".sapUiSizeCompact").length > 0) {
+			this.oVariantPopOver.addStyleClass("sapUiSizeCompact");
+		}
+		this.addDependent(this.oVariantPopOver);
+
+		// oVariantList.getBinding("items").filter(this._getFilters());
+	};
+
+	VariantManagement.prototype._openVariantList = function() {
+		var oItem;
+
+		if (this.oVariantPopOver && this.oVariantPopOver.isOpen()) {
+			this.oVariantPopOver.close();
+			return;
+		}
+
+		this._createVariantList();
+		this._oVariantList.getBinding("items").filter(this._getFilters());
+
+		this.oVariantSelectionPage.setShowSubHeader(this._oVariantList.getItems().length > 9 ? true : false);
+
+		this.oVariantSaveBtn.setEnabled(false);
+		this.oVariantSaveAsBtn.setEnabled(true);
+
+		if (this._isIndustrySolutionModeAndVendorLayer() && this.getManualVariantKey() && (this.getStandardVariantKey() === this.getCurrentVariantKey())) {
+			this.oVariantSaveBtn.setEnabled(false);
+			this.oVariantSaveAsBtn.setEnabled(true);
+		}
+
+		if (this.getModified()) {
+			oItem = this._getItemByKey(this.getSelectedVariantKey());
+			if (!oItem.readOnly || (this._isIndustrySolutionModeAndVendorLayer() && (this.getStandardVariantKey() === oItem.key))) {
+				this.oVariantSaveBtn.setEnabled(true);
+			}
+		}
+
+		this.oVariantPopOver.openBy(this.oVariantPopoverTrigger);
+
+	};
+
+	VariantManagement.prototype._setTriggerButtonIcon = function() {
+		var oIcon;
+
+		if (!Device.system.phone) {
+
+			oIcon = sap.ui.getCore().byId(this.oVariantPopoverTrigger.$("img")[0].id);
+			if (oIcon) {
+				oIcon.toggleStyleClass("sapUiFlVarMngmtImageExpand");
+			}
+		}
+	};
+
+	VariantManagement.prototype._triggerSearch = function(oEvent, oVariantList) {
+
+		if (!oEvent) {
+			return;
+		}
+
+		var parameters = oEvent.getParameters();
+		if (!parameters) {
+			return;
+		}
+
+		var sValue = parameters.newValue ? parameters.newValue : "";
+
+		var oFilter = new Filter({
+			path: "title",
+			operator: sap.ui.model.FilterOperator.Contains,
+			value1: sValue
+		});
+
+		oVariantList.getBinding("items").filter(this._getFilters(oFilter));
+	};
+
+	// SAVE DIALOG
+
+	VariantManagement.prototype._createSaveAsDialog = function() {
+
+		if (!this.oSaveAsDialog) {
+
+			this.oInputName = new Input(this.getId() + "-name", {
+				liveChange: function(oEvent) {
+					this._checkVariantNameConstraints(this.oInputName, this.oSaveSave);
+				}.bind(this)
+			});
+
+			var oLabelName = new Label(this.getId() + "-namelabel", {
+				text: this._oRb.getText("VARIANT_MANAGEMENT_NAME"),
+				required: true
+			});
+			oLabelName.setLabelFor(this.oInputName);
+
+			this.oDefault = new CheckBox(this.getId() + "-default", {
+				text: this._oRb.getText("VARIANT_MANAGEMENT_SETASDEFAULT"),
+				visible: {
+					path: "/showSetAsDefault",
+					model: VariantManagement.INNER_MODEL_NAME
+				},
+				width: "100%"
+			});
+
+			this.oExecuteOnSelect = new CheckBox(this.getId() + "-execute", {
+				text: this._oRb.getText("VARIANT_MANAGEMENT_EXECUTEONSELECT"),
+				visible: {
+					path: "/showExecuteOnSelection",
+					model: VariantManagement.INNER_MODEL_NAME
+				},
+				width: "100%"
+			});
+
+			this.oShare = new CheckBox(this.getId() + "-share", {
+				text: this._oRb.getText("VARIANT_MANAGEMENT_SHARE"),
+				visible: {
+					path: "/showShare",
+					model: VariantManagement.INNER_MODEL_NAME
+				},
+				select: function(oEvent) {
+					this._handleShareSelected(oEvent);
+				}.bind(this),
+				width: "100%"
+			});
+
+			this.oInputManualKey = new Input(this.getId() + "-key", {
+				liveChange: function(oEvent) {
+					this._checkVariantNameConstraints(this.oInputManualKey);
+				}.bind(this)
+			});
+
+			this.oLabelKey = new Label(this.getId() + "-keylabel", {
+				text: this._oRb.getText("VARIANT_MANAGEMENT_KEY"),
+				required: true
+			});
+			this.oLabelKey.setLabelFor(this.oInputManualKey);
+
+			this.oSaveSave = new Button(this.getId() + "-variantsave", {
+				text: this._oRb.getText("VARIANT_MANAGEMENT_OK"),
+				press: function() {
+					this._bSaveCanceled = false;
+					this._handleVariantSaveAs(this.oInputName.getValue());
+				}.bind(this),
+				enabled: true
+			});
+			var oSaveAsDialogOptionsGrid = new Grid({
+				defaultSpan: "L6 M6 S12"
+			});
+
+			if (this.getShowSetAsDefault()) {
+				oSaveAsDialogOptionsGrid.addContent(this.oDefault);
+			}
+			if (this.getShowShare()) {
+				oSaveAsDialogOptionsGrid.addContent(this.oShare);
+			}
+			if (this.getShowExecuteOnSelection()) {
+				oSaveAsDialogOptionsGrid.addContent(this.oExecuteOnSelect);
+			}
+
+			this.oSaveAsDialog = new Dialog(this.getId() + "-savedialog", {
+				title: this._oRb.getText("VARIANT_MANAGEMENT_SAVEDIALOG"),
+				beginButton: this.oSaveSave,
+				endButton: new Button(this.getId() + "-variantcancel", {
+					text: this._oRb.getText("VARIANT_MANAGEMENT_CANCEL"),
+					press: function() {
+						this._bSaveCanceled = true;
+						this.oSaveAsDialog.close();
+					}.bind(this)
+				}),
+				content: [
+					oLabelName, this.oInputName, this.oLabelKey, this.oInputManualKey, oSaveAsDialogOptionsGrid
+				],
+				stretch: Device.system.phone,
+				afterOpen: function() {
+					this._setTriggerButtonIcon(false);
+				}.bind(this),
+				afterClose: function() {
+					this._setTriggerButtonIcon(true);
+				}.bind(this)
+			});
+
+			this.oSaveAsDialog.addStyleClass("sapUiPopupWithPadding");
+			this.oSaveAsDialog.addStyleClass("sapUiFlVarMngmtSaveDialog");
+
+			if (this.oVariantPopoverTrigger.$().closest(".sapUiSizeCompact").length > 0) {
+				this.oSaveAsDialog.addStyleClass("sapUiSizeCompact");
+			}
+
+			this.addDependent(this.oSaveAsDialog);
+		}
+	};
+
+	VariantManagement.prototype._openSaveAsDialog = function() {
+
+		this._createSaveAsDialog();
+
+		this.oInputName.setValue(this.getSelectedVariantText(this.getSelectedVariantKey()));
+		this.oSaveSave.setEnabled(false);
+
+		this.oInputName.setEnabled(true);
+		this.oInputName.setValueState(ValueState.None);
+		this.oInputName.setValueStateText(null);
+		this.oDefault.setSelected(false);
+		this.oShare.setSelected(false);
+		this.oExecuteOnSelect.setSelected(false);
+
+		// set variant name to Standard
+		if (this._isIndustrySolutionModeAndVendorLayer() && this.getManualVariantKey()) {
+			this.oInputName.setValue(this._oRb.getText("VARIANT_MANAGEMENT_STANDARD"));
+			this.oInputName.setEnabled(false);
+		}
+
+		if (this.oVariantPopOver) {
+			this.oVariantPopOver.close();
+		}
+
+		this.sTransport = null;
+		this.sPackage = null;
+		if (this.getManualVariantKey()) {
+			this.oInputManualKey.setVisible(true);
+			this.oInputManualKey.setEnabled(true);
+			this.oInputManualKey.setValueState(ValueState.None);
+			this.oInputManualKey.setValueStateText(null);
+			this.oLabelKey.setVisible(true);
+		} else {
+			this.oInputManualKey.setVisible(false);
+			this.oLabelKey.setVisible(false);
+		}
+
+		this.oSaveAsDialog.open();
+	};
+
+	VariantManagement.prototype._handleVariantSaveAs = function(sNewVariantName) {
+		var sKey = null, sName = sNewVariantName.trim(), sManualKey = this.oInputManualKey.getValue().trim(), sTransport = "", sPackage = "";
+
+		if (sName == "") {
+			this.oInputName.setValueState(ValueState.Error);
+			this.oInputName.setValueStateText(this._oRb.getText("VARIANT_MANAGEMENT_ERROR_EMPTY"));
+			return;
+		}
+
+		if (this.getManualVariantKey()) {
+			if (sManualKey == "") {
+				this.oInputManualKey.setValueState(ValueState.Error);
+				this.oInputManualKey.setValueStateText(this._oRb.getText("VARIANT_MANAGEMENT_ERROR_EMPTY"));
+				return;
+			}
+			sKey = sManualKey;
+		}
+
+		if (this.oSaveAsDialog) {
+			this.oSaveAsDialog.close();
+		}
+
+		if (this.oDefault.getSelected()) {
+			this.setDefaultVariantKey(sKey);
+		}
+		if (this.oShare.getSelected()) {
+			sPackage = this.sPackage;
+			sTransport = this.sTransport;
+		}
+
+		this.setModified(false);
+
+		this.fireSave({
+			key: sKey, // is null
+			name: sName,
+			overwrite: false,
+			def: this.oDefault.getSelected(),
+			execute: this.oExecuteOnSelect.getSelected(),
+			global: this.oShare.getSelected(),
+			lifecyclePackage: sPackage,
+			lifecycleTransportId: sTransport
+		});
+
+	};
+
+	VariantManagement.prototype._handleVariantSave = function() {
+
+		var oItem = this._getItemByKey(this.getSelectedVariantKey());
+
+		var bDefault = false;
+		if (this.getDefaultVariantKey() === oItem.key) {
+			bDefault = true;
+		}
+
+		if (oItem.global) {
+			var fOkay = function(sPackage, sTransport) {
+
+				if (this.oVariantPopOver) {
+					this.oVariantPopOver.close();
+				}
+
+				this.sPackage = sPackage;
+				this.sTransport = sTransport;
+				this.fireSave({
+					name: oItem.title,
+					overwrite: true,
+					key: oItem.key,
+					def: bDefault,
+					global: this._isIndustrySolutionModeAndVendorLayer(),
+					lifecyclePackage: this.sPackage,
+					lifecycleTransportId: this.sTransport
+				});
+			}.bind(this);
+			var fError = function(oResult) {
+				this.sTransport = null;
+				this.sPackage = null;
+			}.bind(this);
+			this._assignTransport(oItem, fOkay, fError);
+		} else {
+
+			if (this.oVariantPopOver) {
+				this.oVariantPopOver.close();
+			}
+
+			this.fireSave({
+				name: oItem.title,
+				overwrite: true,
+				key: oItem.key,
+				def: bDefault
+			});
+		}
+
+		this.setModified(false);
+	};
+
+	VariantManagement.prototype._handleShareSelected = function(oEvent) {
+
+		this.sTransport = null;
+		this.sPackage = null;
+
+		if (oEvent.getParameters().selected) {
+			var fOkay = function(sPackage, sTransport) {
+				this.sTransport = sTransport;
+				this.sPackage = sPackage;
+			}.bind(this);
+			var fError = function(oResult) {
+				this.oShare.setSelected(false);
+				this.sTransport = null;
+				this.sPackage = null;
+			}.bind(this);
+
+			this._assignTransport(null, fOkay, fError);
+		}
+	};
+
+// MANAGE DIALOG
+
+	/**
+	 * Opens the manage dialog.
+	 * @public
+	 * @param {boolean} bCreateAlways in case this is set to <code>true</code> the former dialog will be destroyed, before a new one is created.
+	 */
+	VariantManagement.prototype.openManagementDialog = function(bCreateAlways) {
+		if (bCreateAlways && this.oManagementDialog) {
+			this.oManagementDialog.destroy();
+			this.oManagementDialog = undefined;
+		}
+		this._openManagementDialog();
+	};
+
+	VariantManagement.prototype._createManagementDialog = function() {
+		var oColumn;
+
+		if (!this.oManagementDialog) {
+
+			oColumn = new Column({
+				header: new Text({
+					text: this._oRb.getText("VARIANT_MANAGEMENT_ADD_FAV")
+				}),
+				width: "4rem",
+				visible: {
+					path: "/showFavorites",
+					model: VariantManagement.INNER_MODEL_NAME
+				}
+			});
+
+			oColumn.getHeader().setTooltip(this._oRb.getText("VARIANT_MANAGEMENT_ADD_FAV_TOOLTIP"));
+
+			this.oManagementTable = new Table(this.getId() + "-managementTable", {
+				growing: true,
+				columns: [
+					oColumn, new Column({
+						header: new Text({
+							text: this._oRb.getText("VARIANT_MANAGEMENT_NAME")
+						}),
+						width: "14rem"
+					}), new Column({
+						header: new Text({
+							text: this._oRb.getText("VARIANT_MANAGEMENT_VARIANTTYPE")
+						}),
+						width: "8rem",
+						demandPopin: true,
+						popinDisplay: PopinDisplay.Inline,
+						minScreenWidth: ScreenSize.Tablet,
+						visible: {
+							path: "/showShare",
+							model: VariantManagement.INNER_MODEL_NAME
+						}
+					}), new Column({
+						header: new Text({
+							text: this._oRb.getText("VARIANT_MANAGEMENT_DEFAULT")
+						}),
+						width: "4rem",
+						demandPopin: true,
+						popinDisplay: PopinDisplay.Inline,
+						minScreenWidth: ScreenSize.Tablet,
+						visible: {
+							path: "/showSetAsDefault",
+							model: VariantManagement.INNER_MODEL_NAME
+						}
+					}), new Column({
+						header: new Text({
+							text: this._oRb.getText("VARIANT_MANAGEMENT_EXECUTEONSELECT")
+						}),
+						width: "5rem",
+						hAlign: TextAlign.Center,
+						demandPopin: true,
+						popinDisplay: PopinDisplay.Inline,
+						minScreenWidth: "800px",
+						visible: {
+							path: "/showExecuteOnSelection",
+							model: VariantManagement.INNER_MODEL_NAME
+						}
+					}), new Column({
+						header: new Text({
+							text: this._oRb.getText("VARIANT_MANAGEMENT_AUTHOR")
+						}),
+						width: "8rem",
+						demandPopin: true,
+						popinDisplay: PopinDisplay.Inline,
+						minScreenWidth: "900px"
+					}), new Column({
+						width: "2rem",
+						hAlign: TextAlign.Center
+					}), new Column({
+						visible: false
+					})
+				]
+			});
+
+			this.oManagementSave = new Button(this.getId() + "-managementsave", {
+				text: this._oRb.getText("VARIANT_MANAGEMENT_OK"),
+				enabled: true,
+				press: function() {
+					this._handleManageSavePressed();
+				}.bind(this)
+			});
+
+			this.oManagementCancel = new Button(this.getId() + "-managementcancel", {
+				text: this._oRb.getText("VARIANT_MANAGEMENT_CANCEL"),
+				press: function() {
+					this.oManagementDialog.close();
+					this._handleManageCancelPressed();
+				}.bind(this)
+			});
+
+			this.oManagementDialog = new Dialog(this.getId() + "-managementdialog", {
+				customHeader: new Bar(this.getId() + "-managementHeader", {
+					contentMiddle: [
+						new Text(this.getId() + "-managementHeaderText", {
+							text: this._oRb.getText("VARIANT_MANAGEMENT_MANAGEDIALOG")
+						})
+					]
+				}),
+				beginButton: this.oManagementSave,
+				endButton: this.oManagementCancel,
+				content: [
+					this.oManagementTable
+				],
+				stretch: Device.system.phone,
+				afterOpen: function() {
+					this._setTriggerButtonIcon(false);
+				}.bind(this),
+				afterClose: function() {
+					this._setTriggerButtonIcon(true);
+				}.bind(this)
+			});
+
+			if (this.oVariantPopoverTrigger.$().closest(".sapUiSizeCompact").length > 0) {
+				this.oManagementDialog.addStyleClass("sapUiSizeCompact");
+			}
+			this.addDependent(this.oManagementDialog);
+
+			this.oManagementTable.bindAggregation("items", {
+				path: "variants",
+				model: VariantManagement.MODEL_NAME,
+				factory: this._templateFactoryManagementDialog.bind(this)
+			});
+
+			this.oManagementTable.getBinding("items").filter(this._getFilterNotDeleted());
+
+			this._bDeleteOccured = false;
+		}
+
+	};
+
+	VariantManagement.prototype._templateFactoryManagementDialog = function(sId, oContext) {
+
+		var sTooltip = null, bExeEnabled, oDeleteButton, sBindingPath, oNameControl, oItem = oContext.getObject();
+		if (!oItem) {
+			return undefined;
+		}
+
+		var fLiveChange = function(oEvent) {
+			this._checkVariantNameConstraints(oEvent.oSource, this.oManagementSave, oEvent.oSource.getBindingContext(VariantManagement.MODEL_NAME).getObject().key);
+		}.bind(this);
+
+		var fChange = function(oEvent) {
+			this._handleManageTitleChanged(oEvent.oSource.getBindingContext(VariantManagement.MODEL_NAME).getObject());
+		}.bind(this);
+
+		var fSelectRB = function(oEvent) {
+			if (oEvent.getParameters().selected === true) {
+				this._handleManageDefaultVariantChange(oEvent.oSource.getBindingContext(VariantManagement.MODEL_NAME).getObject());
+			}
+		}.bind(this);
+
+		var fSelectCB = function(oEvent) {
+			this._handleManageExecuteOnSelectionChanged(oEvent.oSource.getBindingContext(VariantManagement.MODEL_NAME).getObject());
+		}.bind(this);
+
+		var fPress = function(oEvent) {
+			this._handleManageDeletePressed(oEvent.oSource.getBindingContext(VariantManagement.MODEL_NAME).getObject());
+		}.bind(this);
+
+		var fSelectFav = function(oEvent) {
+			this._handleManageFavoriteChanged(oEvent.oSource.getBindingContext(VariantManagement.MODEL_NAME).getObject());
+		}.bind(this);
+
+		if (oItem.key !== this.getStandardVariantKey()) {
+			if (oItem.readOnly) {
+				sTooltip = this._oRb.getText("VARIANT_MANAGEMENT_WRONG_LAYER");
+			} else if (oItem.textReadOnly) {
+				sTooltip = this._oRb.getText("VARIANT_MANAGEMENT_WRONG_LANGUAGE");
+			}
+		}
+
+		if ((oItem.key === this.getStandardVariantKey()) || oItem.readOnly || oItem.textReadOnly) {
+			oNameControl = new ObjectIdentifier({
+				title: '{' + VariantManagement.MODEL_NAME + ">title}"
+			});
+			if (sTooltip) {
+				oNameControl.setTooltip(sTooltip);
+			}
+		} else {
+			oNameControl = new Input({
+				liveChange: fLiveChange,
+				change: fChange,
+				value: '{' + VariantManagement.MODEL_NAME + ">title}"
+			});
+		}
+
+		oDeleteButton = new Button({
+			icon: "sap-icon://sys-cancel",
+			enabled: true,
+			type: ButtonType.Transparent,
+			press: fPress,
+			tooltip: this._oRb.getText("VARIANT_MANAGEMENT_DELETE"),
+			// visible: "{:= ${readOnly} ? false : true }}"
+			visible: !oItem.readOnly
+		});
+
+		this._assignColumnInfoForDeleteButton(oDeleteButton);
+
+		bExeEnabled = (oItem.readOnly === false);
+
+		sBindingPath = this.oContext.getPath();
+
+		var oTemplate = new ColumnListItem({
+			cells: [
+				new CheckBox({
+					enabled: {
+						path: sBindingPath + '/defaultVariant',
+						model: VariantManagement.MODEL_NAME,
+						formatter: function(sDefaultKey) {
+							var bState = (oItem.readOnly === false);
+							if (oItem.key === sDefaultKey) {
+								bState = false;
+								if (!oItem.favorite) {
+									this.setSelected(true);
+								}
+							}
+
+							return bState;
+						}
+					},
+					select: fSelectFav,
+					selected: '{' + VariantManagement.MODEL_NAME + ">favorite}"
+				}), oNameControl, new Text({
+					text: this._oRb.getText(oItem.global ? "VARIANT_MANAGEMENT_SHARED" : "VARIANT_MANAGEMENT_PRIVATE"),
+					wrapping: false
+				}), new RadioButton({
+					groupName: this.getId(),
+					select: fSelectRB,
+					// selected: (oItem.key === sDefaultVariantKey) ? true : false
+					selected: {
+						path: sBindingPath + "/defaultVariant",
+						model: VariantManagement.MODEL_NAME,
+						formatter: function(sKey) {
+							return (oItem.key === sKey) ? true : false;
+						}
+					}
+				}), new CheckBox({
+					enabled: bExeEnabled,
+					select: fSelectCB,
+					selected: '{' + VariantManagement.MODEL_NAME + ">executeOnSelect}"
+				}), new Text({
+					text: '{' + VariantManagement.MODEL_NAME + ">author}",
+					textAlign: "Begin"
+				}), oDeleteButton, new Text({
+					text: '{' + VariantManagement.MODEL_NAME + ">key}"
+				})
+
+			]
+		});
+
+		return oTemplate;
+	};
+
+	VariantManagement.prototype._openManagementDialog = function() {
+
+		this._createManagementDialog();
+
+		this.setInitialDefaultVariantKey(this.getDefaultVariantKey());
+
+		if (this.oVariantPopOver) {
+			this.oVariantPopOver.close();
+		}
+
+		this.oManagementSave.setEnabled(false);
+
+		// Idealy this should be done only once in _createtManagementDialog. But the binding does not recognize a change, when filtering is involved.
+		// After delete on the ui we filter the item out .toBeDeleted=true. The real deletion will occure only when OK is pressed.
+		// But the filterd items and the result after real deletion is identical, so no change is detected; based on this the context on the table is
+		// not invalidated....
+		// WA: do the binding always, while opening the dialog.
+		if (this._bDeleteOccured) {
+
+			this._bDeleteOccured = false;
+			this.oManagementTable.bindAggregation("items", {
+				path: "variants",
+				model: VariantManagement.MODEL_NAME,
+				factory: this._templateFactoryManagementDialog.bind(this)
+			});
+
+			this.oManagementTable.getBinding("items").filter(this._getFilterNotDeleted());
+		}
+
+		this.oManagementDialog.open();
+
+	};
+
+	VariantManagement.prototype._assignColumnInfoForDeleteButton = function(oDeleteButton) {
+		if (!this._oInvisibleDeleteColumnName) {
+			this._oInvisibleDeleteColumnName = new InvisibleText({
+				text: this._oRb.getText("VARIANT_MANAGEMENT_ACTION_COLUMN")
+			});
+
+			this.oManagementDialog.addContent(this._oInvisibleDeleteColumnName);
+		}
+
+		if (this._oInvisibleDeleteColumnName) {
+			oDeleteButton.addAriaLabelledBy(this._oInvisibleDeleteColumnName);
+		}
+	};
+
+	VariantManagement.prototype._handleManageDefaultVariantChange = function(oItem) {
+
+		var sKey = oItem.key;
+
+		if (!this._anyInErrorState(this.oManagementTable)) {
+			this.oManagementSave.setEnabled(true);
+		}
+
+		this.setDefaultVariantKey(sKey);
+
+		// TODO: transport assignement ??
+
+	};
+
+	VariantManagement.prototype._handleManageCancelPressed = function() {
+		var sDefaultVariantKey, aItems = this._getItems(), oModel;
+		aItems.forEach(function(oItem) {
+			oItem.toBeDeleted = false;
+			// oItem.deletedTransport = null;
+			oItem.title = oItem.originalTitle;
+			oItem.favorite = oItem.originalFavorite;
+			oItem.executeOnSelection = oItem.originalExecuteOnSelection;
+		});
+
+		sDefaultVariantKey = this.getInitialDefaultVariantKey();
+		if (sDefaultVariantKey !== this.getDefaultVariantKey()) {
+			this.setDefaultVariantKey(sDefaultVariantKey);
+		}
+
+		oModel = this.getModel(VariantManagement.MODEL_NAME);
+		if (oModel) {
+			oModel.checkUpdate();
+		}
+	};
+
+	VariantManagement.prototype._handleManageFavoriteChanged = function(oItem) {
+
+		if (!this._anyInErrorState(this.oManagementTable)) {
+			this.oManagementSave.setEnabled(true);
+		}
+
+		if (oItem.global) {
+			var fOkay = function(sPackage, sTransport) {
+				oItem.lifecyclePackage = sPackage;
+				oItem.lifecycleTransportId = sTransport;
+			};
+			var fError = function(oResult) {
+				oItem.favorite = oItem.originalFavorite;
+			};
+
+			this._assignTransport(oItem, fOkay, fError);
+		}
+	};
+
+	VariantManagement.prototype._handleManageDeletePressed = function(oItem) {
+
+		var oModel, sKey = oItem.key;
+
+		if (!this._anyInErrorState(this.oManagementTable)) {
+			this.oManagementSave.setEnabled(true);
+		}
+
+		oItem.toBeDeleted = true;
+
+		if ((sKey === this.getDefaultVariantKey())) {
+			this.setDefaultVariantKey(this.getStandardVariantKey());
+		}
+
+		if (oItem.global) {
+			var fOkay = function(sPackage, sTransport) {
+				oItem.lifecyclePackage = sPackage;
+				oItem.lifecycleTransportId = sTransport;
+			};
+
+			var fError = function(oResult) {
+				oItem.toBeDeleted = false;
+			};
+
+			this._assignTransport(oItem, fOkay, fError);
+		}
+
+		oModel = this.getModel(VariantManagement.MODEL_NAME);
+		if (oModel) {
+			oModel.checkUpdate();
+		}
+
+		// this.oManagementCancel.focus();
+	};
+
+	VariantManagement.prototype._handleManageExecuteOnSelectionChanged = function(oItem) {
+
+		if (!this._anyInErrorState(this.oManagementTable)) {
+			this.oManagementSave.setEnabled(true);
+		}
+
+		if (oItem.global) {
+			var fOkay = function(sPackage, sTransport) {
+				oItem.lifecyclePackage = sPackage;
+				oItem.lifecycleTransportId = sTransport;
+			};
+			var fError = function(oResult) {
+				oItem.executeOnSelection = oItem.originalExecuteOnSelection;
+			};
+
+			this._assignTransport(oItem, fOkay, fError);
+		}
+	};
+
+	VariantManagement.prototype._handleManageTitleChanged = function(oItem) {
+
+		if (!this._anyInErrorState(this.oManagementTable)) {
+			this.oManagementSave.setEnabled(true);
+		}
+
+		if (!oItem.title.localeCompare(oItem.originalTitle)) {
+
+			if (oItem.global) {
+				var fOkay = function(sPackage, sTransport) {
+					oItem.lifecyclePackage = sPackage;
+					oItem.lifecycleTransportId = sTransport;
+				};
+
+				var fError = function(oResult) {
+					oItem.title = oItem.originalTitle;
+				};
+
+				this._assignTransport(oItem, fOkay, fError);
+			}
+		}
+
+	};
+
+	VariantManagement.prototype._handleManageSavePressed = function() {
+		var aItems = this._getItems();
+
+		this.fireManage();
+
+		this.oManagementDialog.close();
+
+		aItems.some(function(oItem) {
+			if (oItem.toBeDeleted) {
+				this._bDeleteOccured = true;
+				if (oItem.key === this.getSelectedVariantKey()) {
+					this.setModified(false);
+					this.setSelectedVariantKey(this.getStandardVariantKey());
+					return true;
+				}
+			}
+
+			return false;
+		}.bind(this));
+
+	};
+
+	VariantManagement.prototype._anyInErrorState = function(oManagementTable) {
+		var aItems, oInput, bInError = false;
+
+		if (oManagementTable) {
+			aItems = oManagementTable.getItems();
+			aItems.some(function(oItem) {
+				oInput = oItem.getCells()[VariantManagement.COLUMN_NAME_IDX];
+				if (oInput && oInput.getValueState && (oInput.getValueState() === ValueState.Error)) {
+					bInError = true;
+				}
+
+				return bInError;
+			});
+		}
+
+		return bInError;
+	};
+
+// UTILS
+
+	VariantManagement.prototype._getFilters = function(oFilter) {
+		var aFilters = [];
+
+		if (oFilter) {
+			aFilters.push(oFilter);
+		}
+
+		aFilters.push(this._getFilterNotDeleted());
+
+		if (this.getShowFavorites()) {
+			aFilters.push(this._getFilterFavorites());
+		}
+
+		return aFilters;
+	};
+
+	VariantManagement.prototype._getFilterNotDeleted = function() {
+		return new Filter({
+			path: "toBeDeleted",
+			operator: sap.ui.model.FilterOperator.NE,
+			value1: true
+		});
+	};
+
+	VariantManagement.prototype._getFilterFavorites = function() {
+		return new Filter({
+			path: "favorite",
+			operator: sap.ui.model.FilterOperator.EQ,
+			value1: true
+		});
+	};
+
+	VariantManagement.prototype._checkVariantNameConstraints = function(oInputField, oSaveButton, sKey) {
+
+		if (!oInputField) {
+			return;
+		}
+
+		var sValue = oInputField.getValue();
+		sValue = sValue.trim();
+
+		if (!this._checkIsDuplicate(sValue, sKey)) {
+
+			if (sValue === "") {
+				oInputField.setValueState(ValueState.Error);
+				oInputField.setValueStateText(this._oRb.getText("VARIANT_MANAGEMENT_ERROR_EMPTY"));
+			} else if (sValue.length > VariantManagement.MAX_NAME_LEN) {
+				oInputField.setValueState(ValueState.Error);
+				oInputField.setValueStateText(this._oRb.getText("VARIANT_MANAGEMENT_MAX_LEN", [
+					VariantManagement.MAX_NAME_LEN
+				]));
+			} else {
+				oInputField.setValueState(ValueState.None);
+				oInputField.setValueStateText(null);
+			}
+		} else {
+			oInputField.setValueState(ValueState.Error);
+			oInputField.setValueStateText(this._oRb.getText("VARIANT_MANAGEMENT_ERROR_DUPLICATE"));
+		}
+
+		if (oSaveButton) {
+			if (oInputField.getValueState() === ValueState.Error) {
+				oSaveButton.setEnabled(false);
+			} else {
+				oSaveButton.setEnabled(true);
+			}
+		}
+	};
+
+	VariantManagement.prototype._checkIsDuplicate = function(sValue, sKey) {
+		var bDublicate = false, aItems = this._getItems(), sLowerCaseValue = sValue.toLowerCase();
+		aItems.some(function(oItem) {
+			if (oItem.title.toLowerCase() === sLowerCaseValue) {
+
+				if (sKey && (sKey === oItem.key)) {
+					return false;
+				}
+				bDublicate = true;
+			}
+
+			return bDublicate;
+		});
+
+		return bDublicate;
+	};
+
+	VariantManagement.prototype._isIndustrySolutionModeAndVendorLayer = function() {
+		if (this.getIndustrySolutionMode() && this.getVendorLayer()) {
+			return true;
+		}
+
+		return false;
+	};
+
+	VariantManagement.prototype._assignTransport = function(oItem, fOkay, fError) {
+		var sTransport = null;
+
+		var oObject = {
+			type: "variant",
+			name: "",
+			namespace: "",
+			"package": ""
+		};
+		// oObject["package"] = "";
+		if (oItem) {
+			oObject["package"] = oItem.lifecyclePackage;
+			oObject["name"] = oItem.key;
+			oObject["namespace"] = oItem.namespace;
+
+			sTransport = oItem.lifecycleTransportId;
+		}
+		var _fOkay = function(oResult) {
+			fOkay(oResult.getParameters().selectedPackage, oResult.getParameters().selectedTransport);
+		};
+		var _fError = function(oResult) {
+			fError(oResult);
+		};
+
+		if (sTransport != null && sTransport.trim().length > 0) {
+			fOkay(oObject["package"], sTransport);
+		} else {
+			var bCompactMode = false;
+			if (this.oVariantPopoverTrigger.$().closest(".sapUiSizeCompact").length > 0) {
+				bCompactMode = true;
+			}
+			var oTransports = new TransportSelection();
+			oTransports.selectTransport(oObject, _fOkay, _fError, bCompactMode);
+		}
+
+	};
+
+	// exit destroy all controls created in init
+	VariantManagement.prototype.exit = function() {
+
+		if (this.oDefault && !this.oDefault._bIsBeingDestroyed) {
+			this.oDefault.destroy();
+		}
+		this.oDefault = undefined;
+
+		if (this.oShare && !this.oShare._bIsBeingDestroyed) {
+			this.oShare.destroy();
+		}
+		this.oShare = undefined;
+
+		if (this.oExecuteOnSelect && !this.oExecuteOnSelect._bIsBeingDestroyed) {
+			this.oExecuteOnSelect.destroy();
+		}
+		this.oExecuteOnSelect = undefined;
+
+		this.oVariantPopoverTrigger = undefined;
+		this._oRb = undefined;
+
+		this.oContext = undefined;
+
+		this._oVariantList = undefined;
+		this.oVariantSelectionPage = undefined;
+	};
+
+	return VariantManagement;
+
+}, /* bExport= */true);
+
+}; // end of sap/ui/fl/variants/VariantManagement.js
+if ( !jQuery.sap.isDeclared('sap.ui.fl.ChangePersistence') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+jQuery.sap.declare('sap.ui.fl.ChangePersistence'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+sap.ui.define("sap/ui/fl/ChangePersistence",[
+	"sap/ui/fl/Change", "sap/ui/fl/Utils", "sap/ui/fl/LrepConnector", "sap/ui/fl/Cache", "sap/ui/fl/context/ContextManager", "sap/ui/fl/registry/Settings", "sap/ui/fl/variants/VariantController"
+], function(Change, Utils, LRepConnector, Cache, ContextManager, Settings, VariantController) {
+	"use strict";
+
+	/**
+	 * Helper object to access a change from the back end. Access helper object for each change (and variant) which was fetched from the back end
+	 *
+	 * @constructor
+	 * @author SAP SE
+	 * @version 1.37.0-SNAPSHOT
+	 * @experimental Since 1.25.0
+	 * @param {object} mComponent - Component data to initiate <code>ChangePersistence</code> instance
+	 * @param {string} mComponent.name - Name of the component this instance is responsible for
+	 * @param {string} mComponent.appVersion - Version of application
+	 */
+	var ChangePersistence = function(mComponent) {
+		this._mComponent = mComponent;
+		//_mChanges contains:
+		// - mChanges: map of changes (selector id)
+		// - mDependencies: map of changes (change key) that need to be applied before any change. Used to check if a change can be applied. Format:
+		//		mDependencies: {
+		//			"fileNameChange2USERnamespace": {
+		//				"changeObject": oChange2,
+		//				"dependencies": ["fileNameChange1USERnamespace"]
+		//			},
+		//			"fileNameChange3USERnamespace": {
+		//				"changeObject": oChange3,
+		//				"dependencies": ["fileNameChange2USERnamespace"]
+		//			}
+		//		}
+		// - mDependentChangesOnMe: map of changes (change key) that cannot be applied before the change. Used to remove dependencies faster. Format:
+		//		mDependentChangesOnMe: {
+		//			"fileNameChange1USERnamespace": [oChange2],
+		//			"fileNameChange2USERnamespace": [oChange3]
+		//		}
+		this._mChanges = {
+			mChanges: {},
+			mDependencies: {},
+			mDependentChangesOnMe: {}
+		};
+
+		if (!this._mComponent || !this._mComponent.name) {
+			Utils.log.error("The Control does not belong to an SAPUI5 component. Personalization and changes for this control might not work as expected.");
+			throw new Error("Missing component name.");
+		}
+
+		this._oVariantController = new VariantController(this._mComponent.name, this._mComponent.appVersion, {});
+		this._oConnector = this._createLrepConnector();
+		this._aDirtyChanges = [];
+	};
+
+	ChangePersistence.NOTAG = "<NoTag>";
+
+	/**
+	 * Return the name of the SAPUI5 component. All changes are assigned to 1 SAPUI5 component. The SAPUI5 component also serves as authorization
+	 * object.
+	 *
+	 * @returns {String} component name
+	 * @public
+	 */
+	ChangePersistence.prototype.getComponentName = function() {
+		return this._mComponent.name;
+	};
+
+	/**
+	 * Creates a new instance of the LRepConnector
+	 *
+	 * @returns {sap.ui.fl.LrepConnector} LRep connector instance
+	 * @private
+	 */
+	ChangePersistence.prototype._createLrepConnector = function() {
+		return LRepConnector.createConnector();
+	};
+
+
+	ChangePersistence.prototype.getCacheKey = function() {
+		return Cache.getChangesFillingCache(this._oConnector, this._mComponent).then(function(oWrappedChangeFileContent) {
+			if (oWrappedChangeFileContent && oWrappedChangeFileContent.etag) {
+				return oWrappedChangeFileContent.etag;
+			}
+
+			return ChangePersistence.NOTAG;
+		});
+	};
+
+	/**
+	 * Verifies whether a change fulfils the preconditions.
+	 *
+	 * All changes need to be matched with current active contexts;
+	 * only changes whose <code>fileType</code> is 'change' and whose <code>changeType</code> is different from 'defaultVariant' are valid;
+	 * if <code>bIncludeVariants</code> parameter is true, the changes with 'variant' <code>fileType</code> or 'defaultVariant' <code>changeType</code> are also valid
+	 * if it has a selector <code>persistencyKey</code>.
+	 *
+	 * @param {sap.ui.fl.context.Context[]} aActiveContexts - Array of current active contexts
+	 * @param {boolean} [bIncludeVariants] - Indicates that smart variants shall be included
+	 * @param {object} oChangeContent - Content of the change
+	 *
+	 * @returns {boolean} <code>true</code> if all the preconditions are fulfilled
+	 * @public
+	 */
+	ChangePersistence.prototype._preconditionsFulfilled = function(aActiveContexts, bIncludeVariants, oChangeContent) {
+
+		function _isValidFileType () {
+			if (bIncludeVariants) {
+				return (oChangeContent.fileType === "change") || (oChangeContent.fileType === "variant");
+			}
+			return (oChangeContent.fileType === "change") && (oChangeContent.changeType !== "defaultVariant");
+		}
+
+		function _isValidSelector () {
+			if (bIncludeVariants) {
+				if ((oChangeContent.fileType === "variant") || (oChangeContent.changeType === "defaultVariant")){
+					return oChangeContent.selector && oChangeContent.selector.persistencyKey;
+				}
+			}
+			return true;
+		}
+
+		function _isValidContext () {
+			return ContextManager.doesContextMatch(oChangeContent, aActiveContexts);
+		}
+
+		if (_isValidFileType() && _isValidSelector() && _isValidContext()){
+				return true;
+		}
+		return false;
+	};
+
+	/**
+	 * Calls the back end asynchronously and fetches all changes for the component
+	 * New changes (dirty state) that are not yet saved to the back end won't be returned.
+	 * @param {map} mPropertyBag - Contains additional data needed for reading changes
+	 * @param {object} mPropertyBag.appDescriptor - Manifest that belongs to actual component
+	 * @param {string} mPropertyBag.siteId - ID of the site belonging to actual component
+	 * @param {string} [mPropertyBag.sCurrentLayer] - Specifies a single layer for loading changes. If this parameter is set, the max layer filtering is not applied
+	 * @param {boolean} [mPropertyBag.ignoreMaxLayerParameter] - Indicates that changes shall be loaded without layer filtering
+	 * @param {boolean} [mPropertyBag.includeVariants] - Indicates that smart variants shall be included
+	 * @param {string} [mPropertyBag.cacheKey] - key to validate the client side stored cache entry
+	 * @param {string} [mPropertyBag.url] - address to which the request for change should be sent in case the data is not cached
+	 * @see sap.ui.fl.Change
+	 * @returns {Promise} Resolving with an array of changes
+	 * @public
+	 */
+	ChangePersistence.prototype.getChangesForComponent = function(mPropertyBag) {
+		return Cache.getChangesFillingCache(this._oConnector, this._mComponent, mPropertyBag).then(function(oWrappedChangeFileContent) {
+			this._bHasLoadedChangesFromBackEnd = true;
+
+			if (oWrappedChangeFileContent.changes && oWrappedChangeFileContent.changes.settings){
+				Settings._storeInstance(oWrappedChangeFileContent.changes.settings);
+			}
+
+			if (!oWrappedChangeFileContent.changes || !oWrappedChangeFileContent.changes.changes) {
+				return [];
+			}
+
+			var aChanges = oWrappedChangeFileContent.changes.changes;
+
+			if (oWrappedChangeFileContent.changes.variantSection && oWrappedChangeFileContent.changes.variantSection !== {}) {
+				this._oVariantController._setChangeFileContent(oWrappedChangeFileContent);
+				var aVariantChanges = this._oVariantController.loadDefaultChanges();
+				aChanges = aChanges.concat(aVariantChanges);
+			}
+
+			var sCurrentLayer = mPropertyBag && mPropertyBag.currentLayer;
+			if (sCurrentLayer) {
+				var aCurrentLayerChanges = [];
+				aChanges.forEach(function (oChange) {
+					if (oChange.layer === sCurrentLayer) {
+						aCurrentLayerChanges.push(oChange);
+					}
+				});
+				aChanges = aCurrentLayerChanges;
+			} else if (Utils.isLayerFilteringRequired() && !(mPropertyBag && mPropertyBag.ignoreMaxLayerParameter)) {
+				//If layer filtering required, excludes changes in higher layer than the max layer
+				var aFilteredChanges = [];
+				aChanges.forEach(function (oChange) {
+					if (!Utils.isOverMaxLayer(oChange.layer)) {
+						aFilteredChanges.push(oChange);
+					}
+				});
+				aChanges = aFilteredChanges;
+			}
+
+			var bIncludeVariants = mPropertyBag && mPropertyBag.includeVariants;
+
+			var aContextObjects = oWrappedChangeFileContent.changes.contexts || [];
+			return new Promise(function (resolve) {
+				ContextManager.getActiveContexts(aContextObjects).then(function (aActiveContexts) {
+					resolve(aChanges.filter(this._preconditionsFulfilled.bind(this, aActiveContexts, bIncludeVariants)).map(createChange));
+				}.bind(this));
+			}.bind(this));
+
+		}.bind(this));
+
+		function createChange(oChangeContent) {
+			var change = new Change(oChangeContent);
+			change.setState(Change.states.PERSISTED);
+			return change;
+		}
+	};
+
+	/**
+	 * @param {sap.ui.core.UIComponent} oComponent - component containing the control for which the change should be added
+	 * @param {sap.ui.fl.Change} oChange - change which should be added into the mapping
+	 * @see sap.ui.fl.Change
+	 * @returns {map} mChanges - map with added change
+	 * @private
+	 */
+	ChangePersistence.prototype._addChangeIntoMap = function (oComponent, oChange) {
+		var oSelector = oChange.getSelector();
+		if (oSelector && oSelector.id) {
+			var sSelectorId = oSelector.id;
+			if (oSelector.idIsLocal) {
+				sSelectorId = oComponent.createId(sSelectorId);
+			}
+
+			this._addMapEntry(sSelectorId, oChange);
+
+			// if the localId flag is missing and the selector has a component prefix that is not matching the
+			// application component, adds the change for a second time replacing the component ID prefix with
+			// the application component ID prefix
+			if (oSelector.idIsLocal === undefined && sSelectorId.indexOf("---") != -1) {
+				var sComponentPrefix = sSelectorId.split("---")[0];
+
+				if (sComponentPrefix !== oComponent.getId()) {
+					sSelectorId = sSelectorId.split("---")[1];
+					sSelectorId = oComponent.createId(sSelectorId);
+					this._addMapEntry(sSelectorId, oChange);
+				}
+			}
+		}
+
+		return this._mChanges;
+	};
+
+	/**
+	 *
+	 * @param {string} sSelectorId Key in the mapping for which the entry is written
+	 * @param {sap.ui.fl.Change} oChange Change object to be added to the mapping
+	 * @private
+	 */
+	ChangePersistence.prototype._addMapEntry = function (sSelectorId, oChange) {
+		if (!this._mChanges.mChanges[sSelectorId]) {
+			this._mChanges.mChanges[sSelectorId] = [];
+		}
+		this._mChanges.mChanges[sSelectorId].push(oChange);
+	};
+
+	ChangePersistence.prototype._addDependency = function (oDependentChange, oChange) {
+		if (!this._mChanges.mDependencies[oDependentChange.getKey()]) {
+			this._mChanges.mDependencies[oDependentChange.getKey()] = {
+				changeObject: oDependentChange,
+				dependencies: []
+			};
+		}
+		this._mChanges.mDependencies[oDependentChange.getKey()].dependencies.push(oChange.getKey());
+
+		if (!this._mChanges.mDependentChangesOnMe[oChange.getKey()]) {
+			this._mChanges.mDependentChangesOnMe[oChange.getKey()] = [];
+		}
+		this._mChanges.mDependentChangesOnMe[oChange.getKey()].push(oDependentChange.getKey());
+	};
+
+	ChangePersistence.prototype._addControlsDependencies = function (oDependentChange, aControlIdList) {
+		if (aControlIdList.length > 0) {
+			if (!this._mChanges.mDependencies[oDependentChange.getKey()]) {
+				this._mChanges.mDependencies[oDependentChange.getKey()] = {
+					changeObject: oDependentChange,
+					dependencies: [],
+					controlsDependencies: []
+				};
+			}
+			this._mChanges.mDependencies[oDependentChange.getKey()].controlsDependencies = aControlIdList;
+		}
+	};
+
+	/**
+	 * Calls the back end asynchronously and fetches all changes for the component
+	 * New changes (dirty state) that are not yet saved to the back end won't be returned.
+	 * @param {object} oComponent - Component instance used to prepare the IDs (e.g. local)
+	 * @param {map} mPropertyBag - Contains additional data needed for reading changes
+	 * @param {object} mPropertyBag.appDescriptor - Manifest belonging to actual component
+	 * @param {string} mPropertyBag.siteId - ID of the site belonging to actual component
+	 * @see sap.ui.fl.Change
+	 * @returns {Promise} Resolving with a getter for the changes map
+	 * @public
+	 */
+	ChangePersistence.prototype.loadChangesMapForComponent = function (oComponent, mPropertyBag) {
+
+		return this.getChangesForComponent(mPropertyBag).then(createChangeMap.bind(this));
+
+		function createChangeMap(aChanges) {
+			//Since starting RTA does not recreate ChangePersistence instance, resets changes map is required to filter personalized changes
+			this._mChanges = {
+				mChanges: {},
+				mDependencies: {},
+				mDependentChangesOnMe: {}
+			};
+			aChanges.forEach(this._addChangeAndUpdateDependencies.bind(this, oComponent));
+
+			return this.getChangesMapForComponent.bind(this);
+		}
+	};
+
+	ChangePersistence.prototype._addChangeAndUpdateDependencies = function(oComponent, oChange, iIndex, aChangesCopy) {
+		this._addChangeIntoMap(oComponent, oChange);
+
+		var oAppComponent = Utils.getAppComponentForControl(oComponent);
+
+		//create dependencies map
+		var aDependentIdList = oChange.getDependentIdList(oAppComponent);
+		var aDependentControlIdList = oChange.getDependentControlIdList(oAppComponent);
+		this._addControlsDependencies(oChange, aDependentControlIdList);
+		var oPreviousChange;
+		var aPreviousDependentIdList;
+		var iDependentIndex;
+		var bFound;
+
+		for (var i = iIndex - 1; i >= 0; i--) {//loop over the changes
+			oPreviousChange = aChangesCopy[i];
+			aPreviousDependentIdList = aChangesCopy[i].getDependentIdList(oAppComponent);
+			bFound = false;
+			for (var j = 0; j < aDependentIdList.length && !bFound; j++) {
+				iDependentIndex = aPreviousDependentIdList.indexOf(aDependentIdList[j]);
+				if (iDependentIndex > -1) {
+					this._addDependency(oChange, oPreviousChange);
+					bFound = true;
+				}
+			}
+		}
+
+	};
+
+	/**
+	 * Getter for the private aggregation containing sap.ui.fl.Change objects mapped by their selector ids.
+	 * @return {map} mChanges mapping with changes sorted by their selector ids
+	 * @public
+	 */
+	ChangePersistence.prototype.getChangesMapForComponent = function () {
+		return this._mChanges;
+	};
+
+	/**
+	 * Gets the changes for the given view id. The complete view prefix has to match.
+	 *
+	 * Example:
+	 * Change has selector id:
+	 * view1--view2--controlId
+	 *
+	 * Will match for view:
+	 * view1--view2
+	 *
+	 * Will not match for view:
+	 * view1
+	 * view1--view2--view3
+	 *
+	 * @param {string} sViewId - the id of the view, changes should be retrieved for
+	 * @param {map} mPropertyBag - contains additional data that are needed for reading of changes
+	 * @param {object} mPropertyBag.appDescriptor - Manifest that belongs to actual component
+	 * @param {string} mPropertyBag.siteId - id of the site that belongs to actual component
+	 * @returns {Promise} resolving with an array of changes
+	 * @public
+	 */
+	ChangePersistence.prototype.getChangesForView = function(sViewId, mPropertyBag) {
+		var that = this;
+		return this.getChangesForComponent(mPropertyBag).then(function(aChanges) {
+			return aChanges.filter(changesHavingCorrectViewPrefix.bind(that));
+		});
+
+		function changesHavingCorrectViewPrefix(oChange) {
+			var oSelector = oChange.getSelector();
+			if (!oSelector){
+				return false;
+			}
+			var sSelectorId = oSelector.id;
+			if (!sSelectorId || !mPropertyBag) {
+				return false;
+			}
+			var sSelectorIdViewPrefix = sSelectorId.slice(0, sSelectorId.lastIndexOf("--"));
+			var sViewId;
+
+			if (oChange.getSelector().idIsLocal) {
+				var oAppComponent = mPropertyBag.appComponent;
+				if (oAppComponent) {
+					sViewId = oAppComponent.getLocalId(mPropertyBag.viewId);
+				}
+			} else {
+				sViewId = mPropertyBag.viewId;
+			}
+
+			return sSelectorIdViewPrefix === sViewId;
+		}
+	};
+
+	/**
+	 * Adds a new change (could be variant as well) and returns the id of the new change.
+	 *
+	 * @param {object} vChange - The complete and finalized JSON object representation the file content of the change or a Change instance
+	 * @param {object} oComponent Component instance
+	 * @returns {sap.ui.fl.Change} the newly created change object
+	 * @public
+	 */
+	ChangePersistence.prototype.addChange = function(vChange, oComponent) {
+		var oNewChange;
+		if (vChange instanceof Change){
+			oNewChange = vChange;
+		}else {
+			oNewChange = new Change(vChange);
+		}
+		this._aDirtyChanges.push(oNewChange);
+		this._addChangeIntoMap(oComponent, oNewChange);
+		this._addPropagationListener(oComponent);
+
+
+		return oNewChange;
+	};
+
+	/**
+	 * If the first changes were created, the <code>propagationListener</code> of <code>sap.ui.fl</code> might not yet
+	 * be attached to the application component and must be added then.
+	 *
+	 * @param {sap.ui.core.UiComponent} oComponent Application component that might not have a propagation listener yet
+	 * @private
+	 */
+	ChangePersistence.prototype._addPropagationListener = function (oComponent) {
+		if (oComponent) {
+			var fnCheckIsNotFlPropagationListener = function (fnPropagationListener) {
+				return !fnPropagationListener._bIsSapUiFlFlexControllerApplyChangesOnControl;
+			};
+			var bNoFlPropagationListenerAttached = oComponent.getPropagationListeners().every(fnCheckIsNotFlPropagationListener);
+
+			if (bNoFlPropagationListenerAttached) {
+				var oManifest = oComponent.getManifest();
+				var sVersion = Utils.getAppVersionFromManifest(oManifest);
+				var oFlexController = sap.ui.fl.FlexControllerFactory.create(this.getComponentName(), sVersion);
+				var fnPropagationListener = oFlexController.getBoundApplyChangesOnControl(this.getChangesMapForComponent.bind(this), oComponent);
+				oComponent.addPropagationListener(fnPropagationListener);
+			}
+		}
+	};
+
+	/**
+	 * Saves all dirty changes by calling the appropriate back-end method (create for new changes, deleteChange for deleted changes);
+	 * to ensure the correct order, the methods are called sequentially;
+	 * after a change was saved successfully, it is removed from the dirty changes and the cache is updated.
+	 *
+	 * @returns {Promise} resolving after all changes have been saved
+	 */
+	ChangePersistence.prototype.saveDirtyChanges = function() {
+		var aDirtyChangesClone = this._aDirtyChanges.slice(0);
+		var aDirtyChanges = this._aDirtyChanges;
+		var aRequests = this._getRequests(aDirtyChangesClone);
+		var aPendingActions = this._getPendingActions(aDirtyChangesClone);
+
+		if (aPendingActions.length === 1 && aRequests.length === 1 && aPendingActions[0] === "NEW") {
+			var sRequest = aRequests[0];
+			var aPreparedDirtyChangesBulk = this._prepareDirtyChanges(aDirtyChanges);
+			return this._oConnector.create(aPreparedDirtyChangesBulk, sRequest).then(this._massUpdateCacheAndDirtyState(aDirtyChanges, aDirtyChangesClone));
+		} else {
+			return aDirtyChangesClone.reduce(function (sequence, oDirtyChange) {
+				var saveAction = sequence.then(this._performSingleSaveAction(oDirtyChange).bind(this));
+				saveAction.then(this._updateCacheAndDirtyState(aDirtyChanges, oDirtyChange));
+
+				return saveAction;
+			}.bind(this), Promise.resolve());
+		}
+	};
+
+	ChangePersistence.prototype._performSingleSaveAction = function (oDirtyChange) {
+		return function() {
+			if (oDirtyChange.getPendingAction() === "NEW") {
+				return this._oConnector.create(oDirtyChange.getDefinition(), oDirtyChange.getRequest());
+			}
+
+			if (oDirtyChange.getPendingAction() === "DELETE") {
+				return this._oConnector.deleteChange({
+					sChangeName: oDirtyChange.getId(),
+					sLayer: oDirtyChange.getLayer(),
+					sNamespace: oDirtyChange.getNamespace(),
+					sChangelist: oDirtyChange.getRequest()
+				});
+			}
+		};
+	};
+
+	ChangePersistence.prototype._updateCacheAndDirtyState = function (aDirtyChanges, oDirtyChange) {
+		var that = this;
+
+		return function() {
+			if (oDirtyChange.getPendingAction() === "NEW") {
+				Cache.addChange(that._mComponent, oDirtyChange.getDefinition());
+			}
+
+			if (oDirtyChange.getPendingAction() === "DELETE") {
+				Cache.deleteChange(that._mComponent, oDirtyChange.getDefinition());
+			}
+
+			var iIndex = aDirtyChanges.indexOf(oDirtyChange);
+			if (iIndex > -1) {
+				aDirtyChanges.splice(iIndex, 1);
+			}
+		};
+	};
+
+	ChangePersistence.prototype._massUpdateCacheAndDirtyState = function (aDirtyChanges, aDirtyChangesClone) {
+		var that = this;
+
+		jQuery.each(aDirtyChangesClone, function (index, oDirtyChange) {
+			that._updateCacheAndDirtyState(aDirtyChanges, oDirtyChange)();
+		});
+	};
+
+	ChangePersistence.prototype._getRequests = function (aDirtyChanges) {
+		var aRequests = [];
+
+		jQuery.each(aDirtyChanges, function (index, oChange) {
+			var sRequest = oChange.getRequest();
+			if (aRequests.indexOf(sRequest) === -1) {
+				aRequests.push(sRequest);
+			}
+		});
+
+		return aRequests;
+	};
+
+	ChangePersistence.prototype._getPendingActions = function (aDirtyChanges) {
+		var aPendingActions = [];
+
+		jQuery.each(aDirtyChanges, function (index, oChange) {
+			var sPendingAction = oChange.getPendingAction();
+			if (aPendingActions.indexOf(sPendingAction) === -1) {
+				aPendingActions.push(sPendingAction);
+			}
+		});
+
+		return aPendingActions;
+	};
+
+	ChangePersistence.prototype._prepareDirtyChanges = function (aDirtyChanges) {
+		var aChanges = [];
+
+		jQuery.each(aDirtyChanges, function (index, oChange) {
+			aChanges.push(oChange.getDefinition());
+		});
+
+		return aChanges;
+	};
+
+	ChangePersistence.prototype.getDirtyChanges = function() {
+		return this._aDirtyChanges;
+	};
+
+	/**
+	 * Prepares a change to be deleted with the next call to
+	 * @see {ChangePersistence#saveDirtyChanges};
+	 *
+	 * If the given change is already in the dirty changes and
+	 * has pending action 'NEW' it will be removed, assuming,
+	 * it has just been created in the current session;
+	 *
+	 * Otherwise it will be marked for deletion.
+	 *
+	 * @param {sap.ui.fl.Change} oChange - the change to be deleted
+	 */
+	ChangePersistence.prototype.deleteChange = function(oChange) {
+		var nIndexInDirtyChanges = this._aDirtyChanges.indexOf(oChange);
+
+		if (nIndexInDirtyChanges > -1) {
+			if (oChange.getPendingAction() === "DELETE"){
+				return;
+			}
+			this._aDirtyChanges.splice(nIndexInDirtyChanges, 1);
+			this._deleteChangeInMap(oChange);
+			return;
+		}
+
+		oChange.markForDeletion();
+		this._aDirtyChanges.push(oChange);
+		this._deleteChangeInMap(oChange);
+	};
+
+	/**
+	 * Deletes a change object from the internal map.
+	 *
+	 * @param {sap.ui.fl.Change} oChange which has to be removed from the mapping
+	 * @private
+	 */
+	ChangePersistence.prototype._deleteChangeInMap = function (oChange) {
+		var sChangeKey = oChange.getKey();
+		var mChanges = this._mChanges.mChanges;
+		var mDependencies = this._mChanges.mDependencies;
+		var mDependentChangesOnMe = this._mChanges.mDependentChangesOnMe;
+
+		//mChanges
+		Object.keys(mChanges).some(function (key) {
+			var aChanges = mChanges[key];
+			var nIndexInMapElement = aChanges
+				.map(function(oExistingChange){
+					return oExistingChange.getKey();
+				}).indexOf(oChange.getKey());
+			if (nIndexInMapElement !== -1) {
+				aChanges.splice(nIndexInMapElement, 1);
+				return true;
+			}
+		});
+
+		//mDependencies
+		Object.keys(mDependencies).forEach( function(key) {
+			if (key === sChangeKey) {
+				delete mDependencies[key];
+			} else if ( mDependencies[key].dependencies
+				&& jQuery.isArray(mDependencies[key].dependencies)
+				&& mDependencies[key].dependencies.indexOf(sChangeKey) !== -1 ) {
+				mDependencies[key].dependencies.splice(mDependencies[key].dependencies.indexOf(sChangeKey), 1);
+				if (mDependencies[key].dependencies.length === 0) {
+					delete mDependencies[key];
+				}
+			}
+		});
+
+		//mDependentChangesOnMe
+		Object.keys(mDependentChangesOnMe).forEach( function(key) {
+			if (key === sChangeKey) {
+				delete mDependentChangesOnMe[key];
+			} else if ( jQuery.isArray(mDependentChangesOnMe[key])
+				&& mDependentChangesOnMe[key].indexOf(sChangeKey) !== -1 ) {
+				mDependentChangesOnMe[key].splice(mDependentChangesOnMe[key].indexOf(sChangeKey), 1);
+				if (mDependentChangesOnMe[key].length === 0) {
+					delete mDependentChangesOnMe[key];
+				}
+			}
+		});
+	};
+
+	/**
+	 * TODO!!!
+	 *
+	 * @param {sap.ui.fl.Change} oChange - the change to be deleted
+	 */
+	ChangePersistence.prototype.loadSwitchChangesMapForComponent = function(sVariantManagementId, sCurrentVariant, sNewVariant) {
+		return this._oVariantController.getChangesForVariantSwitch(sVariantManagementId, sCurrentVariant, sNewVariant, this._mChanges.mChanges);
+	};
+
+	return ChangePersistence;
+}, true);
+
+}; // end of sap/ui/fl/ChangePersistence.js
+if ( !jQuery.sap.isDeclared('sap.ui.fl.ChangePersistenceFactory') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+jQuery.sap.declare('sap.ui.fl.ChangePersistenceFactory'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.core.Component'); // unlisted dependency retained
+sap.ui.define("sap/ui/fl/ChangePersistenceFactory",[
+	"jquery.sap.global", "sap/ui/core/Component", "sap/ui/fl/ChangePersistence", "sap/ui/fl/Utils"
+], function(jQuery, Component, ChangePersistence, Utils) {
+	"use strict";
+
+	/**
+	 * Factory to get or create a new instances of {sap.ui.fl.ChangePersistence}
+	 * @constructor
+	 * @alias sap.ui.fl.ChangePersistenceFactory
+	 * @experimental Since 1.27.0
+	 * @author SAP SE
+	 * @version 1.50.6
+	 */
+	var ChangePersistenceFactory = {};
+
+	ChangePersistenceFactory._instanceCache = {};
+
+	/**
+	 * Creates or returns an instance of the ChangePersistence
+	 * @param {String} sComponentName - Name of the component
+	 * @param {String} sAppVersion - Current running version of application
+	 * @returns {sap.ui.fl.ChangePersistence} <code>ChangePersistence</code> instance
+	 *
+	 * @public
+	 */
+	ChangePersistenceFactory.getChangePersistenceForComponent = function(sComponentName, sAppVersion) {
+		var oChangePersistence;
+		sAppVersion = sAppVersion || Utils.DEFAULT_APP_VERSION;
+
+		if (!ChangePersistenceFactory._instanceCache[sComponentName]) {
+			ChangePersistenceFactory._instanceCache[sComponentName] = {};
+		}
+		oChangePersistence = ChangePersistenceFactory._instanceCache[sComponentName][sAppVersion];
+		if (!oChangePersistence) {
+			var oComponent = {
+				name : sComponentName,
+				appVersion : sAppVersion
+			};
+			oChangePersistence = new ChangePersistence(oComponent);
+			ChangePersistenceFactory._instanceCache[sComponentName][sAppVersion] = oChangePersistence;
+		}
+
+		return oChangePersistence;
+	};
+
+	/**
+	 * Creates or returns an instance of the ChangePersistence for the component of the specified control.
+	 * The control needs to be embedded into a component.
+	 * @param {sap.ui.core.Control} oControl The control for example a SmartField, SmartGroup or View
+	 * @returns {sap.ui.fl.ChangePersistence} instance
+	 *
+	 * @public
+	 */
+	ChangePersistenceFactory.getChangePersistenceForControl = function(oControl) {
+		var sComponentId;
+		sComponentId = this._getComponentClassNameForControl(oControl);
+		var sAppVersion = Utils.getAppVersionFromManifest(Utils.getAppComponentForControl(oControl).getManifest());
+		return ChangePersistenceFactory.getChangePersistenceForComponent(sComponentId, sAppVersion);
+	};
+
+	/**
+	 * Returns the name of the component of the control
+	 * @param {sap.ui.core.Control} oControl Control
+	 * @returns {String} The name of the component. Undefined if no component was found
+	 *
+	 * @private
+	 */
+	ChangePersistenceFactory._getComponentClassNameForControl = function(oControl) {
+		return Utils.getComponentClassName(oControl);
+	};
+
+	/**
+	 * Registers the ChangePersistenceFactory._onLoadComponent to the Component loading functionality
+	 *
+	 * @since 1.38
+	 * @private
+	 */
+	ChangePersistenceFactory.registerLoadComponentEventHandler = function () {
+		Component._fnLoadComponentCallback = this._onLoadComponent.bind(this);
+	};
+
+	/**
+	 * Processing of the load component, shared by _onLoadComponent and _getChangesForComponentAfterInstantiation.
+	 *
+	 * @param {object} oConfig - copy of the configuration of loaded component
+	 * @param {object} oConfig.asyncHints - async hints passed from the app index to the core Component processing
+	 * @param {object} oManifest - Manifest of the component
+	 * @returns {object} Wrapper for oChangePersistence and oRequestOptions
+	 * @since 1.43
+	 * @private
+	 */
+	ChangePersistenceFactory._doLoadComponent = function (oConfig, oManifest) {
+		var oChangePersistenceWrapper = {oChangePersistence: {}, oRequestOptions: {}};
+		var sComponentName = Utils.getFlexReference(oManifest);
+		var sAppVersion = Utils.getAppVersionFromManifest(oManifest);
+		var sMaxLayer, oStartupParameters, oTechnicalParameters;
+
+		oStartupParameters = oConfig && oConfig.componentData && oConfig.componentData.startupParameters || {};
+		oTechnicalParameters = oConfig && oConfig.componentData && oConfig.componentData.technicalParameters;
+
+		if (oStartupParameters["sap-app-id"] && oStartupParameters["sap-app-id"].length === 1) {
+			// deprecated app variant id support with no caching
+			sComponentName = oStartupParameters["sap-app-id"][0];
+		} else {
+			if (oConfig) {
+				var aAsyncHints = oConfig.asyncHints;
+				if (aAsyncHints && aAsyncHints.requests && Array.isArray(aAsyncHints.requests)) {
+					var oFlAsyncHint = this._findFlAsyncHint(aAsyncHints.requests, sComponentName);
+					if (oFlAsyncHint) {
+						oChangePersistenceWrapper.oRequestOptions.cacheKey = oFlAsyncHint.cachebusterToken || "<NO CHANGES>";
+						oChangePersistenceWrapper.oRequestOptions.url = oFlAsyncHint.url;
+					}
+				}
+			}
+		}
+		//Checks technicalParameters/startup (old) parameter for sap-ui-fl-max-layer value
+		var oMaxLayerParameters = oTechnicalParameters || oStartupParameters;
+		if (oMaxLayerParameters && oMaxLayerParameters["sap-ui-fl-max-layer"] && oMaxLayerParameters["sap-ui-fl-max-layer"].length === 1) {
+			sMaxLayer = oMaxLayerParameters["sap-ui-fl-max-layer"][0];
+		}
+		Utils.setMaxLayerParameter(sMaxLayer);
+
+		oChangePersistenceWrapper.oRequestOptions.siteId = Utils.getSiteIdByComponentData(oConfig.componentData);
+		oChangePersistenceWrapper.oChangePersistence = this.getChangePersistenceForComponent(sComponentName, sAppVersion);
+
+		return oChangePersistenceWrapper;
+	};
+
+	/**
+	 * Callback which is called within the early state of Component processing.
+	 * Already triggers the loading of the flexibility changes if the loaded manifest is an application variant.
+	 *
+	 * @param {object} oConfig - copy of the configuration of loaded component
+	 * @param {object} oConfig.asyncHints - async hints passed from the app index to the core Component processing
+	 * @param {object} oManifest - copy of the manifest of loaded component
+	 * @param {object} oManifest."sap.app"
+	 * @param {string} oManifest."sap.app".type - type of the component (i.e. "application").
+	 * The processing is only done for components of the type "application"
+	 * @since 1.38
+	 * @private
+	 */
+	ChangePersistenceFactory._onLoadComponent = function (oConfig, oManifest) {
+
+		// stop processing if the component is not of the type application
+		if (!Utils.isApplication(oManifest)) {
+			return;
+		}
+
+		var oChangePersistenceWrapper = this._doLoadComponent(oConfig, oManifest);
+
+		oChangePersistenceWrapper.oChangePersistence.getChangesForComponent(oChangePersistenceWrapper.oRequestOptions);
+	};
+
+	/**
+	 * Callback which is called within the early state of Component instantiation.
+	 *
+	 * @param {object} oConfig - copy of the configuration of loaded component
+	 * @param {object} oConfig.asyncHints - async hints passed from the app index to the core Component processing
+	 * @param {object} oManifest - copy of the manifest of loaded component
+	 * @param {object} oManifest."sap.app"
+	 * @param {string} oManifest."sap.app".type - type of the component (i.e. "application").
+	 * @param {object} oComponent Component instance
+	 * The processing is only done for components of the type "application"
+	 * @returns {Promise} Promise resolving after the changes are loaded with a getter to retrieve the mapped changes.
+	 * @since 1.43
+	 * @private
+	 */
+	ChangePersistenceFactory._getChangesForComponentAfterInstantiation = function (oConfig, oManifest, oComponent) {
+
+		// stop processing if the component is not of the type application
+		if (!Utils.isApplication(oManifest)) {
+			return Promise.resolve(function() {
+				return {
+					mChanges: {},
+					mDependencies: {},
+					mDependentChangesOnMe: {}
+				};
+			});
+		}
+
+		var oChangePersistenceWrapper = this._doLoadComponent(oConfig, oManifest);
+
+		return oChangePersistenceWrapper.oChangePersistence.loadChangesMapForComponent(oComponent, oChangePersistenceWrapper.oRequestOptions);
+	};
+
+	ChangePersistenceFactory._findFlAsyncHint = function (oAsyncHintRequest, sReference) {
+		var that = this;
+		var oFlAsyncHint;
+
+		jQuery.each(oAsyncHintRequest, function (nIndex, oAsyncHint) {
+			if (that._flAsyncHintMatches(oAsyncHint, sReference)) {
+				oFlAsyncHint = oAsyncHint;
+				return false; // break forEach
+			}
+		});
+
+		return oFlAsyncHint;
+	};
+
+	ChangePersistenceFactory._flAsyncHintMatches = function (oAsyncHintRequest, sReference) {
+		return oAsyncHintRequest.name === "sap.ui.fl.changes" && oAsyncHintRequest.reference === sReference;
+	};
+
+	return ChangePersistenceFactory;
+}, true);
+
+}; // end of sap/ui/fl/ChangePersistenceFactory.js
+if ( !jQuery.sap.isDeclared('sap.ui.fl.FakeLrepConnector') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+jQuery.sap.declare('sap.ui.fl.FakeLrepConnector'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.thirdparty.URI'); // unlisted dependency retained
+sap.ui.define("sap/ui/fl/FakeLrepConnector",[
+	"jquery.sap.global", "sap/ui/thirdparty/URI", "sap/ui/fl/Utils", "sap/ui/fl/LrepConnector", "sap/ui/fl/Cache", "sap/ui/fl/ChangePersistenceFactory"
+], function(jQuery, uri, FlexUtils, LrepConnector, Cache, ChangePersistenceFactory) {
+	"use strict";
+	var oLrepConnector = Object.create(LrepConnector.prototype);
+	FakeLrepConnector._oBackendInstances = {};
+
+	/**
+	 * Please use the {@link FakeLrepConnector#enableFakeConnector} function
+	 * to enable the FakeLrepConnector.
+	 *
+	 * Provides a fake implementation for the sap.ui.fl.LrepConnector
+	 * @param {String} sInitialComponentJsonPath - the relative path to a test-component-changes.json file
+	 *
+	 * @constructor
+	 * @alias sap.ui.fl.FakeLrepConnector
+	 * @experimental Since 1.27.0
+	 * @author SAP SE
+	 * @version 1.50.6
+	 */
+	function FakeLrepConnector(sInitialComponentJsonPath){
+		this.sInitialComponentJsonPath = sInitialComponentJsonPath;
+	}
+
+	for (var prop in oLrepConnector){
+		if (typeof oLrepConnector[prop] === 'function'){
+			/*eslint-disable noinspection, no-loop-func */
+			FakeLrepConnector.prototype[prop] = (function(prop){
+				return function() {
+					throw new Error('Method ' + prop + '() is not implemented in FakeLrepConnector.');
+				};
+			}(prop));
+			/*eslint-enable noinspection, no-loop-func */
+		}
+	}
+
+	FakeLrepConnector.prototype.loadChanges = function(sComponentClassName){
+		var initialComponentJsonPath = this.sInitialComponentJsonPath;
+
+		return new Promise(function(resolve, reject){
+			jQuery.getJSON(initialComponentJsonPath).done(function(oResponse){
+				var result = {
+					changes: oResponse,
+					componentClassName: sComponentClassName
+				};
+
+				resolve(result);
+			}).fail(function(error){
+				reject(error);
+			});
+		});
+	};
+
+	FakeLrepConnector.prototype.create = function(payload, changeList, isVariant){
+		// REVISE ensure old behavior for now, but check again for changes
+		if (!isVariant){
+			return Promise.resolve();
+		}
+
+		if (!payload.creation){
+			payload.creation = new Date().toISOString();
+		}
+
+		return Promise.resolve({
+			response: payload,
+			status: 'success'
+		});
+	};
+
+	FakeLrepConnector.prototype.update = function(payload, changeName, changelist, isVariant) {
+		// REVISE ensure old behavior for now, but check again for changes
+		if (!isVariant){
+			return Promise.resolve();
+		}
+
+		return Promise.resolve({
+			response: payload,
+			status: 'success'
+		});
+	};
+
+	FakeLrepConnector.prototype.deleteChange = function(params, isVariant){
+		// REVISE ensure old behavior for now, but check again for changes
+		if (!isVariant){
+			return Promise.resolve();
+		}
+
+		return Promise.resolve({
+			response: undefined,
+			status: 'nocontent'
+		});
+	};
+
+	FakeLrepConnector.prototype.send = function(sUri, sMethod, oData, mOptions){
+		return new Promise(function(resolve, reject){
+			handleGetTransports(sUri, sMethod, oData, mOptions, resolve, reject);
+			handleMakeChangesTransportable(sUri, sMethod, oData, mOptions, resolve, reject);
+		});
+	};
+
+	function handleMakeChangesTransportable(sUri, sMethod, oData, mOptions, resolve){
+		if (sUri.match(/^\/sap\/bc\/lrep\/actions\/make_changes_transportable\//) && sMethod === 'POST'){
+			resolve();
+		}
+	}
+
+	//REVISE Make response configurable
+	function handleGetTransports(sUri, sMethod, oData, mOptions, resolve, reject){
+		if (sUri.match(/^\/sap\/bc\/lrep\/actions\/gettransports\//)){
+			resolve({
+				response: {
+					"transports": [
+						{
+							"transportId": "U31K008488",
+							"description": "The Ultimate Transport",
+							"owner": "Fantasy Owner",
+							"locked": false
+						}
+					],
+					"localonly": false,
+					"errorCode": ""
+				}
+			});
+		}
+	}
+
+	/**
+	 * Enables fake LRep connector.
+	 *
+	 * Hooks into the {@link sap.ui.fl.LrepConnector.createConnector} factory function to enable the fake LRep connector.
+	 * If the <code>sAppComponentName</code> is provided, replaces the connector instance of corresponding {@link sap.ui.fl.ChangePersistence} by a fake one.
+	 * After enabling fake LRep connector, function {@link sap.ui.fl.FakeLrepConnector.disableFakeConnector} must be called to restore the original connector.
+	 *
+	 * @param {string} sInitialComponentJsonPath - Relative path to a test-component-changes.json file
+	 * @param {string} [sAppComponentName] - Name of application component to overwrite the existing LRep connector
+	 * @param {string} [sAppVersion] - Version of application to overwrite the existing LRep connector
+	 */
+	FakeLrepConnector.enableFakeConnector = function(sInitialComponentJsonPath, sAppComponentName, sAppVersion){
+
+		function replaceConnectorFactory() {
+			FakeLrepConnector.enableFakeConnector.original = LrepConnector.createConnector;
+			LrepConnector.createConnector = function(){
+				if (!FakeLrepConnector._oFakeInstance){
+					FakeLrepConnector._oFakeInstance = new FakeLrepConnector(sInitialComponentJsonPath);
+				}
+				return FakeLrepConnector._oFakeInstance;
+			};
+		}
+
+		if (sAppComponentName && sAppVersion) {
+			var oChangePersistence = ChangePersistenceFactory.getChangePersistenceForComponent(sAppComponentName, sAppVersion);
+			if (!(oChangePersistence._oConnector instanceof FakeLrepConnector)){
+				Cache.clearEntry(sAppComponentName, sAppVersion);
+				if (!FakeLrepConnector._oBackendInstances[sAppComponentName]){
+					FakeLrepConnector._oBackendInstances[sAppComponentName] = {};
+				}
+				FakeLrepConnector._oBackendInstances[sAppComponentName][sAppVersion] = oChangePersistence._oConnector;
+				oChangePersistence._oConnector = new FakeLrepConnector(sInitialComponentJsonPath);
+			}
+			replaceConnectorFactory();
+			return;
+		}
+
+		Cache.clearEntries();
+
+		if (FakeLrepConnector.enableFakeConnector.original){
+			return;
+		}
+		replaceConnectorFactory();
+	};
+
+	/**
+	 * Restores the original {@link sap.ui.fl.LrepConnector.createConnector} factory function.
+	 * If the <code>sAppComponentName</code> is provided, restores the connector instance of corresponding {@link sap.ui.fl.ChangePersistence} by the original one.
+	 *
+	 * @param {string} [sAppComponentName] - Name of application component to restore the original LRep connector
+	 * @param {string} [sAppVersion] - Version of application to restore the original LRep connector
+	 */
+	FakeLrepConnector.disableFakeConnector = function(sAppComponentName, sAppVersion){
+
+		function restoreConnectorFactory() {
+			if (FakeLrepConnector.enableFakeConnector.original){
+				LrepConnector.createConnector = FakeLrepConnector.enableFakeConnector.original;
+				FakeLrepConnector.enableFakeConnector.original = undefined;
+				FakeLrepConnector._oFakeInstance = undefined;
+			}
+		}
+
+		if (sAppComponentName && sAppVersion) {
+			var oChangePersistence = ChangePersistenceFactory.getChangePersistenceForComponent(sAppComponentName, sAppVersion);
+			if (!(oChangePersistence._oConnector instanceof LrepConnector)) {
+				Cache.clearEntry(sAppComponentName, sAppVersion);
+				if (FakeLrepConnector._oBackendInstances[sAppComponentName] && FakeLrepConnector._oBackendInstances[sAppComponentName][sAppVersion]) {
+					oChangePersistence._oConnector = FakeLrepConnector._oBackendInstances[sAppComponentName][sAppVersion];
+					FakeLrepConnector._oBackendInstances[sAppComponentName][sAppVersion] = undefined;
+				}
+			}
+			restoreConnectorFactory();
+			return;
+		}
+
+		Cache.clearEntries();
+		restoreConnectorFactory();
+	};
+
+	return FakeLrepConnector;
+
+}, true);
+
+}; // end of sap/ui/fl/FakeLrepConnector.js
+if ( !jQuery.sap.isDeclared('sap.ui.fl.FakeLrepConnectorLocalStorage') ) {
+/*
+ * ! UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+jQuery.sap.declare('sap.ui.fl.FakeLrepConnectorLocalStorage'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+sap.ui.define("sap/ui/fl/FakeLrepConnectorLocalStorage",[
+	"sap/ui/fl/FakeLrepLocalStorage",
+	"sap/ui/fl/FakeLrepConnector",
+	"sap/ui/fl/LrepConnector",
+	"sap/ui/fl/Cache",
+	"sap/ui/fl/ChangePersistenceFactory"
+	], function(
+	FakeLrepLocalStorage, FakeLrepConnector, LrepConnector, Cache, ChangePersistenceFactory) {
+	"use strict";
+
+	FakeLrepConnectorLocalStorage._oBackendInstances = {};
+
+	/**
+	 * Class for connecting to Fake LREP storing changes in localStorage
+	 *
+	 * @class
+	 *
+	 * @author SAP SE
+	 * @version 1.50.6
+	 *
+	 * @private
+	 * @static
+	 * @since 1.48
+	 * @alias sap.ui.fl.FakeLrepConnectorLocalStorage
+	 */
+	function FakeLrepConnectorLocalStorage(mSettings){
+		this.mSettings = jQuery.extend({
+			"isKeyUser": true,
+			"isAtoAvailable": false,
+			"isProductiveSystem": false
+		}, mSettings);
+	}
+
+	jQuery.extend(FakeLrepConnectorLocalStorage.prototype, FakeLrepConnector.prototype);
+
+	/**
+	 * Creates a Fake Lrep change in localStorage
+	 * @param  {Object|Array} vChangeDefinitions - single or multiple changeDefinitions
+	 * @returns {Promise} Returns a promise to the result of the request
+	 */
+	FakeLrepConnectorLocalStorage.prototype.create = function(vChangeDefinitions) {
+		var response;
+		if (Array.isArray(vChangeDefinitions)) {
+			response = vChangeDefinitions.map(function(mChangeDefinition) {
+				return this._saveChange(mChangeDefinition);
+			}.bind(this));
+		} else {
+			response = this._saveChange(vChangeDefinitions);
+		}
+
+		return Promise.resolve({
+			response: response,
+			status: 'success'
+		});
+	};
+
+	FakeLrepConnectorLocalStorage.prototype._saveChange = function(mChangeDefinition) {
+		if (!mChangeDefinition.creation){
+			mChangeDefinition.creation = new Date().toISOString();
+		}
+		FakeLrepLocalStorage.saveChange(mChangeDefinition.fileName, mChangeDefinition);
+		return mChangeDefinition;
+	};
+
+
+	FakeLrepConnectorLocalStorage.prototype.update = function(mChangeDefinition, sChangeName, aChangelist, bIsVariant) {
+		return Promise.resolve({
+			response: this._saveChange(mChangeDefinition),
+			status: 'success'
+		});
+	};
+
+	/**
+	 * Deletes a Fake Lrep change in localStorage
+	 * @param  {Object} oChange - The change object
+	 * @param  {Object} oChange.sChangeName - File name of the change object
+	 * @returns {Promise} Returns a promise to the result of the request
+	 */
+	FakeLrepConnectorLocalStorage.prototype.deleteChange = function(oChange) {
+
+		FakeLrepLocalStorage.deleteChange(oChange.sChangeName);
+
+		return Promise.resolve({
+			response: undefined,
+			status: "nocontent"
+		});
+	};
+
+	/**
+	 * Deletes all Fake Lrep changes in localStorage
+	 * @returns {Promise} Returns a promise to the result of the request
+	 */
+	FakeLrepConnectorLocalStorage.prototype.deleteChanges = function() {
+
+		FakeLrepLocalStorage.deleteChanges();
+
+		return Promise.resolve({
+			response: undefined,
+			status: "nocontent"
+		});
+	};
+
+	/**
+	 * Loads the changes for the given Component class name
+	 * from the FakeLrepLocalStorage
+	 * and also loads the mandatory FakeLrepConnector.json file.
+	 * The settings are take from the JSON file, but changes are replaced with
+	 * the changes from the local storage.
+	 *
+	 * @param {String} sComponentClassName - Component class name
+	 * @returns {Promise} Returns a Promise with the changes and componentClassName
+	 * @public
+	 */
+	FakeLrepConnectorLocalStorage.prototype.loadChanges = function(sComponentClassName) {
+
+		var aChanges = FakeLrepLocalStorage.getChanges();
+
+		return new Promise(function(resolve, reject){
+			var result = {
+				changes: {
+					changes : aChanges,
+					contexts : [],
+					settings : this.mSettings
+				},
+				componentClassName: sComponentClassName
+			};
+			resolve(result);
+		}.bind(this));
+
+	};
+
+
+	/**
+	 * Loads the settings.
+	 * The settings is actually an empty object and is required for mocking the customer/vendor based process.
+	 *
+	 * @returns {Promise} Returns a Promise with an empty object as current settings
+	 * @public
+	 */
+	FakeLrepConnectorLocalStorage.prototype.loadSettings = function() {
+
+		return new Promise(function(resolve, reject){
+			var oSettings = {};
+			resolve(oSettings);
+		});
+
+	};
+
+	/**
+	 * Enables fake LRep connector.
+	 *
+	 * Hooks into the {@link sap.ui.fl.LrepConnector.createConnector} factory function to enable the fake LRep connector.
+	 * If the <code>sAppComponentName</code> is provided, replaces the connector instance of corresponding {@link sap.ui.fl.ChangePersistence} by a fake one.
+	 * After enabling fake LRep connector, function {@link sap.ui.fl.FakeLrepConnectorLocalStorage.disableFakeConnector} must be called to restore the original connector.
+	 *
+	 * @param {object} [mSettings] - map of FakeLrepConnector settings
+	 * @param {string} [sAppComponentName] - Name of application component to overwrite the existing LRep connector
+	 * @param {string} [sAppVersion] - Version of application to overwrite the existing LRep connector
+	 */
+	FakeLrepConnectorLocalStorage.enableFakeConnector = function(mSettings, sAppComponentName, sAppVersion){
+		mSettings = mSettings || {};
+
+		function replaceConnectorFactory() {
+			FakeLrepConnectorLocalStorage.enableFakeConnector.original = LrepConnector.createConnector;
+			LrepConnector.createConnector = function() {
+				if (!FakeLrepConnectorLocalStorage._oFakeInstance){
+					FakeLrepConnectorLocalStorage._oFakeInstance = new FakeLrepConnectorLocalStorage(mSettings);
+				}
+				return FakeLrepConnectorLocalStorage._oFakeInstance;
+			};
+		}
+
+		if (sAppComponentName && sAppVersion) {
+			var oChangePersistence = ChangePersistenceFactory.getChangePersistenceForComponent(sAppComponentName, sAppVersion);
+			if (!(oChangePersistence._oConnector instanceof FakeLrepConnectorLocalStorage)) {
+				Cache.clearEntry(sAppComponentName, sAppVersion);
+				if (!FakeLrepConnectorLocalStorage._oBackendInstances[sAppComponentName]){
+					FakeLrepConnectorLocalStorage._oBackendInstances[sAppComponentName] = {};
+				}
+				FakeLrepConnectorLocalStorage._oBackendInstances[sAppComponentName][sAppVersion] = oChangePersistence._oConnector;
+				oChangePersistence._oConnector = new FakeLrepConnectorLocalStorage(mSettings);
+			}
+			replaceConnectorFactory();
+			return;
+		}
+
+		Cache.clearEntries();
+
+		if (FakeLrepConnectorLocalStorage.enableFakeConnector.original){
+			return;
+		}
+		replaceConnectorFactory();
+	};
+
+	/**
+	 * Restores the original {@link sap.ui.fl.LrepConnector.createConnector} factory function.
+	 * If the <code>sAppComponentName</code> is provided, restores the connector instance of corresponding {@link sap.ui.fl.ChangePersistence} by the original one.
+	 *
+	 * @param {string} [sAppComponentName] - Name of application component to restore the original LRep connector
+	 * @param {string} [sAppVersion] - Version of application to restore the original LRep connector
+	 */
+	FakeLrepConnectorLocalStorage.disableFakeConnector = function(sAppComponentName, sAppVersion){
+
+		function restoreConnectorFactory() {
+			if (FakeLrepConnectorLocalStorage.enableFakeConnector.original){
+				LrepConnector.createConnector = FakeLrepConnectorLocalStorage.enableFakeConnector.original;
+				FakeLrepConnectorLocalStorage.enableFakeConnector.original = undefined;
+				FakeLrepConnectorLocalStorage._oFakeInstance = undefined;
+			}
+		}
+
+		if (sAppComponentName && sAppVersion) {
+			var oChangePersistence = ChangePersistenceFactory.getChangePersistenceForComponent(sAppComponentName, sAppVersion);
+			if (!(oChangePersistence._oConnector instanceof LrepConnector)){
+				Cache.clearEntry(sAppComponentName, sAppVersion);
+				if (FakeLrepConnectorLocalStorage._oBackendInstances[sAppComponentName] && FakeLrepConnectorLocalStorage._oBackendInstances[sAppComponentName][sAppVersion]) {
+					oChangePersistence._oConnector = FakeLrepConnectorLocalStorage._oBackendInstances[sAppComponentName][sAppVersion];
+					FakeLrepConnectorLocalStorage._oBackendInstances[sAppComponentName][sAppVersion] = undefined;
+				}
+			}
+			restoreConnectorFactory();
+			return;
+		}
+
+		Cache.clearEntries();
+		restoreConnectorFactory();
+	};
+
+	return FakeLrepConnectorLocalStorage;
+
+}, /* bExport= */ true);
+}; // end of sap/ui/fl/FakeLrepConnectorLocalStorage.js
 if ( !jQuery.sap.isDeclared('sap.ui.fl.Persistence') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -10936,7 +13795,7 @@ sap.ui.define("sap/ui/fl/Persistence",[
 	 * @param {string} [sStableIdPropertyName='id'] the stable id
 	 * @alias sap.ui.fl.Persistence
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.25.0
 	 */
 	var Persistence = function(oControl, sStableIdPropertyName) {
@@ -11162,6 +14021,7 @@ sap.ui.define("sap/ui/fl/Persistence",[
 			if (bNoFilter === true && oChangeContent.fileType === 'change' || that._sStableId === value) {
 				oChange = new Change(oChangeContent);
 				oChange.attachEvent(Change.events.markForDeletion, that._onDeleteChange.bind(that));
+				oChange.setState(Change.states.PERSISTED);
 				sChangeId = oChange.getId();
 				if (oChange.isValid()) {
 					if (that._oChanges[sChangeId] && oChange.isVariant()) {
@@ -11642,7 +14502,7 @@ sap.ui.define("sap/ui/fl/core/EventDelegate",[
 	 * @alias sap.ui.fl.core.EventDelegate
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.27.0
 	 * @private
 	 *
@@ -11718,7 +14578,7 @@ sap.ui.define("sap/ui/fl/core/EventDelegate",[
 
 	/**
 	 * Function which is called on mouse-over on the registered control to trigger the flexibility framework
-	 * @param {sap.ui.core.Event} oEvent Event parameters
+	 * @param {jQuery.Event} oEvent Event parameters
 	 *
 	 * @public
 	 */
@@ -11742,7 +14602,7 @@ sap.ui.define("sap/ui/fl/core/EventDelegate",[
 
 	/**
 	 * Function which is called on mouse-out on the registered control to notify that the control is not in scope anymore for flexibility
-	 * @param {sap.ui.core.Event} oEvent Event parameters
+	 * @param {jQuery.Event} oEvent Event parameters
 	 *
 	 * @public
 	 */
@@ -11759,6 +14619,251 @@ sap.ui.define("sap/ui/fl/core/EventDelegate",[
 }, true);
 
 }; // end of sap/ui/fl/core/EventDelegate.js
+if ( !jQuery.sap.isDeclared('sap.ui.fl.descriptorRelated.api.DescriptorChangeFactory') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+jQuery.sap.declare('sap.ui.fl.descriptorRelated.api.DescriptorChangeFactory'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorChangeFactory",[
+	"sap/ui/fl/ChangePersistenceFactory",
+	"sap/ui/fl/ChangePersistence",
+	"sap/ui/fl/Change",
+	"sap/ui/fl/descriptorRelated/internal/Utils",
+	"sap/ui/fl/registry/Settings",
+	"sap/ui/fl/Utils"
+], function(ChangePersistenceFactory, ChangePersistence, Change, Utils, Settings, FlexUtils) {
+	"use strict";
+
+	/**
+	 * Descriptor Related
+	 * @namespace
+	 * @name sap.ui.fl.descriptorRelated
+	 * @author SAP SE
+	 * @version 1.50.6
+	 * @private
+	 * @sap-restricted
+	 */
+
+	/**
+	 * Descriptor Related Apis
+	 * @namespace
+	 * @name sap.ui.fl.descriptorRelated.api
+	 * @author SAP SE
+	 * @version 1.50.6
+	 * @private
+	 * @sap-restricted
+	 */
+
+	/**
+	 * Descriptor Change
+	 *
+	 * @param {object} mChangeFile change file
+	 * @param {sap.ui.fl.descriptorRelated.api.DescriptorInlineChange} oInlineChange inline change object
+	 * @param {sap.ui.fl.registry.Settings} oSettings settings
+	 *
+	 * @constructor
+	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorChange
+	 * @author SAP SE
+	 * @version 1.50.6
+	 * @private
+	 * @sap-restricted
+	 */
+	var DescriptorChange = function(mChangeFile,oInlineChange,oSettings) { //so far, parameter correspond to inline change format
+		this._mChangeFile = mChangeFile;
+		this._mChangeFile.packageName = '$TMP';
+		this._oInlineChange = oInlineChange;
+		this._sTransportRequest = null;
+		this._oSettings = oSettings;
+	};
+
+	/**
+	 * Set transport request (for ABAP Backend)
+	 *
+	 * @param {string} sTransportRequest transport request
+	 *
+	 * @return {Promise} resolving when setting of transport request was successful
+	 *
+	 * @private
+	 * @sap-restricted
+	 */
+	DescriptorChange.prototype.setTransportRequest = function(sTransportRequest) {
+		try {
+			//partial check: length le 20, alphanumeric, upper case, no space not underscore - data element in ABAP: TRKORR, CHAR20
+			Utils.checkTransportRequest(sTransportRequest);
+		} catch (oError) {
+			return Promise.reject(oError);
+		}
+
+		this._sTransportRequest = sTransportRequest;
+		return Promise.resolve();
+	};
+
+	/**
+	 * Set package (for ABAP Backend)
+	 *
+	 * @param {string} sPackage package
+	 *
+	 * @return {Promise} resolving when setting of package was successful
+	 *
+	 * @private
+	 * @sap-restricted
+	 */
+	DescriptorChange.prototype.setPackage = function(sPackage) {
+		try {
+			//partial check: length le 30, alphanumeric, upper case, / for namespace, no space, no underscore - data element in ABAP: DEVCLASS, CHAR30
+			Utils.checkPackage(sPackage);
+		} catch (oError) {
+			return Promise.reject(oError);
+		}
+		this._mChangeFile.packageName = sPackage;
+		return Promise.resolve();
+	};
+
+	/**
+	 * Submits the descriptor change to the backend
+	 *
+	 * @return {Promise} resolving after all changes have been saved
+	 *
+	 * @private
+	 * @sap-restricted
+	 */
+	DescriptorChange.prototype.submit = function() {
+		this.store();
+
+		//submit
+		var oChangePersistence = this._getChangePersistence(this._mChangeFile.reference);
+		return oChangePersistence.saveDirtyChanges();
+	};
+
+	/**
+	 * Stores the descriptor change in change persistence
+	 *
+	 * @return {object} change object
+	 *
+	 * @private
+	 * @sap-restricted
+	 */
+	DescriptorChange.prototype.store = function() {
+		// create persistence
+		var sComponentName = this._mChangeFile.reference;
+		var sAppVersion = this._mChangeFile.validAppVersions.creation;
+		var oChangePersistence = this._getChangePersistence(sComponentName, sAppVersion);
+
+		//add change to persistence
+		var oChange = this._getChangeToSubmit();
+		oChangePersistence.addChange(oChange);
+
+		return oChange;
+	};
+
+	DescriptorChange.prototype._getChangePersistence = function(sComponentName, sAppVersion) {
+		return ChangePersistenceFactory.getChangePersistenceForComponent(sComponentName, sAppVersion);
+	};
+
+	DescriptorChange.prototype._getChangeToSubmit = function() {
+		//create Change
+		var oChange = new Change(this._getMap());
+
+		if ( this._sTransportRequest ) {
+			oChange.setRequest( this._sTransportRequest );
+		}  else if ( this._oSettings.isAtoEnabled() && FlexUtils.isCustomerDependentLayer(this._mChangeFile.layer) ) {
+			oChange.setRequest( 'ATO_NOTIFICATION' );
+		}
+		return oChange;
+	};
+
+	DescriptorChange.prototype._getMap = function() {
+		var mInlineChange = this._oInlineChange.getMap();
+
+		this._mChangeFile.content = mInlineChange.content;
+		this._mChangeFile.texts = mInlineChange.texts;
+		return this._mChangeFile;
+	};
+
+	/**
+	 * Returns a copy of the JSON object of the descriptor change
+	 *
+	 * @return {object} copy of JSON object of the descriptor change
+	 *
+	 * @private
+	 * @sap-restricted
+	 */
+	DescriptorChange.prototype.getJson = function() {
+		return jQuery.extend(true, {}, this._getMap());
+	};
+
+//Descriptor LREP Change Factory
+	/**
+	 * Factory for Descriptor Changes
+	 *
+	 * @constructor
+	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorChangeFactory
+	 * @author SAP SE
+	 * @version 1.50.6
+	 * @private
+	 * @sap-restricted
+	 */
+
+	var DescriptorChangeFactory = function() {};
+
+	/**
+	 * Creates a new descriptor change
+	 *
+	 * @param {string} sReference the descriptor id for which the change is created
+	 * @param {object} oInlineChange the inline change instance
+	 * @param {string} sLayer layer of the descriptor change
+	 *
+	 * @return {Promise} resolving the new Change instance
+	 *
+	 * @private
+	 * @sap-restricted
+	 */
+	DescriptorChangeFactory.prototype.createNew = function(sReference, oInlineChange, sLayer, oAppComponent) {
+		var fSetHostingIdForTextKey = function(_oDescriptorInlineChange, sId){
+			//providing "hosting id" for appdescr_app_setTitle and similar
+			//"hosting id" is descriptor variant id
+			if ( _oDescriptorInlineChange["setHostingIdForTextKey"] ){
+				_oDescriptorInlineChange.setHostingIdForTextKey(sId);
+			}
+		};
+		fSetHostingIdForTextKey(oInlineChange,sReference);
+
+		var sAppVersion;
+		if (oAppComponent) {
+			var mManifest = oAppComponent.getManifest();
+			sAppVersion = FlexUtils.getAppVersionFromManifest(mManifest);
+		}
+
+		var mPropertyBag = {};
+		mPropertyBag.changeType = oInlineChange._getChangeType();
+		mPropertyBag.componentName = sReference;
+		mPropertyBag.reference = sReference;
+		mPropertyBag.validAppVersions =  sAppVersion ? {
+			"creation": sAppVersion,
+			"from": sAppVersion
+		} : {};
+
+		if (!sLayer){
+			//default to 'CUSTOMER'
+			mPropertyBag.layer = 'CUSTOMER';
+		} else {
+			if (sLayer != 'VENDOR' && sLayer != 'PARTNER' && !FlexUtils.isCustomerDependentLayer(sLayer)) {
+				throw new Error("Parameter \"layer\" needs to be 'VENDOR', 'PARTNER' or customer dependent");
+			}
+			mPropertyBag.layer = sLayer;
+		}
+
+		var mChangeFile = Change.createInitialFileContent(mPropertyBag );
+		return Settings.getInstance().then(function(oSettings) {
+			return Promise.resolve( new DescriptorChange(mChangeFile, oInlineChange, oSettings) );
+		});
+	};
+
+	return DescriptorChangeFactory;
+}, true);
+}; // end of sap/ui/fl/descriptorRelated/api/DescriptorChangeFactory.js
 if ( !jQuery.sap.isDeclared('sap.ui.fl.registry.ChangeHandlerRegistration') ) {
 /*!
 * UI development toolkit for HTML5 (OpenUI5)
@@ -11846,7 +14951,7 @@ sap.ui.define("sap/ui/fl/FlexController",[
 	 * @alias sap.ui.fl.FlexController
 	 * @experimental Since 1.27.0
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 */
 	var FlexController = function (sComponentName, sAppVersion) {
 		this._oChangePersistence = undefined;
@@ -11890,6 +14995,23 @@ sap.ui.define("sap/ui/fl/FlexController",[
 	 */
 	FlexController.prototype.getAppVersion = function () {
 		return this._sAppVersion;
+	};
+
+	/**
+	 * Returns the variant model object
+	 *
+	 * @returns {Object} Variant Model Object
+	 * @public
+	 */
+	FlexController.prototype.getVariantModelData = function () {
+		var oData;
+		if (this._oChangePersistence &&
+				this._oChangePersistence._oVariantController._mVariantManagement &&
+				Object.keys(this._oChangePersistence._oVariantController._mVariantManagement).length > 0) {
+			oData = this._oChangePersistence._oVariantController._fillVariantModel();
+		}
+
+		return oData;
 	};
 
 	/**
@@ -11966,6 +15088,9 @@ sap.ui.define("sap/ui/fl/FlexController",[
 		}
 		ChangeHandler = this._getChangeHandler(oChange, sControlType);
 		if (ChangeHandler) {
+			if (/*ChangeHandler.revertChange && */oChangeSpecificData["variantManagementKey"] && oChangeSpecificData["variantKey"]) {
+				jQuery.sap.log.error("VariantChange" + "-" + oChangeSpecificData["variantManagementKey"] + "-" + oChangeSpecificData["variantKey"]); /*Only temporary*/
+			}
 			ChangeHandler.completeChangeContent(oChange, oChangeSpecificData, {
 				modifier: JsControlTreeModifier,
 				appComponent: oAppComponent
@@ -12010,6 +15135,22 @@ sap.ui.define("sap/ui/fl/FlexController",[
 	};
 
 	/**
+	 * Prepares a change to be deleted with the next call to
+	 * @see {ChangePersistence#saveDirtyChanges};
+	 *
+	 * If the given change is already in the dirty changes and
+	 * has pending action 'NEW' it will be removed, assuming,
+	 * it has just been created in the current session;
+	 *
+	 * Otherwise it will be marked for deletion.
+	 *
+	 * @param {sap.ui.fl.Change} oChange - the change to be deleted
+	 */
+	FlexController.prototype.deleteChange = function (oChange) {
+		this._oChangePersistence.deleteChange(oChange);
+	};
+
+	/**
 	 * Creates a new change and applies it immediately
 	 *
 	 * @param {object} oChangeSpecificData The data specific to the change, e.g. the new label for a RenameField change
@@ -12023,7 +15164,7 @@ sap.ui.define("sap/ui/fl/FlexController",[
 				modifier: JsControlTreeModifier,
 				appComponent: Utils.getAppComponentForControl(oControl)
 			};
-			this._checkTargetAndApplyChange(oChange, oControl, mPropertyBag);
+			this.checkTargetAndApplyChange(oChange, oControl, mPropertyBag);
 		} catch (oException) {
 			this._oChangePersistence.deleteChange(oChange);
 			throw oException;
@@ -12044,7 +15185,7 @@ sap.ui.define("sap/ui/fl/FlexController",[
 	 * Loads and applies all changes for the specified xml tree view
 	 *
 	 * @param {object} oView - the view to process as XML tree
-	 * @param {object} mPropertyBag
+	 * @param {object} mPropertyBag - collection of cross-functional attributes
 	 * @param {string} mPropertyBag.viewId - id of the processed view
 	 * @param {string} mPropertyBag.componentId - name of the root component of the view
 	 * @returns {Promise} without parameters. Promise resolves once all changes of the view have been applied
@@ -12066,7 +15207,7 @@ sap.ui.define("sap/ui/fl/FlexController",[
 	/**
 	 * Loads and applies all changes for the specified view
 	 *
-	 * @param {object} mPropertyBag
+	 * @param {object} mPropertyBag - collection of cross-functional attributes
 	 * @param {object} mPropertyBag.view - the view to process as XML tree
 	 * @param {string} mPropertyBag.viewId - id of the processed view
 	 * @param {object} mPropertyBag.modifier - polymorph reuse operations handling the changes on the given view type
@@ -12078,16 +15219,16 @@ sap.ui.define("sap/ui/fl/FlexController",[
 
 		mPropertyBag.siteId = Utils.getSiteId(mPropertyBag.appComponent);
 
-		return this._oChangePersistence.getChangesForView(mPropertyBag.viewId, mPropertyBag).then(
-			this._resolveGetChangesForView.bind(this, mPropertyBag),
-			this._handlePromiseChainError.bind(this, mPropertyBag.view)
-		);
+		return this._oChangePersistence.getChangesForView(mPropertyBag.viewId, mPropertyBag)
+
+		.then(this._resolveGetChangesForView.bind(this, mPropertyBag),
+			this._handlePromiseChainError.bind(this, mPropertyBag.view));
 	};
 
 	/**
 	 * Looping over all retrieved flexibility changes and applying them onto the targeted control within the view
 	 *
-	 * @param {object} mPropertyBag
+	 * @param {object} mPropertyBag - collection of cross-functional attributes
 	 * @param {object} mPropertyBag.view - the view to process
 	 * @param {string} mPropertyBag.viewId - id of the processed view
 	 * @param {string} mPropertyBag.appComponent - app component
@@ -12095,7 +15236,7 @@ sap.ui.define("sap/ui/fl/FlexController",[
 	 * @param {object} mPropertyBag.appDescriptor - app descriptor containing the metadata of the current application
 	 * @param {string} mPropertyBag.siteId - id of the flp site containing this application
 	 * @param {sap.ui.fl.Change[]} aChanges - list of flexibility changes on controls for the current processed view
-	 * @returns {object} view - view object with all applied changes
+	 * @returns {object} Returns view object with all applied changes
 	 * @private
 	 */
 	FlexController.prototype._resolveGetChangesForView = function (mPropertyBag, aChanges) {
@@ -12119,7 +15260,8 @@ sap.ui.define("sap/ui/fl/FlexController",[
 					throw new Error("A flexibility change tries to change a nonexistent control.");
 				}
 
-				this._checkTargetAndApplyChange(oChange, oControl, mPropertyBag);
+				this.checkTargetAndApplyChange(oChange, oControl, mPropertyBag);
+
 			} catch (oException) {
 				this._logApplyChangeError(oException, oChange);
 			}
@@ -12156,55 +15298,102 @@ sap.ui.define("sap/ui/fl/FlexController",[
 	 * @param {object} mPropertyBag.modifier - polymorph reuse operations handling the changes on the given view type
 	 * @param {object} mPropertyBag.appDescriptor - app descriptor containing the metadata of the current application
 	 * @param {object} mPropertyBag.appComponent - component instance that is currently loading
-	 * @private
+	 * @public
 	 */
-	FlexController.prototype._checkTargetAndApplyChange = function (oChange, oControl, mPropertyBag) {
+	FlexController.prototype.checkTargetAndApplyChange = function (oChange, oControl, mPropertyBag) {
 		var oModifier = mPropertyBag.modifier;
 		var sControlType = oModifier.getControlType(oControl);
 		var oChangeHandler = this._getChangeHandler(oChange, sControlType);
 
 		if (!oChangeHandler) {
-			if (oChange && oControl) {
-				Utils.log.warning("Change handler implementation for change not found or change type not enabled for current layer - Change ignored");
-			}
+			Utils.log.warning("Change handler implementation for change not found or change type not enabled for current layer - Change ignored");
 			return;
 		}
 
-		var aCustomData = oModifier.getAggregation(oControl, "customData") || [];
+		var mCustomData = this._getAppliedCustomData(oChange, oControl, oModifier);
+		var sAppliedChanges = mCustomData.appliedChangesString;
+		var aAppliedChanges = mCustomData.appliedChanges;
+		var oAppliedChangeCustomData = mCustomData.appliedChangeCustomData;
+
 		var sChangeId = oChange.getId();
-		var aAppliedChanges = [];
-		var oAppliedChangeCustomData;
-		var sAppliedChanges = "";
-		aCustomData.some(function (oCustomData) {
-			var sKey = oModifier.getProperty(oCustomData, "key");
-			if (sKey === FlexController.appliedChangesCustomDataKey) {
-				oAppliedChangeCustomData = oCustomData;
-				sAppliedChanges = oModifier.getProperty(oCustomData, "value");
-				aAppliedChanges = sAppliedChanges.split(",");
-				return true; // break loop
-			}
-		});
 
 		if (aAppliedChanges.indexOf(sChangeId) === -1) {
 			try {
 				oChangeHandler.applyChange(oChange, oControl, mPropertyBag);
 			} catch (ex) {
 				this._setMergeError(true);
-				Utils.log.error("Change could not be applied. Merge error detected.");
+				Utils.log.error("Change could not be applied. Merge error detected.", ex.stack || "");
 				return;
 			}
 
+			var sValue = sAppliedChanges ? sAppliedChanges + "," + sChangeId : sChangeId;
+			this._writeCustomData(oAppliedChangeCustomData, sValue, mPropertyBag, oControl);
+		}
+	};
+
+	FlexController.prototype._removeFromAppliedChangesAndMaybeRevert = function(oChange, oControl, mPropertyBag, bRevert) {
+		var oModifier = mPropertyBag.modifier;
+		var sControlType = oModifier.getControlType(oControl);
+		var oChangeHandler = this._getChangeHandler(oChange, sControlType);
+
+		if (bRevert && !oChangeHandler) {
+			Utils.log.warning("Change handler implementation for change not found or change type not enabled for current layer - Change ignored");
+			return;
+		}
+
+		var mCustomData = this._getAppliedCustomData(oChange, oControl, oModifier);
+		var aAppliedChanges = mCustomData.appliedChanges;
+		var oAppliedChangeCustomData = mCustomData.appliedChangeCustomData;
+
+		var sChangeId = oChange.getId();
+		var iIndex = aAppliedChanges.indexOf(sChangeId);
+		if (iIndex > -1) {
+			if (bRevert) {
+				try {
+					oChangeHandler.revertChange(oChange, oControl, mPropertyBag);
+				} catch (error) {
+					Utils.log.error("Change could not be reverted.");
+					return;
+				}
+			}
 			if (oAppliedChangeCustomData) {
-				oModifier.setProperty(oAppliedChangeCustomData, "value", sAppliedChanges + "," + sChangeId);
-			} else {
-				var oAppComponent = mPropertyBag.appComponent;
-				var oView = mPropertyBag.view;
-				oAppliedChangeCustomData = oModifier.createControl("sap.ui.core.CustomData", oAppComponent, oView);
-				oModifier.setProperty(oAppliedChangeCustomData, "key", FlexController.appliedChangesCustomDataKey);
-				oModifier.setProperty(oAppliedChangeCustomData, "value", sChangeId);
-				oModifier.insertAggregation(oControl, "customData", oAppliedChangeCustomData, 0, oView, true);
+				aAppliedChanges.splice(iIndex, 1);
+				this._writeCustomData(oAppliedChangeCustomData, aAppliedChanges.join(), mPropertyBag, oControl);
 			}
 		}
+	};
+
+	FlexController.prototype._writeCustomData = function(oCustomData, sValue, mPropertyBag, oControl) {
+		var oModifier = mPropertyBag.modifier;
+
+		if (oCustomData) {
+			oModifier.setProperty(oCustomData, "value", sValue);
+		} else {
+			var oAppComponent = mPropertyBag.appComponent;
+			var oView = mPropertyBag.view;
+			oCustomData = oModifier.createControl("sap.ui.core.CustomData", oAppComponent, oView);
+			oModifier.setProperty(oCustomData, "key", FlexController.appliedChangesCustomDataKey);
+			oModifier.setProperty(oCustomData, "value", sValue);
+			oModifier.insertAggregation(oControl, "customData", oCustomData, 0, oView);
+		}
+	};
+
+	FlexController.prototype._getAppliedCustomData = function(oChange, oControl, oModifier) {
+		var aCustomData = oModifier.getAggregation(oControl, "customData") || [];
+		var oReturn = {
+			appliedChanges: []
+		};
+		aCustomData.some(function (oCustomData) {
+			var sKey = oModifier.getProperty(oCustomData, "key");
+			if (sKey === FlexController.appliedChangesCustomDataKey) {
+				oReturn.appliedChangeCustomData = oCustomData;
+				oReturn.appliedChangesString = oModifier.getProperty(oCustomData, "value");
+				oReturn.appliedChanges = oReturn.appliedChangesString.split(",");
+				return true; // break loop
+			}
+		});
+
+		return oReturn;
 	};
 
 	FlexController.prototype._handlePromiseChainError = function (oView, oError) {
@@ -12441,15 +15630,15 @@ sap.ui.define("sap/ui/fl/FlexController",[
 	};
 
 	/**
-	 * Apply the changes on the control. This function is called just before the end of the
-	 * creation process.
+	 * Apply the changes in the control; this function is called just before the end of the
+	 * creation process, changes are applied synchronously.
 	 *
 	 * @param {function} fnGetChangesMap Getter to retrieve the mapped changes belonging to the app component
 	 * @param {object} oAppComponent Component instance that is currently loading
 	 * @param {object} oControl Control instance that is being created
-	 * @public
+	 * @private
 	 */
-	FlexController.prototype.applyChangesOnControl = function (fnGetChangesMap, oAppComponent, oControl) {
+	FlexController.prototype._applyChangesOnControl = function (fnGetChangesMap, oAppComponent, oControl) {
 		var mChangesMap = fnGetChangesMap();
 		var mChanges = mChangesMap.mChanges;
 		var mDependencies = mChangesMap.mDependencies;
@@ -12457,16 +15646,126 @@ sap.ui.define("sap/ui/fl/FlexController",[
 		var aChangesForControl = mChanges[oControl.getId()] || [];
 		aChangesForControl.forEach(function (oChange) {
 			if (!mDependencies[oChange.getKey()]) {
-				this._checkTargetAndApplyChange(oChange, oControl, {modifier: JsControlTreeModifier, appComponent: oAppComponent});
+				this.checkTargetAndApplyChange(oChange, oControl, {
+					modifier: JsControlTreeModifier,
+					appComponent: oAppComponent
+				});
 				this._updateDependencies(mDependencies, mDependentChangesOnMe, oChange.getKey());
 			} else {
 				//saves the information whether a change was already processed but not applied.
 				mDependencies[oChange.getKey()][FlexController.PENDING] =
-					this._checkTargetAndApplyChange.bind(this, oChange, oControl, {modifier: JsControlTreeModifier, appComponent: oAppComponent});
+					this.checkTargetAndApplyChange.bind(this, oChange, oControl, {
+						modifier: JsControlTreeModifier,
+						appComponent: oAppComponent
+					});
 			}
 		}.bind(this));
 
-		this._processDependentQueue(mDependencies, mDependentChangesOnMe, oAppComponent);
+		this._processDependentQueue(mDependencies, mDependentChangesOnMe);
+	};
+
+	/**
+	 * Get <code>_applyChangesOnControl</code> function bound to the <code>FlexController</code> instance;
+	 * this function must be used within the <code>addPropagationListener</code> function to ensure  proper
+	 * identification of the bound function (identity check is not possible due to the wrapping of the <code>.bind</code>).
+	 *
+	 * @param {function} fnGetChangesMap Getter to retrieve the mapped changes belonging to the app component
+	 * @param {object} oAppComponent Component instance that is currently loading
+	 * @public
+	 */
+	FlexController.prototype.getBoundApplyChangesOnControl = function (fnGetChangesMap, oComponent) {
+		var fnBoundApplyChangesOnControl = this._applyChangesOnControl.bind(this, fnGetChangesMap, oComponent);
+		fnBoundApplyChangesOnControl._bIsSapUiFlFlexControllerApplyChangesOnControl = true;
+		return fnBoundApplyChangesOnControl;
+	};
+
+	/**
+	 * Revert changes for a control and removes the change from the applied Changes stored in the Controls Custom Data.
+	 *
+	 * @param {array} aChanges Array of to be reverted changes
+	 * @param {object} oAppComponent Component instance
+	 * @param {object} oControl Control instance
+	 * @public
+	 */
+	FlexController.prototype.revertChangesOnControl = function(aChanges, oAppComponent) {
+		aChanges.forEach(function(oChange) {
+			var mPropertyBag = {
+				modifier: JsControlTreeModifier,
+				appComponent: oAppComponent
+			};
+			var oSelector = this._getSelectorOfChange(oChange);
+			var oControl = mPropertyBag.modifier.bySelector(oSelector, mPropertyBag.appComponent);
+			this._removeFromAppliedChangesAndMaybeRevert(oChange, oControl, {
+				modifier: JsControlTreeModifier,
+				appComponent: oAppComponent
+			}, true);
+			this._oChangePersistence._deleteChangeInMap(oChange);
+		}.bind(this));
+	};
+
+	/**
+	 * Applying variant changes.
+	 *
+	 * @param {array} aChanges Array of relevant changes
+	 * @param {object} oComponent Component instance
+	 * @public
+	 */
+	FlexController.prototype.applyVariantChanges = function(aChanges, oComponent) {
+		var oAppComponent = Utils.getAppComponentForControl(oComponent);
+		var aApplyChanges = [];
+		aChanges.forEach(function(oChange) {
+			var mChangesMap = this._oChangePersistence.getChangesMapForComponent().mChanges;
+			var aAllChanges = Object.keys(mChangesMap).reduce(function (aChanges, sControlId) {
+				return aChanges.concat(mChangesMap[sControlId]);
+			}, []);
+			this._oChangePersistence._addChangeAndUpdateDependencies(oComponent, oChange, aAllChanges.length, aAllChanges);
+
+			aApplyChanges.push( function () {
+				var mPropertyBag = {
+					modifier: JsControlTreeModifier,
+					appComponent: oAppComponent
+				};
+				var oSelector = this._getSelectorOfChange(oChange);
+				var oControl = mPropertyBag.modifier.bySelector(oSelector, mPropertyBag.appComponent);
+				if (!oControl) {
+					Utils.log.error("A flexibility change tries to change a nonexistent control.");
+					return;
+				}
+				this._applyChangesOnControl(this._oChangePersistence.getChangesMapForComponent.bind(this._oChangePersistence), oAppComponent, oControl);
+			}.bind(this));
+		}.bind(this));
+		aApplyChanges.forEach(function (fnApplyChange) {
+			fnApplyChange();
+		});
+	};
+
+	/**
+	 * Remove the change from the applied Changes stored in the Controls Custom Data without reverting the change.
+	 *
+	 * @param {object} oChange Change
+	 * @param {object} oAppComponent Component instance
+	 * @param {object} oControl Control instance
+	 * @public
+	 */
+	FlexController.prototype.removeFromAppliedChangesOnControl = function(oChange, oAppComponent, oControl) {
+		this._removeFromAppliedChangesAndMaybeRevert(oChange, oControl, {modifier: JsControlTreeModifier, appComponent: oAppComponent}, false);
+	};
+
+	FlexController.prototype._updateControlsDependencies = function (mDependencies) {
+		var oControl;
+		Object.keys(mDependencies).forEach(function(sChangeKey) {
+			var oDependency = mDependencies[sChangeKey];
+			if (oDependency.controlsDependencies && oDependency.controlsDependencies.length > 0) {
+				var iLength = oDependency.controlsDependencies.length;
+				while (iLength--) {
+					var sId = oDependency.controlsDependencies[iLength];
+					oControl = sap.ui.getCore().byId(sId);
+					if (oControl) {
+						oDependency.controlsDependencies.splice(iLength, 1);
+					}
+				}
+			}
+		});
 	};
 
 	FlexController.prototype._updateDependencies = function (mDependencies, mDependentChangesOnMe, sChangeKey) {
@@ -12482,21 +15781,25 @@ sap.ui.define("sap/ui/fl/FlexController",[
 		}
 	};
 
-	FlexController.prototype._processDependentQueue = function (mDependencies, mDependentChangesOnMe, oAppComponent) {
+	FlexController.prototype._processDependentQueue = function (mDependencies, mDependentChangesOnMe) {
 		var aAppliedChanges;
 		var aDependenciesToBeDeleted;
 
 		do {
 			aAppliedChanges = [];
 			aDependenciesToBeDeleted = [];
+			this._updateControlsDependencies(mDependencies);
 			for (var i = 0; i < Object.keys(mDependencies).length; i++) {
 				var sDependencyKey = Object.keys(mDependencies)[i];
 				var oDependency = mDependencies[sDependencyKey];
-				if (oDependency[FlexController.PENDING] && oDependency.dependencies.length === 0 && !oDependency[FlexController.PROCESSING]) {
-					oDependency[FlexController.PROCESSING] = true;
-					oDependency[FlexController.PENDING]();
-					aDependenciesToBeDeleted.push(sDependencyKey);
-					aAppliedChanges.push(oDependency.changeObject.getKey());
+				if (oDependency[FlexController.PENDING] &&
+					oDependency.dependencies.length === 0 &&
+					!(oDependency.controlsDependencies && oDependency.controlsDependencies.length > 0) &&
+					!oDependency[FlexController.PROCESSING]) {
+						oDependency[FlexController.PROCESSING] = true;
+						oDependency[FlexController.PENDING]();
+						aDependenciesToBeDeleted.push(sDependencyKey);
+						aAppliedChanges.push(oDependency.changeObject.getKey());
 				}
 			}
 
@@ -12524,8 +15827,8 @@ if ( !jQuery.sap.isDeclared('sap.ui.fl.FlexControllerFactory') ) {
 jQuery.sap.declare('sap.ui.fl.FlexControllerFactory'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
 sap.ui.define("sap/ui/fl/FlexControllerFactory",[
-	"jquery.sap.global", "sap/ui/fl/FlexController", "sap/ui/fl/Utils", "sap/ui/fl/ChangePersistenceFactory"
-], function(jQuery, FlexController, Utils, ChangePersistenceFactory) {
+	"jquery.sap.global", "sap/ui/fl/FlexController", "sap/ui/fl/Utils", "sap/ui/fl/ChangePersistenceFactory", "sap/ui/fl/variants/VariantModel"
+], function(jQuery, FlexController, Utils, ChangePersistenceFactory, VariantModel) {
 	"use strict";
 
 	/**
@@ -12534,7 +15837,7 @@ sap.ui.define("sap/ui/fl/FlexControllerFactory",[
 	 * @alias sap.ui.fl.FlexControllerFactory
 	 * @experimental Since 1.27.0
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 */
 	var FlexControllerFactory = {};
 
@@ -12594,10 +15897,11 @@ sap.ui.define("sap/ui/fl/FlexControllerFactory",[
 		if (Utils.isApplication(oManifest)) {
 			var oFlexController = FlexControllerFactory.createForControl(oComponent, oManifest);
 			ChangePersistenceFactory._getChangesForComponentAfterInstantiation(vConfig, oManifest, oComponent)
-				.then(function (fnGetChangesMap) {
-						oComponent.addPropagationListener(oFlexController.applyChangesOnControl.bind(oFlexController, fnGetChangesMap, oComponent));
-					}
-				);
+			.then(function (fnGetChangesMap) {
+				oComponent.addPropagationListener(oFlexController.getBoundApplyChangesOnControl(fnGetChangesMap, oComponent));
+				var oData = oFlexController.getVariantModelData() || {};
+				oComponent.setModel(new VariantModel(oData, oFlexController, oComponent), "$FlexVariants");
+			});
 		}
 	};
 
@@ -12628,7 +15932,7 @@ sap.ui.define("sap/ui/fl/PreprocessorImpl",[
 	 * @class
 	 * @constructor
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.27.0
 	 */
 	var PreprocessorImpl = function(){
@@ -12721,7 +16025,7 @@ sap.ui.define("sap/ui/fl/RegistrationDelegator",[
 	 * @class
 	 * @constructor
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.43.0
 	 */
 	var RegistrationDelegator = {
@@ -12830,7 +16134,7 @@ sap.ui.define("sap/ui/fl/XmlPreprocessorImpl",[
 	 * @class
 	 * @constructor
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.27.0
 	 */
 	var XmlPreprocessorImpl = function(){
@@ -12851,7 +16155,7 @@ sap.ui.define("sap/ui/fl/XmlPreprocessorImpl",[
 	XmlPreprocessorImpl.process = function(oView, mProperties){
 		try {
 			if (!mProperties || mProperties.sync) {
-				Utils.log.warning("Flexibility feature for applying changes on an XML view is only available for " +
+				jQuery.sap.log.warning("Flexibility feature for applying changes on an XML view is only available for " +
 					"asynchronous views; merge is be done later on the JS controls.");
 				return (oView);
 			}
@@ -12884,7 +16188,7 @@ sap.ui.define("sap/ui/fl/XmlPreprocessorImpl",[
 				});
 			}, function () {
 				Utils.log.warning("Error happens when getting flex cache key! flexibility XML view preprocessing is skipped. " +
-					"The processing will be done later on the JS controls.");
+				"The processing will be done later on the JS controls.");
 				return Promise.resolve(oView);
 			});
 		} catch (error) {
@@ -12931,28 +16235,27 @@ if ( !jQuery.sap.isDeclared('sap.ui.fl.library') ) {
  */
 
 jQuery.sap.declare('sap.ui.fl.library'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-sap.ui.define("sap/ui/fl/library",["sap/ui/fl/RegistrationDelegator"
-	],
-	function(RegistrationDelegator) {
+sap.ui.define("sap/ui/fl/library",[
+	"sap/ui/fl/RegistrationDelegator"
+], function(RegistrationDelegator) {
 	"use strict";
 
 	/**
 	 * SAPUI5 library for UI Flexibility and Descriptor Changes and Descriptor Variants.
-	 *
 	 * @namespace
 	 * @name sap.ui.fl
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @private
 	 * @sap-restricted
-	 *
 	 */
 
 	sap.ui.getCore().initLibrary({
-		name:"sap.ui.fl",
-		version:"1.48.5",
-		dependencies:["sap.ui.core","sap.m"],
-		noLibraryCSS: true,
+		name: "sap.ui.fl",
+		version: "1.50.6",
+		dependencies: [
+			"sap.ui.core", "sap.m"
+		],
 		extensions: {
 			"sap.ui.support": {
 				diagnosticPlugins: [
@@ -12966,6 +16269,6 @@ sap.ui.define("sap/ui/fl/library",["sap/ui/fl/RegistrationDelegator"
 
 	return sap.ui.fl;
 
-}, /* bExport= */ true);
+}, /* bExport= */true);
 
 }; // end of sap/ui/fl/library.js

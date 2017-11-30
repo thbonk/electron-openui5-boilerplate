@@ -17,7 +17,7 @@ sap.ui.define([
 	 * @param {object} [mSettings] initial settings for the new control
 	 * @class The ConditionPanel Control will be used to implement the Sorting, Filtering and Grouping panel of the new Personalization dialog.
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @constructor
 	 * @public
 	 * @since 1.26.0
@@ -365,9 +365,9 @@ sap.ui.define([
 	 * @param {string} sType defines the type for which this operations will be used. is <code>sType</code> is not defined the operations will be used as default
 	 *        operations.
 	 */
-	P13nConditionPanel.prototype.setOperations = function(aOperation, sType) {
+	P13nConditionPanel.prototype.setOperations = function(aOperations, sType) {
 		sType = sType || "default";
-		this._oTypeOperations[sType] = aOperation;
+		this._oTypeOperations[sType] = aOperations;
 
 		this._updateAllOperations();
 	};
@@ -1589,17 +1589,12 @@ sap.ui.define([
 				oControl = new sap.m.Input(params);
 				break;
 			case "date":
-				oConditionGrid.oFormatter = DateFormat.getDateInstance();
+				oConditionGrid.oFormatter = DateFormat.getDateInstance({strictParsing : true});
 				oControl = new sap.m.DatePicker(params);
 				break;
 			case "time":
-				oConditionGrid.oFormatter = DateFormat.getTimeInstance();
+				oConditionGrid.oFormatter = DateFormat.getTimeInstance({strictParsing : true});
 				oControl = new sap.m.TimePicker(params);
-
-				//				var oLocale = sap.ui.getCore().getConfiguration().getFormatSettings().getFormatLocale();
-				//				var oLocaleData = sap.ui.core.LocaleData.getInstance(oLocale);
-				//				oControl.setDisplayFormat( oLocaleData.getTimePattern("short"));
-
 				break;
 			default:
 				oConditionGrid.oFormatter = null;
@@ -1834,7 +1829,7 @@ sap.ui.define([
 			// we have to insert the control into the content with rerendering (bSuppressInvalidate=false) the UI,
 			// otherwise in some use cases the "between" value fields will not be rendered.
 			// This additional rerender might trigger some problems for screenreader.
-			oConditionGrid.insertContent(oCtrl, ctrlIndex);
+			oConditionGrid.insertContent(oCtrl, ctrlIndex === -1 ? 0 : ctrlIndex);
 			//oConditionGrid.insertAggregation("content", oCtrl, ctrlIndex, true);
 
 			var oValue, sValue;
@@ -2201,6 +2196,13 @@ sap.ui.define([
 			oValue1 = oConditionGrid.oFormatter.parse(sValue1);
 			if (isNaN(oValue1) || oValue1 === null) {
 				sValue1 = "";
+			}
+		}
+
+		// in case of a BT and a Date type try to set the minDate for the To value datepicker
+		if (sOperation === "BT" && oConditionGrid.value1.setMinDate) {
+			if (oConditionGrid.value2 && oConditionGrid.value2.setMinDate) {
+				oConditionGrid.value2.setMinDate(oValue1 instanceof Date ? oValue1 : null);
 			}
 		}
 

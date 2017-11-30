@@ -16,7 +16,7 @@ sap.ui.define([
 	 * @alias sap.ui.fl.StandardVariant
 	 * @author SAP SE
 	 *
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @experimental Since 1.38.0
 	 */
@@ -121,7 +121,9 @@ sap.ui.define([
 		var oNewsetChange = this.getNewestStandardVariantChangeDeleteTheRest(mChanges);
 
 		if (oNewsetChange) {
-			oNewsetChange.getContent().executeOnSelect = bNewExecuteOnSelect;
+			var oContent = oNewsetChange.getContent();
+			oContent.executeOnSelect = bNewExecuteOnSelect;
+			oNewsetChange.setContent(oContent);
 		}
 
 		return oNewsetChange;

@@ -493,17 +493,6 @@ html.sap-desktop {
 }
 /* END "CheckBox.less" */
 
-/* START "ColumnListItem.less" */
-/* ===================================== */
-/* CSS for control sap.m/ColumnListItem  */
-/* Belize High Contrast White theme      */
-/* ===================================== */
-
-html[data-sap-ui-browser="ie11"] .sapMListTblRow:focus{
-	outline-width: 3px;
-}
-/* END "ColumnListItem.less" */
-
 /* START "CustomTile.less" */
 /* ================================= */
 /* CSS for control sap.m/CustomTile  */
@@ -603,16 +592,16 @@ html[data-sap-ui-browser="ie11"] .sapMListTblRow:focus{
 /* ================================== */
 
 .sapMGT {
-	border-radius: 0.375rem;
+	border-radius: 0.125rem;
 }
 
 .sapMGT.sapMGTBackgroundImage .sapMGTContent {
-	border-bottom-left-radius: 0.375rem;
-	border-bottom-right-radius: 0.375rem;
+	border-bottom-left-radius: 0.125rem;
+	border-bottom-right-radius: 0.125rem;
 }
 
 .sapMGT.sapMGTScopeActions.sapMGTBackgroundImage .sapMGTContent:before {
-	border-radius: 0.375rem;
+	border-radius: 0.125rem;
 }
 
 .sapMGTOverlay {
@@ -1332,6 +1321,11 @@ html.sap-desktop .sapMGrowingList  .sapMCLI.sapMLIB.sapMLIB-CTX:focus{
 	outline:none;
 }
 
+/* avoid double focus borders in IE */
+html.sap-desktop .sapMGrowingList .sapMLIBLegacyOutline:focus::before {
+	border: none;
+}
+
 html.sap-desktop .sapMLIB-CTX:focus .sapMGrowingListTrigger {
 	border: 0.125rem dotted @sapUiContentFocusColor;
 	border-radius: 0;
@@ -1344,6 +1338,10 @@ html.sap-desktop .sapMLIB-CTX:focus .sapMGrowingListTrigger {
 /* Belize High Contrast White theme    */
 /* =================================== */
 
+html[data-sap-ui-browser='ie11'] .sapMLIBFocusable:focus {
+	outline-width: 3px;
+}
+
 .sapMLIBFocusable:focus {
 	outline: 2px dotted @sapUiContentFocusColor;
 	outline-offset: -2px;
@@ -1352,13 +1350,6 @@ html.sap-desktop .sapMLIB-CTX:focus .sapMGrowingListTrigger {
 /* IE ignores outline-offset. Use an overlay: */
 .sapMLIBLegacyOutline:focus::before {
 	border: 0.125rem dotted @sapUiContentFocusColor;
-}
-
-html.sap-desktop .sapMLIBImgNav:focus,
-html.sap-desktop .sapMLIBIconDet:focus,
-html.sap-desktop .sapMLIBIconDel:focus {
-	outline: 0.125rem dotted @sapUiContentFocusColor;
-	outline-offset: -0.125rem;
 }
 /* END "ListItemBase.less" */
 
@@ -1521,6 +1512,7 @@ html.sap-desktop .sapMMultiComboBoxList .sapMComboBoxBaseItem:focus {
 	bottom: 0;
 	left: 0;
 	pointer-events: none;
+	z-index: 2;
 }
 
 .sapMMultiInput:not(.sapMInputBaseReadonly) .sapMInputValHelp > .sapMInputValHelpInner:hover,
@@ -1678,9 +1670,23 @@ html.sap-desktop .sapMLIB.sapMNLI:focus::after {
 /* Belize High Contrast White theme       */
 /* ====================================== */
 
-html.sap-desktop .sapMObjectAttributeActive:focus .sapMObjectAttributeText {
+.sapMObjectAttributeActive:focus .sapMObjectAttributeText {
+	position: relative;
+}
+
+html.sap-desktop .sapMObjectAttributeActive:focus .sapMObjectAttributeText::after {
+	pointer-events: none;
+	display: block;
+	content: "";
+	position: absolute;
+	top: 0.125rem;
+	left: 0.125rem;
+	bottom: 0.125rem;
+	right: 0.125rem;
 	outline: 0.125rem dotted @sapUiContentFocusColor;
-	outline-offset: -0.125rem;
+}
+
+html.sap-desktop .sapMObjectAttributeActive:focus .sapMObjectAttributeText {
 	text-decoration: none;
 }
 
@@ -1711,22 +1717,12 @@ html.sap-desktop .sapMObjectAttributeActive:focus .sapMObjectAttributeText {
 	text-decoration: underline;
 }
 
-.sapMOHR .sapMObjectAttributeActive:focus .sapMObjectAttributeText {
-	outline: 0.125rem dotted @sapUiHcStandardForeground;
-	outline-offset: -0.125rem;
-}
-
 /*=========================================== */
 /* Custom design for Static Object Header     */
 /*=========================================== */
 
 .sapMOH .sapMObjectAttributeActive .sapMObjectAttributeText {
 	text-decoration: underline;
-}
-
-.sapMOH .sapMObjectAttributeActive:focus .sapMObjectAttributeText {
-	outline: 0.125rem dotted @sapUiContentFocusColor;
-	outline-offset: -0.125rem;
 }
 /* END "ObjectAttribute.less" */
 
@@ -2034,7 +2030,7 @@ html.sap-phone {
 /* ================================= */
 
 .sapMPageFloatingFooter {
-	> footer {
+	> .sapMPageFooter {
 		opacity: 1;
 	}
 }
@@ -2146,6 +2142,11 @@ html.sap-phone {
 	vertical-align: bottom;
 }
 
+.sapMPIDisplayOnly .sapMPIText:before {
+	font-size: 0.6875rem;
+	vertical-align: top;
+}
+
 .sapMPITextLeft::before {
 	margin-left: 0.25rem;
 }
@@ -2173,22 +2174,24 @@ html.sap-phone {
 
 .sapMPIBarDisabled {
 	opacity: 1;
-	border-color: @sapUiHcReducedAltForeground;
+	border-color: @sapUiHcReducedForeground;
 
-	.sapMPITextLeft {
-		color: @sapUiHcReducedAltForeground;
-	}
-
+	.sapMPIText.sapMPITextLeft,
 	.sapMPITextRight,
 	.sapMPIBarRemaining > .sapMPITextRight::before {
-		color: @sapUiHcReducedForeground;
+		color: @sapUiContentDisabledTextColor;
 	}
 
 	.sapMPIBarNeutral,
 	.sapMPIBarPositive,
 	.sapMPIBarNegative,
 	.sapMPIBarCritical {
-		background: @sapUiHcReducedForeground;
+		background: @sapUiHcReducedBackground;
+		border-color: @sapUiHcReducedForeground;
+	}
+
+	.sapMPIBarRemaining {
+		border-color: @sapUiHcReducedForeground;
 	}
 }
 /* END "ProgressIndicator.less" */
@@ -2330,8 +2333,17 @@ html[data-sap-ui-browser^="ie"].sap-desktop .sapMSliderProgress:focus:before {
 	color: @sapUiHcReducedAltForeground;
 }
 
+.sapMRI.sapMRIDisplayOnly {
+	.sapMRIIconSel{
+		color: @sapUiContentIconColor;
+	}
+	.sapMRIIconUnsel {
+		color: darken(@sapUiContentForegroundColor, 50);
+	}
+}
+
 /* Custom focus outline */
-html.sap-desktop .sapMRI:focus:not(.sapMRIDisabled) {
+html.sap-desktop .sapMRI:focus:not(.sapMRIDisabled):not(.sapMRIDisplayOnly){
 	outline: 0.125rem dotted @sapUiContentFocusColor;
 	outline-offset: -0.125rem;
 }
@@ -2342,7 +2354,7 @@ html[data-sap-ui-browser^="ie"].sap-desktop {
 		outline: none;
 		position: relative;
 	}
-	.sapMRI:focus:not(.sapMRIDisabled)::before {
+	.sapMRI:focus:not(.sapMRIDisabled):not(.sapMRIDisplayOnly)::before {
 		content: " ";
 		box-sizing: border-box;
 		width: 100%;
@@ -2645,18 +2657,6 @@ html.sap-desktop .sapMSlt:not(.sapMSltIconOnly):not(.sapMSltDisabled):focus,
 	border-color: @sapUiFieldHoverBorderColor;
 }
 
-.sapMSltPicker .sapMSelectListItemBaseSelected {
-	outline: 0.125rem dotted @sapUiContentFocusColor;
-	outline-offset: -0.188rem;
-}
-
-html[data-sap-ui-browser^="ie"].sap-desktop,
-html[data-sap-ui-browser^="ed"].sap-desktop {
-	.sapMSltPicker .sapMSelectListItemBaseSelected::before {
-		border: 0.125rem dashed @sapUiContentFocusColor;
-	}
-}
-
 /* FIX: IE and Edge do not support css outline-offset */
 
 html[data-sap-ui-browser^="ie"].sap-desktop,
@@ -2819,6 +2819,12 @@ html.sap-desktop .sapMSltIconOnly:hover:not(.sapMSltPressed):not(.sapMTSSlt) {
 	background: @sapUiListSelectionBackgroundColor;
 }
 
+.sapMSltPicker-CTX .sapMSelectListItemBaseSelected,
+.sapMComboBoxBasePicker-CTX .sapMSelectListItemBaseSelected {
+	outline: 0.125rem dotted @sapUiContentFocusColor;
+	outline-offset: -0.188rem;
+}
+
 /* disabled */
 .sapMSelectListItemBaseDisabled {
 	background: @sapUiHcReducedBackground;
@@ -2834,6 +2840,12 @@ html.sap-desktop li.sapMSelectListItemBase:focus {
 /* FIX: IE and Edge do not support css outline-offset */
 html[data-sap-ui-browser^="ie"].sap-desktop,
 html[data-sap-ui-browser^="ed"].sap-desktop {
+	.sapMSltPicker-CTX .sapMSelectListItemBaseSelected::before {
+		border: 0.125rem dashed @sapUiContentFocusColor;
+	}
+	.sapMComboBoxBasePicker-CTX .sapMSelectListItemBaseSelected::before {
+		border: 0.125rem dashed @sapUiContentFocusColor;
+	}
 	.sapMSelectListItemBase:focus::before {
 		border: 0.125rem dashed @sapUiContentFocusColor;
 	}
@@ -2964,12 +2976,8 @@ html.sap-desktop .sapMST:focus:not([tabindex]) {
 	background-color: @sapUiHighlight;
 }
 
-.sapMST .sapMGT {
-	border-radius: 0px;
-
-	&:active .sapMGTFocusDiv {
-		border: none;
-	}
+.sapMST .sapMGT:active .sapMGTFocusDiv {
+	border: none;
 }
 
 /* END "SlideTile.less" */
@@ -3220,39 +3228,11 @@ html[data-sap-ui-browser^='ed'] .sapMListTbl {
 /* ================================= */
 
 .sapMTabStrip {
-	border-bottom: solid 1px @sapUiObjectHeaderBorderColor;
-	/* This class can override the default border-top style */
-	&.sapMTabStripTopBorderVisible {
-		border-top: 1px solid @sapUiPageHeaderBorderColor;
-	}
 	.sapMTSTabsContainer {
 		.sapMTSTabs {
 			.sapMTabStripItem {
-				border-right: 1px solid @sapUiPageHeaderBorderColor;
 				&.sapMTabStripItemSelected {
-					background: @sapUiSegmentedButtonSelectedBackground;
-					border-right: 1px solid @sapUiPageHeaderBorderColor;
-					border-bottom: none;
-				}
-				&:hover {
-					background: @sapUiSegmentedButtonHoverBackground;
-					border-right: 1px solid @sapUiPageHeaderBorderColor;
-				}
-				&:active {
-					background: @sapUiSegmentedButtonActiveBackground;
-					border-right: 1px solid @sapUiPageHeaderBorderColor;
-				}
-				.sapMTSItemCloseBtnCnt {
-					.sapMBtn {
-						.sapMBtnInner  {
-							&:active {
-								background-color: @sapUiSegmentedButtonActiveBackground;	
-							}
-						}
-					}
-				}
-				&:first-child {
-					border-left: 1px solid @sapUiPageHeaderBorderColor;
+					border-bottom: solid 0.25rem @sapUiGroupTitleBorderColor;
 				}
 				&:focus::before {
 					pointer-events: none;
@@ -3568,7 +3548,6 @@ html[data-sap-ui-browser^="ed"].sap-desktop {
 
 html.sap-desktop .sapMTokenizer:focus{
 	outline: 0.125rem dotted @sapUiContentFocusColor;
-	outline-offset: -3px;
 }
 
 html[data-sap-ui-browser^="ie"].sap-desktop,

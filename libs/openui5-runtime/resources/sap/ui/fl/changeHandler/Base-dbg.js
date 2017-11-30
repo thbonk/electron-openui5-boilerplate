@@ -4,20 +4,18 @@
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define([
-	"sap/ui/fl/Utils", "jquery.sap.global"
-], function(Utils, $) {
+sap.ui.define(function() {
 	"use strict";
 
 	/**
 	 * Base functionality for all change handler which provides some reuse methods
 	 * @alias sap.ui.fl.changeHandler.Base
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @experimental Since 1.27.0
 	 *
 	 */
-	var Base = { };
+	var Base = {};
 
 	/**
 	 * Sets a text in a change.

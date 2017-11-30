@@ -17,10 +17,10 @@ sap.ui.define(['jquery.sap.global', './ComboBoxRenderer'],
 	var DropdownBoxRenderer = sap.ui.core.Renderer.extend(ComboBoxRenderer);
 
 	/**
-	 * Renders additional HTML for the DropdownBox to the TextField before the INPUT element (sets the icon)
+	 * Renders additional HTML for the DropdownBox to the TextField before the INPUT element (sets the icon).
 	 *
-	 * @param {sap.ui.fw.RenderManager} oRenderManager the RenderManager that can be used for writing to the Render-Output-Buffer
-	 * @param {sap.ui.fw.Control} oDdb an object representation of the control that should be rendered
+	 * @param {sap.ui.core.RenderManager} rm The RenderManager that can be used for writing to the Render-Output-Buffer
+	 * @param {sap.ui.core.Control} oDdb An object representation of the control that should be rendered
 	 */
 	DropdownBoxRenderer.renderOuterContentBefore = function(rm, oDdb){
 
@@ -29,10 +29,10 @@ sap.ui.define(['jquery.sap.global', './ComboBoxRenderer'],
 	};
 
 	/**
-	 * Renders additional HTML for the DropdownBox to the TextField after the INPUT element (sets the select box)
+	 * Renders additional HTML for the DropdownBox to the TextField after the INPUT element (sets the select box).
 	 *
-	 * @param {sap.ui.fw.RenderManager} oRenderManager the RenderManager that can be used for writing to the Render-Output-Buffer
-	 * @param {sap.ui.fw.Control} oDdb an object representation of the control that should be rendered
+	 * @param {sap.ui.core.RenderManager} rm The RenderManager that can be used for writing to the Render-Output-Buffer
+	 * @param {sap.ui.core.Control} oDdb An object representation of the control that should be rendered
 	 */
 	DropdownBoxRenderer.renderOuterContent = function(rm, oDdb){
 
@@ -45,10 +45,10 @@ sap.ui.define(['jquery.sap.global', './ComboBoxRenderer'],
 	};
 
 	/**
-	 * Used to set the tabindex of the dropdownbox to -1
+	 * Used to set the tabindex of the dropdownbox to -1.
 	 *
-	 * @param {sap.ui.fw.RenderManager} oRenderManager the RenderManager that can be used for writing to the Render-Output-Buffer
-	 * @param {sap.ui.fw.Control} oDdb an object representation of the control that should be rendered
+	 * @param {sap.ui.core.RenderManager} rm The RenderManager that can be used for writing to the Render-Output-Buffer
+	 * @param {sap.ui.core.Control} oDdb An object representation of the control that should be rendered
 	 */
 	DropdownBoxRenderer.renderTextFieldEnabled = function(rm, oDdb) {
 

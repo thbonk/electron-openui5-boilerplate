@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @public
@@ -97,11 +97,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 			}
 		};
 
-		/**
-		 * Value property setter
+		/*
+		 * Value property setter.
 		 *
 		 * @override
-		 * @param sValue
+		 * @param {string} sValue The value to be set
 		 * @returns {sap.ui.unified.Currency} <code>this</code> pointer for chaining
 		 */
 		Currency.prototype.setValue = function(sValue) {
@@ -133,10 +133,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 			}
 		};
 
-		/**
-		 * Currency property setter
-		 * @param sValue {String} The ISO 4217 currency code
-		 * @return {object} this to enable chaining
+		/*
+		 * Currency property setter.
+		 * @param {string} sValue The ISO 4217 currency code
+		 * @return {sap.ui.unified.Currency} <code>this</code> pointer for chaining
 		 */
 		Currency.prototype.setCurrency = function (sValue) {
 			var iCurrencyDigits,
@@ -172,10 +172,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 			return this;
 		};
 
-		/**
-		 * UseSymbol property setter
-		 * @param bValue {boolean}
-		 * @return {object} this to enable chaining
+		/*
+		 * UseSymbol property setter.
+		 * @param {boolean} bValue Whether the control must show the currency symbol instead of the ISO currency code
+		 * @return {sap.ui.unified.Currency} <code>this</code> pointer for chaining
 		 */
 		Currency.prototype.setUseSymbol = function (bValue) {
 			this.setProperty("useSymbol", bValue, true);
@@ -183,10 +183,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 			return this;
 		};
 
-		/**
-		 * MaxPrecision property setter
-		 * @param iValue {int}
-		 * @return {object} this to enable chaining
+		/*
+		 * MaxPrecision property setter.
+		 * @param {int} iValue The maximum precision value
+		 * @return {sap.ui.unified.Currency} <code>this</code> pointer for chaining
 		 */
 		Currency.prototype.setMaxPrecision = function (iValue) {
 			this.setProperty("maxPrecision", iValue, true);
@@ -224,9 +224,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		};
 
 		/**
-		 * The formatted value
+		 * The formatted value.
 		 *
-		 * @type string
+		 * @type {string}
+		 * @returns {string} The formatted value
 		 * @public
 		 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 		 */
@@ -264,9 +265,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		};
 
 		/**
-		 * Get symbol of the currency, if available
+		 * Get symbol of the currency, if available.
 		 *
-		 * @type string
+		 * @type {string}
 		 * @public
 		 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 		 */
@@ -276,6 +277,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 
 		/**
 		 * @see sap.ui.core.Control#getAccessibilityInfo
+		 * @returns {Object} Current accessibility state of the control.
 		 * @protected
 		 */
 		Currency.prototype.getAccessibilityInfo = function() {

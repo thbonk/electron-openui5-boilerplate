@@ -27,7 +27,7 @@ sap.ui.define([
 	 * @constructor
 	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorVariant
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @private
 	 * @sap-restricted
 	 */
@@ -46,6 +46,9 @@ sap.ui.define([
 			this._layer = mParameters.layer;
 			if ( typeof mParameters.isAppVariantRoot != undefined){
 				this._isAppVariantRoot = mParameters.isAppVariantRoot;
+			}
+			if ( typeof mParameters.referenceVersion != undefined){
+				this._referenceVersion = mParameters.referenceVersion;
 			}
 			this._mode = 'NEW';
 
@@ -212,6 +215,9 @@ sap.ui.define([
 				if ( typeof this._isAppVariantRoot != undefined ) {
 					mResult.isAppVariantRoot = this._isAppVariantRoot;
 				}
+				if ( typeof this._referenceVersion != undefined ) {
+					mResult.referenceVersion = this._referenceVersion;
+				}
 				return mResult;
 
 			case 'FROM_EXISTING':
@@ -232,7 +238,7 @@ sap.ui.define([
 	 * @namespace
 	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorVariantFactory
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @private
 	 * @sap-restricted
 	 */
@@ -247,7 +253,7 @@ sap.ui.define([
 	/**
 	 * Creates a new descriptor variant
 	 *
-	 * @param {object} mParameters
+	 * @param {object} mParameters the parameters
 	 * @param {string} mParameters.reference the referenced descriptor or descriptor variant id
 	 * @param {string} mParameters.id the id for the descriptor variant id
 	 * @param {string} [mParameters.layer='CUSTOMER'] the layer for the descriptor variant

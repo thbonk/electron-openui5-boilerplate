@@ -30,7 +30,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * @implements sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -117,7 +117,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 		},
 		aggregations : {
 			/**
-			 * A <code>sap.m.LightBox</code> instance, that will be opened automatically when the user interacts with the image.
+			 * A <code>sap.m.LightBox</code> instance, that will be opened automatically when the user interacts with the <code>Image</code> control.
 			 *
 			 * The <code>tap</code> event will still be fired.
 			 * @public
@@ -275,21 +275,44 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	};
 
 	/**
+	 * Sets the <code>detailBox</code> aggregation.
+	 * @param {sap.m.LightBox|undefined} oLightBox - Instance of the <code>LightBox</code> control or undefined
+	 * @returns {object} <code>this</code> for chaining
+	 * @override
+	 * @public
+	 */
+	Image.prototype.setDetailBox = function (oLightBox) {
+		var oCurrentDetailBox = this.getDetailBox();
+
+		if (oLightBox) {
+			// In case someone try's to set the same LightBox twice we don't do anything
+			if (oLightBox === oCurrentDetailBox) {
+				return this;
+			}
+
+			// If we already have a LightBox detach old one's event
+			if (oCurrentDetailBox) {
+				this.detachPress(this._fnLightBoxOpen, oCurrentDetailBox);
+			}
+
+			// Bind the LightBox open method to the press event of the Image
+			this._fnLightBoxOpen = oLightBox.open;
+			this.attachPress(this._fnLightBoxOpen, oLightBox);
+		} else if (this._fnLightBoxOpen) {
+			// If there was a LightBox - cleanup
+			this.detachPress(this._fnLightBoxOpen, oCurrentDetailBox);
+			this._fnLightBoxOpen = null;
+		}
+
+		return this.setAggregation("detailBox", oLightBox);
+	};
+
+	/**
 	 * the 'beforeRendering' event handler
 	 * @private
 	 */
 	Image.prototype.onBeforeRendering = function() {
 		this._defaultEventTriggered = false;
-
-		if (!this._fnLightBoxOpen) {
-			var oLightBox = this.getDetailBox();
-
-			if (oLightBox) {
-				this._fnLightBoxOpen = oLightBox.open;
-
-				this.attachPress(this._fnLightBoxOpen.bind(oLightBox));
-			}
-		}
 	};
 
 	/**

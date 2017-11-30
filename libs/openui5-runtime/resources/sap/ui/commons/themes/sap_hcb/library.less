@@ -161,7 +161,7 @@
 /* SAP-HCB Theme                                     */
 /* ================================================= */
 
-@sapUiButtonHeight: 18px;
+@_sap_ui_commons_Button_Height: 18px;
 
 .sapUiBtnS {
 	border-radius: 2px;
@@ -355,11 +355,11 @@ html[data-sap-ui-browser^="ie"] .sapUiCb:focus:after {
 /* HCB theme                                       */
 /* =============================================== */
 
-@sapUiComboBoxHeight: 18px;
+@_sap_ui_commons_ComboBox_Height: 18px;
 
 .sapUiTfCombo {
 	padding: 0 18px 0 0;
-	height: @sapUiComboBoxHeight;
+	height: @_sap_ui_commons_ComboBox_Height;
 	font-size: @sapUiDesktopFontSize;
 }
 
@@ -424,7 +424,7 @@ html[data-sap-ui-browser^="ie"] .sapUiCb:focus:after {
 /* SAP-HCB Theme                                 */
 /* ============================================= */
 
-@sapUiDlgFooterHeight: 36px;
+@_sap_ui_commons_Dialog_FooterHeight: 36px;
 
 /* header */
 
@@ -706,7 +706,7 @@ html[data-sap-ui-browser^="ed"] .sapUiTableCell > .sapUiLnk:focus:before {
 /* SAP-HCB Theme                                  */
 /* ============================================== */
 
-@sapUiListBoxBorderRadius: 2px;
+@_sap_ui_commons_ListBox_BorderRadius: 2px;
 
 .sapUiLbx {
 	border-collapse: separate; /* to prevent inheriting "collapse" */
@@ -1071,7 +1071,7 @@ html[data-sap-ui-browser^="ie"] .sapUiMenuButton.sapUiBtnIconOnly > .sapUiBtnIco
 /* SAP-HCB Theme                                */
 /* ============================================ */
 
-@sapUiPanelBorderRadius: 3px;
+@_sap_ui_commons_Panel_BorderRadius: 3px;
 
 .sapUiPanel {
 	font-size: @sapUiDesktopFontSize;
@@ -1281,9 +1281,9 @@ html[data-sap-ui-browser^="ie"] .sapUiRb:focus:after {
 /* ====================================================== */
 
 // Override image URLs defined in base to point to the theme specific images
-@sapUiRatingSymbolSelected: url("img/rating/star_selected.png");
-@sapUiRatingSymbolUnselected: url("img/rating/star_unselected.png");
-@sapUiRatingSymbolHovered: url("img/rating/star_hover.png");
+@_sap_ui_commons_RatingIndicator_SymbolSelected: url("img/rating/star_selected.png");
+@_sap_ui_commons_RatingIndicator_SymbolUnselected: url("img/rating/star_unselected.png");
+@_sap_ui_commons_RatingIndicator_SymbolHovered: url("img/rating/star_hover.png");
 
 .sapUiRating {
 	font-size: @sapUiDesktopFontSize;
@@ -1468,12 +1468,12 @@ html[data-sap-ui-browser^="ie"] .sapUiRb:focus:after {
 /* ====================================================== */
 
 .sapUiSearchField {
-	height: 18px; /*@sapUiTextFieldHeight;*/
+	height: 18px;
 	font-size: @sapUiDesktopFontSize;
 }
 
 .sapUiSearchFieldTf {
-	height: 18px; /*@sapUiTextFieldHeight;*/
+	height: 18px;
 	margin-top: 0px;
 }
 
@@ -2005,7 +2005,7 @@ html[data-sap-ui-browser^="ie"] .sapUiRb:focus:after {
 /* HCB theme                                        */
 /* ================================================ */
 
-@sapUiTextFieldHeight: 18px;
+@_sap_ui_commons_TextField_Height: 18px;
 
 .sapUiTf {
 	outline: none; /* remove Safari glow effect */
@@ -2015,7 +2015,7 @@ html[data-sap-ui-browser^="ie"] .sapUiRb:focus:after {
 }
 
 .sapUiTf:not(.sapUiTfInner) {
-	height: @sapUiTextFieldHeight;
+	height: @_sap_ui_commons_TextField_Height;
 }
 
 .sapUiTfBrd.sapUiTfDsbl,

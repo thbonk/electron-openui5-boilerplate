@@ -35,5 +35,5 @@ T.prototype.startPlugin=function(c){this.oCoreOther=c;this.oCore=c;this.oCore.at
 T.prototype.stopPlugin=function(){this.oCore.detachControlEvent(this.onControlEvent,this);this.oCore=null;};
 T.prototype.onControlEvent=function(e){if(this.oCore.isLocked()){var b=e.getParameter("browserEvent");if(b.type=="click"){var E=b.srcControl;if(E){var s=new H('sap-ui-testsuite-SelectionHighlighter');s.highlight(E.getDomRef());if(selectControl){selectControl(E.getId());}}}}};
 (function(){var t=new T();sap.ui.getCore().registerPlugin(t);}());return T;},true);
-jQuery.sap.require("sap.ui.test.TestEnv");
+sap.ui.requireSync("sap/ui/test/TestEnv");
 //# sourceMappingURL=sap-ui-testenv.js.map

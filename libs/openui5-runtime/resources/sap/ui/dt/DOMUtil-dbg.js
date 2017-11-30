@@ -20,7 +20,7 @@ function(
 	 * Utility functionality for DOM
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @private
 	 * @static
@@ -285,16 +285,16 @@ function(
 
 			// pseudo elements can't be inserted via js, so we should create a real elements,
 			// which copy pseudo styling
-			var oAfterElement = jQuery("<span></span>");
+			var oPseudoElement = jQuery("<span></span>");
 			if (sPseudoElement === ":after") {
-				oAfterElement.appendTo(oDest);
+				oPseudoElement.appendTo(oDest);
 			} else {
-				oAfterElement.prependTo(oDest);
+				oPseudoElement.prependTo(oDest);
 			}
 
-			oAfterElement.text(sContent.replace(/\"/g, ""));
-			DOMUtil._copyStylesTo(mStyles, oAfterElement.get(0));
-			oAfterElement.css("display", "inline");
+			oPseudoElement.text(sContent.replace(/(^['"])|(['"]$)/g, ""));
+			DOMUtil._copyStylesTo(mStyles, oPseudoElement.get(0));
+			oPseudoElement.css("display", "inline");
 		}
 	};
 

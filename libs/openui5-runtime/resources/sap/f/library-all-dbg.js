@@ -83,6 +83,89 @@ sap.ui.define("sap/f/AvatarRenderer",[],
 		return AvatarRenderer;
 	}, /* bExport= */ true);
 }; // end of sap/f/AvatarRenderer.js
+if ( !jQuery.sap.isDeclared('sap.f.DynamicPage.designtime') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+// Provides the Design Time Metadata for the sap.f.DynamicPage control
+jQuery.sap.declare('sap.f.DynamicPage.designtime'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+sap.ui.define("sap/f/DynamicPage.designtime",[],
+	function() {
+	"use strict";
+
+	return {
+		aggregations : {
+			title : {
+				domRef : ":sap-domref .sapFDynamicPageTitle"
+			},
+			header : {
+				domRef : ":sap-domref .sapFDynamicPageHeader"
+			},
+			content : {
+				domRef :  ":sap-domref .sapFDynamicPageContent"
+			},
+			footer : {
+				domRef : ":sap-domref .sapFDynamicPageActualFooterControl"
+			}
+		},
+		scrollContainers : [{
+				domRef : "> .sapFDynamicPageContentWrapper",
+				aggregations : ["header", "content"]
+			},
+			{
+				domRef : function(oElement) {
+					return oElement.$("vertSB-sb").get(0);
+				}
+			}]
+	};
+
+}, /* bExport= */ false);
+
+}; // end of sap/f/DynamicPage.designtime.js
+if ( !jQuery.sap.isDeclared('sap.f.DynamicPageHeader.designtime') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+// Provides the Design Time Metadata for the sap.f.DynamicPageHeader control
+jQuery.sap.declare('sap.f.DynamicPageHeader.designtime'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+sap.ui.define("sap/f/DynamicPageHeader.designtime",[],
+	function() {
+	"use strict";
+
+	return {
+		aggregations : {
+			content : {
+				domRef :  ":sap-domref .sapFDynamicPageHeaderContent",
+				actions : {
+					move : {
+						changeType : "moveControls"
+					}
+				}
+			}
+		},
+		actions : {
+			remove : {
+				changeType : "hideControl"
+			},
+			reveal : {
+				changeType : "unhideControl"
+			}
+		},
+		name: {
+			singular: "DYNAMIC_PAGE_HEADER_NAME",
+			plural: "DYNAMIC_PAGE_HEADER_NAME_PLURAL"
+		}
+	};
+
+}, /* bExport= */ false);
+
+}; // end of sap/f/DynamicPageHeader.designtime.js
 if ( !jQuery.sap.isDeclared('sap.f.DynamicPageHeaderRenderer') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -303,17 +386,91 @@ sap.ui.define("sap/f/DynamicPageRenderer",["sap/ui/Device"], function (Device) {
 }, /* bExport= */ true);
 
 }; // end of sap/f/DynamicPageRenderer.js
-if ( !jQuery.sap.isDeclared('sap.f.DynamicPageTitleRenderer') ) {
+if ( !jQuery.sap.isDeclared('sap.f.DynamicPageTitle.designtime') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
  * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
+// Provides the Design Time Metadata for the sap.f.DynamicPageTitle control
+jQuery.sap.declare('sap.f.DynamicPageTitle.designtime'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+sap.ui.define("sap/f/DynamicPageTitle.designtime",[],
+	function () {
+		"use strict";
+
+		return {
+			aggregations: {
+				heading: {
+					domRef: ":sap-domref .sapFDynamicPageTitleLeftHeading"
+				},
+				actions: {
+					domRef: function (oElement) {
+						return oElement.$("overflowToolbar").get(0);
+					},
+					actions: {
+						split: {
+							changeType: "splitMenuButton"
+						},
+						combine: {
+							changeType: "combineButtons"
+						}
+					}
+				},
+				content: {
+					domRef: ":sap-domref .sapFDynamicPageTitleContent",
+					actions: {
+						move: {
+							changeType: "moveControls"
+						}
+					}
+				},
+				snappedContent: {
+					domRef: function (oElement) {
+						return oElement.$("snapped-wrapper").get(0);
+					},
+					actions: {
+						move: {
+							changeType: "moveControls"
+						}
+					}
+				},
+				expandedContent: {
+					domRef: function (oElement) {
+						return oElement.$("expand-wrapper").get(0);
+					},
+					actions: {
+						move: {
+							changeType: "moveControls"
+						}
+					}
+				}
+			},
+			actions: {
+				remove: {
+					changeType: "hideControl"
+				},
+				reveal: {
+					changeType: "unhideControl"
+				}
+			},
+			name: {
+				singular: "DYNAMIC_PAGE_TITLE_NAME",
+				plural: "DYNAMIC_PAGE_TITLE_NAME_PLURAL"
+			}
+		};
+
+	}, /* bExport= */ false);
+}; // end of sap/f/DynamicPageTitle.designtime.js
+if ( !jQuery.sap.isDeclared('sap.f.DynamicPageTitleRenderer') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
 jQuery.sap.declare('sap.f.DynamicPageTitleRenderer'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 sap.ui.define("sap/f/DynamicPageTitleRenderer",[], function () {
 	"use strict";
-
 
 	/**
 	 * DynamicPage Title renderer.
@@ -328,102 +485,116 @@ sap.ui.define("sap/f/DynamicPageTitleRenderer",[], function () {
 	 * @param {sap.ui.core.Control} oDynamicPageTitle An object representation of the control that should be rendered
 	 */
 	DynamicPageTitleRenderer.render = function (oRm, oDynamicPageTitle) {
-		var oActions = oDynamicPageTitle._getOverflowToolbar(),
-			oLeftContent = oDynamicPageTitle.getHeading(),
-			aSnapContent = oDynamicPageTitle.getSnappedContent(),
-			aExpandContent = oDynamicPageTitle.getExpandedContent(),
-			sId = oDynamicPageTitle.getId(),
-			sAriaText = oDynamicPageTitle._oRB.getText("TOGGLE_HEADER");
+		var oDynamicPageTitleState = oDynamicPageTitle._getState();
 
-		// Dynamic Page Layout Title Root DOM Element.
+		// DynamicPageTitle Root DOM Element.
 		oRm.write("<div");
 		oRm.writeAttribute("tabindex", 0);
 		oRm.writeControlData(oDynamicPageTitle);
-		// ACC State
-		oRm.writeAccessibilityState({
-			role: "heading",
-			level: 2
-		});
+		oRm.writeAccessibilityState({role: "heading", level: 2});
 		oRm.addClass("sapFDynamicPageTitle");
+		if (!oDynamicPageTitleState.hasContent) {
+			oRm.addClass("sapFDynamicPageTitleWithoutContent");
+		}
 		oRm.writeClasses();
 		oRm.write(">");
+		this._renderLeftArea(oRm, oDynamicPageTitleState);
+		this._renderRightArea(oRm, oDynamicPageTitleState);
+		oRm.write("<span id=\"" + oDynamicPageTitleState.id + "-Descr\" class=\"sapUiInvisibleText\">" + oDynamicPageTitleState.ariaText + "</span>");
+		oRm.write("</div>"); // Root end.
+	};
 
+	DynamicPageTitleRenderer._renderLeftArea = function (oRm, oDynamicPageTitleState) {
 		// Left Area
 		oRm.write("<div");
 		oRm.addClass("sapFDynamicPageTitleLeft");
 		oRm.writeClasses();
 		oRm.write(">");
+
 		oRm.write("<div");
+		oRm.writeAttribute("id", oDynamicPageTitleState.id + "-left-inner");
 		oRm.addClass("sapFDynamicPageTitleLeftInner");
+		oRm.addClass(oDynamicPageTitleState.isPrimaryAreaBegin ? "sapFDynamicPageTitleAreaHighPriority" : "sapFDynamicPageTitleAreaLowPriority");
 		oRm.writeClasses();
 		oRm.write(">");
-		// Page Title Content
+		// Left Area -> heading aggregation
 		oRm.write("<div");
 		oRm.addClass("sapFDynamicPageTitleLeftHeading");
 		oRm.writeClasses();
 		oRm.write(">");
-		oRm.renderControl(oLeftContent);
+		oRm.renderControl(oDynamicPageTitleState.heading);
 		oRm.write("</div>");
 
-		if (aSnapContent.length > 0 || aExpandContent.length > 0) {
-			// Snapped/Expand Content
+		// Left Area -> snappedContent/expandContent aggregation
+		if (oDynamicPageTitleState.hasAdditionalContent) {
 			oRm.write("<div");
 			oRm.addClass("sapFDynamicPageTitleLeftSnappedExpandContent");
 			oRm.writeClasses();
 			oRm.write(">");
-			DynamicPageTitleRenderer._renderSnappedContent(oRm, oDynamicPageTitle, aSnapContent);
-			DynamicPageTitleRenderer._renderExpandContent(oRm, oDynamicPageTitle, aExpandContent);
+			if (oDynamicPageTitleState.hasSnappedContent) {
+				DynamicPageTitleRenderer._renderSnappedContent(oRm, oDynamicPageTitleState);
+			}
+			if (oDynamicPageTitleState.hasExpandedContent) {
+				DynamicPageTitleRenderer._renderExpandContent(oRm, oDynamicPageTitleState);
+			}
 			oRm.write("</div>");
 		}
-
-		oRm.write("</div>");
 		oRm.write("</div>");
 
+		// Content aggregation
+		oRm.write("<div");
+		oRm.writeAttributeEscaped("id", oDynamicPageTitleState.id + "-content");
+		oRm.addClass("sapFDynamicPageTitleContent");
+		oRm.addClass(oDynamicPageTitleState.isPrimaryAreaBegin ? "sapFDynamicPageTitleAreaLowPriority" : "sapFDynamicPageTitleAreaHighPriority");
+		oRm.writeClasses();
+		oRm.write(">");
+		oDynamicPageTitleState.content.forEach(oRm.renderControl);
+		oRm.write("</div>");
+
+		// Dummy invisible element just to let display:flex with justify-content: space between
+		// to allocate space between the Middle area and the Actions,
+		// otherwise the areas would be stickied together.
+		oRm.write("<span class=\"sapFDynamicPageTitleInvisibleEl\"></span>");
+		oRm.write("</div>");
+	};
+
+	DynamicPageTitleRenderer._renderRightArea = function (oRm, oDynamicPageTitleState) {
 		// Right Area
 		oRm.write("<div");
 		oRm.addClass("sapFDynamicPageTitleRight");
 		oRm.writeClasses();
 		oRm.write(">");
-		// Actions
 		oRm.write("<div");
 		oRm.addClass("sapFDynamicPageTitleRightActions");
 		oRm.writeClasses();
 		oRm.write(">");
-
-		if (oActions.getContent().length > 0) {
-			oRm.renderControl(oActions);
+		if (oDynamicPageTitleState.hasActions) {
+			oRm.renderControl(oDynamicPageTitleState.actionBar);
 		}
-
 		oRm.write("</div>");
 		oRm.write("</div>");
-		oRm.write("<span id=\"" + sId + "-Descr\" class=\"sapUiInvisibleText\">" + sAriaText + "</span>");
-		oRm.write("</div>"); //Root end.
 	};
 
-	DynamicPageTitleRenderer._renderExpandContent = function (oRm, oDynamicPageTitle, aExpandContent) {
-		if (aExpandContent.length > 0) {
-			oRm.write("<div");
-			oRm.writeAttributeEscaped("id", oDynamicPageTitle.getId() + "-expand-wrapper");
-			oRm.writeClasses();
-			oRm.write(">");
-			aExpandContent.forEach(oRm.renderControl);
-			oRm.write("</div>");
-		}
+	DynamicPageTitleRenderer._renderExpandContent = function (oRm, oDynamicPageTitleState) {
+		oRm.write("<div");
+		oRm.writeAttributeEscaped("id", oDynamicPageTitleState.id + "-expand-wrapper");
+		oRm.writeClasses();
+		oRm.write(">");
+		oDynamicPageTitleState.expandedContent.forEach(oRm.renderControl);
+		oRm.write("</div>");
 	};
 
-	DynamicPageTitleRenderer._renderSnappedContent = function (oRm, oDynamicPageTitle, aSnapContent) {
-		if (aSnapContent.length > 0) {
-			oRm.write("<div");
-			oRm.writeAttributeEscaped("id", oDynamicPageTitle.getId() + "-snapped-wrapper");
-			if (!oDynamicPageTitle._getShowSnapContent()) {
-				oRm.addClass("sapUiHidden");
-			}
-			oRm.addClass("sapFDynamicPageTitleSnapped");
-			oRm.writeClasses();
-			oRm.write(">");
-			aSnapContent.forEach(oRm.renderControl);
-			oRm.write("</div>");
+	DynamicPageTitleRenderer._renderSnappedContent = function (oRm, oDynamicPageTitleState) {
+		oRm.write("<div");
+		oRm.writeAttributeEscaped("id", oDynamicPageTitleState.id + "-snapped-wrapper");
+		if (!oDynamicPageTitleState.showSnapContent) {
+			oRm.addClass("sapUiHidden");
 		}
+		oRm.addClass("sapFDynamicPageTitleSnapped");
+		oRm.writeClasses();
+		oRm.write(">");
+		oDynamicPageTitleState.snappedContent.forEach(oRm.renderControl);
+		oRm.write("</div>");
 	};
 
 	return DynamicPageTitleRenderer;
@@ -431,6 +602,42 @@ sap.ui.define("sap/f/DynamicPageTitleRenderer",[], function () {
 }, /* bExport= */ true);
 
 }; // end of sap/f/DynamicPageTitleRenderer.js
+if ( !jQuery.sap.isDeclared('sap.f.flexibility.DynamicPageTitle.flexibility') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+jQuery.sap.declare('sap.f.flexibility.DynamicPageTitle.flexibility'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('sap.m.changeHandler.CombineButtons'); // unlisted dependency retained
+jQuery.sap.require('sap.m.changeHandler.SplitMenuButton'); // unlisted dependency retained
+sap.ui.define("sap/f/flexibility/DynamicPageTitle.flexibility",[
+	"sap/m/changeHandler/CombineButtons",
+	"sap/m/changeHandler/SplitMenuButton"
+], function (CombineButtonsHandler, SplitMenuButtonHandler) {
+	"use strict";
+
+	return {
+		"hideControl": "default",
+		"unhideControl": "default",
+		"combineButtons": {
+			"changeHandler": CombineButtonsHandler,
+			"layers": {
+				"CUSTOMER": false
+			}
+		},
+		"splitMenuButton": {
+			"changeHandler": SplitMenuButtonHandler,
+			"layers": {
+				"CUSTOMER": false
+			}
+		},
+		"moveControls": "default"
+	};
+}, /* bExport= */ true);
+
+}; // end of sap/f/flexibility/DynamicPageTitle.flexibility.js
 if ( !jQuery.sap.isDeclared('sap.f.library') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -452,22 +659,23 @@ sap.ui.define("sap/f/library",["jquery.sap.global",
 	"use strict";
 
 	/**
-	 * SAPUI5 library with controls specialized for Fiori applications.
+	 * SAPUI5 library with controls specialized for SAP Fiori apps.
 	 *
 	 * @namespace
 	 * @name sap.f
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @public
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.f",
-		version: "1.48.5",
+		version: "1.50.6",
 		dependencies : ["sap.ui.core", "sap.m"],
 		types: [
-			"sap.f.LayoutType"
+			"sap.f.LayoutType",
+			"sap.f.DynamicPageTitleArea"
 		],
 		controls: [
 			"sap.f.Avatar",
@@ -483,6 +691,7 @@ sap.ui.define("sap/f/library",["jquery.sap.global",
 			"sap.f.semantic.CopyAction",
 			"sap.f.semantic.DeleteAction",
 			"sap.f.semantic.DiscussInJamAction",
+			"sap.f.semantic.EditAction",
 			"sap.f.semantic.ExitFullScreenAction",
 			"sap.f.semantic.FavoriteAction",
 			"sap.f.semantic.FlagAction",
@@ -499,8 +708,46 @@ sap.ui.define("sap/f/library",["jquery.sap.global",
 			"sap.f.semantic.SendMessageAction",
 			"sap.f.semantic.ShareInJamAction",
 			"sap.f.semantic.TitleMainAction"
-		]
+		],
+		extensions: {
+            flChangeHandlers: {
+				"sap.f.DynamicPageHeader" : {
+					"hideControl": "default",
+					"unhideControl": "default",
+					"moveControls": "default"
+				},
+				"sap.f.DynamicPageTitle" : "sap/f/flexibility/DynamicPageTitle"
+			}
+		}
 	});
+
+
+	/**
+	* Defines the areas within the <code>sap.f.DynamicPageTitle</code>.
+	*
+	* @enum {string}
+	* @public
+	* @since 1.50
+	* @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	*/
+	sap.f.DynamicPageTitleArea = {
+		/**
+		* The area includes the <code>heading<code>, <code>expandedContent<code> and <code>snappedContent<code> aggregations,
+		* positioned in the beginning area of the {@link sap.f.DynamicPageTitle}.
+		*
+		* @public
+		*/
+		Begin: "Begin",
+
+		/**
+		* The area includes the <code>content<code> aggregation,
+		* positioned in the middle part of the {@link sap.f.DynamicPageTitle}.
+		*
+		* @public
+		*/
+		Middle: "Middle"
+	};
+
 
 	/**
 	 * Layouts, representing the number of columns to be displayed and their relative widths for a {@link sap.f.FlexibleColumnLayout} control.
@@ -521,7 +768,9 @@ sap.ui.define("sap/f/library",["jquery.sap.global",
 
 		/**
 		 * Desktop: 100/-/-  only the Begin column is displayed
+		 *
 		 * Tablet:  100/-/-  only the Begin column is displayed
+		 *
 		 * Phone:   100/-/-  only the Begin column is displayed
 		 *
 		 * Use to start with a master page.
@@ -532,7 +781,9 @@ sap.ui.define("sap/f/library",["jquery.sap.global",
 
 		/**
 		 * Desktop: 67/33/-  Begin (expanded) and Mid columns are displayed
+		 *
 		 * Tablet:  67/33/-  Begin (expanded) and Mid columns are displayed
+		 *
 		 * Phone:   -/100/-  only the Mid column is displayed
 		 *
 		 * Use to display both a master and a detail page when the user should focus on the master page.
@@ -543,7 +794,9 @@ sap.ui.define("sap/f/library",["jquery.sap.global",
 
 		/**
 		 * Desktop: 33/67/-  Begin and Mid (expanded) columns are displayed
+		 *
 		 * Tablet:  33/67/-  Begin and Mid (expanded) columns are displayed
+		 *
 		 * Phone:   -/100/-  only the Mid column is displayed
 		 *
 		 * Use to display both a master and a detail page when the user should focus on the detail page.
@@ -554,7 +807,9 @@ sap.ui.define("sap/f/library",["jquery.sap.global",
 
 		/**
 		 * Desktop: -/100/-  only the Mid column is displayed
+		 *
 		 * Tablet:  -/100/-  only the Mid column is displayed
+		 *
 		 * Phone:   -/100/-  only the Mid column is displayed
 		 *
 		 * Use to display a detail page only, when the user should focus entirely on it.
@@ -565,7 +820,9 @@ sap.ui.define("sap/f/library",["jquery.sap.global",
 
 		/**
 		 * Desktop: 25/50/25 Begin, Mid (expanded) and End columns are displayed
+		 *
 		 * Tablet:  0/67/33  Mid (expanded) and End columns are displayed, Begin is accessible by a layout arrow
+		 *
 		 * Phone:   -/-/100  only the End column is displayed
 		 *
 		 * Use to display all three pages (master, detail, detail-detail) when the user should focus on the detail.
@@ -576,7 +833,9 @@ sap.ui.define("sap/f/library",["jquery.sap.global",
 
 		/**
 		 * Desktop: 25/25/50 Begin, Mid and End (expanded) columns are displayed
+		 *
 		 * Tablet:  0/33/67  Mid and End (expanded) columns are displayed, Begin is accessible by layout arrows
+		 *
 		 * Phone:   -/-/100  (only the End column is displayed)
 		 *
 		 * Use to display all three pages (master, detail, detail-detail) when the user should focus on the detail-detail.
@@ -587,7 +846,9 @@ sap.ui.define("sap/f/library",["jquery.sap.global",
 
 		/**
 		 * Desktop: 33/67/0  Begin and Mid (expanded) columns are displayed, End is accessible by a layout arrow
+		 *
 		 * Tablet:  33/67/0  Begin and Mid (expanded) columns are displayed, End is accessible by a layout arrow
+		 *
 		 * Phone:   -/-/100  only the End column is displayed
 		 *
 		 * Use to display the master and detail pages when the user should focus on the detail.
@@ -599,7 +860,9 @@ sap.ui.define("sap/f/library",["jquery.sap.global",
 
 		/**
 		 * Desktop: 67/33/0  Begin (expanded) and Mid columns are displayed, End is accessible by layout arrows
+		 *
 		 * Tablet:  67/33/0  Begin (expanded) and Mid columns are displayed, End is accessible by layout arrows
+		 *
 		 * Phone:   -/-/100  only the End column is displayed
 		 *
 		 * Use to display the master and detail pages when the user should focus on the master.
@@ -611,7 +874,9 @@ sap.ui.define("sap/f/library",["jquery.sap.global",
 
 		/**
 		 * Desktop: -/-/100  only the End column is displayed
+		 *
 		 * Tablet:  -/-/100  only the End column is displayed
+		 *
 		 * Phone:   -/-/100  only the End column is displayed
 		 *
 		 * Use to display a detail-detail page only, when the user should focus entirely on it.
@@ -1099,23 +1364,26 @@ jQuery.sap.declare('sap.f.semantic.SemanticConfiguration'); // unresolved depend
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
 jQuery.sap.require('sap.ui.base.Metadata'); // unlisted dependency retained
 jQuery.sap.require('sap.ui.core.IconPool'); // unlisted dependency retained
-jQuery.sap.require('sap.m.ButtonType'); // unlisted dependency retained
+jQuery.sap.require('sap.m.library'); // unlisted dependency retained
 jQuery.sap.require('sap.m.OverflowToolbarLayoutData'); // unlisted dependency retained
-jQuery.sap.require('sap.m.OverflowToolbarPriority'); // unlisted dependency retained
 sap.ui.define("sap/f/semantic/SemanticConfiguration",[
 	"jquery.sap.global",
 	"sap/ui/base/Metadata",
 	"sap/ui/core/IconPool",
-	"sap/m/ButtonType",
-	"sap/m/OverflowToolbarLayoutData",
-	"sap/m/OverflowToolbarPriority"
+	"sap/m/library",
+	"sap/m/OverflowToolbarLayoutData"
 ], function(jQuery,
 			Metadata,
 			IconPool,
-			ButtonType,
-			OverflowToolbarLayoutData,
-			OverflowToolbarPriority) {
+			mobileLibrary,
+			OverflowToolbarLayoutData) {
 		"use strict";
+
+	// shortcut for sap.m.OverflowToolbarPriority
+	var OverflowToolbarPriority = mobileLibrary.OverflowToolbarPriority;
+
+	// shortcut for sap.m.ButtonType
+	var ButtonType = mobileLibrary.ButtonType;
 
 	/**
 	* Constructor for a <code>sap.f.semantic.SemanticConfiguration</code>.
@@ -1123,7 +1391,7 @@ sap.ui.define("sap/f/semantic/SemanticConfiguration",[
 	* @class
 	* Defines the visual properties and placement for each supported semantic type.
 	*
-	* @version 1.48.5
+	* @version 1.50.6
 	* @private
 	* @since 1.46.0
 	* @alias sap.f.semantic.SemanticConfiguration
@@ -1156,7 +1424,7 @@ sap.ui.define("sap/f/semantic/SemanticConfiguration",[
 	* Returns the configuration of the semantic type.
 	*
 	* @param {String} sType
-	* @returns {Object || null}
+	* @returns {Object | null}
 	*/
 	SemanticConfiguration.getConfiguration = function (sType) {
 		return SemanticConfiguration._oTypeConfigs[sType] || null;
@@ -1167,7 +1435,7 @@ sap.ui.define("sap/f/semantic/SemanticConfiguration",[
 	* defined in the configuration, that will be applied.
 	*
 	* @param {String} sType
-	* @returns {Object || null}
+	* @returns {Object | null}
 	*/
 	SemanticConfiguration.getSettings = function (sType) {
 		if (SemanticConfiguration.isKnownSemanticType(sType)) {
@@ -1182,7 +1450,7 @@ sap.ui.define("sap/f/semantic/SemanticConfiguration",[
 	* defined in the configuration.
 	*
 	* @param {String} sType
-	* @returns {String || null}
+	* @returns {String | null}
 	*/
 	SemanticConfiguration.getConstraints = function (sType) {
 		if (SemanticConfiguration.isKnownSemanticType(sType)) {
@@ -1211,7 +1479,7 @@ sap.ui.define("sap/f/semantic/SemanticConfiguration",[
 	* defined in the configuration.
 	*
 	* @param {String} sType
-	* @returns {Number || null}
+	* @returns {Number | null}
 	*/
 	SemanticConfiguration.getOrder = function (sType) {
 		if (SemanticConfiguration.isKnownSemanticType(sType)) {
@@ -1219,6 +1487,19 @@ sap.ui.define("sap/f/semantic/SemanticConfiguration",[
 		}
 
 		return null;
+	};
+
+	/**
+	 * Determines if the <code>SemanticControl</code> should be preprocessed.
+	 *
+	 * @returns {Boolean}
+	 */
+	SemanticConfiguration.shouldBePreprocessed = function (sType) {
+		if (SemanticConfiguration.isKnownSemanticType(sType)) {
+			return SemanticConfiguration._oTypeConfigs[sType].needPreprocesing || false;
+		}
+
+		return false;
 	};
 
 	/**
@@ -1250,7 +1531,7 @@ sap.ui.define("sap/f/semantic/SemanticConfiguration",[
 
 
 	/**
-	* <code>SemanticControl> configuration object.
+	* <code>SemanticControl</code> configuration object.
 	*/
 	SemanticConfiguration._oTypeConfigs = (function () {
 		var oTypeConfigs = {},
@@ -1270,13 +1551,13 @@ sap.ui.define("sap/f/semantic/SemanticConfiguration",[
 			}
 		};
 
-		oTypeConfigs["sap.f.semantic.AddAction"] = {
+		oTypeConfigs["sap.f.semantic.EditAction"] = {
 			placement: SemanticConfiguration._Placement.titleText,
 			order: 1,
 			getSettings: function() {
 				return {
-					text: oBundle.getText("SEMANTIC_CONTROL_ADD"),
-					tooltip: oBundle.getText("SEMANTIC_CONTROL_ADD"),
+					text: oBundle.getText("SEMANTIC_CONTROL_EDIT"),
+					tooltip: oBundle.getText("SEMANTIC_CONTROL_EDIT"),
 					type: ButtonType.Transparent
 				};
 			}
@@ -1299,6 +1580,18 @@ sap.ui.define("sap/f/semantic/SemanticConfiguration",[
 			getSettings: function() {
 				return {
 					text: oBundle.getText("SEMANTIC_CONTROL_COPY"),
+					type: ButtonType.Transparent
+				};
+			}
+		};
+
+		oTypeConfigs["sap.f.semantic.AddAction"] = {
+			placement: SemanticConfiguration._Placement.titleText,
+			order: 4,
+			getSettings: function() {
+				return {
+					text: oBundle.getText("SEMANTIC_CONTROL_ADD"),
+					tooltip: oBundle.getText("SEMANTIC_CONTROL_ADD"),
 					type: ButtonType.Transparent
 				};
 			}
@@ -1412,9 +1705,11 @@ sap.ui.define("sap/f/semantic/SemanticConfiguration",[
 			}
 		};
 
+		// FOOTER Semantic RIGHT Actions
 		oTypeConfigs["sap.m.DraftIndicator"] = {
-			placement: SemanticConfiguration._Placement.footerLeft,
-			order: 1,
+			placement: SemanticConfiguration._Placement.footerRight,
+			order: 0,
+			needPreprocesing: true,
 			mainAction : false,
 			getSettings: function() {
 				return {
@@ -1423,10 +1718,9 @@ sap.ui.define("sap/f/semantic/SemanticConfiguration",[
 			}
 		};
 
-		// FOOTER Semantic RIGHT Actions
 		oTypeConfigs["sap.f.semantic.FooterMainAction"] = {
 			placement: SemanticConfiguration._Placement.footerRight,
-			order: 0,
+			order: 1,
 			mainAction : true,
 			getSettings: function() {
 				return {
@@ -1440,7 +1734,7 @@ sap.ui.define("sap/f/semantic/SemanticConfiguration",[
 
 		oTypeConfigs["sap.f.semantic.PositiveAction"] = {
 			placement: SemanticConfiguration._Placement.footerRight,
-			order: 1,
+			order: 2,
 			mainAction : false,
 			getSettings: function() {
 				return {
@@ -1454,7 +1748,7 @@ sap.ui.define("sap/f/semantic/SemanticConfiguration",[
 
 		oTypeConfigs["sap.f.semantic.NegativeAction"] = {
 			placement: SemanticConfiguration._Placement.footerRight,
-			order: 2,
+			order: 3,
 			mainAction : false,
 			getSettings: function() {
 				return {
@@ -1612,6 +1906,19 @@ sap.ui.define("sap/f/semantic/SemanticContainer",[
 	};
 
 	/**
+	 * Returns the shouldBePreprocessed state of a <code>SemanticControl</code>,
+	 * defined in <code>sap.f.semantic.SemanticConfiguration</code>.
+	 *
+	 * @param {sap.f.semantic.SemanticControl} oControl
+	 * @returns {Boolean}
+	 */
+	SemanticContainer.prototype._shouldBePreprocessed = function(oControl) {
+		var sType = (oControl._getType && oControl._getType()) || oControl.getMetadata().getName();
+
+		return SemanticConfiguration.shouldBePreprocessed(sType);
+	};
+
+	/**
 	* Returns the order of a <code>SemanticControl</code> instance,
 	* defined in <code>sap.f.semantic.SemanticConfiguration</code>.
 	*
@@ -1731,7 +2038,7 @@ sap.ui.define("sap/f/semantic/SemanticControl",[
 	* @abstract
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -1905,19 +2212,22 @@ if ( !jQuery.sap.isDeclared('sap.f.semantic.SemanticFooter') ) {
 jQuery.sap.declare('sap.f.semantic.SemanticFooter'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
 jQuery.sap.require('sap.m.ToolbarSpacer'); // unlisted dependency retained
-jQuery.sap.require('sap.m.ButtonType'); // unlisted dependency retained
+jQuery.sap.require('sap.m.library'); // unlisted dependency retained
 sap.ui.define("sap/f/semantic/SemanticFooter",[
 	"jquery.sap.global",
 	"sap/m/ToolbarSpacer",
-	"sap/m/ButtonType",
+	"sap/m/library",
 	"./SemanticConfiguration",
 	"./SemanticContainer"
 ], function(jQuery,
 			ToolBarSpacer,
-			ButtonType,
+			mobileLibrary,
 			SemanticConfiguration,
 			SemanticContainer) {
 	"use strict";
+
+	// shortcut for sap.m.ButtonType
+	var ButtonType = mobileLibrary.ButtonType;
 
 	/**
 	* Constructor for a <code>sap.f.semantic.SemanticFooter</code>.
@@ -2062,7 +2372,6 @@ sap.ui.define("sap/f/semantic/SemanticFooter",[
 		this._callContainerAggregationMethod("insertContent", oControl, iIndexToInsert);
 		this._iSemanticLeftContentCount ++;
 		this._aSemanticLeftContent.push(oSemanticControl);
-		this._preProcessControl(oControl);
 
 		return this;
 	};
@@ -2078,6 +2387,9 @@ sap.ui.define("sap/f/semantic/SemanticFooter",[
 
 		this._aSemanticRightContent.push(oSemanticControl);
 		this._callContainerAggregationMethod("insertContent",  oControl, this._getSemanticRightContentInsertIndex(oSemanticControl));
+		if (this._shouldBePreprocessed(oSemanticControl)) {
+			this._preProcessControl(oControl);
+		}
 
 		return this;
 	};
@@ -2094,7 +2406,6 @@ sap.ui.define("sap/f/semantic/SemanticFooter",[
 		this._callContainerAggregationMethod("removeContent", oControl);
 		this._iSemanticLeftContentCount --;
 		this._aSemanticLeftContent.splice(this._aSemanticLeftContent.indexOf(oControl), 1);
-		this._postProcessControl(oControl);
 		return oSemanticControl;
 	};
 
@@ -2109,6 +2420,7 @@ sap.ui.define("sap/f/semantic/SemanticFooter",[
 
 		this._callContainerAggregationMethod("removeContent", oControl);
 		this._aSemanticRightContent.splice(this._aSemanticRightContent.indexOf(oSemanticControl), 1);
+		this._postProcessControl(oControl);
 
 		return oSemanticControl;
 	};
@@ -2145,7 +2457,7 @@ sap.ui.define("sap/f/semantic/SemanticFooter",[
 	};
 
 	/*
-	* Inserts a <code>sap.m.ToolbarSpacer<code>
+	* Inserts a <code>sap.m.ToolbarSpacer</code>
 	* between the <code>footerLeft</code> and <code>footerRight</code> areas.
 	*
 	* @returns {sap.f.semantic.SemanticFooter}
@@ -2156,7 +2468,7 @@ sap.ui.define("sap/f/semantic/SemanticFooter",[
 	};
 
 	/*
-	* Returns lazily a <code>sap.m.ToolbarSpacer<code> instance.
+	* Returns lazily a <code>sap.m.ToolbarSpacer</code> instance.
 	*
 	* @returns {sap.m.ToolbarSpacer}
 	*/
@@ -2251,7 +2563,7 @@ jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
 jQuery.sap.require('sap.ui.core.IconPool'); // unlisted dependency retained
 jQuery.sap.require('sap.ui.base.EventProvider'); // unlisted dependency retained
 jQuery.sap.require('sap.m.Button'); // unlisted dependency retained
-jQuery.sap.require('sap.m.ButtonType'); // unlisted dependency retained
+jQuery.sap.require('sap.m.library'); // unlisted dependency retained
 jQuery.sap.require('sap.m.OverflowToolbarButton'); // unlisted dependency retained
 jQuery.sap.require('sap.m.OverflowToolbarLayoutData'); // unlisted dependency retained
 sap.ui.define("sap/f/semantic/SemanticShareMenu",[
@@ -2259,7 +2571,7 @@ sap.ui.define("sap/f/semantic/SemanticShareMenu",[
 	"sap/ui/core/IconPool",
 	"sap/ui/base/EventProvider",
 	"sap/m/Button",
-	"sap/m/ButtonType",
+	"sap/m/library",
 	"sap/m/OverflowToolbarButton",
 	"sap/m/OverflowToolbarLayoutData",
 	"./SemanticConfiguration",
@@ -2269,12 +2581,15 @@ sap.ui.define("sap/f/semantic/SemanticShareMenu",[
 	IconPool,
 	EventProvider,
 	Button,
-	ButtonType,
+	mobileLibrary,
 	OverflowToolbarButton,
 	OverflowToolbarLayoutData,
 	SemanticConfiguration,
 	SemanticContainer) {
 	"use strict";
+
+	// shortcut for sap.m.ButtonType
+	var ButtonType = mobileLibrary.ButtonType;
 
 	/**
 	* Constructor for a <code>sap.f.semantic.SemanticShareMenu</code>.
@@ -2558,8 +2873,6 @@ sap.ui.define("sap/f/semantic/SemanticShareMenu",[
 	 * The method is called after a control has been removed
 	 * in order to update the <code>ShareMenu</code> mode.
 	 *
-	 *
-	 * @param {sap.f.semantic.SemanticControl} oControl
 	 * @returns {Boolean}
 	 */
 	SemanticShareMenu.prototype._onControlRemoved = function() {
@@ -2623,23 +2936,26 @@ if ( !jQuery.sap.isDeclared('sap.f.semantic.SemanticTitle') ) {
  */
 jQuery.sap.declare('sap.f.semantic.SemanticTitle'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-jQuery.sap.require('sap.m.ButtonType'); // unlisted dependency retained
+jQuery.sap.require('sap.m.library'); // unlisted dependency retained
 jQuery.sap.require('sap.m.ToolbarSeparator'); // unlisted dependency retained
 jQuery.sap.require('sap.m.ToolbarSpacer'); // unlisted dependency retained
 sap.ui.define("sap/f/semantic/SemanticTitle",[
 	"jquery.sap.global",
-	"sap/m/ButtonType",
+	"sap/m/library",
 	"sap/m/ToolbarSeparator",
 	"sap/m/ToolbarSpacer",
 	"./SemanticConfiguration",
 	"./SemanticContainer"
 ], function(jQuery,
-			ButtonType,
+			mobileLibrary,
 			ToolbarSeparator,
 			ToolBarSpacer,
 			SemanticConfiguration,
 			SemanticContainer) {
 	"use strict";
+
+	// shortcut for sap.m.ButtonType
+	var ButtonType = mobileLibrary.ButtonType;
 
 	/**
 	 * Constructor for a <code>sap.f.semantic.SemanticTitle</code>.
@@ -2955,7 +3271,7 @@ sap.ui.define("sap/f/semantic/SemanticTitle",[
 	* Determines the insert index of the <code>sap.f.semantic.MainAction</code>,
 	* that is about to be added in the <code>titleText</code> area.
 	*
-	* <b>Note:<b> The <code>MainAction</code> should always be the first title action,
+	* <b>Note:</b> The <code>MainAction</code> should always be the first title action,
 	* based on the semantic order requirements and it is defined in <code>SemanticConfiguration</code> as well.
 	*
 	* @private
@@ -3263,7 +3579,7 @@ sap.ui.define("sap/f/Avatar",[
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -3310,7 +3626,7 @@ sap.ui.define("sap/f/Avatar",[
 			},
 			aggregations : {
 				/**
-				 * A <code>sap.m.LightBox</code> instance, that will be opened automatically when the user interacts with the <code>Avatar</code>.
+				 * A <code>sap.m.LightBox</code> instance, that will be opened automatically when the user interacts with the <code>Avatar</code> control.
 				 *
 				 * The <code>press</code> event will still be fired.
 				 * @since 1.48
@@ -3359,20 +3675,32 @@ sap.ui.define("sap/f/Avatar",[
 
 	/**
 	 * Sets the <code>detailBox</code> aggregation.
-	 * @param {sap.m.LightBox|undefined} oLightBox - Instance of the LightBox control or undefined
+	 * @param {sap.m.LightBox|undefined} oLightBox - Instance of the <code>LightBox</code> control or undefined
 	 * @returns {object} <code>this</code> for chaining
 	 * @since 1.48
 	 * @override
 	 * @public
 	 */
 	Avatar.prototype.setDetailBox = function (oLightBox) {
+		var oCurrentDetailBox = this.getDetailBox();
+
 		if (oLightBox) {
+			// In case someone try's to set the same LightBox twice we don't do anything
+			if (oLightBox === oCurrentDetailBox) {
+				return this;
+			}
+
+			// If we already have a LightBox detach old one's event
+			if (oCurrentDetailBox) {
+				this.detachPress(this._fnLightBoxOpen, oCurrentDetailBox);
+			}
+
 			// Bind the LightBox open method to the press event of the Avatar
-			this._fnLightBoxOpen = oLightBox.open.bind(oLightBox);
-			this.attachPress(this._fnLightBoxOpen);
+			this._fnLightBoxOpen = oLightBox.open;
+			this.attachPress(this._fnLightBoxOpen, oLightBox);
 		} else if (this._fnLightBoxOpen) {
 			// If there was a LightBox - cleanup
-			Control.prototype.detachEvent.call(this, "press", this._fnLightBoxOpen);
+			this.detachPress(this._fnLightBoxOpen, oCurrentDetailBox);
 			this._fnLightBoxOpen = null;
 		}
 
@@ -3397,11 +3725,7 @@ sap.ui.define("sap/f/Avatar",[
 
 		if (!this.hasListeners("press")) {
 			this.$().removeAttr("tabindex");
-			if (this.getDecorative()) {
-				this.$().attr("role", "presentation");
-			} else {
-				this.$().removeAttr("role");
-			}
+			this.$().removeAttr("role");
 		}
 
 		return this;
@@ -3435,7 +3759,7 @@ sap.ui.define("sap/f/Avatar",[
 	 * Checks the validity of the <code>initials</code> parameter and returns <code>true</code> if the
 	 * initials are correct.
 	 *
-	 * @param sInitials
+	 * @param {string} sInitials
 	 * @returns {boolean}
 	 * @private
 	 */
@@ -3454,7 +3778,7 @@ sap.ui.define("sap/f/Avatar",[
 	/**
 	 * Validates the <code>src</code> parameter, and sets the actual type appropriately.
 	 *
-	 * @param sSrc
+	 * @param {string} sSrc
 	 * @returns {sap.f.Avatar}
 	 * @private
 	 */
@@ -3472,7 +3796,7 @@ sap.ui.define("sap/f/Avatar",[
 	/**
 	 * Validates the entered parameters, and returns what the actual display type parameter would be.
 	 *
-	 * @returns {string|*}
+	 * @returns {sap.f.AvatarType}
 	 * @private
 	 */
 	Avatar.prototype._getActualDisplayType = function () {
@@ -3495,8 +3819,8 @@ sap.ui.define("sap/f/Avatar",[
 	/**
 	 * Returns the path for the default icon, based on the value of the <code>DisplayShape</code> property.
 	 *
-	 * @param sDisplayShape
-	 * @returns {*}
+	 * @param {sap.f.AvatarShape} sDisplayShape
+	 * @returns {string} the default icon
 	 * @private
 	 */
 	Avatar.prototype._getDefaultIconPath = function (sDisplayShape) {
@@ -3644,7 +3968,7 @@ sap.ui.define("sap/f/DynamicPage",[
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -3678,7 +4002,7 @@ sap.ui.define("sap/f/DynamicPage",[
 				headerExpanded: {type: "boolean", group: "Behavior", defaultValue: true},
 
 				/**
-				 * Determines whether the the user can switch between the expanded/collapsed states of the
+				 * Determines whether the user can switch between the expanded/collapsed states of the
 				 * <code>DynamicPageHeader</code> by clicking on the <code>DynamicPageTitle</code>. If set to
 				 * <code>false</code>, the <code>DynamicPageTitle</code> is not clickable and the application
 				 * must provide other means for expanding/collapsing the <code>DynamicPageHeader</code>, if necessary.
@@ -3725,7 +4049,8 @@ sap.ui.define("sap/f/DynamicPage",[
 				 * <code>DynamicPage</code> custom <code>ScrollBar</code>.
 				 */
 				_scrollBar: {type: "sap.ui.core.ScrollBar", multiple: false, visibility: "hidden"}
-			}
+			},
+			designTime : true
 		}
 	});
 
@@ -3928,7 +4253,7 @@ sap.ui.define("sap/f/DynamicPage",[
 
 	/**
 	 * Hides/shows the footer container.
-	 * @param bShow
+	 * @param {boolean} bShow
 	 * @private
 	 */
 	DynamicPage.prototype._toggleFooter = function (bShow) {
@@ -4224,12 +4549,12 @@ sap.ui.define("sap/f/DynamicPage",[
 	};
 
 	/**
-	 * Determines the appropriate position of the <code>ScrollBar</code> based on the used device.
+	 * Determines the current scroll position.
 	 * @returns {Number}
 	 * @private
 	 */
 	DynamicPage.prototype._getScrollPosition = function () {
-		return this.getScrollDelegate().getScrollTop();
+		return exists(this.$wrapper) ? this.$wrapper.scrollTop() : 0;
 	};
 
 	/**
@@ -4476,9 +4801,8 @@ sap.ui.define("sap/f/DynamicPage",[
 			oScrollBar.toggleStyleClass("sapUiHidden", !bScrollBarNeeded);
 			this.toggleStyleClass("sapFDynamicPageWithScroll", bScrollBarNeeded);
 			this.bHasScrollbar = bScrollBarNeeded;
-			jQuery.sap.delayedCall(0, this, this._updateFitContainer);
 		}
-
+		jQuery.sap.delayedCall(0, this, this._updateFitContainer);
 		jQuery.sap.delayedCall(0, this, this._updateScrollBarOffset);
 
 	};
@@ -4523,7 +4847,7 @@ sap.ui.define("sap/f/DynamicPage",[
 
 	/**
 	 * Updates the media size of the control based on its own width, not on the entire screen size (which media query does).
-	 * This is necessary, because the control will be embedded in other controls (like the <code>sap.f.FlexibleColumnLayout<code>),
+	 * This is necessary, because the control will be embedded in other controls (like the <code>sap.f.FlexibleColumnLayout</code>),
 	 * thus it will not be using all of the screen width, but despite that the paddings need to be appropriate.
 	 * @param {Number} iWidth - the actual width of the control
 	 * @private
@@ -5013,7 +5337,7 @@ sap.ui.define("sap/f/DynamicPage",[
 	};
 
 	/**
-	 * Detaches the the <code>DynamicPage</code> content scroll handler.
+	 * Detaches the <code>DynamicPage</code> content scroll handler.
 	 * @private
 	 */
 	DynamicPage.prototype._detachScrollHandler = function () {
@@ -5039,11 +5363,14 @@ jQuery.sap.declare('sap.f.DynamicPageHeader'); // unresolved dependency added by
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
 jQuery.sap.require('sap.ui.core.Control'); // unlisted dependency retained
 jQuery.sap.require('sap.ui.core.InvisibleText'); // unlisted dependency retained
-jQuery.sap.require('sap.m.ButtonType'); // unlisted dependency retained
+jQuery.sap.require('sap.m.library'); // unlisted dependency retained
 jQuery.sap.require('sap.m.ToggleButton'); // unlisted dependency retained
-sap.ui.define("sap/f/DynamicPageHeader",["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/core/InvisibleText", "sap/m/ButtonType", "sap/m/ToggleButton"],
-	function (jQuery, library, Control, InvisibleText, ButtonType, ToggleButton) {
+sap.ui.define("sap/f/DynamicPageHeader",["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/core/InvisibleText", "sap/m/library", "sap/m/ToggleButton"],
+	function (jQuery, library, Control, InvisibleText, mobileLibrary, ToggleButton) {
 		"use strict";
+
+		// shortcut for sap.m.ButtonType
+		var ButtonType = mobileLibrary.ButtonType;
 
 		/**
 		 * Constructor for a new <code>DynamicPageHeader</code>.
@@ -5076,7 +5403,7 @@ sap.ui.define("sap/f/DynamicPageHeader",["jquery.sap.global", "./library", "sap/
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @public
@@ -5104,7 +5431,8 @@ sap.ui.define("sap/f/DynamicPageHeader",["jquery.sap.global", "./library", "sap/
 					 *  The pin/unpin button in the header.
 					 */
 					_pinButton: {type: "sap.m.Button", multiple: false, visibility: "hidden"}
-				}
+				},
+				designTime: true
 			}
 		});
 
@@ -5140,7 +5468,7 @@ sap.ui.define("sap/f/DynamicPageHeader",["jquery.sap.global", "./library", "sap/
 
 		/**
 		 * Determines the pin/unpin toggle button state.
-		 * @param bValue
+		 * @param {boolean} bValue
 		 * @private
 		 */
 		DynamicPageHeader.prototype._togglePinButton = function (bValue) {
@@ -5258,7 +5586,6 @@ sap.ui.define("sap/f/DynamicPageHeader",["jquery.sap.global", "./library", "sap/
 		};
 
 		return DynamicPageHeader;
-
 	}, /* bExport= */ false);
 
 }; // end of sap/f/DynamicPageHeader.js
@@ -5314,7 +5641,7 @@ sap.ui.define("sap/f/DynamicPageTitle",["jquery.sap.global", "./library", "sap/u
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -5325,6 +5652,16 @@ sap.ui.define("sap/f/DynamicPageTitle",["jquery.sap.global", "./library", "sap/u
 	var DynamicPageTitle = Control.extend("sap.f.DynamicPageTitle", /** @lends sap.f.DynamicPageTitle.prototype */ {
 		metadata: {
 			library: "sap.f",
+			properties: {
+				/**
+				* Determines which of the <code>DynamicPageTitle</code> areas (Begin, Middle) is primary.
+				*
+				* <b>Note:</b> The primary area is shrinking at lower rate, remaining visible as much as it can.
+				*
+				* @since 1.50
+				*/
+				primaryArea : {type: "sap.f.DynamicPageTitleArea", group: "Appearance", defaultValue: sap.f.DynamicPageTitleArea.Begin}
+			},
 			aggregations: {
 
 				/**
@@ -5338,6 +5675,13 @@ sap.ui.define("sap/f/DynamicPageTitle",["jquery.sap.global", "./library", "sap/u
 				 * suitable for {@link sap.m.Toolbar} and {@link sap.m.OverflowToolbar}.
 				 */
 				actions: {type: "sap.ui.core.Control", multiple: true, singularName: "action"},
+
+				/**
+				* The content is positioned in the <code>DynamicPageTitle</code> middle area
+				* and displayed in both expanded and collapsed (snapped) states.
+				* @since 1.50
+				*/
+				content: {type: "sap.ui.core.Control", multiple: true},
 
 				/**
 				 * The content that is displayed in the <code>DynamicPageTitle</code> in collapsed (snapped) state.
@@ -5354,7 +5698,8 @@ sap.ui.define("sap/f/DynamicPageTitle",["jquery.sap.global", "./library", "sap/u
 				 */
 				_overflowToolbar: {type: "sap.ui.core.Control", multiple: false, visibility: "hidden"}
 
-			}
+			},
+			designTime: true
 		}
 	});
 
@@ -5381,6 +5726,14 @@ sap.ui.define("sap/f/DynamicPageTitle",["jquery.sap.global", "./library", "sap/u
 		this._setShowSnapContent(this._getShowSnapContent());
 		this._setShowExpandContent(this._getShowExpandContent());
 	};
+
+	DynamicPageTitle.prototype.setPrimaryArea = function (sArea) {
+		if (this.getDomRef()) {
+			this._toggleAreaPriorityClasses(sArea === library.DynamicPageTitleArea.Begin);
+		}
+		return this.setProperty("primaryArea", sArea, true);
+	};
+
 
 	/**
 	 * Fires the <code>DynamicPageTitle</code> press event.
@@ -5415,6 +5768,8 @@ sap.ui.define("sap/f/DynamicPageTitle",["jquery.sap.global", "./library", "sap/u
 	 * @private
 	 */
 	DynamicPageTitle.prototype._cacheDomElements = function () {
+		this.$beginArea = this.$("left-inner");
+		this.$middleArea = this.$("content");
 		this.$snappedWrapper = this.$("snapped-wrapper");
 		this.$expandWrapper = this.$("expand-wrapper");
 	};
@@ -5448,6 +5803,9 @@ sap.ui.define("sap/f/DynamicPageTitle",["jquery.sap.global", "./library", "sap/u
 
 		oAction._fnOriginalGetParent = oAction.getParent;
 		oAction.getParent = this._fnActionSubstituteParentFunction;
+
+		oAction._sOriginalParentAggregationName = oAction.sParentAggregationName;
+		oAction.sParentAggregationName = "actions";
 	};
 
 	/**
@@ -5461,7 +5819,14 @@ sap.ui.define("sap/f/DynamicPageTitle",["jquery.sap.global", "./library", "sap/u
 			return;
 		}
 
+		// The runtime adaptation tipically removes and then adds aggregations multiple times.
+		// That is why we need to make sure that the controls are in their previous state
+		// when preprocessed. Otherwise the wrong parent aggregation name is passed
 		oAction.getParent = oAction._fnOriginalGetParent;
+		oAction._fnOriginalGetParent = null;
+
+		oAction.sParentAggregationName = oAction._sOriginalParentAggregationName;
+		oAction._sOriginalParentAggregationName = null;
 	};
 
 	/**
@@ -5473,13 +5838,12 @@ sap.ui.define("sap/f/DynamicPageTitle",["jquery.sap.global", "./library", "sap/u
 		.forEach(function (sMethod) {
 			DynamicPageTitle.prototype[sMethod] = function (oControl) {
 				var oToolbar = this._getOverflowToolbar(),
-					sToolbarMethod = sMethod.replace(/Actions?/, "Content"),
-					vResult;
+					sToolbarMethod = sMethod.replace(/Actions?/, "Content");
 
 				if (sMethod === "addAction" || sMethod === "insertAction") {
-					vResult = oToolbar[sToolbarMethod].apply(oToolbar, arguments);
+					oToolbar[sToolbarMethod].apply(oToolbar, arguments);
 					this._preProcessAction(oControl);
-					return vResult;
+					return this;
 				} else if (sMethod === "removeAction") {
 					this._postProcessAction(oControl);
 				} else if (sMethod === "removeAllActions" || sMethod === "destroyActions") {
@@ -5530,6 +5894,52 @@ sap.ui.define("sap/f/DynamicPageTitle",["jquery.sap.global", "./library", "sap/u
 		return this._bShowExpandContent;
 	};
 
+	/**
+	 * Updates the priority classes of the <code>DynamicPageTitle</code> areas.
+	 * @param {boolean} isPrimaryAreaBegin
+	 * @private
+	 * @since 1.50
+	 */
+	DynamicPageTitle.prototype._toggleAreaPriorityClasses = function (isPrimaryAreaBegin) {
+		this.$beginArea.toggleClass("sapFDynamicPageTitleAreaHighPriority", isPrimaryAreaBegin);
+		this.$beginArea.toggleClass("sapFDynamicPageTitleAreaLowPriority", !isPrimaryAreaBegin);
+		this.$middleArea.toggleClass("sapFDynamicPageTitleAreaHighPriority", !isPrimaryAreaBegin);
+		this.$middleArea.toggleClass("sapFDynamicPageTitleAreaLowPriority", isPrimaryAreaBegin);
+	};
+
+	DynamicPageTitle.prototype._getState = function () {
+		var oActionsBar = this._getOverflowToolbar(),
+			sID = this.getId(),
+			aActions = oActionsBar.getContent(),
+			aContent = this.getContent(),
+			oHeading = this.getHeading(),
+			aSnapContent = this.getSnappedContent(),
+			aExpandContent = this.getExpandedContent(),
+			bHasExpandedContent = aExpandContent.length > 0,
+			bHasSnappedContent = aSnapContent.length > 0,
+			bShowSnapContent = this._getShowSnapContent(),
+			sAriaText = this._oRB.getText("TOGGLE_HEADER"),
+			sPrimaryArea = this.getPrimaryArea();
+
+			return {
+				id: sID,
+				actionBar: oActionsBar,
+				hasActions: aActions.length > 0,
+				content: aContent,
+				hasContent: aContent.length > 0,
+				heading: oHeading,
+				snappedContent: aSnapContent,
+				expandedContent: aExpandContent,
+				hasSnappedContent: bHasSnappedContent,
+				hasExpandedContent: bHasExpandedContent,
+				hasAdditionalContent: bHasExpandedContent || bHasSnappedContent,
+				showSnapContent: bShowSnapContent,
+				isPrimaryAreaBegin: sPrimaryArea === "Begin",
+				ariaText: sAriaText
+			};
+	};
+
+
 	return DynamicPageTitle;
 }, /* bExport= */ false);
 
@@ -5544,7 +5954,6 @@ if ( !jQuery.sap.isDeclared('sap.f.FlexibleColumnLayout') ) {
 // Provides control sap.f.FlexibleColumnLayout.
 jQuery.sap.declare('sap.f.FlexibleColumnLayout'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-jQuery.sap.require('sap.f.LayoutType'); // unlisted dependency retained
 jQuery.sap.require('sap.ui.Device'); // unlisted dependency retained
 jQuery.sap.require('sap.ui.core.ResizeHandler'); // unlisted dependency retained
 jQuery.sap.require('sap.ui.core.Control'); // unlisted dependency retained
@@ -5554,15 +5963,18 @@ jQuery.sap.require('sap.m.NavContainer'); // unlisted dependency retained
 sap.ui.define("sap/f/FlexibleColumnLayout",[
 	"jquery.sap.global",
 	"./library",
-	"./LayoutType",
 	"sap/ui/Device",
 	"sap/ui/core/ResizeHandler",
 	"sap/ui/core/Control",
 	"sap/ui/core/InvisibleText",
 	"sap/m/Button",
 	"sap/m/NavContainer"
-], function (jQuery, library, LT, Device, ResizeHandler, Control, InvisibleText, Button, NavContainer) {
+], function (jQuery, library, Device, ResizeHandler, Control, InvisibleText, Button, NavContainer) {
 	"use strict";
+
+
+	// shortcut for sap.f.LayoutType
+	var LT = library.LayoutType;
 
 
 	/**
@@ -5610,7 +6022,7 @@ sap.ui.define("sap/f/FlexibleColumnLayout",[
 	 *
 	 * @extends sap.ui.core.Control
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -6122,7 +6534,7 @@ sap.ui.define("sap/f/FlexibleColumnLayout",[
 
 	/**
 	 * Instantiates a nav container for the column and binds events
-	 * @param sColumn - the column for which a nav container must be created
+	 * @param {string} sColumn - the column for which a nav container must be created
 	 * @returns {*}
 	 * @private
 	 */
@@ -6143,8 +6555,8 @@ sap.ui.define("sap/f/FlexibleColumnLayout",[
 	/**
 	 * Proxies the navigation events from the internal nav containers to the app.
 	 * @param oEvent
-	 * @param bAfter
-	 * @param sColumn
+	 * @param {boolean} bAfter
+	 * @param {string} sColumn
 	 * @private
 	 */
 	FlexibleColumnLayout.prototype._handleNavigationEvent = function(oEvent, bAfter, sColumn){
@@ -6249,6 +6661,7 @@ sap.ui.define("sap/f/FlexibleColumnLayout",[
 
 	FlexibleColumnLayout.prototype.exit = function () {
 		this._deregisterResizeHandler();
+		this._handleEvent(jQuery.Event("Destroy"));
 	};
 
 	FlexibleColumnLayout.prototype._registerResizeHandler = function () {
@@ -6477,7 +6890,7 @@ sap.ui.define("sap/f/FlexibleColumnLayout",[
 
 	/**
 	 * Gets the size (in %) of a column based on the current layout
-	 * @param sColumn - string: begin/mid/end
+	 * @param {string} sColumn - string: begin/mid/end
 	 * @returns {*}
 	 * @private
 	 */
@@ -6508,7 +6921,7 @@ sap.ui.define("sap/f/FlexibleColumnLayout",[
 
 	/**
 	 * Returns the maximum number of columns that can be displayed at once for a certain control width
-	 * @param iWidth
+	 * @param {int} iWidth
 	 * @returns {number}
 	 * @private
 	 */
@@ -6554,7 +6967,7 @@ sap.ui.define("sap/f/FlexibleColumnLayout",[
 
 	/**
 	 * Called when the layout arrows were clicked.
-	 * @param sShiftDirection - left/right (direction of the arrow)
+	 * @param {string} sShiftDirection - left/right (direction of the arrow)
 	 * @private
 	 */
 	FlexibleColumnLayout.prototype._onArrowClick = function (sShiftDirection) {
@@ -6630,8 +7043,8 @@ sap.ui.define("sap/f/FlexibleColumnLayout",[
 
 	/**
 	 * Changes the visibility of a navigation button.
-	 * @param sButton
-	 * @param bShow
+	 * @param {string} sButton
+	 * @param {boolean} bShow
 	 * @private
 	 */
 	FlexibleColumnLayout.prototype._toggleButton = function (sButton, bShow) {
@@ -7117,8 +7530,8 @@ sap.ui.define("sap/f/FlexibleColumnLayout",[
 
 	/**
 	 * Returns a string, representing the relative percentage sizes of the columns for the given layout in the format "begin/mid/end" (f.e. "33/67/0")
-	 * @param sLayout - the layout
-	 * @param bAsArray - return an array in the format [33, 67, 0] instead of a string "33/67/0"
+	 * @param {string} sLayout - the layout
+	 * @param {boolean} bAsArray - return an array in the format [33, 67, 0] instead of a string "33/67/0"
 	 * @returns {string|array}
 	 * @sap-restricted sap.f.FlexibleColumnLayoutSemanticHelper
 	 * @private
@@ -7215,7 +7628,7 @@ sap.ui.define("sap/f/FlexibleColumnLayout",[
 
 	/**
 	 * Creates an invisible text in the static area and returns its id
-	 * @param sResourceBundleKey
+	 * @param {string} sResourceBundleKey
 	 * @private
 	 * @returns {string}
 	 */
@@ -7235,7 +7648,7 @@ sap.ui.define("sap/f/FlexibleColumnLayout",[
 
 	/**
 	 * Adds a new entry to the history
-	 * @param sLayout
+	 * @param {string} sLayout
 	 */
 	LayoutHistory.prototype.addEntry = function (sLayout) {
 		if (typeof sLayout !== "undefined") {
@@ -7396,14 +7809,15 @@ if ( !jQuery.sap.isDeclared('sap.f.FlexibleColumnLayoutSemanticHelper') ) {
 
 jQuery.sap.declare('sap.f.FlexibleColumnLayoutSemanticHelper'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-jQuery.sap.require('sap.f.LayoutType'); // unlisted dependency retained
 sap.ui.define("sap/f/FlexibleColumnLayoutSemanticHelper",[
 	"jquery.sap.global",
 	"./library",
-	"./LayoutType",
 	"./FlexibleColumnLayout"
-], function (jQuery, library, LT, FlexibleColumnLayout) {
+], function (jQuery, library, FlexibleColumnLayout) {
 	"use strict";
+
+	// shortcut for sap.f.LayoutType
+	var LT = library.LayoutType;
 
 	/**
 	 * Constructor for an sap.f.FlexibleColumnLayoutSemanticHelper.
@@ -7440,28 +7854,90 @@ sap.ui.define("sap/f/FlexibleColumnLayoutSemanticHelper",[
 	 *
 	 * For more information, see {@link sap.f.FlexibleColumnLayoutSemanticHelper#getCurrentUIState} and {@link sap.f.FlexibleColumnLayoutSemanticHelper#getNextUIState}
 	 *
-	 * @version 1.48.5
-	 * @param {sap.f.FlexibleColumnLayout} oFlexibleColumnLayout The <code>sap.f.FlexibleColumnLayout</code> object whose state will be manipulated
-	 * @param {object} oSettings Determines the rules that will be used by the helper
-	 * @param {sap.f.LayoutType} oSettings.defaultTwoColumnLayoutType Determines what two-column layout type will be suggested by default: <code>sap.f.LayoutType.TwoColumnsBeginExpanded</code> (default) or <code>sap.f.LayoutType.TwoColumnsMidExpanded</code>
-	 * @param {sap.f.LayoutType} oSettings.defaultThreeColumnLayoutType Determines what three-column layout type will be suggested by default: <code>sap.f.LayoutType.ThreeColumnsMidExpanded</code> (default) or <code>sap.f.LayoutType.ThreeColumnsEndExpanded</code>
-	 * @param {string} oSettings.mode Determines the suggested layout types: <code>Normal</code> (3-column layouts), <code>MasterDetail</code> (2-column layouts for the first two pages, all other pages will open in fullscreen), and <code>SingleColumn</code> (one page at a time only)
+	 * @version 1.50.6
+	 * @param {sap.f.FlexibleColumnLayout} oFlexibleColumnLayout
+	 * The <code>sap.f.FlexibleColumnLayout</code> object whose state will be manipulated.
+	 *
+	 * @param {object} oSettings Determines the rules that will be used by the helper.
+	 *
+	 * @param {sap.f.LayoutType} oSettings.defaultTwoColumnLayoutType
+	 * Determines what two-column layout type will be suggested by default:
+	 * <code>sap.f.LayoutType.TwoColumnsBeginExpanded</code> (default) or <code>sap.f.LayoutType.TwoColumnsMidExpanded</code>.
+	 *
+	 * @param {sap.f.LayoutType} oSettings.defaultThreeColumnLayoutType
+	 * Determines what three-column layout type will be suggested by default:
+	 * <code>sap.f.LayoutType.ThreeColumnsMidExpanded</code> (default) or <code>sap.f.LayoutType.ThreeColumnsEndExpanded</code>.
+	 *
+	 * @param {int} oSettings.maxColumnsCount
+	 * Determines the maximum number of columns that will be displayed side by side.
+	 *
+	 * <ul>Possible values:
+	 *
+	 * <li>Value of <code>1</code> only single-column layouts will be suggested.</li>
+	 *
+	 * <li>Value of <code>2</code> Up to 2-column layouts will be suggested.</li>
+	 *
+	 * <li>Value of <code>3</code> (default) - Up to 3-column layouts will be suggested.</li></ul>
+	 *
+	 * @param {int} oSettings.initialColumnsCount
+	 * Determines whether a single-column or a 2-column layout will be suggested
+	 * for logical level 0.
+	 *
+	 * <ul>Possible values:
+	 *
+	 * <li>Value of <code>1</code> (default) - A single-column layout will be suggested
+	 * for logical level 0.</li>
+	 *
+	 * <li>Value of <code>2</code> - A 2-column layout will be suggested for logical level 0.</li></ul>
+	 *
+	 * @param {string} oSettings.mode
+	 * <b>Deprecated as of version 1.50</b>, use <code>maxColumnsCount</code> param
+	 * instead.
+	 *
+	 * Determines the suggested layout types: <code>Normal</code> (3-column layouts),
+	 * <code>MasterDetail</code> (2-column layouts for the first two pages, all other
+	 * pages will open in fullscreen), and <code>SingleColumn</code> (one page at a
+	 * time only).
+	 *
 	 * @public
 	 * @since 1.46.0
 	 * @alias sap.f.FlexibleColumnLayoutSemanticHelper
 	 */
 	var FlexibleColumnLayoutSemanticHelper = function (oFlexibleColumnLayout, oSettings) {
+		var oModeToMaxColumnsCountMapping = {
+				Normal: 3,
+				MasterDetail: 2,
+				SingleColumn: 1
+			},
+			iInitial,
+			iMax;
+		oSettings || (oSettings = {});
 		this._oFCL = oFlexibleColumnLayout;
-		this._mode = "Normal";
 
-		// Currently only the the default 3-column type is configurable
+		// Layout types
 		this._defaultLayoutType = LT.OneColumn;
 		this._defaultTwoColumnLayoutType = [LT.TwoColumnsBeginExpanded, LT.TwoColumnsMidExpanded].indexOf(oSettings.defaultTwoColumnLayoutType) !== -1 ?
 			oSettings.defaultTwoColumnLayoutType : LT.TwoColumnsBeginExpanded;
 		this._defaultThreeColumnLayoutType = [LT.ThreeColumnsMidExpanded, LT.ThreeColumnsEndExpanded].indexOf(oSettings.defaultThreeColumnLayoutType) !== -1 ?
 			oSettings.defaultThreeColumnLayoutType : LT.ThreeColumnsMidExpanded;
-		this._mode = ["Normal", "MasterDetail", "SingleColumn"].indexOf(oSettings.mode) !== -1 ?
-			oSettings.mode : "Normal";
+
+		// Maximum number of columns and mode (deprecated)
+		if (["Normal", "MasterDetail", "SingleColumn"].indexOf(oSettings.mode) !== -1 && !oSettings.maxColumnsCount) {
+			iMax = oModeToMaxColumnsCountMapping[oSettings.mode];
+		} else {
+			iMax = oSettings.maxColumnsCount ? parseInt(oSettings.maxColumnsCount, 10) : 3;
+			if (iMax < 1 || iMax > 3) {
+				iMax = 3;
+			}
+		}
+		this._maxColumnsCount = iMax;
+
+		// Initial number of columns (1 by default, can be set to 2 for MasterDetail or Normal modes only)
+		iInitial = oSettings.initialColumnsCount ? parseInt(oSettings.initialColumnsCount, 10) : 1;
+		if (iInitial < 1 || iInitial > 2 || this._maxColumnsCount === 1) {
+			iInitial = 1;
+		}
+		this._initialColumnsCount = iInitial;
 	};
 
 	/**
@@ -7491,6 +7967,13 @@ sap.ui.define("sap/f/FlexibleColumnLayoutSemanticHelper",[
 
 		if (typeof FlexibleColumnLayoutSemanticHelper._oInstances[sId] === "undefined") {
 			FlexibleColumnLayoutSemanticHelper._oInstances[sId] = new FlexibleColumnLayoutSemanticHelper(oFlexibleColumnLayout, oSettings);
+
+			var oDelegate = {
+				onDestroy: function() {
+					delete FlexibleColumnLayoutSemanticHelper._oInstances[sId];
+				}
+			};
+			oFlexibleColumnLayout.addEventDelegate(oDelegate);
 		}
 
 		return FlexibleColumnLayoutSemanticHelper._oInstances[sId];
@@ -7558,7 +8041,7 @@ sap.ui.define("sap/f/FlexibleColumnLayoutSemanticHelper",[
 	 *
 	 * About the format of return value, see: {@link sap.f.FlexibleColumnLayoutSemanticHelper#getCurrentUIState}
 	 *
-	 * @param iLevel - the view level that should be represented. 0 means initial (master only), 1 - master-detail,
+	 * @param {int} iNextLevel - the view level that should be represented. 0 means initial (master only), 1 - master-detail,
 	 * 2 - master-detail-detail, 3 and above - subsequent views
 	 *
 	 * @public
@@ -7567,18 +8050,24 @@ sap.ui.define("sap/f/FlexibleColumnLayoutSemanticHelper",[
 	FlexibleColumnLayoutSemanticHelper.prototype.getNextUIState = function (iNextLevel) {
 
 		var sCurrentLayout = this._oFCL.getLayout(),
+			iInitial = this._initialColumnsCount,
 			sNextLayout;
 
 		// Level 0 - the first page
 		if (iNextLevel === 0) {
-			// From any layout, going to level 0 is always showing the begin column only
-			sNextLayout = LT.OneColumn;
+			// From any layout, going to level 0 is always showing the begin column only, unless initialColumnsCount=2. Then a 2-column layout is suggested even for level 0
+			// However, a 2-column layout should only be suggested if there is enough space for 2 columns, hence the additional check
+			if (iInitial === 2 && this._canShowTwoColumns()) {
+				sNextLayout = this._defaultTwoColumnLayoutType;
+			} else {
+				sNextLayout = LT.OneColumn;
+			}
 		}
 
 		// Level 1 - the second page
 		if (iNextLevel === 1) {
 
-			if (this._mode === "SingleColumn") {
+			if (this._maxColumnsCount === 1) {
 
 				sNextLayout = LT.MidColumnFullScreen;
 
@@ -7600,7 +8089,7 @@ sap.ui.define("sap/f/FlexibleColumnLayoutSemanticHelper",[
 		// Level 2 - the third page
 		if (iNextLevel === 2) {
 
-			if (this._mode === "SingleColumn" || this._mode === "MasterDetail") {
+			if (this._maxColumnsCount < 3) {
 
 				// Clicking the mid column when in 2-column layout should open the third column in fullscreen mode
 				sNextLayout = LT.EndColumnFullScreen;
@@ -7634,7 +8123,7 @@ sap.ui.define("sap/f/FlexibleColumnLayoutSemanticHelper",[
 
 	/**
 	 * Returns information about the current layout
-	 * @param sLayout
+	 * @param {sap.f.LayoutType} sLayout
 	 * @returns {{layout: string, maxColumnsCount: number, columnsSizes: {beginColumn, midColumn, endColumn}, columnsVisibility: {beginColumn, midColumn, endColumn}, isFullScreen, isLogicallyFullScreen, actionButtonsInfo: {midColumn, endColumn}}}
 	 * @private
 	 */
@@ -7699,7 +8188,7 @@ sap.ui.define("sap/f/FlexibleColumnLayoutSemanticHelper",[
 			aEligibleLayouts,
 			sExitFullScreen;
 
-		if (this._mode === "SingleColumn") {
+		if (this._maxColumnsCount === 1) {
 			return {
 				midColumn: oMidColumn,
 				endColumn: oEndColumn
@@ -7739,7 +8228,7 @@ sap.ui.define("sap/f/FlexibleColumnLayoutSemanticHelper",[
 
 			if (sColumnWidthDistribution === "0/0/100") {
 
-				if (this._mode !== "MasterDetail") {
+				if (this._maxColumnsCount !== 2) {
 					aEligibleLayouts = [LT.ThreeColumnsMidExpanded, LT.ThreeColumnsEndExpanded];
 					sExitFullScreen = this._oFCL._getLayoutHistory().getClosestEntryThatMatches(aEligibleLayouts) || this._defaultThreeColumnLayoutType;
 
@@ -7773,6 +8262,21 @@ sap.ui.define("sap/f/FlexibleColumnLayoutSemanticHelper",[
 			defaultTwoColumnLayoutType: this._defaultTwoColumnLayoutType,
 			defaultThreeColumnLayoutType: this._defaultThreeColumnLayoutType
 		};
+	};
+
+	/**
+	 * Determines whether the FCL can display 2 columns side by side.
+	 * This check can only be performed reliably if the control is rendered (so that its width can be measured).
+	 * Otherwise, only a best guess can be made, based on the window size, instead.
+	 *
+	 * @returns {boolean}
+	 * @private
+	 */
+	FlexibleColumnLayoutSemanticHelper.prototype._canShowTwoColumns = function () {
+		var iControlWidth = this._oFCL._getControlWidth(),
+			iMaxColumnsCount = this._oFCL._getMaxColumnsCountForWidth( iControlWidth || window.innerWidth);
+
+		return iMaxColumnsCount > 1;
 	};
 
 	return FlexibleColumnLayoutSemanticHelper;
@@ -8236,11 +8740,11 @@ sap.ui.define("sap/f/semantic/SemanticButton",[
 	* A base class for the available semantic actions, such as {@link sap.f.semantic.AddAction AddAction},
 	* {@link sap.f.semantic.CloseAction CloseAction}, etc.
 	*
-	* @extends <code>sap.f.semantic.SemanticControl</code>
+	* @extends sap.f.semantic.SemanticControl
 	* @abstract
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -8368,7 +8872,7 @@ sap.ui.define("sap/f/semantic/SemanticPage",[
 	* <ul>Text actions:
 	* <li>The main semantic text action - <code>titleMainAction</code></li>
 	* <li>Any custom text actions - <code>titleCustomTextActions</code></li>
-	* <li>The semantic text actions - <code>addAction</code>, <code>deleteAction</code>, and <code>copyAction</code></li></ul>
+	* <li>The semantic text actions - <code>editAction</code>, <code>deleteAction</code>, <code>copyAction</code> and <code>addAction</code></li></ul>
 	*
 	* <ul>Icon actions:
 	* <li>Any custom icon actions - <code>titleCustomIconActions</code></li>
@@ -8405,7 +8909,7 @@ sap.ui.define("sap/f/semantic/SemanticPage",[
 	* @extends sap.ui.core.Control
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -8447,7 +8951,7 @@ sap.ui.define("sap/f/semantic/SemanticPage",[
 				preserveHeaderStateOnScroll: {type: "boolean", group: "Behavior", defaultValue: false},
 
 				/**
-				* Determines whether the the user can switch between the expanded/collapsed states of the
+				* Determines whether the user can switch between the expanded/collapsed states of the
 				* header by clicking on the title.
 				*
 				* If set to <code>false</code>, the title is not clickable and the application
@@ -8493,9 +8997,10 @@ sap.ui.define("sap/f/semantic/SemanticPage",[
 				titleMainAction: {type: "sap.f.semantic.TitleMainAction", multiple: false},
 
 				/**
-				* A semantic-specific button which is placed in the <code>TextActions</code> area of the <code>SemanticPage</code> title.
-				*/
-				addAction: {type: "sap.f.semantic.AddAction", multiple: false},
+				 * A semantic-specific button which is placed in the <code>TextActions</code> area of the <code>SemanticPage</code> title.
+				 * @since 1.50
+				 */
+				editAction: {type: "sap.f.semantic.EditAction", multiple: false},
 
 				/**
 				* A semantic-specific button which is placed in the <code>TextActions</code> area of the <code>SemanticPage</code> title.
@@ -8506,6 +9011,11 @@ sap.ui.define("sap/f/semantic/SemanticPage",[
 				* A semantic-specific button which is placed in the <code>TextActions</code> area of the <code>SemanticPage</code> title.
 				*/
 				copyAction: {type: "sap.f.semantic.CopyAction", multiple: false},
+
+				/**
+				 * A semantic-specific button which is placed in the <code>TextActions</code> area of the <code>SemanticPage</code> title.
+				 */
+				addAction: {type: "sap.f.semantic.AddAction", multiple: false},
 
 				/**
 				* A semantic-specific button which is placed in the <code>IconActions</code> area of the <code>SemanticPage</code> title.
@@ -8622,7 +9132,7 @@ sap.ui.define("sap/f/semantic/SemanticPage",[
 
 				/**
 				* The <code>customShareActions</code> are placed in the <code>ShareMenu</code> area of the
-				* <code>SemanticPage</code> title, right after the the semantic actions.
+				* <code>SemanticPage</code> title, right after the semantic actions.
 				*/
 				customShareActions: {type: "sap.m.Button", multiple: true},
 
@@ -9282,13 +9792,16 @@ if ( !jQuery.sap.isDeclared('sap.f.semantic.SemanticToggleButton') ) {
  */
 
 jQuery.sap.declare('sap.f.semantic.SemanticToggleButton'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-jQuery.sap.require('sap.m.ButtonType'); // unlisted dependency retained
+jQuery.sap.require('sap.m.library'); // unlisted dependency retained
 sap.ui.define("sap/f/semantic/SemanticToggleButton",[
 	'./SemanticButton',
 	'./SemanticControl',
-	'sap/m/ButtonType'
-], function(SemanticButton, SemanticControl, ButtonType) {
+	'sap/m/library'
+], function(SemanticButton, SemanticControl, mobileLibrary) {
 	"use strict";
+
+	// shortcut for sap.m.ButtonType
+	var ButtonType = mobileLibrary.ButtonType;
 
 	/**
 	* Constructor for a new <code>SemanticToggleButton</code>.
@@ -9299,11 +9812,11 @@ sap.ui.define("sap/f/semantic/SemanticToggleButton",[
 	* @class
 	* A base class for the {@link sap.f.semantic.FavoriteAction} and {@link sap.f.semantic.FlagAction}.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	* @abstract
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -9424,10 +9937,10 @@ sap.ui.define("sap/f/semantic/SendEmailAction",['sap/f/semantic/SemanticButton']
 	* A semantic-specific button, eligible for the <code>sendEmailAction</code> aggregation of the
 	* {@link sap.f.semantic.SemanticPage} to be placed in the share menu within its title.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -9465,10 +9978,10 @@ sap.ui.define("sap/f/semantic/SendMessageAction",['sap/f/semantic/SemanticButton
 	* A semantic-specific button, eligible for the <code>sendMessageAction</code> aggregation of the
 	* {@link sap.f.semantic.SemanticPage} to be placed in the share menu within its title.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -9506,10 +10019,10 @@ sap.ui.define("sap/f/semantic/ShareInJamAction",['sap/f/semantic/SemanticButton'
 	* A semantic-specific button, eligible for the <code>shareInJamAction</code> aggregation of the
 	* {@link sap.f.semantic.SemanticPage} to be placed in the share menu within its title.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -9667,10 +10180,10 @@ sap.ui.define("sap/f/semantic/AddAction",['sap/f/semantic/SemanticButton'], func
 	* A semantic-specific button, eligible for the <code>addAction</code> aggregation of the
 	* {@link sap.f.semantic.SemanticPage} to be placed in its title.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -9707,10 +10220,10 @@ sap.ui.define("sap/f/semantic/CloseAction",['./SemanticButton'], function(Semant
 	* A semantic-specific button, eligible for the <code>closeAction</code> aggregation of the
 	* {@link sap.f.semantic.SemanticPage} to be placed in its title.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -9747,10 +10260,10 @@ sap.ui.define("sap/f/semantic/CopyAction",['./SemanticButton'], function(Semanti
 	* A semantic-specific button, eligible for the <code>copyAction</code> aggregation of the
 	* {@link sap.f.semantic.SemanticPage} to be placed in its title.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -9788,10 +10301,10 @@ sap.ui.define("sap/f/semantic/DeleteAction",['sap/f/semantic/SemanticButton'], f
 	* A semantic-specific button, eligible for the <code>deleteAction</code> aggregation of the
 	* {@link sap.f.semantic.SemanticPage} to be placed in its title.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -9829,10 +10342,10 @@ sap.ui.define("sap/f/semantic/DiscussInJamAction",['sap/f/semantic/SemanticButto
 	* A semantic-specific button, eligible for the <code>discussInJamAction</code> aggregation of the
 	* {@link sap.f.semantic.SemanticPage} to be placed in the share menu within its title.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -9849,6 +10362,46 @@ sap.ui.define("sap/f/semantic/DiscussInJamAction",['sap/f/semantic/SemanticButto
 	return DiscussInJamAction;
 }, /* bExport= */ true);
 }; // end of sap/f/semantic/DiscussInJamAction.js
+if ( !jQuery.sap.isDeclared('sap.f.semantic.EditAction') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+jQuery.sap.declare('sap.f.semantic.EditAction'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+sap.ui.define("sap/f/semantic/EditAction",['./SemanticButton'], function(SemanticButton) {
+	"use strict";
+
+	/**
+	* Constructor for a new <code>EditAction</code>.
+	* @param {string} [sId] ID for the new control, generated automatically if no ID is given
+	* @param {object} [mSettings] Custom initial settings for the new control
+	*
+	* @class
+	* A semantic-specific button, eligible for the <code>editAction</code> aggregation of the
+	* {@link sap.f.semantic.SemanticPage} to be placed in its title.
+	*
+	* @extends sap.f.semantic.SemanticButton
+	*
+	* @author SAP SE
+	* @version 1.50.6
+	*
+	* @constructor
+	* @public
+	* @since 1.50
+	* @alias sap.f.semantic.EditAction
+	* @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
+	*/
+	var EditAction = SemanticButton.extend("sap.f.semantic.EditAction", /** @lends sap.f.semantic.EditAction.prototype */ {
+		metadata: {
+			library: "sap.f"
+		}
+	});
+
+	return EditAction;
+}, /* bExport= */ true);
+
+}; // end of sap/f/semantic/EditAction.js
 if ( !jQuery.sap.isDeclared('sap.f.semantic.ExitFullScreenAction') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -9868,10 +10421,10 @@ sap.ui.define("sap/f/semantic/ExitFullScreenAction",['./SemanticButton'], functi
 	* A semantic-specific button, eligible for the <code>exitFullScreenAction</code> aggregation of the
 	* {@link sap.f.semantic.SemanticPage} to be placed in its title.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -9909,10 +10462,10 @@ sap.ui.define("sap/f/semantic/FavoriteAction",['./SemanticToggleButton'], functi
 	* A semantic-specific button, eligible for the <code>favoriteAction</code> aggregation of the
 	* {@link sap.f.semantic.SemanticPage} to be placed in its title.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -9950,10 +10503,10 @@ sap.ui.define("sap/f/semantic/FlagAction",['./SemanticToggleButton'], function(S
 	* A semantic-specific button, eligible for the <code>flagAction</code> aggregation of the
 	* {@link sap.f.semantic.SemanticPage} to be placed in its title.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -9990,10 +10543,10 @@ sap.ui.define("sap/f/semantic/FullScreenAction",['./SemanticButton'], function(S
 	* A semantic-specific button, eligible for the <code>fullScreenAction</code> aggregation of the
 	* {@link sap.f.semantic.SemanticPage} to be placed in its title.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -10030,10 +10583,10 @@ sap.ui.define("sap/f/semantic/MainAction",['sap/f/semantic/SemanticButton'], fun
 	* @class
 	* Serves as a base class for the {@link sap.f.semantic.TitleMainAction} and {@link sap.f.semantic.FooterMainAction} controls.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -10078,10 +10631,10 @@ sap.ui.define("sap/f/semantic/MessagesIndicator",['./SemanticButton'], function(
 	* A semantic-specific button, eligible for the <code>messagesIndicator</code> aggregation of the
 	* {@link sap.f.semantic.SemanticPage} to be placed in its footer.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -10119,10 +10672,10 @@ sap.ui.define("sap/f/semantic/NegativeAction",['sap/f/semantic/SemanticButton'],
 	* A semantic-specific button, eligible for the <code>negativeAction</code> aggregation of the
 	* {@link sap.f.semantic.SemanticPage} to be placed in its footer.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -10168,10 +10721,10 @@ sap.ui.define("sap/f/semantic/PositiveAction",['sap/f/semantic/SemanticButton'],
 	* A semantic-specific button, eligible for the <code>positiveAction</code> aggregation of the
 	* {@link sap.f.semantic.SemanticPage} to be placed in its footer.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -10217,10 +10770,10 @@ sap.ui.define("sap/f/semantic/PrintAction",['sap/f/semantic/SemanticButton'], fu
 	* A semantic-specific button, eligible for the <code>printAction</code> aggregation of the
 	* {@link sap.f.semantic.SemanticPage} to be placed in the share menu within its title.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -10258,10 +10811,10 @@ sap.ui.define("sap/f/semantic/TitleMainAction",["./MainAction"], function(MainAc
 	* A semantic-specific button, eligible for the <code>titleMainAction</code> aggregation of the
 	* {@link sap.f.semantic.SemanticPage} to be placed in its title.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public
@@ -10299,10 +10852,10 @@ sap.ui.define("sap/f/semantic/FooterMainAction",["./MainAction"], function(MainA
 	* A semantic-specific button, eligible for the <code>footerMainAction</code> aggregation of the
 	* {@link sap.f.semantic.SemanticPage} to be placed in its footer.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public

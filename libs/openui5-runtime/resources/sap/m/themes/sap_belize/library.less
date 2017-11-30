@@ -175,6 +175,9 @@ html.sap-desktop .sapMBtn:focus > .sapMBtnEmphasized.sapMFocusable {
 	outline-color:    @_sap_m_Button_EmphasizedFocusColor;
 }
 
+.sapMTB-Transparent-CTX .sapMBtnInner:not(.sapMToggleBtnPressed):not(.sapMBtnEmphasized):not(.sapMBtnAccept):not(.sapMBtnReject):not(.sapMBtnActive) {
+	border-color: @sapUiButtonLiteBorderColor;
+}
 /* ---------------------------------------------------------------------*/
 /* Custom focus outline for IE and Edge:                                */
 /* ---------------------------------------------------------------------*/
@@ -847,7 +850,7 @@ html.sap-desktop .sapMGT.sapMGTBackgroundImage:active .sapMGTFocusDiv {
 /* Belize theme                           */
 /* ====================================== */
 
-@_sap_m_HeaderContainer_Translucent_Background: fade(@sapUiObjectHeaderBackground, 100);
+@_sap_m_HeaderContainer_TranslucentBackground: fade(@sapUiObjectHeaderBackground, 100);
 
 .sapMHdrCntrBtn > .sapMBtnInner {
 	border: none;
@@ -858,7 +861,7 @@ html.sap-desktop .sapMGT.sapMGTBackgroundImage:active .sapMGTFocusDiv {
 }
 
 .sapMHdrCntrBGTranslucent {
-	background-color: @_sap_m_HeaderContainer_Translucent_Background;
+	background-color: @_sap_m_HeaderContainer_TranslucentBackground;
 }
 /* END "HeaderContainer.less" */
 
@@ -1087,27 +1090,8 @@ html[data-sap-ui-browser^="ed"].sap-desktop .sapMITBItem:focus.sapMITBAll{
 
 /* Value Help */
 
-.sapMInputBaseState .sapMInputValHelp{
-	right: 0.125rem;
-	height: 2.25rem;
-	width: 2.25rem;
-}
-
 .sapMInputBaseState.sapMInputDescription.sapMInputVH > span > .sapMInputValHelp {
 	left: -2.375rem;
-}
-
-.sapMInputBaseState {
-	.sapMInputValHelp {
-		min-height: 2.25rem;
-		min-width: 2.25rem;
-	}
-
-	.sapMInputValHelp > .sapMInputValHelpInner {
-		height: 2.25rem;
-		width: 2.25rem;
-		line-height: 2.25rem;
-	}
 }
 
 .sapMInputBaseState.sapMInputDescription.sapMInputVH > span > .sapMInputValHelp > .sapMInputValHelpInner{
@@ -1122,19 +1106,8 @@ div.sapMInputSuggestionPopup {
 
 /* Compact size */
 .sapUiSizeCompact {
-	.sapMInputBaseState .sapMInputValHelp {
-		height: 1.375rem;
-		width: 1.375rem;
-	}
-
 	.sapMInputBaseState.sapMInputDescription.sapMInputVH > span > .sapMInputValHelp {
 		left: -1.5rem;
-	}
-
-	.sapMInputBaseState .sapMInputValHelp > .sapMInputValHelpInner {
-		height: 2.125rem;
-		width: 2.125rem;
-		line-height: 1.375rem;
 	}
 }
 /* END "Input.less" */
@@ -1267,7 +1240,7 @@ div.sapMComboBoxBasePicker {
 	border: none;
 
 	& .sapMComboBoxBasePickerValueState .sapMComboBoxBasePickerTitle.sapMTitle {
-		margin-left: 0.75rem;
+		padding-left: 0.75rem;
 	}
 }
 
@@ -1302,6 +1275,17 @@ div.sapMComboBoxBasePicker .sapMComboBoxBasePickerValueState {
 }
 /* END "ComboBoxBase.less" */
 
+
+/* START "Label.less" */
+/* ============================ */
+/* CSS for control sap.m/Label  */
+/* Belize theme                 */
+/* ============================ */
+
+.sapMLabelDisplayOnly {
+	color: lighten(@sapUiContentLabelColor, 20%);
+}
+/* END "Label.less" */
 
 /* START "LightBox.less" */
 /* =============================== */
@@ -1400,6 +1384,12 @@ div.sapMComboBoxBasePicker .sapMComboBoxBasePickerValueState {
 .sapMLIBActive.sapMLIBFocusable:focus {
 	outline-color: @sapUiContentContrastFocusColor;
 }
+
+/* Fix for IE/Edge visual appearance of buttons */
+.sapMLIB .sapMBtn:hover .sapMBtnHoverable.sapMBtnTransparent {
+	background-clip: border-box;
+	border-color: transparent;
+}
 /* END "ListItemBase.less" */
 
 /* START "MessageStrip.less" */
@@ -1497,6 +1487,7 @@ div.sapMComboBoxBasePicker .sapMComboBoxBasePickerValueState {
 	bottom: 1px;
 	left: 1px;
 	pointer-events: none;
+	z-index: 2;
 }
 
 .sapMMultiInput.sapMInputBaseWarning .sapMMultiInputBorder,
@@ -1599,14 +1590,23 @@ div.sapMComboBoxBasePicker .sapMComboBoxBasePickerValueState {
 
 @_sap_m_ObjectAttribute_ListTextShadowColor: none;
 
-html.sap-desktop .sapMObjectAttributeActive:focus > .sapMText {
+.sapMObjectAttributeActive:focus .sapMObjectAttributeText {
+	position: relative;
+}
+
+.sapMObjectAttributeActive:focus .sapMObjectAttributeText::after {
+	pointer-events: none;
+	display: block;
+	content: "";
+	position: absolute;
+	top: 1px;
+	left: 1px;
+	bottom: 1px;
+	right: 1px;
 	outline: 1px dotted @sapUiContentFocusColor;
-	outline-offset: -1px;
 }
 
 .sapMObjectAttributeActive:focus .sapMObjectAttributeText {
-	outline: 1px dotted @sapUiContentFocusColor;
-	outline-offset: -1px;
 	text-decoration: none;
 }
 
@@ -1631,11 +1631,6 @@ html[data-sap-ui-browser ^= "ie"], html[data-sap-ui-browser^="ed"] {
 	text-decoration: underline;
 }
 
-.sapMOHR .sapMObjectAttributeActive:focus .sapMObjectAttributeText {
-	outline: 1px dotted @sapUiContentFocusColor;
-	outline-offset: -1px;
-}
-
 /*=========================================== */
 /* Custom design for Static Object Header     */
 /*=========================================== */
@@ -1643,11 +1638,6 @@ html[data-sap-ui-browser ^= "ie"], html[data-sap-ui-browser^="ed"] {
 .sapMOH .sapMObjectAttributeActive .sapMObjectAttributeText:active,
 .sapMOH .sapMObjectAttributeActive .sapMObjectAttributeText:hover {
 	text-decoration: underline;
-}
-
-.sapMOH .sapMObjectAttributeActive:focus .sapMObjectAttributeText {
-	outline: 1px dotted @sapUiContentFocusColor;
-	outline-offset: -1px;
 }
 
 .sapMOHR .sapMObjectAttributeActive .sapMObjectAttributeText,
@@ -1981,6 +1971,21 @@ html.sap-phone {
 }
 /* END "PlanningCalendar.less" */
 
+/* START "ProgressIndicator.less" */
+/* ======================================== */
+/* CSS for control sap.m/ProgressIndicator  */
+/* Belize theme                             */
+/* ======================================== */
+
+.sapMPIDisplayOnly:not(.sapMPIBarDisabled) .sapMPIBarNeutral {
+	background: @sapUiBaseText;
+}
+
+.sapMPIDisplayOnly:not(.sapMPIBarDisabled) .sapMPIText.sapMPITextLeft {
+	color: contrast(@sapUiBaseText, @sapUiBaseText, @sapUiContentForegroundColor, @sapUiContentContrastTextThreshold);
+}
+/* END "ProgressIndicator.less" */
+
 /* START "PullToRefresh.less" */
 /* ==================================== */
 /* CSS for control sap.m/PullToRefresh  */
@@ -2062,8 +2067,8 @@ html.sap-desktop .sapMQuickViewPage .sapUiIcon:focus {
 /* Belize theme                       */
 /* ================================== */
 
-@_sap_m_Slider_HandleHoverBackground: fade(darken(@sapUiFieldBackground, 15), 60);
-@_sap_m_Slider_HandleBorderColor: darken(@sapUiFieldBorderColor, 15);
+@_sap_m_RangeSlider_HandleHoverBackground: fade(darken(@sapUiFieldBackground, 15), 60);
+@_sap_m_RangeSlider_HandleBorderColor: darken(@sapUiFieldBorderColor, 15);
 
 /* overlap */
 .sapMSliderHandle.sapMSliderHandleOverlap {
@@ -2076,8 +2081,8 @@ html.sap-desktop .sapMQuickViewPage .sapUiIcon:focus {
 }
 
 .sapMSliderProgress:hover ~ .sapMSliderHandle {
-  background-color: @_sap_m_Slider_HandleHoverBackground;
-  border: 0.125rem solid @_sap_m_Slider_HandleBorderColor;
+  background-color: @_sap_m_RangeSlider_HandleHoverBackground;
+  border: 0.125rem solid @_sap_m_RangeSlider_HandleBorderColor;
 }
 /* END "RangeSlider.less" */
 
@@ -2107,7 +2112,7 @@ html.sap-desktop .sapMQuickViewPage .sapUiIcon:focus {
 }
 
 /* Custom focus outline */
-html.sap-desktop .sapMRI:focus:not(.sapMRIDisabled) {
+html.sap-desktop .sapMRI:focus:not(.sapMRIDisabled):not(.sapMRIDisplayOnly){
 	outline: 1px dotted @sapUiContentFocusColor;
 	outline-offset: -1px;
 }
@@ -2118,7 +2123,7 @@ html[data-sap-ui-browser^="ie"].sap-desktop {
 		outline: none;
 		position: relative;
 	}
-	.sapMRI:focus:not(.sapMRIDisabled)::before {
+	.sapMRI:focus:not(.sapMRIDisabled):not(.sapMRIDisplayOnly)::before {
 		content: " ";
 		box-sizing: border-box;
 		width: 100%;
@@ -2187,10 +2192,6 @@ html.sap-desktop .sapMScrollContVH::-webkit-scrollbar {
 	color: @sapUiHighlight;
 }
 
-.sapMFocus>.sapMSFF>.sapMSFB:active {
-	color: @sapUiButtonActiveTextColor;
-}
-
 .sapMSFB:hover{
 	background-color: @sapUiButtonLiteHoverBackground;
 }
@@ -2203,10 +2204,35 @@ html.sap-desktop .sapMScrollContVH::-webkit-scrollbar {
 /* END "SearchField.less" */
 
 /* START "SegmentedButton.less" */
-/* ====================================== */
-/* CSS for control sap.m/SegmentedButton  */
-/* Belize theme                           */
-/* ====================================== */
+/* ==============================================*/
+/* CSS for control sap.m/SegmentedButton.control */
+/* BlueCrystal theme                             */
+/* ==============================================*/
+
+.sapMSegB {
+	height: 2.5rem;
+	vertical-align: top;
+	position: relative;
+	.sapMSegBBtn {
+		font-size: 0.875rem;
+		height: 2.5rem;
+		line-height: 2.375rem;
+		padding-left: 1rem;
+		padding-right: 1rem;
+		text-align: center;
+		text-shadow: none;
+		color: @sapUiSegmentedButtonTextColor;
+		border-top: 1px solid @sapUiSegmentedButtonBorderColor;
+		border-left: 1px solid @sapUiSegmentedButtonBorderColor;
+		border-bottom: 1px solid @sapUiSegmentedButtonBorderColor;
+		border-right: 1px solid transparent;
+		background-color: @sapUiSegmentedButtonBackground;
+		&:not(.sapMSegBBtnMixed) .sapMImg {
+			padding-left: 1rem;
+			padding-right: 1rem;
+		}
+	}
+}
 
 .sapMSegBBtn:first-child {
 	border-top-left-radius: 0.2rem;
@@ -2216,6 +2242,15 @@ html.sap-desktop .sapMScrollContVH::-webkit-scrollbar {
 .sapMSegBBtn:last-child {
 	border-top-right-radius: 0.2rem;
 	border-bottom-right-radius: 0.2rem;
+}
+
+// Adding margin to be displayed correct in sap.m.Bar
+.sapMBar .sapMSegB {
+	margin: 0.250rem 0;
+}
+
+html.sap-desktop .sapMSegBBtnFocusable:hover {
+	background: @sapUiSegmentedButtonHoverBackground;
 }
 
 .sapMSegBBtn:last-child {
@@ -2234,6 +2269,130 @@ html.sap-desktop {
 		outline: 1px dotted;
 		outline-offset: -3px;
 		outline-color: @sapUiContentContrastFocusColor;
+	}
+}
+
+html[data-sap-ui-browser^="ie"].sap-desktop .sapMSegBBtnFocusable.sapMSegBBtnSel:focus,
+html[data-sap-ui-browser^="ed"].sap-desktop .sapMSegBBtnFocusable.sapMSegBBtnSel:focus {
+		outline-color: @sapUiContentFocusColor;
+}
+
+.sapMSegB.sapMSegBIcons {
+	.sapMSegBBtn:not(.sapMSegBBtnMixed) {
+		padding: 0;
+	}
+	.sapMSegBBtn.sapMSegBBtnMixed .sapMImg,
+	.sapMSegBBtn.sapMSegBBtnMixed .sapUiIcon {
+		padding-left: 0;
+		padding-right: 0.5rem;
+	}
+}
+
+.sapMSegBBtn.sapMSegBBtnSel {
+	background: @sapUiSegmentedButtonSelectedBackground;
+	color: @sapUiSegmentedButtonSelectedTextColor;
+	border-color: @sapUiSegmentedButtonSelectedHoverBorderColor;
+	.sapUiIcon{
+		color: @sapUiSegmentedButtonSelectedIconColor;
+	}
+}
+.sapMSegBBtnFocusable.sapMBtnActive  {
+	background: @sapUiButtonActiveBackground;
+	color: @sapUiSegmentedButtonActiveTextColor;
+	.sapUiIcon{
+		color: @sapUiSegmentedButtonActiveIconColor;
+	}
+}
+
+.sapMSegBBtn.sapMSegBBtnFocusable.sapMSegBBtnSel:hover,
+.sapMSegBBtnFocusable.sapMBtnActive:hover,
+html.sap-desktop .sapMSegBBtn.sapMSegBBtnFocusable.sapMSegBBtnSel:hover,
+html.sap-desktop .sapMSegBBtnFocusable.sapMBtnActive:hover {
+	background: @sapUiSegmentedButtonSelectedHoverBackground;
+}
+
+.sapMSegBBtn.sapMSegBBtnFocusable.sapMSegBBtnSel {
+	border-right: 1px solid @sapUiSegmentedButtonSelectedHoverBorderColor;
+	// Hide next button left border
+	+ .sapMSegBBtn {
+		border-left: 1px solid transparent;
+	}
+}
+
+.sapMSegB img {
+	line-height: 2.375rem;
+	max-height:  2.375rem;
+	vertical-align: middle;
+}
+.sapMSegBBtn .sapUiIcon {
+	font-size: 1.375rem;
+	line-height: 2.375rem;
+	width: 2.375rem;
+	color: @sapUiSegmentedButtonIconColor;
+	vertical-align: middle;
+	text-align: center;
+}
+
+/* Compact size */
+.sapUiSizeCompact {
+	.sapMSegB {
+		height: 1.625rem;
+	}
+
+	.sapMSegBBtn {
+		height: 1.625rem;
+		line-height: 1.5rem;
+		padding-left: 0.4375rem;
+		padding-right: 0.4375rem;
+	}
+
+	.sapMSegBBtn:first-child {
+		border-top-left-radius: 0.2rem;
+		border-bottom-left-radius: 0.2rem;
+	}
+
+	.sapMSegBBtn:last-child {
+		border-top-right-radius: 0.2rem;
+		border-bottom-right-radius: 0.2rem;
+	}
+
+	.sapMSegB img {
+		line-height: 1.5rem;
+		height: 1.3rem;
+		width: 1.3rem;
+	}
+
+	.sapMSegBBtn .sapUiIcon {
+		font-size: 1rem;
+		line-height: 1.5rem;
+		width: 1.0rem;
+		vertical-align: top;
+	}
+	.sapMSegB {
+		.sapMBtnIconLeft {
+			margin-left: 0;
+		}
+		&.sapMSegBIcons .sapMSegBBtnMixed {
+			img {
+				padding: 0;
+			}
+		}
+	}
+	.sapMSegBIcons:not(.sapMSegBBtnMixed) {
+		.sapMImg,
+		.sapUiIcon {
+			padding-left: 0.4375rem;
+			padding-right: 0.4375rem;
+		}
+	}
+	.sapMSegBIcons {
+		.sapMSegBBtn.sapMSegBBtnMixed {
+			.sapMImg,
+			.sapUiIcon {
+				padding-left: 0;
+				padding-right: 0;
+			}
+		}
 	}
 }
 
@@ -2308,18 +2467,6 @@ html[data-sap-ui-browser^="ed"].sap-desktop {
 	}
 }
 
-.sapMSltPicker .sapMSelectListItemBaseSelected {
-	outline: 1px dotted @sapUiContentFocusColor;
-	outline-offset: -2px;
-}
-
-html[data-sap-ui-browser^="ie"].sap-desktop,
-html[data-sap-ui-browser^="ed"].sap-desktop {
-	.sapMSltPicker .sapMSelectListItemBaseSelected::before {
-		border: 1px dashed @sapUiContentFocusColor;
-	}
-}
-
 .sapMSltHoverable:not(.sapMSltState):hover {
 	border-color: @sapUiFieldHoverBorderColor;
 	background: @sapUiFieldHoverBackground;
@@ -2356,6 +2503,12 @@ html[data-sap-ui-browser^="ed"].sap-desktop {
 	background: @sapUiListSelectionBackgroundColor;
 }
 
+.sapMSltPicker-CTX .sapMSelectListItemBaseSelected,
+.sapMComboBoxBasePicker-CTX .sapMSelectListItemBaseSelected {
+	outline: 1px dotted @sapUiContentFocusColor;
+	outline-offset: -2px;
+}
+
 /* pressed */
 html.sap-desktop .sapMSelectListItemBase.sapMSelectListItemBasePressed:focus {
 	outline: 1px dotted @sapUiContentContrastFocusColor;
@@ -2374,8 +2527,14 @@ html.sap-desktop .sapMSelectListItemBase:focus {
 
 html[data-sap-ui-browser^="ie"].sap-desktop,
 html[data-sap-ui-browser^="ed"].sap-desktop {
+	.sapMSltPicker-CTX .sapMSelectListItemBaseSelected::before {
+		border: 1px dotted @sapUiContentFocusColor;
+	}
+	.sapMComboBoxBasePicker-CTX .sapMSelectListItemBaseSelected::before {
+		border: 1px dotted @sapUiContentFocusColor;
+	}
 	.sapMSelectListItemBase:focus::before {
-		border: 1px dashed @sapUiContentFocusColor;
+		border: 1px dotted @sapUiContentFocusColor;
 	}
 }
 /* END "SelectList.less" */
@@ -2695,6 +2854,11 @@ html.sap-desktop .sapMSwtCont:focus > .sapMSwt {
 		}
 	}
 }
+
+html.sap-phone .sapMTabStrip .sapMTSOverflowSelect {
+	border: none;
+	background: transparent;
+}
 /* END "TabStrip.less" */
 
 /* START "TileContent.less" */
@@ -2874,11 +3038,6 @@ html[data-sap-ui-browser^="ed"].sap-desktop {
 /* CSS for control sap.m/Tokenizer  */
 /* Belize theme                     */
 /* ================================ */
-
-html.sap-desktop .sapMTokenizer:focus {
-	outline: 1px dotted @sapUiContentFocusColor;
-	outline-offset: -3px;
-}
 
 html[data-sap-ui-browser^="ie"].sap-desktop,
 html[data-sap-ui-browser^="ed"].sap-desktop {

@@ -220,14 +220,14 @@
 				"jquery.sap.global.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/LocaleData.js",
+				"sap/ui/core/Renderer.js",
 				"sap/ui/model/type/Date.js",
 				"sap/ui/unified/calendar/CalendarDate.js",
 				"sap/ui/unified/calendar/CalendarUtils.js",
 				"sap/ui/unified/calendar/Header.js",
 				"sap/ui/unified/calendar/MonthPicker.js",
 				"sap/ui/unified/calendar/MonthsRow.js",
-				"sap/ui/unified/calendar/YearPicker.js",
-				"sap/ui/unified/library.js"
+				"sap/ui/unified/calendar/YearPicker.js"
 			],
 			"condRequired": [
 				"sap/ui/core/Popup.js"
@@ -244,14 +244,14 @@
 				"jquery.sap.global.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/LocaleData.js",
+				"sap/ui/core/Renderer.js",
 				"sap/ui/model/type/Date.js",
 				"sap/ui/unified/calendar/CalendarDate.js",
 				"sap/ui/unified/calendar/CalendarUtils.js",
 				"sap/ui/unified/calendar/Header.js",
 				"sap/ui/unified/calendar/MonthPicker.js",
 				"sap/ui/unified/calendar/MonthsRow.js",
-				"sap/ui/unified/calendar/YearPicker.js",
-				"sap/ui/unified/library.js"
+				"sap/ui/unified/calendar/YearPicker.js"
 			],
 			"condRequired": [
 				"sap/ui/core/Popup.js"
@@ -278,6 +278,7 @@
 			"isDebug": true,
 			"required": [
 				"jquery.sap.global.js",
+				"sap/ui/core/Renderer.js",
 				"sap/ui/unified/CalendarDateInterval.js",
 				"sap/ui/unified/CalendarDateIntervalRenderer.js",
 				"sap/ui/unified/calendar/CalendarDate.js",
@@ -291,6 +292,7 @@
 			"module": "sap/ui/unified/CalendarOneMonthInterval.js",
 			"required": [
 				"jquery.sap.global.js",
+				"sap/ui/core/Renderer.js",
 				"sap/ui/unified/CalendarDateInterval.js",
 				"sap/ui/unified/CalendarDateIntervalRenderer.js",
 				"sap/ui/unified/calendar/CalendarDate.js",
@@ -1083,6 +1085,10 @@
 			"required": [
 				"jquery.sap.global.js"
 			]
+		},
+		{
+			"name": "StandardCalendarLegendItem.type",
+			"designtime": true
 		},
 		{
 			"name": "calendar/CalendarDate-dbg.js",

@@ -16,12 +16,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', './Split
 	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
-	 * PaneContainer is an abstraction of Splitter
+	 * PaneContainer is an abstraction of Splitter.
+	 *
 	 * Could be used as an aggregation of ResponsiveSplitter or other PaneContainers.
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -106,6 +107,34 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', './Split
 		if (oObject instanceof PaneContainer && oObject._oSplitter) {
 			oObject._oSplitter.addEventDelegate(oEventDelegate, oObject._oSplitter);
 		}
+
+		return vResult;
+	};
+
+	/**
+	 * Pane removal
+	 *
+	 * @public
+	 * @param oObject
+	 * @returns {sap.ui.base.ManagedObject}
+	 */
+	PaneContainer.prototype.removePane = function (oObject) {
+		var vResult =  this.removeAggregation("panes", oObject),
+			oEventDelegate = {
+				onAfterRendering: function () {
+					this.triggerResize();
+					this.removeEventDelegate(oEventDelegate);
+				}
+			};
+
+		// When nesting Panes there should be resize event everytime a new pane is removed.
+		// However it is too early and it has not been subscribed yet to the resize handler.
+		// Therefore the resize event should be triggered manually.
+		this.getPanes().forEach(function (pane) {
+			if (pane instanceof PaneContainer && pane._oSplitter) {
+				pane._oSplitter.addEventDelegate(oEventDelegate, pane._oSplitter);
+			}
+		});
 
 		return vResult;
 	};

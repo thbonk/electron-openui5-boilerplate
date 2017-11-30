@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Item', 'sap/ui/cor
 			 * @extends sap.ui.core.Item
 			 *
 			 * @author SAP SE
-			 * @version 1.48.5
+			 * @version 1.50.6
 			 *
 			 * @constructor
 			 * @public
@@ -75,8 +75,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Item', 'sap/ui/cor
 			/**
 			 * Gets or creates the sap.m.Button instance for the custom tab.
 			 * @public
-			 * @param   {object} oOptions
-			 * @returns {sap.m.Button}
+			 * @param {Object} oOptions The options to be assigned to the button
+			 * @returns {sap.m.Button} The created button
 			 */
 			ViewSettingsCustomTab.prototype.getTabButton = function (oOptions) {
 				if (this._oTabButton === null) {

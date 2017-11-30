@@ -37,7 +37,7 @@ sap.ui.define("sap/ui/codeeditor/CodeEditor",[
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -177,6 +177,12 @@ sap.ui.define("sap/ui/codeeditor/CodeEditor",[
 		this._oEditor.getSession().setMode("ace/mode/javascript");
 		this._oEditor.setTheme("ace/theme/tomorrow");
 		this._oEditor.renderer.setShowGutter(true);
+
+		// Do not scroll to end of input when setting value
+		// it has been reported as annoying to end users
+		// when they have to scroll to the beginning of content
+		this._oEditor.$blockScrolling = Infinity;
+
 		var that = this;
 
 		this._oEditor.addEventListener("change", function(oEvent) {
@@ -412,7 +418,7 @@ sap.ui.define("sap/ui/codeeditor/library",['sap/ui/core/Core'],
 		],
 		elements: [],
 		noLibraryCSS: false,
-		version: "1.48.5"
+		version: "1.50.6"
 	});
 
 

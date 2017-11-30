@@ -19,7 +19,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Menu', './MenuItemBase', './l
 	 * Common button control that opens a menu when clicked by the user. The control provides an API for configuring the docking position
 	 * of the menu.
 	 * @extends sap.ui.commons.Button
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -82,7 +82,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Menu', './MenuItemBase', './l
 	/**
 	 * Function is called when button is clicked.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The fired event
 	 * @private
 	 */
 	MenuButton.prototype.onclick = function(oEvent) {
@@ -104,7 +104,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Menu', './MenuItemBase', './l
 	/**
 	 * Function is called when mouse key is clicked down.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The fired event
 	 * @private
 	 */
 	MenuButton.prototype.onmousedown = function(oEvent) {
@@ -116,7 +116,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Menu', './MenuItemBase', './l
 	/**
 	 * Function is called when mouse leaves the control.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The fired event
 	 * @private
 	 */
 	MenuButton.prototype.onmouseout = function(oEvent) {
@@ -132,7 +132,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Menu', './MenuItemBase', './l
 	/**
 	 * Function is called when enter key is pressed.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The fired event
 	 * @private
 	 */
 	MenuButton.prototype.onsapenter = function(oEvent){
@@ -143,7 +143,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Menu', './MenuItemBase', './l
 	/**
 	 * Function is called when space key is pressed.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The fired event
 	 * @private
 	 */
 	MenuButton.prototype.onsapspace = function(oEvent){
@@ -154,7 +154,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Menu', './MenuItemBase', './l
 	/**
 	 * Function is called when down key is pressed with a modifier key.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The fired event
 	 * @private
 	 */
 	//Requested by UX, see CSN 0120061532 0001379793 2011
@@ -175,7 +175,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Menu', './MenuItemBase', './l
 
 	/**
 	 * Setter for the aggregated <code>menu</code>.
-	 * @param {sap.ui.unified.Menu} oMenu
+	 * @param {sap.ui.unified.Menu} oMenu The menu to be set to the menu aggregation
 	 * @return {sap.ui.commons.MenuButton} <code>this</code> to allow method chaining
 	 * @public
 	 */

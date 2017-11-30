@@ -40,7 +40,7 @@ sap.ui.define([
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @public
@@ -70,8 +70,9 @@ sap.ui.define([
 						source: {type: "sap.ui.core.URI", group: "Misc", defaultValue: null},
 						/**
 						 * A custom error message that is displayed when the PDF file cannot be loaded.
+						 * @deprecated As of version 1.50.0, replaced by {@link sap.m.PDFViewer#getErrorPlaceholderMessage()}.
 						 */
-						errorMessage: {type: "string", group: "Misc", defaultValue: null},
+						errorMessage: {type: "string", group: "Misc", defaultValue: null, deprecated: true},
 						/**
 						 * A custom text that is displayed instead of the PDF file content when the PDF
 						 * file cannot be loaded.
@@ -80,8 +81,9 @@ sap.ui.define([
 						/**
 						 * A custom title for the PDF viewer popup dialog. Works only if the PDF viewer
 						 * is set to open in a popup dialog.
+						 * @deprecated As of version 1.50.0, replaced by {@link sap.m.PDFViewer#getTitle()}.
 						 */
-						popupHeaderTitle: {type: "string", group: "Misc", defaultValue: null},
+						popupHeaderTitle: {type: "string", group: "Misc", defaultValue: null, deprecated: true},
 
 						/**
 						 * A custom title for the PDF viewer.

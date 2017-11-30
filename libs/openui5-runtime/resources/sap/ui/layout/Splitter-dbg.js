@@ -29,7 +29,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -927,6 +927,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	 * Splitter bars).
 	 *
 	 * @param {string} [sType] The type of resize step ("inc", "dec", "max", "min")
+	 * @param {int} [iStepSize] The step size for the keyboard event
 	 * @param {jQuery.Event} [oEvent] The original keyboard event
 	 */
 	Splitter.prototype._onKeyboardResize = function(sType, iStepSize, oEvent) {
@@ -935,7 +936,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 			return;
 		}
 
-		var iStepSize = iStepSize;
 		var iBigStep  = 999999;
 
 		var iBar = parseInt(oEvent.target.id.substr(sBarId.length), 10);

@@ -73,7 +73,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 * @param {Element[]} aItemDomRefs Array of DOM references representing the items for the navigation
 	 * @param {boolean} [bNotInTabChain=false] Whether the selected element should be in the tab chain or not
 	 *
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @constructor
 	 * @alias sap.ui.core.delegate.ItemNavigation
 	 * @public
@@ -513,7 +513,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 * Sets the focus to the item with the given index.
 	 *
 	 * @param {int} iIndex Index of the item to focus
-	 * @param {jQuery.event} oEvent Event that leads to focus change
+	 * @param {jQuery.Event} oEvent Event that leads to focus change
 	 * @private
 	 */
 	ItemNavigation.prototype.focusItem = function(iIndex, oEvent) {

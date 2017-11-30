@@ -50,7 +50,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -156,7 +156,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 					 * If the panel will expand, this is true.
 					 * If the panel will collapse, this is false.
 					 */
-					expand: {type : "boolean"}
+					expand: {type : "boolean"},
+
+					/**
+					 * Identifies whether the event is triggered by an user interaction or by calling setExpanded.
+					 * @since 1.50
+					 */
+					triggeredByInteraction: {type: "boolean"}
 				}
 			}
 		},
@@ -164,6 +170,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	}});
 
 	Panel.prototype.init = function () {
+
+		// identifies whether the last expand action is triggered by a user interaction or by calling setExpanded setter
+		this._bInteractiveExpand = false;
 		this.data("sap-ui-fastnavgroup", "true", true); // Define group for F6 handling
 	};
 
@@ -232,6 +241,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @public
 	 */
 	Panel.prototype.setExpanded = function (bExpanded) {
+
 		if (bExpanded === this.getExpanded()) {
 			return this;
 		}
@@ -247,7 +257,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 		this._toggleExpandCollapse();
 		this._toggleCssClasses();
-		this.fireExpand({ expand : bExpanded });
+		this.fireExpand({ expand: bExpanded, triggeredByInteraction: this._bInteractiveExpand });
+		this._bInteractiveExpand = false;
 
 		return this;
 	};
@@ -313,6 +324,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			decorative: false,
 			useIconTooltip: false,
 			press: function () {
+				that._bInteractiveExpand = true;
 				that.setExpanded(!that.getExpanded());
 			}
 		}).addStyleClass("sapMPanelExpandableIcon");
@@ -323,7 +335,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	};
 
 	Panel.prototype._setContentHeight = function () {
-		var iAdjustedContentHeight,
+		var sAdjustedContentHeight,
 		thisDomRef = this.getDomRef(),
 		oPanelContent = thisDomRef && thisDomRef.querySelector(".sapMPanelContent");
 
@@ -333,8 +345,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 		// 'offsetTop' measures the vertical space occupied by siblings before this one
 		// Earlier each previous sibling's height was calculated separately and then all height values were summed up
-		iAdjustedContentHeight = thisDomRef.clientHeight - oPanelContent.offsetTop;
-		oPanelContent.style.height = iAdjustedContentHeight + 'px';
+		sAdjustedContentHeight =  'calc(' + this.getHeight() + ' - ' + oPanelContent.offsetTop + 'px)';
+		oPanelContent.style.height = sAdjustedContentHeight;
 	};
 
 	Panel.prototype._toggleExpandCollapse = function () {

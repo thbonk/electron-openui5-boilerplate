@@ -27,7 +27,7 @@ sap.ui.define(['jquery.sap.global', './Column', './library', 'sap/ui/core/Elemen
 	 * @extends sap.ui.table.Column
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -105,7 +105,7 @@ sap.ui.define(['jquery.sap.global', './Column', './library', 'sap/ui/core/Elemen
 		}
 
 		var bReturn = this.setProperty("grouped", bGrouped, bSuppressInvalidate);
-		this._updateColumns(true);
+		this._updateColumns();
 
 		return bReturn;
 	};
@@ -232,10 +232,6 @@ sap.ui.define(['jquery.sap.global', './Column', './library', 'sap/ui/core/Elemen
 		return vFilterType;
 	};
 
-	AnalyticalColumn.prototype._afterSort = function() {
-		this._updateTableAnalyticalInfo();
-	};
-
 	AnalyticalColumn.prototype._updateColumns = function(bSupressRefresh, bForceChange) {
 		var oParent = this.getParent();
 		if (isInstanceOfAnalyticalTable(oParent)) {
@@ -258,7 +254,7 @@ sap.ui.define(['jquery.sap.global', './Column', './library', 'sap/ui/core/Elemen
 	};
 
 	AnalyticalColumn.prototype.shouldRender = function() {
-		if (!this.getVisible()) {
+		if (!this.getVisible() || this.getTemplate() == null) {
 			return false;
 		}
 		return (!this.getGrouped() || this._bLastGroupAndGrouped || this.getShowIfGrouped()) && (!this._bDependendGrouped || this._bLastGroupAndGrouped);

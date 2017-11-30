@@ -576,13 +576,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider', './Target', './
 			/**
 			 * hook to distinguish between the router and an application calling this
 			 * @private
+			 * @param {any} [vData] an object that will be passed to the display event in the data property.
 			 * @name sap.ui.core.routing.Targets#_display
 			 */
 
 			/**
 			 *
-			 * @param sName name of the single target
-			 * @param vData event data
+			 * @param {string} sName name of the single target
+			 * @param {any} [vData] an object that will be passed to the display event in the data property.
 			 * @private
 			 * @name sap.ui.core.routing.Targets.#_displaySingleTarget
 			 */
@@ -590,7 +591,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider', './Target', './
 			/**
 			 * Called by the UIComponent since the rootView id is not known in the constructor
 			 *
-			 * @param sId
+			 * @param {string} sId
 			 * @private
 			 */
 			_setRootViewId: function (sId) {

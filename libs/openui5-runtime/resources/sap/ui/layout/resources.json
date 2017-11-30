@@ -119,6 +119,29 @@
 			"designtime": true
 		},
 		{
+			"name": "BlockLayoutCellData-dbg.js",
+			"module": "sap/ui/layout/BlockLayoutCellData.js",
+			"isDebug": true,
+			"required": [
+				"jquery.sap.global.js",
+				"sap/ui/core/LayoutData.js",
+				"sap/ui/layout/library.js"
+			]
+		},
+		{
+			"name": "BlockLayoutCellData.control",
+			"designtime": true
+		},
+		{
+			"name": "BlockLayoutCellData.js",
+			"module": "sap/ui/layout/BlockLayoutCellData.js",
+			"required": [
+				"jquery.sap.global.js",
+				"sap/ui/core/LayoutData.js",
+				"sap/ui/layout/library.js"
+			]
+		},
+		{
 			"name": "BlockLayoutCellRenderer-dbg.js",
 			"module": "sap/ui/layout/BlockLayoutCellRenderer.js",
 			"isDebug": true,
@@ -157,6 +180,7 @@
 			"required": [
 				"jquery.sap.global.js",
 				"sap/ui/core/Control.js",
+				"sap/ui/layout/BlockLayoutCellData.js",
 				"sap/ui/layout/library.js"
 			]
 		},
@@ -170,6 +194,7 @@
 			"required": [
 				"jquery.sap.global.js",
 				"sap/ui/core/Control.js",
+				"sap/ui/layout/BlockLayoutCellData.js",
 				"sap/ui/layout/library.js"
 			]
 		},
@@ -737,6 +762,27 @@
 			]
 		},
 		{
+			"name": "changeHandler/AddSimpleFormField-dbg.js",
+			"module": "sap/ui/layout/changeHandler/AddSimpleFormField.js",
+			"isDebug": true,
+			"required": [
+				"jquery.sap.global.js",
+				"sap/ui/fl/Utils.js",
+				"sap/ui/fl/changeHandler/Base.js",
+				"sap/ui/fl/changeHandler/ChangeHandlerMediator.js"
+			]
+		},
+		{
+			"name": "changeHandler/AddSimpleFormField.js",
+			"module": "sap/ui/layout/changeHandler/AddSimpleFormField.js",
+			"required": [
+				"jquery.sap.global.js",
+				"sap/ui/fl/Utils.js",
+				"sap/ui/fl/changeHandler/Base.js",
+				"sap/ui/fl/changeHandler/ChangeHandlerMediator.js"
+			]
+		},
+		{
 			"name": "changeHandler/AddSimpleFormGroup-dbg.js",
 			"module": "sap/ui/layout/changeHandler/AddSimpleFormGroup.js",
 			"isDebug": true,
@@ -902,6 +948,7 @@
 			"module": "sap/ui/layout/flexibility/SimpleForm.flexibility.js",
 			"isDebug": true,
 			"required": [
+				"sap/ui/layout/changeHandler/AddSimpleFormField.js",
 				"sap/ui/layout/changeHandler/AddSimpleFormGroup.js",
 				"sap/ui/layout/changeHandler/HideSimpleForm.js",
 				"sap/ui/layout/changeHandler/MoveSimpleForm.js",
@@ -913,6 +960,7 @@
 			"name": "flexibility/SimpleForm.flexibility.js",
 			"module": "sap/ui/layout/flexibility/SimpleForm.flexibility.js",
 			"required": [
+				"sap/ui/layout/changeHandler/AddSimpleFormField.js",
 				"sap/ui/layout/changeHandler/AddSimpleFormGroup.js",
 				"sap/ui/layout/changeHandler/HideSimpleForm.js",
 				"sap/ui/layout/changeHandler/MoveSimpleForm.js",
@@ -1308,12 +1356,18 @@
 		{
 			"name": "form/SimpleForm.designtime-dbg.js",
 			"module": "sap/ui/layout/form/SimpleForm.designtime.js",
-			"isDebug": true
+			"isDebug": true,
+			"required": [
+				"sap/ui/fl/changeHandler/ChangeHandlerMediator.js"
+			]
 		},
 		{
 			"name": "form/SimpleForm.designtime.js",
 			"module": "sap/ui/layout/form/SimpleForm.designtime.js",
-			"designtime": true
+			"designtime": true,
+			"required": [
+				"sap/ui/fl/changeHandler/ChangeHandlerMediator.js"
+			]
 		},
 		{
 			"name": "form/SimpleForm.js",
@@ -1397,6 +1451,7 @@
 				"sap/ui/fl/Utils.js",
 				"sap/ui/fl/changeHandler/Base.js",
 				"sap/ui/fl/changeHandler/BaseRename.js",
+				"sap/ui/fl/changeHandler/ChangeHandlerMediator.js",
 				"sap/ui/fl/changeHandler/JsControlTreeModifier.js"
 			],
 			"included": [
@@ -1405,6 +1460,7 @@
 				"sap/ui/layout/AssociativeSplitter.js",
 				"sap/ui/layout/BlockLayout.js",
 				"sap/ui/layout/BlockLayoutCell.js",
+				"sap/ui/layout/BlockLayoutCellData.js",
 				"sap/ui/layout/BlockLayoutCellRenderer.js",
 				"sap/ui/layout/BlockLayoutRenderer.js",
 				"sap/ui/layout/BlockLayoutRow.js",
@@ -1436,6 +1492,7 @@
 				"sap/ui/layout/VerticalLayout.js",
 				"sap/ui/layout/VerticalLayoutRenderer.js",
 				"sap/ui/layout/changeHandler/AddFormContainer.js",
+				"sap/ui/layout/changeHandler/AddSimpleFormField.js",
 				"sap/ui/layout/changeHandler/AddSimpleFormGroup.js",
 				"sap/ui/layout/changeHandler/HideSimpleForm.js",
 				"sap/ui/layout/changeHandler/MoveSimpleForm.js",
@@ -1497,6 +1554,7 @@
 				"sap/ui/fl/Utils.js",
 				"sap/ui/fl/changeHandler/Base.js",
 				"sap/ui/fl/changeHandler/BaseRename.js",
+				"sap/ui/fl/changeHandler/ChangeHandlerMediator.js",
 				"sap/ui/fl/changeHandler/JsControlTreeModifier.js"
 			],
 			"included": [
@@ -1505,6 +1563,7 @@
 				"sap/ui/layout/AssociativeSplitter.js",
 				"sap/ui/layout/BlockLayout.js",
 				"sap/ui/layout/BlockLayoutCell.js",
+				"sap/ui/layout/BlockLayoutCellData.js",
 				"sap/ui/layout/BlockLayoutCellRenderer.js",
 				"sap/ui/layout/BlockLayoutRenderer.js",
 				"sap/ui/layout/BlockLayoutRow.js",
@@ -1536,6 +1595,7 @@
 				"sap/ui/layout/VerticalLayout.js",
 				"sap/ui/layout/VerticalLayoutRenderer.js",
 				"sap/ui/layout/changeHandler/AddFormContainer.js",
+				"sap/ui/layout/changeHandler/AddSimpleFormField.js",
 				"sap/ui/layout/changeHandler/AddSimpleFormGroup.js",
 				"sap/ui/layout/changeHandler/HideSimpleForm.js",
 				"sap/ui/layout/changeHandler/MoveSimpleForm.js",

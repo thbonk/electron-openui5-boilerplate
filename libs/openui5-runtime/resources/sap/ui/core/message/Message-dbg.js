@@ -6,7 +6,7 @@
 
 // Provides the implementation for a Message
 sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
-	function(jQuery, Object, library, MessageProcessor) {
+	function(jQuery, Object, MessageProcessor) {
 	"use strict";
 
 	/**
@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	 * @extends sap.ui.base.Object
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 *
@@ -30,12 +30,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	 * @param {string} [mParameters.id] The message id: will be defaulted if no id is set
 	 * @param {string} [mParameters.message] The message text
 	 * @param {string} [mParameters.description] The message description
+	 * @param {string} [mParameters.descriptionUrl] The message description url to get a more detailed message
 	 * @param {string} [mParameters.additionalText] The message additionalText
 	 * @param {sap.ui.core.MessageType} [mParameters.type] The message type
 	 * @param {string} [mParameters.code] The message code
+	 * @param {boolean} [mParameters.technical=false] If the message is set as technical message
 	 * @param {sap.ui.core.message.MessageProcessor} [mParameters.processor]
 	 * @param {string} [mParameters.target] The message target: The syntax MessageProcessor dependent. Read the documentation of the respective MessageProcessor.
-	 * @param {boolean} [mParameters.persistent] Sets message persistent: If persistent is set <code>true</code> the message lifecycle controlled by the application
+	 * @param {boolean} [mParameters.persistent] Sets message persistent: If persistent is set <code>true</code> the message lifecycle is controlled by the application
 	 * @param {int} [mParameters.date=Date.now()] Sets message date which can be used to remove old messages. Number of milliseconds elapsed since 1 January 1970 00:00:00 UTC
 	 *
 	 * @public
@@ -66,7 +68,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	/**
 	 * Returns the Message Id
 	 *
-	 *  @returns {string} id
+	 * @returns {string} id
+	 * @public
 	 */
 	Message.prototype.getId = function() {
 		return this.id;
@@ -76,6 +79,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	 * Set message text
 	 *
 	 * @param {string} sMessage The Message as text
+	 * @public
 	 */
 	Message.prototype.setMessage = function(sMessage) {
 		this.message = sMessage;
@@ -85,6 +89,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	 * Returns message text
 	 *
 	 * @returns {string} message
+	 * @public
 	 */
 	Message.prototype.getMessage = function() {
 		return this.message;
@@ -94,6 +99,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	 * Set message description
 	 *
 	 * @param {string} sDescription The Message description
+	 * @public
 	 */
 	Message.prototype.setDescription = function(sDescription) {
 		this.description = sDescription;
@@ -102,7 +108,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	/**
 	 * Returns the message description
 	 *
-	 *  @returns {string} description
+	 * @returns {string} description
+	 * @public
 	 */
 	Message.prototype.getDescription = function() {
 		return this.description;
@@ -111,8 +118,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	/**
 	 * Sets the additionaltext for the message or merge different additionaltext strings
 	 *
-	 * @private
 	 * @param {string} sAdditionalText The additionaltext.
+	 * @public
 	 */
 	Message.prototype.setAdditionalText = function(sAdditionalText) {
 		this.additionalText = sAdditionalText;
@@ -122,6 +129,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	 * Returns the messages additional text.
 	 *
 	 * @returns {string} The additionaltext
+	 * @public
 	 */
 	Message.prototype.getAdditionalText = function() {
 		return this.additionalText;
@@ -130,7 +138,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	/**
 	 * Returns the message description URL which should be used to download the description content
 	 *
-	 *  @returns {string} The URL pointing to the description long text
+	 * @returns {string} The URL pointing to the description long text
+	 * @public
 	 */
 	Message.prototype.getDescriptionUrl = function() {
 		return this.descriptionUrl;
@@ -140,6 +149,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	 * Set message description URL which should be used to download the description content
 	 *
 	 * @param {string} sDescription The URL pointing to the description long text
+	 * @public
 	 */
 	Message.prototype.setDescriptionUrl = function(sDescriptionUrl) {
 		this.descriptionUrl = sDescriptionUrl;
@@ -149,6 +159,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	 * Set message type
 	 *
 	 * @param {sap.ui.core.MessageType} sType The Message type
+	 * @public
 	 */
 	Message.prototype.setType = function(sType) {
 		if (sType in sap.ui.core.MessageType) {
@@ -161,7 +172,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	/**
 	 * Returns the message type
 	 *
-	 *  @returns {sap.ui.core.MessageType} type
+	 * @returns {sap.ui.core.MessageType} type
+	 * @public
 	 */
 	Message.prototype.getType = function() {
 		return this.type;
@@ -172,6 +184,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	 * respective MessageProcessor.
 	 *
 	 * @param {string} sTarget The Message target
+	 * @public
 	 */
 	Message.prototype.setTarget = function(sTarget) {
 		this.target = sTarget;
@@ -180,7 +193,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	/**
 	 * Returns the message target
 	 *
-	 *  @returns {string} target
+	 * @returns {string} target
+	 * @public
 	 */
 	Message.prototype.getTarget = function() {
 		return this.target;
@@ -190,6 +204,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	 * Set message processor
 	 *
 	 * @param {sap.ui.core.message.MessageProcessor} oMessageProcessor The Message processor
+	 * @public
 	 */
 	Message.prototype.setMessageProcessor = function(oMessageProcessor) {
 		if (oMessageProcessor instanceof MessageProcessor) {
@@ -202,7 +217,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	/**
 	 * Returns the message processor
 	 *
-	 *  @returns {sap.ui.core.message.MessageProcessor} processor
+	 * @returns {sap.ui.core.message.MessageProcessor} processor
+	 * @public
 	 */
 	Message.prototype.getMessageProcessor = function() {
 		return this.processor;
@@ -212,6 +228,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	 * Set message code
 	 *
 	 * @param {string} sCode The Message code
+	 * @public
 	 */
 	Message.prototype.setCode = function(sCode) {
 		this.code = sCode;
@@ -220,7 +237,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	/**
 	 * Returns the message code
 	 *
-	 *  @returns {string} code
+	 * @returns {string} code
+	 * @public
 	 */
 	Message.prototype.getCode = function() {
 		return this.code;
@@ -231,6 +249,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	 *
 	 * @param {boolean} bPersistent Set Message persistent: If persisten is set true the message
 	 * lifecycle controlled by Application
+	 * @public
 	 */
 	Message.prototype.setPersistent = function(bPersistent) {
 		this.persistent = bPersistent;
@@ -239,7 +258,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	/**
 	 * Returns the if Message is persistent
 	 *
-	 *  @returns {boolean} bPersistent
+	 * @returns {boolean} bPersistent
+	 * @public
 	 */
 	Message.prototype.getPersistent = function() {
 		return this.persistent;
@@ -248,8 +268,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	/**
 	 * Set message as technical message
 	 *
-	 * @param {boolean} bTechnical Set Message as technical message
-	 * lifecycle controlled by Application
+	 * @param {boolean} bTechnical Set Message as technical message lifecycle controlled by Application
+	 * @public
 	 */
 	Message.prototype.setTechnical = function(bTechnical) {
 		this.technical = bTechnical;
@@ -258,7 +278,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	/**
 	 * Returns the if Message set as technical message
 	 *
-	 *  @returns {boolean} bTechnical
+	 * @returns {boolean} true if message is technical or false if not
+	 * @public
 	 */
 	Message.prototype.getTechnical = function() {
 		return this.technical;
@@ -297,6 +318,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	 * Set the date of the message, this will automatically be set on message creation
 	 *
 	 * @param {int} iDate The message date in number of milliseconds elapsed since 1 January 1970 00:00:00 UTC. As returned by Date.now().
+	 * @public
 	 */
 	Message.prototype.setDate = function(iDate) {
 		this.date = iDate;
@@ -305,7 +327,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	/**
 	 * Set the date of the message
 	 *
-	 *  @returns {int} The message date in number of milliseconds elapsed since 1 January 1970 00:00:00 UTC. As returned by Date.now().
+	 * @returns {int} The message date in number of milliseconds elapsed since 1 January 1970 00:00:00 UTC. As returned by Date.now().
+	 * @public
 	 */
 	Message.prototype.getDate = function() {
 		return this.date;

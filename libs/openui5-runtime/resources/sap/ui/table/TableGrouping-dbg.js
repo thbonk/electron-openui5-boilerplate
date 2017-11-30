@@ -15,7 +15,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter'
 	 * Note: Do not access the function of this helper directly but via <code>sap.ui.table.TableUtils.Grouping...</code>
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @namespace
 	 * @name sap.ui.table.TableGrouping
 	 * @private
@@ -202,12 +202,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter'
 		 */
 		isInGroupingRow : function(oCellRef) {
 			var oInfo = TableGrouping.TableUtils.getCellInfo(oCellRef);
-			if (oInfo && oInfo.type === TableGrouping.TableUtils.CELLTYPES.DATACELL) {
+
+			if (oInfo.isOfType(TableGrouping.TableUtils.CELLTYPE.DATACELL)) {
 				return oInfo.cell.parent().hasClass("sapUiTableGroupHeader");
-			} else if (oInfo && oInfo.type === TableGrouping.TableUtils.CELLTYPES.ROWHEADER
-							|| oInfo && oInfo.type === TableGrouping.TableUtils.CELLTYPES.ROWACTION) {
+			} else if (oInfo.isOfType(TableGrouping.TableUtils.CELLTYPE.ROWHEADER | TableGrouping.TableUtils.CELLTYPE.ROWACTION)) {
 				return oInfo.cell.hasClass("sapUiTableGroupHeader");
 			}
+
 			return false;
 		},
 
@@ -232,12 +233,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter'
 		 */
 		isInSumRow : function(oCellRef) {
 			var oInfo = TableGrouping.TableUtils.getCellInfo(oCellRef);
-			if (oInfo && oInfo.type === TableGrouping.TableUtils.CELLTYPES.DATACELL) {
+
+			if (oInfo.isOfType(TableGrouping.TableUtils.CELLTYPE.DATACELL)) {
 				return oInfo.cell.parent().hasClass("sapUiAnalyticalTableSum");
-			} else if (oInfo && oInfo.type === TableGrouping.TableUtils.CELLTYPES.ROWHEADER
-							|| oInfo && oInfo.type === TableGrouping.TableUtils.CELLTYPES.ROWACTION) {
+			} else if (oInfo.isOfType(TableGrouping.TableUtils.CELLTYPE.ROWHEADER | TableGrouping.TableUtils.CELLTYPE.ROWACTION)) {
 				return oInfo.cell.hasClass("sapUiAnalyticalTableSum");
 			}
+
 			return false;
 		},
 

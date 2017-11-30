@@ -18,7 +18,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/unified/Menu', 'sap
 		 * Note: Do not access the function of this helper directly but via <code>sap.ui.table.TableUtils.Menu...</code>
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 * @namespace
 		 * @name sap.ui.table.TableMenuUtils
 		 * @private
@@ -70,13 +70,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/unified/Menu', 'sap
 				}
 
 				var oCellInfo = MenuUtils.TableUtils.getCellInfo($TableCell);
-				var iColumnIndex;
+				var iColumnIndex = oCellInfo.columnIndex;
+				var iRowIndex = oCellInfo.rowIndex;
 				var bExecuteDefault;
 
-				if (oCellInfo.type === MenuUtils.TableUtils.CELLTYPES.COLUMNHEADER) {
+				if (oCellInfo.isOfType(MenuUtils.TableUtils.CELLTYPE.COLUMNHEADER)) {
 					var bCellHasMenuButton = $TableCell.find(".sapUiTableColDropDown").length > 0;
-
-					iColumnIndex = MenuUtils.TableUtils.getColumnHeaderCellInfo($TableCell).index;
 
 					if (Device.system.desktop || bCellHasMenuButton) {
 						MenuUtils.removeColumnHeaderCellMenu(oTable, iColumnIndex);
@@ -92,15 +91,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/unified/Menu', 'sap
 							MenuUtils.openColumnContextMenu(oTable, iColumnIndex, bHoverFirstMenuItem, $TableCell);
 						}
 					} else {
-						MenuUtils.applyColumnHeaderCellMenu(oTable, iColumnIndex);
+						MenuUtils.applyColumnHeaderCellMenu(oTable, iColumnIndex, $TableCell);
 					}
 
-				} else if (oCellInfo.type === MenuUtils.TableUtils.CELLTYPES.DATACELL) {
-					var oCellIndices = MenuUtils.TableUtils.getDataCellInfo(oTable, $TableCell);
-					var iRowIndex = oCellIndices.rowIndex;
-
+				} else if (oCellInfo.isOfType(MenuUtils.TableUtils.CELLTYPE.DATACELL)) {
 					bExecuteDefault = true;
-					iColumnIndex = oCellIndices.columnIndex;
 
 					if (bFireEvent) {
 						var oRowColCell = MenuUtils.TableUtils.getRowColCell(oTable, iRowIndex, iColumnIndex, true);
@@ -170,6 +165,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/unified/Menu', 'sap
 					}
 				}
 				MenuUtils.closeDataCellContextMenu(oTable);
+
+				var colspan = oCell && oCell.attr("colspan");
+				if (colspan && colspan !== "1") {
+					return; // headers with span do not have connection to a column, do not open the context menu
+				}
 
 				oColumn._openMenu(oCell && oCell[0] || oColumn.getDomRef(), bHoverFirstMenuItem);
 			},
@@ -275,7 +275,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/unified/Menu', 'sap
 
 					// Open the menu below the cell if is is not already open.
 					var oCell =  oRow.getCells()[iColumnIndex];
-					var $Cell =  MenuUtils.TableUtils.getParentDataCell(oTable, oCell.getDomRef());
+					var $Cell =  MenuUtils.TableUtils.getParentCell(oTable, oCell.getDomRef());
 
 					if ($Cell !== null && !MenuUtils.TableUtils.Grouping.isInGroupingRow($Cell)) {
 						oCell = $Cell[0];
@@ -348,7 +348,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/unified/Menu', 'sap
 			 * @see openContextMenu
 			 * @see removeColumnHeaderCellMenu
 			 */
-			applyColumnHeaderCellMenu: function(oTable, iColumnIndex) {
+			applyColumnHeaderCellMenu: function(oTable, iColumnIndex, $TableCell) {
 				if (oTable == null ||
 					iColumnIndex == null || iColumnIndex < 0) {
 					return;
@@ -359,10 +359,15 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/unified/Menu', 'sap
 					return;
 				}
 
+				var colspan = $TableCell && $TableCell.attr("colspan");
+				if (colspan && colspan !== "1") {
+					return; // headers with span do not have connection to a column, do not open the context menu
+				}
+
 				var oColumn = oColumns[iColumnIndex];
 
 				if (oColumn.getVisible() && (oColumn.getResizable() || oColumn._menuHasItems())) {
-					var $Column = oColumn.$();
+					var $Column = $TableCell || oColumn.$();
 					var $ColumnCell = $Column.find(".sapUiTableColCell");
 					var bCellMenuAlreadyExists = $Column.find(".sapUiTableColCellMenu").length > 0;
 
@@ -385,7 +390,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/unified/Menu', 'sap
 
 						$Column.on("focusout",
 							function(oTable, iColumnIndex) {
-								MenuUtils.removeColumnHeaderCellMenu(oTable, iColumnIndex);
+								MenuUtils.removeColumnHeaderCellMenu(oTable);
 								this.off("focusout");
 							}.bind($Column, oTable, iColumnIndex)
 						);
@@ -398,31 +403,15 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/unified/Menu', 'sap
 			 * Removes the cell menu from the dom and unhides the column header cell.
 			 *
 			 * @param {sap.ui.table.Table} oTable Instance of the table.
-			 * @param {int} iColumnIndex The column index of the column header to remove the cell menu from.
 			 * @private
 			 *
 			 * @see openContextMenu
 			 * @see applyColumnHeaderCellMenu
 			 */
-			removeColumnHeaderCellMenu: function(oTable, iColumnIndex) {
-				if (oTable == null ||
-					iColumnIndex == null || iColumnIndex < 0) {
-					return;
-				}
-
-				var oColumns = oTable.getColumns();
-				if (iColumnIndex >= oColumns.length) {
-					return;
-				}
-
-				var oColumn = oColumns[iColumnIndex];
-				var $Column = oColumn.$();
-				var $ColumnCellMenu = $Column.find(".sapUiTableColCellMenu");
-				var bCellMenuExists = $ColumnCellMenu.length > 0;
-
-				if (bCellMenuExists) {
-					var $ColumnCell = $Column.find(".sapUiTableColCell");
-					$ColumnCell.show();
+			removeColumnHeaderCellMenu: function(oTable) {
+				var $ColumnCellMenu = oTable && oTable.$().find(".sapUiTableCHT .sapUiTableColCellMenu");
+				if ($ColumnCellMenu.length) {
+					$ColumnCellMenu.parent().find(".sapUiTableColCell").show();
 					$ColumnCellMenu.remove();
 				}
 			}

@@ -16,7 +16,7 @@ sap.ui.define([
 	 * @alias sap.ui.fl.DefaultVariant
 	 * @author SAP SE
 	 *
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @experimental Since 1.25.0
 	 */
@@ -121,7 +121,9 @@ sap.ui.define([
 		var oNewsetChange = this.getNewestDefaultVariantChangeDeleteTheRest(mChanges);
 
 		if (oNewsetChange) {
-			oNewsetChange.getContent().defaultVariantName = sNewDefaultVariantId;
+			var oContent = oNewsetChange.getContent();
+			oContent.defaultVariantName = sNewDefaultVariantId;
+			oNewsetChange.setContent(oContent);
 		}
 
 		return oNewsetChange;

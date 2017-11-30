@@ -36,6 +36,11 @@
 			"theme": "sap_belize_plus"
 		},
 		{
+			"name": "Label.less",
+			"designtime": true,
+			"theme": "sap_belize_plus"
+		},
+		{
 			"name": "Link.less",
 			"designtime": true,
 			"theme": "sap_belize_plus"
@@ -132,6 +137,11 @@
 		},
 		{
 			"name": "Token.less",
+			"designtime": true,
+			"theme": "sap_belize_plus"
+		},
+		{
+			"name": "Toolbar.less",
 			"designtime": true,
 			"theme": "sap_belize_plus"
 		},

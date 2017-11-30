@@ -4,9 +4,15 @@
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define([ "sap/m/GenericTileRenderer", "sap/m/LoadState", "sap/m/GenericTileScope" ],
-	function(TileRenderer, LoadState, GenericTileScope) {
+sap.ui.define([ "sap/m/GenericTileRenderer", "sap/m/library"],
+	function(TileRenderer, library) {
 	"use strict";
+
+	// shortcut for sap.m.GenericTileScope
+	var GenericTileScope = library.GenericTileScope;
+
+	// shortcut for sap.m.LoadState
+	var LoadState = library.LoadState;
 
 	/**
 	 * GenericTileLineMode renderer.

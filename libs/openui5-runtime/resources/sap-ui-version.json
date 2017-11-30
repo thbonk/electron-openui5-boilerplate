@@ -1,135 +1,135 @@
 {
 	"name": "OpenUI5 Distribution",
-	"version": "1.48.5",
-	"buildTimestamp": "201707311933",
+	"version": "1.50.6",
+	"buildTimestamp": "201711130933",
 	"scmRevision": "",
-	"gav": "com.sap.openui5.dist:runtime:1.48.5:war",
+	"gav": "com.sap.openui5.dist:runtime:1.50.6:war",
 	"libraries": [
 		{
 			"name": "sap.ui.core",
-			"version": "1.48.5",
-			"buildTimestamp": "201707311933",
+			"version": "1.50.6",
+			"buildTimestamp": "201711130933",
 			"scmRevision": "",
-			"gav": "com.sap.ui5:core:1.48.5:jar"
+			"gav": "com.sap.ui5:core:1.50.6:jar"
 		},
 		{
 			"name": "sap.f",
-			"version": "1.48.5",
-			"buildTimestamp": "201707311933",
+			"version": "1.50.6",
+			"buildTimestamp": "201711130933",
 			"scmRevision": "",
-			"gav": "com.sap.ui5:fiori:1.48.5:jar"
+			"gav": "com.sap.ui5:fiori:1.50.6:jar"
 		},
 		{
 			"name": "sap.m",
-			"version": "1.48.5",
-			"buildTimestamp": "201707311933",
+			"version": "1.50.6",
+			"buildTimestamp": "201711130933",
 			"scmRevision": "",
-			"gav": "com.sap.ui5:mobile:1.48.5:jar"
+			"gav": "com.sap.ui5:mobile:1.50.6:jar"
 		},
 		{
 			"name": "sap.tnt",
-			"version": "1.48.5",
-			"buildTimestamp": "201707311933",
+			"version": "1.50.6",
+			"buildTimestamp": "201711130933",
 			"scmRevision": "",
-			"gav": "com.sap.ui5:tnt:1.48.5:jar"
+			"gav": "com.sap.ui5:tnt:1.50.6:jar"
 		},
 		{
 			"name": "sap.ui.codeeditor",
-			"version": "1.48.5",
-			"buildTimestamp": "201707311933",
+			"version": "1.50.6",
+			"buildTimestamp": "201711130933",
 			"scmRevision": "",
-			"gav": "com.sap.ui5:codeeditor:1.48.5:jar"
+			"gav": "com.sap.ui5:codeeditor:1.50.6:jar"
 		},
 		{
 			"name": "sap.ui.commons",
-			"version": "1.48.5",
-			"buildTimestamp": "201707311933",
+			"version": "1.50.6",
+			"buildTimestamp": "201711130933",
 			"scmRevision": "",
-			"gav": "com.sap.ui5:commons:1.48.5:jar"
+			"gav": "com.sap.ui5:commons:1.50.6:jar"
 		},
 		{
 			"name": "sap.ui.dt",
-			"version": "1.48.5",
-			"buildTimestamp": "201707311933",
+			"version": "1.50.6",
+			"buildTimestamp": "201711130933",
 			"scmRevision": "",
-			"gav": "com.sap.ui5:dt:1.48.5:jar"
+			"gav": "com.sap.ui5:dt:1.50.6:jar"
 		},
 		{
 			"name": "sap.ui.fl",
-			"version": "1.48.5",
-			"buildTimestamp": "201707311933",
+			"version": "1.50.6",
+			"buildTimestamp": "201711130933",
 			"scmRevision": "",
-			"gav": "com.sap.ui5:fl:1.48.5:jar"
+			"gav": "com.sap.ui5:fl:1.50.6:jar"
 		},
 		{
 			"name": "sap.ui.layout",
-			"version": "1.48.5",
-			"buildTimestamp": "201707311933",
+			"version": "1.50.6",
+			"buildTimestamp": "201711130933",
 			"scmRevision": "",
-			"gav": "com.sap.ui5:layout:1.48.5:jar"
+			"gav": "com.sap.ui5:layout:1.50.6:jar"
+		},
+		{
+			"name": "sap.ui.rta",
+			"version": "1.50.6",
+			"buildTimestamp": "201711130933",
+			"scmRevision": "",
+			"gav": "com.sap.ui5:rta:1.50.6:jar"
 		},
 		{
 			"name": "sap.ui.suite",
-			"version": "1.48.5",
-			"buildTimestamp": "201707311933",
+			"version": "1.50.6",
+			"buildTimestamp": "201711130933",
 			"scmRevision": "",
-			"gav": "com.sap.ui5:suite:1.48.5:jar"
+			"gav": "com.sap.ui5:suite:1.50.6:jar"
 		},
 		{
 			"name": "sap.ui.support",
-			"version": "1.48.5",
-			"buildTimestamp": "201707311933",
+			"version": "1.50.6",
+			"buildTimestamp": "201711130933",
 			"scmRevision": "",
-			"gav": "com.sap.ui5:support:1.48.5:jar"
+			"gav": "com.sap.ui5:support:1.50.6:jar"
 		},
 		{
 			"name": "sap.ui.table",
-			"version": "1.48.5",
-			"buildTimestamp": "201707311933",
+			"version": "1.50.6",
+			"buildTimestamp": "201711130933",
 			"scmRevision": "",
-			"gav": "com.sap.ui5:table:1.48.5:jar"
+			"gav": "com.sap.ui5:table:1.50.6:jar"
 		},
 		{
 			"name": "sap.ui.unified",
-			"version": "1.48.5",
-			"buildTimestamp": "201707311933",
+			"version": "1.50.6",
+			"buildTimestamp": "201711130933",
 			"scmRevision": "",
-			"gav": "com.sap.ui5:unified:1.48.5:jar"
+			"gav": "com.sap.ui5:unified:1.50.6:jar"
 		},
 		{
 			"name": "sap.ui.ux3",
-			"version": "1.48.5",
-			"buildTimestamp": "201707311933",
+			"version": "1.50.6",
+			"buildTimestamp": "201711130933",
 			"scmRevision": "",
-			"gav": "com.sap.ui5:ux3:1.48.5:jar"
+			"gav": "com.sap.ui5:ux3:1.50.6:jar"
 		},
 		{
 			"name": "sap.uxap",
-			"version": "1.48.5",
-			"buildTimestamp": "201707311933",
+			"version": "1.50.6",
+			"buildTimestamp": "201711130933",
 			"scmRevision": "",
-			"gav": "com.sap.uxap:uxap-uilib:1.48.5:jar"
+			"gav": "com.sap.uxap:uxap-uilib:1.50.6:jar"
 		},
 		{
 			"name": "themelib_sap_belize",
-			"version": "1.48.5",
-			"buildTimestamp": "201707311933",
+			"version": "1.50.6",
+			"buildTimestamp": "201711130933",
 			"scmRevision": "",
-			"gav": "com.sap.ui5:themelib_sap_belize:1.48.5:jar"
+			"gav": "com.sap.ui5:themelib_sap_belize:1.50.6:jar"
 		},
 		{
 			"name": "themelib_sap_bluecrystal",
-			"version": "1.48.5",
-			"buildTimestamp": "201707311933",
+			"version": "1.50.6",
+			"buildTimestamp": "201711130933",
 			"scmRevision": "",
-			"gav": "com.sap.ui5:themelib_sap_bluecrystal:1.48.5:jar"
-		},
-		{
-			"name": "themelib_sap_goldreflection",
-			"version": "1.48.5",
-			"buildTimestamp": "201707311933",
-			"scmRevision": "",
-			"gav": "com.sap.ui5:themelib_sap_goldreflection:1.48.5:jar"
+			"gav": "com.sap.ui5:themelib_sap_bluecrystal:1.50.6:jar"
 		}
 	]
 }

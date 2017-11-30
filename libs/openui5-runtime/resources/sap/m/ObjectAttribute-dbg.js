@@ -25,7 +25,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * <code>text</code> property is styled and acts as a link. In this case the <code>text</code>
 	 * property must also be set, as otherwise there will be no link displayed for the user.
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -160,6 +160,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 
 	/**
 	 * @private
+	 * @param {object} oEvent The fired event
 	 */
 	ObjectAttribute.prototype.ontap = function(oEvent) {
 		//event should only be fired if the click is on the text
@@ -172,6 +173,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 
 	/**
 	 * @private
+	 * @param {object} oEvent The fired event
 	 */
 	ObjectAttribute.prototype.onsapenter = function(oEvent) {
 		if (this._isSimulatedLink()) {
@@ -186,6 +188,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 
 	/**
 	 * @private
+	 * @param {object} oEvent The fired event
 	 */
 	ObjectAttribute.prototype.onsapspace = function(oEvent) {
 		this.onsapenter(oEvent);
@@ -208,7 +211,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 
 	/**
 	 * Called when the control is touched.
-	 *
+	 * @param {object} oEvent The fired event
 	 * @private
 	 */
 	ObjectAttribute.prototype.ontouchstart = function(oEvent) {

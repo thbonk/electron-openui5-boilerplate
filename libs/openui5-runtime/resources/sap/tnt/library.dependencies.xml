@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <library  version="2.0" name="sap.tnt">
-  <module name="sap/tnt/NavigationList.js" size="6710" compressedSize="3479">
+  <module name="sap/tnt/NavigationList.js" size="6775" compressedSize="3516">
     <description>Provides control sap.tnt.NavigationList</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -11,7 +11,7 @@
       <module name="sap/ui/core/delegate/ItemNavigation.js"/>
     </requires>
   </module>
-  <module name="sap/tnt/NavigationListItem.js" size="16750" compressedSize="9137">
+  <module name="sap/tnt/NavigationListItem.js" size="16904" compressedSize="9078">
     <description>Provides control sap.tnt.NavigationListItem.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -23,14 +23,14 @@
       <module name="sap/ui/core/Renderer.js"/>
     </requires>
   </module>
-  <module name="sap/tnt/NavigationListRenderer.js" size="1588" compressedSize="683">
+  <module name="sap/tnt/NavigationListRenderer.js" size="1620" compressedSize="691">
     <description>Provides the default renderer for control sap.tnt.NavigationList</description>
     <requires>
       <module name="jquery.sap.global.js"/>
       <module name="sap/ui/core/Renderer.js"/>
     </requires>
   </module>
-  <module name="sap/tnt/SideNavigation.js" size="9729" compressedSize="5087">
+  <module name="sap/tnt/SideNavigation.js" size="9683" compressedSize="5087">
     <description>Provides control sap.t.SideNavigation.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -47,7 +47,7 @@
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/tnt/ToolHeader.js" size="4070" compressedSize="1757">
+  <module name="sap/tnt/ToolHeader.js" size="4420" compressedSize="1757">
     <description>Provides control sap.tnt.ToolHeader</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -74,7 +74,7 @@
       <module name="sap/ui/core/Control.js"/>
     </requires>
   </module>
-  <module name="sap/tnt/ToolPage.js" size="5140" compressedSize="2453">
+  <module name="sap/tnt/ToolPage.js" size="5518" compressedSize="2453">
     <description>Provides control sap.t.ToolPage.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -90,7 +90,7 @@
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/tnt/library-preload.js" size="27809">
+  <module name="sap/tnt/library-preload.js" size="27795">
     <requires>
       <module name="jquery.sap.global.js"/>
       <module name="sap/m/BarInPageEnabler.js"/>

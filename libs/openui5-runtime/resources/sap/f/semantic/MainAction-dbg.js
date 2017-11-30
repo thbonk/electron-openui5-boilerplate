@@ -15,10 +15,10 @@ sap.ui.define(['sap/f/semantic/SemanticButton'], function(SemanticButton) {
 	* @class
 	* Serves as a base class for the {@link sap.f.semantic.TitleMainAction} and {@link sap.f.semantic.FooterMainAction} controls.
 	*
-	* @extends <code>sap.f.semantic.SemanticButton</code>
+	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.48.5
+	* @version 1.50.6
 	*
 	* @constructor
 	* @public

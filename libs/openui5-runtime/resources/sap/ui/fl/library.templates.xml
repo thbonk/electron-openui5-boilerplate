@@ -109,4 +109,61 @@
 </transport/TransportDialog>
 ]]></xmlTemplate>
 </Template>
+<Template name="sap.ui.fl.variants.VariantManagement" alias="VariantManagement,Management">
+	<jsTemplate><![CDATA[new sap.ui.fl.variants.VariantManagement({
+	id: "${id}", // sap.ui.core.ID
+	busy: false, // boolean
+	busyIndicatorDelay: 1000, // int
+	visible: true, // boolean
+	fieldGroupIds: [], // string[], since 1.31
+	showExecuteOnSelection: false, // boolean
+	showShare: false, // boolean
+	showSetAsDefault: true, // boolean
+	showFavorites: false, // boolean
+	industrySolutionMode: false, // boolean
+	vendorLayer: false, // boolean
+	manualVariantKey: false, // boolean
+	showSave: true, // boolean
+	showSaveAs: true, // boolean
+	showManage: true, // boolean
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Element, since 1.19
+	"for": [], // sap.ui.core.Control
+	validateFieldGroup: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	save: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	manage: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this]
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<variants/VariantManagement xmlns="sap.ui.fl"
+	id="${id}"
+	busy="false"
+	busyIndicatorDelay="1000"
+	visible="true"
+	fieldGroupIds=""
+	showExecuteOnSelection="false"
+	showShare="false"
+	showSetAsDefault="true"
+	showFavorites="false"
+	industrySolutionMode="false"
+	vendorLayer="false"
+	manualVariantKey="false"
+	showSave="true"
+	showSaveAs="true"
+	showManage="true"
+	"for"=""
+	validateFieldGroup=""
+	save=""
+	manage="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+</variants/VariantManagement>
+]]></xmlTemplate>
+</Template>
 </Library>

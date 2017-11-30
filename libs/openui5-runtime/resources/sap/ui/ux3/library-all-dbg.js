@@ -2633,7 +2633,7 @@ sap.ui.define("sap/ui/ux3/ShellColorPicker",['jquery.sap.global', 'sap/ui/base/E
 
 	/**
 	 * Returns the oColor object (hsl-based) for the given CSS string that is built like this: "rgb(127,0,1)"
-	 * @param sRgbString
+	 * @param {string} sRgbString
 	 */
 	ShellColorPicker.parseCssRgbString = function(sRgbString) {
 		sRgbString = jQuery.trim(sRgbString.replace(/rgb\(/, "").replace(/\)/, ""));
@@ -4441,14 +4441,14 @@ sap.ui.define("sap/ui/ux3/library",['jquery.sap.global',
 	 * @namespace
 	 * @name sap.ui.ux3
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @public
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.ux3",
-		version: "1.48.5",
+		version: "1.50.6",
 		dependencies : ["sap.ui.core","sap.ui.commons"],
 		types: [
 			"sap.ui.ux3.ActionBarSocialActions",
@@ -4842,7 +4842,7 @@ sap.ui.define("sap/ui/ux3/ActionBar",['jquery.sap.global', 'sap/ui/core/Control'
 	 *
 	 * When using this control, please be aware that it fulfills rather specific requirements: it has been designed for and is used within composite controls QuickView and ThingInspector.
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -5089,9 +5089,9 @@ sap.ui.define("sap/ui/ux3/ActionBar",['jquery.sap.global', 'sap/ui/core/Control'
 	 * Load language dependent text for given resource bundle key and optional
 	 * arguments, if the resource contains dynamic content
 	 *
-	 * @param sKey resource bundle key
+	 * @param {string} sKey resource bundle key
 	 * @param aArgs used to fill dynamic resource content
-	 * @return the resource if it was found in the bundle or 'sKey' if no matching
+	 * @return {string} the resource if it was found in the bundle or 'sKey' if no matching
 	 *		 resource was available.
 	 * @private
 	 */
@@ -5115,8 +5115,8 @@ sap.ui.define("sap/ui/ux3/ActionBar",['jquery.sap.global', 'sap/ui/core/Control'
 	 * that 'sActionId' taken from 'this.mActionKeys', otherwise
 	 * a warning will be logged and 'undefined is returned'
 	 *
-	 * @param sActionId
-	 * @return new or pooled instance of the specified action or 'undefined'
+	 * @param {string} sActionId
+	 * @return {object} new or pooled instance of the specified action or 'undefined'
 	 */
 	ActionBar.prototype._getSocialAction = function (sActionId) {
 
@@ -5483,11 +5483,11 @@ sap.ui.define("sap/ui/ux3/ActionBar",['jquery.sap.global', 'sap/ui/core/Control'
 	/*
 	 * Shows or hides standard button 'Update' on toolbar
 	 *
-	 * @param bFlag show or hide this social action on the toolbar
+	 * @param {boolean} bFlag show or hide this social action on the toolbar
 	 */
 	ActionBar.prototype.setShowUpdate = function(bFlag) {
 		this._setShowSocialAction(this._getSocialAction(this.mActionKeys.Update), bFlag);
-		// supress rerendering
+		// suppress rerendering
 		this.setProperty("showUpdate", bFlag, true);
 		return this;
 	};
@@ -5495,11 +5495,11 @@ sap.ui.define("sap/ui/ux3/ActionBar",['jquery.sap.global', 'sap/ui/core/Control'
 	/*
 	 * Shows or hides standard button 'Follow' on toolbar
 	 *
-	 * @param bFlag show or hide this social action on the toolbar
+	 * @param {boolean} bFlag show or hide this social action on the toolbar
 	 */
 	ActionBar.prototype.setShowFollow = function(bFlag) {
 		this._setShowSocialAction(this._getSocialAction(this.mActionKeys.Follow), bFlag);
-		// supress rerendering
+		// suppress rerendering
 		this.setProperty("showFollow", bFlag, true);
 		return this;
 	};
@@ -5507,11 +5507,11 @@ sap.ui.define("sap/ui/ux3/ActionBar",['jquery.sap.global', 'sap/ui/core/Control'
 	/*
 	 * Shows or hides standard button 'Flag' on toolbar
 	 *
-	 * @param bFlag show or hide this social action on the toolbar
+	 * @param {boolean} bFlag show or hide this social action on the toolbar
 	 */
 	ActionBar.prototype.setShowFlag = function(bFlag) {
 		this._setShowSocialAction(this._getSocialAction(this.mActionKeys.Flag), bFlag);
-		// supress rerendering
+		// suppress rerendering
 		this.setProperty("showFlag", bFlag, true);
 		return this;
 	};
@@ -5523,7 +5523,7 @@ sap.ui.define("sap/ui/ux3/ActionBar",['jquery.sap.global', 'sap/ui/core/Control'
 	 */
 	ActionBar.prototype.setShowFavorite = function(bFlag) {
 		this._setShowSocialAction(this._getSocialAction(this.mActionKeys.Favorite), bFlag);
-		// supress rerendering
+		// suppress rerendering
 		this.setProperty("showFavorite", bFlag, true);
 		return this;
 	};
@@ -5535,7 +5535,7 @@ sap.ui.define("sap/ui/ux3/ActionBar",['jquery.sap.global', 'sap/ui/core/Control'
 	 */
 	ActionBar.prototype.setShowOpen = function(bFlag) {
 		this._setShowSocialAction(this._getSocialAction(this.mActionKeys.Open), bFlag);
-		// supress rerendering
+		// suppress rerendering
 		this.setProperty("showOpen", bFlag, true);
 		return this;
 	};
@@ -5547,7 +5547,7 @@ sap.ui.define("sap/ui/ux3/ActionBar",['jquery.sap.global', 'sap/ui/core/Control'
 	 * @private
 	 */
 	ActionBar.prototype._setFollowState = function(oFollowState) {
-		// supress rerendering
+		// suppress rerendering
 		this.setProperty("followState", oFollowState, true);
 		return this;
 	};
@@ -5559,7 +5559,7 @@ sap.ui.define("sap/ui/ux3/ActionBar",['jquery.sap.global', 'sap/ui/core/Control'
 	 * @private
 	 */
 	ActionBar.prototype._setFlagState = function(oFlagState) {
-		// supress rerendering
+		// suppress rerendering
 		this.setProperty("flagState", oFlagState, true);
 		return this;
 	};
@@ -5571,7 +5571,7 @@ sap.ui.define("sap/ui/ux3/ActionBar",['jquery.sap.global', 'sap/ui/core/Control'
 	 * @private
 	 */
 	ActionBar.prototype._setUpdateState = function(oUpdateState) {
-		// supress rerendering
+		// suppress rerendering
 		this.setProperty("updateState", oUpdateState, true);
 		return this;
 	};
@@ -5582,14 +5582,14 @@ sap.ui.define("sap/ui/ux3/ActionBar",['jquery.sap.global', 'sap/ui/core/Control'
 	 * @private
 	 */
 	ActionBar.prototype._setFavoriteState = function(oFavoriteState) {
-		// supress rerendering
+		// suppress rerendering
 		this.setProperty("favoriteState", oFavoriteState, true);
 		return this;
 	};
 
 	// Implementation of API method
 	ActionBar.prototype.setThingIconURI = function(oIcon) {
-	    // supress rendering
+	    // suppress rendering
 		this.setProperty("thingIconURI", oIcon, true);
 		var oUpdateAction = this.mActionMap[this.mActionKeys.Update];
 		if (oUpdateAction && this._feeder) {
@@ -5734,8 +5734,8 @@ sap.ui.define("sap/ui/ux3/ActionBar",['jquery.sap.global', 'sap/ui/core/Control'
 	 * to private method 'sap.ui.ux3.ActionBar.prototype._prepareSocialAction'. After that,
 	 * the action's 'fnInit' exit is called, if it is defined.
 	 *
-	 * @param oSocialAction social action to add to the actionbar
-	 * @param iIndex position at which new action shall be inserted. If not defined, new action will be appended
+	 * @param {object} oSocialAction social action to add to the actionbar
+	 * @param {int} iIndex position at which new action shall be inserted. If not defined, new action will be appended
 	 *		to the end od the aggregation.
 	 * @return sap.ui.ux3.ActionBar the sap.ui.ux3.ActionBar instance if 'oSocialAction' was added successfully,
 	 * null otherwise.
@@ -5770,8 +5770,8 @@ sap.ui.define("sap/ui/ux3/ActionBar",['jquery.sap.global', 'sap/ui/core/Control'
 	 * text of the action's button. Finally, adds 'oSocialAction' to the actionbar's
 	 * action map and its '_socialActions' aggregation.
 	 *
-	 * @param oSocialAction social action to add to the actionbar.
-	 * @param iIndex position at which new action shall be inserted. If not defined, new action will be appended
+	 * @param {object} oSocialAction social action to add to the actionbar.
+	 * @param {int} iIndex position at which new action shall be inserted. If not defined, new action will be appended
 	 *		to the end od the aggregation.
 	 * @return sap.ui.ux3.ActionBar the sap.ui.ux3.ActionBar instance
 	 * @private
@@ -5805,9 +5805,9 @@ sap.ui.define("sap/ui/ux3/ActionBar",['jquery.sap.global', 'sap/ui/core/Control'
 	/**
 	 * Calls '_addSocialAction' or '_removeSocialAction' depending on 'bFlag'.
 	 *
-	 * @param oSocialAction social action to deal with.
-	 * @param bFlag show the action or not.
-	 * @return the sap.ui.ux3.ActionBar instance
+	 * @param {object} oSocialAction social action to deal with.
+	 * @param {boolean} bFlag show the action or not.
+	 * @return {sap.ui.ux3.ActionBar} the sap.ui.ux3.ActionBar instance
 	 * @see sap.ui.ux3.ActionBar._addSocialAction
 	 * @see sap.ui.ux3.ActionBar._removeSocialAction
 	 * @private
@@ -5837,8 +5837,8 @@ sap.ui.define("sap/ui/ux3/ActionBar",['jquery.sap.global', 'sap/ui/core/Control'
 	/**
 	 * Implementation of API method insertBusinessAction.
 	 *
-	 * @param oBusinessAction business action to be added
-	 * @param iIndex position at which the business action is to be displayed amidst the
+	 * @param {object} oBusinessAction business action to be added
+	 * @param {int} iIndex position at which the business action is to be displayed amidst the
 	 *		other business actions
 	 * @return sap.ui.ux3.ActionBar the sap.ui.ux3.ActionBar instance
 	 */
@@ -5861,8 +5861,8 @@ sap.ui.define("sap/ui/ux3/ActionBar",['jquery.sap.global', 'sap/ui/core/Control'
 	 * and buttons. Calls rerenderBusinessActions if param 'bRerender' is true
 	 *
 	 * @param oBusinessAction business action to be removed
-	 * @param bRerender if this flag is set, business actions are re-rendered.
-	 * @return sap.ui.ux3.ActionBar the sap.ui.ux3.ActionBar instance
+	 * @param {boolean} bRerender if this flag is set, business actions are re-rendered.
+	 * @return {sap.ui.ux3.ActionBar] sap.ui.ux3.ActionBar the sap.ui.ux3.ActionBar instance
 	 * @private
 	 */
 	ActionBar.prototype._removeBusinessAction = function(oBusinessAction, bRerender) {
@@ -5983,8 +5983,8 @@ sap.ui.define("sap/ui/ux3/ActionBar",['jquery.sap.global', 'sap/ui/core/Control'
 	 * private aggregation '_businessActionButtons'. If an 'iIndex' is present, it is taken into
 	 * consideration in all of these cases.
 	 *
-	 * @param oBusinessAction business action to be added
-	 * @param iIndex position at which new action shall be inserted. If not defined, new action will be appended
+	 * @param {object} oBusinessAction business action to be added
+	 * @param {int} iIndex position at which new action shall be inserted. If not defined, new action will be appended
 	 *		to the end of the aggregation.
 	 * @return sap.ui.ux3.ActionBar the sap.ui.ux3.ActionBar instance
 	 * @private
@@ -6239,9 +6239,9 @@ sap.ui.define("sap/ui/ux3/ActionBar",['jquery.sap.global', 'sap/ui/core/Control'
 
 	/**
 	 * Creates an action button for a specified action if
-	 * @param oBusinessAction the action for which the button should be found
-	 * @param oMenuItem menu item which corresponds to the button
-	 * @param iIndex position at which button shall be shown
+	 * @param {object} oBusinessAction the action for which the button should be found
+	 * @param {object} oMenuItem menu item which corresponds to the button
+	 * @param {int} iIndex position at which button shall be shown
 	 * @return new button for specified action
 	 * @private
 	 */
@@ -6384,7 +6384,7 @@ sap.ui.define("sap/ui/ux3/Collection",['jquery.sap.global', 'sap/ui/core/Element
 	 * @class
 	 * Collection
 	 * @extends sap.ui.core.Element
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -6588,7 +6588,7 @@ sap.ui.define("sap/ui/ux3/CollectionInspector",['jquery.sap.global', 'sap/ui/cor
 	 * @class
 	 * CollectionInspector
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -6836,8 +6836,6 @@ sap.ui.define("sap/ui/ux3/CollectionInspector",['jquery.sap.global', 'sap/ui/cor
 
 	/**
 	 * rerender the content if different collection or collection item is selected
-	 *
-	 * @param int Index of the collection that should be rendered
 	 *
 	 * @private
 	 */
@@ -7156,7 +7154,6 @@ sap.ui.define("sap/ui/ux3/CollectionInspector",['jquery.sap.global', 'sap/ui/cor
 	/**
 	 * Updates the css classes for the selected items
 	 *
-	 * @param {jQuery.Event} oEvent
 	 * @private
 	 */
 	CollectionInspector.prototype.refreshSelectionHighlighting = function() {
@@ -7219,7 +7216,7 @@ sap.ui.define("sap/ui/ux3/DataSet",['jquery.sap.global', 'sap/ui/core/Control', 
 	 * @class
 	 * DataSet
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -7534,7 +7531,6 @@ sap.ui.define("sap/ui/ux3/DataSet",['jquery.sap.global', 'sap/ui/core/Control', 
 	 * Prepare rendering: Calls init end exit hooks on the selected view instance. Necessary to keep the view
 	 * consistent to the DataSet state.
 	 *
-	 * @param {string} sItemId Id of the selected DataSetItem
 	 * @private
 	*/
 	DataSet.prototype.prepareRendering = function() {
@@ -7560,7 +7556,6 @@ sap.ui.define("sap/ui/ux3/DataSet",['jquery.sap.global', 'sap/ui/core/Control', 
 	/**
 	 * Returns the LeadSelection index
 	 *
-	 * @param {string} sItemId Id of the selected DataSetItem
 	 * @return {int} selected index
 	 * @protected
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
@@ -7996,7 +7991,7 @@ sap.ui.define("sap/ui/ux3/DataSetItem",['jquery.sap.global', 'sap/ui/core/Elemen
 	 * @class
 	 * DataSet Item
 	 * @extends sap.ui.core.Element
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -8109,7 +8104,7 @@ sap.ui.define("sap/ui/ux3/DataSetSimpleView",['jquery.sap.global', 'sap/ui/core/
 	 * DataSetSimpleView provides a simple view example for DataSet usage.
 	 * @extends sap.ui.core.Control
 	 * @implements sap.ui.ux3.DataSetView
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -8508,7 +8503,6 @@ sap.ui.define("sap/ui/ux3/DataSetSimpleView",['jquery.sap.global', 'sap/ui/core/
 	/**
 	 * Function is called when window is resized
 	 *
-	 * @param {jQuery.Event} oEvent
 	 * @private
 	 */
 	DataSetSimpleView.prototype.onresize = function() {
@@ -8639,7 +8633,7 @@ sap.ui.define("sap/ui/ux3/ExactArea",['jquery.sap.global', 'sap/ui/commons/Toolb
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -8727,7 +8721,7 @@ sap.ui.define("sap/ui/ux3/ExactAttribute",['jquery.sap.global', 'sap/ui/core/Ele
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -9126,7 +9120,7 @@ sap.ui.define("sap/ui/ux3/ExactList",['jquery.sap.global', 'sap/ui/commons/ListB
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -10653,7 +10647,7 @@ sap.ui.define("sap/ui/ux3/FacetFilter",['jquery.sap.global', 'sap/ui/core/Contro
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -10718,7 +10712,7 @@ sap.ui.define("sap/ui/ux3/FacetFilterList",['jquery.sap.global', 'sap/ui/commons
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -11043,7 +11037,7 @@ sap.ui.define("sap/ui/ux3/Feeder",['jquery.sap.global', 'sap/ui/commons/Button',
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -11376,7 +11370,7 @@ sap.ui.define("sap/ui/ux3/NavigationBar",['jquery.sap.global', 'sap/ui/core/Cont
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -11808,7 +11802,7 @@ sap.ui.define("sap/ui/ux3/NavigationBar",['jquery.sap.global', 'sap/ui/core/Cont
 	/**
 	 * Visually adapts the NavigationBar to the new selection, using animations instead of re-rendering.
 	 *
-	 * @param sItemId may be null, which means all selection is removed
+	 * @param {string} sItemId may be null, which means all selection is removed
 	 * @private
 	 */
 	NavigationBar.prototype._updateSelection = function(sItemId) {
@@ -11941,8 +11935,8 @@ sap.ui.define("sap/ui/ux3/NavigationBar",['jquery.sap.global', 'sap/ui/core/Cont
 	/**
 	 * Scrolls the items if possible, using an animation.
 	 *
-	 * @param iDelta how far to scroll
-	 * @param iDuration how long to scroll (ms)
+	 * @param {int} iDelta how far to scroll
+	 * @param {int} iDuration how long to scroll (ms)
 	 * @private
 	 */
 	NavigationBar.prototype._scroll = function(iDelta, iDuration) {
@@ -12229,7 +12223,7 @@ sap.ui.define("sap/ui/ux3/NavigationItem",['jquery.sap.global', 'sap/ui/core/Ite
 	 * @extends sap.ui.core.Item
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -12305,7 +12299,7 @@ sap.ui.define("sap/ui/ux3/NotificationBar",['jquery.sap.global', 'sap/ui/core/Co
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -13634,7 +13628,7 @@ sap.ui.define("sap/ui/ux3/Notifier",['jquery.sap.global', 'sap/ui/commons/Callou
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -13942,7 +13936,7 @@ sap.ui.define("sap/ui/ux3/Overlay",['jquery.sap.global', 'sap/ui/core/Control', 
 	 * @implements sap.ui.core.PopupInterface
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -14099,12 +14093,12 @@ sap.ui.define("sap/ui/ux3/Overlay",['jquery.sap.global', 'sap/ui/core/Control', 
 
 	/**
 	 *
-	 * @param fFocusFirst
-	 * @param fFocusLast
-	 * @param fApplyChanges
+	 * @param {function} fnFocusFirst
+	 * @param {function} fnFocusLast
+	 * @param {function} fnApplyChanges
 	 * @private
 	 */
-	Overlay.prototype._initDom = function(fFocusFirst, fFocusLast, fApplyChanges) {
+	Overlay.prototype._initDom = function(fnFocusFirst, fnFocusLast, fnApplyChanges) {
 		//Override the popup theming and init the focus handling
 		var oShell = jQuery(".sapUiUx3Shell").control();
 		this._oShell = oShell.length ? oShell[0] : null;
@@ -14112,7 +14106,7 @@ sap.ui.define("sap/ui/ux3/Overlay",['jquery.sap.global', 'sap/ui/core/Control', 
 		this.$().css("position", "fixed");
 		if (oShell) {
 			this._bFocusEventsRegistered = true;
-			oShell.syncWithCanvasSize(this.getId(), true, fFocusFirst, fFocusLast, fApplyChanges);
+			oShell.syncWithCanvasSize(this.getId(), true, fnFocusFirst, fnFocusLast, fnApplyChanges);
 			this.$("firstFocusDummyPaneFw").attr("tabindex", "0").focusin(jQuery.proxy(oShell.focusFirstHdr,oShell));
 			this.$("firstFocusDummyPaneBw").attr("tabindex", "0").focusin(jQuery.proxy(oShell.focusLastTool,oShell));
 			this.$("LastFocusDummyPane").attr("tabindex", "0").focusin(jQuery.proxy(oShell.focusPaneStart,oShell));
@@ -14209,7 +14203,7 @@ sap.ui.define("sap/ui/ux3/Overlay",['jquery.sap.global', 'sap/ui/core/Control', 
 	/**
 	 * Handle the click event happening on the Overlay.
 	 *
-	 * @param {jQuery.EventObject} oEvent
+	 * @param {jQuery.Event} oEvent
 	 * @private
 	 */
 	Overlay.prototype.onclick = function(oEvent) {
@@ -14219,7 +14213,7 @@ sap.ui.define("sap/ui/ux3/Overlay",['jquery.sap.global', 'sap/ui/core/Control', 
 	/**
 	 * Handle the sapselect pseudo event happening on the Overlay.
 	 *
-	 * @param {jQuery.EventObject} oEvent
+	 * @param {jQuery.Event} oEvent
 	 * @private
 	 */
 	Overlay.prototype.onsapselect = function(oEvent) {
@@ -14229,7 +14223,7 @@ sap.ui.define("sap/ui/ux3/Overlay",['jquery.sap.global', 'sap/ui/core/Control', 
 	/**
 	 * Event handling for Overlay Buttons.
 	 *
-	 * @param {jQuery.EventObject} oEvent
+	 * @param {jQuery.Event} oEvent
 	 * @private
 	 */
 	Overlay.prototype._handleButtonEvent = function(oEvent) {
@@ -14352,7 +14346,7 @@ sap.ui.define("sap/ui/ux3/OverlayContainer",['jquery.sap.global', './Overlay', '
 	 * @extends sap.ui.ux3.Overlay
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -14510,7 +14504,7 @@ sap.ui.define("sap/ui/ux3/OverlayDialog",['jquery.sap.global', 'sap/ui/core/Inte
 	 * @class
 	 * Dialog implementation based on the Overlay. If used in a Shell it leaves the Tool-Palette, Pane-Bar and Header-Items accessible.
 	 * @extends sap.ui.ux3.Overlay
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -14825,7 +14819,7 @@ sap.ui.define("sap/ui/ux3/QuickView",['jquery.sap.global', 'sap/ui/commons/Callo
 	 * @extends sap.ui.commons.CalloutBase
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -15025,7 +15019,7 @@ sap.ui.define("sap/ui/ux3/QuickView",['jquery.sap.global', 'sap/ui/commons/Callo
 
 	/**
 	* Handle the mouseover event
-	* @param {jQuery.EventObject} oEvent The event that occurred on the QuickView link
+	* @param {jQuery.Event} oEvent The event that occurred on the QuickView link
 	* @private
 	 */
 	QuickView.prototype.onmouseover = function(oEvent) {
@@ -15351,7 +15345,7 @@ sap.ui.define("sap/ui/ux3/Shell",['jquery.sap.global', 'sap/ui/commons/Menu', 's
 	 * The Ux3 GoldReflection Shell, which is an application frame with navigation capabilities.
 	 * It is supposed to be added to a direct child of the BODY tag of a page and there should be no other parts of the page consuming space outside the Shell.
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -18011,7 +18005,7 @@ sap.ui.define("sap/ui/ux3/ThingAction",['jquery.sap.global', 'sap/ui/core/Elemen
 	 * @class
 	 * Thing Action for Swatch, QuickView, Thinginspector
 	 * @extends sap.ui.core.Element
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -18100,7 +18094,7 @@ sap.ui.define("sap/ui/ux3/ThingGroup",['jquery.sap.global', 'sap/ui/core/Element
 	 * @class
 	 * Thing Group Area
 	 * @extends sap.ui.core.Element
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -18170,7 +18164,7 @@ sap.ui.define("sap/ui/ux3/ThingViewer",['jquery.sap.global', 'sap/ui/core/Contro
 	 * ThingViewer: Same as ThingInspector but decoupled from the Overlay and the ActionBar.
 	 * The control can be added to a Parent container that has a defined width. The ThingViewer fill the whole container. If the parent container has no width defined the control will not work properly.
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -18715,7 +18709,7 @@ sap.ui.define("sap/ui/ux3/ToolPopup",['jquery.sap.global', 'sap/ui/core/Control'
          *
          * @namespace
          * @author SAP SE
-         * @version 1.48.5
+         * @version 1.50.6
          *
          * @constructor
          * @public
@@ -19063,7 +19057,7 @@ sap.ui.define("sap/ui/ux3/ToolPopup",['jquery.sap.global', 'sap/ui/core/Control'
 
             /**
              * Handler for focus, adapted for this control,
-             * @param {jQuery.EventObject} oEvent
+             * @param {jQuery.Event} oEvent
              *
              * @private
              */
@@ -19647,7 +19641,7 @@ sap.ui.define("sap/ui/ux3/ToolPopup",['jquery.sap.global', 'sap/ui/core/Control'
              * Additionally it is necessary to restore the focus as if the ToolPopup was closed via "close()".
              * If the corresponding suppress-parameter was given to "close" no focus will be restored.
              *
-             * @param {jQuery.EventObject} oEvent
+             * @param {jQuery.Event} oEvent
              * @private
              */
             var fnOnClosed = function (oEvent) {
@@ -20077,7 +20071,8 @@ sap.ui.define("sap/ui/ux3/ToolPopup",['jquery.sap.global', 'sap/ui/core/Control'
         /**
          * Overriden setter for the max width internally.
          *
-         * @param sMaxWidth
+         * @param {sap.ui.core.CSSSize} sMaxWidth
+         * @returns {sap.ui.ux3.ToolPopup}
          */
         ToolPopup.prototype.setMaxWidth = function (sMaxWidth) {
             var pattern = /[0-9]+px/;
@@ -20126,7 +20121,7 @@ sap.ui.define("sap/ui/ux3/ExactBrowser",['jquery.sap.global', 'sap/ui/commons/Bu
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -20529,7 +20524,7 @@ sap.ui.define("sap/ui/ux3/Feed",['jquery.sap.global', 'sap/ui/commons/DropdownBo
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -21021,7 +21016,7 @@ sap.ui.define("sap/ui/ux3/FeedChunk",['jquery.sap.global', 'sap/ui/commons/MenuB
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -21723,7 +21718,7 @@ sap.ui.define("sap/ui/ux3/ThingInspector",['jquery.sap.global', './ActionBar', '
 	 * @class
 	 * Thing Inspector
 	 * @extends sap.ui.ux3.Overlay
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -22471,7 +22466,7 @@ sap.ui.define("sap/ui/ux3/Exact",['jquery.sap.global', 'sap/ui/commons/Button', 
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public

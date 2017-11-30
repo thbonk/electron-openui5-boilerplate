@@ -21,7 +21,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @implements sap.ui.commons.ToolbarItem, sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -446,6 +446,23 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 	};
 
+	if (sap.ui.Device.browser.internet_explorer) {
+		//In IE pasting of strings with line endings cutoffs the text after the 1st line ending, so make sure line endings are removed
+		TextField.prototype.onpaste = function(oEvent) {
+			var clipboardData,
+				pastedData,
+				modifiedData;
+
+			clipboardData = oEvent.clipboardData || window.clipboardData;
+			pastedData = clipboardData.getData('Text');
+
+			if (pastedData) {
+				modifiedData = pastedData.replace(/(?:\r\n|\r|\n)/g, ' ').replace(/\s+$/, "");
+				clipboardData.setData("Text", modifiedData);
+			}
+		};
+	}
+
 	TextField.prototype._realOninput = function(oEvent) {
 
 		if (sap.ui.Device.browser.internet_explorer) {
@@ -524,7 +541,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	/* Overwrite of generated function - no new JS-doc.
 	 * Property setter for the editable state
 	 *
-	 * @param bEditable
+	 * @param {boolean} bEditable
 	 * @return {sap.ui.commons.TextField} <code>this</code> to allow method chaining
 	 * @public
 	 */
@@ -546,7 +563,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	/* Overwrite of generated function - no new JS-doc.
 	 * Property setter for the enabled state
 	 *
-	 * @param bEnabled
+	 * @param {boolean} bEnabled
 	 * @return {sap.ui.commons.TextField} <code>this</code> to allow method chaining
 	 * @public
 	 */
@@ -568,7 +585,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	/* Overwrite of generated function - no new JS-doc.
 	 * Property setter for the Required-State
 	 *
-	 * @param bRequired:
+	 * @param {boolean} bRequired:
 	 * @return {sap.ui.commons.TextField} <code>this</code> to allow method chaining
 	 * @public
 	 */
@@ -596,7 +613,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	/* Overwrite of generated function - no new JS-doc.
 	 * Property setter for the Design
 	 *
-	 * @param sDesign:
+	 * @param {sap.ui.core.Design} sDesign:
 	 * @return {sap.ui.commons.TextField} <code>this</code> to allow method chaining
 	 * @public
 	 */
@@ -621,7 +638,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	/* Overwrite of generated function - no new JS-doc.
 	 * Property setter for the Value
 	 *
-	 * @param sValue:
+	 * @param {string} sValue:
 	 * @return {sap.ui.commons.TextField} <code>this</code> to allow method chaining
 	 * @public
 	 */
@@ -837,6 +854,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 	/**
 	 * @see sap.ui.core.Control#getAccessibilityInfo
+	 * @returns {Object} Current accessibility state of the control
 	 * @protected
 	 */
 	TextField.prototype.getAccessibilityInfo = function() {

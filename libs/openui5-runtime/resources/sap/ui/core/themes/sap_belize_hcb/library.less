@@ -97,7 +97,7 @@
 
 html.sap-desktop ::-webkit-scrollbar {
 	background-color: @sapUiHcStandardBackground;
-	border-left: 1px solid @sapUiHcReducedAltForeground;
+	border: 1px solid @sapUiHcReducedAltForeground;
 }
 
 html.sap-desktop ::-webkit-scrollbar:horizontal {
@@ -110,8 +110,7 @@ html.sap-desktop ::-webkit-scrollbar:vertical {
 
 html.sap-desktop ::-webkit-scrollbar-thumb {
 	background-color: @sapUiHcReducedAltForeground;
-	box-shadow: inset @sapUiHcStandardBackground 0 0 0 0.125rem;
-	border-left: 1px solid @sapUiHcReducedAltForeground;
+	border: 1px solid @sapUiHcReducedAltForeground;
 }
 
 html.sap-desktop ::-webkit-scrollbar-thumb:hover {
@@ -125,8 +124,13 @@ html.sap-desktop ::-webkit-scrollbar-thumb:hover {
 /* Belize High Contrast Black theme  */
 /* ================================= */
 
-.sapUiIcon:focus {
+html:not([data-sap-ui-browser^="ie"]):not([data-sap-ui-browser^="ed"]) .sapUiIcon:focus {
 	outline-color: @sapUiHcStandardForeground;
+}
+
+html[data-sap-ui-browser^="ie"] .sapUiIcon:focus::after,
+html[data-sap-ui-browser^="ed"] .sapUiIcon:focus::after {
+	border-color: @sapUiHcStandardForeground;
 }
 
 .sapUiIconColorNeutral {
@@ -168,12 +172,12 @@ html.sap-desktop ::-webkit-scrollbar-thumb:hover {
 /* Belize High Contrast Black theme                */
 /* =============================================== */
 
-@sapUiLocalBusyIndicatorBG: fade(@sapUiHcStandardBackground, 30%);
-@sapUiLocalBusyIndicatorBG_IE: @sapUiHcStandardBackground;
+@_sap_ui_core_LocalBusyIndicator_Background: fade(@sapUiHcStandardBackground, 30%);
+@_sap_ui_core_LocalBusyIndicator_BackgroundIE: @sapUiHcStandardBackground;
 
 // Color the BusyIndicator with the standard FG color in HCB
 // The brandColor default is black, and thus invisible in HCB
-@sapUiLocalBusyIndicatorColor: @sapUiHcStandardForeground;
+@_sap_ui_core_LocalBusyIndicator_Color: @sapUiHcStandardForeground;
 /* END "LocalBusyIndicator.less" */
 
 /* START "Shadow.less" */

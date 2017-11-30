@@ -24,7 +24,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './Form', 'sap/ui/lay
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -303,7 +303,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './Form', 'sap/ui/lay
 			oContainer = oElement.getParent();
 		}
 
-		if (oContainer.getExpandable()) {
+		if (oContainer.getExpandable() && oControl === oContainer._oExpandButton) {
+			// only react on expander, not on input fields or other content
 			oContainer.setExpanded(true);
 		}
 	};
@@ -321,7 +322,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './Form', 'sap/ui/lay
 			oContainer = oElement.getParent();
 		}
 
-		if (oContainer.getExpandable()) {
+		if (oContainer.getExpandable() && oControl === oContainer._oExpandButton) {
+			// only react on expander, not on input fields or other content
 			oContainer.setExpanded(false);
 		}
 	};

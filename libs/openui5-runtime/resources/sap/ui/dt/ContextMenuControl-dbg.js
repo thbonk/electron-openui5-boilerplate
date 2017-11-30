@@ -16,7 +16,7 @@ sap.ui.define([
 	 * @class Context - Menu for Design time
 	 * @extends sap.ui.unified.Menu
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -41,6 +41,7 @@ sap.ui.define([
 	 */
 	ContextMenuControl.prototype.init = function() {
 		Menu.prototype.init.apply(this, arguments);
+		this.addStyleClass("sapUiDtContextMenu");
 		this._fnOnKeyDown = this._onKeyDown.bind(this);
 		jQuery(document).keydown(this._fnOnKeyDown);
 		this.attachBrowserEvent("contextmenu", this._onContextMenu, this);

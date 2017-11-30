@@ -41,11 +41,6 @@
 			"theme": "sap_belize_hcb"
 		},
 		{
-			"name": "ColumnListItem.less",
-			"designtime": true,
-			"theme": "sap_belize_hcb"
-		},
-		{
 			"name": "ComboBoxBase.less",
 			"designtime": true,
 			"theme": "sap_belize_hcb"

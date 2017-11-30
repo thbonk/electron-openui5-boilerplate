@@ -4,8 +4,8 @@
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/m/semantic/SegmentedContainer', 'sap/m/semantic/SemanticConfiguration','sap/m/Button', 'sap/m/Title', 'sap/m/ActionSheet', 'sap/m/Page', 'sap/m/OverflowToolbar', 'sap/m/OverflowToolbarButton', 'sap/m/OverflowToolbarLayoutData', 'sap/m/ToolbarSpacer', 'sap/m/Bar', 'sap/ui/core/CustomData', 'sap/ui/base/ManagedObject', 'sap/ui/core/AccessibleLandmarkRole', 'sap/m/PageAccessibleLandmarkInfo','sap/ui/base/ManagedObjectObserver'],
-function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, ActionSheet, Page, OverflowToolbar, OverflowToolbarButton, OverflowToolbarLayoutData, ToolbarSpacer, Bar, CustomData, ManagedObject, AccessibleLandmarkRole, PageAccessibleLandmarkInfo, ManagedObjectObserver) {
+sap.ui.define(['jquery.sap.global', 'sap/m/semantic/SegmentedContainer', 'sap/m/semantic/SemanticConfiguration', 'sap/m/Button', 'sap/m/Title', 'sap/m/ActionSheet', 'sap/m/Page', 'sap/m/OverflowToolbar', 'sap/m/OverflowToolbarButton', 'sap/m/OverflowToolbarLayoutData', 'sap/m/ToolbarSpacer', 'sap/m/Bar', 'sap/ui/core/CustomData', 'sap/ui/base/ManagedObject', 'sap/m/PageAccessibleLandmarkInfo','sap/ui/base/ManagedObjectObserver'],
+function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, ActionSheet, Page, OverflowToolbar, OverflowToolbarButton, OverflowToolbarLayoutData, ToolbarSpacer, Bar, CustomData, ManagedObject, PageAccessibleLandmarkInfo, ManagedObjectObserver) {
 	"use strict";
 
 	/**
@@ -37,7 +37,7 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 	 * @abstract
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -125,6 +125,17 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 					type: "sap.m.semantic.SemanticRuleSetType",
 					group: "Misc",
 					defaultValue: sap.m.semantic.SemanticRuleSetType.Classic
+				},
+
+				/**
+				 * Determines the backgound color of the page. For more
+				 * information, see {@link sap.m.Page#backgroundDesign}.
+				 * @since 1.52
+				 */
+				backgroundDesign: {
+					type: "sap.m.PageBackgroundDesign",
+					group: "Appearance",
+					defaultValue: sap.m.PageBackgroundDesign.Standard
 				}
 			},
 			defaultAggregation: "content",
@@ -364,6 +375,12 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 
 	SemanticPage.prototype.destroyLandmarkInfo = function () {
 		return this._getPage().destroyLandmarkInfo();
+	};
+
+	SemanticPage.prototype.setBackgroundDesign = function (sBgDesign) {
+		this.setProperty("backgroundDesign", sBgDesign, true);
+		this._getPage().setBackgroundDesign(sBgDesign);
+		return this;
 	};
 
 	/*

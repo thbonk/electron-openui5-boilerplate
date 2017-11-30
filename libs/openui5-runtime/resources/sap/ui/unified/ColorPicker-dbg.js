@@ -30,7 +30,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -430,7 +430,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		this.bResponsive = oHelper.isResponsive();
 
 		// Color picker cursor size in px obtained from less parameter. Keep in mind width and height are the same.
-		this._iCPCursorSize = parseInt(Parameters.get("_sap_ui_unified_ColorPickerCircleSize"), 10);
+		this._iCPCursorSize = parseInt(Parameters.get("_sap_ui_unified_ColorPicker_CircleSize"), 10);
 
 		// Init _processChanges and _bHSLMode according to default control mode
 		this._processChanges = this._processHSVChanges;
@@ -444,7 +444,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		metadata: {
 			events: {
 				/**
-				 * Fired on interaction with the <code>ColorPickerBox<code>.
+				 * Fired on interaction with the <code>ColorPickerBox</code>.
 				 */
 				select: {
 					parameters: {
@@ -453,7 +453,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 					}
 				},
 				/**
-				 * Fired on size change of the <code>ColorPickerBox<code>.
+				 * Fired on size change of the <code>ColorPickerBox</code>.
 				 */
 				resize: {
 					parameters: {
@@ -1400,7 +1400,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		// calculate and set HEX-value from the RGB-values
 		var redValue   = Math.round(parseInt(this.oRedField.getValue(),10)),
 			greenValue = Math.round(parseInt(this.oGreenField.getValue(),10)),
-			blueValue  = Math.round(parseInt(this.oBlueField.getValue(),10));
+			blueValue  = Math.round(parseInt(this.oBlueField.getValue(),10)),
+			// 765 is the sum of red, green and blue values if they are all equal to 255 which in combination gives pure white
+			bPureWhite = (redValue + greenValue + blueValue) === 765;
 
 		this._calculateHEX(redValue, greenValue, blueValue);
 		this.oHexField.setValue(this.sHexString);
@@ -1409,12 +1411,18 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			this._calculateHSL(redValue, greenValue, blueValue);
 			this.oLitField.setValue(this.Color.l);
 		} else {
-			this._calculateHSV(redValue, greenValue, blueValue);
+			// Special case if the currently selected color is pure white we should not reset the HUE slider
+			// as it has no effect for the color but only a visual representation for the user.
+			if (!bPureWhite) {
+				this._calculateHSV(redValue, greenValue, blueValue);
+			}
 			this.oValField.setValue(this.Color.v);
 		}
 
 		// calculate and set HSV-values from the RGB-values
-		this.oHueField.setValue(this.Color.h);
+		if (!bPureWhite) {
+			this.oHueField.setValue(this.Color.h);
+		}
 		this.oSatField.setValue(this.Color.s);
 
 		// update slider value
@@ -2243,7 +2251,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	};
 
 	/**
-	 * Method is used only for qUnit testing to get the CONSTANTS object.
+	 * Method is used only for QUnit testing to get the CONSTANTS object.
 	 * @returns {object} CONSTANTS object
 	 * @private
 	 */

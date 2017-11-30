@@ -5,8 +5,8 @@
  */
 
 // Provides base class sap.ui.core.tmpl.Template for all templates
-sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/base/BindingParser', 'sap/ui/core/Control', 'sap/ui/core/RenderManager'],
-	function(jQuery, ManagedObject, BindingParser, Control, RenderManager) {
+sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/base/BindingParser', 'sap/ui/core/Control', 'sap/ui/core/RenderManager', 'jquery.sap.sjax'],
+	function(jQuery, ManagedObject, BindingParser, Control, RenderManager /*, jQuerySap1 */) {
 	"use strict";
 
 
@@ -30,7 +30,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/base/Bi
 	 * @extends sap.ui.base.ManagedObject
 	 * @abstract
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @alias sap.ui.core.tmpl.Template
 	 * @since 1.15
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel

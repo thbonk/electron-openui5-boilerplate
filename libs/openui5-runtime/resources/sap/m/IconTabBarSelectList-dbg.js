@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control',
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @private
@@ -100,6 +100,27 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control',
 
 			this._itemNavigation.setRootDomRef(this.getDomRef());
 			this._itemNavigation.setItemDomRefs(domRefs);
+		};
+
+		/**
+		 * Returns all the items aggregations marked as visible.
+		 *
+		 * @private
+		 */
+		IconTabBarSelectList.prototype.getVisibleItems = function() {
+			var items = this.getItems(),
+				visibleItems = [],
+				item;
+
+			for (var i = 0; i < items.length; i++) {
+				item = items[i];
+
+				if (item.getVisible()) {
+					visibleItems.push(item);
+				}
+			}
+
+			return visibleItems;
 		};
 
 		IconTabBarSelectList.prototype.setSelectedItem = function (item) {

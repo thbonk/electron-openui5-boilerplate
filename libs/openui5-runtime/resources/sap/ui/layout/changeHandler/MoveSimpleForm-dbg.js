@@ -13,7 +13,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/fl/changeHandler/JsControlTreeModifi
 			 *
 			 * @alias sap.ui.fl.changeHandler.MoveElements
 			 * @author SAP SE
-			 * @version 1.48.5
+			 * @version 1.50.6
 			 * @experimental Since 1.34.0
 			 */
 			var MoveSimpleForm = {};
@@ -32,7 +32,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/fl/changeHandler/JsControlTreeModifi
 				for (var i = 0; i < aContent.length; i++) {
 					var sType = oModifier.getControlType(aContent[i]);
 					if (aStopToken.indexOf(sType) === -1) {
-						if (aContent[i].getVisible()) {
+						if (oModifier.getVisible(aContent[i])) {
 							return true;
 						}
 					} else {
@@ -52,121 +52,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/fl/changeHandler/JsControlTreeModifi
 					oModifier.insertAggregation(oSimpleForm, "content", oTitle, 0, oView);
 				}
 
-				return oSimpleForm.getContent();
-			};
-
-			/**
-			 * Moves an element from one aggregation to another.
-			 *
-			 * @param {sap.ui.fl.Change} oChangeWrapper
-			 *          change object with instructions to be applied on the control map
-			 * @param {sap.ui.core.Control} oSimpleForm
-			 *          oSourceParent control that matches the change selector for applying the change, which is the source of
-			 *          the move
-			 * @param {object} mPropertyBag
-			 *          map containing the control modifier object (either sap.ui.fl.changeHandler.JsControlTreeModifier or
-			 *          sap.ui.fl.changeHandler.XmlTreeModifier), the view object where the controls are embedded and the application component
-			 * @returns {boolean} true - if change could be applied
-			 * @public
-			 */
-			MoveSimpleForm.applyChange = function(oChangeWrapper, oSimpleForm, mPropertyBag) {
-				var oModifier = mPropertyBag.modifier;
-				var oView = mPropertyBag.view;
-				var oAppComponent = mPropertyBag.appComponent;
-
-				var oContent = oChangeWrapper.getContent();
-				var mMovedElement = oContent.movedElements[0];
-				var aContent = oModifier.getAggregation(oSimpleForm, MoveSimpleForm.CONTENT_AGGREGATION);
-
-				if (oChangeWrapper.getChangeType() === MoveSimpleForm.CHANGE_TYPE_MOVE_FIELD) {
-					// !important : element was used in 1.40, do not remove for compatibility!
-					var oSourceField = oModifier.bySelector(mMovedElement.elementSelector || mMovedElement.element, oAppComponent, oView);
-					var iSourceFieldIndex = aContent.indexOf(oSourceField);
-					var iSourceFieldLength = fnGetFieldLength(oModifier, aContent, iSourceFieldIndex);
-
-					// Compute the fields target index
-					// !important : groupId was used in 1.40, do not remove for compatibility!
-					var oTargetGroup = oModifier.bySelector(mMovedElement.target.groupSelector || mMovedElement.target.groupId, oAppComponent, oView);
-					var iTargetGroupIndex = aContent.indexOf(oTargetGroup);
-					// !important : groupId was used in 1.40, do not remove for compatibility!
-					var oSourceGroup = oModifier.bySelector(mMovedElement.source.groupSelector || mMovedElement.source.groupId, oAppComponent, oView);
-					var iSourceGroupIndex = aContent.indexOf(oSourceGroup);
-
-					var iTargetFieldIndex = fnMapFieldIndexToContentAggregationIndex(oModifier, aContent, iTargetGroupIndex,
-							mMovedElement.target.fieldIndex, (iSourceGroupIndex === iTargetGroupIndex)
-									&& (mMovedElement.source.fieldIndex < mMovedElement.target.fieldIndex));
-					var iTargetFieldLength = fnGetFieldLength(oModifier, aContent, iTargetFieldIndex);
-
-					var aContentClone = aContent.slice();
-					var aFieldElements = aContentClone.slice(iSourceFieldIndex, iSourceFieldIndex + iSourceFieldLength);
-
-					var aSegmentBeforeSource, aSegmentBeforeTarget, aSegmentBetweenSourceAndTarget, aSegmentTillEnd;
-					if (iSourceFieldIndex < iTargetFieldIndex) {
-						aSegmentBeforeSource = aContentClone.slice(0, iSourceFieldIndex);
-						aSegmentBetweenSourceAndTarget = aContentClone.slice(iSourceFieldIndex + iSourceFieldLength, iTargetFieldIndex
-								+ iTargetFieldLength);
-						aSegmentTillEnd = aContentClone.slice(iTargetFieldIndex + iTargetFieldLength, aContentClone.length);
-						aContentClone = aSegmentBeforeSource.concat(aSegmentBetweenSourceAndTarget.concat(aFieldElements.concat(aSegmentTillEnd)));
-					} else if (iSourceFieldIndex > iTargetFieldIndex) {
-						aSegmentBeforeTarget = aContentClone.slice(0, iTargetFieldIndex + iTargetFieldLength);
-						aSegmentBetweenSourceAndTarget = aContentClone.slice(iTargetFieldIndex + iTargetFieldLength, iSourceFieldIndex);
-						aSegmentTillEnd = aContentClone.slice(iSourceFieldIndex + iSourceFieldLength, aContentClone.length);
-						aContentClone = aSegmentBeforeTarget.concat(aFieldElements.concat(aSegmentBetweenSourceAndTarget.concat(aSegmentTillEnd)));
-					}
-
-					if (iSourceFieldIndex != iTargetFieldIndex) {
-						oModifier.removeAllAggregation(oSimpleForm, MoveSimpleForm.CONTENT_AGGREGATION);
-						for (var i = 0; i < aContentClone.length; ++i) {
-							oModifier.insertAggregation(oSimpleForm, MoveSimpleForm.CONTENT_AGGREGATION, aContentClone[i], i);
-						}
-					}
-
-				} else if (oChangeWrapper.getChangeType() === MoveSimpleForm.CHANGE_TYPE_MOVE_GROUP) {
-
-					var aStopGroupToken = [MoveSimpleForm.sTypeTitle,
-											MoveSimpleForm.sTypeToolBar,
-											MoveSimpleForm.sTypeMTitle,
-											MoveSimpleForm.sTypeOverflowToolBar];
-					// !important : element was used in 1.40, do not remove for compatibility!
-					var oMovedGroup = oModifier.bySelector(mMovedElement.elementSelector || mMovedElement.element, oAppComponent, oView);
-
-					// If needed, insert a Title for the first group.
-					if (mMovedElement.target.groupIndex === 0 || !oMovedGroup) {
-						aContent = fnAddTitleToFirstGroupIfNeeded(oModifier, aContent, oSimpleForm, mPropertyBag, aStopGroupToken, oContent.newControlId);
-					}
-
-					var iMovedGroupIndex = oMovedGroup ? aContent.indexOf(oMovedGroup) : 0;
-
-					var iTargetIndex = fnMapGroupIndexToContentAggregationIndex(oModifier, aStopGroupToken, aContent,
-							mMovedElement.target.groupIndex);
-					var oTargetGroup = aContent[iTargetIndex];
-					var iTargetLength = fnMeasureLengthOfSequenceUntilStopToken(oModifier, iTargetIndex, aContent,
-							aStopGroupToken);
-
-					var iMovedLength = fnMeasureLengthOfSequenceUntilStopToken(oModifier, iMovedGroupIndex, aContent,
-							aStopGroupToken);
-					var aContentClone = aContent.slice();
-					// Cut the moved group from the result array...
-					aContentClone.splice(iMovedGroupIndex, iMovedLength);
-
-					iTargetIndex = aContentClone.indexOf(oTargetGroup);
-
-					var iOffset = mMovedElement.source.groupIndex < mMovedElement.target.groupIndex ? iTargetLength : 0;
-					// and insert it at the target index
-					aContentClone = fnArrayRangeCopy(aContent, iMovedGroupIndex, aContentClone, iTargetIndex + iOffset,
-							iMovedLength);
-
-					oModifier.removeAllAggregation(oSimpleForm, MoveSimpleForm.CONTENT_AGGREGATION);
-					for (var i = 0; i < aContentClone.length; ++i) {
-						oModifier.insertAggregation(oSimpleForm, MoveSimpleForm.CONTENT_AGGREGATION, aContentClone[i], i);
-					}
-
-				} else {
-					jQuery.sap.log.warning("Unknown change type detected. Cannot apply to SimpleForm");
-				}
-
-				return true;
-
+				return oModifier.getAggregation(oSimpleForm, "content");
 			};
 
 			var fnMapGroupIndexToContentAggregationIndex = function(oModifier, aStopToken, aContent, iGroupIndex) {
@@ -309,6 +195,119 @@ sap.ui.define(["jquery.sap.global", "sap/ui/fl/changeHandler/JsControlTreeModifi
 				};
 			};
 
+			var fnRemoveAndInsertAggregation = function(oModifier, oSimpleForm, MoveSimpleForm, aContentClone, oView) {
+				oModifier.removeAllAggregation(oSimpleForm, MoveSimpleForm.CONTENT_AGGREGATION);
+				for (var i = 0; i < aContentClone.length; ++i) {
+					oModifier.insertAggregation(oSimpleForm, MoveSimpleForm.CONTENT_AGGREGATION, aContentClone[i], i, oView);
+				}
+			};
+
+			/**
+			 * Moves an element from one aggregation to another.
+			 *
+			 * @param {sap.ui.fl.Change} oChangeWrapper
+			 *          change object with instructions to be applied on the control map
+			 * @param {sap.ui.core.Control} oSimpleForm
+			 *          oSourceParent control that matches the change selector for applying the change, which is the source of
+			 *          the move
+			 * @param {object} mPropertyBag
+			 *          map containing the control modifier object (either sap.ui.fl.changeHandler.JsControlTreeModifier or
+			 *          sap.ui.fl.changeHandler.XmlTreeModifier), the view object where the controls are embedded and the application component
+			 * @returns {boolean} true - if change could be applied
+			 * @public
+			 */
+			MoveSimpleForm.applyChange = function(oChangeWrapper, oSimpleForm, mPropertyBag) {
+				var oModifier = mPropertyBag.modifier;
+				var oView = mPropertyBag.view;
+				var oAppComponent = mPropertyBag.appComponent;
+				var oTargetGroup, aContentClone;
+
+				var oContent = oChangeWrapper.getContent();
+				var mMovedElement = oContent.movedElements[0];
+				var aContent = oModifier.getAggregation(oSimpleForm, MoveSimpleForm.CONTENT_AGGREGATION);
+
+				if (oChangeWrapper.getChangeType() === MoveSimpleForm.CHANGE_TYPE_MOVE_FIELD) {
+					// !important : element was used in 1.40, do not remove for compatibility!
+					var oSourceField = oModifier.bySelector(mMovedElement.elementSelector || mMovedElement.element, oAppComponent, oView);
+					var iSourceFieldIndex = aContent.indexOf(oSourceField);
+					var iSourceFieldLength = fnGetFieldLength(oModifier, aContent, iSourceFieldIndex);
+
+					// Compute the fields target index
+					// !important : groupId was used in 1.40, do not remove for compatibility!
+					oTargetGroup = oModifier.bySelector(mMovedElement.target.groupSelector || mMovedElement.target.groupId, oAppComponent, oView);
+					var iTargetGroupIndex = aContent.indexOf(oTargetGroup);
+					// !important : groupId was used in 1.40, do not remove for compatibility!
+					var oSourceGroup = oModifier.bySelector(mMovedElement.source.groupSelector || mMovedElement.source.groupId, oAppComponent, oView);
+					var iSourceGroupIndex = aContent.indexOf(oSourceGroup);
+
+					var iTargetFieldIndex = fnMapFieldIndexToContentAggregationIndex(oModifier, aContent, iTargetGroupIndex,
+							mMovedElement.target.fieldIndex, (iSourceGroupIndex === iTargetGroupIndex)
+									&& (mMovedElement.source.fieldIndex < mMovedElement.target.fieldIndex));
+					var iTargetFieldLength = fnGetFieldLength(oModifier, aContent, iTargetFieldIndex);
+
+					aContentClone = aContent.slice();
+					var aFieldElements = aContentClone.slice(iSourceFieldIndex, iSourceFieldIndex + iSourceFieldLength);
+
+					var aSegmentBeforeSource, aSegmentBeforeTarget, aSegmentBetweenSourceAndTarget, aSegmentTillEnd;
+					if (iSourceFieldIndex < iTargetFieldIndex) {
+						aSegmentBeforeSource = aContentClone.slice(0, iSourceFieldIndex);
+						aSegmentBetweenSourceAndTarget = aContentClone.slice(iSourceFieldIndex + iSourceFieldLength, iTargetFieldIndex
+								+ iTargetFieldLength);
+						aSegmentTillEnd = aContentClone.slice(iTargetFieldIndex + iTargetFieldLength, aContentClone.length);
+						aContentClone = aSegmentBeforeSource.concat(aSegmentBetweenSourceAndTarget.concat(aFieldElements.concat(aSegmentTillEnd)));
+					} else if (iSourceFieldIndex > iTargetFieldIndex) {
+						aSegmentBeforeTarget = aContentClone.slice(0, iTargetFieldIndex + iTargetFieldLength);
+						aSegmentBetweenSourceAndTarget = aContentClone.slice(iTargetFieldIndex + iTargetFieldLength, iSourceFieldIndex);
+						aSegmentTillEnd = aContentClone.slice(iSourceFieldIndex + iSourceFieldLength, aContentClone.length);
+						aContentClone = aSegmentBeforeTarget.concat(aFieldElements.concat(aSegmentBetweenSourceAndTarget.concat(aSegmentTillEnd)));
+					}
+
+					if (iSourceFieldIndex != iTargetFieldIndex) {
+						fnRemoveAndInsertAggregation(oModifier, oSimpleForm, MoveSimpleForm, aContentClone, oView);
+					}
+
+				} else if (oChangeWrapper.getChangeType() === MoveSimpleForm.CHANGE_TYPE_MOVE_GROUP) {
+
+					var aStopGroupToken = [MoveSimpleForm.sTypeTitle,
+											MoveSimpleForm.sTypeToolBar,
+											MoveSimpleForm.sTypeMTitle,
+											MoveSimpleForm.sTypeOverflowToolBar];
+					// !important : element was used in 1.40, do not remove for compatibility!
+					var oMovedGroup = oModifier.bySelector(mMovedElement.elementSelector || mMovedElement.element, oAppComponent, oView);
+
+					// If needed, insert a Title for the first group.
+					if (mMovedElement.target.groupIndex === 0 || !oMovedGroup) {
+						aContent = fnAddTitleToFirstGroupIfNeeded(oModifier, aContent, oSimpleForm, mPropertyBag, aStopGroupToken, oContent.newControlId);
+					}
+
+					var iMovedGroupIndex = oMovedGroup ? aContent.indexOf(oMovedGroup) : 0;
+
+					var iTargetIndex = fnMapGroupIndexToContentAggregationIndex(oModifier, aStopGroupToken, aContent,
+							mMovedElement.target.groupIndex);
+					oTargetGroup = aContent[iTargetIndex];
+					var iTargetLength = fnMeasureLengthOfSequenceUntilStopToken(oModifier, iTargetIndex, aContent,
+							aStopGroupToken);
+
+					var iMovedLength = fnMeasureLengthOfSequenceUntilStopToken(oModifier, iMovedGroupIndex, aContent,
+							aStopGroupToken);
+					aContentClone = aContent.slice();
+					// Cut the moved group from the result array...
+					aContentClone.splice(iMovedGroupIndex, iMovedLength);
+
+					iTargetIndex = aContentClone.indexOf(oTargetGroup);
+
+					var iOffset = mMovedElement.source.groupIndex < mMovedElement.target.groupIndex ? iTargetLength : 0;
+					// and insert it at the target index
+					aContentClone = fnArrayRangeCopy(aContent, iMovedGroupIndex, aContentClone, iTargetIndex + iOffset, iMovedLength);
+
+					fnRemoveAndInsertAggregation(oModifier, oSimpleForm, MoveSimpleForm, aContentClone, oView);
+				} else {
+					jQuery.sap.log.warning("Unknown change type detected. Cannot apply to SimpleForm");
+				}
+
+				return true;
+
+			};
 
 			/**
 			 * Completes the change by adding change handler specific content

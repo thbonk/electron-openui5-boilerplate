@@ -18,7 +18,7 @@ sap.ui.define([
 	 * @namespace
 	 * @name sap.ui.fl.descriptorRelated
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @private
 	 * @sap-restricted
 	 */
@@ -28,7 +28,7 @@ sap.ui.define([
 	 * @namespace
 	 * @name sap.ui.fl.descriptorRelated.api
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @private
 	 * @sap-restricted
 	 */
@@ -43,7 +43,7 @@ sap.ui.define([
 	 * @constructor
 	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorChange
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @private
 	 * @sap-restricted
 	 */
@@ -107,17 +107,36 @@ sap.ui.define([
 	 * @sap-restricted
 	 */
 	DescriptorChange.prototype.submit = function() {
+		this.store();
+
+		//submit
+		var oChangePersistence = this._getChangePersistence(this._mChangeFile.reference);
+		return oChangePersistence.saveDirtyChanges();
+	};
+
+	/**
+	 * Stores the descriptor change in change persistence
+	 *
+	 * @return {object} change object
+	 *
+	 * @private
+	 * @sap-restricted
+	 */
+	DescriptorChange.prototype.store = function() {
 		// create persistence
 		var sComponentName = this._mChangeFile.reference;
-		//TODO: Add application version
-		var oChangePersistence = ChangePersistenceFactory.getChangePersistenceForComponent(sComponentName);
+		var sAppVersion = this._mChangeFile.validAppVersions.creation;
+		var oChangePersistence = this._getChangePersistence(sComponentName, sAppVersion);
 
 		//add change to persistence
 		var oChange = this._getChangeToSubmit();
 		oChangePersistence.addChange(oChange);
 
-		//submit
-		return oChangePersistence.saveDirtyChanges();
+		return oChange;
+	};
+
+	DescriptorChange.prototype._getChangePersistence = function(sComponentName, sAppVersion) {
+		return ChangePersistenceFactory.getChangePersistenceForComponent(sComponentName, sAppVersion);
 	};
 
 	DescriptorChange.prototype._getChangeToSubmit = function() {
@@ -159,7 +178,7 @@ sap.ui.define([
 	 * @constructor
 	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorChangeFactory
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @private
 	 * @sap-restricted
 	 */
@@ -178,7 +197,7 @@ sap.ui.define([
 	 * @private
 	 * @sap-restricted
 	 */
-	DescriptorChangeFactory.prototype.createNew = function(sReference,oInlineChange,sLayer) {
+	DescriptorChangeFactory.prototype.createNew = function(sReference, oInlineChange, sLayer, oAppComponent) {
 		var fSetHostingIdForTextKey = function(_oDescriptorInlineChange, sId){
 			//providing "hosting id" for appdescr_app_setTitle and similar
 			//"hosting id" is descriptor variant id
@@ -188,10 +207,20 @@ sap.ui.define([
 		};
 		fSetHostingIdForTextKey(oInlineChange,sReference);
 
+		var sAppVersion;
+		if (oAppComponent) {
+			var mManifest = oAppComponent.getManifest();
+			sAppVersion = FlexUtils.getAppVersionFromManifest(mManifest);
+		}
+
 		var mPropertyBag = {};
 		mPropertyBag.changeType = oInlineChange._getChangeType();
 		mPropertyBag.componentName = sReference;
 		mPropertyBag.reference = sReference;
+		mPropertyBag.validAppVersions =  sAppVersion ? {
+			"creation": sAppVersion,
+			"from": sAppVersion
+		} : {};
 
 		if (!sLayer){
 			//default to 'CUSTOMER'

@@ -16,7 +16,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/theming/
 
 	/**
 	 * Table renderer.
+	 *
 	 * @namespace
+	 * @name sap.ui.table.TableRenderer
 	 */
 	var TableRenderer = {};
 
@@ -68,7 +70,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/theming/
 			rm.addClass(iRowActionCount == 1 ? "sapUiTableRActS" : "sapUiTableRAct");
 		}
 
-		if (TableUtils.isNoDataVisible(oTable) && !TableUtils.hasPendingRequest(oTable)) {
+		if (TableUtils.isNoDataVisible(oTable) && !TableUtils.hasPendingRequests(oTable)) {
 			rm.addClass("sapUiTableEmpty"); // no data!
 		}
 
@@ -418,15 +420,18 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/theming/
 
 		rm.writeAttribute("tabindex", "-1");
 
-		if (nSpan > 1) {
-			rm.writeAttribute("colspan", nSpan);
-		}
-
-		oTable._getAccRenderExtension().writeAriaAttributesFor(rm, oTable, "COLUMNHEADER", {
+		var mAccParams = {
 			column: oColumn,
 			headerId: sHeaderId,
 			index: iIndex
-		});
+		};
+
+		if (nSpan > 1) {
+			rm.writeAttribute("colspan", nSpan);
+			mAccParams.colspan = true;
+		}
+
+		oTable._getAccRenderExtension().writeAriaAttributesFor(rm, oTable, "COLUMNHEADER", mAccParams);
 
 		rm.addClass("sapUiTableCol");
 		if (bLastFixed) {
@@ -1067,7 +1072,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/theming/
 	};
 
 	TableRenderer.renderTableCellControl = function(rm, oTable, oCell, bIsFirstColumn) {
-		if (bIsFirstColumn && TableUtils.Grouping.isTreeMode(oTable)) {
+		if (bIsFirstColumn && TableUtils.Grouping.isTreeMode(oTable) && !oTable._bFlatMode) {
 			var oRow = oCell.getParent();
 			rm.write("<span class='sapUiTableTreeIcon' tabindex='-1' id='" + oRow.getId() + "-treeicon'");
 			oTable._getAccRenderExtension().writeAriaAttributesFor(rm, oTable, "TREEICON", {row: oRow});

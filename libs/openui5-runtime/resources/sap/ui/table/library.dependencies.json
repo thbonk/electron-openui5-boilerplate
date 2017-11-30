@@ -3,16 +3,16 @@
     {
       "name" : "sap/ui/table/AnalyticalColumn.js",
       "description" : "Provides control sap.ui.table.AnalyticalColumn.",
-      "size" : 12919,
-      "compressedSize" : 5242,
+      "size" : 12849,
+      "compressedSize" : 5194,
       "required" : ["jquery.sap.global.js", "sap/ui/core/Element.js", "sap/ui/model/type/Boolean.js", "sap/ui/model/type/DateTime.js", "sap/ui/model/type/Float.js", "sap/ui/model/type/Integer.js", "sap/ui/model/type/Time.js", "sap/ui/table/AnalyticalColumnMenu.js", "sap/ui/table/Column.js", "sap/ui/table/TableUtils.js", "sap/ui/table/library.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/AnalyticalColumnMenu.js",
       "description" : "Provides control sap.ui.table.AnalyticalColumnMenu.",
-      "size" : 4044,
-      "compressedSize" : 1711,
+      "size" : 3581,
+      "compressedSize" : 1671,
       "required" : ["jquery.sap.global.js", "sap/ui/table/ColumnMenu.js", "sap/ui/table/library.js"],
       "includes" : []
     },
@@ -35,8 +35,8 @@
     {
       "name" : "sap/ui/table/AnalyticalTable.js",
       "description" : "Provides control sap.ui.table.AnalyticalTable.",
-      "size" : 50519,
-      "compressedSize" : 19147,
+      "size" : 48469,
+      "compressedSize" : 18627,
       "required" : ["jquery.sap.global.js", "sap/ui/base/ManagedObject.js", "sap/ui/core/Popup.js", "sap/ui/model/SelectionModel.js", "sap/ui/model/Sorter.js", "sap/ui/model/analytics/ODataModelAdapter.js", "sap/ui/table/AnalyticalColumn.js", "sap/ui/table/Table.js", "sap/ui/table/TableUtils.js", "sap/ui/table/TreeTable.js", "sap/ui/table/library.js", "sap/ui/unified/Menu.js", "sap/ui/unified/MenuItem.js"],
       "includes" : []
     },
@@ -51,16 +51,16 @@
     {
       "name" : "sap/ui/table/Column.js",
       "description" : "Provides control sap.ui.table.Column.",
-      "size" : 36072,
-      "compressedSize" : 12055,
+      "size" : 36995,
+      "compressedSize" : 12260,
       "required" : ["jquery.sap.global.js", "sap/ui/core/Element.js", "sap/ui/core/Popup.js", "sap/ui/core/RenderManager.js", "sap/ui/core/library.js", "sap/ui/model/Filter.js", "sap/ui/model/FilterOperator.js", "sap/ui/model/FilterType.js", "sap/ui/model/Sorter.js", "sap/ui/model/Type.js", "sap/ui/model/type/String.js", "sap/ui/table/ColumnMenu.js", "sap/ui/table/TableUtils.js", "sap/ui/table/library.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/ColumnMenu.js",
       "description" : "Provides control sap.ui.table.ColumnMenu.",
-      "size" : 14812,
-      "compressedSize" : 6263,
+      "size" : 15090,
+      "compressedSize" : 6361,
       "required" : ["jquery.sap.global.js", "sap/ui/Device.js", "sap/ui/core/RenderManager.js", "sap/ui/table/TableUtils.js", "sap/ui/table/library.js", "sap/ui/unified/Menu.js", "sap/ui/unified/MenuItem.js", "sap/ui/unified/MenuTextFieldItem.js"],
       "includes" : []
     },
@@ -107,9 +107,9 @@
     {
       "name" : "sap/ui/table/RowSettings.js",
       "description" : "Provides control sap.ui.table.RowSettings",
-      "size" : 3944,
-      "compressedSize" : 1467,
-      "required" : ["jquery.sap.global.js", "sap/ui/core/Element.js", "sap/ui/core/MessageType.js", "sap/ui/table/TableUtils.js", "sap/ui/table/library.js"],
+      "size" : 4029,
+      "compressedSize" : 1483,
+      "required" : ["jquery.sap.global.js", "sap/ui/core/Element.js", "sap/ui/core/library.js", "sap/ui/table/TableUtils.js", "sap/ui/table/library.js"],
       "includes" : []
     },
     {
@@ -123,72 +123,80 @@
     {
       "name" : "sap/ui/table/Table.js",
       "description" : "Provides control sap.ui.table.Table.",
-      "size" : 139447,
-      "compressedSize" : 53088,
-      "required" : ["jquery.sap.dom.js", "jquery.sap.global.js", "jquery.sap.trace.js", "sap/ui/Device.js", "sap/ui/core/Control.js", "sap/ui/core/Element.js", "sap/ui/core/IconPool.js", "sap/ui/core/ResizeHandler.js", "sap/ui/core/ScrollBar.js", "sap/ui/core/delegate/ItemNavigation.js", "sap/ui/core/theming/Parameters.js", "sap/ui/core/util/Export.js", "sap/ui/core/util/ExportTypeCSV.js", "sap/ui/model/ChangeReason.js", "sap/ui/model/Context.js", "sap/ui/model/Filter.js", "sap/ui/model/SelectionModel.js", "sap/ui/model/Sorter.js", "sap/ui/table/Column.js", "sap/ui/table/Row.js", "sap/ui/table/TableAccExtension.js", "sap/ui/table/TableExtension.js", "sap/ui/table/TableKeyboardExtension.js", "sap/ui/table/TablePointerExtension.js", "sap/ui/table/TableScrollExtension.js", "sap/ui/table/TableUtils.js", "sap/ui/table/library.js"],
+      "size" : 141509,
+      "compressedSize" : 53320,
+      "required" : ["jquery.sap.dom.js", "jquery.sap.global.js", "jquery.sap.trace.js", "sap/ui/Device.js", "sap/ui/core/Control.js", "sap/ui/core/Element.js", "sap/ui/core/IconPool.js", "sap/ui/core/ResizeHandler.js", "sap/ui/core/ScrollBar.js", "sap/ui/core/delegate/ItemNavigation.js", "sap/ui/core/theming/Parameters.js", "sap/ui/core/util/Export.js", "sap/ui/core/util/ExportTypeCSV.js", "sap/ui/model/BindingMode.js", "sap/ui/model/ChangeReason.js", "sap/ui/model/Context.js", "sap/ui/model/Filter.js", "sap/ui/model/SelectionModel.js", "sap/ui/model/Sorter.js", "sap/ui/table/Column.js", "sap/ui/table/Row.js", "sap/ui/table/TableAccExtension.js", "sap/ui/table/TableExtension.js", "sap/ui/table/TableKeyboardExtension.js", "sap/ui/table/TablePointerExtension.js", "sap/ui/table/TableScrollExtension.js", "sap/ui/table/TableUtils.js", "sap/ui/table/library.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/TableAccExtension.js",
       "description" : "Provides helper sap.ui.table.TableAccExtension.",
-      "size" : 45495,
-      "compressedSize" : 19877,
+      "size" : 48302,
+      "compressedSize" : 20134,
       "required" : ["jquery.sap.global.js", "sap/ui/core/Control.js", "sap/ui/table/TableAccRenderExtension.js", "sap/ui/table/TableExtension.js", "sap/ui/table/TableUtils.js", "sap/ui/table/library.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/TableAccRenderExtension.js",
       "description" : "Provides helper sap.ui.table.TableAccRenderExtension.",
-      "size" : 6934,
-      "compressedSize" : 2839,
+      "size" : 8337,
+      "compressedSize" : 2836,
       "required" : ["jquery.sap.global.js", "sap/ui/table/TableExtension.js", "sap/ui/table/library.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/TableColumnUtils.js",
       "description" : "Provides helper sap.ui.table.TableUtils.",
-      "size" : 27037,
+      "size" : 27041,
       "compressedSize" : 6400,
       "required" : ["jquery.sap.global.js", "sap/ui/Device.js", "sap/ui/core/Element.js", "sap/ui/table/library.js"],
       "includes" : []
     },
     {
+      "name" : "sap/ui/table/TableDragDropExtension.js",
+      "description" : "Provides helper sap.ui.table.TableDragDropExtension.",
+      "size" : 2059,
+      "compressedSize" : 751,
+      "required" : ["jquery.sap.global.js", "sap/ui/table/TableExtension.js"],
+      "includes" : []
+    },
+    {
       "name" : "sap/ui/table/TableExtension.js",
       "description" : "Provides helper sap.ui.table.TableExtension.",
-      "size" : 4527,
-      "compressedSize" : 1755,
+      "size" : 6095,
+      "compressedSize" : 1793,
       "required" : ["jquery.sap.global.js", "sap/ui/base/Object.js", "sap/ui/table/TableUtils.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/TableGrouping.js",
       "description" : "Provides helper sap.ui.table.TableUtils.",
-      "size" : 23268,
-      "compressedSize" : 8522,
+      "size" : 23170,
+      "compressedSize" : 8490,
       "required" : ["jquery.sap.global.js", "sap/ui/Device.js", "sap/ui/core/Element.js", "sap/ui/model/Sorter.js", "sap/ui/table/library.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/TableKeyboardDelegate2.js",
       "description" : "Provides helper sap.ui.table.TableKeyboardDelegate2.",
-      "size" : 79362,
-      "compressedSize" : 28934,
+      "size" : 77920,
+      "compressedSize" : 26590,
       "required" : ["jquery.sap.global.js", "sap/ui/Device.js", "sap/ui/base/Object.js", "sap/ui/table/TableUtils.js", "sap/ui/table/library.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/TableKeyboardExtension.js",
       "description" : "Provides helper sap.ui.table.TableKeyboardExtension.",
-      "size" : 18086,
-      "compressedSize" : 7686,
+      "size" : 18652,
+      "compressedSize" : 7683,
       "required" : ["jquery.sap.global.js", "sap/ui/Device.js", "sap/ui/core/delegate/ItemNavigation.js", "sap/ui/table/TableExtension.js", "sap/ui/table/TableKeyboardDelegate2.js", "sap/ui/table/TableUtils.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/TableMenuUtils.js",
       "description" : "Provides helper sap.ui.table.TableMenuUtils.",
-      "size" : 14844,
-      "compressedSize" : 4338,
+      "size" : 14644,
+      "compressedSize" : 4262,
       "required" : ["jquery.sap.global.js", "sap/ui/Device.js", "sap/ui/core/Popup.js", "sap/ui/unified/Menu.js", "sap/ui/unified/MenuItem.js"],
       "includes" : []
     },
@@ -203,16 +211,16 @@
     {
       "name" : "sap/ui/table/TablePointerExtension.js",
       "description" : "Provides helper sap.ui.table.TablePointerExtension.",
-      "size" : 34826,
-      "compressedSize" : 16562,
+      "size" : 35452,
+      "compressedSize" : 16496,
       "required" : ["jquery.sap.dom.js", "jquery.sap.global.js", "sap/ui/Device.js", "sap/ui/core/Popup.js", "sap/ui/table/TableExtension.js", "sap/ui/table/TableUtils.js", "sap/ui/table/library.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/TableRenderer.js",
       "description" : "Provides default renderer for control sap.ui.table.Table",
-      "size" : 35521,
-      "compressedSize" : 20374,
+      "size" : 35647,
+      "compressedSize" : 20413,
       "required" : ["jquery.sap.global.js", "sap/ui/Device.js", "sap/ui/core/Control.js", "sap/ui/core/IconPool.js", "sap/ui/core/Renderer.js", "sap/ui/core/theming/Parameters.js", "sap/ui/table/TableUtils.js", "sap/ui/table/library.js"],
       "includes" : []
     },
@@ -227,24 +235,24 @@
     {
       "name" : "sap/ui/table/TableScrollExtension.js",
       "description" : "Provides helper sap.ui.table.TableScrollExtension.",
-      "size" : 25090,
-      "compressedSize" : 10071,
+      "size" : 26345,
+      "compressedSize" : 10319,
       "required" : ["jquery.sap.global.js", "sap/ui/Device.js", "sap/ui/table/TableExtension.js", "sap/ui/table/TableUtils.js", "sap/ui/table/library.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/TableUtils.js",
       "description" : "Provides helper sap.ui.table.TableUtils.",
-      "size" : 38319,
-      "compressedSize" : 10332,
-      "required" : ["jquery.sap.global.js", "sap/ui/Device.js", "sap/ui/core/Control.js", "sap/ui/core/MessageType.js", "sap/ui/core/ResizeHandler.js", "sap/ui/model/ChangeReason.js", "sap/ui/table/TableColumnUtils.js", "sap/ui/table/TableGrouping.js", "sap/ui/table/TableMenuUtils.js", "sap/ui/table/library.js"],
+      "size" : 41931,
+      "compressedSize" : 10327,
+      "required" : ["jquery.sap.global.js", "sap/ui/Device.js", "sap/ui/core/Control.js", "sap/ui/core/ResizeHandler.js", "sap/ui/core/library.js", "sap/ui/model/ChangeReason.js", "sap/ui/table/TableColumnUtils.js", "sap/ui/table/TableGrouping.js", "sap/ui/table/TableMenuUtils.js", "sap/ui/table/library.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/TreeTable.js",
       "description" : "Provides control sap.ui.table.TreeTable.",
-      "size" : 24264,
-      "compressedSize" : 6807,
+      "size" : 26190,
+      "compressedSize" : 6948,
       "required" : ["jquery.sap.global.js", "sap/ui/core/Element.js", "sap/ui/model/ClientTreeBindingAdapter.js", "sap/ui/model/TreeBindingCompatibilityAdapter.js", "sap/ui/model/odata/ODataTreeBindingAdapter.js", "sap/ui/table/Table.js", "sap/ui/table/TableUtils.js", "sap/ui/table/library.js"],
       "includes" : []
     },
@@ -258,15 +266,15 @@
     },
     {
       "name" : "sap/ui/table/library-preload.js",
-      "size" : 266885,
-      "required" : ["jquery.sap.dom.js", "jquery.sap.global.js", "jquery.sap.trace.js", "sap/m/TablePersoDialog.js", "sap/ui/Device.js", "sap/ui/base/ManagedObject.js", "sap/ui/base/Object.js", "sap/ui/core/Control.js", "sap/ui/core/Core.js", "sap/ui/core/Element.js", "sap/ui/core/Icon.js", "sap/ui/core/IconPool.js", "sap/ui/core/MessageType.js", "sap/ui/core/Popup.js", "sap/ui/core/RenderManager.js", "sap/ui/core/Renderer.js", "sap/ui/core/ResizeHandler.js", "sap/ui/core/ScrollBar.js", "sap/ui/core/delegate/ItemNavigation.js", "sap/ui/core/library.js", "sap/ui/core/theming/Parameters.js", "sap/ui/core/util/Export.js", "sap/ui/core/util/ExportTypeCSV.js", "sap/ui/model/ChangeReason.js", "sap/ui/model/ClientTreeBindingAdapter.js", "sap/ui/model/Context.js", "sap/ui/model/Filter.js", "sap/ui/model/FilterOperator.js", "sap/ui/model/FilterType.js", "sap/ui/model/SelectionModel.js", "sap/ui/model/Sorter.js", "sap/ui/model/TreeAutoExpandMode.js", "sap/ui/model/TreeBindingCompatibilityAdapter.js", "sap/ui/model/Type.js", "sap/ui/model/analytics/ODataModelAdapter.js", "sap/ui/model/odata/ODataTreeBindingAdapter.js", "sap/ui/model/type/Boolean.js", "sap/ui/model/type/DateTime.js", "sap/ui/model/type/Float.js", "sap/ui/model/type/Integer.js", "sap/ui/model/type/String.js", "sap/ui/model/type/Time.js", "sap/ui/unified/Menu.js", "sap/ui/unified/MenuItem.js", "sap/ui/unified/MenuTextFieldItem.js", "sap/ui/unified/library.js"],
-      "includes" : ["sap/ui/table/AnalyticalColumn.js", "sap/ui/table/AnalyticalColumnMenu.js", "sap/ui/table/AnalyticalColumnMenuRenderer.js", "sap/ui/table/AnalyticalTable.designtime.js", "sap/ui/table/AnalyticalTable.js", "sap/ui/table/AnalyticalTableRenderer.js", "sap/ui/table/Column.js", "sap/ui/table/ColumnMenu.js", "sap/ui/table/ColumnMenuRenderer.js", "sap/ui/table/Row.js", "sap/ui/table/RowAction.js", "sap/ui/table/RowActionItem.js", "sap/ui/table/RowActionRenderer.js", "sap/ui/table/RowSettings.js", "sap/ui/table/Table.designtime.js", "sap/ui/table/Table.js", "sap/ui/table/TableAccExtension.js", "sap/ui/table/TableAccRenderExtension.js", "sap/ui/table/TableColumnUtils.js", "sap/ui/table/TableExtension.js", "sap/ui/table/TableGrouping.js", "sap/ui/table/TableKeyboardDelegate2.js", "sap/ui/table/TableKeyboardExtension.js", "sap/ui/table/TableMenuUtils.js", "sap/ui/table/TablePersoController.js", "sap/ui/table/TablePointerExtension.js", "sap/ui/table/TableRenderer.js", "sap/ui/table/TableRendererUtils.js", "sap/ui/table/TableScrollExtension.js", "sap/ui/table/TableUtils.js", "sap/ui/table/TreeTable.js", "sap/ui/table/TreeTableRenderer.js", "sap/ui/table/library.js", "sap/ui/table/manifest.json"]
+      "size" : 265637,
+      "required" : ["jquery.sap.dom.js", "jquery.sap.global.js", "jquery.sap.trace.js", "sap/m/TablePersoDialog.js", "sap/ui/Device.js", "sap/ui/base/ManagedObject.js", "sap/ui/base/Object.js", "sap/ui/core/Control.js", "sap/ui/core/Core.js", "sap/ui/core/Element.js", "sap/ui/core/Icon.js", "sap/ui/core/IconPool.js", "sap/ui/core/Popup.js", "sap/ui/core/RenderManager.js", "sap/ui/core/Renderer.js", "sap/ui/core/ResizeHandler.js", "sap/ui/core/ScrollBar.js", "sap/ui/core/delegate/ItemNavigation.js", "sap/ui/core/library.js", "sap/ui/core/theming/Parameters.js", "sap/ui/core/util/Export.js", "sap/ui/core/util/ExportTypeCSV.js", "sap/ui/model/BindingMode.js", "sap/ui/model/ChangeReason.js", "sap/ui/model/ClientTreeBindingAdapter.js", "sap/ui/model/Context.js", "sap/ui/model/Filter.js", "sap/ui/model/FilterOperator.js", "sap/ui/model/FilterType.js", "sap/ui/model/SelectionModel.js", "sap/ui/model/Sorter.js", "sap/ui/model/TreeAutoExpandMode.js", "sap/ui/model/TreeBindingCompatibilityAdapter.js", "sap/ui/model/Type.js", "sap/ui/model/analytics/ODataModelAdapter.js", "sap/ui/model/odata/ODataTreeBindingAdapter.js", "sap/ui/model/type/Boolean.js", "sap/ui/model/type/DateTime.js", "sap/ui/model/type/Float.js", "sap/ui/model/type/Integer.js", "sap/ui/model/type/String.js", "sap/ui/model/type/Time.js", "sap/ui/unified/Menu.js", "sap/ui/unified/MenuItem.js", "sap/ui/unified/MenuTextFieldItem.js", "sap/ui/unified/library.js"],
+      "includes" : ["sap/ui/table/AnalyticalColumn.js", "sap/ui/table/AnalyticalColumnMenu.js", "sap/ui/table/AnalyticalColumnMenuRenderer.js", "sap/ui/table/AnalyticalTable.designtime.js", "sap/ui/table/AnalyticalTable.js", "sap/ui/table/AnalyticalTableRenderer.js", "sap/ui/table/Column.js", "sap/ui/table/ColumnMenu.js", "sap/ui/table/ColumnMenuRenderer.js", "sap/ui/table/Row.js", "sap/ui/table/RowAction.js", "sap/ui/table/RowActionItem.js", "sap/ui/table/RowActionRenderer.js", "sap/ui/table/RowSettings.js", "sap/ui/table/Table.designtime.js", "sap/ui/table/Table.js", "sap/ui/table/TableAccExtension.js", "sap/ui/table/TableAccRenderExtension.js", "sap/ui/table/TableColumnUtils.js", "sap/ui/table/TableDragDropExtension.js", "sap/ui/table/TableExtension.js", "sap/ui/table/TableGrouping.js", "sap/ui/table/TableKeyboardDelegate2.js", "sap/ui/table/TableKeyboardExtension.js", "sap/ui/table/TableMenuUtils.js", "sap/ui/table/TablePersoController.js", "sap/ui/table/TablePointerExtension.js", "sap/ui/table/TableRenderer.js", "sap/ui/table/TableRendererUtils.js", "sap/ui/table/TableScrollExtension.js", "sap/ui/table/TableUtils.js", "sap/ui/table/TreeTable.js", "sap/ui/table/TreeTableRenderer.js", "sap/ui/table/library.js", "sap/ui/table/manifest.json"]
     },
     {
       "name" : "sap/ui/table/library-preload.json",
       "size" : 0,
-      "required" : ["jquery.sap.dom.js", "jquery.sap.global.js", "jquery.sap.trace.js", "sap/m/TablePersoDialog.js", "sap/ui/Device.js", "sap/ui/base/ManagedObject.js", "sap/ui/base/Object.js", "sap/ui/core/Control.js", "sap/ui/core/Core.js", "sap/ui/core/Element.js", "sap/ui/core/Icon.js", "sap/ui/core/IconPool.js", "sap/ui/core/MessageType.js", "sap/ui/core/Popup.js", "sap/ui/core/RenderManager.js", "sap/ui/core/Renderer.js", "sap/ui/core/ResizeHandler.js", "sap/ui/core/ScrollBar.js", "sap/ui/core/delegate/ItemNavigation.js", "sap/ui/core/library-preload.json", "sap/ui/core/library.js", "sap/ui/core/theming/Parameters.js", "sap/ui/core/util/Export.js", "sap/ui/core/util/ExportTypeCSV.js", "sap/ui/model/ChangeReason.js", "sap/ui/model/ClientTreeBindingAdapter.js", "sap/ui/model/Context.js", "sap/ui/model/Filter.js", "sap/ui/model/FilterOperator.js", "sap/ui/model/FilterType.js", "sap/ui/model/SelectionModel.js", "sap/ui/model/Sorter.js", "sap/ui/model/TreeAutoExpandMode.js", "sap/ui/model/TreeBindingCompatibilityAdapter.js", "sap/ui/model/Type.js", "sap/ui/model/analytics/ODataModelAdapter.js", "sap/ui/model/odata/ODataTreeBindingAdapter.js", "sap/ui/model/type/Boolean.js", "sap/ui/model/type/DateTime.js", "sap/ui/model/type/Float.js", "sap/ui/model/type/Integer.js", "sap/ui/model/type/String.js", "sap/ui/model/type/Time.js", "sap/ui/unified/Menu.js", "sap/ui/unified/MenuItem.js", "sap/ui/unified/MenuTextFieldItem.js", "sap/ui/unified/library-preload.json", "sap/ui/unified/library.js"],
-      "includes" : ["sap/ui/table/AnalyticalColumn.js", "sap/ui/table/AnalyticalColumnMenu.js", "sap/ui/table/AnalyticalColumnMenuRenderer.js", "sap/ui/table/AnalyticalTable.designtime.js", "sap/ui/table/AnalyticalTable.js", "sap/ui/table/AnalyticalTableRenderer.js", "sap/ui/table/Column.js", "sap/ui/table/ColumnMenu.js", "sap/ui/table/ColumnMenuRenderer.js", "sap/ui/table/Row.js", "sap/ui/table/RowAction.js", "sap/ui/table/RowActionItem.js", "sap/ui/table/RowActionRenderer.js", "sap/ui/table/RowSettings.js", "sap/ui/table/Table.designtime.js", "sap/ui/table/Table.js", "sap/ui/table/TableAccExtension.js", "sap/ui/table/TableAccRenderExtension.js", "sap/ui/table/TableColumnUtils.js", "sap/ui/table/TableExtension.js", "sap/ui/table/TableGrouping.js", "sap/ui/table/TableKeyboardDelegate2.js", "sap/ui/table/TableKeyboardExtension.js", "sap/ui/table/TableMenuUtils.js", "sap/ui/table/TablePersoController.js", "sap/ui/table/TablePointerExtension.js", "sap/ui/table/TableRenderer.js", "sap/ui/table/TableRendererUtils.js", "sap/ui/table/TableScrollExtension.js", "sap/ui/table/TableUtils.js", "sap/ui/table/TreeTable.js", "sap/ui/table/TreeTableRenderer.js", "sap/ui/table/library.js", "sap/ui/table/manifest.json"]
+      "required" : ["jquery.sap.dom.js", "jquery.sap.global.js", "jquery.sap.trace.js", "sap/m/TablePersoDialog.js", "sap/ui/Device.js", "sap/ui/base/ManagedObject.js", "sap/ui/base/Object.js", "sap/ui/core/Control.js", "sap/ui/core/Core.js", "sap/ui/core/Element.js", "sap/ui/core/Icon.js", "sap/ui/core/IconPool.js", "sap/ui/core/Popup.js", "sap/ui/core/RenderManager.js", "sap/ui/core/Renderer.js", "sap/ui/core/ResizeHandler.js", "sap/ui/core/ScrollBar.js", "sap/ui/core/delegate/ItemNavigation.js", "sap/ui/core/library-preload.json", "sap/ui/core/library.js", "sap/ui/core/theming/Parameters.js", "sap/ui/core/util/Export.js", "sap/ui/core/util/ExportTypeCSV.js", "sap/ui/model/BindingMode.js", "sap/ui/model/ChangeReason.js", "sap/ui/model/ClientTreeBindingAdapter.js", "sap/ui/model/Context.js", "sap/ui/model/Filter.js", "sap/ui/model/FilterOperator.js", "sap/ui/model/FilterType.js", "sap/ui/model/SelectionModel.js", "sap/ui/model/Sorter.js", "sap/ui/model/TreeAutoExpandMode.js", "sap/ui/model/TreeBindingCompatibilityAdapter.js", "sap/ui/model/Type.js", "sap/ui/model/analytics/ODataModelAdapter.js", "sap/ui/model/odata/ODataTreeBindingAdapter.js", "sap/ui/model/type/Boolean.js", "sap/ui/model/type/DateTime.js", "sap/ui/model/type/Float.js", "sap/ui/model/type/Integer.js", "sap/ui/model/type/String.js", "sap/ui/model/type/Time.js", "sap/ui/unified/Menu.js", "sap/ui/unified/MenuItem.js", "sap/ui/unified/MenuTextFieldItem.js", "sap/ui/unified/library-preload.json", "sap/ui/unified/library.js"],
+      "includes" : ["sap/ui/table/AnalyticalColumn.js", "sap/ui/table/AnalyticalColumnMenu.js", "sap/ui/table/AnalyticalColumnMenuRenderer.js", "sap/ui/table/AnalyticalTable.designtime.js", "sap/ui/table/AnalyticalTable.js", "sap/ui/table/AnalyticalTableRenderer.js", "sap/ui/table/Column.js", "sap/ui/table/ColumnMenu.js", "sap/ui/table/ColumnMenuRenderer.js", "sap/ui/table/Row.js", "sap/ui/table/RowAction.js", "sap/ui/table/RowActionItem.js", "sap/ui/table/RowActionRenderer.js", "sap/ui/table/RowSettings.js", "sap/ui/table/Table.designtime.js", "sap/ui/table/Table.js", "sap/ui/table/TableAccExtension.js", "sap/ui/table/TableAccRenderExtension.js", "sap/ui/table/TableColumnUtils.js", "sap/ui/table/TableDragDropExtension.js", "sap/ui/table/TableExtension.js", "sap/ui/table/TableGrouping.js", "sap/ui/table/TableKeyboardDelegate2.js", "sap/ui/table/TableKeyboardExtension.js", "sap/ui/table/TableMenuUtils.js", "sap/ui/table/TablePersoController.js", "sap/ui/table/TablePointerExtension.js", "sap/ui/table/TableRenderer.js", "sap/ui/table/TableRendererUtils.js", "sap/ui/table/TableScrollExtension.js", "sap/ui/table/TableUtils.js", "sap/ui/table/TreeTable.js", "sap/ui/table/TreeTableRenderer.js", "sap/ui/table/library.js", "sap/ui/table/manifest.json"]
     },
     {
       "name" : "sap/ui/table/library.js",
@@ -290,247 +298,247 @@
     },
     {
       "name" : "sap/ui/table/messagebundle_ar.properties",
-      "size" : 11271,
+      "size" : 12211,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_bg.properties",
-      "size" : 13289,
+      "size" : 14422,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_ca.properties",
-      "size" : 7191,
+      "size" : 7966,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_cs.properties",
-      "size" : 7699,
+      "size" : 8523,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_da.properties",
-      "size" : 7030,
+      "size" : 7772,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_de.properties",
-      "size" : 7126,
+      "size" : 7873,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_el.properties",
-      "size" : 12953,
+      "size" : 14126,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_en.properties",
-      "size" : 6522,
+      "size" : 7236,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_en_US_sappsd.properties",
-      "size" : 14659,
+      "size" : 16000,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_en_US_saptrc.properties",
-      "size" : 8040,
+      "size" : 8892,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_es.properties",
-      "size" : 7209,
+      "size" : 7983,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_et.properties",
-      "size" : 7031,
+      "size" : 7747,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_fi.properties",
-      "size" : 7477,
+      "size" : 8242,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_fr.properties",
-      "size" : 7260,
+      "size" : 8036,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_hi.properties",
-      "size" : 12523,
+      "size" : 13450,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_hr.properties",
-      "size" : 6923,
+      "size" : 7660,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_hu.properties",
-      "size" : 8037,
+      "size" : 8862,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_it.properties",
-      "size" : 7027,
+      "size" : 7809,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_iw.properties",
-      "size" : 10847,
+      "size" : 11800,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_ja.properties",
-      "size" : 9066,
+      "size" : 9869,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_kk.properties",
-      "size" : 13518,
+      "size" : 14628,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_ko.properties",
-      "size" : 8962,
+      "size" : 9739,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_lt.properties",
-      "size" : 7693,
+      "size" : 8446,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_lv.properties",
-      "size" : 7516,
+      "size" : 8273,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_ms.properties",
-      "size" : 6669,
+      "size" : 7386,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_nl.properties",
-      "size" : 6871,
+      "size" : 7631,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_no.properties",
-      "size" : 6932,
+      "size" : 7667,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_pl.properties",
-      "size" : 7650,
+      "size" : 8416,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_pt.properties",
-      "size" : 7107,
+      "size" : 7895,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_ro.properties",
-      "size" : 7243,
+      "size" : 8007,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_ru.properties",
-      "size" : 13430,
+      "size" : 14848,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_sh.properties",
-      "size" : 6929,
+      "size" : 7702,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_sk.properties",
-      "size" : 7525,
+      "size" : 8336,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_sl.properties",
-      "size" : 7106,
+      "size" : 7854,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_sv.properties",
-      "size" : 7033,
+      "size" : 7765,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_th.properties",
-      "size" : 12469,
+      "size" : 13566,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_tr.properties",
-      "size" : 7903,
+      "size" : 8674,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_uk.properties",
-      "size" : 13854,
+      "size" : 14979,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_vi.properties",
-      "size" : 8828,
+      "size" : 9632,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_zh_CN.properties",
-      "size" : 7686,
+      "size" : 8435,
       "required" : [],
       "includes" : []
     },
     {
       "name" : "sap/ui/table/messagebundle_zh_TW.properties",
-      "size" : 7699,
+      "size" : 8436,
       "required" : [],
       "includes" : []
     }

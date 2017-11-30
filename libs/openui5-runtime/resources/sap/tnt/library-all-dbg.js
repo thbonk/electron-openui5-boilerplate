@@ -33,6 +33,7 @@ sap.ui.define("sap/tnt/NavigationListRenderer",['jquery.sap.global', 'sap/ui/cor
 			var group,
 				role,
 				groups = control.getItems(),
+				length = groups.length,
 				expanded = control.getExpanded();
 
 			rm.write("<ul");
@@ -59,9 +60,9 @@ sap.ui.define("sap/tnt/NavigationListRenderer",['jquery.sap.global', 'sap/ui/cor
 
 			rm.write(">");
 
-			for (var i = 0; i < groups.length; i++) {
+			for (var i = 0; i < length; i++) {
 				group = groups[i];
-				group.render(rm, control);
+				group.render(rm, control, i, length);
 			}
 
 			rm.write("</ul>");
@@ -389,14 +390,14 @@ sap.ui.define("sap/tnt/library",['jquery.sap.global',
 	 * @namespace
 	 * @name sap.tnt
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @public
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : 'sap.tnt',
-		version: '1.48.5',
+		version: '1.50.6',
 		dependencies : ['sap.ui.core','sap.m'],
 		types: [],
 		interfaces: [],
@@ -447,7 +448,7 @@ sap.ui.define("sap/tnt/NavigationList",['jquery.sap.global', './library', 'sap/u
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @public
@@ -658,7 +659,10 @@ sap.ui.define("sap/tnt/NavigationList",['jquery.sap.global', './library', 'sap/u
 				verticalScrolling: true,
 				initialFocus: selectedItem,
 				afterClose: function () {
-					that._popover = null;
+					if (that._popover) {
+						that._popover.destroy();
+						that._popover = null;
+					}
 				},
 				content: list,
 				ariaLabelledBy: [NavigationList._sAriaPopupLabelId]
@@ -706,7 +710,7 @@ sap.ui.define("sap/tnt/NavigationListItem",["jquery.sap.global", "./library", "s
 		 * @extends sap.ui.core.Item
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @public
@@ -1062,12 +1066,12 @@ sap.ui.define("sap/tnt/NavigationListItem",["jquery.sap.global", "./library", "s
 		 * Renders the item.
 		 * @private
 		 */
-		NavigationListItem.prototype.render = function (rm, control) {
+		NavigationListItem.prototype.render = function (rm, control, index, length) {
 
 			if (this.getLevel() == 0) {
-				this.renderFirstLevelNavItem(rm, control);
+				this.renderFirstLevelNavItem(rm, control, index, length);
 			} else {
-				this.renderSecondLevelNavItem(rm, control);
+				this.renderSecondLevelNavItem(rm, control, index, length);
 			}
 		};
 
@@ -1075,7 +1079,7 @@ sap.ui.define("sap/tnt/NavigationListItem",["jquery.sap.global", "./library", "s
 		 * Renders the group item.
 		 * @private
 		 */
-		NavigationListItem.prototype.renderGroupItem = function (rm, control) {
+		NavigationListItem.prototype.renderGroupItem = function (rm, control, index, length) {
 
 			rm.write('<div');
 
@@ -1123,39 +1127,44 @@ sap.ui.define("sap/tnt/NavigationListItem",["jquery.sap.global", "./library", "s
 		 * Renders the first-level navigation item.
 		 * @private
 		 */
-		NavigationListItem.prototype.renderFirstLevelNavItem = function (rm, control) {
+		NavigationListItem.prototype.renderFirstLevelNavItem = function (rm, control, index, length) {
 			var item,
 				items = this.getItems(),
+				childrenLength = items.length,
 				expanded = this.getExpanded(),
-				isListExpanded = control.getExpanded();
+				isListExpanded = control.getExpanded(),
+				text = this.getText();
 
 			rm.write('<li');
 			rm.writeElementData(this);
-			rm.writeAttribute("aria-expanded", this.getExpanded());
-			rm.writeAttribute("aria-level", 1);
+
 
 			if (this.getEnabled() && !isListExpanded) {
 				rm.write(' tabindex="-1"');
 			}
 
-			var text = this.getText();
-
 			// ARIA
-			if (!isListExpanded) {
-				var text = this.getText();
+			var ariaProps = {
+				level: '1',
+				expanded: this.getExpanded(),
+				posinset: index + 1,
+				setsize: length
+			};
 
+			if (!isListExpanded) {
 				var sTooltip = this.getTooltip_AsString() || text;
 				if (sTooltip) {
 					rm.writeAttributeEscaped("title", sTooltip);
 				}
 
-				rm.writeAttributeEscaped("aria-label", text);
-
-				rm.writeAttribute("role", 'button');
-				rm.writeAttribute("aria-haspopup", true);
+				ariaProps.label = text;
+				ariaProps.role = 'button';
+				ariaProps.haspopup = true;
 			} else {
-				rm.writeAttribute("role", "treeitem");
+				ariaProps.role = 'treeitem';
 			}
+
+			rm.writeAccessibilityState(ariaProps);
 
 			rm.writeAttribute("tabindex", "0");
 
@@ -1179,7 +1188,7 @@ sap.ui.define("sap/tnt/NavigationListItem",["jquery.sap.global", "./library", "s
 
 				for (var i = 0; i < items.length; i++) {
 					item = items[i];
-					item.render(rm, control, this);
+					item.render(rm, control, i, childrenLength);
 				}
 
 				rm.write("</ul>");
@@ -1192,7 +1201,7 @@ sap.ui.define("sap/tnt/NavigationListItem",["jquery.sap.global", "./library", "s
 		 * Renders the second-level navigation item.
 		 * @private
 		 */
-		NavigationListItem.prototype.renderSecondLevelNavItem = function (rm, control) {
+		NavigationListItem.prototype.renderSecondLevelNavItem = function (rm, control, index, length) {
 
 			var group = this.getParent();
 
@@ -1217,8 +1226,12 @@ sap.ui.define("sap/tnt/NavigationListItem",["jquery.sap.global", "./library", "s
 			}
 
 			// ARIA
-			rm.writeAttribute("role", 'treeitem');
-			rm.writeAttribute("aria-level", 2);
+			rm.writeAccessibilityState({
+				role: 'treeitem',
+				level: '2',
+				posinset: index + 1,
+				setsize: length
+			});
 
 			rm.writeClasses();
 
@@ -1415,15 +1428,17 @@ sap.ui.define("sap/tnt/SideNavigation",['jquery.sap.global', './library', 'sap/u
 		 * @param {object} [mSettings] Initial settings for the new control
 		 *
 		 * @class
-		 * The SideNavigation control is a container, which consists of flexible and fixed parts on top of each other. The flexible part adapts its size to the fixed one.
-		 * The flexible part has a scrollbar when the content is larger than the available space.
-		 * Whenever the height of the whole control is less than 256 pixels, the scrollbar becomes joint for the two parts.
-		 *
-		 * <b>Note:</b> In order for the SideNavigation to stretch properly, its parent layout control should only be the sap.tnt.ToolPage.
+		 * The SideNavigation control is a container, which consists of flexible and fixed parts on top of each other.
+		 * <h4>Responsive Behavior</h4>
+		 * <ul>
+		 * <li>The flexible part adapts its size to the fixed one.</li>
+		 * <li>The flexible part has a scrollbar when the content is larger than the available space.</li>
+		 * </ul>
+		 *<b>Note:</b> In order for the SideNavigation to stretch properly, its parent layout control should only be the sap.tnt.ToolPage.
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @public
@@ -1768,15 +1783,18 @@ sap.ui.define("sap/tnt/ToolHeader",['jquery.sap.global', './library', 'sap/ui/co
 		 * @class
 		 *
 		 * The ToolHeader control is a horizontal container that is most
-		 * commonly used to display buttons, labels, selects and other various input controls.
-		 *
-		 * The ToolHeader control is based on sap.m.OverflowToolbar. In addition to the OverflowToolbar,
-		 * the user can specify where the overflow button is placed.
-		 *
+		 * commonly used to display buttons, labels, and other various input controls.
+		 * <h4>Overview</h4>
+		 * The ToolHeader control is based on {@link sap.m.OverflowToolbar}. It contains clearly structured menus of commands that are available across the various apps within the same tool layout.
+		 * <h4>Usage</h4>
+		 * <ul>
+		 * <li>If an app implements side navigation in addition to the tool header menu, the menu icon must be the first item on the left-hand side of the tool header.</li>
+		 * <li>The app menu and the side navigation must not have any dependencies and must work independently.</li>
+		 * </ul>
 		 * @extends sap.m.OverflowToolbar
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @public
@@ -1831,7 +1849,7 @@ sap.ui.define("sap/tnt/ToolHeader",['jquery.sap.global', './library', 'sap/ui/co
 				popover.oControlsManager._preProcessSapMButton = this._preProcessPopoverControlsSapMButton.bind(popover.oControlsManager);
 
 				if (sap.ui.Device.system.phone) {
-					// This will trigger when the toolbar is in the header/footer, because the the position is known in advance (strictly top/bottom)
+					// This will trigger when the toolbar is in the header/footer, because the position is known in advance (strictly top/bottom)
 					popover.attachBeforeOpen(this._shiftPopupShadow, this);
 
 					// This will trigger when the toolbar is not in the header/footer, when the actual calculation is ready (see the overridden _calcPlacement)
@@ -1909,7 +1927,7 @@ sap.ui.define("sap/tnt/ToolHeaderUtilitySeparator",['jquery.sap.global', './libr
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @public
@@ -1958,11 +1976,16 @@ sap.ui.define("sap/tnt/ToolPage",['./library', 'sap/ui/core/Control', 'sap/ui/De
 		 * @param {object} [mSettings] Initial settings for the new control
 		 *
 		 * @class
-		 * The ToolPage is a layout control, used to put together the parts of a basic tools app - ToolHeader, SideNavigation and contents area.
+		 * The ToolPage is a layout control, used to create a basic tools app that has a header, side navigation and contents area.
+		 * <h4>Overview</h4>
+		 * The control has three main areas - a header on top, navigation to the side and a content are that can hold any control. The header and side navigation use custom controls
+		 * - {@link sap.tnt.ToolHeader} and {@link sap.tnt.SideNavigation}.
+		 * <h4>Usage</h4>
+		 * The main usage for the asp.tnt controls is for scenarios in the tooling or administration space.
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @public

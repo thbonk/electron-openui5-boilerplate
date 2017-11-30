@@ -48,7 +48,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Core", "sap/ui/core/library", "
 			"sap.uxap.ModelMapping",
 			"sap.uxap.ObjectPageHeaderLayoutData"
 		],
-		version: "1.48.5",
+		version: "1.50.6",
 		extensions: {
 			flChangeHandlers: {
 				"sap.uxap.ObjectPageHeader" : "sap/uxap/flexibility/ObjectPageHeader",
@@ -60,32 +60,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Core", "sap/ui/core/library", "
 						}
 					}
 				},
-				"sap.uxap.ObjectPageSection": {
-					"hideControl": {
-						"changeHandler": "default",
-						"layers": {
-							"USER": true
-						}
-					},
-					"unhideControl": {
-						"changeHandler": "default",
-						"layers": {
-							"USER": true
-						}
-					},
-					"stashControl": {
-						"changeHandler": "default",
-						"layers": {
-							"USER": true
-						}
-					},
-					"unstashControl": {
-						"changeHandler": "default",
-						"layers": {
-							"USER": true
-						}
-					}
-				},
+				"sap.uxap.ObjectPageSection": "sap/uxap/flexibility/ObjectPageSection",
 				"sap.uxap.ObjectPageSubSection" : "sap/uxap/flexibility/ObjectPageSubSection",
 				"sap.ui.core._StashedControl" : {
 					"unstashControl": {
@@ -335,4 +310,4 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Core", "sap/ui/core/library", "
 
 	return sap.uxap;
 
-}, /* bExport= */ true);
+});

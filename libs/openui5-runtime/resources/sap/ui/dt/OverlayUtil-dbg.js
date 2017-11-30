@@ -6,8 +6,15 @@
 
 // Provides object sap.ui.dt.OverlayUtil.
 sap.ui.define([
-	'jquery.sap.global', 'sap/ui/dt/OverlayRegistry', 'sap/ui/dt/ElementUtil'
-], function(jQuery, OverlayRegistry, ElementUtil) {
+	'jquery.sap.global',
+	'sap/ui/dt/OverlayRegistry',
+	'sap/ui/dt/ElementUtil'
+],
+function(
+	jQuery,
+	OverlayRegistry,
+	ElementUtil
+) {
 	"use strict";
 
 	/**
@@ -15,7 +22,7 @@ sap.ui.define([
 	 *
 	 * @class Utility functionality to work with overlays
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @private
 	 * @static
 	 * @since 1.30
@@ -26,7 +33,10 @@ sap.ui.define([
 	var OverlayUtil = {};
 
 	/**
-	 *
+	 * Check if the overlay is in target zone aggregation.
+	 * @param  {sap.ui.dt.ElementOverlay}  oElementOverlay The overlay to be checked
+	 * @return {boolean}                   Returns true if overlay is in target zone
+	 * @private
 	 */
 	OverlayUtil.isInTargetZoneAggregation = function(oElementOverlay) {
 		var oAggregationOverlay = oElementOverlay.getParent();
@@ -34,7 +44,13 @@ sap.ui.define([
 	};
 
 	/**
-	 * Returns an object with public parent, aggregation in public parent and direct index
+	 * Returns an object with public parent, aggregation in public parent and direct index.
+	 * @param  {sap.ui.dt.ElementOverlay} oElementOverlay The overlay to get the information from
+	 * @return {object}
+	 *         {object.parent}            The overlay parent element
+	 *         {object.aggregation}       The parent aggregation
+	 *         {object.index}             Position of the parent element in the aggregation
+	 * @private
 	 */
 	OverlayUtil.getParentInformation = function(oElementOverlay) {
 		var oParentOverlay = oElementOverlay.getParentElementOverlay();
@@ -62,7 +78,10 @@ sap.ui.define([
 	};
 
 	/**
-	 *
+	 * Get the closest overlay to an element (moving up the tree).
+	 * @param  {sap.ui.core.Element} oElement The element to be checked
+	 * @return {sap.ui.dt.ElementOverlay} Returns the overlay that was found first
+	 * @private
 	 */
 	OverlayUtil.getClosestOverlayFor = function(oElement) {
 		if (!oElement) {
@@ -80,7 +99,10 @@ sap.ui.define([
 	};
 
 	/**
-	 *
+	 * Get the Overlay geometry.
+	 * @param  {array}  aGeometry Array with the element geometries
+	 * @return {object} Returns geometry information: size (width, height), position (left, top) and visibility
+	 * @private
 	 */
 	OverlayUtil.getGeometry = function(aGeometry) {
 		var minLeft, maxRight, minTop, maxBottom;
@@ -120,7 +142,11 @@ sap.ui.define([
 	};
 
 	/**
-	 *
+	 * Get the closest overlay to an overlay (moving up the tree) for a particular element type.
+	 * @param  {string} sType The element type being searched
+	 * @param  {sap.ui.dt.ElementOverlay} oOverlay The source overlay
+	 * @return {sap.ui.dt.ElementOverlay} Returns the overlay for that element type that was found first
+	 * @private
 	 */
 	OverlayUtil.getClosestOverlayForType = function(sType, oOverlay) {
 		while (oOverlay && !ElementUtil.isInstanceOf(oOverlay.getElementInstance(), sType)) {
@@ -131,11 +157,14 @@ sap.ui.define([
 	};
 
 	/**
-	 *
+	 * Get the closest overlay (moving up the tree) that is scrollable.
+	 * @param  {sap.ui.dt.ElementOverlay} oOverlay The source overlay
+	 * @return {sap.ui.dt.ElementOverlay} Returns the scrollable overlay that was found first
+	 * @private
 	 */
 	OverlayUtil.getClosestScrollable = function(oOverlay) {
 		if (!oOverlay) {
-			return;
+			return undefined;
 		}
 
 		oOverlay = oOverlay.getParent();
@@ -148,11 +177,11 @@ sap.ui.define([
 
 	/**
 	 * Returns first descendant of given ElementOverlay which fulfills
-	 * the given condition. Recursive function
+	 * the given condition. Recursive function.
 	 *
 	 * @param {sap.ui.dt.ElementOverlay} oOverlay - Source overlay object
 	 * @param {function} fnCondition - condition to search
-	 * @returns {sap.ui.dt.ElementOverlay} overlay which fulfills the condition otherwise it returns 'undefined'
+	 * @returns {sap.ui.dt.ElementOverlay} Returns the overlay which fulfills the condition, otherwise it returns 'undefined'
 	 * @private
 	 */
 	OverlayUtil.getFirstDescendantByCondition = function(oOverlay, fnCondition) {
@@ -174,10 +203,10 @@ sap.ui.define([
 	};
 
 	/**
-	 * Returns all overlay children as ElementOverlay
+	 * Returns all overlay children as ElementOverlay.
 	 *
 	 * @param {sap.ui.dt.ElementOverlay} oOverlay - Source overlay object
-	 * @returns {array} array of child overlays {sap.ui.dt.ElementOverlay}
+	 * @returns {array} Returns an array of child overlays {sap.ui.dt.ElementOverlay}
 	 * @private
 	 */
 	OverlayUtil.getAllChildOverlays = function(oOverlay) {
@@ -196,10 +225,10 @@ sap.ui.define([
 	};
 
 	/**
-	 * Returns first child overlay
+	 * Returns first child overlay.
 	 *
 	 * @param {sap.ui.dt.ElementOverlay} oOverlay - Source overlay object
-	 * @returns {sap.ui.dt.ElementOverlay} first child overlays
+	 * @returns {sap.ui.dt.ElementOverlay} Returns the first child overlay
 	 * @private
 	 */
 	OverlayUtil.getFirstChildOverlay = function(oOverlay) {
@@ -211,10 +240,10 @@ sap.ui.define([
 	};
 
 	/**
-	 * Returns last child overlay
+	 * Returns last child overlay.
 	 *
 	 * @param {sap.ui.dt.ElementOverlay} oOverlay - Source overlay object
-	 * @returns {sap.ui.dt.ElementOverlay} last child overlays
+	 * @returns {sap.ui.dt.ElementOverlay} Returns the last child overlay
 	 * @private
 	 */
 	OverlayUtil.getLastChildOverlay = function(oOverlay) {
@@ -226,11 +255,14 @@ sap.ui.define([
 	};
 
 	/**
-	 *
+	 * Returns next sibling overlay (going down the tree).
+	 * @param  {sap.ui.dt.ElementOverlay} oOverlay The source overlay
+	 * @return {sap.ui.dt.ElementOverlay} Returns the next sibling overlay
+	 * @private
 	 */
 	OverlayUtil.getNextSiblingOverlay = function(oOverlay) {
 		if (!oOverlay) {
-			return;
+			return undefined;
 		}
 
 		var oParentAggregationOverlay = oOverlay.getParentAggregationOverlay();
@@ -255,11 +287,14 @@ sap.ui.define([
 	};
 
 	/**
-	 *
+	 * Returns previous sibling overlay (going up the tree).
+	 * @param  {sap.ui.dt.ElementOverlay} oOverlay The source overlay
+	 * @return {sap.ui.dt.ElementOverlay} Returns the previous sibling overlay
+	 * @private
 	 */
 	OverlayUtil.getPreviousSiblingOverlay = function(oOverlay) {
 		if (!oOverlay) {
-			return;
+			return undefined;
 		}
 
 		var oParentAggregationOverlay = oOverlay.getParentAggregationOverlay();
@@ -284,11 +319,14 @@ sap.ui.define([
 	};
 
 	/**
-	 *
+	 * Get next overlay (look first in children, then next siblings).
+	 * @param  {sap.ui.dt.Overlay} oOverlay The source overlay
+	 * @return {sap.ui.dt.Overlay} Returns the overlay that was found first
+	 * @private
 	 */
 	OverlayUtil.getNextOverlay = function(oOverlay) {
 		if (!oOverlay) {
-			return;
+			return undefined;
 		}
 
 		var oFirstChildOverlay = this.getFirstChildOverlay(oOverlay);
@@ -310,16 +348,18 @@ sap.ui.define([
 	};
 
 	/**
-	 *
+	 * Get next overlay (look first in parent, then previous siblings).
+	 * @param  {sap.ui.dt.Overlay} oOverlay The source overlay
+	 * @return {sap.ui.dt.Overlay} Returns the overlay that was found first
 	 */
 	OverlayUtil.getPreviousOverlay = function(oOverlay) {
 		if (!oOverlay) {
-			return;
+			return undefined;
 		}
 
 		var oParentAggregationOverlay = oOverlay.getParentAggregationOverlay();
 		if (!oParentAggregationOverlay) {
-			return;
+			return undefined;
 		}
 
 		var oPreviousSiblingOverlay = this.getPreviousSiblingOverlay(oOverlay);
@@ -337,7 +377,9 @@ sap.ui.define([
 	};
 
 	/**
-	 *
+	 * Returns the root overlay of an overlay.
+	 * @param  {sap.ui.dt.Overlay} oOverlay The source overlay
+	 * @return {sap.ui.dt.Overlay} Returns the root overlay
 	 */
 	OverlayUtil.getRootOverlay = function(oOverlay) {
 		var oParentOverlay = oOverlay;
@@ -350,7 +392,10 @@ sap.ui.define([
 	};
 
 	/**
-	 *
+	 * Applies a function to every element in an overlay's element tree.
+	 * @param  {sap.ui.dt.ElementOverlay} oElementOverlay The source overlay
+	 * @param  {function} fnCallback The function to be applied
+	 * @private
 	 */
 	OverlayUtil.iterateOverlayElementTree = function(oElementOverlay, fnCallback) {
 		fnCallback(oElementOverlay);
@@ -362,6 +407,13 @@ sap.ui.define([
 		}, this);
 	};
 
+	/**
+	 * Applies a function to every 'aggregation-like' children (e.g. associations).
+	 * @param  {sap.ui.dt.ElementOverlay} oElementOverlay  The source overlay
+	 * @param  {string} sAggregationName The name of the aggregation
+	 * @param  {function} fnCallback The function to be applied
+	 * @private
+	 */
 	OverlayUtil.iterateOverAggregationLikeChildren = function(oElementOverlay, sAggregationName, fnCallback) {
 		var oElement = oElementOverlay.getElementInstance();
 		var vChildren;
@@ -374,7 +426,10 @@ sap.ui.define([
 	};
 
 	/**
-	 *
+	 * Applies a function to every overlay in the tree (going down the tree).
+	 * @param  {sap.ui.dt.Overlay} oOverlay The source overlay
+	 * @param  {function} fnCallback The function to be applied
+	 * @private
 	 */
 	OverlayUtil.iterateOverlayTree = function(oOverlay, fnCallback) {
 		fnCallback(oOverlay);
@@ -386,7 +441,10 @@ sap.ui.define([
 
 
 	/**
-	 *
+	 * Checks if a DOM node is part of an overlay container.
+	 * @param  {any}  oNode The node to be checked
+	 * @return {boolean} Returns true if the node is part of an overlay container
+	 * @private
 	 */
 	OverlayUtil.isInOverlayContainer = function(oNode) {
 		if (oNode && jQuery(oNode).closest(".sapUiDtOverlay, #overlay-container").length) {
@@ -395,7 +453,10 @@ sap.ui.define([
 	};
 
 	/**
-	 *
+	 * Returns the closest overlay to a given node.
+	 * @param  {any} oNode The source node
+	 * @return {sap.ui.dt.Overlay} Returns the closest overlay
+	 * @private
 	 */
 	OverlayUtil.getClosestOverlayForNode = function(oNode) {
 		var oElement = ElementUtil.getClosestElementForNode(oNode);

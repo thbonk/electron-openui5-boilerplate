@@ -21,7 +21,7 @@ sap.ui.define([
 	 * @class The MutationObserver observes changes of a ManagedObject and propagates them via events.
 	 * @extends sap.ui.base.ManagedObject
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @constructor
 	 * @private
 	 * @since 1.30
@@ -71,6 +71,7 @@ sap.ui.define([
 		jQuery(window).on("resize", this._fnFireDomChanged);
 
 		window.addEventListener("scroll", this._onScroll, true);
+		this._aIgnoredMutations = [];
 	};
 
 	/**
@@ -87,6 +88,17 @@ sap.ui.define([
 		jQuery(window).off("resize", this._fnFireDomChanged);
 
 		window.removeEventListener("scroll", this._onScroll, true);
+	};
+
+	/**
+	 * Ignores a Mutation once
+	 *
+	 * @param {object} mParams
+	 * @param {object} mParams.target domNode of the target
+	 * @param {object} mParams.type type of the mutation
+	 */
+	MutationObserver.prototype.ignoreOnce = function(mParams) {
+		this._aIgnoredMutations.push(mParams);
 	};
 
 	/**
@@ -110,18 +122,38 @@ sap.ui.define([
 						oTarget = oMutation.target.parentNode;
 					}
 
-					// filter out all mutation in overlays
-					if (!OverlayUtil.isInOverlayContainer(oTarget)) {
-						aTargetNodes.push(oTarget);
+					// TODO: ignore all RTA dom elements (dialogs, context menus, toolbars etc.)
+					var bIsFromRTA = OverlayUtil.isInOverlayContainer(oTarget)
+						|| jQuery(oTarget).closest(".sapUiDtContextMenu").length > 0
+						|| jQuery(oTarget).closest(".sapUiRtaToolbar").length > 0;
 
-						// define closest element to notify it's overlay about the dom mutation
-						var oOverlay = OverlayUtil.getClosestOverlayForNode(oTarget);
-						var sElementId = oOverlay ? oOverlay.getElementInstance().getId() : undefined;
-						if (sElementId) {
-							aElementIds.push(sElementId);
+					var bRelevantNode = jQuery.contains(document, oTarget)
+						&& oTarget.id !== "sap-ui-static"
+						&& jQuery(oTarget).closest("#sap-ui-preserve").length === 0;
+
+					if (bRelevantNode && !bIsFromRTA) {
+						var bIgnore = this._aIgnoredMutations.some(function(oIgnoredMutation, iIndex, aSource) {
+							if (oIgnoredMutation.target === oMutation.target
+									&& (oIgnoredMutation.type ? oIgnoredMutation.type === oMutation.type : true)) {
+								aSource.splice(iIndex, 1);
+								return true;
+							}
+						});
+
+
+						if (!bIgnore) {
+							aTargetNodes.push(oTarget);
+
+							// define closest element to notify it's overlay about the dom mutation
+							var oOverlay = OverlayUtil.getClosestOverlayForNode(oTarget);
+							var sElementId = oOverlay ? oOverlay.getElementInstance().getId() : undefined;
+							if (sElementId) {
+								aElementIds.push(sElementId);
+							}
 						}
 					}
-				});
+
+				}.bind(this));
 
 				if (aTargetNodes.length) {
 					this.fireDomChanged({

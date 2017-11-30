@@ -15,13 +15,16 @@ sap.ui.define([
 	"sap/m/OverflowToolbarLayoutData",
 	"sap/m/OverflowToolbarAssociativePopover",
 	"sap/m/OverflowToolbarAssociativePopoverControls",
-	"sap/m/OverflowToolbarPriority",
 	"sap/ui/core/IconPool",
 	"sap/m/SearchField"
 ], function (jQuery, library, ToggleButton, InvisibleText, Toolbar, ToolbarSpacer, OverflowToolbarLayoutData,
-			 OverflowToolbarAssociativePopover, OverflowToolbarAssociativePopoverControls, OverflowToolbarPriority,
+			 OverflowToolbarAssociativePopover, OverflowToolbarAssociativePopoverControls,
 			 IconPool, SearchField) {
 	"use strict";
+
+
+	// shortcut for sap.m.OverflowToolbarPriority
+	var OverflowToolbarPriority = library.OverflowToolbarPriority;
 
 
 	/**
@@ -37,7 +40,7 @@ sap.ui.define([
 	 * <h3>Overview</h3>
 	 *
 	 * The content of the <code>OverflowToolbar</code> moves into the overflow area from
-	 * right to left when the the available space is not enough in the visible area of
+	 * right to left when the available space is not enough in the visible area of
 	 * the container. It can be accessed by the user through the overflow button that
 	 * opens it in a popover.
 	 *
@@ -69,6 +72,13 @@ sap.ui.define([
 	 * <li>{@link sap.ui.comp.smartfield.SmartField}</li>
 	 * <li>{@link sap.ui.comp.smartfield.SmartLabel}</li></ul>
 	 *
+	 * <b>Note:</b> The <code>OverflowToolbar</code> is an adaptive container that checks the available
+	 * width and hides the part of its content that doesn't fit. It is intended that simple controls,
+	 * such as {@link sap.m.Button} and {@link sap.m.Label} are used as content. Embedding other
+	 * adaptive container controls, such as {@link sap.m.Breadcrumbs}, results in competition for the available
+	 * space - both controls calculate the available space based on the other one's size and both change their
+	 * width at the same time, leading to incorrectly distributed space.
+	 *
 	 * <h3>Responsive behavior</h3>
 	 *
 	 * The height of the toolbar changes on desktop, tablet, and smartphones.
@@ -77,7 +87,7 @@ sap.ui.define([
 	 * @implements sap.ui.core.Toolbar,sap.m.IBar
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -97,7 +107,7 @@ sap.ui.define([
 
 	/**
 	 * A shorthand for calling Toolbar.prototype methods
-	 * @param sFuncName - the name of the method
+	 * @param {string} sFuncName - the name of the method
 	 * @param aArguments - the arguments to pass in the form of array
 	 * @returns {*}
 	 * @private
@@ -190,6 +200,14 @@ sap.ui.define([
 
 
 	OverflowToolbar.prototype._doLayout = function () {
+		var oCore = sap.ui.getCore();
+
+		// If the theme is not applied, control widths should not be measured and cached
+		if (!oCore.isThemeApplied()) {
+			jQuery.sap.log.debug("OverflowToolbar: theme not applied yet, skipping calculations", this);
+			return;
+		}
+
 		var iWidth = this.$().width();
 
 		// Stop listening for control changes while calculating the layout to avoid an infinite loop scenario
@@ -511,10 +529,13 @@ sap.ui.define([
 
 	/**
 	 * Closes the action sheet, resets the toolbar, and re-initializes variables to force a full layout recalc
-	 * @param bHardReset - skip the optimization, described in _setControlsOverflowAndShrinking
+	 * @param {boolean} bHardReset - skip the optimization, described in _setControlsOverflowAndShrinking
 	 * @private
 	 */
 	OverflowToolbar.prototype._resetAndInvalidateToolbar = function (bHardReset) {
+		if (this._bIsBeingDestroyed) {
+			return;
+		}
 
 		this._resetToolbar();
 
@@ -733,7 +754,7 @@ sap.ui.define([
 
 	/**
 	 *
-	 * @param bValue
+	 * @param {boolean} bValue
 	 * @returns {OverflowToolbar}
 	 * @private
 	 */

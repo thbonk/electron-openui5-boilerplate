@@ -23,7 +23,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * @implements sap.ui.core.IShrinkable, sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -82,8 +82,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * It is better to define line-height in CSS instead of "normal" to get consistent maxLines results since normal line-height
 	 * not only varies from browser to browser but they also vary from one font face to another and can also vary within a given face.
 	 *
-	 * Default value is 1.2
-	 *
 	 * @since 1.22
 	 * @protected
 	 * @type {number}
@@ -102,7 +100,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	Text.prototype.cacheLineHeight = true;
 
 	/**
-	 * Ellipsis(…) text to indicate more text when clampText function is used.
+	 * Ellipsis(...) text to indicate more text when clampText function is used.
 	 *
 	 * Can be overwritten with 3dots(...) if fonts do not support this UTF-8 character.
 	 *
@@ -110,7 +108,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * @protected
 	 * @type {string}
 	 */
-	Text.prototype.ellipsis = '…';
+	Text.prototype.ellipsis = '...';
 
 	/**
 	 * To prevent from the layout thrashing of the textContent call, this method

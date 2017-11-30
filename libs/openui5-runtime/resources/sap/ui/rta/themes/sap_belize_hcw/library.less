@@ -1,0 +1,70 @@
+/* NOTE: This file was generated as an optimized version of "library.source.less" for the Theme Designer. */
+
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+@import "../base/library.less";
+@import "../../../../../../Base/baseLib/sap_belize_hcw/base.less"; /* ORIGINAL IMPORT PATH: "../../../../../sap/ui/core/themes/sap_belize_hcw/base.less" */
+
+@import "../../../../../sap/ui/core/themes/sap_belize_hcw/global.less";
+
+/* START "Toolbar.base.less" */
+.sapUiRtaToolbarContainer .sapUiRtaToolbar {
+	border-bottom: 1px solid @sapHCStandardFG; /* Rolling back override in Base `.sapUiRtaToolbarContainer .sapUiRtaToolbar` */
+	}
+
+/* END "Toolbar.base.less" */
+
+/* START "Toolbar.standalone.less" */
+/* type: standalone */
+.sapUiRtaToolbar.type_standalone.color_default {
+	background-color: #fff;
+	border-bottom: inherit;
+	}
+	.sapUiRtaToolbar.type_standalone.color_default .sapMBtn .sapMBtnContent,
+	.sapUiRtaToolbar.type_standalone.color_default .sapMBtn .sapMBtnTransparent .sapMBtnIcon {
+		color: inherit;
+		}
+		.sapUiRtaToolbar.type_standalone.color_default .sapMBtn.sapMBtnDisabled .sapMBtnContent,
+		.sapUiRtaToolbar.type_standalone.color_default .sapMBtn.sapMBtnDisabled .sapMBtnIcon {
+			color: inherit;
+			}
+		.sapUiRtaToolbar.type_standalone.color_default .sapMBtn:focus .sapMFocusable {
+			outline-color: inherit;
+			}
+
+/* END "Toolbar.standalone.less" */
+
+
+/* START "Overlay.less" */
+/******************************************************************
+	Style of the RTA Overlays - HCW Theme
+*******************************************************************/
+@_sap_ui_rta_Overlay_HoverBG : fade(@sapUiAccent6, 40%);
+@_sap_ui_rta_Overlay_ActiveBG : fade(@sapUiAccent6, 40%);
+@_sap_ui_rta_Overlay_Border : @sapUiAccent6;
+
+@sapHCStandardFG: @sapUiPageHeaderTextColor;
+@sapHCStandardBG: @sapUiPageHeaderBackground;
+
+.sapUiDtOverlay {
+	&:focus {
+		outline: none;
+		&:before {
+			border-width: 2px;
+		}
+	}
+}
+
+.sapUiRta {
+	.sapUiRtaOverlayHover {
+		&:after {
+			border-width: 2px;
+		}
+	}
+}
+
+/* END "Overlay.less" */
+

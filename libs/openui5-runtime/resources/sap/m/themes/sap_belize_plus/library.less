@@ -53,7 +53,7 @@
 /* Belize Plus theme                      */
 /* ====================================== */
 
-@_sap_m_HeaderContainer_Translucent_Background: fade(@sapUiObjectHeaderBackground, 60);
+@_sap_m_HeaderContainer_TranslucentBackground: fade(@sapUiObjectHeaderBackground, 60);
 /* END "HeaderContainer.less" */
 
 /* START "IconTabBar.less" */
@@ -65,7 +65,25 @@
 @_sap_m_IconTabBar_TextHoverColor: lighten(@sapUiGroupTitleTextColor, 2);
 @_sap_m_IconTabBar_SelectedTextColor: @sapUiSelected;
 @_sap_m_IconTabBar_SelectedTextHoverColor: lighten(@sapUiSelected, 10);
+
+.sapContrastPlus .sapMITH.sapMITHBackgroundDesignTransparent,
+.sapContrastPlus.sapMITH.sapMITHBackgroundDesignTransparent,
+.sapContrastPlus .sapMITH.sapMITHBackgroundDesignTranslucent,
+.sapContrastPlus.sapMITH.sapMITHBackgroundDesignTranslucent {
+	background: @sapUiGroupContentBackground;
+}
 /* END "IconTabBar.less" */
+
+/* START "Label.less" */
+/* ============================ */
+/* CSS for control sap.m/Label  */
+/* Belize Plus theme            */
+/* ============================ */
+
+.sapMLabelDisplayOnly {
+	color: @sapUiContentLabelColor;
+}
+/* END "Label.less" */
 
 /* START "Link.less" */
 /* ============================= */
@@ -209,6 +227,11 @@
 
 @_sap_m_TabStrip_ItemHoverTextColor: lighten(@sapUiGroupTitleTextColor, 10);
 @_sap_m_TabStrip_ItemSelectedTextColor: lighten(@sapUiGroupTitleTextColor, 20);
+
+html.sap-phone .sapMTabStrip .sapMTSOverflowSelect {
+	border: none;
+	background: transparent;
+}
 /* END "TabStrip.less" */
 
 /* START "TileContent.less" */
@@ -229,6 +252,18 @@
 @_sap_m_Token_BorderColor: lighten(@sapUiButtonBackground, 15);
 @_sap_m_Token_HoverBorderColor: lighten(@sapUiButtonHoverBackground, 5);
 /* END "Token.less" */
+
+/* START "Toolbar.less" */
+/* ============================== */
+/* CSS for control sap.m/Toolbar  */
+/* Belize Plus theme              */
+/* ============================== */
+
+.sapContrastPlus .sapMTB.sapMTB-Transparent-CTX,
+.sapContrastPlus.sapMTB.sapMTB-Transparent-CTX {
+	background: @sapUiGroupContentBackground;
+}
+/* END "Toolbar.less" */
 
 /* START "ViewSettingsDialog.less" */
 /* ========================================= */
@@ -258,4 +293,10 @@
 
 @_sap_m_RatingIndicator_IconUnselectedColor: lighten(@sapUiContentForegroundColor, 30);
 @_sap_m_RatingIndicator_IconHoverColor: lighten(@sapUiAccent1, 5);
+
+.sapMRI.sapMRIDisplayOnly {
+  .sapMRIUnsel {
+    color: lighten(@sapUiContentForegroundColor, 30);
+  }
+}
 /* END "RatingIndicator.less" */

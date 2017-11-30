@@ -19,7 +19,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @since 1.34
 	 *
 	 * @public
@@ -71,13 +71,17 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 				/**
 				 * Description of a header image that is used in the tooltip.
 				 */
-				"imageDescription" : {type : "string", group : "Misc", defaultValue : null},
-
+				"imageDescription" : {type : "string", group : "Accessibility", defaultValue : null},
 				/**
 				 * Changes the visualization in order to enable additional actions with the Generic Tile.
 				 * @since 1.46.0
 				 */
-				"scope": { type: "sap.m.GenericTileScope", group: "Misc", defaultValue: sap.m.GenericTileScope.Display }
+				"scope": { type: "sap.m.GenericTileScope", group: "Misc", defaultValue: sap.m.GenericTileScope.Display },
+				/**
+				 * Additional description for aria-label. The aria-label is rendered before the standard aria-label.
+				 * @since 1.50.0
+				 */
+				"ariaLabel": { type: "string", group: "Accessibility", defaultValue: null }
 			},
 			defaultAggregation : "tileContent",
 			aggregations : {
@@ -102,7 +106,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 			},
 			events : {
 				/**
-				 * The event is fired when the user chooses the tile.
+				 * The event is fired when the user presses the tile.
 				 */
 				"press" : {
 					parameters: {
@@ -120,8 +124,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 						"action": { type: "string" },
 
 						/**
-						 * The Element's DOM Element. Points to GenericTile instance DOM Element in Display scope.
-						 * In Actions scope the domRef points to the DOM Element of the remove button (if pressed) or the more icon.
+						 * The pressed DOM Element pointing to the GenericTile's DOM Element in Display scope.
+						 * In Actions scope it points to the more icon, when the tile is pressed, or to the DOM Element of the remove button, when the remove button is pressed.
 						 * @since 1.46.0
 						 */
 						"domRef" : { type: "any" }
@@ -143,7 +147,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 		Remove : "Remove"
 	};
 
-	GenericTile.LINEMODE_SIBILING_PROPERTIES = [ "state", "subheader", "header", "scope" ];
+	GenericTile.LINEMODE_SIBLING_PROPERTIES = [ "state", "subheader", "header", "scope" ];
 
 	/* --- Lifecycle Handling --- */
 
@@ -664,9 +668,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 	};
 
 	/* --- Event Handling --- */
-	/**
-	 * Handler for touchstart event
-	 */
 	GenericTile.prototype.ontouchstart = function() {
 		if (this.$("hover-overlay").length > 0) {
 			this.$("hover-overlay").addClass("sapMGTPressActive");
@@ -679,18 +680,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 		}
 	};
 
-	/**
-	 * Handler for touchcancel event
-	 */
 	GenericTile.prototype.ontouchcancel = function() {
 		if (this.$("hover-overlay").length > 0) {
 			this.$("hover-overlay").removeClass("sapMGTPressActive");
 		}
 	};
 
-	/**
-	 * Handler for touchend event
-	 */
 	GenericTile.prototype.ontouchend = function() {
 		if (this.$("hover-overlay").length > 0) {
 			this.$("hover-overlay").removeClass("sapMGTPressActive");
@@ -703,11 +698,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 		}
 	};
 
-	/**
-	 * Handler for tap event
-	 *
-	 * @param {sap.ui.base.Event} event Event which was fired
-	 */
 	GenericTile.prototype.ontap = function(event) {
 		var oParams;
 		if (this._bTilePress && this.getState() !== library.LoadState.Disabled) {
@@ -718,11 +708,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 		}
 	};
 
-	/**
-	 * Handler for keydown event
-	 *
-	 * @param {sap.ui.base.Event} event Event which was fired
-	 */
 	GenericTile.prototype.onkeydown = function(event) {
 		if (jQuery.sap.PseudoEvents.sapselect.fnCheck(event) && this.getState() !== library.LoadState.Disabled) {
 			if (this.$("hover-overlay").length > 0) {
@@ -732,11 +717,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 		}
 	};
 
-	/**
-	 * Handler for keyup event
-	 *
-	 * @param {sap.ui.base.Event} event Event which was fired
-	 */
 	GenericTile.prototype.onkeyup = function(event) {
 		var oParams,
 			bFirePress = false,
@@ -769,8 +749,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 	GenericTile.prototype.setProperty = function(sPropertyName) {
 		sap.ui.core.Control.prototype.setProperty.apply(this, arguments);
 
-		//If properties in GenericTile.LINEMODE_SIBILING_PROPERTIES are being changed, update all sibling controls that are GenericTiles in LineMode
-		if (this.getMode() === library.GenericTileMode.LineMode && GenericTile.LINEMODE_SIBILING_PROPERTIES.indexOf(sPropertyName) !== -1) {
+		//If properties in GenericTile.LINEMODE_SIBLING_PROPERTIES are being changed, update all sibling controls that are GenericTiles in LineMode
+		if (this.getMode() === library.GenericTileMode.LineMode && GenericTile.LINEMODE_SIBLING_PROPERTIES.indexOf(sPropertyName) !== -1) {
 			this._bUpdateLineTileSiblings = true;
 		}
 		return this;
@@ -928,7 +908,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 
 	/**
 	 * Returns text for ARIA label.
-	 * If the the application provides a specific tooltip, the ARIA label is equal to the tooltip text.
+	 * If the application provides a specific tooltip, the ARIA label is equal to the tooltip text.
 	 * If the application doesn't provide a tooltip or the provided tooltip contains only white spaces,
 	 * calls _getAriaAndTooltipText to get text.
 	 *
@@ -937,18 +917,22 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 	 */
 	GenericTile.prototype._getAriaText = function() {
 		var sAriaText = this.getTooltip_Text();
+		var sAriaLabel = this.getAriaLabel();
 		if (!sAriaText || this._isTooltipSuppressed()) {
 			sAriaText = this._getAriaAndTooltipText(); // ARIA label set by the control
 		}
 		if (this.getScope() === library.GenericTileScope.Actions) {
 			sAriaText = this._oRb.getText("GENERICTILE_ACTIONS_ARIA_TEXT") + " " + sAriaText;
 		}
+		if (sAriaLabel) {
+			sAriaText = sAriaLabel + " " + sAriaText;
+		}
 		return sAriaText; // ARIA label set by the app, equal to tooltip
 	};
 
 	/**
 	 * Returns text for tooltip or null.
-	 * If the the application provides a specific tooltip, the returned string is equal to the tooltip text.
+	 * If the application provides a specific tooltip, the returned string is equal to the tooltip text.
 	 * If the tooltip provided by the application is a string of only white spaces, the function returns null.
 	 *
 	 * @returns {String} Text for tooltip or null.

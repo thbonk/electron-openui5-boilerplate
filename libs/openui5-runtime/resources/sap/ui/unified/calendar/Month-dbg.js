@@ -6,8 +6,8 @@
 
 //Provides control sap.ui.unified.Calendar.
 sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleData', 'sap/ui/core/delegate/ItemNavigation',
-			'sap/ui/model/type/Date', 'sap/ui/unified/calendar/CalendarUtils', 'sap/ui/unified/calendar/CalendarDate', 'sap/ui/unified/library'],
-			function(jQuery, Control, LocaleData, ItemNavigation, Date1, CalendarUtils, CalendarDate, library) {
+		'sap/ui/model/type/Date', 'sap/ui/unified/calendar/CalendarUtils', 'sap/ui/unified/calendar/CalendarDate', 'sap/ui/unified/library'],
+	function(jQuery, Control, LocaleData, ItemNavigation, Date1, CalendarUtils, CalendarDate, library) {
 	"use strict";
 
 	/*
@@ -27,7 +27,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 	 * If used inside the calendar the properties and aggregation are directly taken from the parent
 	 * (To not duplicate and sync DateRanges and so on...)
 	 * @extends sap.ui.core.Control
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -40,7 +40,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		library : "sap.ui.unified",
 		properties : {
 			/**
-			 * the month including this date is rendered and this date is initial focused (if no other focus set)
+			 * A date as JavaScript Date object.
+			 * The month including this date is rendered and this date is focused initially (if no other focus is set).
 			 */
 			date : {type : "object", group : "Data"},
 
@@ -210,6 +211,67 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 
 	};
 
+	Month.prototype.onmouseover = function(oEvent) {
+		var $Target = jQuery(oEvent.target),
+			oSelectedDateRange,
+			iDate1,
+			iDate2;
+
+		if (!this.getIntervalSelection()) {
+			return;
+		}
+
+		oSelectedDateRange = this.getSelectedDates()[0];
+
+		if (!oSelectedDateRange || !oSelectedDateRange.getStartDate() || oSelectedDateRange.getEndDate()) {
+			return;
+		}
+
+		if (!$Target.hasClass('sapUiCalItemText') && !$Target.hasClass('sapUiCalItem')) {
+			return;
+		}
+
+		if ($Target.hasClass('sapUiCalItemText')) {
+			$Target = $Target.parent();
+		}
+
+		iDate1 = parseInt(this._oFormatYyyymmdd.format(oSelectedDateRange.getStartDate()), 10);
+		iDate2 = $Target.data("sapDay");
+
+		//swap if necessary
+		if (iDate1 > iDate2) {
+			iDate1 = iDate1 + iDate2;
+			iDate2 = iDate1 - iDate2;
+			iDate1 = iDate1 - iDate2;
+		}
+
+		if (this.hasListeners("datehovered")) {
+			this.fireEvent("datehovered", { date1: iDate1, date2: iDate2 });
+		} else {
+			this._markDatesBetweenStartAndHoveredDate(iDate1, iDate2);
+		}
+	};
+
+	Month.prototype._markDatesBetweenStartAndHoveredDate = function(iDate1, iDate2) {
+		var aDomRefs,
+			$CheckRef,
+			iCheckDate,
+			i;
+
+		aDomRefs = this.$().find(".sapUiCalItem");
+
+		for (i = 0; i < aDomRefs.length; i++) {
+			$CheckRef = jQuery(aDomRefs[i]);
+			iCheckDate = $CheckRef.data('sapDay');
+
+			if (iCheckDate > iDate1 && iCheckDate < iDate2) {
+				$CheckRef.addClass('sapUiCalItemSelBetween');
+			} else {
+				$CheckRef.removeClass('sapUiCalItemSelBetween');
+			}
+		}
+	};
+
 	Month.prototype.onsapfocusleave = function(oEvent){
 
 		if (!oEvent.relatedControlId || !jQuery.sap.containsOrEquals(this.getDomRef(), sap.ui.getCore().byId(oEvent.relatedControlId).getFocusDomRef())) {
@@ -305,7 +367,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 
 	};
 
-	/**
+	/*
 	 * Sets a date for the month.
 	 * @param {Date} oDate a JavaScript date
 	 * @return {sap.ui.unified.calendar.Month} <code>this</code> for method chaining
@@ -840,8 +902,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 						_updateSelection.call(this, oEndDate, oStartDate);
 					}
 				}
-			}else {
-				var oFocusedDate = CalendarDate.fromLocalJSDate(this._oFormatYyyymmdd.parse($Target.attr("data-sap-day"), this.getPrimaryCalendarType()));
+			} else {
+				var oFocusedDate = CalendarDate.fromLocalJSDate(this._oFormatYyyymmdd.parse($Target.attr("data-sap-day")), this.getPrimaryCalendarType());
 
 				if (!oFocusedDate.isSame(oOldFocusedDate)) {
 					if ($Target.hasClass("sapUiCalItemOtherMonth")) {
@@ -1418,7 +1480,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 	/**
 	 *
 	 * @param {sap.ui.unified.calendar.CalendarDate} oDate the calendar date
-	 * @param {boolean} bNoFocus
+	 * @param {boolean} bNoFocus Will the focusing of the date be skipped (true) or not (false)
 	 * @private
 	 */
 	function _changeDate (oDate, bNoFocus){
@@ -1531,7 +1593,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 	/**
 	 * Selects a given date.
 	 * @param{sap.ui.unified.calendar.CalendarDate} oDate the date to select
-	 * @param {boolean} bMove
+	 * @param {boolean} bMove Whether there is move mode
 	 * @return {boolean} true if the date was really selected, false otherwise
 	 * @private
 	 */
@@ -1579,7 +1641,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 					oEndDate = oStartDate;
 					oStartDate = oDate;
 					if (!bMove) {
-						// in move mode do not set date. this bring broblems if on backward move the start date would be cahnged
+						// in move mode do not set date. this bring problems if on backward move the start date would be cahnged
 						oDateRange.setProperty("startDate", oStartDate.toLocalJSDate(), true); // no-rerendering
 						oDateRange.setProperty("endDate", oEndDate.toLocalJSDate(), true); // no-rerendering
 					}
@@ -1689,7 +1751,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 				$DomRef = jQuery(aDomRefs[i]);
 				bStart = false;
 				bEnd = false;
-				oDay = CalendarDate.fromLocalJSDate(this._oFormatYyyymmdd.parse($DomRef.attr("data-sap-day"), sap.ui.core.CalendarType.Gregorian));
+				oDay = CalendarDate.fromLocalJSDate(this._oFormatYyyymmdd.parse($DomRef.attr("data-sap-day")), sap.ui.core.CalendarType.Gregorian);
 				if (oDay.isSame(aStartDate[0])) {
 					$DomRef.addClass("sapUiCalItemSelStart");
 					bStart = true;

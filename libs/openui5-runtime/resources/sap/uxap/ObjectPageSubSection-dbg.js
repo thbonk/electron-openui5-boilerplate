@@ -11,28 +11,32 @@ sap.ui.define([
 	"sap/ui/layout/Grid",
 	"sap/ui/layout/GridData",
 	"./ObjectPageSectionBase",
-	"./ObjectPageSubSectionLayout",
-	"./ObjectPageSubSectionMode",
 	"./ObjectPageLazyLoader",
 	"./BlockBase",
 	"sap/m/Button",
 	"sap/ui/Device",
 	"sap/ui/core/StashedControlSupport",
+	"sap/ui/base/ManagedObjectObserver",
 	"./library"
 ], function (jQuery,
 			 CustomData,
 			 Grid,
 			 GridData,
 			 ObjectPageSectionBase,
-			 ObjectPageSubSectionLayout,
-			 ObjectPageSubSectionMode,
 			 ObjectPageLazyLoader,
 			 BlockBase,
 			 Button,
 			 Device,
 			 StashedControlSupport,
+			 ManagedObjectObserver,
 			 library) {
 	"use strict";
+
+	// shortcut for sap.uxap.ObjectPageSubSectionMode
+	var ObjectPageSubSectionMode = library.ObjectPageSubSectionMode;
+
+	// shortcut for sap.uxap.ObjectPageSubSectionLayout
+	var ObjectPageSubSectionLayout = library.ObjectPageSubSectionLayout;
 
 	/**
 	 * Constructor for a new ObjectPageSubSection.
@@ -117,6 +121,12 @@ sap.ui.define([
 		this._$spacer = [];
 		this._sContainerSelector = ".sapUxAPBlockContainer";
 
+		this._oObserver = new ManagedObjectObserver(ObjectPageSubSection.prototype._observeChanges.bind(this));
+		this._oObserver.observe(this, {
+			aggregations: [
+				"actions"
+			]
+		});
 
 		//switch logic for the default mode
 		this._switchSubSectionMode(this.getMode());
@@ -142,6 +152,69 @@ sap.ui.define([
 		}
 
 		return this.getAggregation("_grid");
+	};
+
+	ObjectPageSubSection.prototype._hasVisibleActions = function () {
+		var aActions = this.getActions() || [];
+
+		if (aActions.length === 0) {
+		 return false;
+		}
+		return aActions.filter(function(oAction) {
+		   return oAction.getVisible();
+		}).length > 0;
+	};
+
+	/**
+	 * Called whenever the actions aggregation is mutated.
+	 * @param oChanges
+	 * @private
+	 */
+	ObjectPageSubSection.prototype._observeChanges = function (oChanges) {
+		var oObject = oChanges.object,
+			sChangeName = oChanges.name,
+			sMutationName = oChanges.mutation,
+			oChild = oChanges.child,
+			bHasTitle;
+
+		if (oObject === this) {// changes on SubSection level
+
+			if (sChangeName === "actions") { // change of the actions aggregation
+				if (sMutationName === "insert") {
+					this._observeAction(oChild);
+				} else if (sMutationName === "remove") {
+					this._unobserveAction(oChild);
+				}
+			}
+
+		} else if (sChangeName === "visible") { // change of the actions elements` visibility
+			bHasTitle = this._getInternalTitleVisible() && this.getTitle().trim() !== "";
+			if (!bHasTitle) {
+				this.$("header").toggleClass("sapUiHidden", !this._hasVisibleActions());
+			}
+		}
+	};
+
+	/**
+	 * Starts observing the <code>visible</code> property.
+	 * @param {sap.ui.core.Control} oControl
+	 * @private
+	 */
+	ObjectPageSubSection.prototype._observeAction = function(oControl) {
+		this._oObserver.observe(oControl, {
+			properties: ["visible"]
+		});
+	};
+
+	/**
+	 * Stops observing the <code>visible</code> property.
+	 * @param {sap.ui.core.Control} oControl
+	 * @private
+	 */
+	ObjectPageSubSection.prototype._unobserveAction = function(oControl) {
+		this._oObserver.unobserve(oControl, {
+			properties: ["visible"]
+		});
 	};
 
 	ObjectPageSubSection.prototype._unStashControls = function () {
@@ -759,7 +832,7 @@ sap.ui.define([
 
 	/**
 	 * switch the state for the subsection
-	 * @param sSwitchToMode
+	 * @param {sap.uxap.ObjectPageSubSectionMode} sSwitchToMode
 	 * @private
 	 */
 	ObjectPageSubSection.prototype._switchSubSectionMode = function (sSwitchToMode) {
@@ -777,7 +850,7 @@ sap.ui.define([
 	/**
 	 * set the mode on a control if there is such mode property
 	 * @param oBlock
-	 * @param sMode
+	 * @param {string} sMode
 	 * @private
 	 */
 	ObjectPageSubSection.prototype._setBlockMode = function (oBlock, sMode) {

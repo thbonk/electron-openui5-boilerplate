@@ -18,11 +18,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element'],
 	 * @param {object} [mSettings] initial settings for the new control
 	 *
 	 * @class
-	 * Represents a parameter for the UploadCollection.
+	 * Defines a structure of the element of the 'parameters' aggregation.
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -50,4 +50,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element'],
 
 	return UploadCollectionParameter;
 
-}, /* bExport= */ true);
+});

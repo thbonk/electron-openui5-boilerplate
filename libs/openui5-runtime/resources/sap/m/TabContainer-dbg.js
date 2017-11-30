@@ -19,12 +19,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		 * The <code>TabContainer</code> control represents a collection of tabs with associated content.
 		 *
 		 * The <code>TabContainer</code> is a full-page container that takes 100% of the parent width and height.
-		 * As the control is expected to occupy the the whole parent, it should be the only child of its parent.
+		 * As the control is expected to occupy the whole parent, it should be the only child of its parent.
 		 *
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @public
@@ -122,7 +122,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 					hasSelect: true,
 					itemSelect: function(oEvent) {
 						var oItem = oEvent.getParameter("item"),
-						    oSelectedItem = this._fromTabStripItem(oItem);
+							oSelectedItem = this._fromTabStripItem(oItem);
 						this.setSelectedItem(oSelectedItem, oEvent);
 					}.bind(this),
 					itemClose: function(oEvent) {
@@ -206,7 +206,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		/**
 		 * Finds a <code>TabContainerItem</code> corresponding to a given <code>TabStripItem</code>.
 		 *
-		 * @param oItem {sap.m.TabStripItem} <code>TabStripItem</code> instance, the corresponding <code>TabContainerItem</code> to be searched for
+		 * @param {sap.m.TabStripItem} oItem <code>TabStripItem</code> instance, the corresponding <code>TabContainerItem</code> to be searched for
 		 * @returns {sap.m.TabStripItem | null} The <code>TabContainerItem</code> found (if any)
 		 * @private
 		 */
@@ -260,8 +260,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		};
 
 		/**
-		 * Gets the <code>TabContainerItem</code> content if present.
-		 * @returns { null | Array<sap.ui.core.Control> }
+		 * Gets the <code>TabContainerItem</code> content of the selected item if present.
+		 * @returns { null | Array<sap.ui.core.Control> } The <code>TabContainerItem</code> content
 		 * @private
 		 */
 		TabContainer.prototype._getSelectedItemContent = function() {
@@ -281,7 +281,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		/**
 		 * Calculates the next item to be focused and selected and applies the focus and selection when an item is removed.
 		 *
-		 * @param bSetAsSelected {boolean} Whether the next item to be selected
+		 * @param {boolean} bSetAsSelected Whether the next item to be selected
 		 * @private
 		 */
 		TabContainer.prototype._moveToNextItem = function (bSetAsSelected) {
@@ -312,7 +312,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		/**
 		 * Removes an item from the aggregation named <code>items</code>.
 		 *
-		 * @param vItem {int | string | sap.m.TabContainerItem} The item to remove or its index or ID
+		 * @param {int | string | sap.m.TabContainerItem} vItem The item to remove or its index or ID
 		 * @returns {sap.m.TabContainerItem} The removed item or null
 		 * @public
 		 */
@@ -337,9 +337,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		/**
 		 * Overrides the method in order to handle propagation of item property changes to the <code>_tabStrip</code> instance copies.
 		 *
-		 * @param sAggregationName {string} Name of the added aggregation
-		 * @param oObject {object} Instance that is going to be added
-		 * @param bSuppressInvalidate {boolean} Flag indicating whether invalidation should be suppressed
+		 * @param {string} sAggregationName Name of the added aggregation
+		 * @param {object} oObject Instance that is going to be added
+		 * @param {boolean} bSuppressInvalidate Flag indicating whether invalidation should be suppressed
 		 * @returns {object} This instance for chaining
 		 */
 		TabContainer.prototype.addAggregation = function(sAggregationName, oObject, bSuppressInvalidate) {
@@ -360,10 +360,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			return Control.prototype.addAggregation.call(this, sAggregationName, oObject, bSuppressInvalidate);
 		};
 
-		/**
+		/*
 		 * Adds a new <code>TabContainerItem</code> to the <code>items</code> aggregation of the <code>TabContainer</code>.
 		 *
-		 * @param oItem {sap.m.TabContainerItem} The new <code>TabContainerItem</code> to be added
+		 * @param {sap.m.TabContainerItem} oItem The new <code>TabContainerItem</code> to be added
 		 * @returns {sap.m.TabContainerItem} The newly added <code>TabContainerItem</code>
 		 * @override
 		 */
@@ -381,7 +381,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			return oItem;
 		};
 
-		/**
+		/*
 		 * Destroys all <code>TabContainerItem</code> entities from the <code>items</code> aggregation of the <code>TabContainer</code>.
 		 *
 		 * @returns {sap.m.TabContainer} This instance for chaining
@@ -394,11 +394,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			return this.destroyAggregation("items");
 		};
 
-		/**
+		/*
 		 * Inserts a new <code>TabContainerItem</code> to the <code>items</code> aggregation of the <code>TabContainer</code> at a specified index.
 		 *
-		 * @param oItem {sap.m.TabContainerItem} The new <code>TabContainerItem</code> to be inserted
-		 * @param iIndex {int} The index where the passed <code>TabContainerItem</code> to be inserted
+		 * @param {sap.m.TabContainerItem} oItem The new <code>TabContainerItem</code> to be inserted
+		 * @param {int} iIndex The index where the passed <code>TabContainerItem</code> to be inserted
 		 * @returns {sap.m.TabContainer} This instance for chaining
 		 * @override
 		 */
@@ -415,7 +415,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			return this.insertAggregation("items", oItem, iIndex);
 		};
 
-		/**
+		/*
 		 * Removes all <code>TabContainerItem</code> entities from the <code>items</code> aggregation of the <code>TabContainer</code>.
 		 *
 		 * @returns {sap.m.TabContainer} This instance for chaining
@@ -432,7 +432,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		/**
 		 * Overrides the <code>addButton</code> property setter to proxy to the <code>TabStrip</code>.
 		 *
-		 * @param oButton {sap.ui.core.Control} The new control to be set as <code>TabStrip</code> <code>addButton</code> aggregation
+		 * @param {sap.ui.core.Control} oButton The new control to be set as <code>TabStrip</code> <code>addButton</code> aggregation
 		 * @returns {sap.m.TabContainer} This instance for chaining
 		 * @override
 		 */
@@ -450,10 +450,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			return this._getTabStrip().getAddButton();
 		};
 
-		/**
+		/*
 		 * Override <code>showAddNewButton</code> property setter to proxy to the <code>TabStrip</code>.
 		 *
-		 * @param bShowButton {boolean} Whether to show the <code>addNewButton</code>
+		 * @param {boolean} bShowButton Whether to show the <code>addNewButton</code>
 		 * @returns {sap.m.TabContainer} <code>this</code> pointer for chaining
 		 * @override
 		 */
@@ -467,11 +467,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			return this;
 		};
 
-		/**
+		/*
 		 * Override <code>selectedItem</code> property setter.
 		 *
-		 * @param oSelectedItem {sap.m.TabContainerItem} The new <code>TabContainerItem</code> to be selected
-		 * @param oEvent {object} Event object that may be present when the selection change is bubbling
+		 * @param {sap.m.TabContainerItem} oSelectedItem The new <code>TabContainerItem</code> to be selected
+		 * @param {jQuery.Event} oEvent  Event object that may be present when the selection change is bubbling
 		 * @returns {sap.m.TabContainer} <code>this</code> pointer for chaining
 		 * @override
 		 */
@@ -496,7 +496,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		/**
 		 * Re-renders only the displayed content.
 		 * @private
-		 * @param oContent Content, which should be rendered.
+		 * @param {Object} oContent The content, which should be rendered.
 		 */
 		TabContainer.prototype._rerenderContent = function(oContent) {
 			var $content = this.$("content"),

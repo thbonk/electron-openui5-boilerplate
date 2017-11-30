@@ -76,6 +76,16 @@
 			"designtime": true
 		},
 		{
+			"name": "DynamicPage.designtime-dbg.js",
+			"module": "sap/f/DynamicPage.designtime.js",
+			"isDebug": true
+		},
+		{
+			"name": "DynamicPage.designtime.js",
+			"module": "sap/f/DynamicPage.designtime.js",
+			"designtime": true
+		},
+		{
 			"name": "DynamicPage.js",
 			"module": "sap/f/DynamicPage.js",
 			"required": [
@@ -95,8 +105,8 @@
 			"required": [
 				"jquery.sap.global.js",
 				"sap/f/library.js",
-				"sap/m/ButtonType.js",
 				"sap/m/ToggleButton.js",
+				"sap/m/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/InvisibleText.js"
 			]
@@ -106,13 +116,23 @@
 			"designtime": true
 		},
 		{
+			"name": "DynamicPageHeader.designtime-dbg.js",
+			"module": "sap/f/DynamicPageHeader.designtime.js",
+			"isDebug": true
+		},
+		{
+			"name": "DynamicPageHeader.designtime.js",
+			"module": "sap/f/DynamicPageHeader.designtime.js",
+			"designtime": true
+		},
+		{
 			"name": "DynamicPageHeader.js",
 			"module": "sap/f/DynamicPageHeader.js",
 			"required": [
 				"jquery.sap.global.js",
 				"sap/f/library.js",
-				"sap/m/ButtonType.js",
 				"sap/m/ToggleButton.js",
+				"sap/m/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/InvisibleText.js"
 			]
@@ -157,6 +177,16 @@
 			"designtime": true
 		},
 		{
+			"name": "DynamicPageTitle.designtime-dbg.js",
+			"module": "sap/f/DynamicPageTitle.designtime.js",
+			"isDebug": true
+		},
+		{
+			"name": "DynamicPageTitle.designtime.js",
+			"module": "sap/f/DynamicPageTitle.designtime.js",
+			"designtime": true
+		},
+		{
 			"name": "DynamicPageTitle.js",
 			"module": "sap/f/DynamicPageTitle.js",
 			"required": [
@@ -165,6 +195,10 @@
 				"sap/m/OverflowToolbar.js",
 				"sap/ui/core/Control.js"
 			]
+		},
+		{
+			"name": "DynamicPageTitleArea.type",
+			"designtime": true
 		},
 		{
 			"name": "DynamicPageTitleRenderer-dbg.js",
@@ -181,7 +215,6 @@
 			"isDebug": true,
 			"required": [
 				"jquery.sap.global.js",
-				"sap/f/LayoutType.js",
 				"sap/f/library.js",
 				"sap/m/Button.js",
 				"sap/m/NavContainer.js",
@@ -200,7 +233,6 @@
 			"module": "sap/f/FlexibleColumnLayout.js",
 			"required": [
 				"jquery.sap.global.js",
-				"sap/f/LayoutType.js",
 				"sap/f/library.js",
 				"sap/m/Button.js",
 				"sap/m/NavContainer.js",
@@ -234,7 +266,6 @@
 			"required": [
 				"jquery.sap.global.js",
 				"sap/f/FlexibleColumnLayout.js",
-				"sap/f/LayoutType.js",
 				"sap/f/library.js"
 			]
 		},
@@ -244,13 +275,29 @@
 			"required": [
 				"jquery.sap.global.js",
 				"sap/f/FlexibleColumnLayout.js",
-				"sap/f/LayoutType.js",
 				"sap/f/library.js"
 			]
 		},
 		{
 			"name": "LayoutType.type",
 			"designtime": true
+		},
+		{
+			"name": "flexibility/DynamicPageTitle.flexibility-dbg.js",
+			"module": "sap/f/flexibility/DynamicPageTitle.flexibility.js",
+			"isDebug": true,
+			"required": [
+				"sap/m/changeHandler/CombineButtons.js",
+				"sap/m/changeHandler/SplitMenuButton.js"
+			]
+		},
+		{
+			"name": "flexibility/DynamicPageTitle.flexibility.js",
+			"module": "sap/f/flexibility/DynamicPageTitle.flexibility.js",
+			"required": [
+				"sap/m/changeHandler/CombineButtons.js",
+				"sap/m/changeHandler/SplitMenuButton.js"
+			]
 		},
 		{
 			"name": "library-all-dbg.js",
@@ -277,19 +324,18 @@
 			"merged": true,
 			"required": [
 				"jquery.sap.global.js",
-				"sap/f/LayoutType.js",
 				"sap/m/ActionSheet.js",
 				"sap/m/Button.js",
-				"sap/m/ButtonType.js",
 				"sap/m/InstanceManager.js",
 				"sap/m/NavContainer.js",
 				"sap/m/OverflowToolbar.js",
 				"sap/m/OverflowToolbarButton.js",
 				"sap/m/OverflowToolbarLayoutData.js",
-				"sap/m/OverflowToolbarPriority.js",
 				"sap/m/ToggleButton.js",
 				"sap/m/ToolbarSeparator.js",
 				"sap/m/ToolbarSpacer.js",
+				"sap/m/changeHandler/CombineButtons.js",
+				"sap/m/changeHandler/SplitMenuButton.js",
 				"sap/m/library.js",
 				"sap/ui/Device.js",
 				"sap/ui/base/EventProvider.js",
@@ -313,15 +359,19 @@
 			"included": [
 				"sap/f/Avatar.js",
 				"sap/f/AvatarRenderer.js",
+				"sap/f/DynamicPage.designtime.js",
 				"sap/f/DynamicPage.js",
+				"sap/f/DynamicPageHeader.designtime.js",
 				"sap/f/DynamicPageHeader.js",
 				"sap/f/DynamicPageHeaderRenderer.js",
 				"sap/f/DynamicPageRenderer.js",
+				"sap/f/DynamicPageTitle.designtime.js",
 				"sap/f/DynamicPageTitle.js",
 				"sap/f/DynamicPageTitleRenderer.js",
 				"sap/f/FlexibleColumnLayout.js",
 				"sap/f/FlexibleColumnLayoutRenderer.js",
 				"sap/f/FlexibleColumnLayoutSemanticHelper.js",
+				"sap/f/flexibility/DynamicPageTitle.flexibility.js",
 				"sap/f/library.js",
 				"sap/f/manifest.json",
 				"sap/f/routing/Router.js",
@@ -335,6 +385,7 @@
 				"sap/f/semantic/CopyAction.js",
 				"sap/f/semantic/DeleteAction.js",
 				"sap/f/semantic/DiscussInJamAction.js",
+				"sap/f/semantic/EditAction.js",
 				"sap/f/semantic/ExitFullScreenAction.js",
 				"sap/f/semantic/FavoriteAction.js",
 				"sap/f/semantic/FlagAction.js",
@@ -371,19 +422,18 @@
 			"merged": true,
 			"required": [
 				"jquery.sap.global.js",
-				"sap/f/LayoutType.js",
 				"sap/m/ActionSheet.js",
 				"sap/m/Button.js",
-				"sap/m/ButtonType.js",
 				"sap/m/InstanceManager.js",
 				"sap/m/NavContainer.js",
 				"sap/m/OverflowToolbar.js",
 				"sap/m/OverflowToolbarButton.js",
 				"sap/m/OverflowToolbarLayoutData.js",
-				"sap/m/OverflowToolbarPriority.js",
 				"sap/m/ToggleButton.js",
 				"sap/m/ToolbarSeparator.js",
 				"sap/m/ToolbarSpacer.js",
+				"sap/m/changeHandler/CombineButtons.js",
+				"sap/m/changeHandler/SplitMenuButton.js",
 				"sap/m/library-preload.json",
 				"sap/m/library.js",
 				"sap/ui/Device.js",
@@ -409,15 +459,19 @@
 			"included": [
 				"sap/f/Avatar.js",
 				"sap/f/AvatarRenderer.js",
+				"sap/f/DynamicPage.designtime.js",
 				"sap/f/DynamicPage.js",
+				"sap/f/DynamicPageHeader.designtime.js",
 				"sap/f/DynamicPageHeader.js",
 				"sap/f/DynamicPageHeaderRenderer.js",
 				"sap/f/DynamicPageRenderer.js",
+				"sap/f/DynamicPageTitle.designtime.js",
 				"sap/f/DynamicPageTitle.js",
 				"sap/f/DynamicPageTitleRenderer.js",
 				"sap/f/FlexibleColumnLayout.js",
 				"sap/f/FlexibleColumnLayoutRenderer.js",
 				"sap/f/FlexibleColumnLayoutSemanticHelper.js",
+				"sap/f/flexibility/DynamicPageTitle.flexibility.js",
 				"sap/f/library.js",
 				"sap/f/manifest.json",
 				"sap/f/routing/Router.js",
@@ -431,6 +485,7 @@
 				"sap/f/semantic/CopyAction.js",
 				"sap/f/semantic/DeleteAction.js",
 				"sap/f/semantic/DiscussInJamAction.js",
+				"sap/f/semantic/EditAction.js",
 				"sap/f/semantic/ExitFullScreenAction.js",
 				"sap/f/semantic/FavoriteAction.js",
 				"sap/f/semantic/FlagAction.js",
@@ -931,6 +986,25 @@
 			]
 		},
 		{
+			"name": "semantic/EditAction-dbg.js",
+			"module": "sap/f/semantic/EditAction.js",
+			"isDebug": true,
+			"required": [
+				"sap/f/semantic/SemanticButton.js"
+			]
+		},
+		{
+			"name": "semantic/EditAction.control",
+			"designtime": true
+		},
+		{
+			"name": "semantic/EditAction.js",
+			"module": "sap/f/semantic/EditAction.js",
+			"required": [
+				"sap/f/semantic/SemanticButton.js"
+			]
+		},
+		{
 			"name": "semantic/ExitFullScreenAction-dbg.js",
 			"module": "sap/f/semantic/ExitFullScreenAction.js",
 			"isDebug": true,
@@ -1151,9 +1225,8 @@
 			"isDebug": true,
 			"required": [
 				"jquery.sap.global.js",
-				"sap/m/ButtonType.js",
 				"sap/m/OverflowToolbarLayoutData.js",
-				"sap/m/OverflowToolbarPriority.js",
+				"sap/m/library.js",
 				"sap/ui/base/Metadata.js",
 				"sap/ui/core/IconPool.js"
 			]
@@ -1163,9 +1236,8 @@
 			"module": "sap/f/semantic/SemanticConfiguration.js",
 			"required": [
 				"jquery.sap.global.js",
-				"sap/m/ButtonType.js",
 				"sap/m/OverflowToolbarLayoutData.js",
-				"sap/m/OverflowToolbarPriority.js",
+				"sap/m/library.js",
 				"sap/ui/base/Metadata.js",
 				"sap/ui/core/IconPool.js"
 			]
@@ -1226,8 +1298,8 @@
 				"jquery.sap.global.js",
 				"sap/f/semantic/SemanticConfiguration.js",
 				"sap/f/semantic/SemanticContainer.js",
-				"sap/m/ButtonType.js",
-				"sap/m/ToolbarSpacer.js"
+				"sap/m/ToolbarSpacer.js",
+				"sap/m/library.js"
 			]
 		},
 		{
@@ -1237,8 +1309,8 @@
 				"jquery.sap.global.js",
 				"sap/f/semantic/SemanticConfiguration.js",
 				"sap/f/semantic/SemanticContainer.js",
-				"sap/m/ButtonType.js",
-				"sap/m/ToolbarSpacer.js"
+				"sap/m/ToolbarSpacer.js",
+				"sap/m/library.js"
 			]
 		},
 		{
@@ -1302,9 +1374,9 @@
 				"sap/f/semantic/SemanticConfiguration.js",
 				"sap/f/semantic/SemanticContainer.js",
 				"sap/m/Button.js",
-				"sap/m/ButtonType.js",
 				"sap/m/OverflowToolbarButton.js",
 				"sap/m/OverflowToolbarLayoutData.js",
+				"sap/m/library.js",
 				"sap/ui/base/EventProvider.js",
 				"sap/ui/core/IconPool.js"
 			]
@@ -1317,9 +1389,9 @@
 				"sap/f/semantic/SemanticConfiguration.js",
 				"sap/f/semantic/SemanticContainer.js",
 				"sap/m/Button.js",
-				"sap/m/ButtonType.js",
 				"sap/m/OverflowToolbarButton.js",
 				"sap/m/OverflowToolbarLayoutData.js",
+				"sap/m/library.js",
 				"sap/ui/base/EventProvider.js",
 				"sap/ui/core/IconPool.js"
 			]
@@ -1332,9 +1404,9 @@
 				"jquery.sap.global.js",
 				"sap/f/semantic/SemanticConfiguration.js",
 				"sap/f/semantic/SemanticContainer.js",
-				"sap/m/ButtonType.js",
 				"sap/m/ToolbarSeparator.js",
-				"sap/m/ToolbarSpacer.js"
+				"sap/m/ToolbarSpacer.js",
+				"sap/m/library.js"
 			]
 		},
 		{
@@ -1344,9 +1416,9 @@
 				"jquery.sap.global.js",
 				"sap/f/semantic/SemanticConfiguration.js",
 				"sap/f/semantic/SemanticContainer.js",
-				"sap/m/ButtonType.js",
 				"sap/m/ToolbarSeparator.js",
-				"sap/m/ToolbarSpacer.js"
+				"sap/m/ToolbarSpacer.js",
+				"sap/m/library.js"
 			]
 		},
 		{
@@ -1356,7 +1428,7 @@
 			"required": [
 				"sap/f/semantic/SemanticButton.js",
 				"sap/f/semantic/SemanticControl.js",
-				"sap/m/ButtonType.js"
+				"sap/m/library.js"
 			]
 		},
 		{
@@ -1369,7 +1441,7 @@
 			"required": [
 				"sap/f/semantic/SemanticButton.js",
 				"sap/f/semantic/SemanticControl.js",
-				"sap/m/ButtonType.js"
+				"sap/m/library.js"
 			]
 		},
 		{

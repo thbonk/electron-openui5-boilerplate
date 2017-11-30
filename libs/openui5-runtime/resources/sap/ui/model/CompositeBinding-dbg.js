@@ -24,12 +24,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType', './BindingMode', './
 
 	var CompositeBinding = PropertyBinding.extend("sap.ui.model.CompositeBinding", /** @lends sap.ui.model.CompositeBinding.prototype */ {
 
-		constructor : function (aBindings, bRawValues) {
+		constructor : function (aBindings, bRawValues, bInternalValues) {
 			PropertyBinding.apply(this, [null,""]);
 			this.aBindings = aBindings;
 			this.aValues = null;
 			this.bRawValues = bRawValues;
 			this.bPreventUpdate = false;
+			this.bInternalValues = bInternalValues;
 		},
 		metadata : {
 
@@ -84,6 +85,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType', './BindingMode', './
 		// If a composite type is used, the type decides whether to use raw values or not
 		if (this.oType) {
 			this.bRawValues = this.oType.getUseRawValues();
+			this.bInternalValues = this.oType.getUseInternalValues();
+
+			if (this.bRawValues && this.bInternalValues) {
+				throw new Error(this.oType + " has both 'bUseRawValues' & 'bUseInternalValues' set to true. Only one of them is allowed to be true");
+			}
 		}
 	};
 
@@ -165,7 +171,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType', './BindingMode', './
 	 */
 	CompositeBinding.prototype.setExternalValue = function(oValue) {
 		var aValues, aCurrentValues,
-			oInternalType = this.sInternalType && DataType.getType(this.sInternalType);
+			oInternalType = this.sInternalType && DataType.getType(this.sInternalType),
+			that = this;
 
 		// No twoway binding when using formatters
 		if (this.fnFormatter) {
@@ -209,7 +216,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType', './BindingMode', './
 			jQuery.each(this.aBindings, function(i, oBinding) {
 				oValue = aValues[i];
 				if (oValue !== undefined) {
-					oBinding.setExternalValue(oValue);
+					if (that.bInternalValues) {
+						oBinding.setInternalValue(oValue);
+					} else {
+						oBinding.setExternalValue(oValue);
+					}
 				}
 			});
 		}
@@ -233,9 +244,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType', './BindingMode', './
 		if (this.bRawValues) {
 			aValues = this.getValue();
 		} else {
-			jQuery.each(this.aBindings, function(i, oBinding) {
-				aValues.push(oBinding.getExternalValue());
-			});
+			this.aBindings.forEach(function(oBinding) {
+				aValues.push(this.bInternalValues ? oBinding.getInternalValue() : oBinding.getExternalValue());
+			}.bind(this));
 		}
 		return this._toExternalValue(aValues);
 	};

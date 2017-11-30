@@ -173,6 +173,94 @@ window.sapUiSupportReport.filter = (function () {
 jQuery.sap.declare('sap.ui.support.library-all');
 jQuery.sap.declare('sap.ui.support.supportRules.report.resources.collapseExpand'); // raw module, declared by SAPUI5 'AllInOne' Builder
 jQuery.sap.declare('sap.ui.support.supportRules.report.resources.filter'); // raw module, declared by SAPUI5 'AllInOne' Builder
+if ( !jQuery.sap.isDeclared('sap.ui.core.CoreHelper.support') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+/**
+ * Helper for core functionality in Support Tool infrastructure.
+ */
+jQuery.sap.declare('sap.ui.core.CoreHelper.support'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+sap.ui.define("sap/ui/core/CoreHelper.support",["jquery.sap.global"],
+	function (jQuery) {
+		"use strict";
+
+		var CoreHelper = {
+			/***
+			 * Checks of passed node has parent control of type UI5.
+			 * @param node HTML element that will be checked.
+			 * @param oScope Scope in witch checking will be executed.
+			 * @returns {boolean} If node has parent of type UI5 control it will return true, otherwise false.
+			 */
+			nodeHasUI5ParentControl : function (node, oScope) {
+				/**
+				 * Here we white list all controls that can contain DOM elements with style different than the framework style
+				 */
+				var skipParents = ["sap.ui.core.HTML"],
+					parentNode = jQuery(node).control()[0];
+
+				if (!parentNode) {
+					return false;
+				}
+
+				var parentName = parentNode.getMetadata().getName(),
+					isParentOutOfSkipList = skipParents.indexOf(parentName) === -1,
+					isParentInScope = oScope.getElements().indexOf(parentNode) > -1;
+
+				return isParentOutOfSkipList && isParentInScope;
+
+			},
+
+			/***
+			 * Search and filter all style sheets that are not loaded by the default theme and controls.
+			 * @returns {array} List of all custom CSS files paths.
+			 */
+			getExternalStyleSheets : function () {
+				return Array.from(document.styleSheets).filter(function (styleSheet) {
+					var themeName = sap.ui.getCore().getConfiguration().getTheme(),
+						styleSheetEnding = "/themes/" + themeName + "/library.css",
+						hasHref = !styleSheet.href || !styleSheet.href.endsWith(styleSheetEnding),
+						hasRules = !!styleSheet.rules;
+
+					return hasHref && hasRules;
+				});
+			},
+
+			/***
+			 * Gets the right path to the style sheet.
+			 * @param styleSheet Style sheet that need to be checked.
+			 * @returns {string} Full path to the file if its loaded externally and "Inline" if applied style is added by <style> tag
+			 */
+			getStyleSheetName : function (styleSheet) {
+				return styleSheet.href || "Inline";
+			},
+
+			/***
+			 * Gets the only the style sheet name from source.
+			 * @param styleSheet
+			 * @returns {string} Name of the file source or "<style> tag" if style sheet is inline.
+			 */
+			getStyleSource: function (styleSheet) {
+				var styleSheetSourceName;
+
+				if (styleSheet.href) {
+					// This will get only the name of the styleSheet example: "/customstyle.css"
+					styleSheetSourceName = styleSheet.href.substr(styleSheet.href.lastIndexOf("/"), styleSheet.href.length - 1);
+				} else {
+					styleSheetSourceName = " <style> tag ";
+				}
+
+				return styleSheetSourceName;
+			}
+		};
+
+		return CoreHelper;
+
+	}, true);
+}; // end of sap/ui/core/CoreHelper.support.js
 if ( !jQuery.sap.isDeclared('sap.ui.support.library') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -191,9 +279,15 @@ sap.ui.define("sap/ui/support/library",["sap/ui/core/library"],
 
 	/**
 	 * UI5 library: sap.ui.support.
+	 * A library for the Support Assistant tool.
+	 * <h3>Overview</h3>
+The library provides the Support Assistant tool. It enables application developers to check whether their applications are built according to the best practices for building SAPUI5 apps. The tool uses a set of pre-defined rules to check all aspects of an application.
 	 *
 	 * @namespace
 	 * @name sap.ui.support
+	 * @author SAP SE
+	 * @version 1.50.6
+	 *
 	 * @public
 	 */
 
@@ -204,36 +298,120 @@ sap.ui.define("sap/ui/support/library",["sap/ui/core/library"],
 		name : "sap.ui.support",
 		// Loading sap.ui.codeeditor is moved to overlay.html to make sure it is loaded from the correct origin.
 		dependencies : ["sap.ui.core", "sap.ui.fl", "sap.m", "sap.ui.layout"],
-		types: ["sap.ui.support.Severity"],
+		types: [
+			"sap.ui.support.Severity"
+		],
 		interfaces: [],
 		controls: [],
 		elements: [],
 		noLibraryCSS: false,
-		version: "1.48.5"
+		version: "1.50.6"
 	});
 
+	/**
+	 * Defines severity types.
+	 * @enum {string}
+	 * @since 1.50.6
+	 * @public
+	 */
 	sap.ui.support.Severity = {
+		/**
+		 * Medium issue severity.
+		 * @public
+		 */
 		Medium: "Medium",
+		/**
+		 * High issue severity.
+		 * @public
+		 */
 		High: "High",
+		/**
+		 * Low issue severity.
+		 * @public
+		 */
 		Low: "Low"
 	};
 
+	/**
+	 * Defines the Audiences.
+	 * @enum {string}
+	 * @since 1.50.6
+	 * @public
+	 */
 	sap.ui.support.Audiences = {
+		/**
+		 * Audience just on Control level.
+		 * @public
+		 */
 		Control: "Control",
+		/**
+		 * Audience just on Internal level.
+		 * @public
+		 */
 		Internal: "Internal",
+		/**
+		 * Audience just on Application level.
+		 * @public
+		 */
 		Application: "Application"
 	};
 
+	/**
+	 * Issue Categories.
+	 * @enum {string}
+	 * @since 1.50.6
+	 * @public
+	 */
 	sap.ui.support.Categories = {
+		/**
+		 * Accessibility issue category.
+		 * @public
+		 */
 		Accessibility: "Accessibility",
+		/**
+		 * Performance issue category.
+		 * @public
+		 */
 		Performance: "Performance",
+		/**
+		 * Memory issue category.
+		 * @public
+		 */
 		Memory: "Memory",
+		/**
+		 * Binding issue category.
+		 * @public
+		 */
 		Bindings: "Bindings",
+		/**
+		 * Consistency issue category.
+		 * @public
+		 */
 		Consistency: "Consistency",
+		/**
+		 * Functionality issue category.
+		 * @public
+		 */
 		Functionality : "Functionality",
+		/**
+		 * Usability issue category.
+		 * @public
+		 */
 		Usability : "Usability",
+		/**
+		 * DataModel issue category.
+		 * @public
+		 */
 		DataModel: "DataModel",
+		/**
+		 * Usage issue category.
+		 * @public
+		 */
 		Usage: "Usage",
+		/**
+		 * Accessibility issue category.
+		 * @public
+		 */
 		Other: "Other"
 	};
 
@@ -262,13 +440,16 @@ sap.ui.define("sap/ui/support/supportRules/Analyzer",["jquery.sap.global", "sap/
 		"use strict";
 
 		/**
+		 * @class
+		 * @constructor
+		 * <h3>Overview</h3>
 		 * Analyzer class that runs tasks. A Task runs a function for every entry in its object array.
 		 * The Analyzer counts the task objects and calculates the percentages.
+		 * <h3>Usage</h3>
 		 * With the start, restart, stop and pause methods the analyzer can be controlled.
-		 * While started it walks async through the list of object for each task and completes them.
-		 *
-		 *
+		 * While running it asynchronously, it selects objects from the list of each task and completes them.
 		 * @private
+		 * @name sap.ui.support.Analyzer
 		 */
 		var Analyzer = function () {
 			this.reset();
@@ -276,10 +457,10 @@ sap.ui.define("sap/ui/support/supportRules/Analyzer",["jquery.sap.global", "sap/
 
 		/**
 		 * Returns the total progress for all tasks with all their objects.
-		 * @returns {int} total progress for all tasks with all their objects.
-		 *
 		 * @private
-		 * @experimental
+		 * @method
+		 * @memberof sap.ui.support.Analyzer
+		 * @returns {int} Total progress for all tasks with all their objects
 		 */
 		Analyzer.prototype.getProgress = function () {
 			return this._iTotalProgress;
@@ -287,11 +468,13 @@ sap.ui.define("sap/ui/support/supportRules/Analyzer",["jquery.sap.global", "sap/
 
 		/**
 		 * Adds a task to with a name to the analyzer.
-		 * The fnTaskProcessor function is called if the task is run for every object in aObjects.
-		 *
-		 * @param sTaskName
-		 * @param fnTaskProcessor
-		 * @param aObjects
+		 * The <code>fnTaskProcessor</code> function is called if the task is run for every object in aObjects.
+		 * @private
+		 * @method
+		 * @memberof sap.ui.support.Analyzer
+		 * @param {string} sTaskName The name of the task to be executed
+		 * @param {function} fnTaskProcessor Custom function from the user
+		 * @param {object[]} aObjects All rules for a given task
 		 */
 		Analyzer.prototype.addTask = function (sTaskName, fnTaskProcessor, aObjects) {
 			var oTask = {
@@ -307,6 +490,9 @@ sap.ui.define("sap/ui/support/supportRules/Analyzer",["jquery.sap.global", "sap/
 		/**
 		 * Resets the analyzer and clears all tasks
 		 * @private
+		 * @method
+		 * @memberof sap.ui.support.Analyzer
+		 * @returns {void}
 		 */
 		Analyzer.prototype.reset = function () {
 			this._iTotalProgress = 0;
@@ -323,7 +509,11 @@ sap.ui.define("sap/ui/support/supportRules/Analyzer",["jquery.sap.global", "sap/
 
 		/**
 		 * Returns whether the Analyzer is currently running
-		 * @returns
+		 * @private
+		 * @method
+		 * @name sap.ui.support.Analyzer.running
+		 * @memberof sap.ui.support.Analyzer
+		 * @returns {boolean} Check if the Analyzer is still running
 		 */
 		Analyzer.prototype.running = function () {
 			return this._bRunning;
@@ -332,12 +522,17 @@ sap.ui.define("sap/ui/support/supportRules/Analyzer",["jquery.sap.global", "sap/
 		/**
 		 * Starts the analyzer to run all tasks
 		 * @private
+		 * @method
+		 * @name sap.ui.support.Analyzer.start
+		 * @memberof sap.ui.support.Analyzer
+		 * @param {function} fnResolve The function is called when the analyzer finishes all tasks
+		 * @returns {Promise} progressPromise
 		 */
-		Analyzer.prototype.start = function (resolveFn) {
+		Analyzer.prototype.start = function (fnResolve) {
 			var that = this;
 			// resolve() is called when the analyzer finishes all tasks.
 			// It is called inside _done function.
-			that.resolve = resolveFn;
+			that.resolve = fnResolve;
 			that.startedAt = new Date();
 			var progressPromise = new Promise(
 				function (resolve, reject) {
@@ -351,11 +546,12 @@ sap.ui.define("sap/ui/support/supportRules/Analyzer",["jquery.sap.global", "sap/
 
 		/**
 		 * Internal method to start the next run on the next object.
-		 * @param bContinue {boolean} true if called via timer
-		 * @param fnResolve {function} resolve function
-		 *
 		 * @private
-		 * @experimental
+		 * @method
+		 * @name sap.ui.support.Analyzer._start
+		 * @memberof sap.ui.support.Analyzer
+		 * @param {boolean} bContinue True if called via timer, false if the Analyzer is started manually
+		 * @param {function} fnResolve Resolve function
 		 */
 		Analyzer.prototype._start = function (bContinue, fnResolve) {
 			if (this._bRunning && !bContinue) {
@@ -388,8 +584,11 @@ sap.ui.define("sap/ui/support/supportRules/Analyzer",["jquery.sap.global", "sap/
 
 		/**
 		 * Processes the next object in the current task
-		 *
-		 * @param fnResolve {function} resolves promise to notify of finished state
+		 * @private
+		 * @method
+		 * @name sap.ui.support.Analyzer._next
+		 * @memberof sap.ui.support.Analyzer
+		 * @param {function} fnResolve Resolves promise to notify of finished state
 		 */
 		Analyzer.prototype._next = function (fnResolve) {
 			if (!this._bRunning) {
@@ -428,6 +627,14 @@ sap.ui.define("sap/ui/support/supportRules/Analyzer",["jquery.sap.global", "sap/
 			}
 		};
 
+		/**
+		 * Get the elapsed time in the form of a string.
+		 * @private
+		 * @method
+		 * @name sap.ui.support.Analyzer.getElapsedTimeString
+		 * @memberof sap.ui.support.Analyzer
+		 * @returns {string} Returns the total elapsed time since the Analyzer has started
+		 */
 		Analyzer.prototype.getElapsedTimeString = function () {
 			if (!this.elapsedTime) {
 				return;
@@ -444,6 +651,7 @@ sap.ui.define("sap/ui/support/supportRules/Analyzer",["jquery.sap.global", "sap/
 			];
 
 			return oBuffer.join(":");
+
 		};
 
 		return Analyzer;
@@ -462,21 +670,62 @@ sap.ui.define("sap/ui/support/supportRules/Constants",[],
 		"use strict";
 
 		/**
-		 * Constants variables used in the Support Assistant
+		 * Constants used in the Support Assistant
 		 * @enum
-		 *
+		 * @private
 		 * @author SAP SE
 		 * @namespace
-		 *
+		 * @name sap.ui.support.Constants
 		 * @alias sap.ui.support.AssistantConstants
+		 * @returns {Object} Object that contains all the constants.
 		 */
 		return {
+			/**
+			 * @enum
+			 * @readonly
+			 * The following constants are used to store rules and user data in the local storage.
+			 */
+
+			/**
+			 * Stores temporary rules.
+			 * @type {string}
+			 */
 			TEMP_RULESETS_NAME: "temporary",
+
+			/**
+			 * Name of the SupportAssistant.
+			 * @type {string}
+			 */
 			SUPPORT_ASSISTANT_NAME: "Support Assistant",
+
+			/**
+			 * Key for storing temporary rules in the local storage.
+			 * @type {string}
+			 */
 			LOCAL_STORAGE_TEMP_RULES_KEY: "support-assistant-temprules",
+
+			/**
+			 * Key for storing selected rules in the local storage.
+			 * @type {string}
+			 */
 			LOCAL_STORAGE_SELECTED_RULES_KEY: "support-assistant-selected-rules",
+
+			/**
+			 * Key for storing selected context in the local storage.
+			 * @type {string}
+			 */
 			LOCAL_STORAGE_SELECTED_CONTEXT_KEY: "support-assistant-settings-selected-context",
+
+			/**
+			 * Stores temporary rules in the local storage.
+			 * @type {string}
+			 */
 			LOCAL_STORAGE_SELECTED_CONTEXT_COMPONENT_KEY: "support-assistant-settings-selected-context-components",
+
+			/**
+			 * The name of the persistence cookie.
+			 * @type {string}
+			 */
 			COOKIE_NAME: "persistence-cookie"
 		};
 
@@ -502,35 +751,61 @@ sap.ui.define("sap/ui/support/supportRules/CoreFacade",[],
 		var coreInstance = null;
 
 		/**
-		 * Constructor for facade to given core object
+		 * <h3>Overview</h3>
+		 * The CoreFacade interface gives access to the Metadata, Models, UI areas and Components of the Core object.
+		 * <h3>Usage</h3>
+		 * The CoreFacade is passed to all rule check functions as an object. This helps rule developers to access the core state.
 		 *
-		 * @returns {object} Core facade
-		 * @param {object} oCore Core object as available in plugin
+		 * @public
+		 * @constructor
+		 * @namespace
+		 * @name sap.ui.support.CoreFacade
+		 * @memberof sap.ui.support
+		 * @author SAP SE
+		 * @version 1.50.6
+		 * @param {object} oCore Core object as available in core plugins
+		 * @returns {object} Instance of the <code>CoreFacade</code>
 		 */
 		function CoreFacade(oCore) {
 			coreInstance = oCore;
 
 			return {
 				/**
-				 * @returns {object} Core metadata
+				 * Gets the Metadata from the Core object.
+				 * @public
+				 * @method
+				 * @name sap.ui.support.CoreFacade.getMetadata
+				 * @memberof sap.ui.support.CoreFacade
 				 */
 				getMetadata: function () {
 					return coreInstance.getMetadata();
 				},
 				/**
-				 * @returns {object} UI areas
+				 * Gets the UI areas from the Core object.
+				 * @public
+				 * @method
+				 * @name sap.ui.support.CoreFacade.getUIAreas
+				 * @memberof sap.ui.support.CoreFacade
 				 */
 				getUIAreas: function () {
 					return coreInstance.mUIAreas;
 				},
 				/**
-				 * @returns {object} Components
+				 * Gets the Components from the Core object.
+				 * @public
+				 * @method
+				 * @name sap.ui.support.CoreFacade.getComponents
+				 * @memberof sap.ui.support.CoreFacade
 				 */
 				getComponents: function () {
 					return coreInstance.mObjects.component;
 				},
 				/**
-				 * @returns {object} Models
+				 * Gets the Models from the Core object.
+				 * @public
+				 * @method
+				 * @name sap.ui.support.CoreFacade.getModels
+				 * @memberof sap.ui.support.CoreFacade
 				 */
 				getModels: function () {
 					return coreInstance.oModels;
@@ -543,638 +818,6 @@ sap.ui.define("sap/ui/support/supportRules/CoreFacade",[],
 	}, true);
 
 }; // end of sap/ui/support/supportRules/CoreFacade.js
-if ( !jQuery.sap.isDeclared('sap.ui.support.supportRules.ElementTree') ) {
-/*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
- * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
- */
-
-jQuery.sap.declare('sap.ui.support.supportRules.ElementTree'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-jQuery.sap.require('sap.ui.base.ManagedObject'); // unlisted dependency retained
-sap.ui.define("sap/ui/support/supportRules/ElementTree",["jquery.sap.global", "sap/ui/base/ManagedObject"],
-	function (jQuery, ManagedObject) {
-		"use strict";
-
-		function _isObject(data) {
-			return (typeof data === "object" && !Array.isArray(data) && data !== null);
-		}
-
-		/**
-		 * @param {ElementTreeRenderingOptions} options
-		 * @returns {string}
-		 * @private
-		 */
-		function _startElementTreeList(options) {
-
-			return "<ul " + options.attributes.join(" ") + ">";
-		}
-
-		/**
-		 * @returns {string}
-		 * @private
-		 */
-		function _endElementTreeList() {
-			return "</ul>";
-		}
-
-		/**
-		 * @param {ElementTreeRenderingOptions.controls} options
-		 * @returns {string}
-		 * @private
-		 */
-		function _startElementTreeListItem(options, hasIssue) {
-			var html = "<li data-id=\"" + options.id + "\" ";
-			if (hasIssue) {
-				html += "issue";
-			}
-			html += ">";
-			return html;
-		}
-
-		/**
-		 * @returns {string}
-		 * @private
-		 */
-		function _endElementTreeListItem() {
-			return "</li>";
-		}
-
-		/**
-		 * Create HTML for the left part of the ElementTree list item.
-		 * @param {ElementTreeOptions.controls} controls
-		 * @param {number} paddingLeft
-		 * @returns {string}
-		 * @private
-		 */
-		function _getElementTreeLeftColumnOfListItem(controls, paddingLeft) {
-			var html = "<offset style=\"padding-left:" + paddingLeft + "px\" >";
-
-			if (controls.content.length > 0) {
-				html += "<arrow down=\"true\"></arrow>";
-			} else {
-				html += "<place-holder></place-holder>";
-			}
-
-			html += "</offset>";
-
-			return html;
-		}
-
-		/**
-		 * Create HTML for the right part of the ElementTree list item.
-		 * @param {Object} control - JSON object form {ElementTreeOptions.controls}
-		 * @returns {string}
-		 * @private
-		 */
-		function _getElementTreeRightColumnOfListItem(control, numberOfIssues) {
-			var splitControlName = control.name.split(".");
-			var name = splitControlName[splitControlName.length - 1];
-			var nameSpace = control.name.replace(name, "");
-			var hideShowClass = (numberOfIssues > 0) ? "showNumbOfIssues" : "hideNumbOfIssues";
-
-			return "<tag data-search=\"" + control.name + control.id + "\">" +
-				"&#60;" +
-				"<namespace>" + nameSpace + "</namespace>" +
-				name +
-				"<attribute>&#32;id=\"<attribute-value>" + control.id + "</attribute-value>\"</attribute>" +
-				"&#62;" +
-				"</tag>" + "<span class = " + hideShowClass  + ">[" + numberOfIssues + "  issue(s)] </span>";
-		}
-
-		/**
-		 * Search for the nearest parent Node.
-		 * @param {element} element - HTML DOM element that will be the root of the search
-		 * @param {string} parentNodeName - The desired HTML parent element nodeName
-		 * @returns {Object} HTML DOM element
-		 * @private
-		 */
-		function _findNearestDOMParent(element, parentNodeName) {
-			while (element.nodeName !== parentNodeName) {
-				if (element.nodeName === "CONTROL-TREE") {
-					break;
-				}
-				element = element.parentNode;
-			}
-
-			return element;
-		}
-
-		/**
-		 * ElementTree constructor.
-		 * @param {string} id - The id of the DOM container
-		 * @param {ElementTree} instantiationOptions
-		 * @constructor
-		 */
-		function ElementTree(id, instantiationOptions) {
-			var areInstantiationOptionsAnObject = _isObject(instantiationOptions);
-			var options;
-
-			/**
-			 * Make sure that the options parameter is Object and
-			 * that the ElementTree can be instantiate without initial options.
-			 */
-			if (areInstantiationOptionsAnObject) {
-				options = instantiationOptions;
-			} else {
-				options = {};
-			}
-
-			// Save DOM reference
-			this._ElementTreeContainer = document.getElementById(id);
-
-			/**
-			 * Method fired when the number of issues against an element is clicked
-			 */
-			this.onIssueCountClicked = options.onIssueCountClicked ? options.onIssueCountClicked : function () {};
-
-			/**
-			 * Method fired when the selected element in the ElementTree is changed.
-			 * @param {string} selectedElementId - The selected element id
-			 */
-			this.onSelectionChanged = options.onSelectionChanged ? options.onSelectionChanged : function (selectedElementId) {};
-
-			/**
-			 * Method fired when the hovered element in the ElementTree is changed.
-			 * @param {string} hoveredElementId - The hovered element id
-			 */
-			this.onHoverChanged = options.onHoverChanged ? options.onHoverChanged : function (hoveredElementId) {};
-
-			/**
-			 * Method fired when the mouse is out of the ElementTree.
-			 */
-			this.onMouseOut = options.onMouseOut ? options.onMouseOut : function () {};
-
-			/**
-			 * Method fired when the initial ElementTree rendering is done.
-			 */
-			this.onInitialRendering = options.onInitialRendering ? options.onInitialRendering : function () {};
-
-			// Object with the tree model that will be visualized
-			this.setData(options.data);
-		}
-
-		/**
-		 * Initialize Tree.
-		 */
-		ElementTree.prototype.init = function () {
-			if (!this._ElementTreeContainer) {
-				return;
-			}
-
-			this._createHTML();
-			this._createHandlers();
-
-			// Fire event to notify that the ElementTree is initialized
-			this.onInitialRendering();
-		};
-
-		/**
-		 * Get the data model used for the tree.
-		 * @returns {ElementTreeOptions} the data that is used for the tree
-		 */
-		ElementTree.prototype.getData = function () {
-			return this._data;
-		};
-
-		/**
-		 * Set the data model used for the tree.
-		 * @param {ElementTreeOptions} data
-		 * @returns {ElementTree}
-		 */
-		ElementTree.prototype.setData = function (data) {
-			var oldData = this.getData();
-			var isDataAnObject = _isObject(data);
-
-			if (isDataAnObject === false) {
-				jQuery.sap.log.warning("The parameter should be an Object");
-				return;
-			}
-
-			// Make sure that the new data is different from the old one
-			if (JSON.stringify(oldData) === JSON.stringify(data)) {
-				return;
-			}
-
-			this._data = data;
-
-			// Initialize ElementTree on first rendering
-			// If it is a second rendering, render only the tree elements
-			if (this._isFirstRendering === undefined) {
-				this.init();
-				this._isFirstRendering = true;
-			} else {
-				this._createTree();
-			}
-
-			return this;
-		};
-
-		ElementTree.prototype.setContainerId = function (id) {
-			this._ElementTreeContainer = document.getElementById(id);
-			this.init();
-		};
-
-		/**
-		 * Returns the selected <li> element of the tree.
-		 * @returns {Element} HTML DOM element
-		 */
-		ElementTree.prototype.getSelectedElement = function () {
-			return this._selectedElement;
-		};
-
-		/**
-		 * Set the selected <li> element of the tree.
-		 * @param {string} elementID - HTML DOM element id
-		 * @returns {ElementTree}
-		 */
-		ElementTree.prototype.setSelectedElement = function (elementID, bNotify) {
-			var selectedElement;
-
-			if (typeof elementID !== "string") {
-				jQuery.sap.log.warning("Please use a valid string parameter");
-				return;
-			}
-
-			selectedElement = this._ElementTreeContainer.querySelector("#" + elementID);
-
-			if (selectedElement === null) {
-				jQuery.sap.log.warning("The selected element is not a child of the ElementTree");
-				return;
-			}
-
-			this._selectedElement = selectedElement;
-			this._selectTreeElement(selectedElement, bNotify);
-
-			return this;
-		};
-
-		ElementTree.prototype.clearSelection = function () {
-			var selectedList = this._ElementTreeContainer.querySelector("[selected]");
-
-			if (selectedList) {
-				selectedList.removeAttribute("selected");
-			}
-		};
-
-		/**
-		 * Create and places the ElementTree HTML.
-		 * @private
-		 */
-		ElementTree.prototype._createHTML = function () {
-			var html;
-
-			html = this._createFilter();
-			html += this._createTreeContainer();
-
-			this._ElementTreeContainer.innerHTML = html;
-			// Save reverences for future use
-			this._setReferences();
-
-			if (this.getData() !== undefined) {
-				this._createTree();
-			}
-		};
-
-		/**
-		 * Create the HTML needed for filtering.
-		 * @returns {string}
-		 * @private
-		 */
-		ElementTree.prototype._createFilter = function () {
-			return "<filter>" +
-				"<end>" +
-				"<label><input type=\"checkbox\" issues checked/>Issues</label>" +
-				"<label><input type=\"checkbox\" namespaces checked/>Namespaces</label>" +
-				"<label><input type=\"checkbox\" attributes/>Attributes</label>" +
-				"</end>" +
-				"</filter>";
-		};
-
-		/**
-		 * Create the HTML container for the tree.
-		 * @returns {string}
-		 * @private
-		 */
-		ElementTree.prototype._createTreeContainer = function () {
-			return "<tree show-namespaces show-problematic-elements></tree>";
-		};
-
-		/**
-		 * Create ElementTree HTML.
-		 */
-		ElementTree.prototype._createTree = function () {
-			var controls = this.getData().controls;
-
-			this._treeContainer.innerHTML = this._createTreeHTML(controls);
-		};
-
-		/**
-		 * Create HTML tree from JSON.
-		 * @param {ElementTreeOptions.controls} controls
-		 * @param {number} level - nested level
-		 * @returns {string} HTML ElementTree in form of a string
-		 * @private
-		 */
-		ElementTree.prototype._createTreeHTML = function (controls, level) {
-			if (controls === undefined || controls.length === 0) {
-				return "";
-			}
-
-			var html = "";
-			var nestedLevel = level || 0;
-			var paddingLeft = ++nestedLevel * 10;
-			var that = this;
-			var issuesIds = this.getData().issuesIds;
-
-			controls.forEach(function (control) {
-				html += _startElementTreeList({
-					attributes: ["expanded=\"true\""]
-				});
-
-				var hasIssue = issuesIds[control.id] !== undefined ? true : false;
-				var numberOfIssues = 0;
-				var numberOfIssues = hasIssue ? issuesIds[control.id].length : 0;
-					html += _startElementTreeListItem({
-					id: control.id
-				}, hasIssue);
-
-				html += _getElementTreeLeftColumnOfListItem(control, paddingLeft);
-
-				html += _getElementTreeRightColumnOfListItem(control, numberOfIssues);
-
-				html += _endElementTreeListItem();
-
-				html += that._createTreeHTML(control.content, nestedLevel);
-
-				html += _endElementTreeList();
-			});
-
-			return html;
-		};
-
-		/**
-		 * Hide/Show nested "<ul>" in "<li>" elements.
-		 * @param {Element} target - DOM element
-		 * @private
-		 */
-		ElementTree.prototype._toggleCollapse = function (target) {
-			var targetParent = _findNearestDOMParent(target.parentNode, "UL");
-
-			if (target.getAttribute("right") === "true") {
-				target.removeAttribute("right");
-				target.setAttribute("down", "true");
-
-				targetParent.setAttribute("expanded", "true");
-			} else if (target.getAttribute("down") === "true") {
-				target.removeAttribute("down");
-
-				targetParent.removeAttribute("expanded");
-				target.setAttribute("right", "true");
-			}
-		};
-
-		/**
-		 * Add visual selection to clicked "<li>" elements.
-		 * @param {Element} targetElement - DOM element
-		 * @private
-		 */
-		ElementTree.prototype._selectTreeElement = function (targetElement, bNotify) {
-			var target = _findNearestDOMParent(targetElement, "LI");
-			var dataId = target.attributes["data-id"];
-
-			if (!dataId) {
-				return;
-			}
-
-			var id = dataId.value;
-			// Prevent tree element selection for allowing proper multiple tree element selection for copy/paste
-			if (id === this._ElementTreeContainer.id) {
-				return;
-			}
-
-			this._scrollToElement(target);
-
-			if (bNotify) {
-				this.onSelectionChanged(id);
-			}
-
-			if (targetElement.classList.contains("showNumbOfIssues")) {
-				this.clearSelection();
-
-				target.setAttribute("selected", "true");
-
-				if (bNotify) {
-					this.onIssueCountClicked(id);
-				}
-			}
-		};
-
-		/**
-		 * Scroll to element in the ElementTree.
-		 * @param {Element} target - DOM element to which need to be scrolled
-		 */
-		ElementTree.prototype._scrollToElement = function (target) {
-			var desiredViewBottomPosition = this._treeContainer.offsetHeight - this._treeContainer.offsetTop + this._treeContainer.scrollTop;
-
-			if (target.offsetTop > desiredViewBottomPosition || target.offsetTop < this._treeContainer.scrollTop) {
-				this._treeContainer.scrollTop = target.offsetTop - window.innerHeight / 6;
-			}
-		};
-
-		/**
-		 * Search tree elements that match given criteria.
-		 * @param {string} userInput - Search criteria
-		 * @private
-		 */
-		ElementTree.prototype._searchInTree = function (userInput) {
-			var searchableElements = this._ElementTreeContainer.querySelectorAll("[data-search]");
-			var searchInput = userInput.toLocaleLowerCase();
-			var elementInformation;
-
-			for (var i = 0; i < searchableElements.length; i++) {
-				elementInformation = searchableElements[i].getAttribute("data-search").toLocaleLowerCase();
-
-				if (elementInformation.indexOf(searchInput) !== -1) {
-					searchableElements[i].parentNode.setAttribute("matching", true);
-				} else {
-					searchableElements[i].parentNode.removeAttribute("matching");
-				}
-			}
-		};
-
-		/**
-		 * Remove  "matching" attribute from the search.
-		 * @private
-		 */
-		ElementTree.prototype._removeAttributesFromSearch = function () {
-			var elements = this._treeContainer.querySelectorAll("[matching]");
-
-			for (var i = 0; i < elements.length; i++) {
-				elements[i].removeAttribute("matching");
-			}
-		};
-
-		/**
-		 * Visualize the number of elements which satisfy the search.
-		 * @private
-		 */
-		ElementTree.prototype._setSearchResultCount = function (count) {
-			this._filterContainer.querySelector("results").innerHTML = "(" + count + ")";
-		};
-
-		/**
-		 * Event handler for mouse click on a tree element arrow.
-		 * @param {Object} event - click event
-		 * @private
-		 */
-		ElementTree.prototype._onArrowClick = function (event) {
-			var target = event.target;
-
-			if (target.nodeName === "ARROW") {
-				this._toggleCollapse(target);
-			} else {
-				this._selectTreeElement(target, true);
-			}
-		};
-
-		/**
-		 * Event handler for user input in "search" input.
-		 * @param {Object} event - keyup event
-		 * @private
-		 */
-		ElementTree.prototype._onSearchInput = function (event) {
-			var target = event.target;
-			var searchResultCount;
-
-			if (target.getAttribute("search") !== null) {
-
-				if (target.value.length !== 0) {
-					this._searchInTree(target.value);
-				} else {
-					this._removeAttributesFromSearch("matching");
-				}
-
-				searchResultCount = this._treeContainer.querySelectorAll("[matching]").length;
-				this._setSearchResultCount(searchResultCount);
-			}
-		};
-
-		/**
-		 * Event handler for onsearch event.
-		 * @param {Object} event - onsearch event
-		 * @private
-		 */
-		ElementTree.prototype._onSearchEvent = function (event) {
-			var searchResultCount;
-
-			if (event.target.value.length === 0) {
-				this._removeAttributesFromSearch("matching");
-
-				searchResultCount = this._treeContainer.querySelectorAll("[matching]").length;
-				this._setSearchResultCount(searchResultCount);
-			}
-
-		};
-
-		/**
-		 * Event handler for ElementTree options change.
-		 * @param {Object} event - click event
-		 * @private
-		 */
-		ElementTree.prototype._onOptionsChange = function (event) {
-			var target = event.target;
-
-			if (target.getAttribute("filter") !== null) {
-				if (target.checked) {
-					this._treeContainer.setAttribute("show-filtered-elements", true);
-				} else {
-					this._treeContainer.removeAttribute("show-filtered-elements");
-				}
-			}
-
-			if (target.getAttribute("issues") !== null) {
-				if (target.checked) {
-					this._treeContainer.setAttribute("show-problematic-elements", true);
-				} else {
-					this._treeContainer.removeAttribute("show-problematic-elements");
-				}
-			}
-
-			if (target.getAttribute("namespaces") !== null) {
-				if (target.checked) {
-					this._treeContainer.setAttribute("show-namespaces", true);
-				} else {
-					this._treeContainer.removeAttribute("show-namespaces");
-				}
-			}
-
-			if (target.getAttribute("attributes") !== null) {
-				if (target.checked) {
-					this._treeContainer.setAttribute("show-attributes", true);
-				} else {
-					this._treeContainer.removeAttribute("show-attributes");
-				}
-			}
-
-		};
-
-		/**
-		 * Event handler for mouse hover on tree element.
-		 * @param {Object} event - mouse event
-		 * @private
-		 */
-		ElementTree.prototype._onTreeElementMouseHover = function (event) {
-			var target = _findNearestDOMParent(event.target, "LI");
-
-			var hoverList = this._ElementTreeContainer.querySelector("[hover]");
-
-			if (hoverList) {
-				hoverList.removeAttribute("hover");
-			}
-
-			target.setAttribute("hover", "true");
-
-			var dataId = target.attributes["data-id"];
-			this.onHoverChanged(dataId && dataId.value);
-		};
-
-		/**
-		 * Event handler for mouse out of the tree element.
-		 * @param {Object} event - mouse event
-		 * @private
-		 */
-		ElementTree.prototype._onTreeElementMouseOut = function (event) {
-			this.onMouseOut();
-		};
-
-		/**
-		 * Create all event handlers for the ElementTree.
-		 * @private
-		 */
-		ElementTree.prototype._createHandlers = function () {
-			this._treeContainer.onclick = this._onArrowClick.bind(this);
-			this._filterContainer.onkeyup = this._onSearchInput.bind(this);
-			this._filterContainer.onsearch = this._onSearchEvent.bind(this);
-			this._filterContainer.onchange = this._onOptionsChange.bind(this);
-			this._ElementTreeContainer.onmouseover = this._onTreeElementMouseHover.bind(this);
-			this._ElementTreeContainer.onmouseout = this._onTreeElementMouseOut.bind(this);
-		};
-
-		/**
-		 * Save references to ElementTree different sections.
-		 * @private
-		 */
-		ElementTree.prototype._setReferences = function () {
-			this._filterContainer = this._ElementTreeContainer.querySelector("filter");
-			this._treeContainer = this._ElementTreeContainer.querySelector("tree");
-		};
-
-		return ElementTree;
-	});
-
-}; // end of sap/ui/support/supportRules/ElementTree.js
 if ( !jQuery.sap.isDeclared('sap.ui.support.supportRules.ExecutionScope') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -1311,104 +954,6 @@ sap.ui.define("sap/ui/support/supportRules/ExecutionScope",["jquery.sap.global"]
 		return ExecutionScope;
 	}, true);
 }; // end of sap/ui/support/supportRules/ExecutionScope.js
-if ( !jQuery.sap.isDeclared('sap.ui.support.supportRules.Highlighter') ) {
-/*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
- * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
- */
-
-jQuery.sap.declare('sap.ui.support.supportRules.Highlighter'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-sap.ui.define("sap/ui/support/supportRules/Highlighter",[],
-	function () {
-		"use strict";
-
-		// Reference for the highlighter DOM element
-		var _highLighter = null;
-
-		/**
-		 * Hide the highlighter.
-		 * @private
-		 */
-		function _hideHighLighter() {
-			_highLighter.style.display = "none";
-		}
-
-		/**
-		 * Show the highlighter.
-		 * @private
-		 */
-		function _showHighLighter() {
-			_highLighter.style.display = "block";
-		}
-
-		/**
-		 * Create DOM element for visual highlighting.
-		 * @private
-		 */
-		function _createHighLighter() {
-			var highLighter = document.createElement("div");
-
-			highLighter.style.cssText = "box-sizing: border-box;border:1px solid blue;background: rgba(20, 20, 200, 0.4);position: absolute";
-
-			var highLighterWrapper = document.createElement("div");
-
-			highLighterWrapper.id = "ui5-highlighter";
-			highLighterWrapper.style.cssText = "position: fixed;top:0;right:0;bottom:0;left:0;z-index: 1000;overflow: hidden;";
-			highLighterWrapper.appendChild(highLighter);
-
-			document.body.appendChild(highLighterWrapper);
-
-			// Save reference for later usage
-			_highLighter = document.getElementById("ui5-highlighter");
-
-			// Add event handler
-			_highLighter.onmouseover = _hideHighLighter;
-		}
-
-		/**
-		 * Highlight controls.
-		 * @type {{setDimensions: Function}}
-		 */
-		return {
-			/**
-			 * Set the position of the visual highlighter.
-			 * @param {string} elementId - The id of the DOM element that need to be highlighted
-			 * @returns {exports}
-			 */
-			highlight: function (elementId) {
-				var highlighter;
-				var targetDomElement;
-				var targetRect;
-
-				if (_highLighter === null && !document.getElementById("ui5-highlighter")) {
-					_createHighLighter();
-				} else {
-					_showHighLighter();
-				}
-
-				highlighter = _highLighter.firstElementChild;
-				targetDomElement = document.getElementById(elementId);
-
-				if (targetDomElement) {
-					targetRect = targetDomElement.getBoundingClientRect();
-
-					highlighter.style.top = targetRect.top + "px";
-					highlighter.style.left = targetRect.left + "px";
-					highlighter.style.height = targetRect.height + "px";
-					highlighter.style.width = targetRect.width + "px";
-				}
-
-				return this;
-			},
-			/**
-			 * Hides the visual highlighter.
-			 */
-			hideHighLighter: _hideHighLighter
-		};
-	});
-
-}; // end of sap/ui/support/supportRules/Highlighter.js
 if ( !jQuery.sap.isDeclared('sap.ui.support.supportRules.IssueManager') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -1416,6 +961,10 @@ if ( !jQuery.sap.isDeclared('sap.ui.support.supportRules.IssueManager') ) {
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
+/**
+ * The IssueManager interface stores, groups and converts issues from the Core Object to a usable model by the Support Assistant.
+ * Issues can be added only through the IssueManager using <code>addIssue</code> method.
+ */
 jQuery.sap.declare('sap.ui.support.supportRules.IssueManager'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
 jQuery.sap.require('sap.ui.base.Object'); // unlisted dependency retained
@@ -1423,80 +972,130 @@ sap.ui.define("sap/ui/support/supportRules/IssueManager",["jquery.sap.global", "
 	function (jQuery, BaseObject) {
 		"use strict";
 
+		/**
+		 * @type {object[]} _aIssues Issues stored in the IssueManager
+		 * @private
+		 */
 		var _aIssues = [];
+
+		/**
+		 * @type {object[]} _aHistory Array of history objects which contain issues key that has an array of issues.
+		 * @private
+		 */
 		var _aHistory = [];
-		var _convertIssueToViewModel = function (issue) {
-			var element = sap.ui.getCore().byId(issue.context.id),
+
+		/**
+		 * Converts Issue Object to a ViewModel that can be used by the IssueManager.
+		 * @param {object} oIssue Issue Object that is to be converted
+		 * @returns {object} Converted Issue Object
+		 */
+		var _convertIssueToViewModel = function (oIssue) {
+			var element = sap.ui.getCore().byId(oIssue.context.id),
 				className = "";
 
-			if (issue.context.id === "WEBPAGE") {
+			if (oIssue.context.id === "WEBPAGE") {
 				className = "sap.ui.core";
 			} else if (element) {
 				className = element.getMetadata().getName();
 			}
 
 			return {
-				severity: issue.severity,
-				name: issue.rule.title,
-				description: issue.rule.description,
-				resolution: issue.rule.resolution,
-				resolutionUrls: issue.rule.resolutionurls,
-				audiences: issue.rule.audiences,
-				categories: issue.rule.categories,
-				details: issue.details,
-				ruleLibName: issue.rule.libName,
-				ruleId: issue.rule.id,
+				severity: oIssue.severity,
+				name: oIssue.rule.title,
+				description: oIssue.rule.description,
+				resolution: oIssue.rule.resolution,
+				resolutionUrls: oIssue.rule.resolutionurls,
+				audiences: oIssue.rule.audiences,
+				categories: oIssue.rule.categories,
+				details: oIssue.details,
+				ruleLibName: oIssue.rule.libName,
+				ruleId: oIssue.rule.id,
 				context: {
 					className: className,
-					id: issue.context.id
+					id: oIssue.context.id
 				}
 			};
 		};
 
+		/**
+		 * @class
+		 * The IssueManager is used to store and export issues to the Support Assistant.
+		 * <h3>Overview</h3>
+		 * The IssueManager is used to store and export issues found by the Support Assistant.
+		 * <h3>Usage</h3>
+		 * The IssueManager can be used as a static class and add issues using the <code>addIssue</code> method of both the IssueManager or the IssueManagerFacade.
+		 * @public
+		 * @name sap.ui.support.IssueManager
+		 * @alias IssueManager
+		 *
+		 * @lends IssueManager
+		 */
 		var IssueManager = {
+
+
 			/**
-			 * Adds an issue to the list of issues found
-			 * @param {object} oIssue
+			 * Adds an issue to the list of issues found.
+			 * @public
+			 * @method
+			 * @name sap.ui.support.IssueManager.addIssue
+			 * @param {object} oIssue The issue to be added in the IssueManager
 			 */
 			addIssue: function (oIssue) {
 				_aIssues.push(oIssue);
 			},
 			/**
-			 * @param {function} fnCb Callback function to be used in the same
-			 * fashion as Array.prototype.forEach
+			 * Cycles through issues stored in the IssueManager and executes the given callback function.
+			 * @public
+			 * @method
+			 * @name sap.ui.support.IssueManager.walkIssues
+			 * @param {function} fnCallback Callback function to be used in the same fashion as Array.prototype.forEach
 			 */
-			walkIssues: function (fnCb) {
-				_aIssues.forEach(fnCb);
+			walkIssues: function (fnCallback) {
+				_aIssues.forEach(fnCallback);
 			},
+
+			/**
+			 * Clears all issues in the IssueManager.
+			 * @public
+			 * @method
+			 * @name sap.ui.support.IssueManager.clearIssues
+			 * @returns {void}
+			 */
 			clearIssues: function () {
-				// Return if no issues
-				if (!_aIssues.length) {
-					return;
-				}
-
-				// Add to history. Using object for future compatibility
-				_aHistory.push({
-					// Copy array
-					issues: _aIssues.slice()
-				});
-
-				// Reset issues array
 				_aIssues = [];
 			},
+
 			/**
-			 * @returns {array} Issue history - array of objects.
-			 * Each history object has an issues key that contains an array of
-			 * issues
+			 * Saves a new history object with the current issues.
+			 * @public
+			 * @method
+			 * @name sap.ui.support.IssueManager.saveHistory
+			 * @returns {void}
+			 */
+			saveHistory: function () {
+				_aHistory.push({
+					issues: _aIssues.slice()
+				});
+			},
+
+			/**
+			 * Gets history objects with current issues. Each history object has an issues key that contains an array of issues.
+			 * @public
+			 * @method
+			 * @name sap.ui.support.IssueManager.getHistory
+			 * @returns {object[]} Current history in the IssueManager.
 			 */
 			getHistory: function () {
-				this.clearIssues();
 				// Copy and return history
 				return _aHistory.slice();
 			},
+
 			/**
-			 * @returns {array} Issue history - array of objects.
-			 * Each history object has an issues key that contains the issues grouped
-			 * by library and rule in ViewModel format
+			 * Gets grouped history containing <code>ViewModel</code>. Each history object has an issues key that contains the issues grouped by library and rule in ViewModel format.
+			 * @public
+			 * @method
+			 * @name sap.ui.support.IssueManager.getConvertedHistory
+			 * @returns {object[]} convertedHistory Grouped issue history object containing converted issues to ViewModel format.
 			 */
 			getConvertedHistory: function () {
 				var that = this,
@@ -1513,24 +1112,35 @@ sap.ui.define("sap/ui/support/supportRules/IssueManager",["jquery.sap.global", "
 
 				return convertedHistory;
 			},
+
 			/**
-			 * @returns {array} Issues in ViewModel format
-			 * Converts the issues inside the IssueManager
+			 * Converts the issues inside the IssueManager.
+			 * @public
+			 * @method
+			 * @name sap.ui.support.IssueManager.getIssuesModel
+			 * @returns {object[]} viewModel Issues in ViewModel format
 			 */
-			getIssuesViewModel: function () {
-				var viewModel = [];
+			getIssuesModel: function () {
+				var aViewModel = [];
+
 				this.walkIssues(function (issue) {
-					viewModel.push(_convertIssueToViewModel(issue));
+					aViewModel.push(_convertIssueToViewModel(issue));
 				});
-				return viewModel;
+
+				return aViewModel;
 			},
+
 			/**
-			 * @returns {object} All the rules with issues, selected flag and issueCount properties
-			 * The issues are in ViewModel format
+			 * Gets rules and issues, and converts each rule to a ruleViewModel - parameters should be converted as specified beforehand.
+			 * @public
+			 * @method
+			 * @name sap.ui.support.IssueManager.getRulesViewModel
 			 * @param {object} rules All the rules from _mRulesets
-			 * @param {object} selectedRulesIDs The selected rules ids
-			 * @param {array} issues The issues to map to the rulesViewModel.
-			 * The issues passes should be grouped and in ViewModel format
+			 * @param {array} selectedRulesIDs The rule ID's of the selected rules.
+			 * @param {array} issues The issues to map to the rulesViewModel
+			 * The issues passes should be grouped and in ViewModel format.
+			 * @returns {object} rulesViewModel All the rules with issues, selected flag and issueCount properties
+			 * The issues are in ViewModel format.
 			 */
 			getRulesViewModel: function (rules, selectedRulesIDs, issues) {
 				var rulesViewModel = {},
@@ -1595,32 +1205,145 @@ sap.ui.define("sap/ui/support/supportRules/IssueManager",["jquery.sap.global", "
 
 				return rulesViewModel;
 			},
+
+			/**
+			 * Gets rules and converts them into treeTable format.
+			 * @public
+			 * @method
+			 * @name sap.ui.support.IssueManager.getTreeTableViewModel
+			 * @param {object} oRules Deserialized rules found within the current state
+			 * @returns {object} TreeTableModel Rules in treeTable usable format
+			 * The rules are in a TreeTable format.
+			 */
+			getTreeTableViewModel: function(oRules) {
+				var index = 0,
+					innerIndex = 0,
+					treeTableModel = {},
+					rulesViewModel;
+
+				rulesViewModel = this.getRulesViewModel(oRules, [], []);
+				for (var libraryName in rulesViewModel) {
+					treeTableModel[index] = {
+						name: libraryName,
+						type: "lib",
+						rules: []
+					};
+
+					for (var ruleName in rulesViewModel[libraryName]) {
+						treeTableModel[index][innerIndex] = {
+							name: rulesViewModel[libraryName][ruleName].title,
+							description: rulesViewModel[libraryName][ruleName].description,
+							id: rulesViewModel[libraryName][ruleName].id,
+							audiences: rulesViewModel[libraryName][ruleName].audiences,
+							categories: rulesViewModel[libraryName][ruleName].categories,
+							minversion: rulesViewModel[libraryName][ruleName].minversion,
+							resolution: rulesViewModel[libraryName][ruleName].resolution,
+							title:  rulesViewModel[libraryName][ruleName].title,
+							libName: libraryName
+						};
+						innerIndex++;
+					}
+					index++;
+				}
+				return treeTableModel;
+			},
+
+			/**
+			 * Gets issues in TreeTable format.
+			 * @public
+			 * @method
+			 * @name sap.ui.support.IssueManager.getIssuesViewModel
+			 * @param {object} issuesModel All the issues after they have been grouped with <code>groupIssues</code>
+			 * @returns {object} All the issues in TreeTable usable model
+			 */
+			getIssuesViewModel: function(issuesModel) {
+
+				var treeTableModel = {},
+					index = 0,
+					innerIndex = 0,
+					issueCount = 0;
+
+				for (var libName in issuesModel) {
+					treeTableModel[index] = {
+						name: libName,
+						showAudiences: false,
+						showCategories: false,
+						type: "lib"
+					};
+
+					for (var rule in issuesModel[libName]) {
+						treeTableModel[index][innerIndex] = {
+							name: issuesModel[libName][rule][0].name + " (" + issuesModel[libName][rule].length + " issues)",
+							showAudiences: true,
+							showCategories: true,
+							categories: issuesModel[libName][rule][0].categories.join(", "),
+							audiences: issuesModel[libName][rule][0].audiences.join(", "),
+							issueCount: issuesModel[libName][rule].length,
+							description: issuesModel[libName][rule][0].description,
+							resolution: issuesModel[libName][rule][0].resolution,
+							type: "rule",
+							ruleLibName: issuesModel[libName][rule][0].ruleLibName,
+							ruleId: issuesModel[libName][rule][0].ruleId,
+							selected: issuesModel[libName][rule][0].selected,
+							details: issuesModel[libName][rule][0].details,
+							severity: issuesModel[libName][rule][0].severity
+						};
+
+						issueCount += issuesModel[libName][rule].length;
+						innerIndex++;
+					}
+
+					treeTableModel[index].name += " (" + issueCount + " issues)";
+					treeTableModel[index].issueCount = issueCount;
+					issueCount = 0;
+					innerIndex = 0;
+					index++;
+				}
+
+				return treeTableModel;
+			},
+
+			/**
+			 * Clears the history object within the IssueManager.
+			 * @public
+			 * @method
+			 * @name sap.ui.support.IssueManager.clearHistory
+			 * @returns {void}
+			 */
 			clearHistory: function () {
 				_aHistory = [];
 			},
+
 			/**
-			 * @returns {array} Issues in ViewModel format
-			 * @param {array} The issues to convert
-			 * Converts issues to ViewModel format
+			 * Converts issues to view model format.
+			 * @public
+			 * @method
+			 * @name sap.ui.support.IssueManager.convertToViewModel
+			 * @param {array} oIssues The issues to convert
+			 * @returns {array} viewModel Issues in ViewModel format
 			 */
-			convertToViewModel: function (issues) {
+			convertToViewModel: function (oIssues) {
 				var viewModel = [];
-				for (var i = 0; i < issues.length; i++) {
-					viewModel.push(_convertIssueToViewModel(issues[i]));
+				for (var i = 0; i < oIssues.length; i++) {
+					viewModel.push(_convertIssueToViewModel(oIssues[i]));
 				}
 				return viewModel;
 			},
+
 			/**
-			 * @returns {array} Grouped issues
-			 * @param {array} issues The issues to group. Must be in ViewModel format
-			 * Groups issues by library and rule
+			 * Groups all issues by library and rule ID.
+			 * @public
+			 * @method
+			 * @name sap.ui.support.IssueManager.groupIssues
+			 * @param {array} oIssues The issues to group. Must be in a ViewModel format
+			 * @returns {array} groupedIssues Grouped issues by library and rule id
 			 */
-			groupIssues: function (issues) {
+			groupIssues: function (oIssues) {
 				var groupedIssues = {},
 					issue = {};
 
-				for (var i = 0; i < issues.length; i++) {
-					issue = issues[i];
+				for (var i = 0; i < oIssues.length; i++) {
+					issue = oIssues[i];
 
 					if (!groupedIssues[issue.ruleLibName]) {
 						groupedIssues[issue.ruleLibName] = {};
@@ -1635,15 +1358,42 @@ sap.ui.define("sap/ui/support/supportRules/IssueManager",["jquery.sap.global", "
 
 				return groupedIssues;
 			},
+
+			/**
+			 * Creates an instance of the IssueManagerFacade.
+			 * @public
+			 * @method
+			 * @name sap.ui.support.IssueManager.createIssueManagerFacade
+			 * @param {object} oRule Given rule
+			 * @returns {object} New IssueManagerFacade
+			 */
 			createIssueManagerFacade: function (oRule) {
 				return new IssueManagerFacade(oRule);
 			}
 		};
 
+		/**
+		 * Creates an IssueManagerFacade.
+		 * @constructor
+		 * @private
+		 * @method
+		 * @namespace
+		 * @name sap.ui.support.IssueManagerFacade
+		 * @param {object} oRule Rule for the IssueManagerFacade
+		 * @returns {void}
+		 */
 		var IssueManagerFacade = function (oRule) {
 			this.oRule = oRule;
 		};
 
+		/**
+		 * Adds issue to the IssueManager via the IssueManagerFacade.
+		 * @public
+		 * @method
+		 * @memberof IssueManagerFacade
+		 * @param {object} oIssue Issue object to be added in the IssueManager
+		 * @returns {void}
+		 */
 		IssueManagerFacade.prototype.addIssue = function (oIssue) {
 			oIssue.rule = this.oRule;
 
@@ -1721,28 +1471,70 @@ if ( !jQuery.sap.isDeclared('sap.ui.support.supportRules.Storage') ) {
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-/*global localStorage */
+/* global localStorage */
 
 jQuery.sap.declare('sap.ui.support.supportRules.Storage'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 sap.ui.define("sap/ui/support/supportRules/Storage",[
 	"sap/ui/support/supportRules/RuleSerializer",
 	"sap/ui/support/supportRules/Constants"
 ],
+
+/**
+ * @class
+ * The Storage is used to store and recieve data in/from the LocalStorage in the browser.
+ * <h3>Overview</h3>
+ * The Storage class is used to persist user settings.
+ * <h3>Usage</h3>
+ * This class must be used with {@link sap.ui.support.RuleSerializer} and {@link sap.ui.support.Constants} in order to store user data in the LocalStorage.
+ *
+ * @name sap.ui.support.Storage
+ * @alias sap.ui.support.Storage
+ * @author SAP SE.
+ * @version 1.50.6
+ *
+ * @private
+ *
+ * @param {object} RuleSerializer Instance of the {@link sap.ui.support.RuleSerializer}
+ * @param {object} constants Constants written in the {@link sap.ui.support.Constants}
+ *
+ * @returns {object} Methods that enable the user to work with the LocalStorage.
+ * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
+ */
 function (RuleSerializer, constants) {
 	"use strict";
 
+	/**
+	 * Encodes rules written by the user.
+	 * @private
+	 * @function
+	 * @name Encode
+	 * @param {string} sData Stringified object containing rule properties.
+	 * @returns {string} base-64 encoded string.
+	 */
 	function encode(sData) {
 		return window.btoa(unescape(encodeURIComponent(sData)));
 	}
 
+	/**
+	 * Decodes the already encoded data by the user.
+	 * @private
+	 * @function
+	 * @name Decode
+	 * @param {string} sData Stringified base-64 object containing rule properties.
+	 * @returns {string} Stringified object containing rule properties.
+	 */
 	function decode(sData) {
 		return decodeURIComponent(escape(window.atob(sData)));
 	}
 
 	return {
+
 		/**
-		 * Returns all previously created user temporary rules
-		 * @returns {Array} An array containing all the temporary rules
+		 * Returns all previously created temporary rules.
+		 * @private
+		 * @name sap.ui.support.Storage.getRules
+		 * @method
+		 * @returns {object[]} An array containing all the temporary rules.
 		 */
 		getRules: function () {
 			var rawLSData = localStorage.getItem(constants.LOCAL_STORAGE_TEMP_RULES_KEY);
@@ -1761,14 +1553,24 @@ function (RuleSerializer, constants) {
 		},
 
 		/**
-		 * Saves the temporary rules into the local storage persistence layer
-		 * @param {Array} rules The temporary rules from the shared model
+		 * Saves the temporary rules into the LocalStorage persistence layer.
+		 * @private
+		 * @name sap.ui.support.Storage.setRules
+		 * @method
+		 * @param {object[]} rules The temporary rules from the shared model.
 		 */
 		setRules: function (rules) {
 			var stringifyRules = encode(JSON.stringify(rules));
 			localStorage.setItem(constants.LOCAL_STORAGE_TEMP_RULES_KEY, stringifyRules);
 		},
 
+		/**
+		 * Retrieves the selected rules which are stored in the LocalStorage persistence layer.
+		 * @private
+		 * @method
+		 * @name sap.ui.support.Storage.getSelectedRules
+		 * @returns {object[]} All selected rules that are stored in the LocalStorage persistence layer.
+		 */
 		getSelectedRules: function () {
 			var rawLSData = localStorage.getItem(constants.LOCAL_STORAGE_SELECTED_RULES_KEY);
 
@@ -1779,34 +1581,79 @@ function (RuleSerializer, constants) {
 			return JSON.parse(rawLSData);
 		},
 
-		setSelectedRules: function (selectedRules) {
-			localStorage.setItem(constants.LOCAL_STORAGE_SELECTED_RULES_KEY, JSON.stringify(selectedRules));
+		/**
+		 * Stores which rules are selected to be run by the analyzer on the next check.
+		 * @private
+		 * @method
+		 * @name sap.ui.support.Storage.setSelectedRules
+		 * @param {object[]} aSelectedRules The data for the libraries and their rules.
+		 */
+		setSelectedRules: function (aSelectedRules) {
+			localStorage.setItem(constants.LOCAL_STORAGE_SELECTED_RULES_KEY, JSON.stringify(aSelectedRules));
 		},
 
+		/**
+		 * Sets the context for the execution scope in the LocalStorage persistence layer.
+		 * @private
+		 * @method
+		 * @name sap.ui.support.Storage.setSelectedContext
+		 * @param {object} selectedContext Object containing the <code>analyzeContext</code> and <code>subtreeExecutionContextId</code>.
+		 */
 		setSelectedContext: function(selectedContext) {
 			localStorage.setItem(constants.LOCAL_STORAGE_SELECTED_CONTEXT_KEY, JSON.stringify(selectedContext));
 		},
 
+		/**
+		 * Retrieves the selected context from the LocalStorage persistence layer.
+		 * @private
+		 * @method
+		 * @name sap.ui.support.Storage.getSelectedContext
+		 * @returns {string} Parsed value of the <code>selectedContext</code> key in the LocalStorage persistence layer.
+		 */
 		getSelectedContext: function() {
 			return JSON.parse(localStorage.getItem(constants.LOCAL_STORAGE_SELECTED_CONTEXT_KEY));
 		},
 
+		/**
+		 * Sets the scope components that are selected.
+		 * @private
+		 * @method
+		 * @name sap.ui.support.Storage.setSelectedScopeComponents
+		 * @param {object} contextComponent Component that's stored in the LocalStorage.
+		 */
 		setSelectedScopeComponents: function(contextComponent)  {
 			localStorage.setItem(constants.LOCAL_STORAGE_SELECTED_CONTEXT_COMPONENT_KEY, JSON.stringify(contextComponent));
 		},
 
+		/**
+		 * Gets the scope components that are selected.
+		 * @private
+		 * @method
+		 * @name sap.ui.support.Storage.getSelectedScopeComponents
+		 * @returns {string} componentContext The selected components within a given scope.
+		 */
 		getSelectedScopeComponents: function() {
 			var componentContext = localStorage.getItem(constants.LOCAL_STORAGE_SELECTED_CONTEXT_COMPONENT_KEY);
 			return JSON.parse(componentContext);
 		},
+
 		/**
-		 * Overwrites the temporary rules into the local storage persistence layer
-		 * @param {Array} rules The temporary rules from the shared model
+		 * Overwrites the temporary rules into the local storage persistence layer.
+		 * @private
+		 * @method
+		 * @name sap.ui.support.Storage.removeSelectedRules
+		 * @param {object[]} aSelectedRules The temporary rules from the shared model.
 		 */
-		removeSelectedRules: function(selectedRules) {
-			this.setRules(selectedRules);
+		removeSelectedRules: function(aSelectedRules) {
+			this.setRules(aSelectedRules);
 		},
 
+		/**
+		 * Removes all data from LocalStorage persistence layer.
+		 * @private
+		 * @method
+		 * @name sap.ui.support.Storage.removeAllData
+		 */
 		removeAllData: function() {
 			localStorage.removeItem(constants.LOCAL_STORAGE_TEMP_RULES_KEY);
 			localStorage.removeItem(constants.LOCAL_STORAGE_SELECTED_CONTEXT_KEY);
@@ -1814,36 +1661,58 @@ function (RuleSerializer, constants) {
 		},
 
 		/**
-		 * Create cookie to save information if we wish to preserve data in local storage
-		 * @param {String} name of the cookie
-		 * @param {boolean} value of the cookie
+		 * Creates a cookie with encoded information in the LocalStorage persistence layer.
+		 * @private
+		 * @method
+		 * @name sap.ui.support.Storage.createPersistenceCookie
+		 * @param {string} sCookieName Name of the cookie.
+		 * @param {boolean} sCookieValue Contents of the cookie.
+		 * @returns {void}
 		 */
-		createPersistenceCookie: function(name, value) {
-			document.cookie = name + "=" + value;
+		createPersistenceCookie: function(sCookieName, sCookieValue) {
+			document.cookie = sCookieName + "=" + sCookieValue;
 		},
 
-		readPersistenceCookie: function(cname) {
+		/**
+		 * Retrieves the persistence options of the user in the LocalStorage layer.
+		 * @private
+		 * @method
+		 * @name sap.ui.support.Storage.readPersistenceCookie
+		 * @alias readPersistenceCookie
+		 * @param {string} sCookieName Name of the cookie.
+		 * @returns {string} sOutput The persistence options of the user.
+		 */
+		readPersistenceCookie: function(sCookieName) {
 
-			var name = cname + "=",
+			var name = sCookieName + "=",
 				decodedCookie = decodeURIComponent(document.cookie),
 				ca = decodedCookie.split(';'),
-				output = "";
+				sOutput = "";
 			for (var i = 0; i < ca.length; i++) {
 				var c = ca[i];
 				while (c.charAt(0) == ' ') {
 					c = c.substring(1);
 				}
 				if (c.indexOf(name) == 0) {
-					output = c.substring(name.length, c.length);
-					return  output;
+					sOutput = c.substring(name.length, c.length);
+					return sOutput;
 				}
 			}
-			return output;
+
+			return sOutput;
 
 		},
 
-		deletePersistenceCookie: function(cookieName) {
-			document.cookie = cookieName + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+		/**
+		 * Removes the cookie with persistence information in the LocalStorage.
+		 * @private
+		 * @method
+		 * @name sap.ui.support.Storage.deletePersistenceCookie
+		 * @param {string} sCookieName Name of the cookie
+		 * @returns {void}
+		 */
+		deletePersistenceCookie: function(sCookieName) {
+			document.cookie = sCookieName + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 		}
 
 	};
@@ -1863,42 +1732,219 @@ sap.ui.define("sap/ui/support/supportRules/WCBChannels",[
 function () {
 	"use strict";
 
-	// sap.ui.support
-	// WindowCommunicationBus channels
+	/**
+	 * <h3>Overview</h3>
+	 * These channels enable the user to hook to the {@link sap.ui.support.WindowCommunicationBus }
+	 * <h3>Usage</h3>
+	 * These channels are used for communication with Main.
+	 * @name sap.ui.support.WCBChannels
+	 * @alias CommunicationBusChannels
+	 * @readonly
+	 * @protected
+	 * @returns {Object} Returns the channel constants which are used to subscribe to sap.ui.support.WindowCommunicationBus
+	 */
 	return {
+		/**
+		 * @enum
+		 * @readonly
+		 * The following channels can subscribe to the WindowCommunicationBus
+		 */
+
+		/**
+		 * State change in the core.
+		 * @type {string}
+		 * @const
+		 */
 		ON_CORE_STATE_CHANGE:       "ON_CORE_STATE_CHANGE",
+
+		/**
+		 * Shows a report.
+		 * @type {string}
+		 * @const
+		 */
 		ON_SHOW_REPORT_REQUEST:     "ON_SHOW_REPORT_REQUEST",
+
+		/**
+		 * Downloads a report.
+		 * @type {string}
+		 * @const
+		 */
 		ON_DOWNLOAD_REPORT_REQUEST: "ON_DOWNLOAD_REPORT_REQUEST",
+
+		/**
+		 * Starts an analysis.
+		 * @type {string}
+		 * @const
+		 */
 		ON_ANALYZE_REQUEST:         "ON_ANALYZE_REQUEST",
 
+		/**
+		 * Notifies when the rulesets have to be loaded.
+		 * @type {string}
+		 * @const
+		 */
 		ON_INIT_ANALYSIS_CTRL:      "ON_INIT_ANALYSIS_CTRL",
+
+		/**
+		 * Provides the current progress status of the analysis.
+		 * @type {string}
+		 * @const
+		 */
 		ON_PROGRESS_UPDATE:         "ON_PROGRESS_UPDATE",
+
+		/**
+		 * Notifies after the analysis has finished.
+		 * @type {string}
+		 * @const
+		 */
 		ON_ANALYZE_FINISH:          "ON_ANALYZE_FINISH",
 
+		/**
+		 * Verifies rule creation.
+		 * @type {string}
+		 * @const
+		 */
 		VERIFY_CREATE_RULE:         "VERIFY_CREATE_RULE",
+
+		/**
+		 * Verifies rule creation after its finished.
+		 * @type {string}
+		 * @const
+		 */
 		VERIFY_RULE_CREATE_RESULT:  "VERIFY_RULE_CREATE_RESULT",
 
+		/**
+		 * Verifies rule update.
+		 * @type {string}
+		 * @const
+		 */
 		VERIFY_UPDATE_RULE:         "VERIFY_UPDATE_RULE",
+
+		/**
+		 * Verifies rule update after its finished.
+		 * @type {string}
+		 * @const
+		 */
 		VERIFY_RULE_UPDATE_RESULT:  "VERIFY_RULE_UPDATE_RESULT",
 
+		/**
+		 * Posts available libraries.
+		 * @type {string}
+		 * @const
+		 */
 		POST_AVAILABLE_LIBRARIES:    "POST_AVAILABLE_LIBRARIES",
+
+		/**
+		 * Loads all rule sets.
+		 * @type {string}
+		 * @const
+		 */
 		LOAD_RULESETS:               "LOAD_RULESETS",
 
+		/**
+		 * Gets components.
+		 * @type {string}
+		 * @const
+		 */
 		GET_AVAILABLE_COMPONENTS:   "GET_AVAILABLE_COMPONENTS",
+
+		/**
+		 * Posts components.
+		 * @type {string}
+		 * @const
+		 */
 		POST_AVAILABLE_COMPONENTS:  "POST_AVAILABLE_COMPONENTS",
 
+		/**
+		 * Highlight element in TreeTable.
+		 * @type {string}
+		 * @const
+		 */
 		HIGHLIGHT_ELEMENT:          "HIGHLIGHT_ELEMENT",
+
+		/**
+		 * Open given URL.
+		 * @type {string}
+		 * @const
+		 */
 		OPEN_URL:                   "OPEN_URL",
 
+		/**
+		 * Notifies onmouseenter event on the TreeTable.
+		 * @type {string}
+		 * @const
+		 */
 		TREE_ELEMENT_MOUSE_ENTER:   "TREE_ELEMENT_MOUSE_ENTER",
+
+		/**
+		 * Notifies onmouseout event on the TreeTable.
+		 * @type {string}
+		 * @const
+		 */
 		TREE_ELEMENT_MOUSE_OUT:     "TREE_ELEMENT_MOUSE_OUT",
 
+		/**
+		 * Updates support rules in IssueManager.
+		 * @type {string}
+		 * @const
+		 */
 		UPDATE_SUPPORT_RULES:       "UPDATE_SUPPORT_RULES",
+
+		/**
+		 * Upload external modules.
+		 * @type {string}
+		 * @const
+		 */
 		EXTERNAL_MODULE_UPLOADED:   "EXTERNAL_MODULE_UPLOADED",
 
+		/**
+		 * Hides SupportAssistant iframe.
+		 * @type {string}
+		 * @const
+		 */
 		TOGGLE_FRAME_HIDDEN:        "TOGGLE_FRAME_HIDDEN",
+
+		/**
+		 * Ensure SupportAssistant iframe is open.
+		 * @type {string}
+		 * @const
+		 */
 		ENSURE_FRAME_OPENED:        "ENSURE_FRAME_OPENED",
-		RESIZE_FRAME:               "RESIZE_FRAME"
+
+		/**
+		 * Resize SupportAssistant iframe.
+		 * @type {string}
+		 * @const
+		 */
+		RESIZE_FRAME:               "RESIZE_FRAME",
+
+		/**
+		 * Request rules model.
+		 * @type {string}
+		 * @const
+		 */
+		REQUEST_RULES_MODEL:        "REQUEST_RULES_MODEL",
+
+		/**
+		 * Get rules model.
+		 * @type {string}
+		 * @const
+		 */
+		GET_RULES_MODEL:            "GET_RULES_MODEL",
+
+		/**
+		 * Request issues.
+		 * @type {string}
+		 * @const
+		 */
+		REQUEST_ISSUES:             "REQUEST_ISSUES",
+
+		/**
+		 * Gets the issues.
+		 * @type {string}
+		 * @const
+		 */
+		GET_ISSUES:                 "GET_ISSUES"
 	};
 }, true);
 
@@ -1910,6 +1956,9 @@ if ( !jQuery.sap.isDeclared('sap.ui.support.supportRules.WindowCommunicationBus'
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
+/**
+ * @typedef {object} EventListener
+ */
 jQuery.sap.declare('sap.ui.support.supportRules.WindowCommunicationBus'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
 sap.ui.define("sap/ui/support/supportRules/WindowCommunicationBus",[
@@ -1918,11 +1967,25 @@ sap.ui.define("sap/ui/support/supportRules/WindowCommunicationBus",[
 function (jQuery) {
 	"use strict";
 
+	/**
+	 * <h3>Overview</h3>
+	 * The CommunicationBus is responsible for core communication between the SupportAssistant the views and SupportAssistant in iFrame mode.
+	 * @class
+	 * @constructor
+	 * @name sap.ui.support.WindowCommunicationBus
+	 * @memberof sap.ui.support
+	 * @author SAP SE
+	 * @version 1.50.6
+	 * @private
+	 */
 	var CommunicationBus = {
 		channels: {},
 		onMessageChecks: []
 	};
 
+	/**
+	 * Indicates the origin of the SupportAssistant.
+	 */
 	var originParameter = jQuery.sap.getUriParameters().get("sap-ui-xx-support-origin");
 	var origin = originParameter;
 	var frameIdentifier = jQuery.sap.getUriParameters().get("sap-ui-xx-frame-identifier") || '_unnamed_frame_-_use_message_origin_';
@@ -1941,25 +2004,46 @@ function (jQuery) {
 
 	CommunicationBus.origin = origin;
 
-	CommunicationBus.subscribe = function (channelName, callback, context) {
-		if (!this.channels[channelName]) {
-			this.channels[channelName] = [{
-				callback: callback,
-				context: context
+	/**
+	 * Subscribes to a channel with callback and given context
+	 * @private
+	 * @static
+	 * @method
+	 * @name sap.ui.support.WindowCommunicationBus.subscribe
+	 * @memberof sap.ui.support.WindowCommunicationBus
+	 * @param {string} sChannelName Name of the channel to subscribe
+	 * @param {function} fnCallback Callback for the SupportAssistant
+	 * @param {object} oContext Context for the subscribed channel
+	 */
+	CommunicationBus.subscribe = function (sChannelName, fnCallback, oContext) {
+		if (!this.channels[sChannelName]) {
+			this.channels[sChannelName] = [{
+				callback: fnCallback,
+				context: oContext
 			}];
 			return;
 		}
 
-		this.channels[channelName].push({
-			callback: callback,
-			context: context
+		this.channels[sChannelName].push({
+			callback: fnCallback,
+			context: oContext
 		});
 	};
 
-	CommunicationBus.publish = function (channelName, aParams) {
+	/**
+	 * Publishes given channel by name and settings
+	 * @private
+	 * @static
+	 * @method
+	 * @name sap.ui.support.WindowCommunicationBus.publish
+	 * @memberof sap.ui.support.WindowCommunicationBus
+	 * @param {string} sChannelName Name of the channel to publish
+	 * @param {string} aParams Settings passed to the SupportAssistant
+	 */
+	CommunicationBus.publish = function (sChannelName, aParams) {
 		var receivingWindow = this._getReceivingWindow(),
 			dataObject = {
-				channelName: channelName,
+				channelName: sChannelName,
 				params: aParams,
 				_frameIdentifier: frameIdentifier,
 				_origin: window.location.href
@@ -1971,10 +2055,27 @@ function (jQuery) {
 		receivingWindow.postMessage(dataObject, this.origin);
 	};
 
+	/**
+	 * Clears all subscribed channels from the CommunicationBus
+	 * @private
+	 * @static
+	 * @method
+	 * @name sap.ui.support.WindowCommunicationBus.destroyChanels
+	 * @memberof sap.ui.support.WindowCommunicationBus
+	 */
 	CommunicationBus.destroyChanels = function () {
 		CommunicationBus.channels = {};
 	};
 
+	/**
+	 * Retrieves the window hosting the SupportAssistant
+	 * @private
+	 * @static
+	 * @method
+	 * @name sap.ui.support.WindowCommunicationBus._getReceivingWindow
+	 * @memberof sap.ui.support.WindowCommunicationBus
+	 * @returns {object} Window containing the SupportAssistant
+	 */
 	CommunicationBus._getReceivingWindow = function () {
 
 		if (window.communicationWindows && window.communicationWindows.hasOwnProperty("supportTool")) {
@@ -1986,10 +2087,19 @@ function (jQuery) {
 		return window.opener || window.parent;
 	};
 
-	CommunicationBus._onmessage = function (evt) {
+	/**
+	 * This is the message handler used for communication between the CommunicationBus and {@link sap.ui.support.WCBChannels}
+	 * @private
+	 * @static
+	 * @method
+	 * @name sap.ui.support.WindowCommunicationBus._onmessage
+	 * @memberof sap.ui.support.WindowCommunicationBus
+	 * @param {EventListener} evt Event fired by the channels attached to the CommunicationBus
+	 */
+	CommunicationBus._onmessage = function (eMessage) {
 		// Validate received message
 		var checkResults = CommunicationBus.onMessageChecks.every(function (fnMsgCheck) {
-			return fnMsgCheck.call(null, evt);
+			return fnMsgCheck.call(null, eMessage);
 		});
 
 		if (!checkResults) {
@@ -1997,8 +2107,8 @@ function (jQuery) {
 			return;
 		}
 
-		var channelName = evt.data.channelName,
-			params = evt.data.params,
+		var channelName = eMessage.data.channelName,
+			params = eMessage.data.params,
 			callbackObjects = CommunicationBus.channels[channelName];
 
 		if (!callbackObjects) {
@@ -3067,7 +3177,7 @@ function (jQuery, ManagedObject, CommunicationBus, channelNames, constants) {
 		toolFrame.src = sUrl;
 
 		style.width = "100%";
-		style.height = "50%";
+		style.height = "28px";
 		style.position = "absolute";
 		style.left = "0";
 		style.bottom = "0";
@@ -3169,7 +3279,7 @@ function (jQuery, ManagedObject, CommunicationBus, channelNames, constants) {
 	 * Toggles frame state between hidden and shown
 	 * Default is shown
 	 *
-	 * @param hidden {boolean} should the frame hide or not
+	 * @param {boolean} hidden should the frame hide or not
 	 */
 	IFrameController.prototype.toggleHide = function (hidden) {
 		var toolFrameStyle = document.getElementById("sap-ui-supportToolsFrame").style;
@@ -3216,6 +3326,735 @@ function (jQuery, ManagedObject, CommunicationBus, channelNames, constants) {
 }, true);
 
 }; // end of sap/ui/support/supportRules/ui/IFrameController.js
+if ( !jQuery.sap.isDeclared('sap.ui.support.supportRules.ui.external.ElementTree') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+jQuery.sap.declare('sap.ui.support.supportRules.ui.external.ElementTree'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.base.ManagedObject'); // unlisted dependency retained
+sap.ui.define("sap/ui/support/supportRules/ui/external/ElementTree",["jquery.sap.global", "sap/ui/base/ManagedObject"],
+	function (jQuery, ManagedObject) {
+		"use strict";
+
+		function _isObject(data) {
+			return (typeof data === "object" && !Array.isArray(data) && data !== null);
+		}
+
+		/**
+		 * @param {ElementTreeRenderingOptions} options
+		 * @returns {string}
+		 * @private
+		 */
+		function _startElementTreeList(options) {
+
+			return "<ul " + options.attributes.join(" ") + ">";
+		}
+
+		/**
+		 * @returns {string}
+		 * @private
+		 */
+		function _endElementTreeList() {
+			return "</ul>";
+		}
+
+		/**
+		 * @param {ElementTreeRenderingOptions.controls} options
+		 * @returns {string}
+		 * @private
+		 */
+		function _startElementTreeListItem(options, hasIssue) {
+			var html = "<li data-id=\"" + options.id + "\" ";
+			if (hasIssue) {
+				html += "issue";
+			}
+			html += ">";
+			return html;
+		}
+
+		/**
+		 * @returns {string}
+		 * @private
+		 */
+		function _endElementTreeListItem() {
+			return "</li>";
+		}
+
+		/**
+		 * Create HTML for the left part of the ElementTree list item.
+		 * @param {ElementTreeOptions.controls} controls
+		 * @param {number} paddingLeft
+		 * @returns {string}
+		 * @private
+		 */
+		function _getElementTreeLeftColumnOfListItem(controls, paddingLeft) {
+			var html = "<offset style=\"padding-left:" + paddingLeft + "px\" >";
+
+			if (controls.content.length > 0) {
+				html += "<arrow down=\"true\"></arrow>";
+			} else {
+				html += "<place-holder></place-holder>";
+			}
+
+			html += "</offset>";
+
+			return html;
+		}
+
+		/**
+		 * Create HTML for the right part of the ElementTree list item.
+		 * @param {Object} control - JSON object form {ElementTreeOptions.controls}
+		 * @returns {string}
+		 * @private
+		 */
+		function _getElementTreeRightColumnOfListItem(control, numberOfIssues) {
+			var splitControlName = control.name.split(".");
+			var name = splitControlName[splitControlName.length - 1];
+			var nameSpace = control.name.replace(name, "");
+			var hideShowClass = (numberOfIssues > 0) ? "showNumbOfIssues" : "hideNumbOfIssues";
+
+			return "<tag data-search=\"" + control.name + control.id + "\">" +
+				"&#60;" +
+				"<namespace>" + nameSpace + "</namespace>" +
+				name +
+				"<attribute>&#32;id=\"<attribute-value>" + control.id + "</attribute-value>\"</attribute>" +
+				"&#62;" +
+				"</tag>" + "<span class = " + hideShowClass  + ">[" + numberOfIssues + "  issue(s)] </span>";
+		}
+
+		/**
+		 * Search for the nearest parent Node.
+		 * @param {element} element - HTML DOM element that will be the root of the search
+		 * @param {string} parentNodeName - The desired HTML parent element nodeName
+		 * @returns {Object} HTML DOM element
+		 * @private
+		 */
+		function _findNearestDOMParent(element, parentNodeName) {
+			while (element.nodeName !== parentNodeName) {
+				if (element.nodeName === "CONTROL-TREE") {
+					break;
+				}
+				element = element.parentNode;
+			}
+
+			return element;
+		}
+
+		/**
+		 * ElementTree constructor.
+		 * @param {string} id - The id of the DOM container
+		 * @param {ElementTree} instantiationOptions
+		 * @constructor
+		 */
+		function ElementTree(id, instantiationOptions) {
+			var areInstantiationOptionsAnObject = _isObject(instantiationOptions);
+			var options;
+
+			/**
+			 * Make sure that the options parameter is Object and
+			 * that the ElementTree can be instantiate without initial options.
+			 */
+			if (areInstantiationOptionsAnObject) {
+				options = instantiationOptions;
+			} else {
+				options = {};
+			}
+
+			// Save DOM reference
+			this._ElementTreeContainer = document.getElementById(id);
+
+			/**
+			 * Method fired when the number of issues against an element is clicked
+			 */
+			this.onIssueCountClicked = options.onIssueCountClicked ? options.onIssueCountClicked : function () {};
+
+			/**
+			 * Method fired when the selected element in the ElementTree is changed.
+			 * @param {string} selectedElementId - The selected element id
+			 */
+			this.onSelectionChanged = options.onSelectionChanged ? options.onSelectionChanged : function (selectedElementId) {};
+
+			/**
+			 * Method fired when the hovered element in the ElementTree is changed.
+			 * @param {string} hoveredElementId - The hovered element id
+			 */
+			this.onHoverChanged = options.onHoverChanged ? options.onHoverChanged : function (hoveredElementId) {};
+
+			/**
+			 * Method fired when the mouse is out of the ElementTree.
+			 */
+			this.onMouseOut = options.onMouseOut ? options.onMouseOut : function () {};
+
+			/**
+			 * Method fired when the initial ElementTree rendering is done.
+			 */
+			this.onInitialRendering = options.onInitialRendering ? options.onInitialRendering : function () {};
+
+			// Object with the tree model that will be visualized
+			this.setData(options.data);
+		}
+
+		/**
+		 * Initialize Tree.
+		 */
+		ElementTree.prototype.init = function () {
+			if (!this._ElementTreeContainer) {
+				return;
+			}
+
+			this._createHTML();
+			this._createHandlers();
+
+			// Fire event to notify that the ElementTree is initialized
+			this.onInitialRendering();
+		};
+
+		/**
+		 * Get the data model used for the tree.
+		 * @returns {ElementTreeOptions} the data that is used for the tree
+		 */
+		ElementTree.prototype.getData = function () {
+			return this._data;
+		};
+
+		/**
+		 * Set the data model used for the tree.
+		 * @param {ElementTreeOptions} data
+		 * @returns {ElementTree}
+		 */
+		ElementTree.prototype.setData = function (data) {
+			var oldData = this.getData();
+			var isDataAnObject = _isObject(data);
+
+			if (isDataAnObject === false) {
+				jQuery.sap.log.warning("The parameter should be an Object");
+				return;
+			}
+
+			// Make sure that the new data is different from the old one
+			if (JSON.stringify(oldData) === JSON.stringify(data)) {
+				return;
+			}
+
+			this._data = data;
+
+			// Initialize ElementTree on first rendering
+			// If it is a second rendering, render only the tree elements
+			if (this._isFirstRendering === undefined) {
+				this.init();
+				this._isFirstRendering = true;
+			} else {
+				this._createTree();
+			}
+
+			return this;
+		};
+
+		ElementTree.prototype.setContainerId = function (id) {
+			this._ElementTreeContainer = document.getElementById(id);
+			this.init();
+		};
+
+		/**
+		 * Returns the selected <li> element of the tree.
+		 * @returns {Element} HTML DOM element
+		 */
+		ElementTree.prototype.getSelectedElement = function () {
+			return this._selectedElement;
+		};
+
+		/**
+		 * Set the selected <li> element of the tree.
+		 * @param {string} elementID - HTML DOM element id
+		 * @returns {ElementTree}
+		 */
+		ElementTree.prototype.setSelectedElement = function (elementID, bNotify) {
+			var selectedElement;
+
+			if (typeof elementID !== "string") {
+				jQuery.sap.log.warning("Please use a valid string parameter");
+				return;
+			}
+
+			selectedElement = this._ElementTreeContainer.querySelector("[data-id=" + elementID + "]");
+
+			if (selectedElement === null) {
+				jQuery.sap.log.warning("The selected element is not a child of the ElementTree");
+				return;
+			}
+
+			this._selectedElement = selectedElement;
+			this._selectTreeElement(selectedElement, bNotify);
+
+			return this;
+		};
+
+		ElementTree.prototype.clearSelection = function () {
+			var selectedList = this._ElementTreeContainer.querySelector("[selected]");
+
+			if (selectedList) {
+				selectedList.removeAttribute("selected");
+			}
+		};
+
+		/**
+		 * Create and places the ElementTree HTML.
+		 * @private
+		 */
+		ElementTree.prototype._createHTML = function () {
+			var html;
+
+			html = this._createFilter();
+			html += this._createTreeContainer();
+
+			this._ElementTreeContainer.innerHTML = html;
+			// Save reverences for future use
+			this._setReferences();
+
+			if (this.getData() !== undefined) {
+				this._createTree();
+			}
+		};
+
+		/**
+		 * Create the HTML needed for filtering.
+		 * @returns {string}
+		 * @private
+		 */
+		ElementTree.prototype._createFilter = function () {
+			return "<filter>" +
+				"<end>" +
+				"<label><input type=\"checkbox\" issues checked/>Issues</label>" +
+				"<label><input type=\"checkbox\" namespaces checked/>Namespaces</label>" +
+				"<label><input type=\"checkbox\" attributes/>Attributes</label>" +
+				"</end>" +
+				"</filter>";
+		};
+
+		/**
+		 * Create the HTML container for the tree.
+		 * @returns {string}
+		 * @private
+		 */
+		ElementTree.prototype._createTreeContainer = function () {
+			return "<tree show-namespaces show-problematic-elements></tree>";
+		};
+
+		/**
+		 * Create ElementTree HTML.
+		 */
+		ElementTree.prototype._createTree = function () {
+			var controls = this.getData().controls;
+
+			this._treeContainer.innerHTML = this._createTreeHTML(controls);
+		};
+
+		/**
+		 * Create HTML tree from JSON.
+		 * @param {ElementTreeOptions.controls} controls
+		 * @param {number} level - nested level
+		 * @returns {string} HTML ElementTree in form of a string
+		 * @private
+		 */
+		ElementTree.prototype._createTreeHTML = function (controls, level) {
+			if (controls === undefined || controls.length === 0) {
+				return "";
+			}
+
+			var html = "";
+			var nestedLevel = level || 0;
+			var paddingLeft = ++nestedLevel * 10;
+			var that = this;
+			var issuesIds = this.getData().issuesIds;
+
+			controls.forEach(function (control) {
+				html += _startElementTreeList({
+					attributes: ["expanded=\"true\""]
+				});
+
+				var hasIssue = issuesIds[control.id] !== undefined ? true : false;
+				var numberOfIssues = 0;
+				var numberOfIssues = hasIssue ? issuesIds[control.id].length : 0;
+					html += _startElementTreeListItem({
+					id: control.id
+				}, hasIssue);
+
+				html += _getElementTreeLeftColumnOfListItem(control, paddingLeft);
+
+				html += _getElementTreeRightColumnOfListItem(control, numberOfIssues);
+
+				html += _endElementTreeListItem();
+
+				html += that._createTreeHTML(control.content, nestedLevel);
+
+				html += _endElementTreeList();
+			});
+
+			return html;
+		};
+
+		/**
+		 * Hide/Show nested "<ul>" in "<li>" elements.
+		 * @param {Element} target - DOM element
+		 * @private
+		 */
+		ElementTree.prototype._toggleCollapse = function (target) {
+			var targetParent = _findNearestDOMParent(target.parentNode, "UL");
+
+			if (target.getAttribute("right") === "true") {
+				target.removeAttribute("right");
+				target.setAttribute("down", "true");
+
+				targetParent.setAttribute("expanded", "true");
+			} else if (target.getAttribute("down") === "true") {
+				target.removeAttribute("down");
+
+				targetParent.removeAttribute("expanded");
+				target.setAttribute("right", "true");
+			}
+		};
+
+		/**
+		 * Add visual selection to clicked "<li>" elements.
+		 * @param {Element} targetElement - DOM element
+		 * @private
+		 */
+		ElementTree.prototype._selectTreeElement = function (targetElement, bNotify) {
+			var target = _findNearestDOMParent(targetElement, "LI");
+			var dataId = target.attributes["data-id"];
+
+			if (!dataId) {
+				return;
+			}
+
+			var id = dataId.value;
+			// Prevent tree element selection for allowing proper multiple tree element selection for copy/paste
+			if (id === this._ElementTreeContainer.id) {
+				return;
+			}
+
+			this._scrollToElement(target, window);
+
+			if (bNotify) {
+				this.onSelectionChanged(id);
+			}
+
+				this.clearSelection();
+
+				target.setAttribute("selected", "true");
+
+				if (bNotify) {
+					this.onIssueCountClicked(id);
+				}
+		};
+
+		/**
+		 * Scroll to element in the ElementTree.
+		 * @param {Element} target DOM element to which need to be scrolled
+		 * @param {document.window} window The window element. Passed as a parameter to enable parameter mockup and function testing
+		 */
+		ElementTree.prototype._scrollToElement = function (target, window) {
+			var desiredViewBottomPosition = this._treeContainer.offsetHeight - this._treeContainer.offsetTop + this._treeContainer.scrollTop;
+
+			if (target.offsetTop > desiredViewBottomPosition || target.offsetTop < this._treeContainer.scrollTop) {
+				this._treeContainer.scrollTop = target.offsetTop - window.innerHeight / 6;
+			}
+		};
+
+		/**
+		 * Search tree elements that match given criteria.
+		 * @param {string} userInput - Search criteria
+		 * @private
+		 */
+		ElementTree.prototype._searchInTree = function (userInput) {
+			var searchableElements = this._ElementTreeContainer.querySelectorAll("[data-search]");
+			var searchInput = userInput.toLocaleLowerCase();
+			var elementInformation;
+
+			for (var i = 0; i < searchableElements.length; i++) {
+				elementInformation = searchableElements[i].getAttribute("data-search").toLocaleLowerCase();
+
+				if (elementInformation.indexOf(searchInput) !== -1) {
+					searchableElements[i].parentNode.setAttribute("matching", true);
+				} else {
+					searchableElements[i].parentNode.removeAttribute("matching");
+				}
+			}
+		};
+
+		/**
+		 * Remove  "matching" attribute from the search.
+		 * @private
+		 */
+		ElementTree.prototype._removeAttributesFromSearch = function () {
+			var elements = this._treeContainer.querySelectorAll("[matching]");
+
+			for (var i = 0; i < elements.length; i++) {
+				elements[i].removeAttribute("matching");
+			}
+		};
+
+		/**
+		 * Visualize the number of elements which satisfy the search.
+		 * @private
+		 */
+		ElementTree.prototype._setSearchResultCount = function (count) {
+			this._filterContainer.querySelector("results").innerHTML = "(" + count + ")";
+		};
+
+		/**
+		 * Event handler for mouse click on a tree element arrow.
+		 * @param {Object} event - click event
+		 * @private
+		 */
+		ElementTree.prototype._onArrowClick = function (event) {
+			var target = event.target;
+
+			if (target.nodeName === "ARROW") {
+				this._toggleCollapse(target);
+			} else {
+				this._selectTreeElement(target, true);
+			}
+		};
+
+		/**
+		 * Event handler for user input in "search" input.
+		 * @param {Object} event - keyup event
+		 * @private
+		 */
+		ElementTree.prototype._onSearchInput = function (event) {
+			var target = event.target;
+			var searchResultCount;
+
+			if (target.getAttribute("search") !== null) {
+
+				if (target.value.length !== 0) {
+					this._searchInTree(target.value);
+				} else {
+					this._removeAttributesFromSearch("matching");
+				}
+
+				searchResultCount = this._treeContainer.querySelectorAll("[matching]").length;
+				this._setSearchResultCount(searchResultCount);
+			}
+		};
+
+		/**
+		 * Event handler for onsearch event.
+		 * @param {Object} event - onsearch event
+		 * @private
+		 */
+		ElementTree.prototype._onSearchEvent = function (event) {
+			var searchResultCount;
+
+			if (event.target.value.length === 0) {
+				this._removeAttributesFromSearch("matching");
+
+				searchResultCount = this._treeContainer.querySelectorAll("[matching]").length;
+				this._setSearchResultCount(searchResultCount);
+			}
+
+		};
+
+		/**
+		 * Event handler for ElementTree options change.
+		 * @param {Object} event - click event
+		 * @private
+		 */
+		ElementTree.prototype._onOptionsChange = function (event) {
+			var target = event.target;
+
+			if (target.getAttribute("filter") !== null) {
+				if (target.checked) {
+					this._treeContainer.setAttribute("show-filtered-elements", true);
+				} else {
+					this._treeContainer.removeAttribute("show-filtered-elements");
+				}
+			}
+
+			if (target.getAttribute("issues") !== null) {
+				if (target.checked) {
+					this._treeContainer.setAttribute("show-problematic-elements", true);
+				} else {
+					this._treeContainer.removeAttribute("show-problematic-elements");
+				}
+			}
+
+			if (target.getAttribute("namespaces") !== null) {
+				if (target.checked) {
+					this._treeContainer.setAttribute("show-namespaces", true);
+				} else {
+					this._treeContainer.removeAttribute("show-namespaces");
+				}
+			}
+
+			if (target.getAttribute("attributes") !== null) {
+				if (target.checked) {
+					this._treeContainer.setAttribute("show-attributes", true);
+				} else {
+					this._treeContainer.removeAttribute("show-attributes");
+				}
+			}
+
+		};
+
+		/**
+		 * Event handler for mouse hover on tree element.
+		 * @param {Object} event - mouse event
+		 * @private
+		 */
+		ElementTree.prototype._onTreeElementMouseHover = function (event) {
+			var target = _findNearestDOMParent(event.target, "LI");
+
+			var hoverList = this._ElementTreeContainer.querySelector("[hover]");
+
+			if (hoverList) {
+				hoverList.removeAttribute("hover");
+			}
+
+			target.setAttribute("hover", "true");
+
+			var dataId = target.attributes["data-id"];
+			this.onHoverChanged(dataId && dataId.value);
+		};
+
+		/**
+		 * Event handler for mouse out of the tree element.
+		 * @param {Object} event - mouse event
+		 * @private
+		 */
+		ElementTree.prototype._onTreeElementMouseOut = function (event) {
+			this.onMouseOut();
+		};
+
+		/**
+		 * Create all event handlers for the ElementTree.
+		 * @private
+		 */
+		ElementTree.prototype._createHandlers = function () {
+			this._treeContainer.onclick = this._onArrowClick.bind(this);
+			this._filterContainer.onkeyup = this._onSearchInput.bind(this);
+			this._filterContainer.onsearch = this._onSearchEvent.bind(this);
+			this._filterContainer.onchange = this._onOptionsChange.bind(this);
+			this._ElementTreeContainer.onmouseover = this._onTreeElementMouseHover.bind(this);
+			this._ElementTreeContainer.onmouseout = this._onTreeElementMouseOut.bind(this);
+		};
+
+		/**
+		 * Save references to ElementTree different sections.
+		 * @private
+		 */
+		ElementTree.prototype._setReferences = function () {
+			this._filterContainer = this._ElementTreeContainer.querySelector("filter");
+			this._treeContainer = this._ElementTreeContainer.querySelector("tree");
+		};
+
+		return ElementTree;
+	});
+
+}; // end of sap/ui/support/supportRules/ui/external/ElementTree.js
+if ( !jQuery.sap.isDeclared('sap.ui.support.supportRules.ui.external.Highlighter') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+jQuery.sap.declare('sap.ui.support.supportRules.ui.external.Highlighter'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+sap.ui.define("sap/ui/support/supportRules/ui/external/Highlighter",[],
+	function () {
+		"use strict";
+
+		// Reference for the highlighter DOM element
+		var _highLighter = null;
+
+		/**
+		 * Hide the highlighter.
+		 * @private
+		 */
+		function _hideHighLighter() {
+			_highLighter.style.display = "none";
+		}
+
+		/**
+		 * Show the highlighter.
+		 * @private
+		 */
+		function _showHighLighter() {
+			_highLighter.style.display = "block";
+		}
+
+		/**
+		 * Create DOM element for visual highlighting.
+		 * @private
+		 */
+		function _createHighLighter() {
+			var highLighter = document.createElement("div");
+
+			highLighter.style.cssText = "box-sizing: border-box;border:1px solid blue;background: rgba(20, 20, 200, 0.4);position: absolute";
+
+			var highLighterWrapper = document.createElement("div");
+
+			highLighterWrapper.id = "ui5-highlighter";
+			highLighterWrapper.style.cssText = "position: fixed;top:0;right:0;bottom:0;left:0;z-index: 1000;overflow: hidden;";
+			highLighterWrapper.appendChild(highLighter);
+
+			document.body.appendChild(highLighterWrapper);
+
+			// Save reference for later usage
+			_highLighter = document.getElementById("ui5-highlighter");
+
+			// Add event handler
+			_highLighter.onmouseover = _hideHighLighter;
+		}
+
+		/**
+		 * Highlight controls.
+		 * @type {{setDimensions: Function}}
+		 */
+		return {
+			/**
+			 * Set the position of the visual highlighter.
+			 * @param {string} elementId - The id of the DOM element that need to be highlighted
+			 * @returns {exports}
+			 */
+			highlight: function (elementId) {
+				var highlighter;
+				var targetDomElement;
+				var targetRect;
+
+				if (_highLighter === null && !document.getElementById("ui5-highlighter")) {
+					_createHighLighter();
+				} else {
+					_showHighLighter();
+				}
+
+				highlighter = _highLighter.firstElementChild;
+				targetDomElement = document.getElementById(elementId);
+
+				if (targetDomElement) {
+					targetRect = targetDomElement.getBoundingClientRect();
+
+					highlighter.style.top = targetRect.top + "px";
+					highlighter.style.left = targetRect.left + "px";
+					highlighter.style.height = targetRect.height + "px";
+					highlighter.style.width = targetRect.width + "px";
+				}
+
+				return this;
+			},
+			/**
+			 * Hides the visual highlighter.
+			 */
+			hideHighLighter: _hideHighLighter
+		};
+	});
+
+}; // end of sap/ui/support/supportRules/ui/external/Highlighter.js
 if ( !jQuery.sap.isDeclared('sap.ui.support.supportRules.ui.models.SharedModel') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -3300,13 +4139,37 @@ sap.ui.define("sap/ui/support/supportRules/ui/models/SharedModel",[
 		persistingSettings: false,
 		loadingAdditionalRuleSets: false,
 		analyzedFinish: false,
-		selectedRules: true
+		selectedRules: true,
+		filteredIssues: null,
+		issuesCount: 0,
+		visibleRowCountMode:"Auto",
+		visibleRowCount: 10,
+		heightDetailsArea: "inherit"
 	});
 
 	return model;
 });
 
 }; // end of sap/ui/support/supportRules/ui/models/SharedModel.js
+if ( !jQuery.sap.isDeclared('sap.ui.support.supportRules.ui.models.formatter') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+jQuery.sap.declare('sap.ui.support.supportRules.ui.models.formatter'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+sap.ui.define("sap/ui/support/supportRules/ui/models/formatter",[], function () {
+	"use strict";
+
+	return {
+		resolutionUrl: function (aUrls, oUrl) {
+			var sSeparator = aUrls.indexOf(oUrl) === aUrls.length - 1 ? "" : ", \u00a0";
+			return oUrl.text + sSeparator;
+		}
+	};
+});
+}; // end of sap/ui/support/supportRules/ui/models/formatter.js
 if ( !jQuery.sap.isDeclared('sap.ui.support.supportRules.util.StringAnalyzer') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -3325,8 +4188,8 @@ sap.ui.define("sap/ui/support/supportRules/util/StringAnalyzer",[],
 	var StringAnalyzer = {
 		/**
 		 *
-		 * @param sWordA
-		 * @param sWordB
+		 * @param {string} sWordA
+		 * @param {string} sWordB
 		 * @returns levenshtein distance number
 		 */
 		calculateLevenshteinDistance: function(sWordA, sWordB) {
@@ -3406,7 +4269,7 @@ sap.ui.define("sap/ui/table/TableHelper.support",["jquery.sap.global", "sap/ui/s
 		DOCU_REF : "https://sapui5.hana.ondemand.com/",
 
 		DEFAULT_RULE_DEF : {
-			audience: [Audiences.Application],
+			audiences: [Audiences.Application],
 			categories: [Categories.Other],
 			enabled: true,
 			minversion: "1.38",
@@ -3423,7 +4286,7 @@ sap.ui.define("sap/ui/table/TableHelper.support",["jquery.sap.global", "sap/ui/s
 		 * The rule definition object can/must have the following parameters:
 		 *
 		 * 		id:				ID of the rule, MANDATORY
-		 * 		audience:		[Audiences.Application, ...] - Choose one or several, Default "Application"
+		 * 		audiences:		[Audiences.Application, ...] - Choose one or several, Default "Application"
 		 * 		categories:		[Categories.Accessibility, ...] - choose one or several, Default "Other" (TBD)
 		 * 		enabled:		true/false - Default true
 		 * 		minversion:		the minimum version required to run the rule - Default "1.38"
@@ -3450,10 +4313,10 @@ sap.ui.define("sap/ui/table/TableHelper.support",["jquery.sap.global", "sap/ui/s
 		 * @param {sap.ui.support.supportRules.RuleSet} The ruleset
 		 */
 		addRuleToRuleset : function(oRuleDef, oRuleset) {
-			oRuleDef = jQuery.extend({}, TableSupportHelper.DEFAULT_RULE_DEF, oRuleDef);
+			oRuleDef = TableSupportHelper.normalizeRule(oRuleDef);
 			var sResult = oRuleset.addRule(oRuleDef);
 			if (sResult != "success") {
-				jQuery.sap.log.warning("Support Rule '" + oRuleDef.id + "' for library sap.m not applied: " + sResult);
+				jQuery.sap.log.warning("Support Rule '" + oRuleDef.id + "' for library sap.ui.table not applied: " + sResult);
 			}
 		},
 
@@ -3561,6 +4424,110 @@ sap.ui.define("sap/ui/table/TableHelper.support",["jquery.sap.global", "sap/ui/s
 
 }, true);
 }; // end of sap/ui/table/TableHelper.support.js
+if ( !jQuery.sap.isDeclared('sap.uxap.ObjectPageLayout.support') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+/**
+ * Defines support rules of the ObjectPageHeader control of sap.uxap library.
+ */
+jQuery.sap.declare('sap.uxap.ObjectPageLayout.support'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+sap.ui.define("sap/uxap/ObjectPageLayout.support",["jquery.sap.global", "sap/ui/support/library"],
+	function(jQuery, SupportLib) {
+		"use strict";
+
+		// shortcuts
+		var Categories = SupportLib.Categories, // Accessibility, Performance, Memory, ...
+			Severity = SupportLib.Severity,	// Hint, Warning, Error
+			Audiences = SupportLib.Audiences; // Control, Internal, Application
+
+
+		var aRules = [];
+
+		function createRule(oRuleDef) {
+			aRules.push(oRuleDef);
+		}
+
+
+		//**********************************************************
+		// Rule Definitions
+		//**********************************************************
+
+		// Rule checks if objectPage componentContainer height is set
+		createRule({
+			id : "objectPageComponentContainerHeight",
+			audiences: [Audiences.Control],
+			categories: [Categories.Usability],
+			enabled: true,
+			minversion: "1.26",
+			title: "ObjectPageLayout: Height of componentContainer",
+			description: "The componentContainer of ObjectPageLayout should always have a '100%' height explicitly set",
+			resolution: "Set a '100%' height to the ComponentContainer of ObjectPageLayout",
+			resolutionurls: [{
+				text: "SAP Fiori Design Guidelines: Object Page",
+				href: "https://experience.sap.com/fiori-design-web/object-page/#guidelines"
+			}],
+			check: function (issueManager, oCoreFacade, oScope) {
+
+				var aComponentContainers = oScope.getElementsByClassName("sap.ui.core.ComponentContainer"),
+					aPages = oScope.getElementsByClassName("sap.uxap.ObjectPageLayout"),
+					aPageOwnerComponentIds = [],
+
+				getOwnerComponent = function (oControl) {
+
+					var parent = oControl.getParent();
+					while (parent) {
+						if (parent instanceof sap.ui.core.Component) {
+							return parent;
+						} else {
+							parent = parent.getParent();
+						}
+					}
+				},
+				isPageContainer = function(oComponentContainer) {
+					return (aPageOwnerComponentIds.indexOf(oComponentContainer.getComponent()) > -1);
+				},
+				getPageOwnerComponentId = function(oPage) {
+					var oComponent = getOwnerComponent(oPage);
+					return oComponent && oComponent.getId();
+				};
+
+
+				aPageOwnerComponentIds = aPages.map(getPageOwnerComponentId);
+
+				aComponentContainers
+					.forEach(function(oComponentContainer) {
+
+						if (isPageContainer(oComponentContainer) && (oComponentContainer.getHeight() !== "100%")) {
+							var sElementId = oComponentContainer.getId(),
+								sElementName = oComponentContainer.getMetadata().getElementName();
+
+							issueManager.addIssue({
+								severity: Severity.Medium,
+								details: "ComponentContainer '" + sElementName + "' (" + sElementId + ") does not have '100%' height.",
+								context: {
+									id: sElementId
+								}
+							});
+						}
+					});
+			}
+		});
+
+		return {
+			addRulesToRuleset: function(oRuleset) {
+				jQuery.each(aRules, function(idx, oRuleDef){
+					oRuleset.addRule(oRuleDef);
+				});
+			}
+		};
+
+	}, true);
+
+}; // end of sap/uxap/ObjectPageLayout.support.js
 if ( !jQuery.sap.isDeclared('sap.m.Button.support') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -3614,7 +4581,7 @@ sap.ui.define("sap/m/Button.support",["jquery.sap.global", "sap/ui/support/libra
 				.forEach(function(oElement) {
 					if (!jQuery.isEmptyObject(oElement.getProperty("icon"))
 						&& jQuery.isEmptyObject(oElement.getProperty("text"))
-						&& jQuery.isEmptyObject(oElement.getProperty("tooltip"))) {
+						&& jQuery.isEmptyObject(oElement.getAggregation("tooltip"))) {
 
 						var sElementId = oElement.getId(),
 							sElementName = oElement.getMetadata().getElementName();
@@ -4084,8 +5051,8 @@ if ( !jQuery.sap.isDeclared('sap.ui.core.Misc.support') ) {
  */
 jQuery.sap.declare('sap.ui.core.Misc.support'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-sap.ui.define("sap/ui/core/Misc.support",["jquery.sap.global", "sap/ui/support/library"],
-	function(jQuery, SupportLib) {
+sap.ui.define("sap/ui/core/Misc.support",["jquery.sap.global", "sap/ui/support/library", "./CoreHelper.support" ],
+	function(jQuery, SupportLib, CoreHelper) {
 	"use strict";
 
 	// shortcuts
@@ -4133,6 +5100,121 @@ sap.ui.define("sap/ui/core/Misc.support",["jquery.sap.global", "sap/ui/support/l
 						context: {
 							id: "WEBPAGE"
 						}
+					});
+				}
+			});
+
+			/***
+			 * Checks for custom css files
+			 */
+			oRuleSet.addRule({
+				id: "cssCheckCustomStyles",
+				audiences: [Audiences.Application],
+				categories: [Categories.Consistency],
+				enabled: true,
+				minversion: "1.38",
+				title: "CSS modifications - List of custom styles",
+				description: "Checks and report for custom CSS files/styles that overwrite standard UI5 control's CSS values ",
+				resolution: "Avoid CSS manipulations with custom CSS values as this could lead to rendering issues ",
+				resolutionurls: [{
+					text: 'CSS Styling Issues',
+					href: 'https://openui5.hana.ondemand.com/#docs/guide/9d87f925dfbb4e99b9e2963693aa00ef.html'
+				}, {
+					text: 'General Guidelines',
+					href: 'https://openui5.hana.ondemand.com/#docs/guide/5e08ff90b7434990bcb459513d8c52c4.html'
+				}],
+				check: function (issueManager, oCoreFacade, oScope) {
+					var cssFilesMessage = "Following stylesheet file(s) contain 'custom' CSS that could affects (overwrites) UI5 controls' own styles: \n",
+						externalStyleSheets = CoreHelper.getExternalStyleSheets(),
+						foundIssues = 0;
+
+					externalStyleSheets.forEach(function (styleSheet) {
+						var affectsUI5Controls = false;
+
+						Array.from(styleSheet.rules).forEach(function (rule) {
+							var selector = rule.selectorText,
+								matchedNodes = document.querySelectorAll(selector);
+
+							matchedNodes.forEach(function (node) {
+								var hasUI5Parent = CoreHelper.nodeHasUI5ParentControl(node, oScope);
+								if (hasUI5Parent) {
+									affectsUI5Controls = true;
+								}
+							});
+						});
+
+						if (affectsUI5Controls) {
+							cssFilesMessage += "- " + CoreHelper.getStyleSheetName(styleSheet) + "\n";
+							foundIssues++;
+						}
+					});
+
+					if (foundIssues > 0) {
+						issueManager.addIssue({
+							severity: sap.ui.support.Severity.Medium,
+							details: cssFilesMessage,
+							context: {
+								id: "WEBPAGE"
+							}
+						});
+					}
+				}
+			});
+
+			/***
+			 * Checks for custom styles applied on UI elements
+			 */
+			oRuleSet.addRule({
+				id: "cssCheckCustomStylesThatAffectControls",
+				audiences: [Audiences.Application],
+				categories: [Categories.Consistency],
+				enabled: true,
+				minversion: "1.38",
+				title: "CSS modifications - List of affected controls",
+				description: "Checks and report all overwritten standard control's CSS values ",
+				resolution: "Avoid CSS manipulations with custom CSS values as this could lead to rendering issues ",
+				resolutionurls: [{
+					text: 'CSS Styling Issues',
+					href: 'https://openui5.hana.ondemand.com/#docs/guide/9d87f925dfbb4e99b9e2963693aa00ef.html'
+				}, {
+					text: 'General Guidelines',
+					href: 'https://openui5.hana.ondemand.com/#docs/guide/5e08ff90b7434990bcb459513d8c52c4.html'
+				}],
+				check: function (issueManager, oCoreFacade, oScope) {
+					var controlCustomCssHashMap = {},
+						externalStyleSheets = CoreHelper.getExternalStyleSheets();
+
+					externalStyleSheets.forEach(function (styleSheet) {
+
+						Array.from(styleSheet.rules).forEach(function (rule) {
+							var selector = rule.selectorText,
+								matchedNodes = document.querySelectorAll(selector);
+
+							matchedNodes.forEach(function (node) {
+								var hasUI5Parent = CoreHelper.nodeHasUI5ParentControl(node, oScope);
+								if (hasUI5Parent) {
+									var ui5Control = jQuery(node).control()[0];
+
+									if (!controlCustomCssHashMap.hasOwnProperty(ui5Control.getId())) {
+										controlCustomCssHashMap[ui5Control.getId()] =  "";
+									}
+
+									var cssSource = CoreHelper.getStyleSource(styleSheet);
+									controlCustomCssHashMap[ui5Control.getId()] += "'" + selector + "'" + " from " + cssSource + ",\n";
+								}
+							});
+						});
+					});
+
+					Object.keys(controlCustomCssHashMap).forEach(function(id) {
+						issueManager.addIssue({
+							severity: sap.ui.support.Severity.Low,
+							details: "The following selector(s) " + controlCustomCssHashMap[id] + " affects standard style setting for control",
+							context: {
+								id: id
+							}
+						});
+
 					});
 				}
 			});
@@ -4490,7 +5572,10 @@ sap.ui.define("sap/ui/core/View.support",["jquery.sap.global", "sap/ui/support/l
 							var sFullName = oXMLView._xContent.attributes.item(i).value;
 
 							// check all explicit namespaces except for the injected support namespace
-							if (sName.match("xmlns:") && sLocalName !== "xmlns:support") {
+							// and the mvc, because the use of mvc is checked in other rule
+							if (sName.match("xmlns:")
+								&& sLocalName !== "xmlns:support"
+								&& sLocalName !== "mvc") {
 								for (var j = 0; j < oXMLView._xContent.children.length; j++) {
 									var sContent = oXMLView._xContent.children[j].outerHTML;
 
@@ -4642,6 +5727,9 @@ if ( !jQuery.sap.isDeclared('sap.ui.support.supportRules.RuleSet') ) {
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
+/**
+ * The RuleSet is an interface used to create, update and delete ruleset containing rules.
+ */
 jQuery.sap.declare('sap.ui.support.supportRules.RuleSet'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
 sap.ui.define("sap/ui/support/supportRules/RuleSet",[
@@ -4652,10 +5740,35 @@ sap.ui.define("sap/ui/support/supportRules/RuleSet",[
 function (jQuery, storage, constants) {
 	"use strict";
 
+	/**
+	 * Contains all rulesets inside the RuleSet.
+	 *
+	 * @readonly
+	 * @name sap.ui.support.RuleSet.mRuleSets
+	 * @memberof sap.ui.support.RuleSet
+	 */
 	var mRuleSets = {};
 
+	/**
+	 * Creates a RuleSet.
+	 * The RuleSet can store multiple rules concerning namespaces.
+	 * <h3>Usage</h3>
+	 * The RuleSet is an interface used to create, update and delete rulesets.
+	 *
+	 * @class
+	 * @public
+	 * @constructor
+	 * @namespace
+	 * @name sap.ui.support.RuleSet
+	 * @memberof sap.ui.support
+	 * @author SAP SE
+	 * @version 1.50.6
+	 * @param {object} oSettings Name of the initiated
+	 * @returns {void}
+	 */
 	var RuleSet = function (oSettings) {
 		oSettings = oSettings || {};
+
 		if (!oSettings.name) {
 			jQuery.sap.log.error("Please provide a name for the RuleSet.");
 		}
@@ -4663,37 +5776,76 @@ function (jQuery, storage, constants) {
 		if (mRuleSets[oSettings.name]) {
 			return mRuleSets[oSettings.name];
 		}
+
 		this._oSettings = oSettings;
 		this._mRules = {};
 		mRuleSets[oSettings.name] = this;
 	};
 
+	/**
+	 * Clears all rulesets inside the RuleSet.
+	 * @public
+	 * @static
+	 * @method
+	 * @name sap.ui.support.RuleSet.clearAllRuleSets
+	 * @memberof sap.ui.support.RuleSet
+	 * @returns {void}
+	 */
 	RuleSet.clearAllRuleSets = function () {
 		mRuleSets = {};
 	};
 
+	/**
+	 * Gets all rules from the RuleSet.
+	 * @public
+	 * @method
+	 * @name sap.ui.support.RuleSet.getRules
+	 * @memberof sap.ui.support.RuleSet
+	 * @returns {object} All rules within the current RuleSet
+	 */
 	RuleSet.prototype.getRules = function () {
 		return this._mRules;
 	};
 
-	RuleSet.prototype.updateRule = function (oldId, newSettings) {
-		var verifyResult = this._verifySettingsObject(newSettings, true);
+	/**
+	 * Updates rules from the RuleSet.
+	 * @public
+	 * @method
+	 * @name sap.ui.support.RuleSet.updateRule
+	 * @memberof sap.ui.support.RuleSet
+	 * @param {string} sRuleId Rule ID
+	 * @param {object} ORuleSettings Rule settings
+	 * @returns {string} sRuleVerification Rule Verification status
+	 */
+	RuleSet.prototype.updateRule = function (sRuleId, ORuleSettings) {
+		var sRuleVerification = this._verifySettingsObject(ORuleSettings, true);
 
-		if (verifyResult === "success") {
-			delete this._mRules[oldId];
-			this._mRules[newSettings.id] = newSettings;
+		if (sRuleVerification === "success") {
+			delete this._mRules[sRuleId];
+			this._mRules[ORuleSettings.id] = ORuleSettings;
 		}
 
-		return verifyResult;
+		return sRuleVerification;
 	};
 
-	RuleSet.prototype._verifySettingsObject = function (oSettings, update) {
+	/**
+	 * Verifies the settings object of the current RuleSet.
+	 * @private
+	 * @method
+	 * @name sap.ui.support.RuleSet._verifySettingsObject
+	 * @memberof sap.ui.support.RuleSet
+	 * @param {object} oSettings Settings object to be verified
+	 * @param {boolean} bUpdate Triggers update of passed settings object
+	 * @returns {string} Rule Verification status
+	 */
+	RuleSet.prototype._verifySettingsObject = function (oSettings, bUpdate) {
+
 		if (!oSettings.id) {
 			jQuery.sap.log.error("Support rule needs an id.");
 			return "Support rule needs an unique id.";
 		}
 
-		if (!update && this._mRules[oSettings.id]) {
+		if (!bUpdate && this._mRules[oSettings.id]) {
 			jQuery.sap.log.error("Support rule with the id " + oSettings.id + " already exists.");
 			return "Support rule with the id " + oSettings.id + " already exists.";
 		}
@@ -4724,18 +5876,18 @@ function (jQuery, storage, constants) {
 		}
 
 		if (oSettings.audiences && oSettings.audiences.forEach) {
-			var wrongAudience = false,
-				audName = "";
+			var bIsWrongAudience = false,
+				sAudienceName = "";
 			oSettings.audiences.forEach(function (aud) {
 				if (!sap.ui.support.Audiences[aud]) {
-					wrongAudience = true;
-					audName = aud;
+					bIsWrongAudience = true;
+					sAudienceName = aud;
 				}
 			});
 
-			if (wrongAudience) {
-				jQuery.sap.log.error("Audience " + audName + " does not exist. Please use the audiences from sap.ui.support.Audiences");
-				return "Audience " + audName + " does not exist. Please use the audiences from sap.ui.support.Audiences";
+			if (bIsWrongAudience) {
+				jQuery.sap.log.error("Audience " + sAudienceName + " does not exist. Please use the audiences from sap.ui.support.Audiences");
+				return "Audience " + sAudienceName + " does not exist. Please use the audiences from sap.ui.support.Audiences";
 			}
 		}
 
@@ -4745,25 +5897,35 @@ function (jQuery, storage, constants) {
 		}
 
 		if (oSettings.categories && oSettings.categories.forEach) {
-			var wrongCategory = false,
-				catName = "";
+			var bIsWrongCategory = false,
+				sCategoryName = "";
 			oSettings.categories.forEach(function (cat) {
 				if (!sap.ui.support.Categories[cat]) {
-					wrongCategory = true;
-					catName = cat;
+					bIsWrongCategory = true;
+					sCategoryName = cat;
 				}
 			});
 
-			if (wrongCategory) {
-				jQuery.sap.log.error("Category " + catName + " does not exist. Please use the categories from sap.ui.support.Categories");
-				return "Category " + catName + " does not exist. Please use the categories from sap.ui.support.Categories";
+			if (bIsWrongCategory) {
+				jQuery.sap.log.error("Category " + sCategoryName + " does not exist. Please use the categories from sap.ui.support.Categories");
+				return "Category " + sCategoryName + " does not exist. Please use the categories from sap.ui.support.Categories";
 			}
 		}
 
 		return "success";
 	};
 
+	/**
+	 * Adds rules to RuleSet.
+	 * @public
+	 * @method
+	 * @name sap.ui.support.RuleSet.addRule
+	 * @memberof sap.ui.support.RuleSet
+	 * @param {object} oSettings Settings object with rule information
+	 * @returns {string} sRuleVerificationStatus Verification status
+	 */
 	RuleSet.prototype.addRule = function (oSettings) {
+
 		var sCurrentVersion = RuleSet.versionInfo ? RuleSet.versionInfo.version : '';
 
 		var sRuleVersion = oSettings.minversion ? oSettings.minversion : '';
@@ -4779,54 +5941,69 @@ function (jQuery, storage, constants) {
 			return "Rule " + oSettings.id + " should be used with a version >= " + oSettings.minversion;
 		}
 
-		var verifyResult = this._verifySettingsObject(oSettings);
+		var sRuleVerificationStatus = this._verifySettingsObject(oSettings);
 
-		if (verifyResult === "success") {
+		if (sRuleVerificationStatus === "success") {
 			this._mRules[oSettings.id] = oSettings;
 			oSettings.libName = this._oSettings.name;
 		}
 
-		return verifyResult;
+		return sRuleVerificationStatus;
 	};
 
 	/**
-	 * Adds all previously created temporary rules to the current library rules
-	 * @param {Object} data The loaded libraries' and their rules
-	 * @param {Array} tempRules The previously created user temporary rules
+	 * Adds all previously created temporary rules to the current library rules.
+	 * @public
+	 * @static
+	 * @method
+	 * @name sap.ui.support.RuleSet.addToTempRules
+	 * @memberof sap.ui.support.RuleSet
+	 * @param {object} oLibraries The loaded libraries and their rules
+	 * @param {string[]} aTempRules The temporary rules previously created by the user
 	 */
-	RuleSet.addToTempRules = function (data, tempRules) {
-		if (tempRules) {
-			tempRules.forEach(function (tempRule) {
+	RuleSet.addToTempRules = function (oLibraries, aTempRules) {
+		if (aTempRules) {
+			aTempRules.forEach(function (tempRule) {
 				var ruleName = tempRule.id;
-				data[constants.TEMP_RuleSetS_NAME].RuleSet._mRules[ruleName] = tempRule;
+				oLibraries[constants.TEMP_RULESETS_NAME].RuleSet._mRules[ruleName] = tempRule;
 			});
 		}
 	};
 
 	/**
 	 * Stores which rules are selected to be run by the analyzer on the next check
-	 * @param {Array} libraries The data for the libraries and their rules
+	 * @public
+	 * @static
+	 * @method
+	 * @name sap.ui.support.RuleSet.storeSelectionOfRules
+	 * @memberof sap.ui.support.RuleSet
+	 * @param {Object[]} aLibraries The data for the libraries and their rules
 	 */
-	RuleSet.storeSelectionOfRules = function (libraries) {
-		var selectedRules = extractRulesSettingsToSave(libraries);
+	RuleSet.storeSelectionOfRules = function (aLibraries) {
+		var selectedRules = RuleSet._extractRulesSettingsToSave(aLibraries);
 		storage.setSelectedRules(selectedRules);
 	};
 
 	/**
 	 * Loads the previous selection of the user - which rules are selected to be run by the Rule Analyzer.
-	 * The method applies the settings over the current loaded rules.
-	 * @param {Array} libraries The current loaded libraries and their rules
+	 * The method applies the settings to the currently loaded rules.
+	 * @public
+	 * @static
+	 * @method
+	 * @name sap.ui.support.RuleSet.loadSelectionOfRules
+	 * @memberof sap.ui.support.RuleSet
+	 * @param {Object[]} aLibraries The current loaded libraries and their rules
 	 */
-	RuleSet.loadSelectionOfRules = function (libraries) {
+	RuleSet.loadSelectionOfRules = function (aLibraries) {
 		var savedPreferences = storage.getSelectedRules();
 
 		if (!savedPreferences) {
 			return;
 		}
 
-		for (var index = 0; index < libraries.length; index += 1) {
-			var libraryRules = libraries[index].rules;
-			var libraryName = libraries[index].title;
+		for (var index = 0; index < aLibraries.length; index += 1) {
+			var libraryRules = aLibraries[index].rules;
+			var libraryName = aLibraries[index].title;
 
 			for (var rulesIndex = 0; rulesIndex < libraryRules.length; rulesIndex += 1) {
 				//If there is a saved preference for the loaded rule apply it over the default
@@ -4838,34 +6015,38 @@ function (jQuery, storage, constants) {
 	};
 
 	/**
-	 * Extracts all the settings needed to be save from the libraries' rules
-	 * @param {Array} libraries The libraries and rules loaded from the model
-	 * @returns {Object} The extracted settings the should be persisted
+	 * Extracts all the settings needed to be saved from the libraries rules.
+	 * @private
+	 * @method
+	 * @static
+	 * @name sap.ui.support.RuleSet._extractRulesSettingsToSave
+	 * @memberof sap.ui.support.RuleSet
+	 * @param {Object[]} aLibraries The libraries and rules loaded from the model
 	 */
-	function extractRulesSettingsToSave(libraries) {
-		var librarySettings = Object.create(null);
+	RuleSet._extractRulesSettingsToSave = function (aLibraries) {
+		var oLibrarySettings = {};
 		var libraryRules;
-		var librariesCount = libraries.length;
+		var librariesCount = aLibraries.length;
 		var rulesCount;
 		var libraryName;
 		var ruleSettings;
 
 		for (var libraryIndex = 0; libraryIndex < librariesCount; libraryIndex += 1) {
-			libraryName = libraries[libraryIndex].title;
-			librarySettings[libraryName] = Object.create(null);
-			libraryRules = libraries[libraryIndex].rules;
+			libraryName = aLibraries[libraryIndex].title;
+			oLibrarySettings[libraryName] = {};
+			libraryRules = aLibraries[libraryIndex].rules;
 
 			rulesCount = libraryRules.length;
 			for (var rulesIndex = 0; rulesIndex < rulesCount; rulesIndex += 1) {
-				ruleSettings = Object.create(null);
+				ruleSettings = {};
 				ruleSettings.id = libraryRules[rulesIndex].id;
 				ruleSettings.selected = libraryRules[rulesIndex].selected;
-				librarySettings[libraryName][ruleSettings.id] = ruleSettings;
+				oLibrarySettings[libraryName][ruleSettings.id] = ruleSettings;
 			}
 		}
 
-		return librarySettings;
-	}
+		return oLibrarySettings;
+	};
 
 	return RuleSet;
 }, true);
@@ -4927,11 +6108,13 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Analysis.controller",[
 			CommunicationBus.publish(channelNames.ON_INIT_ANALYSIS_CTRL);
 			this.tempRulesLoaded = false;
 
-			this.hackListItemBase();
 			this.getView().setModel(this.model);
+			this.treeTable = this.getView().byId("ruleList");
+			this.cookie = storage.readPersistenceCookie(constants.COOKIE_NAME);
+			this.persistingSettings = this.model.getProperty("/persistingSettings");
 		},
 
-		getTemporaryLib: function() {
+		getTemporaryLib: function () {
 			var libs = this.model.getProperty("/libraries");
 
 			for (var i = 0; i < libs.length; i++) {
@@ -4946,11 +6129,12 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Analysis.controller",[
 			CommunicationBus.subscribe(channelNames.VERIFY_RULE_CREATE_RESULT, function (data) {
 				var result = data.result,
 					newRule = RuleSerializer.deserialize(data.newRule, true),
-					persistingSettings = this.model.getProperty("/persistingSettings"),
-					tempLib = this.getTemporaryLib();
+					tempLib = this.getTemporaryLib(),
+					treeTable = this.model.getProperty('/treeViewModel');
 				if (result == "success") {
 					tempLib.rules.push(newRule);
-					if (persistingSettings) {
+					this._syncTreeTableVieModelTempRulesLib(tempLib, treeTable);
+					if (this.persistingSettings) {
 						storage.setRules(tempLib.rules);
 						if (this.showRuleCreatedToast) {
 							MessageToast.show('Your temporary rule "' + newRule.id + '" was persisted in the local storage');
@@ -4961,10 +6145,7 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Analysis.controller",[
 					var emptyRule = this.model.getProperty("/newEmptyRule");
 					this.model.setProperty("/newRule", jQuery.extend(true, {}, emptyRule));
 					this.goToRuleProperties();
-					this.createRulesUI();
 					this.model.setProperty("/selectedRule", newRule);
-					var panel = this.getView().byId("ruleSetContainer").getContent()[0];
-					panel.setExpanded(true);
 				} else {
 					MessageToast.show("Add rule failed because: " + result);
 				}
@@ -4972,19 +6153,24 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Analysis.controller",[
 
 			CommunicationBus.subscribe(channelNames.VERIFY_RULE_UPDATE_RESULT, function (data) {
 				var result = data.result,
-					updateRule = RuleSerializer.deserialize(data.updateRule, true);
+					updateRule = RuleSerializer.deserialize(data.updateRule, true),
+					that = this;
 
 				if (result === "success") {
-					var ruleSource = this.model.getProperty("/editRuleSource");
+					var ruleSource = this.model.getProperty("/editRuleSource"),
+					treeTable = this.model.getProperty('/treeViewModel');
 					var libraries = this.model.getProperty('/libraries');
 					libraries.forEach(function(lib, libIndex){
 						if (lib.title === constants.TEMP_RULESETS_NAME) {
 							lib.rules.forEach(function(rule, ruleIndex){
 								if (rule.id === ruleSource.id) {
 									lib.rules[ruleIndex] = updateRule;
-									storage.setRules(lib.rules);
+									if (that.persistingSettings) {
+										storage.setRules(lib.rules);
+									}
 								}
 							});
+							that._syncTreeTableVieModelTempRule(updateRule,treeTable);
 						}
 					});
 
@@ -5027,6 +6213,10 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Analysis.controller",[
 
 				this.model.setProperty("/executionScopeComponents", executionScopeComponents);
 			}, this);
+
+			CommunicationBus.subscribe(channelNames.GET_RULES_MODEL, function (treeViewModelRules) {
+				this.model.setProperty("/treeViewModel", treeViewModelRules);
+			}, this);
 		},
 		/**
 		 * Checks if given execution scope component is selected comparing against an array of settings
@@ -5034,7 +6224,7 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Analysis.controller",[
 		 * @param {Array} savedComponents The local storage settings for the checked execution scope components
 		 * @returns {boolean} If the component is checked or not
 		 */
-		checkIfComponentIsSelected: function(component, savedComponents) {
+		checkIfComponentIsSelected: function (component, savedComponents) {
 			for (var index = 0; index < savedComponents.length; index += 1) {
 				if (savedComponents[index].text == component.text && savedComponents[index].selected) {
 					return true;
@@ -5046,13 +6236,15 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Analysis.controller",[
 		onAnalyze: function () {
 			var selectedRules = this._getSelectedRules(),
 				executionContext = this._getExecutionContext();
-			// if (selectedRules.length > 0) {
-			CommunicationBus.publish(channelNames.ON_ANALYZE_REQUEST, {
-				selectedRules: selectedRules,
-				executionContext: executionContext
-			});
+			if (selectedRules.length > 0) {
+				CommunicationBus.publish(channelNames.ON_ANALYZE_REQUEST, {
+					selectedRules: selectedRules,
+					executionContext: executionContext
+				});
 				this.model.setProperty("/showProgressIndicator", true);
-
+			} else {
+				MessageToast.show("Select some rules to be analyzed.");
+			}
 		},
 
 		initSettingsPopover: function () {
@@ -5086,25 +6278,76 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Analysis.controller",[
 			return ctx;
 		},
 		_getSelectedRules: function () {
-			var libs = this.model.getProperty("/libraries"),
-				selectedRules = [];
+			var	selectedRules = [],
+			selectedIndices = this.treeTable.getSelectedIndices(),
+			that = this;
 
-			// When tool is inject from outside libraries is empty
-			// TODO: fix libraries to be there if possible
-			if (Array.isArray(libs)) {
-				libs.forEach(function (lib, libIndex) {
-					lib.rules.forEach(function (rule) {
-						if (rule.selected) {
-							selectedRules.push({
-								libName: lib.title,
-								ruleId: rule.id
-							});
-						}
+			selectedIndices.forEach(function(index){
+				if (that.treeTable.getContextByIndex(index).getObject().id) {
+					selectedRules.push({
+						libName: that.treeTable.getContextByIndex(index).getObject().libName,
+						ruleId: that.treeTable.getContextByIndex(index).getObject().id
 					});
-				});
-			}
+				}
+			});
 
 			return selectedRules;
+		},
+		/**
+		 * Keeps in sync the TreeViewModel for temporary library that we use for visualisation of sap.m.TreeTable and the model that we use in the Suppport Assistant
+		 * @param {Object} tempLib  temporary library model from Support Assistant
+		 * @param {Object} treeTable Model for sap.m.TreeTable visualization
+		 */
+		_syncTreeTableVieModelTempRulesLib: function (tempLib, treeTable) {
+			var innerIndex = 0;
+				for (var ruleIndex in tempLib.rules) {
+					for (var i in treeTable) {
+						if (treeTable[i].name === constants.TEMP_RULESETS_NAME) {
+							treeTable[i][innerIndex] = {
+								name: tempLib.rules[ruleIndex].title,
+								description: tempLib.rules[ruleIndex].description,
+								id: tempLib.rules[ruleIndex].id,
+								audiences: tempLib.rules[ruleIndex].audiences,
+								categories: tempLib.rules[ruleIndex].categories,
+								minversion: tempLib.rules[ruleIndex].minversion,
+								resolution: tempLib.rules[ruleIndex].resolution,
+								title: tempLib.rules[ruleIndex].title,
+								libName: treeTable[i].name,
+								check: tempLib.rules[ruleIndex].check
+							};
+
+						}
+					}
+					innerIndex++;
+				}
+		},
+		/**
+		 * Keeps in sync the TreeViewModel for temporary rules that we use for visualisation of sap.m.TreeTable and the model that we use in the SuppportAssistant
+		 * @param {Object} tempRule Temporary rule
+		 * @param {Object} treeTable Model for sap.m.TreeTable visualization
+		 */
+		_syncTreeTableVieModelTempRule: function (tempRule, treeTable) {
+				var ruleSource = this.model.getProperty("/editRuleSource");
+				for (var i in treeTable) {
+					if (treeTable[i].name === constants.TEMP_RULESETS_NAME) {
+						for (var innerIndex in treeTable[i]) {
+							if (treeTable[i][innerIndex].id === ruleSource.id) {
+								treeTable[i][innerIndex] = {
+									name: tempRule.title,
+									description: tempRule.description,
+									id: tempRule.id,
+									audiences: tempRule.audiences,
+									categories: tempRule.categories,
+									minversion: tempRule.minversion,
+									resolution: tempRule.resolution,
+									title: tempRule.title,
+									libName: treeTable[i].name,
+									check: tempRule.check
+								};
+							}
+						}
+					}
+				}
 		},
 		onAnalyzeSettings: function (oEvent) {
 			CommunicationBus.publish(channelNames.GET_AVAILABLE_COMPONENTS);
@@ -5117,8 +6360,8 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Analysis.controller",[
 					execScope = this.model.getProperty("/executionScopes")[radioKey];
 				this.model.setProperty("/analyzeContext", execScope);
 			}
-			var cookie =  storage.readPersistenceCookie(constants.COOKIE_NAME);
-			if (cookie) {
+
+			if (this.cookie) {
 				this.persistExecutionScope();
 			}
 		},
@@ -5130,13 +6373,12 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Analysis.controller",[
 				this.model.setProperty("/subtreeExecutionContextId", value);
 			}
 
-			var cookie =  storage.readPersistenceCookie(constants.COOKIE_NAME);
-			if (cookie) {
+			if (this.cookie) {
 				this.persistExecutionScope();
 			}
 		},
 
-		persistExecutionScope: function() {
+		persistExecutionScope: function () {
 			var setting = {
 				analyzeContext: this.model.getProperty("/analyzeContext"),
 				subtreeExecutionContextId: this.model.getProperty("/subtreeExecutionContextId")
@@ -5146,10 +6388,9 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Analysis.controller",[
 		},
 
 		onScopeComponentSelect: function (event) {
-			var scopeComponents = this.model.getProperty("/executionScopeComponents"),
-				cookie =  storage.readPersistenceCookie(constants.COOKIE_NAME);
+			var scopeComponents = this.model.getProperty("/executionScopeComponents");
 
-			if (cookie) {
+			if (this.cookie) {
 				storage.setSelectedScopeComponents(scopeComponents);
 			}
 		},
@@ -5159,79 +6400,15 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Analysis.controller",[
 			}
 		},
 
-		createNewRulePress: function(oEvent) {
-
-				var emptyRule = this.model.getProperty("/newEmptyRule");
-				this.model.setProperty("/selectedSetPreviewKey", "availableRules");
-				this.model.setProperty("/newRule", jQuery.extend(true, {}, emptyRule));
-				this.goToCreateRule();
+		createNewRulePress: function (oEvent) {
+			var emptyRule = this.model.getProperty("/newEmptyRule");
+			this.model.setProperty("/selectedSetPreviewKey", "availableRules");
+			this.model.setProperty("/newRule", jQuery.extend(true, {}, emptyRule));
+			this.goToCreateRule();
 		},
 		goToRuleProperties: function () {
 			var navCont = this.getView().byId("rulesNavContainer");
 			navCont.to(this.getView().byId("rulesDisplayPage"), "show");
-		},
-		/**
-		 * Here we need a new behavior for the sap.m.List - we need to be able to both click on the checkbox,
-		 * and click on the whole list item, and those 2 clicks to be separate from each other (with separate
-		 * event handlers)
-		 * In our case 1 list is the rules for 1 library, we have more than one list, and we need the select
-		 * state to also be shared between 2 or more lists (visualy).
-		 * Could be implemented with extension control of the list item, but because we are in iframe this is also fine.
-		 */
-		hackListItemBase: function () {
-			var that = this,
-				oldTap = ListItemBase.prototype.ontap,
-				oldUpdateSelectedDom = ListItemBase.prototype.updateSelectedDOM,
-				oldAfterRendering = ListItemBase.prototype.onAfterRendering;
-
-			var isRulesList = function (list) {
-				var customData = list.getCustomData();
-				if (!customData || customData.length == 0) {
-					return false;
-				}
-
-				var result = false;
-				customData.forEach(function (data) {
-					if (data.getKey() === "rulesList") {
-						result = true;
-					}
-				});
-
-				return result;
-			};
-
-			ListItemBase.prototype.onAfterRendering = function () {
-				oldAfterRendering.apply(this, arguments);
-				if (isRulesList(this.getParent())) {
-					this.$().removeClass("sapMLIBSelected");
-				}
-			};
-
-			ListItemBase.prototype.ontap = function (oEvent) {
-				if (!isRulesList(this.getParent())) {
-					oldTap.call(this, oEvent);
-					return;
-				}
-				if ($(oEvent.target).hasClass("sapMCbBg") || $(oEvent.target).hasClass("sapMCb")) {
-					oldTap.call(this, oEvent);
-				} else {
-					that.model.setProperty("/selectedRuleStringify", "");
-					that.markLIBAsSelected(this);
-
-					var selectedRule = this.getBindingContext().getObject();
-					that.model.setProperty("/selectedRule", selectedRule);
-					that.model.setProperty("/selectedRuleStringify", that.createRuleString(selectedRule));
-				}
-
-				Ruleset.storeSelectionOfRules(that.model.getProperty("/libraries"));
-			};
-
-			ListItemBase.prototype.updateSelectedDOM = function(bSelected, $This) {
-				oldUpdateSelectedDom.call(this, bSelected, $This);
-				if (isRulesList(this.getParent())) {
-					$This.removeClass("sapMLIBSelected");
-				}
-			};
 		},
 		createRuleString: function (rule) {
 			// FIXME
@@ -5266,45 +6443,6 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Analysis.controller",[
 			str += "}";
 			return str;
 		},
-		markLIBAsSelected: function (listItemBase) {
-			if (!listItemBase) {
-				var selectedRuleTitle = this.model.getProperty("/selectedRule/title");
-				this.getView().byId("ruleSetContainer").getContent().forEach(function (libPanel) {
-					libPanel.getContent()[0].getItems().forEach(function (libItem) {
-						if (libItem.getLabel() === selectedRuleTitle) {
-							listItemBase = libItem;
-						}
-					});
-				});
-			} else {
-				this.getView().$().find(".sapMLIB").removeClass("sapMLIBSelected");
-				listItemBase.$().addClass("sapMLIBSelected");
-			}
-		},
-		onAfterNavigate: function (oEvent) {
-			var to = oEvent.getParameter("to"),
-				that = this;
-
-			if (to === this.getView().byId("rulesDisplayPage")) {
-				setTimeout(function () {
-					that.markLIBAsSelected();
-				}, 250);
-			}
-		},
-		selectAll: function () {
-			var that = this;
-			this.visitAllRules(function (rule, ruleIndex, libIndex) {
-					that.model.setProperty("/libraries/" + libIndex + "/rules/" + ruleIndex + "/selected", true);
-			});
-			Ruleset.storeSelectionOfRules(this.model.getProperty("/libraries"));
-		},
-		deselectAll: function () {
-			var that = this;
-			that.visitAllRules(function (rule, ruleIndex, libIndex) {
-					that.model.setProperty("/libraries/" + libIndex + "/rules/" + ruleIndex + "/selected", false);
-			});
-			Ruleset.storeSelectionOfRules(this.model.getProperty("/libraries"));
-		},
 		updateRule: function () {
 			var oldId = this.model.getProperty("/editRuleSource/id"),
 				updateObj = this.model.getProperty("/editRule");
@@ -5319,8 +6457,11 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Analysis.controller",[
 		updatesupportRules: function (data) {
 			data = RuleSerializer.deserialize(data);
 
+			CommunicationBus.publish(channelNames.REQUEST_RULES_MODEL, data);
+
 			var libraries = [],
-				that = this;
+				that = this,
+				persistingSettings = this.model.getProperty("/persistingSettings");
 
 			for (var i in data) {
 				var rules = [],
@@ -5331,6 +6472,7 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Analysis.controller",[
 					rule.libName = i;
 					rule.selected = true;
 					rules.push(rule);
+
 				}
 
 				libraries.push({
@@ -5340,12 +6482,19 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Analysis.controller",[
 				});
 			}
 
-			var firstSelectedRule = libraries[0].rules[0];
+			// Set first rule from first library if there is no temporary rules
+			var firstSelectedRule;
+			if (libraries[0].rules[0] ){
+				firstSelectedRule = libraries[0].rules[0];
+			} else {
+				firstSelectedRule = libraries[1].rules[0];
+			}
+
 			that.placeTemporaryRulesetAtStart(libraries);
 			that.model.setProperty("/selectedRuleStringify", "");
 			that.model.setProperty("/selectedRule", firstSelectedRule);
 			that.model.setProperty("/selectedRuleStringify", that.createRuleString(firstSelectedRule));
-			that.model.setProperty("/libraries", libraries);
+			that.model.setProperty("/libraries",  libraries);
 
 			var tempRules = storage.getRules(),
 				loadingFromAddiotnalRuleSets = that.model.getProperty("/loadingAdditionalRuleSets");
@@ -5355,13 +6504,19 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Analysis.controller",[
 					CommunicationBus.publish(channelNames.VERIFY_CREATE_RULE, RuleSerializer.serialize(tempRule));
 				});
 			}
-			//*This property is neede when we are loading additional rulesets and to not retriger ".VERIFY_CREATE_RULE"*/
+			//*This property is needed when we are loading additional rulesets and to not retriger ".VERIFY_CREATE_RULE"*/
 			that.model.setProperty("/loadingAdditionalRuleSets", false);
+			if (persistingSettings) {
+				var selectedRules = storage.getSelectedRules();
+				selectedRules.forEach(function(selectedIndex){
+					that.treeTable.setSelectedIndex(selectedIndex);
+				});
 
-			Ruleset.loadSelectionOfRules(that.model.getProperty("/libraries"));
-			that.createRulesUI();
-			var panel = that.getView().byId("ruleSetContainer").getContent()[0];
-			panel.setExpanded(true);
+			} else {
+				this.treeTable.selectAll();
+			}
+
+
 		},
 		placeTemporaryRulesetAtStart: function (libraries) {
 			for (var i = 0; i < libraries.length; i++) {
@@ -5375,69 +6530,20 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Analysis.controller",[
 				}
 			}
 		},
-		createRulesUI: function () {
-			var libs = this.model.getProperty("/libraries"),
-				rulesCount = 0,
-				that = this,
-				vlContainer = this.getView().byId("ruleSetContainer");
-			that.model.setProperty("/selectedRule", that.model.getProperty("/libraries/1/rules/1"));
-
-			vlContainer.getContent().forEach(function (content, contentIndex) {
-				vlContainer.removeContent(content);
-			});
-
-			libs.forEach(function (lib, libIndex) {
-
-				var ruleListContent = that._creatingContentForRulesList(lib, libIndex, that);
-
-				var rulesList = new List({
-					mode : "MultiSelect",
-					includeItemInSelection: true,
-					items: {
-						path: "/libraries/" + libIndex + "/rules",
-						template: new InputListItem({
-							label: "{title}",
-							selected: "{selected}",
-							content: ruleListContent
-						})
-					}
-				});
-				rulesList.data("rulesList", true);
-
-				if (lib.rules.length === undefined) {
-					rulesCount = 1;
-				} else {
-					rulesCount = lib.rules.length;
-				}
-
-				var libPanel = new Panel({
-					width: "100%",
-					expandable: true,
-					expanded: false,
-					content: rulesList,
-					headerToolbar: new Toolbar({
-						content: [
-							new Label({
-								text: lib.title + " (" + rulesCount + ")"
-							})
-						]
-					})
-				});
-
-				vlContainer.addContent(libPanel);
-			});
-
-		},
-		addLinkToNewRule: function () {
+		addLinkToRule: function (event) {
 			var tempLink = this.model.getProperty("/tempLink"),
-				copy = jQuery.extend(true, {}, tempLink);
-			this.model.getProperty("/newRule/resolutionurls").push(copy);
-			this.model.checkUpdate(true, true);
-		},
-		addLinkToEditRule: function () {
-			var tempLink = this.model.getProperty("/tempLink"),
-				copy = jQuery.extend(true, {}, tempLink);
-			this.model.getProperty("/editRule/resolutionurls").push(copy);
+				copy = jQuery.extend(true, {}, tempLink),
+				action = event.getSource().getProperty("text"),
+				rule = action === 'Add' ? "/newRule" : "/editRule",
+				urlProperty = this.model.getProperty(rule + "/resolutionurls");
+
+			if (urlProperty) {
+				urlProperty.push(copy);
+			} else {
+				this.model.setProperty(rule + "/resolutionurls", "");
+				urlProperty.push(copy);
+			}
+
 			this.model.checkUpdate(true, true);
 		},
 		goToCreateRule: function () {
@@ -5476,14 +6582,6 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Analysis.controller",[
 				this.model.setProperty("/updateRuleStringified", stringifiedJson);
 			}
 		},
-		visitAllRules: function (callback) {
-			var libs = this.model.getProperty("/libraries");
-			libs.forEach(function (lib, libIndex) {
-				lib.rules.forEach(function (rule, ruleIndex) {
-					callback(rule, ruleIndex, libIndex);
-				});
-			});
-		},
 		loadMarkedSupportLibraries: function () {
 			var list = this.getView().byId("availableLibrariesSet"),
 				libNames = list.getSelectedItems().map(function (item) {
@@ -5503,51 +6601,109 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Analysis.controller",[
 				this.model.setProperty("/loadingAdditionalRuleSets", true);
 			}
 		},
+		onCellClick: function(event){
+			if (event.getParameter("rowBindingContext")) {
+				var selection = event.getParameter("rowBindingContext").getObject(),
+					selectedRule;
 
-		_creatingContentForRulesList: function(lib, libIndex, that) {
-			var tempRulesButtons = [new sap.m.Button({
-				icon:"sap-icon://edit",
-				press: function (oEvent) {
-					var sourceObject = this.getParent().getBindingContext().getObject();
-					that.model.setProperty("/editRuleSource", sourceObject);
-					that.model.setProperty("/editRule", jQuery.extend(true, {}, sourceObject));
-					that.model.checkUpdate(true, true);
-					var navCont = that.getView().byId("rulesNavContainer");
-					navCont.to(that.getView().byId("ruleUpdatePage"), "show");
+				if (selection.id) {
+					selectedRule = this.getMainModelFromTreeViewModel(selection);
+					var stringifiedJson = this.createRuleString(selectedRule);
+					this.model.setProperty("/selectedRuleStringify", stringifiedJson);
 				}
-			}),  new sap.m.Button({
-				icon:"sap-icon://delete",
-				press: function (oEvent) {
+				this.model.setProperty("/selectedRule", selectedRule);
+			}
 
-					var sourceObject = this.getParent().getBindingContext().getObject(),
-						ruleSetWithDeletedRules = [];
+		},
+	getMainModelFromTreeViewModel: function(selectedRule) {
 
-					for (var i = 0; i < lib.rules.length; i++) {
+		var structeredRulesModel =  this.model.getProperty("/libraries"),
+			mainModelRule = null;
 
-						if (lib.rules[i].id !== sourceObject.id) {
-							ruleSetWithDeletedRules.push(lib.rules[i]);
-						}
-					}
-					that.model.setProperty("/libraries/0/rules", ruleSetWithDeletedRules);
-					storage.removeSelectedRules(ruleSetWithDeletedRules);
-					that.createRulesUI();
-					var firstPanelItem = that.getView().byId("ruleSetContainer").getContent()[0];
-					firstPanelItem.setExpanded(true);
-				}
-			})];
-			var content = lib.title === constants.TEMP_RULESETS_NAME ? tempRulesButtons :
-				new sap.m.Button({
-					text: "Duplicate",
-					press: function (oEvent) {
-						var sourceObject = this.getParent().getBindingContext().getObject();
-						var selectedRuleCopy = jQuery.extend(true, {}, sourceObject);
-						that.model.setProperty("/newRule", selectedRuleCopy);
-						that.model.checkUpdate(true, false);
-						that.goToCreateRule();
+		structeredRulesModel.forEach(function(lib, index){
+				structeredRulesModel[index].rules.forEach(function(element){
+					if (selectedRule.id === element.id) {
+						mainModelRule = element;
 					}
 				});
-			return content;
+		});
+
+		return mainModelRule;
+	},
+
+	duplicateRule: function(event){
+		var path =  event.getSource().getBindingContext().getPath(),
+			sourceObject = this.getView().getModel().getProperty(path),
+			selectedRule = this.getMainModelFromTreeViewModel(sourceObject),
+			selectedRuleCopy = jQuery.extend(true, {}, selectedRule);
+
+		this.model.setProperty("/newRule", selectedRuleCopy);
+		this.model.checkUpdate(true, false);
+		this.goToCreateRule();
+	},
+
+	editRule: function(event) {
+		var path =  event.getSource().getBindingContext().getPath(),
+			sourceObject = this.getView().getModel().getProperty(path),
+			selectedRule = this.getMainModelFromTreeViewModel(sourceObject);
+
+		this.model.setProperty("/editRuleSource", selectedRule);
+		this.model.setProperty("/editRule", jQuery.extend(true, {}, selectedRule));
+		this.model.checkUpdate(true, true);
+		var navCont = this.getView().byId("rulesNavContainer");
+		navCont.to(this.getView().byId("ruleUpdatePage"), "show");
+	},
+	deleteTemporaryRule: function(event) {
+		var sourceObject = this.getObjectOnTreeRow(event),
+			treeViewModel = this.model.getProperty("/treeViewModel"),
+			mainModel = this.model.getProperty("/libraries"),
+			rulesNotToBeDeleted = [];
+
+
+		mainModel.forEach(function (lib, libIndex) {
+			if (lib.title === constants.TEMP_RULESETS_NAME) {
+				lib.rules.forEach(function (rule, ruleIndex) {
+					if (rule.id === sourceObject.id) {
+						lib.rules.splice(ruleIndex, 1);
+						return;
+					} else {
+						rulesNotToBeDeleted.push(rule);
+					}
+				});
+			}
+		});
+
+		for (var i in treeViewModel) {
+			if (treeViewModel[i].name === constants.TEMP_RULESETS_NAME) {
+				for (var innerIndex in treeViewModel[i]) {
+					if (treeViewModel[i][innerIndex].id === sourceObject.id) {
+						delete treeViewModel[i][innerIndex];
+					}
+				}
+			}
 		}
+		this.model.setProperty("/treeViewModel", treeViewModel);
+		storage.removeSelectedRules(rulesNotToBeDeleted);
+	},
+	/**
+	* Gets rule from selected row
+	* @param {Object} Event
+	* @returns {Object} ISelected rule from row
+	***/
+	getObjectOnTreeRow: function(event) {
+		var path =  event.getSource().getBindingContext().getPath(),
+		 sourceObject = this.getView().getModel().getProperty(path),
+		 libs = this.model.getProperty("/libraries");
+
+		libs.forEach(function (lib, libIndex) {
+			lib.rules.forEach(function (rule) {
+				if (rule.id === sourceObject.id) {
+					sourceObject.check = rule.check;
+				}
+			});
+		});
+		return sourceObject;
+	}
 	});
 });
 
@@ -5569,9 +6725,11 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Issues.controller",[
 	"sap/ui/model/json/JSONModel",
 	"sap/ui/support/supportRules/WindowCommunicationBus",
 	"sap/ui/support/supportRules/ui/models/SharedModel",
-	"sap/ui/support/supportRules/ElementTree",
-	"sap/ui/support/supportRules/WCBChannels"
-], function ($, Controller, JSONModel, CommunicationBus, SharedModel, ElementTree, channelNames) {
+	"sap/ui/support/supportRules/ui/external/ElementTree",
+	"sap/ui/support/supportRules/IssueManager",
+	"sap/ui/support/supportRules/WCBChannels",
+	"sap/ui/support/supportRules/ui/models/formatter"
+], function ($, Controller, JSONModel, CommunicationBus, SharedModel, ElementTree, IssueManager, channelNames, formatter) {
 	"use strict";
 
 	var mIssueSettings = {
@@ -5597,9 +6755,21 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Issues.controller",[
 
 	return Controller.extend("sap.ui.support.supportRules.ui.controllers.Issues", {
 		ISSUES_LIMIT : 1000,
+		formatter: formatter,
 		onInit: function () {
+
+			this.model = SharedModel;
+			this.setCommunicationSubscriptions();
+			this.getView().setModel(this.model);
+			this.clearFilters();
+			this._initElementTree();
+			this.treeTable = this.getView().byId("issuesList");
+			this.issueTable = this.getView().byId("issueTable");
+		},
+		setCommunicationSubscriptions: function () {
+
 			CommunicationBus.subscribe(channelNames.ON_ANALYZE_FINISH, function (data) {
-			var that = this;
+				var that = this;
 
 				var problematicControlsIds = {};
 
@@ -5621,27 +6791,25 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Issues.controller",[
 				});
 				this.model.setSizeLimit(this.ISSUES_LIMIT);
 				this.model.setProperty("/issues", data.issues);
-				this.model.setProperty("/maxIssuesDisplayedNumber", Math.min(this.ISSUES_LIMIT, data.issues.length));
 				this.model.setProperty('/analyzePressed', true);
-				this.model.setProperty("/visibleIssuesCount", data.issues.length);
-				/*this.elementTreeData = {
-					controls: data.elementTree,
-					issuesIds: problematicControlsIds
-				};*/
-
+				this.model.setProperty("/issuesCount", this.data.issues.length);
+				this.model.setProperty("/selectedIssue", "");
 				this.elementTree.setData({
 					controls: data.elementTree,
 					issuesIds: problematicControlsIds
 				});
 
 				this.clearFilters();
-				this._selectFirstVisibleIssue();
 			}, this);
-
-			this.model = SharedModel;
-			this.getView().setModel(this.model);
-			this.clearFilters();
-			this._initElementTree();
+			CommunicationBus.subscribe(channelNames.GET_ISSUES, function (data) {
+				this.structuredIssuesModel = data.groupedIssues;
+				this.model.setProperty("/issues", data.issuesModel);
+				if (data.issuesModel[0]) {
+					this._setSelectedRule(data.issuesModel[0][0]);
+					this.treeTable.setSelectedIndex(1);
+					this.issueTable.setSelectedIndex(0);
+				}
+			}, this);
 		},
 		_initElementTree: function () {
 			var that = this;
@@ -5651,7 +6819,6 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Issues.controller",[
 					that.clearFilters();
 					that.model.setProperty("/elementFilter", selectedElementId);
 					that.updateIssuesVisibility();
-					that._selectFirstVisibleIssue();
 				},
 				onHoverChanged: function (hoveredElementId) {
 					CommunicationBus.publish(channelNames.TREE_ELEMENT_MOUSE_ENTER, hoveredElementId);
@@ -5682,10 +6849,26 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Issues.controller",[
 			this.elementTree.clearSelection();
 		},
 		onIssuePressed: function (event) {
-			var pressedLi = event.mParameters.listItem,
-				selectedIssue = pressedLi.getBindingContext().getObject();
-			this.model.setProperty("/selectedIssue", selectedIssue);
+			var selectedIssue = this.model.getProperty("/selectedIssue");
 			this.elementTree.setSelectedElement(selectedIssue.context.id, false);
+		},
+		onRowSelectionChanged: function (event) {
+			if (event.getParameter("rowContext")) {
+				var selection = event.getParameter("rowContext").getObject();
+				if (selection.type === "rule") {
+					this._setSelectedRule(selection);
+				} else {
+					this.model.setProperty("/selectedIssue", "");
+				}
+				if (selection.issueCount < 4 ) {
+					this._setPropertiesOfResponsiveDetailsAndTable("Fixed", "inherit");
+					this.model.setProperty("/visibleRowCount", 4);
+
+				} else {
+					this._setPropertiesOfResponsiveDetailsAndTable("Auto", "5rem");
+				}
+			}
+
 		},
 		openDocumentation: function (oEvent) {
 			var link = sap.ui.getCore().byId(oEvent.mParameters.id),
@@ -5693,37 +6876,13 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Issues.controller",[
 			CommunicationBus.publish(channelNames.OPEN_URL, url);
 		},
 		updateIssuesVisibility: function () {
-			var visibleIssuesCount = 0;
-			var issuesList = this.getView().byId("issuesList");
-
 			if (this.data) {
 				var filteredIssues = this.data.issues.filter(this.filterIssueListItems, this);
-
-				this.model.setProperty("/issues", filteredIssues);
-				this.model.setProperty("/maxIssuesDisplayedNumber", Math.min(this.ISSUES_LIMIT, filteredIssues.length));
+				CommunicationBus.publish(channelNames.REQUEST_ISSUES, filteredIssues);
+				this.model.setProperty("/visibleIssuesCount", filteredIssues.length);
 			}
 
 			this.setToolbarHeight();
-
-			issuesList.getItems().forEach(function (item) {
-				item.updateProperty("visible");
-			});
-
-			issuesList.getItems().forEach(function (item) {
-				if (item.getVisible()) {
-					visibleIssuesCount++;
-				}
-			});
-			this.model.setProperty("/visibleIssuesCount", visibleIssuesCount);
-		},
-		_selectFirstVisibleIssue: function () {
-			var list = this.getView().byId("issuesList"),
-				items = list.getVisibleItems();
-
-			if (items.length > 0) {
-				list.setSelectedItem(items[0]);
-				this.model.setProperty("/selectedIssue", items[0].getBindingContext().getObject());
-			}
 		},
 		filterIssueListItems: function (issue) {
 			var sevFilter = this.model.getProperty("/severityFilter"),
@@ -5747,14 +6906,7 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Issues.controller",[
 			return mIssueSettings.severitytexts[sValue];
 		},
 		setToolbarHeight: function() {
-			var issues = this.model.getProperty("/issues");
-			if (issues && issues.length > this.ISSUES_LIMIT) {
-				this.model.setProperty("/filterBarHeight", "3.5rem");
-				this.model.setProperty("/messegeStripHeight", "2.5rem");
-			} else {
 				this.model.setProperty("/filterBarHeight", "4rem");
-				this.model.setProperty("/messegeStripHeight", "2rem");
-			}
 		},
 		onReportPress: function(oEvent) {
 				var oItem = oEvent.getParameter("item"),
@@ -5772,6 +6924,32 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Issues.controller",[
 				executionScopeTitle: this.model.getProperty("/executionScopeTitle"),
 				analysisDurationTitle: this.model.getProperty("/analysisDurationTitle")
 			};
+		},
+		onRowSelection: function(event) {
+			if (event.getParameter("rowContext")) {
+				var selection = event.getParameter("rowContext").getObject();
+				this.elementTree.setSelectedElement(selection.context.id, false);
+				this.model.setProperty("/selectedIssue/details", selection.details);
+			}
+		},
+		_setSelectedRule: function(selection){
+			var selectedIssues,
+				selectionCopy;
+			if (this.model.getProperty("/visibleIssuesCount") > 0) {
+				selectedIssues = this.structuredIssuesModel[selection.ruleLibName][selection.ruleId];
+				selectionCopy = jQuery.extend(true, {}, selection); // clone the model so that the TreeTable will not be affected
+				selectionCopy.issues = selectedIssues;
+				selectionCopy.resolutionUrls = selectedIssues[0].resolutionUrls;
+				this.issueTable.setSelectedIndex(0);
+				this.model.setProperty("/selectedIssue/details", selectionCopy.details);
+				this.model.setProperty("/selectedIssue", selectionCopy);
+			} else {
+			this.model.setProperty("/selectedIssue", "");
+			}
+		},
+		_setPropertiesOfResponsiveDetailsAndTable: function(visibleRowCountMode, heightDetailsArea){
+			this.model.setProperty("/visibleRowCountMode", visibleRowCountMode);
+			this.model.setProperty("/heightDetailsArea", heightDetailsArea);
 		}
 	});
 });
@@ -5881,17 +7059,6 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Main.controller",[
 				that._settingsPopover.openBy(source);
 			}, 0);
 		},
-
-		onNavConAfterNavigate: function (oEvent) {
-			var to = oEvent.getParameter("to");
-			if (to === this.getView().byId("analysis")) {
-				setTimeout(function () {
-					to.getController().markLIBAsSelected();
-				}, 250);
-			}
-		},
-
-
 		goToAnalysis: function (evt) {
 			var navCon = this.getView().byId("navCon");
 			navCon.to(this.getView().byId("analysis"), "show");
@@ -5904,7 +7071,20 @@ sap.ui.define("sap/ui/support/supportRules/ui/controllers/Main.controller",[
 		},
 
 		goToWiki: function () {
-			 window.open('https://uacp2.hana.ondemand.com/viewer/DRAFT/SAPUI5_Internal/57ccd7d7103640e3a187ed55e1d2c163.html','_blank');
+			var url,
+				version = "",
+				fullVersion = sap.ui.getVersionInfo().version,
+				majorVersion = jQuery.sap.Version(fullVersion).getMajor(),
+				minorVersion = jQuery.sap.Version(fullVersion).getMinor();
+
+			if (minorVersion % 2 !== 0) {
+				minorVersion--;
+			}
+
+			version += String(majorVersion) + String(minorVersion);
+			// TODO: add right path to supprot assitan section when documentation is publicly released (1.48).
+			url = "https://help.sap.com/viewer/DRAFT/OpenUI5_" + version + "/615d9e4aaa34447fbd4aa5f19dfde9b8.html";
+			window.open(url, '_blank');
 		},
 
 		setRulesLabel: function (libs) {
@@ -5984,8 +7164,9 @@ if ( !jQuery.sap.isDeclared('sap.ui.table.library.support') ) {
  */
 jQuery.sap.declare('sap.ui.table.library.support'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-sap.ui.define("sap/ui/table/library.support",["jquery.sap.global", "sap/ui/support/library", "sap/ui/support/supportRules/RuleSet", "./TableHelper.support"],
-	function(jQuery, SupportLib, Ruleset, SupportHelper) {
+jQuery.sap.require('sap.ui.Device'); // unlisted dependency retained
+sap.ui.define("sap/ui/table/library.support",["jquery.sap.global", "sap/ui/support/library", "sap/ui/support/supportRules/RuleSet", "./TableHelper.support", 'sap/ui/Device'],
+	function(jQuery, SupportLib, Ruleset, SupportHelper, Device) {
 	"use strict";
 
 	// shortcuts
@@ -6001,8 +7182,37 @@ sap.ui.define("sap/ui/table/library.support",["jquery.sap.global", "sap/ui/suppo
 	var oRuleset = new Ruleset(oLib);
 
 	function createRule(oRuleDef) {
-		oRuleDef.id = "GRIDTABLE_" + oRuleDef.id;
+		oRuleDef.id = "gridTable" + oRuleDef.id;
 		SupportHelper.addRuleToRuleset(oRuleDef, oRuleset);
+	}
+
+
+	//**********************************************************
+	// Helpers related to sap.ui.table Controls
+	//**********************************************************
+
+	/**
+	 * Loops over all columns of all visible tables and calls the given callback with the following parameters:
+	 * table instance, column instance, column template instance.
+	 *
+	 * If the column does not have a template or a type is given and the template is not of this type the callback is not called.
+	 *
+	 * @param {function} fnDoCheck Callback
+	 * @param {object} oScope The scope as given in the rule check function.
+	 * @param {string} [sType] If given an additional type check is performed. Module syntax required!
+	 */
+	function checkColumnTemplate(fnDoCheck, oScope, sType) {
+		var aTables = SupportHelper.find(oScope, true, "sap/ui/table/Table");
+		var aColumns, oTemplate;
+		for (var i = 0; i < aTables.length; i++) {
+			aColumns = aTables[i].getColumns();
+			for (var k = 0; k < aColumns.length; k++) {
+				oTemplate = aColumns[k].getTemplate();
+				if (oTemplate && (!sType || SupportHelper.isInstanceOf(oTemplate, sType))) {
+					fnDoCheck(aTables[i], aColumns[k], oTemplate);
+				}
+			}
+		}
 	}
 
 
@@ -6015,11 +7225,12 @@ sap.ui.define("sap/ui/table/library.support",["jquery.sap.global", "sap/ui/suppo
 	 * Checks whether content densities are used correctly.
 	 */
 	createRule({
-		id : "CONTENT_DENSITY",
+		id : "ContentDensity",
+		categories: [Categories.Usage],
 		title : "Content Density Usage",
 		description : "Checks whether the content densities 'Cozy', 'Compact' and 'Condensed' are used correctly.",
 		resolution : "Ensure that either only the 'Cozy' or 'Compact' content density is used or the 'Condensed' and 'Compact' content densities in combination are used.",
-		resolutionurls : [SupportHelper.createDocuRef("How to use Content Densities", "#docs/guide/e54f729da8e3405fae5e4fe8ae7784c1.html")],
+		resolutionurls : [SupportHelper.createDocuRef("Documentation: Content Densities", "#docs/guide/e54f729da8e3405fae5e4fe8ae7784c1.html")],
 		check : function(oIssueManager, oCoreFacade, oScope) {
 			var $Document = jQuery("html");
 			var $Cozy = $Document.find(".sapUiSizeCozy");
@@ -6053,11 +7264,12 @@ sap.ui.define("sap/ui/table/library.support",["jquery.sap.global", "sap/ui/suppo
 		}
 	});
 
+
 	/*
 	 * Validates whether title or aria-labelledby is correctly set
 	 */
 	createRule({
-		id : "VALIDATE_ACC_TITLE",
+		id : "AccessibleLabel",
 		categories: [Categories.Accessibility],
 		title : "Accessible Label",
 		description : "Checks whether 'sap.ui.table.Table' controls have an accessible label.",
@@ -6072,11 +7284,190 @@ sap.ui.define("sap/ui/table/library.support",["jquery.sap.global", "sap/ui/suppo
 		}
 	});
 
+
+	/*
+	 * Validates sap.ui.core.Icon column templates.
+	 */
+	createRule({
+		id : "ColumnTemplateIcon",
+		categories: [Categories.Accessibility],
+		title : "Column template validation - 'sap.ui.core.Icon'",
+		description : "The 'decorative' property of control 'sap.ui.core.Icon' is set to 'true' although the control is used as column template.",
+		resolution : "Set the 'decorative' property of control 'sap.ui.core.Icon' to 'false' if the control is used as column template.",
+		check : function(oIssueManager, oCoreFacade, oScope) {
+			checkColumnTemplate(function(oTable, oColumn, oIconTemplate) {
+				if (!oIconTemplate.isBound("decorative") && oIconTemplate.getDecorative()) {
+					var sId = oColumn.getId();
+					SupportHelper.reportIssue(oIssueManager, "Column '" + sId + "' of table '" + oTable.getId() + "' uses decorative 'sap.ui.core.Icon' control.", Severity.High, sId);
+				}
+			}, oScope, "sap/ui/core/Icon");
+		}
+	});
+
+
+	/*
+	 * Validates sap.m.Text column templates.
+	 */
+	createRule({
+		id : "ColumnTemplateTextWrapping",
+		categories: [Categories.Usage],
+		title : "Column template validation - 'sap.m.Text'",
+		description : "The 'wrapping' property of the control 'sap.m.Text' is set to 'true' although the control is used as a column template.",
+		resolution : "Set the 'wrapping' property of the control 'sap.m.Text' to 'false' if the control is used as a column template.",
+		check : function(oIssueManager, oCoreFacade, oScope) {
+			checkColumnTemplate(function(oTable, oColumn, oMTextTemplate) {
+				if (!oMTextTemplate.isBound("wrapping") && oMTextTemplate.getWrapping()) {
+					var sColumnId = oColumn.getId();
+					SupportHelper.reportIssue(oIssueManager, "Column '" + sColumnId + "' of table '" + oTable.getId() + "' uses an 'sap.m.Text' control with wrapping enabled.", Severity.High, sColumnId);
+				}
+			}, oScope, "sap/m/Text");
+		}
+	});
+
+
+	/*
+	 * Checks for No Deviating units issue in AnalyticalBinding
+	 */
+	createRule({
+		id : "AnalyticsNoDeviatingUnits",
+		categories: [Categories.Bindings],
+		title : "Analytical Binding reports 'No deviating units found...'",
+		description : "The analytical service returns duplicate IDs. This could also lead to many requests because the analytical binding " +
+						"will request the measures without deviating units again and expects to receive just one record, but again gets several ones ...",
+		resolution : "Adjust the service implementation.",
+		check : function(oIssueManager, oCoreFacade, oScope) {
+			var aTables = SupportHelper.find(oScope, true, "sap/ui/table/AnalyticalTable");
+			var sAnalyticalErrorId = "NO_DEVIATING_UNITS";
+			var oIssues = {};
+
+			SupportHelper.checkLogEntries(function(oLogEntry) {
+				// Filter out totally irrelevant issues
+				if (oLogEntry.level != jQuery.sap.log.Level.ERROR && oLogEntry.level != jQuery.sap.log.Level.FATAL) {
+					return false;
+				}
+				var oInfo = oLogEntry.supportInfo;
+				if (oInfo && oInfo.type === "sap.ui.model.analytics.AnalyticalBinding" && oInfo.analyticalError === sAnalyticalErrorId) {
+					return true;
+				}
+				return false;
+			}, function(oLogEntry){
+				// Check the remaining Issues
+				var sBindingId = oLogEntry.supportInfo.analyticalBindingId;
+				if (sBindingId && !oIssues[sAnalyticalErrorId + "-" + sBindingId]) {
+					var oBinding;
+					for (var i = 0; i < aTables.length; i++) {
+						oBinding = aTables[i].getBinding("rows");
+						if (oBinding && oBinding.__supportUID === sBindingId) {
+							oIssues[sAnalyticalErrorId + "-" + sBindingId] = true; // Ensure is only reported once
+							SupportHelper.reportIssue(oIssueManager, "Analytical Binding reports 'No deviating units found...'", Severity.High, aTables[i].getId());
+						}
+					}
+				}
+			});
+		}
+	});
+
+	/*
+	 * Checks whether the currently visible rows have the expected height.
+	 */
+	createRule({
+		id : "RowHeights",
+		categories: [Categories.Usage],
+		title : "Row heights",
+		description : "Checks whether the currently visible rows have the expected height.",
+		resolution : "Check whether content densities are correctly used, and only the supported controls are used as column templates, with their"
+					 + " wrapping property set to \"false\"",
+		resolutionurls: [
+			SupportHelper.createDocuRef("Documentation: Content Densities", "#docs/guide/e54f729da8e3405fae5e4fe8ae7784c1.html"),
+			SupportHelper.createDocuRef("Documentation: Supported controls", "#docs/guide/148892ff9aea4a18b912829791e38f3e.html"),
+			{text: "SAP Fiori Design Guidelines: Grid Table", href: "https://experience.sap.com/fiori-design-web/grid-table/"}/*,
+			SupportHelper.createDocuRef("API Reference: Column #setTemplate", "#docs/api/symbols/sap.ui.table.Column.html#setTemplate")*/
+		],
+		check: function(oIssueManager, oCoreFacade, oScope) {
+			var aTables = SupportHelper.find(oScope, true, "sap/ui/table/Table");
+			var aVisibleRows;
+			var fActualRowHeight;
+			var iExpectedRowHeight;
+			var oRowElement;
+			var bIsZoomedInChrome = Device.browser.chrome && window.devicePixelRatio != 1;
+			var bUnexpectedRowHeightDetected = false;
+
+			for (var i = 0; i < aTables.length; i++) {
+				aVisibleRows = aTables[i].getRows();
+				iExpectedRowHeight = aTables[i]._getDefaultRowHeight();
+
+				for (var j = 0; j < aVisibleRows.length; j++) {
+					oRowElement = aVisibleRows[j].getDomRef();
+
+					if (oRowElement != null) {
+						fActualRowHeight = oRowElement.getBoundingClientRect().height;
+
+						if (bIsZoomedInChrome) {
+							var nHeightDeviation = Math.abs(iExpectedRowHeight - fActualRowHeight);
+							if (nHeightDeviation > 1) {
+								// If zoomed in Chrome, the actual height may deviate from the expected height by less than 1 pixel. Any higher
+								// deviation shall be considered as defective.
+								bUnexpectedRowHeightDetected = true;
+							}
+						} else if (fActualRowHeight !== iExpectedRowHeight) {
+							bUnexpectedRowHeightDetected = true;
+						}
+
+						if (bUnexpectedRowHeightDetected) {
+							SupportHelper.reportIssue(oIssueManager,
+								"The row height was expected to be " + iExpectedRowHeight + "px, but was " + fActualRowHeight + "px instead."
+								+ " This causes issues with vertical scrolling.",
+								Severity.High, aVisibleRows[j].getId());
+							break;
+						}
+					}
+				}
+			}
+		}
+	});
+
 	return {lib: oLib, ruleset: oRuleset};
 
 }, true);
 
 }; // end of sap/ui/table/library.support.js
+if ( !jQuery.sap.isDeclared('sap.uxap.library.support') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+/**
+ * Adds support rules of the sap.uxap library to the support infrastructure.
+ */
+jQuery.sap.declare('sap.uxap.library.support'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+sap.ui.define("sap/uxap/library.support",[
+	"jquery.sap.global",
+	"sap/ui/support/library",
+	"sap/ui/support/supportRules/RuleSet",
+	"./ObjectPageLayout.support"],
+
+	function(jQuery,
+			 SupportLib,
+			 Ruleset,
+			 ObjectPageLayoutSupport) {
+
+	"use strict";
+
+	var oLib = {
+		name: "sap.uxap",
+		niceName: "ObjectPage library"
+	};
+
+	var oRuleset = new Ruleset(oLib);
+		ObjectPageLayoutSupport.addRulesToRuleset(oRuleset);
+
+	return {lib: oLib, ruleset: oRuleset};
+
+}, true);
+
+}; // end of sap/uxap/library.support.js
 if ( !jQuery.sap.isDeclared('sap.m.library.support') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -6223,7 +7614,9 @@ if ( !jQuery.sap.isDeclared('sap.ui.support.supportRules.Main') ) {
  * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-
+/**
+ * @typedef {object} Event Certain event that's fired by the a user action in the browser
+ */
 jQuery.sap.declare('sap.ui.support.supportRules.Main'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
 jQuery.sap.require('sap.ui.base.ManagedObject'); // unlisted dependency retained
@@ -6235,7 +7628,7 @@ sap.ui.define("sap/ui/support/supportRules/Main",[
 	"sap/ui/support/supportRules/Analyzer",
 	"sap/ui/support/supportRules/CoreFacade",
 	"sap/ui/support/supportRules/ExecutionScope",
-	"sap/ui/support/supportRules/Highlighter",
+	"sap/ui/support/supportRules/ui/external/Highlighter",
 	"sap/ui/support/supportRules/WindowCommunicationBus",
 	"sap/ui/support/supportRules/RuleSerializer",
 	"sap/ui/support/supportRules/RuleSet",
@@ -6253,11 +7646,22 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 	var oMain = null;
 	var customSuffix = 'sprt';
 
-	/**
-	 * Controller for the support tools
-	 * Provides integration with respective data services
-	 */
 	var Main = ManagedObject.extend("sap.ui.support.Main", {
+
+		/**
+		 * <h3>Overview</h3>
+		 * Controller for the support tools.
+		 * Provides integration with respective data services.
+		 *
+		 * @public
+		 * @class
+		 * @constructor
+		 * @namespace
+		 * @name sap.ui.support.Main
+		 * @memberof sap.ui.support
+		 * @author SAP SE
+		 * @version @{version}
+		 */
 		constructor: function () {
 			if (!oMain) {
 				var that = this;
@@ -6270,9 +7674,45 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 				ManagedObject.apply(this, arguments);
 
 				jQuery.sap.support = {
-					analyze: function (executionScope, ruleDescriptors) {
-						return oMain.analyze(executionScope, ruleDescriptors);
+
+					/**
+					 * Analyzes all rules in the given execution scope.
+					 * @public
+					 * @method
+					 * @name sap.ui.support.Main.analyze
+					 * @memberof sap.ui.support.Main
+					 * @param {Object} oExecutionScope The execution scope of the analysis with the type of the scope
+					 * @param {Object[]} aRuleDescriptors An array with rules against which the analysis will be run
+					 * @returns {Promise} Notifies the finished state by starting the Analyzer
+					 */
+					analyze: function (oExecutionScope, aRuleDescriptors) {
+						return oMain.analyze(oExecutionScope, aRuleDescriptors);
 					},
+					/**
+					 * Gets last analysis history.
+					 * @public
+					 * @method
+					 * @name sap.ui.support.Main.getLastAnalysisHistory
+					 * @memberof sap.ui.support.Main
+					 * @returns {Object} Last analysis history.
+					 */
+					getLastAnalysisHistory: function () {
+						var aHistory = this.getAnalysisHistory();
+
+						if (jQuery.isArray(aHistory) && aHistory.length > 0) {
+							return aHistory[aHistory.length - 1];
+						} else {
+							return null;
+						}
+					},
+					/**
+					 * Gets history.
+					 * @public
+					 * @method
+					 * @name sap.ui.support.Main.getAnalysisHistory
+					 * @memberof sap.ui.support.Main
+					 * @returns {Object[]} Current history.
+					 */
 					getAnalysisHistory: function () {
 						if (that._oAnalyzer.running()) {
 							return null;
@@ -6280,6 +7720,14 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 
 						return IssueManager.getHistory();
 					},
+					/**
+					 * Gets formatted history.
+					 * @public
+					 * @method
+					 * @name sap.ui.support.Main.getFormattedAnalysisHistory
+					 * @memberof sap.ui.support.Main
+					 * @returns {Promise} Analyzed and formatted history as string
+					 */
 					getFormattedAnalysisHistory: function () {
 						if (that._oAnalyzer.running()) {
 							return;
@@ -6307,7 +7755,11 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 	});
 
 	/**
-	 * Checks if the current page is inside an iframe.
+	 * Checks if the current page is inside an iFrame.
+	 * @private
+	 * @method
+	 * @name sap.ui.support.Main._isInIframe
+	 * @memberof sap.ui.support.Main
 	 */
 	Main.prototype._isInIframe = function () {
 		try {
@@ -6319,9 +7771,15 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 	};
 
 	/**
-	 * This controller is started by the core as plugin
+	 * This controller is started by the core as a plugin.
+	 * @private
+	 * @method
+	 * @method
+	 * @name sap.ui.support.Main.startPlugin
+	 * @memberof sap.ui.support.Main
+	 * @param {Object[]} aSupportModeConfig Configuration for the SupportAssistant when it's launched.
 	 */
-	Main.prototype.startPlugin = function (supportModeConfig) {
+	Main.prototype.startPlugin = function (aSupportModeConfig) {
 		if (this._pluginStarted) {
 			return;
 		}
@@ -6332,13 +7790,13 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 
 		sap.ui.getCore().registerPlugin({
 			startPlugin: function (oCore) {
-				that._supportModeConfig = supportModeConfig = supportModeConfig || oCore.getConfiguration().getSupportMode();
+				that._supportModeConfig = aSupportModeConfig = aSupportModeConfig || oCore.getConfiguration().getSupportMode();
 				that._setCommunicationSubscriptions();
 
 				// If the current page is inside of an iframe don't start the Support tool.
 				// Otherwise if there are any iframes inside a page, all of them
 				// will have the Support tool started along with the parent page.
-				var bForceUIInFrame = that._isInIframe() && supportModeConfig.indexOf("frame-force-ui") !== -1;
+				var bForceUIInFrame = that._isInIframe() && aSupportModeConfig.indexOf("frame-force-ui") !== -1;
 
 				that._oCore = oCore;
 				that._oDataCollector = new DataCollector(oCore);
@@ -6350,14 +7808,14 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 				// Make sure that we load UI frame, when no parameter supplied
 				// but tools is required to load, or when parameter is there
 				// but is not equal to 'silent'
-				if (!supportModeConfig ||
-					supportModeConfig.indexOf("silent") === -1 ||
+				if (!aSupportModeConfig ||
+					aSupportModeConfig.indexOf("silent") === -1 ||
 					bForceUIInFrame) {
 					// Lazily, asynchronously load the frame controller
 					sap.ui.require(["sap/ui/support/supportRules/ui/IFrameController"], function (IFrameCtrl) {
 						IFrameController = IFrameCtrl;
 
-						IFrameController.injectFrame(supportModeConfig);
+						IFrameController.injectFrame(aSupportModeConfig);
 
 						// Validate messages
 						CommunicationBus.onMessageChecks.push(function (msg) {
@@ -6386,10 +7844,20 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 				that._oCoreFacade = null;
 				that._oDataCollector = null;
 				that._oExecutionScope = null;
+				that._rulesCreated = false;
+				that._mRuleSets = null;
 			}
 		});
 	};
 
+	/**
+	 * Event handler used to catch when new rules are added to a library.
+	 * @private
+	 * @method
+	 * @name sap.ui.support.Main._onLibraryChanged
+	 * @memberof sap.ui.support.Main
+	 * @param {Event} oEvent Contains information about the library and newly created rules
+	 */
 	Main.prototype._onLibraryChanged = function (oEvent) {
 		if (oEvent.getParameter("stereotype") === "library" && this._rulesCreated) {
 			var that = this;
@@ -6400,24 +7868,35 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 		}
 	};
 
+	/**
+	 * Creates event listeners for new elements that are published to the Core object by the CommunicationBus.
+	 * @private
+	 * @method
+	 * @name sap.ui.support.Main._createCoreSpies
+	 * @memberof sap.ui.support.Main
+	 */
 	Main.prototype._createCoreSpies = function () {
 		var that = this,
-			notifyDirtyStateInterval = 500;
+			iNotifyDirtyStateInterval = 500;
 
-		this._dirtyTimeoutHandle = null;
+		this._fnDirtyTimeoutHandle = null;
 
 		var spyFunction = function (fnName) {
+
 			var oldFunction = that._oCore[fnName];
+
 			that._oCore[fnName] = function () {
 				oldFunction.apply(that._oCore, arguments);
+
 				/**
 				 * If we have 50 new elements in the core, don't send 50 new messages for
 				 * dirty state instead wait 500ms and send one message.
 				 */
-				clearTimeout(that._dirtyTimeoutHandle);
-				that._dirtyTimeoutHandle = setTimeout(function () {
+				clearTimeout(that._fnDirtyTimeoutHandle);
+
+				that._fnDirtyTimeoutHandle = setTimeout(function () {
 					CommunicationBus.publish(channelNames.ON_CORE_STATE_CHANGE);
-				}, notifyDirtyStateInterval);
+				}, iNotifyDirtyStateInterval);
 			};
 		};
 
@@ -6425,28 +7904,42 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 		spyFunction("deregisterElement");
 	};
 
+	/**
+	 * Sets subscriptions to the CommunicationBus for temporary rules.
+	 * @private
+	 * @method
+	 * @name sap.ui.support.Main._setCommunicationSubscriptions
+	 * @memberof sap.ui.support.Main
+	 */
 	Main.prototype._setCommunicationSubscriptions = function () {
 		// If configuration contains 'silent' there must be no subscription
 		// for temporary rules
 		if (this._supportModeConfig.indexOf("silent") < 0) {
+
             CommunicationBus.subscribe(channelNames.VERIFY_CREATE_RULE, function (tempRuleSerialized) {
+
                 var tempRule = RuleSerializer.deserialize(tempRuleSerialized),
                     tempRuleSet = this._mRuleSets[constants.TEMP_RULESETS_NAME].ruleset,
                     result = tempRuleSet.addRule(tempRule);
+
                 CommunicationBus.publish(channelNames.VERIFY_RULE_CREATE_RESULT, {
                     result: result,
                     newRule: RuleSerializer.serialize(tempRule)
                 });
+
             }, this);
 
 			CommunicationBus.subscribe(channelNames.VERIFY_UPDATE_RULE, function (data) {
+
 				var tempRule = RuleSerializer.deserialize(data.updateObj),
 					tempRuleSet = this._mRuleSets[constants.TEMP_RULESETS_NAME].ruleset,
 					result = tempRuleSet.updateRule(data.oldId, tempRule);
+
 				CommunicationBus.publish(channelNames.VERIFY_RULE_UPDATE_RESULT, {
 					result: result,
 					updateRule: RuleSerializer.serialize(tempRule)
 				});
+
 			}, this);
 
 			CommunicationBus.subscribe(channelNames.OPEN_URL, function (url) {
@@ -6511,10 +8004,36 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 				that._fetchNonLoadedRuleSets();
 			});
 		}, this);
+
+		CommunicationBus.subscribe(channelNames.REQUEST_RULES_MODEL, function (deserializedRules) {
+			if (deserializedRules) {
+				CommunicationBus.publish(channelNames.GET_RULES_MODEL, IssueManager.getTreeTableViewModel(deserializedRules));
+			}
+		}, this);
+
+		CommunicationBus.subscribe(channelNames.REQUEST_ISSUES, function (issues) {
+			if (issues) {
+				var groupedIssues = IssueManager.groupIssues(issues),
+					issuesModel = IssueManager.getIssuesViewModel(groupedIssues);
+
+				CommunicationBus.publish(channelNames.GET_ISSUES, {
+					groupedIssues: groupedIssues,
+					issuesModel: issuesModel
+				});
+			}
+		}, this);
 	};
 
+	/**
+	 * Gets the load origin of the SupportAssistant.
+	 * @private
+	 * @method
+	 * @name sap.ui.support.Main._getLoadFromSupportOrigin
+	 * @memberof sap.ui.support.Main
+	 * @returns {boolean} bLoadFromSupportOrigin Ensures that the SupportAssistant hasn't been fired from a different origin
+	 */
 	Main.prototype._getLoadFromSupportOrigin = function () {
-		var loadFromSupportOrigin = false;
+		var bLoadFromSupportOrigin = false;
 
 		var coreUri = new window.URI(jQuery.sap.getModulePath("sap.ui.core"));
 		var supportUri = new window.URI(jQuery.sap.getModulePath("sap.ui.support"));
@@ -6522,14 +8041,24 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 		// If loading support tool from different origin,
 		// i.e. protocol or host (host name + port) different
 		if (coreUri.protocol() !== supportUri.protocol() || coreUri.host() !== supportUri.host()) {
-			loadFromSupportOrigin = true;
+			bLoadFromSupportOrigin = true;
 		}
 
-		return loadFromSupportOrigin;
+		return bLoadFromSupportOrigin;
 	};
 
+	/**
+	 * Gets all libraries along with internal and external rules in them.
+	 * @private
+	 * @method
+	 * @name sap.ui.support.Main._fetchLibraryFiles
+	 * @memberof sap.ui.support.Main
+	 * @param {string[]} aLibNames Contains all library names for the given state
+	 * @param {function} fnProcessFile Callback that publishes all rules within each library in the SupportAssistant
+	 * @returns {Promise[]} aAjaxPromises Promises for each library in the SupportAssistant
+	 */
 	Main.prototype._fetchLibraryFiles = function (libNames, fnProcessFile) {
-		var ajaxPromises = [],
+		var aAjaxPromises = [],
 			that = this;
 
 		var supportModulePath = jQuery.sap.getModulePath("sap.ui.support");
@@ -6560,7 +8089,7 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 			}
 
 			// CHECK FOR INTERNAL RULES
-			ajaxPromises.push(new Promise(function (resolve) {
+			aAjaxPromises.push(new Promise(function (resolve) {
 				try {
 					sap.ui.require([(internalLibName).replace(/\./g, "/") + "/library.support"], function () {
 						fnProcessFile(internalLibName);
@@ -6572,7 +8101,7 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 			}));
 
 			// CHECK FOR PUBLIC RULES
-			ajaxPromises.push(new Promise(function (resolve) {
+			aAjaxPromises.push(new Promise(function (resolve) {
 				try {
 					sap.ui.require([customizableLibName.replace(/\./g, "/") + "/library.support"], function () {
 						fnProcessFile(customizableLibName);
@@ -6584,24 +8113,27 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 			}));
 		});
 
-		return ajaxPromises;
+		return aAjaxPromises;
 	};
 
 	/**
 	 * Factory function for creating a RuleSet. Helps reducing API complexity.
 	 * @private
-	 * @param {object} librarySupport object to be used for RuleSet creation
-	 * @returns {object} ruleset object to be added to _mRuleSets
+	 * @method
+	 * @name sap.ui.support.Main._createRuleSet
+	 * @memberof sap.ui.support.Main
+	 * @param {object} librarySupport Object to be used for RuleSet creation
+	 * @returns {object} ruleset RuleSet added to _mRuleSets
 	 */
-	Main.prototype._createRuleSet = function (librarySupport) {
+	Main.prototype._createRuleSet = function (oLibrarySupport) {
 		var oLib = {
-			name: librarySupport.name,
-			niceName: librarySupport.niceName
+			name: oLibrarySupport.name,
+			niceName: oLibrarySupport.niceName
 		};
 		var oRuleSet = new RuleSet(oLib);
 
-		for (var i = 0; i < librarySupport.ruleset.length; i++) {
-			var ruleset = librarySupport.ruleset[i];
+		for (var i = 0; i < oLibrarySupport.ruleset.length; i++) {
+			var ruleset = oLibrarySupport.ruleset[i];
 
 			// If the ruleset contains arrays of rules make sure we add them.
 			if (jQuery.isArray(ruleset)) {
@@ -6619,9 +8151,18 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 		};
 	};
 
-	Main.prototype._fetchSupportRuleSets = function (libNames) {
-		libNames = libNames || [];
-		libNames = libNames.concat(Object.keys(sap.ui.getCore().getLoadedLibraries()));
+	/**
+	 * Gets all rulesets from the SupportAssistant
+	 * @private
+	 * @method
+	 * @name sap.ui.support.Main._fetchSupportRuleSets
+	 * @memberof sap.ui.support.Main
+	 * @param {string[]} aLibNames Contains all library names in the SupportAssistant
+	 * @returns {Promise<CommunicationBus>} mainPromise Has promises for all libraries regarding rulesets in the SupportAssistant
+	 */
+	Main.prototype._fetchSupportRuleSets = function (aLibNames) {
+		aLibNames = aLibNames || [];
+		aLibNames = aLibNames.concat(Object.keys(sap.ui.getCore().getLoadedLibraries()));
 
 		var that = this;
 
@@ -6631,7 +8172,7 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 				that._versionInfo = versionInfo;
 				RuleSet.versionInfo = versionInfo;
 
-				var libFetchPromises = that._fetchLibraryFiles(libNames, function (libName) {
+				var libFetchPromises = that._fetchLibraryFiles(aLibNames, function (libName) {
 					var normalizedLibName = libName.replace("." + customSuffix, "").replace(".internal", ""),
 						libSupport = jQuery.sap.getObject(libName).library.support,
 						library = that._mRuleSets[normalizedLibName];
@@ -6668,19 +8209,26 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 		return mainPromise;
 	};
 
+	/**
+	 * Gets all non loaded libraries in the SupportAssistant which aren't loaded by the user.
+	 * @private
+	 * @method
+	 * @name sap.ui.support.Main._fetchNonLoadedRuleSets
+	 * @memberof sap.ui.support.Main
+	 */
 	Main.prototype._fetchNonLoadedRuleSets = function () {
-		var libs = this._versionInfo.libraries,
+		var aLibraries = this._versionInfo.libraries,
 			data = [];
 
-		var libNames = libs.map(function (lib) {
+		var aLibNames = aLibraries.map(function (lib) {
 			return lib.name;
 		});
 
-		var libFetchPromises = this._fetchLibraryFiles(libNames, function (libName) {
-			libName = libName.replace("." + customSuffix, "").replace(".internal", "");
+		var libFetchPromises = this._fetchLibraryFiles(aLibNames, function (sLibraryName) {
+			sLibraryName = sLibraryName.replace("." + customSuffix, "").replace(".internal", "");
 
-			if (data.indexOf(libName) < 0) {
-				data.push(libName);
+			if (data.indexOf(sLibraryName) < 0) {
+				data.push(sLibraryName);
 			}
 		});
 
@@ -6691,6 +8239,13 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 		});
 	};
 
+	/**
+	 * Create a library for the temporary rules.
+	 * @private
+	 * @method
+	 * @name sap.ui.support.Main._initTempRulesLib
+	 * @memberof sap.ui.support.Main
+	 */
 	Main.prototype._initTempRulesLib = function () {
 		if (this._mRuleSets[constants.TEMP_RULESETS_NAME]) {
 			return;
@@ -6708,11 +8263,14 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 	};
 
 	/**
-	 * @param {object} executionScope - The execution scope of the analysis
-	 * @param {array} ruleDescriptors - An array with rules against which the analysis will be run
-	 * @returns {promise} to notify of finished state
+	 * Analyzes all rules in the given execution scope.
+	 * @private
+	 * @static
+	 * @method
+	 * @param {object[]|object} aRuleDescriptors An array with rules against which the analysis will be run
+	 * @returns {Promise} Notifies the finished state by starting the Analyzer
 	 */
-	Main.prototype.analyze = function (executionScope, ruleDescriptors) {
+	Main.prototype.analyze = function (oExecutionScope, aRuleDescriptors) {
 		var that = this;
 
 		if (this._oAnalyzer && this._oAnalyzer.running()) {
@@ -6720,7 +8278,7 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 		}
 
 		// Validations
-		if (executionScope && ExecutionScope.possibleScopes.indexOf(executionScope.type) === -1) {
+		if (oExecutionScope && ExecutionScope.possibleScopes.indexOf(oExecutionScope.type) === -1) {
 			jQuery.sap.log.error("Invalid execution scope type. Type must be one of the following: "
 				+ ExecutionScope.possibleScopes.join(", "));
 			return;
@@ -6729,22 +8287,27 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 		// When analyze is called as an API function there is a selectors property
 		// which is used to reduce complexity of the API function
 		// selectors is mapped to parentId and components.
-		if (executionScope && executionScope.selectors) {
-			this._mapExecutionScope(executionScope);
+		if (oExecutionScope && oExecutionScope.selectors) {
+			this._mapExecutionScope(oExecutionScope);
 		}
 
 		// Set default scope
-		executionScope = executionScope || {type: "global"};
+		oExecutionScope = oExecutionScope || {type: "global"};
 
 		this._oAnalyzer.reset();
 
-		this.setExecutionScope(executionScope);
+		this.setExecutionScope(oExecutionScope);
 
-		if (Array.isArray(ruleDescriptors)) {
+		if (Array.isArray(aRuleDescriptors)) {
 			// If there are 0 rules don't add tasks.
-			if (ruleDescriptors.length > 0) {
-				this._addTasksForSelectedRules(ruleDescriptors);
+			if (aRuleDescriptors.length > 0) {
+				this._addTasksForSelectedRules(aRuleDescriptors);
 			}
+		} else if (aRuleDescriptors
+			&& typeof aRuleDescriptors === "object"
+			&& aRuleDescriptors.ruleId
+			&& aRuleDescriptors.libName) {
+			this._addTasksForSelectedRules([aRuleDescriptors]);
 		} else {
 			this._addTasksForAllRules();
 		}
@@ -6756,75 +8319,139 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 		});
 	};
 
-	Main.prototype._addTasksForSelectedRules = function (ruleDescriptors) {
+	/**
+	 * Adds tasks for all selected rules in the Analyzer.
+	 * @private
+	 * @method
+	 * @name sap.ui.support.Main._addTasksForSelectedRules
+	 * @memberof sap.ui.support.Main
+	 * @param {object[]} aRuleDescriptors An array with rules against which the analysis will be run
+	 */
+	Main.prototype._addTasksForSelectedRules = function (aRuleDescriptors) {
 		var that = this;
 
 		this._oSelectedRulesIds = {};
 
-		ruleDescriptors.forEach(function (ruleDescriptor) {
+		aRuleDescriptors.forEach(function (ruleDescriptor) {
 			var libWithRules = that._mRuleSets[ruleDescriptor.libName],
 				executedRule = libWithRules.ruleset.getRules()[ruleDescriptor.ruleId];
+
 			that._oAnalyzer.addTask([executedRule.title], function (oObject) {
 				that._analyzeSupportRule(oObject);
 			}, [executedRule]);
+
 			that._oSelectedRulesIds[ruleDescriptor.ruleId] = true;
 		});
 	};
 
+	/**
+	 * Adds tasks for all rules in the Analyzer.
+	 * @private
+	 * @method
+	 * @name sap.ui.support.Main._addTasksForAllRules
+	 * @memberof sap.ui.support.Main
+	 */
 	Main.prototype._addTasksForAllRules = function () {
 		var that = this;
 
+		this._oSelectedRulesIds = {};
+
 		Object.keys(that._mRuleSets).map(function (libName) {
 			var rulesetRules = that._mRuleSets[libName].ruleset.getRules();
+
 			Object.keys(rulesetRules).map(function (ruleId) {
 				var rule = rulesetRules[ruleId];
 				that._oAnalyzer.addTask([rule.title], function (oObject) {
 					that._analyzeSupportRule(oObject);
 				}, [rule]);
+
+				that._oSelectedRulesIds[ruleId] = true;
 			});
+
 		});
 	};
 
-	Main.prototype.setExecutionScope = function (settings) {
-		this._oExecutionScope = ExecutionScope(this._oCore, settings);
+	/**
+	 * Sets execution scope.
+	 * @private
+	 * @method
+	 * @method
+	 * @name sap.ui.support.Main.setExecutionScope
+	 * @memberof sap.ui.support.Main
+	 * @param {object} oSettings Contains the type of execution scope
+	 */
+	Main.prototype.setExecutionScope = function (oSettings) {
+		this._oExecutionScope = ExecutionScope(this._oCore, oSettings);
 	};
 
-	// Map the execution scope selectors property to parentId and components.
-	// Doing this internally to reduce API complexity.
-	Main.prototype._mapExecutionScope = function (executionScope) {
-		if (executionScope.type === "subtree") {
-			if (typeof executionScope.selectors === "string") {
-				executionScope.parentId = executionScope.selectors;
-			} else if (Array.isArray(executionScope.selectors)) {
-				executionScope.parentId = executionScope.selectors[0];
+	/**
+	 * Maps the execution scope <code>selectors</code> property to <code>parentId</code> and components.
+	 * @private
+	 * @method
+	 * @name sap.ui.support.Main._mapExecutionScope
+	 * @memberof sap.ui.support.Main
+	 * @param {object} oExecutionScope The execution scope of the analysis with the type of the scope
+	 */
+	Main.prototype._mapExecutionScope = function (oExecutionScope) {
+		if (oExecutionScope.type === "subtree") {
+
+			if (typeof oExecutionScope.selectors === "string") {
+
+				oExecutionScope.parentId = oExecutionScope.selectors;
+
+			} else if (Array.isArray(oExecutionScope.selectors)) {
+
+				oExecutionScope.parentId = oExecutionScope.selectors[0];
+
 			}
-		} else if (executionScope.type === "components") {
-			if (typeof executionScope.selectors === "string") {
-				executionScope.components = [executionScope.selectors];
-			} else if (Array.isArray(executionScope.selectors)) {
-				executionScope.components = executionScope.selectors;
+
+		} else if (oExecutionScope.type === "components") {
+
+			if (typeof oExecutionScope.selectors === "string") {
+
+				oExecutionScope.components = [oExecutionScope.selectors];
+
+			} else if (Array.isArray(oExecutionScope.selectors)) {
+
+				oExecutionScope.components = oExecutionScope.selectors;
+
 			}
+
 		}
 
-		delete executionScope.selectors;
+		delete oExecutionScope.selectors;
 	};
 
 	/**
 	 * Called after the analyzer finished and reports whether there are issues or not.
+	 * @private
+	 * @method
+	 * @name sap.ui.support.Main._done
+	 * @memberof sap.ui.support.Main
 	 */
 	Main.prototype._done = function () {
-		var issues = IssueManager.getIssuesViewModel(),
-			elementTree = this._createElementTree();
+		var aIssues = IssueManager.getIssuesModel(),
+			aElementTree = this._createElementTree();
 
 		CommunicationBus.publish(channelNames.ON_ANALYZE_FINISH, {
-			issues: issues,
-			elementTree: elementTree,
+			issues: aIssues,
+			elementTree: aElementTree,
 			elapsedTime: this._oAnalyzer.getElapsedTimeString()
 		});
+
+		IssueManager.saveHistory();
 
 		this._oAnalyzer.resolve();
 	};
 
+	/**
+	 * Creates element tree for the TreeTable in the Issues view.
+	 * @private
+	 * @method
+	 * @name sap.ui.support.Main._createElementTree
+	 * @memberof sap.ui.support.Main
+	 * @returns {object[]} The element tree for the current view displayed in the Issues view
+	 */
 	Main.prototype._createElementTree = function () {
 		var contextElements = this._copyElementsStructure(),
 			elementTree = [];
@@ -6845,33 +8472,52 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 		}];
 	};
 
-	Main.prototype._setContextElementReferences = function (contextElements) {
+	/**
+	 * Sets the references in the elements from the element tree.
+	 * @private
+	 * @method
+	 * @name sap.ui.support.Main._setContextElementReferences
+	 * @memberof sap.ui.support.Main
+	 * @param {object} oContextElements Contains all context elements from the element tree
+	 */
+	Main.prototype._setContextElementReferences = function (oContextElements) {
 		var coreElements = this._oCore.mElements;
 
-		for (var elementId in contextElements) {
-			var element = contextElements[elementId],
+		for (var elementId in oContextElements) {
+			var element = oContextElements[elementId],
 				parent = coreElements[elementId] == undefined ? undefined : coreElements[elementId].getParent();
 
 			if (coreElements[elementId] instanceof sap.ui.core.ComponentContainer) {
 				var componentContainer = coreElements[elementId],
 					componentId = componentContainer.getComponent();
+
 				if (componentId) {
-					element.content.push(contextElements[componentId]);
-					contextElements[componentId].skip = true;
+					element.content.push(oContextElements[componentId]);
+					oContextElements[componentId].skip = true;
 				}
 			}
 
 			if (parent) {
 				var parentId = parent.getId();
-				if (!contextElements[parentId]) {
+
+				if (!oContextElements[parentId]) {
 					continue;
 				}
-				contextElements[parentId].content.push(contextElements[elementId]);
-				contextElements[elementId].skip = true;
+
+				oContextElements[parentId].content.push(oContextElements[elementId]);
+				oContextElements[elementId].skip = true;
 			}
 		}
 	};
 
+	/**
+	 * Copies element structure from the execution scope.
+	 * @private
+	 * @method
+	 * @name sap.ui.support.Main._copyElementsStructure
+	 * @memberof sap.ui.support.Main
+	 * @returns {object} copy Contains copied elements structure
+	 */
 	// TODO: the element crushing needs to be encapsulated on it's own
 	Main.prototype._copyElementsStructure = function () {
 		var copy = {},
@@ -6928,35 +8574,42 @@ function (jQuery, ManagedObject, JSONModel, Analyzer, CoreFacade,
 
 	/**
 	 * Used to create a data object for the report.
-	 *
-	 * @param {object} reportConstants - the string constants used in the report and in the Support Tools UI.
-	 * @return {object} contains all the information required to create a report.
+	 * @private
+	 * @method
+	 * @name sap.ui.support.Main._getReportData
+	 * @memberof sap.ui.support.Main
+	 * @param {object} oReportConstants Contains execution scopes and string constants used in the report and in the Support Tools UI.
+	 * @returns {object} Contains all the information required to create a report
 	 */
-	Main.prototype._getReportData = function (reportConstants) {
-		var issues = IssueManager.groupIssues(IssueManager.getIssuesViewModel());
-
+	Main.prototype._getReportData = function (oReportConstants) {
+		var issues = IssueManager.groupIssues(IssueManager.getIssuesModel()),
+			rules = this._mRuleSets,
+			selectedRules = this._oSelectedRulesIds;
 		return {
 			issues: issues,
 			technical: this._oDataCollector.getTechInfoJSON(),
 			application: this._oDataCollector.getAppInfo(),
-			rules: IssueManager.getRulesViewModel(this._mRulesets, this._oSelectedRulesIds, issues),
+			rules: IssueManager.getRulesViewModel(rules, selectedRules, issues),
 			scope: {
 				executionScope: this._oExecutionScope,
 				scopeDisplaySettings: {
-					executionScopes: reportConstants.executionScopes,
-					executionScopeTitle: reportConstants.executionScopeTitle
+					executionScopes: oReportConstants.executionScopes,
+					executionScopeTitle: oReportConstants.executionScopeTitle
 				}
 			},
 			analysisDuration: this._oAnalyzer.getElapsedTimeString(),
-			analysisDurationTitle: reportConstants.analysisDurationTitle,
+			analysisDurationTitle: oReportConstants.analysisDurationTitle,
 			name: constants.SUPPORT_ASSISTANT_NAME
 		};
 	};
 
 	/**
-	 * Callback for checking a support rule from the analyzer
-	 *
-	 * @param oRule
+	  * Callback for checking a support rule from the analyzer.
+	 * @private
+	 * @method
+	 * @name sap.ui.support.Main._analyzeSupportRule
+	 * @memberof sap.ui.support.Main
+	 * @param {object} oRule Contains all data for a given support rule that is to be analyzed
 	 */
 	Main.prototype._analyzeSupportRule = function (oRule) {
 		try {

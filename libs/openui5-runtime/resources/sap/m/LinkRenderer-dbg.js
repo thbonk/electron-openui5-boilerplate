@@ -82,8 +82,6 @@
 		/* set href only if link is enabled - BCP incident 1570020625 */
 		if (oControl.getHref() && oControl.getEnabled()) {
 			oRm.writeAttributeEscaped("href", oControl.getHref());
-		} else {
-			oRm.writeAttribute("href", "#");
 		}
 
 		if (oControl.getTarget()) {

@@ -798,7 +798,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/TreeBinding', 'sap/ui/model/Ch
 
 		var sGroupProperty = this.aAggregationLevel[iLevel - 1],
 			oDimension = this.oAnalyticalQueryResult.findDimensionByPropertyName(sGroupProperty),
-			fValueFormatter = this.mAnalyticalInfoByProperty[sGroupProperty].formatter,
+			// it might happen that grouped property is not contained in the UI (e.g. if grouping is
+			// done with a dimension's text property)
+			fValueFormatter = this.mAnalyticalInfoByProperty[sGroupProperty]
+				&& this.mAnalyticalInfoByProperty[sGroupProperty].formatter,
 			sPropertyValue = oContext.getProperty(sGroupProperty),
 			oTextProperty, sFormattedPropertyValue, sGroupName;
 
@@ -809,7 +812,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/TreeBinding', 'sap/ui/model/Ch
 		var sTextProperty, sTextPropertyValue, fTextValueFormatter;
 		if (oTextProperty) {
 			sTextProperty = oDimension.getTextProperty().name;
-			fTextValueFormatter = this.mAnalyticalInfoByProperty[sTextProperty].formatter;
+			// it might happen that text property is not contained in the UI
+			fTextValueFormatter = this.mAnalyticalInfoByProperty[sTextProperty]
+				&& this.mAnalyticalInfoByProperty[sTextProperty].formatter;
 			sTextPropertyValue = oContext.getProperty(sTextProperty);
 		}
 
@@ -1001,7 +1006,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/TreeBinding', 'sap/ui/model/Ch
 	 *
 	 * @function
 	 * @name sap.ui.model.analytics.AnalyticalBinding.prototype.getAnalyticalInfoForColumn
-	 * @param sColumnName the column name.
+	 * @param {string} sColumnName the column name.
 	 * @return {object}
 	 *            analytical information for the column; see {@link #updateAnalyticalInfo}
 	 *            for an explanation of the object structure
@@ -4323,7 +4328,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/TreeBinding', 'sap/ui/model/Ch
 		var aExportCols = [];
 		for (var k = 0, m = this.aAnalyticalInfo.length; k < m; k++) {
 			var oCol = this.aAnalyticalInfo[k];
-			if ((oCol.visible || oCol.inResult) && oCol.name !== "") {
+			if ((oCol.visible || oCol.inResult)
+					&& oCol.name !== ""
+					&& oCol.name !== aExportCols[aExportCols.length - 1]) {
 				aExportCols.push(oCol.name);
 
 				// add belonging currency column implicitly if present

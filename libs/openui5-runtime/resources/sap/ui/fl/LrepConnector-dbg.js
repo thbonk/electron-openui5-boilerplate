@@ -20,7 +20,7 @@ sap.ui.define([
 	 * @private
 	 * @sap-restricted
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 */
 	var Connector = function(mParameters) {
 		this._initClientParam();
@@ -35,7 +35,7 @@ sap.ui.define([
 		return new Connector(mParameters);
 	};
 
-	Connector.prototype.DEFAULT_CONTENT_TYPE = "application/json";
+	Connector.prototype.DEFAULT_CONTENT_TYPE = "application/json; charset=utf-8";
 	Connector.prototype._sClient = undefined;
 	Connector.prototype._sLanguage = undefined;
 	Connector.prototype._aSentRequestListeners = [];
@@ -148,6 +148,8 @@ sap.ui.define([
 		var mOptions;
 		if (!sContentType) {
 			sContentType = this.DEFAULT_CONTENT_TYPE;
+		} else if (sContentType.indexOf("charset") === -1) {
+			sContentType += "; charset=utf-8";
 		}
 
 		mOptions = jQuery.extend(true, this._getDefaultHeader(), {
@@ -163,7 +165,7 @@ sap.ui.define([
 			}
 		});
 
-		if (oData && mOptions.contentType === "application/json") {
+		if (oData && mOptions.contentType.indexOf("application/json") === 0) {
 			mOptions.dataType = "json";
 			if (typeof oData === "object") {
 				mOptions.data = JSON.stringify(oData);
@@ -355,92 +357,84 @@ sap.ui.define([
 	 * @param {string} [oComponent.appVersion] - Current running version of application
 	 * @param {map} [mPropertyBag] - Contains additional data needed for reading changes
 	 * @param {object} [mPropertyBag.appDescriptor] - Manifest that belongs to actual component
-	 * @param {string} [mPropertyBag.siteId] - <code>sideId<code> that belongs to actual component
+	 * @param {string} [mPropertyBag.siteId] - <code>sideId</code> that belongs to actual component
 	 * @param {string} [mPropertyBag.layer] - Layer up to which changes shall be read (excluding the specified layer)
 	 * @param {string} [mPropertyBag.appVersion] - Version of application whose changes shall be read
+	 * @param {string} [mPropertyBag.url] - address to which the request for change should be sent in case the data is not cached
 	 *
-	 * @returns {Promise} Returns a Promise with the changes (changes, contexts, optional messagebundle), <code>componentClassName<code> and <code>etag<code> value
+	 * @returns {Promise} Returns a Promise with the changes (changes, contexts, optional messagebundle), <code>componentClassName</code> and <code>etag</code> value
 	 * @public
 	 */
 	Connector.prototype.loadChanges = function(oComponent, mPropertyBag) {
-		var sUri;
-		var mOptions = {};
 		var that = this;
-		var sComponentClassName = oComponent.name;
+		var mOptions = {};
+		var sComponentName = oComponent.name;
+		var sUrl = "/sap/bc/lrep/flex/data/";
+		mPropertyBag = mPropertyBag || {};
 
-		if (!sComponentClassName) {
+		if (!sComponentName) {
 			return Promise.reject(new Error("Component name not specified"));
 		}
 
-		sUri = "/sap/bc/lrep/flex/data/";
-
-		var sUpToLayer = "";
-
-		// fill header attribute: appDescriptor.id
-		if (mPropertyBag) {
-			var sCacheKey = mPropertyBag.cacheKey;
-
-			if (sCacheKey) {
+		if (mPropertyBag.url) {
+			sUrl = mPropertyBag.url;
+		} else {
+			if (mPropertyBag.cacheKey) {
 				mOptions.cache = true;
-				sUri += "~" + sCacheKey + "~/";
+				sUrl += "~" + mPropertyBag.cacheKey + "~/";
 			}
 
-			if (mPropertyBag.appDescriptor) {
-				if (mPropertyBag.appDescriptor["sap.app"]) {
-					if (!mOptions.headers) {
-						mOptions.headers = {};
-					}
+			sUrl += sComponentName;
+		}
 
-					mOptions.headers = {
-						"X-LRep-AppDescriptor-Id": mPropertyBag.appDescriptor["sap.app"].id
-					};
-				}
+		if (mPropertyBag.siteId) {
+			if (!mOptions.headers) {
+				mOptions.headers = {};
 			}
 
-			// fill header attribute: siteId
-			if (mPropertyBag.siteId) {
+			mOptions.headers = {
+				"X-LRep-Site-Id": mPropertyBag.siteId
+			};
+		}
+
+		if (mPropertyBag.layer) {
+			sUrl += "&upToLayerType=" + mPropertyBag.layer;
+		}
+
+		if (mPropertyBag.appDescriptor) {
+			if (mPropertyBag.appDescriptor["sap.app"]) {
 				if (!mOptions.headers) {
 					mOptions.headers = {};
 				}
 
 				mOptions.headers = {
-					"X-LRep-Site-Id": mPropertyBag.siteId
+					"X-LRep-AppDescriptor-Id": mPropertyBag.appDescriptor["sap.app"].id
 				};
 			}
-
-			// changes shall be read up to a specified layer type
-			if (mPropertyBag.layer) {
-				sUpToLayer = mPropertyBag.layer;
-			}
 		}
 
-		if (sComponentClassName) {
-			sUri += sComponentClassName;
-		}
 		if (this._sClient) {
-			sUri += "&sap-client=" + this._sClient;
+			sUrl += "&sap-client=" + this._sClient;
 		}
-		if (sUpToLayer) {
-			sUri += "&upToLayerType=" + sUpToLayer;
-		}
+
 		if (oComponent.appVersion && (oComponent.appVersion !== FlexUtils.DEFAULT_APP_VERSION)) {
-			sUri += "&appVersion=" + oComponent.appVersion;
+			sUrl += "&appVersion=" + oComponent.appVersion;
 		}
 
 		// Replace first & with ?
-		sUri = sUri.replace("&", "?");
+		sUrl = sUrl.replace("&", "?");
 
-		return this.send(sUri, undefined, undefined, mOptions)
+		return this.send(sUrl, undefined, undefined, mOptions)
 			.then(function(oResponse) {
 				return {
 					changes: oResponse.response,
-					componentClassName: sComponentClassName,
+					componentClassName: sComponentName,
 					etag: oResponse.etag
 				};
 			}, function(oError) {
 				if (oError.code === 404 || oError.code === 405) {
 					// load changes based old route, because new route is not implemented
-					return that._loadChangesBasedOnOldRoute(sComponentClassName);
+					return that._loadChangesBasedOnOldRoute(sComponentName);
 				} else {
 					throw (oError);
 				}

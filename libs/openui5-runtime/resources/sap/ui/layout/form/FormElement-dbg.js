@@ -21,7 +21,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/EnabledP
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -90,10 +90,15 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/EnabledP
 
 		if (!this._oLabel) {
 			var oOldLabel = this.getLabel();
-			if (oOldLabel && oOldLabel.isRequired) {
-				oOldLabel.isRequired = oOldLabel._sapuiIsRequired;
-				oOldLabel._sapuiIsRequired = undefined;
-				oOldLabel.disableRequiredChangeCheck(false);
+			if (oOldLabel) {
+				if (oOldLabel.setAlternativeLabelFor) {
+					oOldLabel.setAlternativeLabelFor(null);
+				}
+				if (oOldLabel.isRequired) {
+					oOldLabel.isRequired = oOldLabel._sapuiIsRequired;
+					oOldLabel._sapuiIsRequired = undefined;
+					oOldLabel.disableRequiredChangeCheck(false);
+				}
 			}
 		}
 
@@ -356,10 +361,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/EnabledP
 		var oLabel = oFormElement._oLabel;
 		if (oLabel) {
 			oLabel.setLabelFor(oField); // as Label is internal of FormElement, we can use original labelFor
-		}
-		oLabel = oFormElement.getLabel();
-		if (oLabel instanceof sap.ui.core.Control /*might also be a string*/) {
-			oLabel.setAlternativeLabelFor(oField);
+		} else {
+			oLabel = oFormElement.getLabel();
+			if (oLabel instanceof sap.ui.core.Control /*might also be a string*/) {
+				oLabel.setAlternativeLabelFor(oField);
+			}
 		}
 	}
 

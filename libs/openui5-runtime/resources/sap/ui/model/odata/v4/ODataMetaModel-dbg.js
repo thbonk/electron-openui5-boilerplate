@@ -481,7 +481,7 @@ sap.ui.define([
 	 * @extends sap.ui.model.MetaModel
 	 * @public
 	 * @since 1.37.0
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 */
 	var ODataMetaModel = MetaModel.extend("sap.ui.model.odata.v4.ODataMetaModel", {
 		/*
@@ -704,7 +704,7 @@ sap.ui.define([
 	};
 
 	/**
-	 * Requests a module for the given <code>sModuleName<code>.
+	 * Requests a module for the given <code>sModuleName</code>.
 	 *
 	 * @param {string} sModuleName
 	 *   The name of the module to fetch (e.g. sap.ui.model.odata.type.Int16)
@@ -1285,13 +1285,19 @@ sap.ui.define([
 					return vSegment;
 				}
 				// calculate the key predicate asynchronously and append it to the prefix
-				return oContext.fetchAbsoluteValue(vSegment.path).then(function (oEntity) {
-					if (oEntity && ("@$ui5.transient" in oEntity)) {
+				return oContext.fetchValue(vSegment.path).then(function (oEntity) {
+					if (!oEntity) {
+						error("No instance to calculate key predicate at " + vSegment.path);
+					}
+					if ("@$ui5.transient" in oEntity) {
 						bTransient = true;
 						return undefined;
 					}
-					return vSegment.prefix + _Helper.getKeyPredicate(vSegment.type, oEntity);
-				}).catch(function (oError) { // enrich the error message with the path
+					if (!oEntity["@$ui5.predicate"]) {
+						error("No key predicate known at " + vSegment.path);
+					}
+					return vSegment.prefix + oEntity["@$ui5.predicate"];
+				}, function (oError) { // enrich the error message with the path
 					error(oError.message + " at " + vSegment.path);
 				});
 			})).then(function (aFinalEditUrl) {
@@ -1934,7 +1940,7 @@ sap.ui.define([
 				return getQualifier(sTerm, sValueListMapping) !== undefined;
 			}).forEach(function (sTerm) {
 				addMapping(mAnnotationByTerm[sTerm], getQualifier(sTerm, sValueListMapping),
-					that.oModel.sServiceUrl + "$metadata", that.oModel);
+					that.sUrl, that.oModel);
 			});
 
 
@@ -2083,9 +2089,6 @@ sap.ui.define([
 			return mScope;
 		}
 
-		if (mScope.$Version !== "4.0") {
-			logAndThrowError("Unsupported OData version: " + mScope.$Version, sUrl);
-		}
 		for (sReferenceUri in mScope.$Reference) {
 			oReference = mScope.$Reference[sReferenceUri];
 			// interpret reference URI relative to metadata URL

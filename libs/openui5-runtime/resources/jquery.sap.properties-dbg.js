@@ -5,8 +5,8 @@
  */
 
 // Provides access to Java-like properties files
-sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'jquery.sap.sjax'],
-	function(jQuery, Device/* , jQuerySap1 */) {
+sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
+	function(jQuery, Device) {
 	"use strict";
 
 	// Javadoc for private inner class "Properties" - this list of comments is intentional!
@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'jquery.sap.sjax'],
 	 * can be used to retrieve an array of all keys that are currently stored in the collection.
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @since 0.9.0
 	 * @name jQuery.sap.util.Properties
 	 * @public

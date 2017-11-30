@@ -23,7 +23,7 @@ sap.ui.define(['jquery.sap.global', './ListBase', './TreeItemBase', './library',
 	 * @extends sap.m.ListBase
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -32,13 +32,34 @@ sap.ui.define(['jquery.sap.global', './ListBase', './TreeItemBase', './library',
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var Tree = ListBase.extend("sap.m.Tree", { metadata : {
-		library : "sap.m"
-	}});
+		library : "sap.m",
+		events : {
 
-	Tree.prototype.init = function() {
-		ListBase.prototype.init.apply(this, arguments);
-		this.setEnableBusyIndicator(false);
-	};
+			/**
+			 * Fired when an item has been expanded or collapsed by user interaction.
+			 * @since 1.50
+			 */
+			toggleOpenState : {
+				parameters : {
+
+					/**
+					 * Index of the expanded/collapsed item
+					 */
+					itemIndex : {type : "int"},
+
+					/**
+					 * Binding context of the item
+					 */
+					itemContext : {type : "object"},
+
+					/**
+					 * Flag that indicates whether the item has been expanded or collapsed
+					 */
+					expanded : {type : "boolean"}
+				}
+			}
+		}
+	}});
 
 	Tree.prototype.isTreeBinding = function(sName) {
 		return (sName == "items");
@@ -102,8 +123,8 @@ sap.ui.define(['jquery.sap.global', './ListBase', './TreeItemBase', './library',
 			}
 		}
 
-		// Get all nodes.
-		aContexts = oBinding.getContexts(0, Number.MAX_SAFE_INTEGER);
+		// Context length will be filled by model.
+		aContexts = oBinding.getContexts(0);
 
 		// If factory function is used without extended change detection, destroy aggregation
 		if (!oBindingInfo.template) {
@@ -124,8 +145,12 @@ sap.ui.define(['jquery.sap.global', './ListBase', './TreeItemBase', './library',
 	Tree.prototype.onItemExpanderPressed = function(oItem, bExpand) {
 		var iIndex = this.indexOfItem(oItem);
 		var oBindingInfo = this.getBindingInfo("items");
+		var oItemContext = oItem && oItem.getBindingContext(oBindingInfo.model);
 
-		if (oBindingInfo && oItem && oItem.getBindingContext(oBindingInfo.model)) {
+		if (oBindingInfo && oItemContext) {
+			var bExpandedBeforePress = oItem.getExpanded();
+			var bExpandedAfterPress;
+
 			if (bExpand == undefined) {
 				this.getBinding("items").toggleIndex(iIndex);
 			} else if (bExpand) {
@@ -133,8 +158,18 @@ sap.ui.define(['jquery.sap.global', './ListBase', './TreeItemBase', './library',
 			} else {
 				this.getBinding("items").collapse(iIndex);
 			}
-			if (oItem.getExpanded() && (oItem.getLevel() + 1 > this.getDeepestLevel())) {
+
+			bExpandedAfterPress = oItem.getExpanded();
+			if (bExpandedAfterPress && (oItem.getLevel() + 1 > this.getDeepestLevel())) {
 				this._iDeepestLevel = oItem.getLevel() + 1;
+			}
+
+			if (bExpandedBeforePress !== bExpandedAfterPress && !oItem.isLeaf()) {
+				this.fireToggleOpenState({
+					itemIndex: iIndex,
+					itemContext: oItemContext,
+					expanded: bExpandedAfterPress
+				});
 			}
 		}
 	};
@@ -186,18 +221,6 @@ sap.ui.define(['jquery.sap.global', './ListBase', './TreeItemBase', './library',
 	 */
 	Tree.prototype.setGrowingDirection = function() {
 		jQuery.sap.log.error("GrowingDirection of " + this + " is not supported!");
-		return this;
-	};
-
-	/**
-	 * The <code>enableBusyIndicator</code> property is not supported for control <code>Tree</code>.
-	 * @public
-	 * @deprecated
-	 */
-	Tree.prototype.setEnableBusyIndicator = function(bEnable) {
-		if (bEnable) {
-			jQuery.sap.log.error("enableBusyIndicator property is not supported for control " + this);
-		}
 		return this;
 	};
 

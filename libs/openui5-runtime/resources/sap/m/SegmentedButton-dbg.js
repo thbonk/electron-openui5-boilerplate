@@ -23,7 +23,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @implements sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -226,7 +226,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	/**
 	 * Returns a new array with all rendered button widths.
 	 * @param {array} aButtons with buttons
-	 * @returns {array}
+	 * @returns {array} The array of the widths
 	 * @private
 	 */
 	SegmentedButton.prototype._getRenderedButtonWidths = function (aButtons) {
@@ -538,8 +538,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	};
 
 	/**
-	 * Adds item to <code>items</code> aggregation
-	 * @param {sap.m.SegmentedButtonItem} oItem
+	 * Adds item to <code>items</code> aggregation.
+	 * @param {sap.m.SegmentedButtonItem} oItem The item to be added
 	 * @param {boolean} [bSuppressInvalidate=false] If <code>true</code> the control invalidation will be suppressed
 	 * @public
 	 * @override
@@ -550,8 +550,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	};
 
 	/**
-	 * Removes an item from <code>items</code> aggregation
-	 * @param {sap.m.SegmentedButtonItem} oItem
+	 * Removes an item from <code>items</code> aggregation.
+	 * @param {sap.m.SegmentedButtonItem} oItem The item to be removed
 	 * @param {boolean} [bSuppressInvalidate=false] If <code>true</code> the control invalidation will be suppressed
 	 * @public
 	 * @override
@@ -568,8 +568,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	};
 
 	/**
-	 * Inserts item into <code>items</code> aggregation
-	 * @param {sap.m.SegmentedButtonItem} oItem
+	 * Inserts item into <code>items</code> aggregation.
+	 * @param {sap.m.SegmentedButtonItem} oItem The item to be inserted
 	 * @param {int} iIndex index the item should be inserted at
 	 * @param {boolean} [bSuppressInvalidate=false] If <code>true</code> the control invalidation will be suppressed
 	 * @public
@@ -596,6 +596,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	};
 
 	/** Event handler for the internal button press events.
+	 * @param {Object} oEvent The event to be fired
 	 * @private
 	 */
 	SegmentedButton.prototype._buttonPressed = function (oEvent) {
@@ -719,7 +720,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 	/**
 	 * Called when the select is changed so that the SegmentedButton internals stay in sync.
-	 * @param oEvent
+	 * @param {Object} oEvent The event fired
 	 * @private
 	 */
 	SegmentedButton.prototype._selectChangeHandler = function(oEvent) {

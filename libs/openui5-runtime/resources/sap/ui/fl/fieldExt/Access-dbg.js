@@ -12,7 +12,7 @@ sap.ui.define(["jquery.sap.storage"], function(Storage) {
 	 * @alias sap.ui.fl.fieldExt.Access
 	 * @experimental Since 1.25.0
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 */
 	var Access = {};
 

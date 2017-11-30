@@ -18,7 +18,7 @@ sap.ui.define([
 	 * @class The ManagedObjectObserver observes changes of a ManagedObject and propagates them via events.
 	 * @extends sap.ui.base.ManagedObject
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @constructor
 	 * @private
 	 * @since 1.30
@@ -104,7 +104,7 @@ sap.ui.define([
 	};
 
 	/**
-	 * Starts observing the target object. Override this method in classes wich extend ManagedObjectObserver.
+	 * Starts observing the target object. Override this method in classes which extend ManagedObjectObserver.
 	 *
 	 * @param {sap.ui.base.ManagedObject} oTarget The target to observe
 	 * @protected
@@ -499,9 +499,8 @@ sap.ui.define([
 	};
 
 	/**
-	 * Stops observing the target object. Override this method in classes wich extend ManagedObjectObserver.
+	 * Stops observing the target object. Override this method in classes which extend ManagedObjectObserver.
 	 *
-	 * @param {sap.ui.base.ManagedObject} oTarget The target to unobserve
 	 * @protected
 	 */
 	ManagedObjectObserver.prototype.unobserve = function() {
@@ -573,7 +572,7 @@ sap.ui.define([
 	 * @return {sap.ui.base.ManagedObject} The instance of the associated target to observe.
 	 */
 	ManagedObjectObserver.prototype.getTargetInstance = function() {
-		return sap.ui.getCore().byId(this.getTarget());
+		return ElementUtil.getElementInstance(this.getTarget());
 	};
 
 	return ManagedObjectObserver;

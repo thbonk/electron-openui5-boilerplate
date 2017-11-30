@@ -25,7 +25,7 @@ sap.ui.define(['./FormatException', './ParseException', './SimpleType', './Valid
 	 * @extends sap.ui.model.SimpleType
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @param {object} [oFormatOptions] options as provided by concrete subclasses
@@ -40,6 +40,7 @@ sap.ui.define(['./FormatException', './ParseException', './SimpleType', './Valid
 			this.sName = "CompositeType";
 			this.bUseRawValues = false;
 			this.bParseWithValues = false;
+			this.bUseInternalValues = false;
 		},
 
 		metadata : {
@@ -92,6 +93,13 @@ sap.ui.define(['./FormatException', './ParseException', './SimpleType', './Valid
 	 */
 	CompositeType.prototype.getUseRawValues = function() {
 		return this.bUseRawValues;
+	};
+
+	/**
+	 * Returns whether this composite type works on the related native JavaScript values or not.
+	 */
+	CompositeType.prototype.getUseInternalValues = function() {
+		return this.bUseInternalValues;
 	};
 
 	/**

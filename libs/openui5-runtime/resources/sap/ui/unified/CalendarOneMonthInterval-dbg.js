@@ -6,8 +6,8 @@
 
 //Provides control sap.ui.unified.CalendarOneMonthInterval.
 sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sap/ui/unified/calendar/CalendarDate', './library',
-		'sap/ui/unified/CalendarDateInterval', 'sap/ui/unified/CalendarDateIntervalRenderer', 'sap/ui/unified/calendar/OneMonthDatesRow'],
-	function (jQuery, CalendarUtils, CalendarDate, library, CalendarDateInterval, CalendarDateIntervalRenderer, OneMonthDatesRow) {
+		'sap/ui/unified/CalendarDateInterval', 'sap/ui/unified/CalendarDateIntervalRenderer', 'sap/ui/unified/calendar/OneMonthDatesRow', 'sap/ui/core/Renderer'],
+	function (jQuery, CalendarUtils, CalendarDate, library, CalendarDateInterval, CalendarDateIntervalRenderer, OneMonthDatesRow, Renderer) {
 		"use strict";
 
 		/*
@@ -39,7 +39,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sa
 		 * Navigation via year picker switches to the corresponding year and the same month as before the navigation.
 		 *
 		 * @extends sap.ui.unified.CalendarDateInterval
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @private
@@ -56,6 +56,38 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sa
 			this._bShowOneMonth = true;
 		};
 
+		CalendarOneMonthInterval.prototype._getCalendarPicker = function (){
+			var oCalPicker = this.getAggregation("calendarPicker");
+
+			if (!oCalPicker) {
+				oCalPicker = new CustomMonthPicker(this.getId() + "--Cal");
+				oCalPicker.setPopupMode(true);
+
+				oCalPicker.attachEvent("select", function () {
+					var oCalPicker = this._getCalendarPicker(),
+						oCalPickerFocusedDate = oCalPicker._getFocusedDate(),
+						oNewStartDate = CalendarUtils._getFirstDateOfMonth(oCalPickerFocusedDate);
+
+					this._setStartDate(oNewStartDate);
+					this._adjustSelectedDate(oNewStartDate, false);
+					this._oFocusDateOneMonth = oNewStartDate;
+					this._closeCalendarPicker(true);// true means do not focus, as we set the this._oFocusDateOneMonth and focus will happen in .focusDateExtend
+					this._focusDate(oCalPickerFocusedDate, false, true); //true means don't fire event (we already did it in setStartDate())
+				}, this);
+				oCalPicker.attachEvent("cancel", function (oEvent) {
+					var oCalPicker = this._getCalendarPicker(),
+						oCalPickerFocusedDate = oCalPicker._getFocusedDate();
+
+					this._closeCalendarPicker(true);
+					this._oFocusDateOneMonth = oCalPickerFocusedDate;
+					// true means do not focus, as we set the this._oFocusDateOneMonth and focus will happen in .focusDateExtend
+					this._focusDate(oCalPickerFocusedDate, true);
+				}, this);
+				this.setAggregation("calendarPicker", oCalPicker);
+			}
+			return oCalPicker;
+		};
+
 		/**
 		 * Creates a month instance.
 		 * @param {string }sId ID of the instance
@@ -69,7 +101,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sa
 		/**
 		* Handles focusing on a certain date.
 		* Special handling is needed if the navigation refers to date that is outside the visible area.
-		* @param oEvent
+		* @param {Object} oEvent The fired event
 		* @private
 		*/
 		CalendarOneMonthInterval.prototype._handleFocus = function (oEvent) {
@@ -181,42 +213,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sa
 		};
 
 		/**
-		 *
-		 * @param {sap.ui.unified.calendar.CalendarDate} oFocusedDate
-		 * @param {int} iMonth
-		 * @private
-		 */
-		CalendarOneMonthInterval.prototype._adjustFocusedDateUponMonthChange = function(oFocusedDate, iMonth) {
-			oFocusedDate.setMonth(iMonth);
-			if (iMonth != oFocusedDate.getMonth()){
-				// day did not exist in this month (e.g. 31) -> go to last day of month
-				oFocusedDate.setDate(0);
-			}
-
-			this._adjustSelectedDate(oFocusedDate, true);
-		};
-
-		/**
-		 *
-		 * @param {sap.ui.unified.calendar.CalendarDate} oFocusedDate
-		 * @param {int} iYear
-		 * @return {sap.ui.unified.calendar.CalendarDate}
-		 * @private
-		 */
-		CalendarOneMonthInterval.prototype._adjustFocusedDateUponYearChange = function(oFocusedDate, iYear) {
-			var oYearPicker = this.getAggregation("yearPicker"),
-				oDate = CalendarDate.fromLocalJSDate(oYearPicker.getDate(), this.getPrimaryCalendarType());
-
-			oDate.setMonth(oFocusedDate.getMonth());
-			oDate.setDate(oFocusedDate.getDate()); // to keep day and month stable also for islamic date
-			oFocusedDate = oDate;
-
-			this._adjustSelectedDate(oFocusedDate, true);
-
-			return oFocusedDate;
-		};
-
-		/**
 		 * Sets the selection to match the focused date for size S and M.
 		 * @param {sap.ui.unified.calendar.CalendarDate} oDate The date to select unless bUseFirstOfMonth is used
 		 * @param {boolean} bUseFirstOfMonth If specified the first month of the given date will be used
@@ -235,7 +231,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sa
 
 		/**
 		 * Sets the selection.
-		 * @param {sap.ui.unified.calendar.CalendarDate} oDate
+		 * @param {sap.ui.unified.calendar.CalendarDate} oDate The date to be selected
 		 * @private
 		 */
 		CalendarOneMonthInterval.prototype._selectDate = function(oDate) {
@@ -245,17 +241,75 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sa
 			this.removeAllSelectedDates();
 			this.addSelectedDate(new sap.ui.unified.DateRange({startDate: oLocaleDate}));
 			oMonth.selectDate(oLocaleDate);
+			this._bDateRangeChanged = undefined;
 		};
 
 		/**
-		 * Called by PlanningCalendar to check if the given datetime matches visible the dates
-		 * @param {Date} oDateTime
-		 * @return {boolean}
+		 * Called by PlanningCalendar to check if the given datetime matches the visible dates.
+		 * @param {Date} oDateTime The JavaScript date to be checked
+		 * @return {boolean} Whether the given datetime is one of the visible dates
 		 * @private
 		 */
 		CalendarOneMonthInterval.prototype._dateMatchesVisibleRange = function (oDateTime) {
 			return CalendarUtils._isSameMonthAndYear(CalendarDate.fromLocalJSDate(this.getStartDate()),
 				CalendarDate.fromLocalJSDate(oDateTime));
+		};
+
+		/****************************************** CUSTOM MONTH PICKER CONTROL ****************************************/
+
+		var CustomMonthPicker = sap.ui.unified.Calendar.extend("CustomMonthPicker", {
+			renderer: Renderer.extend(sap.ui.unified.CalendarRenderer)
+		});
+
+		CustomMonthPicker.prototype._initializeHeader = function() {
+			var oHeader = new sap.ui.unified.calendar.Header(this.getId() + "--Head", {
+				visibleButton1: false
+			});
+
+			oHeader.attachEvent("pressPrevious", this._handlePrevious, this);
+			oHeader.attachEvent("pressNext", this._handleNext, this);
+			oHeader.attachEvent("pressButton2", this._handleButton2, this);
+			this.setAggregation("header",oHeader);
+		};
+
+		CustomMonthPicker.prototype._shouldFocusB2OnTabNext = function(oEvent) {
+			return jQuery.sap.containsOrEquals(this.getDomRef("content"), oEvent.target);
+		};
+
+		CustomMonthPicker.prototype.onAfterRendering = function () {
+			this._showMonthPicker();
+		};
+
+		CustomMonthPicker.prototype._selectYear = function () {
+			var oYearPicker = this.getAggregation("yearPicker");
+
+			var oFocusedDate = this._getFocusedDate();
+			oFocusedDate.setYear(oYearPicker.getYear());
+
+			this._focusDate(oFocusedDate, true);
+
+			this._showMonthPicker();
+		};
+
+		CustomMonthPicker.prototype._selectMonth = function () {
+			var oMonthPicker = this.getAggregation("monthPicker");
+			var oSelectedDate = this.getSelectedDates()[0];
+			var oFocusedDate = this._getFocusedDate();
+
+			oFocusedDate.setMonth(oMonthPicker.getMonth());
+
+			if (!oSelectedDate) {
+				oSelectedDate = new sap.ui.unified.DateRange();
+			}
+
+			oSelectedDate.setStartDate(oFocusedDate.toLocalJSDate());
+			this.addSelectedDate(oSelectedDate);
+
+			this.fireSelect();
+		};
+
+		CustomMonthPicker.prototype.onsapescape = function(oEvent) {
+			this.fireCancel();
 		};
 
 		return CalendarOneMonthInterval;

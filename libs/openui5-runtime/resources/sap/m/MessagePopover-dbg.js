@@ -5,12 +5,12 @@
  */
 
 // Provides control sap.m.MessagePopover.
-sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolbar", "./ToolbarSpacer", "./Bar", "./List",
-		"./StandardListItem", "./ListType" ,"./library", "sap/ui/core/Control", "./PlacementType", "sap/ui/core/IconPool",
+sap.ui.define([ "jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolbar", "./ToolbarSpacer", "./Bar", "./List",
+		"./StandardListItem", "sap/ui/core/Control", "sap/ui/core/IconPool",
 		"sap/ui/core/HTML", "./Text", "sap/ui/core/Icon", "./SegmentedButton", "./Page", "./NavContainer",
 		"./semantic/SemanticPage", "./Link" ,"./Popover", "./MessagePopoverItem", "./MessageView"],
 	function (jQuery, ResponsivePopover, Button, Toolbar, ToolbarSpacer, Bar, List,
-			  StandardListItem, ListType, library, Control, PlacementType, IconPool,
+			  StandardListItem, Control, IconPool,
 			  HTML, Text, Icon, SegmentedButton, Page, NavContainer, SemanticPage, Link, Popover, MessagePopoverItem,
 			  MessageView) {
 		"use strict";
@@ -50,7 +50,7 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @public
@@ -207,6 +207,8 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		}
 
 		var CSS_CLASS = "sapMMsgPopover",
+			DEFAULT_CONTENT_HEIGHT = "320px",
+			DEFAULT_CONTENT_WIDTH = "440px",
 			ICONS = {
 				back: IconPool.getIconURI("nav-back"),
 				close: IconPool.getIconURI("decline"),
@@ -283,7 +285,8 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 
 			this._oPopover = new ResponsivePopover(this.getId() + "-messagePopover", {
 				showHeader: false,
-				contentWidth: "440px",
+				contentWidth: DEFAULT_CONTENT_WIDTH,
+				contentHeight: DEFAULT_CONTENT_HEIGHT,
 				placement: this.getPlacement(),
 				showCloseButton: false,
 				verticalScrolling: false,
@@ -327,6 +330,12 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 					this['set' + capitalize(sFuncName)](DEFAULT_ASYNC_HANDLERS[sFuncName]);
 				}
 			}, this);
+		};
+
+		MessagePopover.prototype.onBeforeRendering = function () {
+			if (this.getDependents().indexOf(this._oPopover) === -1) {
+				this.addDependent(this._oPopover);
+			}
 		};
 
 		/**
@@ -556,15 +565,15 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		};
 
 		/**
-		 * Expands the MessagePopover so that the width and height are equal
+		 * Expands the MessagePopover so that the width and height are with their default values
 		 * @private
 		 */
 		MessagePopover.prototype._expandMsgPopover = function () {
 			var sDomHeight,
-				sHeight = this._oPopover.getContentWidth();
-
-			if (this.getInitiallyExpanded()) {
+				sHeight = DEFAULT_CONTENT_HEIGHT,
 				sDomHeight = this._oPopover.$("cont").css("height");
+
+			if (this.getInitiallyExpanded() && sDomHeight !== "0px") {
 				sHeight = parseFloat(sDomHeight) ? sDomHeight : sHeight;
 			}
 
@@ -678,6 +687,16 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 
 		MessagePopover.prototype.getHeaderButton = function () {
 			return this._oMessageView.getHeaderButton();
+		};
+
+		MessagePopover.prototype.setModel = function(oModel, sName) {
+			/* When a model is set to the MessagePopover it is propagated to all its aggregation
+				Unfortunately the MessageView is not an aggregation of the MessagePopover (due to some rendering issues)
+				Furthermore the MessageView is actually child of a ResponsivePopover
+				Therefore once the developer set a model to the MessagePopover we need to forward it to the internal MessageView */
+			this._oMessageView.setModel(oModel, sName);
+
+			return Control.prototype.setModel.apply(this, arguments);
 		};
 
 		["invalidate", "addStyleClass", "removeStyleClass", "toggleStyleClass", "hasStyleClass", "getBusyIndicatorDelay",

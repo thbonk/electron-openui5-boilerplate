@@ -17,7 +17,7 @@ sap.ui.define([
 	 * @param {object} [mSettings] initial settings for the new control
 	 * @class The P13nSortPanel control is used to define settings for sorting in table personalization.
 	 * @extends sap.m.P13nPanel
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 * @constructor
 	 * @public
 	 * @since 1.26.0
@@ -189,11 +189,11 @@ sap.ui.define([
 	 * setter for the supported operations array
 	 *
 	 * @public
-	 * @param {array} array of operations <code>[sap.m.P13nConditionOperation.BT, sap.m.P13nConditionOperation.EQ]</code>
+	 * @param {array} aOperations - array of operations <code>[sap.m.P13nConditionOperation.BT, sap.m.P13nConditionOperation.EQ]</code>
 	 * @returns {sap.m.P13nSortPanel} this for chaining
 	 */
-	P13nSortPanel.prototype.setOperations = function(aOperation) {
-		this._aOperations = aOperation;
+	P13nSortPanel.prototype.setOperations = function(aOperations) {
+		this._aOperations = aOperations;
 
 		if (this._oSortPanel) {
 			this._oSortPanel.setOperations(this._aOperations);

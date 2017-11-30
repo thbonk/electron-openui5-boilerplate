@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 	 * @extends sap.m.ListItemBase
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -57,7 +57,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 
 			/**
 			 * By default, one or more requests are sent to get the density perfect version of the icon if the given version of the icon doesn't exist on the server.
-			 * <b>Note:<b> If bandwidth is a key factor for the application, set this value to <code>false</code>.
+			 * <b>Note:</b> If bandwidth is a key factor for the application, set this value to <code>false</code>.
 			 */
 			iconDensityAware : {type : "boolean", group : "Misc", defaultValue : true},
 

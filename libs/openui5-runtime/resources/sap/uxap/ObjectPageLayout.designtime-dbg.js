@@ -20,7 +20,9 @@ sap.ui.define([],
 		},
 		aggregations : {
 			sections : {
-				domRef : ":sap-domref > .sapUxAPObjectPageWrapper",
+				domRef : function(oElement) {
+					return oElement.$("sectionsContainer").get(0);
+				},
 				childNames : {
 					singular : function(){
 						return sap.uxap.i18nModel.getResourceBundle().getText("SECTION_CONTROL_NAME");
@@ -32,14 +34,16 @@ sap.ui.define([],
 				actions : {
 					move : "moveControls"
 				}
-			},
-			vScroll : {
-				ignore: false,
-				domRef : function(oElement) {
-					return oElement.$("vertSB-sb").get(0);
-				}
 			}
 		},
+		scrollContainers : [{
+			domRef : "> .sapUxAPObjectPageWrapper",
+			aggregations : ["sections", "headerContent"]
+		}, {
+			domRef : function(oElement) {
+				return oElement.$("vertSB-sb").get(0);
+			}
+		}],
 
 		cloneDomRef : ":sap-domref > header"
 	};

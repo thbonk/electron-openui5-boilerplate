@@ -3,14 +3,14 @@
     {
       "name" : "sap/ui/codeeditor/CodeEditor.js",
       "description" : "global ace",
-      "size" : 10405,
-      "compressedSize" : 4367,
+      "size" : 10614,
+      "compressedSize" : 4406,
       "required" : ["jquery.sap.global.js", "sap/ui/codeeditor/js/ace/ace.js", "sap/ui/codeeditor/js/ace/mode-javascript.js", "sap/ui/codeeditor/js/ace/mode-json.js", "sap/ui/core/Control.js"],
       "includes" : []
     },
     {
       "name" : "sap/ui/codeeditor/library-preload.js",
-      "size" : 5783,
+      "size" : 5822,
       "required" : ["jquery.sap.global.js", "sap/ui/codeeditor/js/ace/ace.js", "sap/ui/codeeditor/js/ace/mode-javascript.js", "sap/ui/codeeditor/js/ace/mode-json.js", "sap/ui/core/Control.js", "sap/ui/core/Core.js"],
       "includes" : ["sap/ui/codeeditor/CodeEditor.js", "sap/ui/codeeditor/library.js", "sap/ui/codeeditor/manifest.json"]
     },

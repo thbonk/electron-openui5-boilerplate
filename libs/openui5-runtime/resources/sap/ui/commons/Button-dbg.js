@@ -23,7 +23,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @implements sap.ui.commons.ToolbarItem, sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -148,7 +148,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	/**
 	 * Function is called when button is clicked.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The event fired
 	 * @private
 	 */
 	Button.prototype.onclick = function(oEvent) {
@@ -161,9 +161,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	};
 
 	/**
-	 * Handles the sapenter event does not bubble
+	 * Handles the sapenter event does not bubble.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The event fired
 	 * @private
 	 */
 	Button.prototype.onsapenter = function(oEvent) {
@@ -174,7 +174,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * Function is called when mouse key is clicked down. The button style classes
 	 * are replaced then.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The event fired
 	 * @private
 	 */
 	Button.prototype.onmousedown = function(oEvent) {
@@ -195,7 +195,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		// webkit && firefox on mac does not focus a Button on click, it even unfocuses it onmousedown!
 		if (bFocus && (!!sap.ui.Device.browser.webkit || (!!sap.ui.Device.browser.firefox && navigator.platform.indexOf("Mac") === 0))) {
 			if (sap.ui.Device.browser.mobile && !!sap.ui.Device.browser.webkit) {
-				//In mobile Webkit Browsers (IPad) the focus must be set immediately to ensure that a focusout happens whereever the
+				//In mobile Webkit Browsers (IPad) the focus must be set immediately to ensure that a focusout happens wherever the
 				//focus currently is. The deleayedCall below is still needed due to the reason described above. (CSN 2536817 2012)
 				this.focus();
 			}
@@ -208,7 +208,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	/**
 	 * When mouse key is up again, reset the background images to normal.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The event fired
 	 * @private
 	 */
 	Button.prototype.onmouseup = function(oEvent) {
@@ -220,7 +220,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	/**
 	 * When mouse is going out of the control, reset the background images to normal.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The event fired
 	 * @private
 	 */
 	Button.prototype.onmouseout = function(oEvent) {
@@ -232,7 +232,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	/**
 	 * When mouse is going over the control a hover effect is done.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The event fired
 	 * @private
 	 */
 	Button.prototype.onmouseover = function(oEvent) {
@@ -244,7 +244,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	/**
 	 * When the button looses the focus, this method is called.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The event fired
 	 * @private
 	 */
 	Button.prototype.onfocusout = function(oEvent) {
@@ -256,7 +256,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	/**
 	 * When the button gets the focus, this method is called.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The event fired
 	 * @private
 	 */
 	Button.prototype.onfocusin = function(oEvent) {
@@ -330,6 +330,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 	/**
 	 * @see sap.ui.core.Control#getAccessibilityInfo
+	 * @returns {Object} Current accessibility state of the control.
 	 * @protected
 	 */
 	Button.prototype.getAccessibilityInfo = function() {

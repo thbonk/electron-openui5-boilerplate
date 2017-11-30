@@ -5,9 +5,12 @@
  */
 
 // Provides control sap.f.DynamicPageHeader.
-sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/core/InvisibleText", "sap/m/ButtonType", "sap/m/ToggleButton"],
-	function (jQuery, library, Control, InvisibleText, ButtonType, ToggleButton) {
+sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/core/InvisibleText", "sap/m/library", "sap/m/ToggleButton"],
+	function (jQuery, library, Control, InvisibleText, mobileLibrary, ToggleButton) {
 		"use strict";
+
+		// shortcut for sap.m.ButtonType
+		var ButtonType = mobileLibrary.ButtonType;
 
 		/**
 		 * Constructor for a new <code>DynamicPageHeader</code>.
@@ -40,7 +43,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 *
 		 * @constructor
 		 * @public
@@ -68,7 +71,8 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 					 *  The pin/unpin button in the header.
 					 */
 					_pinButton: {type: "sap.m.Button", multiple: false, visibility: "hidden"}
-				}
+				},
+				designTime: true
 			}
 		});
 
@@ -104,7 +108,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 
 		/**
 		 * Determines the pin/unpin toggle button state.
-		 * @param bValue
+		 * @param {boolean} bValue
 		 * @private
 		 */
 		DynamicPageHeader.prototype._togglePinButton = function (bValue) {
@@ -222,5 +226,4 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 		};
 
 		return DynamicPageHeader;
-
 	}, /* bExport= */ false);

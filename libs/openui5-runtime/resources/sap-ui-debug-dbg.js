@@ -77,5 +77,5 @@ PropertyList.prototype._isChildOfQuickHelp=function(d){while(d){if(d.id==="sap-u
 PropertyList.prototype.onmouseover=function(e){var s=e.target;if(this._isChildOfQuickHelp(s)){if(this.oQuickHelpTimer){clearTimeout(this.oQuickHelpTimer);this.oQuickHelpTimer=undefined;}this.bMovedOverTooltip=true;var t=this.oParentDomRef.ownerDocument.getElementById("sap-ui-quickhelp");if(t){t.style.opacity='';t.style.filter='';}}else if(s.getAttribute("data-sap-ui-quickhelp")){this.showQuickHelp(s);}};
 PropertyList.prototype.onmouseout=function(e){var s=e.target;if(this._isChildOfQuickHelp(s)){if(this.oQuickHelpTimer){clearTimeout(this.oQuickHelpTimer);this.oQuickHelpTimer=undefined;}this.bMovedOverTooltip=false;var t=this;this.oQuickHelpTimer=setTimeout(function(){t.hideQuickHelp();},50);}else if(s.getAttribute("data-sap-ui-quickhelp")){if(this.oQuickHelpTimer){clearTimeout(this.oQuickHelpTimer);this.oQuickHelpTimer=undefined;}if(!this.bMovedOverTooltip){var t=this;this.oQuickHelpTimer=setTimeout(function(){t.hideQuickHelp();},800);}}};
 return PropertyList;});
-jQuery.sap.require("sap.ui.debug.DebugEnv");
+sap.ui.requireSync("sap/ui/debug/DebugEnv");
 //# sourceMappingURL=sap-ui-debug.js.map

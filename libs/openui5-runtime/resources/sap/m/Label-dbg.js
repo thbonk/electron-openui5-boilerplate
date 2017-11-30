@@ -17,11 +17,26 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 *
 	 * @class
 	 * The Label control is used in a UI5 mobile application to provide label text for other controls. Design such as bold, and text alignment can be specified.
+	 * As of version 1.50 the default value of the <code>wrapping</code> property is set to <code>false</code>
+	 *
+	 * Labels for required fields are marked with an asterisk.
+	 * <h3>Overview</h3>
+	 * Labels are used as titles for single controls or groups of controls.
+	 * <h3>Usage</h3>
+	 * <h4>When to use</h4>
+	 * <ul>
+	 * <li>It's recommended to use the <code>Label</code> in Form controls.</li>
+	 * <li>Use title case for labels.</li>
+	 * </ul>
+	 * <h4>When not to use</h4>
+	 * <ul>
+	 * <li> It is not recommended to use labels in Bold.</li>
+	 * </ul>
 	 * @extends sap.ui.core.Control
 	 * @implements sap.ui.core.Label,sap.ui.core.IShrinkable
 	 *
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 *
 	 * @constructor
 	 * @public
@@ -63,9 +78,27 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			width : {type : "sap.ui.core.CSSSize", group : "Dimension", defaultValue : ''},
 
 			/**
-			 * Indicates that user input is required in the input this label labels.
+			 * Indicates that user input is required for input control labeled by the sap.m.Label.
+			 * When the property is set to true and associated input field is empty an asterisk character is added to the label text.
 			 */
-			required : {type : "boolean", group : "Misc", defaultValue : false}
+			required : {type : "boolean", group : "Misc", defaultValue : false},
+
+			/**
+			 * Determines if the label is in displayOnly mode. Controls in this mode are neither interactive, nor editable, nor focusable, and not in the tab chain.
+			 *
+			 * <b>Note:</b> This property should be used only in Form controls in preview mode.
+			 *
+			 * @since 1.50.0
+			 */
+			displayOnly : {type : "boolean", group : "Appearance", defaultValue : false},
+
+			/**
+			 * Determines the wrapping of the text within the <code>Label</code>.
+			 * If set to true the <code>Label</code> will wrap, when set to false the <code>Label</code> will be truncated and replaced with ellipsis which is the default behavior.
+			 *
+			 * @since 1.50
+			 */
+			wrapping: {type : "boolean", group : "Appearance", defaultValue : false}
 		},
 		associations : {
 
@@ -101,8 +134,19 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		return this;
 	};
 
+	Label.prototype.setDisplayOnly = function(displayOnly) {
+		if (typeof displayOnly !== "boolean") {
+			jQuery.sap.log.error("DisplayOnly property should be boolean. The new value will not be set");
+			return this;
+		}
+
+		this.$().toggleClass("sapMLabelDisplayOnly", displayOnly);
+
+		return sap.ui.core.Control.prototype.setProperty.call(this, "displayOnly", displayOnly);
+	};
+
 	/**
-	 * @see sap.ui.core.Control#getAccessibilityInfo
+	 * @see sap.ui.core.Control#getAccessibilityInfo Provides the current accessibility state of the control.
 	 * @protected
 	 */
 	Label.prototype.getAccessibilityInfo = function() {

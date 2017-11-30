@@ -11,7 +11,9 @@
 
 @import "global.less";
 /* START "shared.less" */
-/* Shared CSS for 'sap_bluecrystal' theme */
+/* ============================= */
+/* Shared CSS BlueCrystal theme  */
+/* ============================= */
 
 * {
 	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
@@ -440,6 +442,11 @@ html.sapUiSuppressBackgroundStyles .sapUiBody:before {
 
 
 /* START "BrowserScrollbar.less" */
+/* ============================================= */
+/* CSS for control sap.ui.core/BrowserScrollbar  */
+/* BlueCrystal theme                             */
+/* ============================================= */
+
 /****** IE ******/
 
 html[data-sap-ui-browser*="ie"] .sapUiBody {
@@ -468,14 +475,13 @@ html.sap-desktop ::-webkit-scrollbar-thumb:hover {
 html.sap-desktop ::-webkit-scrollbar-corner {
 	background-color: @sapUiScrollBarTrackColor;
 }
-
 /* END "BrowserScrollbar.less" */
 
 /* START "DatePicker.less" */
-/* ============================================== */
-/* CSS for control sap.ui.core/DatePicker.control */
-/* Bluecrystal                                    */
-/* ============================================== */
+/* ======================================= */
+/* CSS for control sap.ui.core/DatePicker  */
+/* BlueCrystal theme                       */
+/* ======================================= */
 
 .sapUiDP{
 	width: 190px;
@@ -487,8 +493,18 @@ html.sap-desktop ::-webkit-scrollbar-corner {
 /* END "DatePicker.less" */
 
 /* START "Icon.less" */
-.sapUiIcon:focus {
+/* ================================= */
+/* CSS for control sap.ui.core/Icon  */
+/* BlueCrystal theme                 */
+/* ================================= */
+
+html:not([data-sap-ui-browser^="ie"]):not([data-sap-ui-browser^="ed"]) .sapUiIcon:focus {
 	outline-color: @sapUiKeyboardFocus;
+}
+
+html[data-sap-ui-browser^="ie"] .sapUiIcon:focus::after,
+html[data-sap-ui-browser^="ed"] .sapUiIcon:focus::after {
+	border-color: @sapUiKeyboardFocus;
 }
 
 .sapMTB-Info-CTX > .sapUiIcon {

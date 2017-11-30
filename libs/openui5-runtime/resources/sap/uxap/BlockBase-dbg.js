@@ -13,8 +13,9 @@ sap.ui.define([
 	"sap/ui/model/Context",
 	"sap/ui/Device",
 	"sap/ui/layout/form/ResponsiveGridLayout",
-	"./library"
-], function (Control, CustomData, BlockBaseMetadata, ModelMapping, Context, Device, ResponsiveGridLayout, library) {
+	"./library",
+	"sap/ui/core/Component"
+], function (Control, CustomData, BlockBaseMetadata, ModelMapping, Context, Device, ResponsiveGridLayout, library, Component) {
 		"use strict";
 
 		/**
@@ -406,7 +407,19 @@ sap.ui.define([
 		 * @protected
 		 */
 		BlockBase.prototype.createView = function (mParameter, sMode) {
-			return sap.ui.xmlview(this.getId() + "-" + sMode, mParameter);
+			var oOwnerComponent,
+				fnCreateView;
+
+			fnCreateView = function () {
+				return sap.ui.xmlview(this.getId() + "-" + sMode, mParameter);
+			}.bind(this);
+
+			oOwnerComponent = Component.getOwnerComponentFor(this);
+			if (oOwnerComponent) {
+				return oOwnerComponent.runAsOwner(fnCreateView);
+			} else {
+				return fnCreateView();
+			}
 		};
 
 		/**
@@ -654,8 +667,8 @@ sap.ui.define([
 		/**
 		 * Set the showSubSectionMore property.
 		 * Ask the parent ObjectPageSubSection to refresh its see more visibility state if present.
-		 * @param bValue
-		 * @param bInvalidate
+		 * @param {boolean} bValue
+		 * @param {boolean} bInvalidate
 		 * @returns {*}
 		 */
 		BlockBase.prototype.setShowSubSectionMore = function (bValue, bInvalidate) {
@@ -704,10 +717,10 @@ sap.ui.define([
 		/**
 		 * Override of the default model lifecycle method to disable the automatic binding resolution for lazyloading.
 		 * @override
-		 * @param bSkipLocal
-		 * @param bSkipChildren
-		 * @param sModelName
-		 * @param bUpdateAll
+		 * @param {boolean} bSkipLocal
+		 * @param {boolean} bSkipChildren
+		 * @param {string} sModelName
+		 * @param {boolean} bUpdateAll
 		 * @returns {*}
 		 */
 		BlockBase.prototype.updateBindingContext = function (bSkipLocal, bSkipChildren, sModelName, bUpdateAll) {
@@ -721,8 +734,8 @@ sap.ui.define([
 		/**
 		 * Override of the default model lifecycle method to disable the automatic binding resolution for lazyloading.
 		 * @override
-		 * @param bUpdateAll
-		 * @param sModelName
+		 * @param {boolean} bUpdateAll
+		 * @param {string} sModelName
 		 * @returns {*}
 		 */
 		BlockBase.prototype.updateBindings = function (bUpdateAll, sModelName) {

@@ -141,13 +141,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 
 	/**
 	 * Create a reference to an OData model already loaded elsewhere with the help
-	 * of SAP UI5.
+	 * of SAPUI5.
 	 *
 	 * @param {object}
 	 *            oModel holding the OData model.
 	 * @constructor
 	 *
-	 * @class Handle to an already instantiated SAP UI5 OData model.
+	 * @class Handle to an already instantiated SAPUI5 OData model.
 	 * @name sap.ui.model.analytics.odata4analytics.Model.ReferenceByModel
 	 * @public
 	 */
@@ -182,7 +182,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 	 *            aWorkaroundID listing all workarounds to be applied.
 	 * @constructor
 	 *
-	 * @class Handle to an already instantiated SAP UI5 OData model.
+	 * @class Handle to an already instantiated SAPUI5 OData model.
 	 * @name sap.ui.model.analytics.odata4analytics.Model.ReferenceWithWorkaround
 	 * @public
 	 */
@@ -752,9 +752,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		},
 
 		/**
-		 * Get underlying OData model provided by SAP UI5
+		 * Get underlying OData model provided by SAPUI5
 		 *
-		 * @returns {object} The SAP UI5 representation of the model.
+		 * @returns {object} The SAPUI5 representation of the model.
 		 * @public
 		 * @function
 		 * @name sap.ui.model.analytics.odata4analytics.Model#getODataModel
@@ -1083,7 +1083,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		/**
 		 * Get property holding the totaled property list
 		 *
-		 * @returns {object} The DataJS object representing this property
+		 * @returns {object} The datajs object representing this property
 		 * @public
 		 * @function
 		 * @name sap.ui.model.analytics.odata4analytics.QueryResult#getTotaledPropertiesListProperty
@@ -1398,7 +1398,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 	 * @param {sap.ui.model.analytics.odata4analytics.Parameterization}
 	 *            oParameterization The parameterization containing this parameter
 	 * @param {object}
-	 *            oProperty The DataJS object object representing the text property
+	 *            oProperty The datajs object object representing the text property
 	 *
 	 * @constructor
 	 *
@@ -1472,7 +1472,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		/**
 		 * Get text property related to this parameter
 		 *
-		 * @returns {object} The DataJS object representing the text property or
+		 * @returns {object} The datajs object representing the text property or
 		 *          null if it does not exist
 		 * @public
 		 * @function
@@ -1593,7 +1593,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		/**
 		 * Get property
 		 *
-		 * @returns {object} The DataJS object representing the property of this
+		 * @returns {object} The datajs object representing the property of this
 		 *          parameter
 		 * @public
 		 * @function
@@ -1660,7 +1660,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 	 * @param {sap.ui.model.analytics.odata4analytics.QueryResult}
 	 *            oQueryResult The query result containing this dimension
 	 * @param {object}
-	 *            oProperty The DataJS object object representing the dimension
+	 *            oProperty The datajs object object representing the dimension
 	 *
 	 * @constructor
 	 *
@@ -1702,7 +1702,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		/**
 		 * Get the key property
 		 *
-		 * @returns {object} The DataJS object representing the property for the
+		 * @returns {object} The datajs object representing the property for the
 		 *          dimension key
 		 * @public
 		 * @function
@@ -1715,7 +1715,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		/**
 		 * Get text property related to this dimension
 		 *
-		 * @returns {object} The DataJS object representing the text property or
+		 * @returns {object} The datajs object representing the text property or
 		 *          null if it does not exist
 		 * @public
 		 * @function
@@ -1915,7 +1915,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 	 * @param {sap.ui.model.analytics.odata4analytics.QueryResult}
 	 *            oQueryResult The query result containing this dimension attribute
 	 * @param {object}
-	 *            oProperty The DataJS object object representing the dimension
+	 *            oProperty The datajs object object representing the dimension
 	 *            attribute
 	 *
 	 * @constructor
@@ -1977,7 +1977,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		/**
 		 * Get the key property
 		 *
-		 * @returns {object} The DataJS object representing the property for the key
+		 * @returns {object} The datajs object representing the property for the key
 		 *          of this dimension attribute
 		 * @public
 		 * @function
@@ -1990,7 +1990,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		/**
 		 * Get text property related to this dimension attribute
 		 *
-		 * @returns {object} The DataJS object representing the text property or
+		 * @returns {object} The datajs object representing the text property or
 		 *          null if it does not exist
 		 * @public
 		 * @function
@@ -2048,7 +2048,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 	 * @param {sap.ui.model.analytics.odata4analytics.QueryResult}
 	 *            oQueryResult The query result containing this measure
 	 * @param {object}
-	 *            oProperty The DataJS object object representing the measure
+	 *            oProperty The datajs object object representing the measure
 	 *
 	 * @constructor
 	 *
@@ -2112,7 +2112,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		/**
 		 * Get the raw value property
 		 *
-		 * @returns {object} The DataJS object representing the property holding the
+		 * @returns {object} The datajs object representing the property holding the
 		 *          raw value of this measure
 		 * @public
 		 * @function
@@ -2126,7 +2126,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		 * Get the text property associated to the raw value property holding the
 		 * formatted value related to this measure
 		 *
-		 * @returns {object} The DataJS object representing the property holding the
+		 * @returns {object} The datajs object representing the property holding the
 		 *          formatted value text of this measure or null if this measure
 		 *          does not have a unit
 		 * @public
@@ -2140,7 +2140,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		/**
 		 * Get the unit property related to this measure
 		 *
-		 * @returns {object} The DataJS object representing the unit property or
+		 * @returns {object} The datajs object representing the unit property or
 		 *          null if this measure does not have a unit
 		 * @public
 		 * @function
@@ -2203,17 +2203,17 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 	 * query. Do not create your own instances.
 	 *
 	 * @param {object}
-	 *            oModel DataJS object for the OData model containing this entity
+	 *            oModel datajs object for the OData model containing this entity
 	 *            set
 	 * @param {object}
-	 *            oSchema DataJS object for the schema surrounding the container of
+	 *            oSchema datajs object for the schema surrounding the container of
 	 *            this entity set
 	 * @param {object}
-	 *            oContainer DataJS object for the container holding this entity set
+	 *            oContainer datajs object for the container holding this entity set
 	 * @param {object}
-	 *            oEntitySet DataJS object for the entity set
+	 *            oEntitySet datajs object for the entity set
 	 * @param {object}
-	 *            oEntityType DataJS object for the entity type
+	 *            oEntityType datajs object for the entity type
 	 *
 	 * @constructor
 	 *
@@ -2259,7 +2259,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		/**
 		 * Get full description for this entity set
 		 *
-		 * @returns {object} The DataJS object representing the entity set
+		 * @returns {object} The datajs object representing the entity set
 		 * @public
 		 * @function
 		 * @name sap.ui.model.analytics.odata4analytics.EntitySet#getSetDescription
@@ -2271,7 +2271,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		/**
 		 * Get entity type used for this entity set
 		 *
-		 * @returns {object} The DataJS object representing the entity type
+		 * @returns {object} The datajs object representing the entity type
 		 * @public
 		 * @function
 		 * @name sap.ui.model.analytics.odata4analytics.EntitySet#getEntityType
@@ -2367,12 +2367,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 	 * query. Do not create your own instances.
 	 *
 	 * @param {object}
-	 *            oModel DataJS object for the OData model containing this entity
+	 *            oModel datajs object for the OData model containing this entity
 	 *            type
 	 * @param {object}
-	 *            oSchema DataJS object for the schema containing this entity type
+	 *            oSchema datajs object for the schema containing this entity type
 	 * @param {object}
-	 *            oEntityType DataJS object for the entity type
+	 *            oEntityType datajs object for the entity type
 	 *
 	 * @constructor
 	 *
@@ -2521,7 +2521,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		 *
 		 * @return {object} Object with (JavaScript) properties, one for each (OData
 		 *         entity type) property. These (JavaScript) properties hold the
-		 *         DataJS object representing the property
+		 *         datajs object representing the property
 		 * @public
 		 * @function
 		 * @name sap.ui.model.analytics.odata4analytics.EntityType#getProperties
@@ -2535,7 +2535,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		 *
 		 * @param {string}
 		 *            sPropertyName Property name
-		 * @returns {object} The DataJS object representing the property or null if
+		 * @returns {object} The datajs object representing the property or null if
 		 *          it does not exist
 		 * @public
 		 * @function
@@ -2663,7 +2663,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		 *
 		 * @param {string}
 		 *            sPropertyName Property name
-		 * @returns {object} The DataJS object representing the text property or
+		 * @returns {object} The datajs object representing the text property or
 		 *          null if it does not exist
 		 * @public
 		 * @function
@@ -2691,7 +2691,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		 *
 		 * @param {string}
 		 *            sPropertyName Property name
-		 * @returns {object} The DataJS object representing the super-ordinate
+		 * @returns {object} The datajs object representing the super-ordinate
 		 *          property or null if it does not exist
 		 * @public
 		 * @function
@@ -2827,7 +2827,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		/**
 		 * Get full description for this entity type
 		 *
-		 * @returns {object} The DataJS object representing the entity type
+		 * @returns {object} The datajs object representing the entity type
 		 * @public
 		 * @function
 		 * @name sap.ui.model.analytics.odata4analytics.EntityType#getTypeDescription
@@ -2873,19 +2873,19 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 	 * @param {sap.ui.model.analytics.odata4analytics.EntityType}
 	 *            oEntityType object for the entity type
 	 * @param {object}
-	 *            oNodeIDProperty DataJS object for the property holding the
+	 *            oNodeIDProperty datajs object for the property holding the
 	 *            hierarchy node ID identifying the hierarchy node to which the
 	 *            OData entry belongs
 	 * @param {object}
-	 *            oParentNodeIDProperty DataJS object for the property holding the
+	 *            oParentNodeIDProperty datajs object for the property holding the
 	 *            node ID of the parent of the hierarchy node pointed to by the
 	 *            value of oNodeIDProperty
 	 * @param {object}
-	 *            oNodeLevelProperty DataJS object for the property holding the
+	 *            oNodeLevelProperty datajs object for the property holding the
 	 *            level number for the of the hierarchy node pointed to by the value
 	 *            of oNodeIDProperty
 	 * @param {object}
-	 *            oNodeValueProperty DataJS object for the property holding the data
+	 *            oNodeValueProperty datajs object for the property holding the data
 	 *            value for the of the hierarchy node pointed to by the value of
 	 *            oNodeIDProperty
 	 *
@@ -2941,7 +2941,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		/**
 		 * Get the property holding the node ID of the hierarchy node
 		 *
-		 * @returns {object} The DataJS object representing this property
+		 * @returns {object} The datajs object representing this property
 		 * @public
 		 * @function
 		 * @name sap.ui.model.analytics.odata4analytics.RecursiveHierarchy#getNodeIDProperty
@@ -2953,7 +2953,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		/**
 		 * Get the property holding the parent node ID of the hierarchy node
 		 *
-		 * @returns {object} The DataJS object representing this property
+		 * @returns {object} The datajs object representing this property
 		 * @public
 		 * @function
 		 * @name sap.ui.model.analytics.odata4analytics.RecursiveHierarchy#getParentNodeIDProperty
@@ -2965,7 +2965,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		/**
 		 * Get the property holding the level of the hierarchy node
 		 *
-		 * @returns {object} The DataJS object representing this property
+		 * @returns {object} The datajs object representing this property
 		 * @public
 		 * @function
 		 * @name sap.ui.model.analytics.odata4analytics.RecursiveHierarchy#getNodeLevelProperty
@@ -2978,7 +2978,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		 * Get the property holding the value that is structurally organized by the
 		 * hierarchy
 		 *
-		 * @returns {object} The DataJS object representing this property
+		 * @returns {object} The datajs object representing this property
 		 * @public
 		 * @function
 		 * @name sap.ui.model.analytics.odata4analytics.RecursiveHierarchy#getNodeValueProperty
@@ -3005,9 +3005,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 	 * query option.
 	 *
 	 * @param {object}
-	 *            oModel DataJS object for the OData model containing this entity type
+	 *            oModel datajs object for the OData model containing this entity type
 	 * @param {object}
-	 *            oSchema DataJS object for the schema containing this entity type
+	 *            oSchema datajs object for the schema containing this entity type
 	 * @param {sap.ui.model.analytics.odata4analytics.EntityType}
 	 *            oEntityType object for the entity type
 	 *
@@ -3534,10 +3534,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 	 * can be rendered as value for the $orderby system query option.
 	 *
 	 * @param {object}
-	 *            oModel DataJS object for the OData model containing this entity
+	 *            oModel datajs object for the OData model containing this entity
 	 *            type
 	 * @param {object}
-	 *            oSchema DataJS object for the schema containing this entity type
+	 *            oSchema datajs object for the schema containing this entity type
 	 * @param {sap.ui.model.analytics.odata4analytics.EntityType}
 	 *            oEntityType object for the entity type
 	 *
@@ -4008,7 +4008,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		 * path comprising a parameterization. If a path is provided, it overwrites
 		 * any parameterization object that might have been specified separately.
 		 *
-		 * @param sResourcePath
+		 * @param {string} sResourcePath
 		 *            Resource path pointing to the entity set of the query result.
 		 *            Must include a valid parameterization if query contains
 		 *            parameters.
@@ -4235,14 +4235,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		 * Specify which dimension components shall be included in the query result.
 		 * The settings get applied to the currently defined aggregation level.
 		 *
-		 * @param sDimensionName
+		 * @param {string} sDimensionName
 		 *            Name of the dimension for which the settings get applied.
 		 *            Specify null to apply the settings to all dimensions in the
 		 *            aggregation level.
-		 * @param bIncludeKey
+		 * @param {boolean} bIncludeKey
 		 *            Indicator whether or not to include the dimension key in the
 		 *            query result. Pass null to keep current setting.
-		 * @param bIncludeText
+		 * @param {boolean} bIncludeText
 		 *            Indicator whether or not to include the dimension text (if
 		 *            available) in the query result. Pass null to keep current
 		 *            setting.
@@ -4286,18 +4286,18 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		 * Specify which measure components shall be included in the query result.
 		 * The settings get applied to the currently set measures.
 		 *
-		 * @param sMeasureName
+		 * @param {string} sMeasureName
 		 *            Name of the measure for which the settings get applied.
 		 *            Specify null to apply the settings to all currently set
 		 *            measures.
-		 * @param bIncludeRawValue
+		 * @param {boolean} bIncludeRawValue
 		 *            Indicator whether or not to include the raw value in the query
 		 *            result. Pass null to keep current setting.
-		 * @param bIncludeFormattedValue
+		 * @param {boolean} bIncludeFormattedValue
 		 *            Indicator whether or not to include the formatted value (if
 		 *            available) in the query result. Pass null to keep current
 		 *            setting.
-		 * @param bIncludeUnit
+		 * @param {boolean} bIncludeUnit
 		 *            Indicator whether or not to include the unit (if available) in
 		 *            the query result. Pass null to keep current setting.
 		 * @public
@@ -4836,7 +4836,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		 * Specify which components of the parameter shall be included in the value
 		 * set.
 		 *
-		 * @param bIncludeText
+		 * @param {boolean} bIncludeText
 		 *            Indicator whether or not to include the parameter text (if
 		 *            available) in the value set. Pass null to keep current
 		 *            setting.
@@ -5118,10 +5118,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Filter', 'sap/ui/model/FilterO
 		 * Specify which components of the dimension shall be included in the value
 		 * set.
 		 *
-		 * @param bIncludeText
+		 * @param {boolean} bIncludeText
 		 *            Indicator whether or not to include the dimension text (if
 		 *            available) in the value set.
-		 * @param bIncludeAttributes
+		 * @param {boolean} bIncludeAttributes
 		 *            Indicator whether or not to include all dimension attributes
 		 *            (if available) in the value set.
 		 * @public

@@ -14,7 +14,7 @@ sap.ui.define(function () {
 	 * @alias sap.ui.fl.EventHistory
 	 * @experimental Since 1.47.0
 	 * @author SAP SE
-	 * @version 1.48.5
+	 * @version 1.50.6
 	 */
 	var EventHistory = function () {
 	};
@@ -46,7 +46,7 @@ sap.ui.define(function () {
 	 *
 	 * @param {string} sChannelId The channel of the event
 	 * @param {string} sEventId The identifier of the event
-	 * @param {map} The parameter map carried by the event
+	 * @param {map} mParameters The parameter map carried by the event
 	 *
 	 * @public
 	 */

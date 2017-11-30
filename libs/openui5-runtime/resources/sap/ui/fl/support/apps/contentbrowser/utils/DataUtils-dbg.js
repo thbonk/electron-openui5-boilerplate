@@ -14,7 +14,7 @@ sap.ui.define("sap/ui/fl/support/apps/contentbrowser/utils/DataUtils", ["sap/m/G
 		 * @constructor
 		 * @alias sap.ui.fl.support.apps.contentbrowser.utils.DataUtils
 		 * @author SAP SE
-		 * @version 1.48.5
+		 * @version 1.50.6
 		 * @experimental Since 1.45
 		 */
 		var DataUtils = {
@@ -75,7 +75,7 @@ sap.ui.define("sap/ui/fl/support/apps/contentbrowser/utils/DataUtils", ["sap/m/G
 			/**
 			 * Verifies if item content is not in the black list.
 			 * @param {Object} oContentItem - content item needs to be verified
-			 * @returns {Boolean} - <code>true<code> if not in the black list
+			 * @returns {Boolean} - <code>true</code> if not in the black list
 			 * @public
 			 */
 			isNotOnBlacklist: function (oContentItem) {
@@ -134,7 +134,7 @@ sap.ui.define("sap/ui/fl/support/apps/contentbrowser/utils/DataUtils", ["sap/m/G
 			 *
 			 * @param {string} sString - string that has to be checked
 			 * @param {string} sSuffix - suffix
-			 * @returns {boolean} <code>true<code> if the passed suffix is the last part of the passed string
+			 * @returns {boolean} <code>true</code> if the passed suffix is the last part of the passed string
 			 * @public
 			 */
 			endsStringWith: function (sString, sSuffix) {

@@ -243,6 +243,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	breadcrumbs: undefined, // sap.m.Breadcrumbs, since 1.50
 	breadCrumbsLinks: [], // sap.m.Link
 	navigationBar: undefined, // sap.m.Bar
 	actions: [], // sap.ui.core.Control
@@ -291,6 +292,7 @@
 	markChangesPress="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<breadcrumbs></breadcrumbs> <!-- sap.m.Breadcrumbs, since 1.50 -->
 		<breadCrumbsLinks></breadCrumbsLinks> <!-- sap.m.Link -->
 		<navigationBar></navigationBar> <!-- sap.m.Bar -->
 		<actions></actions> <!-- sap.ui.core.Control -->
@@ -442,14 +444,14 @@
 	alwaysShowContentHeader: false, // boolean, since 1.34.0
 	showEditHeaderButton: false, // boolean, since 1.34.0
 	flexEnabled: false, // boolean, since 1.34.0
-	showFooter: false, // boolean
+	showFooter: false, // boolean, since 1.40
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
 	sections: [], // sap.uxap.ObjectPageSection
 	headerTitle: undefined, // sap.uxap.ObjectPageHeader
 	headerContent: [], // sap.ui.core.Control
-	footer: undefined, // sap.m.IBar
+	footer: undefined, // sap.m.IBar, since 1.40
 	selectedSection: undefined, // sap.uxap.ObjectPageSection, since 1.44.0
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -462,7 +464,7 @@
 	}, this],
 	navigate: [function (oEvent) {
 		var ${control} = oEvent.getSource();
-	}, this] // since 1.38.1
+	}, this] // since 1.40
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<ObjectPageLayout xmlns="sap.uxap"
@@ -498,7 +500,7 @@
 		<sections></sections> <!-- sap.uxap.ObjectPageSection -->
 		<headerTitle></headerTitle> <!-- sap.uxap.ObjectPageHeader -->
 		<headerContent></headerContent> <!-- sap.ui.core.Control -->
-		<footer></footer> <!-- sap.m.IBar -->
+		<footer></footer> <!-- sap.m.IBar, since 1.40 -->
 </ObjectPageLayout>
 ]]></xmlTemplate>
 </Template>
