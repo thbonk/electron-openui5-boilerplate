@@ -28,7 +28,7 @@ function(jQuery,
 	 * @extends sap.ui.dt.ControlDragDrop
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private

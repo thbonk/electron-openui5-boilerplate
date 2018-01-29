@@ -390,14 +390,14 @@ sap.ui.define("sap/tnt/library",['jquery.sap.global',
 	 * @namespace
 	 * @name sap.tnt
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @public
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : 'sap.tnt',
-		version: '1.50.6',
+		version: '1.50.8',
 		dependencies : ['sap.ui.core','sap.m'],
 		types: [],
 		interfaces: [],
@@ -448,7 +448,7 @@ sap.ui.define("sap/tnt/NavigationList",['jquery.sap.global', './library', 'sap/u
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 *
 		 * @constructor
 		 * @public
@@ -710,7 +710,7 @@ sap.ui.define("sap/tnt/NavigationListItem",["jquery.sap.global", "./library", "s
 		 * @extends sap.ui.core.Item
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 *
 		 * @constructor
 		 * @public
@@ -1438,7 +1438,7 @@ sap.ui.define("sap/tnt/SideNavigation",['jquery.sap.global', './library', 'sap/u
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 *
 		 * @constructor
 		 * @public
@@ -1794,7 +1794,7 @@ sap.ui.define("sap/tnt/ToolHeader",['jquery.sap.global', './library', 'sap/ui/co
 		 * @extends sap.m.OverflowToolbar
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 *
 		 * @constructor
 		 * @public
@@ -1927,7 +1927,7 @@ sap.ui.define("sap/tnt/ToolHeaderUtilitySeparator",['jquery.sap.global', './libr
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 *
 		 * @constructor
 		 * @public
@@ -1985,7 +1985,7 @@ sap.ui.define("sap/tnt/ToolPage",['./library', 'sap/ui/core/Control', 'sap/ui/De
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 *
 		 * @constructor
 		 * @public

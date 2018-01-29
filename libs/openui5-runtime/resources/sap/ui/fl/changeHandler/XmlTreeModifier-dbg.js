@@ -24,8 +24,13 @@ sap.ui.define(["sap/ui/fl/changeHandler/BaseTreeModifier", "sap/ui/base/DataType
 				return this.getProperty(oControl, "visible");
 			},
 
-			setStashed: function (oControl, oPropertyValue) {
-				this.setProperty(oControl, "stashed", oPropertyValue);
+			setStashed: function (oControl, bStashed) {
+				if (!bStashed) {
+					oControl.removeAttribute("stashed");
+				} else {
+					this.setProperty(oControl, "stashed", bStashed);
+				}
+				this.setVisible(oControl, !bStashed);
 			},
 
 			getStashed: function (oControl) {
@@ -306,8 +311,8 @@ sap.ui.define(["sap/ui/fl/changeHandler/BaseTreeModifier", "sap/ui/base/DataType
 
 			getBindingTemplate: function (oControl, sAggregationName) {
 				var oAggregationNode = this._findAggregationNode(oControl, sAggregationName);
-				if (oAggregationNode && oAggregationNode.childNodes.length === 1) {
-					return oAggregationNode.childNodes[0];
+				if (oAggregationNode && this._children(oAggregationNode).length === 1) {
+					return this._children(oAggregationNode)[0];
 				}
 
 			},

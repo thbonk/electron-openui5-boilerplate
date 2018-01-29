@@ -19,7 +19,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @since 1.34
 	 *
 	 * @public
@@ -717,7 +717,20 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 		}
 	};
 
-	GenericTile.prototype.onkeyup = function(event) {
+	/*--- update Aria Label when Generic Tile change. Used while navigate using Tab Key and focus is on Generic Tile  ---*/
+
+        GenericTile.prototype._updateAriaLabel = function () {
+
+            var sAriaText = this._getAriaText(),
+                $Tile = this.$(),
+                bIsAriaUpd = false;
+            if ($Tile.attr("aria-label") !== sAriaText) {
+                $Tile.attr("aria-label", sAriaText);
+                bIsAriaUpd = true;                  // Aria Label Updated
+            }
+            return bIsAriaUpd;
+        };
+        GenericTile.prototype.onkeyup = function(event) {
 		var oParams,
 			bFirePress = false,
 			sScope = this.getScope(),
@@ -742,6 +755,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/T
 			this.firePress(oParams);
 			event.preventDefault();
 		}
+
+            this._updateAriaLabel();  // To update the Aria Label for Generic Tile on change.
 	};
 
 	/* --- Getters and Setters --- */

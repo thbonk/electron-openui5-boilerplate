@@ -35,7 +35,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/XMLTemplateProcessor', 'sap/ui/
 	 * control's dependents aggregation or add it by using {@link sap.ui.core.mvc.XMLView#addDependent}.
 	 *
 	 * @extends sap.ui.core.mvc.View
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -327,7 +327,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/XMLTemplateProcessor', 'sap/ui/
 				// extract the properties of the view from the XML element
 				if ( !that.isSubView() ) {
 					// for a real XMLView, we need to parse the attributes of the root node
-					XMLTemplateProcessor.parseViewAttributes(xContent, that, mSettings);
+					var mSettingsFromXML = {};
+					// enrich mSettingsFromXML
+					XMLTemplateProcessor.parseViewAttributes(xContent, that, mSettingsFromXML);
+					if (!mSettings.async) {
+						// extend mSettings which get applied implicitly during view constructor
+						jQuery.sap.extend(mSettings, mSettingsFromXML);
+					} else {
+						// apply the settings from the loaded view source via an explicit call
+						that.applySettings(mSettingsFromXML);
+					}
 				} else {
 					// when used as fragment: prevent connection to controller, only top level XMLView must connect
 					delete mSettings.controller;

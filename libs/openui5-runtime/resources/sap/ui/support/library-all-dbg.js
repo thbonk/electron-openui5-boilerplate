@@ -286,7 +286,7 @@ The library provides the Support Assistant tool. It enables application develope
 	 * @namespace
 	 * @name sap.ui.support
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @public
 	 */
@@ -305,13 +305,13 @@ The library provides the Support Assistant tool. It enables application develope
 		controls: [],
 		elements: [],
 		noLibraryCSS: false,
-		version: "1.50.6"
+		version: "1.50.8"
 	});
 
 	/**
 	 * Defines severity types.
 	 * @enum {string}
-	 * @since 1.50.6
+	 * @since 1.50.8
 	 * @public
 	 */
 	sap.ui.support.Severity = {
@@ -335,7 +335,7 @@ The library provides the Support Assistant tool. It enables application develope
 	/**
 	 * Defines the Audiences.
 	 * @enum {string}
-	 * @since 1.50.6
+	 * @since 1.50.8
 	 * @public
 	 */
 	sap.ui.support.Audiences = {
@@ -359,7 +359,7 @@ The library provides the Support Assistant tool. It enables application develope
 	/**
 	 * Issue Categories.
 	 * @enum {string}
-	 * @since 1.50.6
+	 * @since 1.50.8
 	 * @public
 	 */
 	sap.ui.support.Categories = {
@@ -762,7 +762,7 @@ sap.ui.define("sap/ui/support/supportRules/CoreFacade",[],
 		 * @name sap.ui.support.CoreFacade
 		 * @memberof sap.ui.support
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 * @param {object} oCore Core object as available in core plugins
 		 * @returns {object} Instance of the <code>CoreFacade</code>
 		 */
@@ -1490,7 +1490,7 @@ sap.ui.define("sap/ui/support/supportRules/Storage",[
  * @name sap.ui.support.Storage
  * @alias sap.ui.support.Storage
  * @author SAP SE.
- * @version 1.50.6
+ * @version 1.50.8
  *
  * @private
  *
@@ -1975,7 +1975,7 @@ function (jQuery) {
 	 * @name sap.ui.support.WindowCommunicationBus
 	 * @memberof sap.ui.support
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @private
 	 */
 	var CommunicationBus = {
@@ -5762,7 +5762,7 @@ function (jQuery, storage, constants) {
 	 * @name sap.ui.support.RuleSet
 	 * @memberof sap.ui.support
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @param {object} oSettings Name of the initiated
 	 * @returns {void}
 	 */

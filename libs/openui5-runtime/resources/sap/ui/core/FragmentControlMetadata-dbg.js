@@ -32,7 +32,7 @@ sap.ui.define([
 	 * @param {object} oClassInfo static info to construct the metadata from
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @since 1.48.0
 	 * @alias sap.ui.core.FragmentControlMetadata
 	 * @private

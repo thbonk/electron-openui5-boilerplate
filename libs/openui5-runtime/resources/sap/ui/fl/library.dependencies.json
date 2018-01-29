@@ -139,8 +139,8 @@
     {
       "name" : "sap/ui/fl/Utils.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 29990,
-      "compressedSize" : 9142,
+      "size" : 30080,
+      "compressedSize" : 9160,
       "required" : ["jquery.sap.global.js", "sap/ui/core/Component.js"],
       "includes" : []
     },
@@ -259,8 +259,8 @@
     {
       "name" : "sap/ui/fl/changeHandler/XmlTreeModifier.js",
       "description" : "! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.",
-      "size" : 11836,
-      "compressedSize" : 4330,
+      "size" : 11959,
+      "compressedSize" : 4405,
       "required" : ["jquery.sap.global.js", "sap/ui/base/DataType.js", "sap/ui/fl/changeHandler/BaseTreeModifier.js"],
       "includes" : []
     },
@@ -370,7 +370,7 @@
     },
     {
       "name" : "sap/ui/fl/library-preload.js",
-      "size" : 186799,
+      "size" : 186892,
       "required" : ["jquery.sap.global.js", "jquery.sap.storage.js", "sap/m/Bar.js", "sap/m/Button.js", "sap/m/ButtonType.js", "sap/m/CheckBox.js", "sap/m/Column.js", "sap/m/ColumnListItem.js", "sap/m/ComboBox.js", "sap/m/Dialog.js", "sap/m/DialogRenderer.js", "sap/m/Input.js", "sap/m/InputListItem.js", "sap/m/Label.js", "sap/m/List.js", "sap/m/MessageToast.js", "sap/m/ObjectIdentifier.js", "sap/m/OverflowToolbar.js", "sap/m/OverflowToolbarLayoutData.js", "sap/m/OverflowToolbarPriority.js", "sap/m/Page.js", "sap/m/PlacementType.js", "sap/m/PopinDisplay.js", "sap/m/RadioButton.js", "sap/m/ResponsivePopover.js", "sap/m/ScreenSize.js", "sap/m/SearchField.js", "sap/m/SelectList.js", "sap/m/Table.js", "sap/m/Text.js", "sap/m/Toolbar.js", "sap/m/ToolbarSpacer.js", "sap/ui/Device.js", "sap/ui/base/DataType.js", "sap/ui/base/EventProvider.js", "sap/ui/base/ManagedObject.js", "sap/ui/base/Object.js", "sap/ui/core/Component.js", "sap/ui/core/Control.js", "sap/ui/core/InvisibleText.js", "sap/ui/core/ListItem.js", "sap/ui/core/TextAlign.js", "sap/ui/core/ValueState.js", "sap/ui/core/mvc/Controller.js", "sap/ui/core/mvc/View.js", "sap/ui/core/mvc/XMLView.js", "sap/ui/layout/Grid.js", "sap/ui/layout/HorizontalLayout.js", "sap/ui/model/Context.js", "sap/ui/model/Filter.js", "sap/ui/model/json/JSONModel.js", "sap/ui/thirdparty/URI.js"],
       "includes" : ["sap/ui/fl/Cache.js", "sap/ui/fl/Change.js", "sap/ui/fl/ChangePersistence.js", "sap/ui/fl/ChangePersistenceFactory.js", "sap/ui/fl/DefaultVariant.js", "sap/ui/fl/EventHistory.js", "sap/ui/fl/FakeLrepConnector.js", "sap/ui/fl/FakeLrepConnectorLocalStorage.js", "sap/ui/fl/FakeLrepLocalStorage.js", "sap/ui/fl/FlexController.js", "sap/ui/fl/FlexControllerFactory.js", "sap/ui/fl/LrepConnector.js", "sap/ui/fl/Persistence.js", "sap/ui/fl/Preprocessor.js", "sap/ui/fl/PreprocessorImpl.js", "sap/ui/fl/RegistrationDelegator.js", "sap/ui/fl/StandardVariant.js", "sap/ui/fl/Utils.js", "sap/ui/fl/XmlPreprocessorImpl.js", "sap/ui/fl/changeHandler/Base.js", "sap/ui/fl/changeHandler/BaseRename.js", "sap/ui/fl/changeHandler/BaseTreeModifier.js", "sap/ui/fl/changeHandler/ChangeHandlerMediator.js", "sap/ui/fl/changeHandler/HideControl.js", "sap/ui/fl/changeHandler/JsControlTreeModifier.js", "sap/ui/fl/changeHandler/MoveControls.js", "sap/ui/fl/changeHandler/MoveElements.js", "sap/ui/fl/changeHandler/PropertyBindingChange.js", "sap/ui/fl/changeHandler/PropertyChange.js", "sap/ui/fl/changeHandler/StashControl.js", "sap/ui/fl/changeHandler/UnhideControl.js", "sap/ui/fl/changeHandler/UnstashControl.js", "sap/ui/fl/changeHandler/XmlTreeModifier.js", "sap/ui/fl/codeExt/CodeExtManager.js", "sap/ui/fl/context/BaseContextProvider.js", "sap/ui/fl/context/Context.js", "sap/ui/fl/context/ContextManager.js", "sap/ui/fl/context/DeviceContextProvider.js", "sap/ui/fl/context/SwitchContextProvider.js", "sap/ui/fl/core/EventDelegate.js", "sap/ui/fl/core/FlexVisualizer.js", "sap/ui/fl/descriptorRelated/api/DescriptorChangeFactory.js", "sap/ui/fl/descriptorRelated/api/DescriptorInlineChangeFactory.js", "sap/ui/fl/descriptorRelated/api/DescriptorVariantFactory.js", "sap/ui/fl/descriptorRelated/internal/Utils.js", "sap/ui/fl/fieldExt/Access.js", "sap/ui/fl/library.js", "sap/ui/fl/manifest.json", "sap/ui/fl/registry/ChangeHandlerRegistration.js", "sap/ui/fl/registry/ChangeRegistry.js", "sap/ui/fl/registry/ChangeRegistryItem.js", "sap/ui/fl/registry/ChangeTypeMetadata.js", "sap/ui/fl/registry/Settings.js", "sap/ui/fl/registry/SimpleChanges.js", "sap/ui/fl/transport/TransportDialog.js", "sap/ui/fl/transport/TransportSelection.js", "sap/ui/fl/transport/Transports.js", "sap/ui/fl/variants/VariantController.js", "sap/ui/fl/variants/VariantManagement.designtime.js", "sap/ui/fl/variants/VariantManagement.js", "sap/ui/fl/variants/VariantModel.js"]
     },

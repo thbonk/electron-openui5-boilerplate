@@ -39,7 +39,7 @@ sap.ui.define(['jquery.sap.global',
 		 * Constructor for a new sap.ui.rta.SettingsDialog control.
 		 * @extends sap.ui.core.Control
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 * @constructor
 		 * @private
 		 * @since 1.34

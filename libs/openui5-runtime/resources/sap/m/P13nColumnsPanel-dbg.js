@@ -18,7 +18,7 @@ sap.ui.define([
 	 * @class The <code>P13nColumnsPanel</code> control is used to define column-specific settings for table personalization.
 	 * @extends sap.m.P13nPanel
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @constructor
 	 * @public
 	 * @since 1.26.0
@@ -1005,11 +1005,11 @@ sap.ui.define([
 		this._getVisibleModelItems().forEach(function(oMItem) {
 			oMItem.visible = false;
 			// Search in item text
-			if (oMItem.text && oMItem.text.match(oRegExp)) {
+			if (typeof oMItem.text === "string" && oMItem.text.match(oRegExp)) {
 				oMItem.visible = true;
 			}
 			// Search in tooltip
-			if (oMItem.tooltip && oMItem.tooltip.match(oRegExp)) {
+			if (typeof oMItem.tooltip === "string" && oMItem.tooltip.match(oRegExp)) {
 				oMItem.visible = true;
 			}
 		});

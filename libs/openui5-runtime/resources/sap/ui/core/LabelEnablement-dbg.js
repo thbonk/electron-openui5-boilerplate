@@ -37,11 +37,17 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject'],
 		return oControl;
 	}
 
+	function findLabelForControl(label) {
+		var sId = label.getLabelFor() || label._sAlternativeId || '';
+
+		return sId;
+	}
+
 	// Updates the mapping tables for the given label, in destroy case only a cleanup is done
 	function refreshMapping(oLabel, bDestroy){
 		var sLabelId = oLabel.getId();
 		var sOldId = oLabel.__sLabeledControl;
-		var sNewId = bDestroy ? null : oLabel.getLabelForRendering();
+		var sNewId = bDestroy ? null : findLabelForControl(oLabel);
 
 		if (sOldId == sNewId) {
 			return;
@@ -128,7 +134,7 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject'],
 	 * @see sap.ui.core.LabelEnablement#enrich
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @protected
 	 * @alias sap.ui.core.LabelEnablement
 	 * @namespace

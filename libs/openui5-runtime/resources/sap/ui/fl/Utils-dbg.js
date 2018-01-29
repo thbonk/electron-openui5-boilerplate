@@ -27,7 +27,7 @@ sap.ui.define([
 	 * @namespace
 	 * @alias sap.ui.fl.Utils
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.25.0
 	 */
 	var Utils = {
@@ -37,7 +37,7 @@ sap.ui.define([
 		_sTopLayer : aLayers[aLayers.length - 1],
 		_sMaxLayer : aLayers[aLayers.length - 1],
 		DEFAULT_APP_VERSION : "DEFAULT_APP_VERSION",
-		APP_ID_AT_DESIGN_TIME : "sap.ui.fl",
+		APP_ID_AT_DESIGN_TIME : "${pro" + "ject.art" + "ifactId}", //avoid replaced by content of sap.ui.fl placeholder at build steps
 		/**
 		 * log object exposes available log functions
 		 *

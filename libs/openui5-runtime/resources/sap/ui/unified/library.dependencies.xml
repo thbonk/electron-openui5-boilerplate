@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <library  version="2.0" name="sap.ui.unified">
-  <module name="sap/ui/unified/Calendar.js" size="65912" compressedSize="31551">
+  <module name="sap/ui/unified/Calendar.js" size="65679" compressedSize="31408">
     <description>Provides control sap.ui.unified.Calendar.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -460,10 +460,11 @@
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/ui/unified/calendar/Month.js" size="56784" compressedSize="25775">
+  <module name="sap/ui/unified/calendar/Month.js" size="56687" compressedSize="25813">
     <description>Provides control sap.ui.unified.Calendar.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
+      <module name="sap/ui/Device.js"/>
       <module name="sap/ui/core/Control.js"/>
       <module name="sap/ui/core/LocaleData.js"/>
       <module name="sap/ui/core/delegate/ItemNavigation.js"/>
@@ -473,10 +474,11 @@
       <module name="sap/ui/unified/library.js"/>
     </requires>
   </module>
-  <module name="sap/ui/unified/calendar/MonthPicker.js" size="16386" compressedSize="7653">
+  <module name="sap/ui/unified/calendar/MonthPicker.js" size="17304" compressedSize="8153">
     <description>Provides control sap.ui.unified.Calendar.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
+      <module name="sap/ui/Device.js"/>
       <module name="sap/ui/core/Control.js"/>
       <module name="sap/ui/core/LocaleData.js"/>
       <module name="sap/ui/core/delegate/ItemNavigation.js"/>
@@ -560,10 +562,11 @@
       <module name="sap/ui/unified/calendar/CalendarUtils.js"/>
     </requires>
   </module>
-  <module name="sap/ui/unified/calendar/YearPicker.js" size="18435" compressedSize="8443">
+  <module name="sap/ui/unified/calendar/YearPicker.js" size="19303" compressedSize="8914">
     <description>Provides control sap.ui.unified.Calendar.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
+      <module name="sap/ui/Device.js"/>
       <module name="sap/ui/core/Control.js"/>
       <module name="sap/ui/core/date/UniversalDate.js"/>
       <module name="sap/ui/core/delegate/ItemNavigation.js"/>
@@ -581,7 +584,7 @@
       <module name="sap/ui/unified/calendar/CalendarDate.js"/>
     </requires>
   </module>
-  <module name="sap/ui/unified/library-preload.js" size="418946">
+  <module name="sap/ui/unified/library-preload.js" size="419816">
     <requires>
       <module name="jquery.sap.dom.js"/>
       <module name="jquery.sap.global.js"/>

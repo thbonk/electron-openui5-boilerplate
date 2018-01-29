@@ -24,7 +24,7 @@
       <module name="sap/ui/layout/SplitterRenderer.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/BlockLayout.js" size="7456" compressedSize="2337">
+  <module name="sap/ui/layout/BlockLayout.js" size="7494" compressedSize="2348">
     <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -72,7 +72,7 @@
       <module name="sap/ui/layout/library.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/BlockLayoutRowRenderer.js" size="3173" compressedSize="1625">
+  <module name="sap/ui/layout/BlockLayoutRowRenderer.js" size="3173" compressedSize="1627">
     <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -194,7 +194,7 @@
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/ResponsiveSplitter.js" size="23111" compressedSize="11125">
+  <module name="sap/ui/layout/ResponsiveSplitter.js" size="23387" compressedSize="11125">
     <description>Provides control sap.ui.layout.ResponsiveSplitter.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -551,7 +551,7 @@
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/ui/layout/library-preload.js" size="228674">
+  <module name="sap/ui/layout/library-preload.js" size="228687">
     <requires>
       <module name="jquery.sap.global.js"/>
       <module name="sap/ui/base/DataType.js"/>

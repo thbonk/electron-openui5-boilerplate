@@ -24,7 +24,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 	 * Basic Calendar.
 	 * This calendar is used for DatePickers
 	 * @extends sap.ui.core.Control
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -1820,16 +1820,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 				var oMonth = aMonths[i];
 				oMonth._bDateRangeChanged = true;
 				oMonth._bInvalidateSync = true;
-				if (aMonths.length > 1) {
-					oMonth._bNoFocus = true;
-				}
+				oMonth._bNoFocus = true;
 				oMonth.invalidate(oOrigin);
 				oMonth._bInvalidateSync = undefined;
-			}
-
-			if (aMonths.length > 1) {
-				// restore focus
-				this._focusDate(this._getFocusedDate(), true, true);
 			}
 		}
 
@@ -1932,10 +1925,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		}
 
 		var oCalDate = CalendarDate.fromLocalJSDate(oDate, this.getPrimaryCalendarType());
-
-		if (this._oFocusedDate && this._oFocusedDate.isSame(oCalDate)) {
-			return;
-		}
 
 		var iYear = oCalDate.getYear();
 		CalendarUtils._checkYearInValidRange(iYear);

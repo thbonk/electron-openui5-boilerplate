@@ -1219,6 +1219,7 @@
 				"jquery.sap.global.js",
 				"sap/m/DatePicker.js",
 				"sap/m/library.js",
+				"sap/ui/Device.js",
 				"sap/ui/model/type/Date.js"
 			],
 			"condRequired": [
@@ -1236,6 +1237,7 @@
 				"jquery.sap.global.js",
 				"sap/m/DatePicker.js",
 				"sap/m/library.js",
+				"sap/ui/Device.js",
 				"sap/ui/model/type/Date.js"
 			],
 			"condRequired": [
@@ -2516,6 +2518,7 @@
 				"sap/m/Toolbar.js",
 				"sap/m/ToolbarSpacer.js",
 				"sap/m/library.js",
+				"sap/ui/core/Control.js",
 				"sap/ui/core/IconPool.js",
 				"sap/ui/core/InvisibleText.js",
 				"sap/ui/core/Item.js",
@@ -2543,6 +2546,7 @@
 				"sap/m/Toolbar.js",
 				"sap/m/ToolbarSpacer.js",
 				"sap/m/library.js",
+				"sap/ui/core/Control.js",
 				"sap/ui/core/IconPool.js",
 				"sap/ui/core/InvisibleText.js",
 				"sap/ui/core/Item.js",

@@ -155,7 +155,7 @@
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/ui/table/Table.js" size="141509" compressedSize="53320">
+  <module name="sap/ui/table/Table.js" size="141572" compressedSize="53363">
     <description>Provides control sap.ui.table.Table.</description>
     <requires>
       <module name="jquery.sap.dom.js"/>
@@ -357,7 +357,7 @@
       <module name="sap/ui/table/TreeTable.js"/>
     </requires>
   </module>
-  <module name="sap/ui/table/library-preload.js" size="265637">
+  <module name="sap/ui/table/library-preload.js" size="265680">
     <requires>
       <module name="jquery.sap.dom.js"/>
       <module name="jquery.sap.global.js"/>

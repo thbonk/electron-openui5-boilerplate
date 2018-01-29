@@ -13,7 +13,7 @@ sap.ui.define(['jquery.sap.global', '../base/EventProvider', './Popup', './Core'
 	 * Provides methods to show or hide a waiting animation covering the whole
 	 * page and blocking user interaction.
 	 * @namespace
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @public
 	 * @alias sap.ui.core.BusyIndicator
 	 */

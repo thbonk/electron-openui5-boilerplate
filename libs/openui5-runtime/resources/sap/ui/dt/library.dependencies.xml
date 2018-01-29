@@ -170,7 +170,7 @@
       <module name="sap/ui/dt/library.js"/>
     </requires>
   </module>
-  <module name="sap/ui/dt/library-preload.js" size="117452">
+  <module name="sap/ui/dt/library-preload.js" size="117727">
     <requires>
       <module name="jquery.sap.dom.js"/>
       <module name="jquery.sap.global.js"/>
@@ -386,7 +386,7 @@
       <module name="sap/ui/dt/OverlayRegistry.js"/>
     </requires>
   </module>
-  <module name="sap/ui/dt/test/ElementEnablementTest.js" size="7759" compressedSize="4349">
+  <module name="sap/ui/dt/test/ElementEnablementTest.js" size="8295" compressedSize="4622">
     <description>Provides class sap.ui.dt.test.ElementEnablementTest.</description>
     <requires>
       <module name="jquery.sap.global.js"/>

@@ -163,7 +163,7 @@ sap.ui.define([
 	 *   &lt;/my:List&gt
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @since 1.48.0
 	 * @alias sap.ui.core.FragmentProxy
 	 * @experimental

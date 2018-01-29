@@ -25,7 +25,7 @@ function(
 	 * Utility functionality for DOM
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @private
 	 * @static
@@ -399,7 +399,7 @@ sap.ui.define("sap/ui/dt/ElementUtil",['jquery.sap.global'],
 			 * @class Utility functionality to work with élements, e.g. iterate through aggregations, find parents, ...
 			 *
 			 * @author SAP SE
-			 * @version 1.50.6
+			 * @version 1.50.8
 			 *
 			 * @private
 			 * @static
@@ -928,7 +928,7 @@ sap.ui.define("sap/ui/dt/ManagedObjectObserver",[
 	 * @class The ManagedObjectObserver observes changes of a ManagedObject and propagates them via events.
 	 * @extends sap.ui.base.ManagedObject
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @constructor
 	 * @private
 	 * @since 1.30
@@ -1512,7 +1512,7 @@ function(ManagedObject, ElementUtil) {
 	 * Static registry for Overlays
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @private
 	 * @static
@@ -1604,7 +1604,7 @@ function(
 	 *
 	 * @class Utility functionality to work with overlays
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @private
 	 * @static
 	 * @since 1.30
@@ -2077,7 +2077,7 @@ function(ManagedObject) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -2277,7 +2277,7 @@ function(jQuery) {
 	 * Utility functionality to work with élements, e.g. iterate through aggregations, find parents, ...
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @private
 	 * @static
@@ -2406,7 +2406,7 @@ function(jQuery) {
 	 * @namespace
 	 * @name sap.ui.dt
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental This class is experimental and provides only limited functionality. Also the API might be changed in future.
 	 * @private
 	 */
@@ -2414,7 +2414,7 @@ function(jQuery) {
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.dt",
-		version: "1.50.6",
+		version: "1.50.8",
 		dependencies : ["sap.ui.core"],
 		types: [
 			"sap.ui.dt.SelectionMode"
@@ -2482,7 +2482,7 @@ function(Plugin, DOMUtil, OverlayUtil, ElementUtil) {
 	 * @extends sap.ui.dt.plugin.Plugin
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -3302,7 +3302,7 @@ sap.ui.define("sap/ui/dt/plugin/ElementMover",['sap/ui/base/ManagedObject', 'sap
 	 * @class The ElementMover enables movement of UI5 elements based on aggregation types, which can be used by drag and
 	 *        drop or cut and paste behavior.
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -3585,7 +3585,7 @@ function(Plugin) {
 	 * @extends sap.ui.dt.Plugin
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -3671,7 +3671,7 @@ function(jQuery, ElementUtil, OverlayRegistry) {
 	 * Utility functionality for Element tests
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @private
 	 * @static
@@ -3798,7 +3798,7 @@ function(jQuery, ManagedObject, ElementTest, ChangeRegistry) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -3987,7 +3987,7 @@ function(jQuery, ManagedObject, ElementEnablementTest2) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -4118,7 +4118,7 @@ function(jQuery, ManagedObject) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -4411,7 +4411,7 @@ function(jQuery, ManagedObject) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -4534,7 +4534,7 @@ sap.ui.define("sap/ui/dt/test/report/Statistic",['jquery.sap.global', 'sap/ui/co
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -4634,7 +4634,7 @@ sap.ui.define("sap/ui/dt/test/report/StatisticRenderer",['jquery.sap.global'],
 
 	/**
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @namespace
 	 */
 	var StatisticRenderer = {
@@ -4708,7 +4708,7 @@ sap.ui.define("sap/ui/dt/test/report/Table",['jquery.sap.global', 'sap/ui/core/C
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -4947,7 +4947,7 @@ sap.ui.define("sap/ui/dt/test/report/TableRenderer",['jquery.sap.global'],
 
 	/**
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @namespace
 	 */
 	var TableRenderer = {
@@ -4997,7 +4997,7 @@ sap.ui.define("sap/ui/dt/AggregationOverlayRenderer",['sap/ui/dt/RenderingUtil']
 
 	/**
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @namespace
 	 */
 	var AggregationOverlayRenderer = {
@@ -5041,7 +5041,7 @@ sap.ui.define("sap/ui/dt/ContextMenuControl",[
 	 * @class Context - Menu for Design time
 	 * @extends sap.ui.unified.Menu
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -5216,7 +5216,7 @@ function(jQuery, ManagedObjectObserver) {
 	 * @extends sap.ui.dt.ManagedObjectObserver
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -5330,7 +5330,7 @@ function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -5542,7 +5542,7 @@ sap.ui.define("sap/ui/dt/ElementOverlayRenderer",['sap/ui/dt/RenderingUtil'],
 
 	/**
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @namespace
 	 */
 	var OverlayRenderer = {
@@ -5590,7 +5590,7 @@ sap.ui.define("sap/ui/dt/MutationObserver",[
 	 * @class The MutationObserver observes changes of a ManagedObject and propagates them via events.
 	 * @extends sap.ui.base.ManagedObject
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @constructor
 	 * @private
 	 * @since 1.30
@@ -5816,7 +5816,7 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -6611,7 +6611,7 @@ function(ManagedObject) {
 	 * @extends sap.ui.dt.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -6747,7 +6747,7 @@ sap.ui.define("sap/ui/dt/plugin/ContextMenu",[
 	 * @class The ContextMenu registers event handler to open the context menu. Menu entries can dynamically be added
 	 * @extends sap.ui.dt.Plugin
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -6946,7 +6946,7 @@ sap.ui.define("sap/ui/dt/plugin/ControlDragDrop",['sap/ui/dt/plugin/DragDrop', '
 	 * @class The ControlDragDrop enables D&D functionality for the overlays based on aggregation types
 	 * @extends sap.ui.dt.plugin.DragDrop"
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @constructor
 	 * @private
 	 * @since 1.30
@@ -7110,7 +7110,7 @@ sap.ui.define("sap/ui/dt/plugin/CutPaste",[
 	 * @class The CutPaste enables Cut & Paste functionality for the overlays based on aggregation types
 	 * @extends sap.ui.dt.Plugin"
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -7330,7 +7330,7 @@ sap.ui.define("sap/ui/dt/plugin/TabHandling",[
 	 * @class The TabHandling plugin adjusts the tabindex for the elements.
 	 * @extends sap.ui.dt.Plugin
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @constructor
 	 * @private
 	 * @since 1.38
@@ -7450,7 +7450,7 @@ function (jQuery, DesignTimeMetadata) {
 	 * @extends sap.ui.core.DesignTimeMetadata
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -7541,7 +7541,7 @@ function(jQuery, Overlay) {
 	 * @extends sap.ui.core.Overlay
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -7718,7 +7718,7 @@ function(jQuery, DesignTimeMetadata, AggregationDesignTimeMetadata) {
 	 * @extends sap.ui.core.DesignTimeMetadata
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -7962,7 +7962,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -8949,7 +8949,7 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -9602,6 +9602,24 @@ sap.ui.define("sap/ui/dt/test/ElementEnablementTest",[
 function(jQuery, Test, DesignTime, ElementTest) {
 	"use strict";
 
+	// Wait until the theme is changed
+	function themeChanged() {
+		return new Promise(function(resolve) {
+			function onChanged() {
+				sap.ui.getCore().detachThemeChanged(onChanged);
+				resolve();
+			}
+			sap.ui.getCore().attachThemeChanged(onChanged);
+		});
+	}
+	// Wait until the theme is applied
+	function whenThemeApplied() {
+		if (sap.ui.getCore().isThemeApplied()) {
+			return Promise.resolve();
+		} else {
+			return themeChanged();
+		}
+	}
 
 	/**
 	 * Constructor for an ElementEnablementTest.
@@ -9615,7 +9633,7 @@ function(jQuery, Test, DesignTime, ElementTest) {
 	 * @extends sap.ui.dt.test.Test
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -9748,43 +9766,45 @@ function(jQuery, Test, DesignTime, ElementTest) {
 		this._bErrorDuringRendering = false;
 
 		return new Promise(function(fnResolve, fnReject) {
-			this._oElement = this._createElement();
+			whenThemeApplied().then(function() {
+				this._oElement = this._createElement();
 
-			try {
-				this._oElement.getRenderer();
-			} catch (oError) {
-				this._bNoRenderer = true;
-			}
-
-			if (!this._bNoRenderer) {
 				try {
-					this._oElement.placeAt(this._getTestArea().get(0));
-					sap.ui.getCore().applyChanges();
+					this._oElement.getRenderer();
 				} catch (oError) {
-					this._bErrorDuringRendering = true;
+					this._bNoRenderer = true;
 				}
 
-				if (!this._bErrorDuringRendering) {
-					this._oDesignTime = new DesignTime({
-						rootElements : [this._oElement]
-					});
-					this._oDesignTime.attachEventOnce("synced", function() {
+				if (!this._bNoRenderer) {
+					try {
+						this._oElement.placeAt(this._getTestArea().get(0));
 						sap.ui.getCore().applyChanges();
-						if (this.getTimeout()) {
-							this._iTimeout = window.setTimeout(function() {
-								fnResolve();
-							}, this.getTimeout());
-						} else {
-							fnResolve();
-						}
+					} catch (oError) {
+						this._bErrorDuringRendering = true;
+					}
 
-					}, this);
+					if (!this._bErrorDuringRendering) {
+						this._oDesignTime = new DesignTime({
+							rootElements : [this._oElement]
+						});
+						this._oDesignTime.attachEventOnce("synced", function() {
+							sap.ui.getCore().applyChanges();
+							if (this.getTimeout()) {
+								this._iTimeout = window.setTimeout(function() {
+									fnResolve();
+								}, this.getTimeout());
+							} else {
+								fnResolve();
+							}
+
+						}, this);
+					} else {
+						fnResolve();
+					}
 				} else {
 					fnResolve();
 				}
-			} else {
-				fnResolve();
-			}
+			}.bind(this));
 		}.bind(this));
 	};
 
@@ -9918,7 +9938,7 @@ function(jQuery, Test, ElementEnablementTest) {
 	 * @extends sap.ui.dt.test.Test
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private

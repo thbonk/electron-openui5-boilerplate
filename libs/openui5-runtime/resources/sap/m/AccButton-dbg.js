@@ -21,7 +21,7 @@ sap.ui.define(['jquery.sap.global', './Button' ],
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private

@@ -24,7 +24,7 @@ sap.ui.define(['jquery.sap.global', './ListBase', './ListItemBase', './library']
 	 * @extends sap.m.ListBase
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -462,6 +462,11 @@ sap.ui.define(['jquery.sap.global', './ListBase', './ListItemBase', './library']
 		return sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("ACC_CTR_TYPE_TABLE");
 	};
 
+	// custom footer text announcement is only for tables
+	Table.prototype.getAccessibilityDescription = function() {
+		return ListBase.prototype.getAccessibilityDescription.call(this) + " " + this.getFooterText();
+	};
+
 	Table.prototype._setHeaderAnnouncement = function() {
 		var oBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m"),
 			sAnnouncement = oBundle.getText("ACC_CTR_TYPE_HEADER_ROW") + " ";
@@ -471,6 +476,11 @@ sap.ui.define(['jquery.sap.global', './ListBase', './ListItemBase', './library']
 		}
 
 		this.getColumns(true).forEach(function(oColumn, i) {
+			// only set the header announcement for visible columns
+			if (!oColumn.getVisible()) {
+				return;
+			}
+
 			var oHeader = oColumn.getHeader();
 			if (oHeader && oHeader.getVisible()) {
 				sAnnouncement += ListItemBase.getAccessibilityText(oHeader) + " ";
@@ -483,6 +493,11 @@ sap.ui.define(['jquery.sap.global', './ListBase', './ListItemBase', './library']
 	Table.prototype._setFooterAnnouncement = function() {
 		var sAnnouncement = sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("ACC_CTR_TYPE_FOOTER_ROW") + " ";
 		this.getColumns(true).forEach(function(oColumn, i) {
+			// only set the footer announcement for visible columns
+			if (!oColumn.getVisible()) {
+				return;
+			}
+
 			var oFooter = oColumn.getFooter();
 			if (oFooter && oFooter.getVisible()) {
 				// announce header as well

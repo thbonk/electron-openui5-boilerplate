@@ -24,7 +24,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library'],
 	 * @extends sap.m.ListItemBase
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -106,6 +106,9 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library'],
 	GroupHeaderListItem.prototype.getContentAnnouncement = function() {
 		return this.getTitle();
 	};
+
+	// group header has no group announcement
+	GroupHeaderListItem.prototype.getGroupAnnouncement = function() {};
 
 	return GroupHeaderListItem;
 

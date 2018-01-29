@@ -20,7 +20,7 @@ The library provides the Support Assistant tool. It enables application develope
 	 * @namespace
 	 * @name sap.ui.support
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @public
 	 */
@@ -39,13 +39,13 @@ The library provides the Support Assistant tool. It enables application develope
 		controls: [],
 		elements: [],
 		noLibraryCSS: false,
-		version: "1.50.6"
+		version: "1.50.8"
 	});
 
 	/**
 	 * Defines severity types.
 	 * @enum {string}
-	 * @since 1.50.6
+	 * @since 1.50.8
 	 * @public
 	 */
 	sap.ui.support.Severity = {
@@ -69,7 +69,7 @@ The library provides the Support Assistant tool. It enables application develope
 	/**
 	 * Defines the Audiences.
 	 * @enum {string}
-	 * @since 1.50.6
+	 * @since 1.50.8
 	 * @public
 	 */
 	sap.ui.support.Audiences = {
@@ -93,7 +93,7 @@ The library provides the Support Assistant tool. It enables application develope
 	/**
 	 * Issue Categories.
 	 * @enum {string}
-	 * @since 1.50.6
+	 * @since 1.50.8
 	 * @public
 	 */
 	sap.ui.support.Categories = {

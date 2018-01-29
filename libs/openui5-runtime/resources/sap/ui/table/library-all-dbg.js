@@ -103,7 +103,7 @@ sap.ui.define("sap/ui/table/TableMenuUtils",['jquery.sap.global', 'sap/ui/Device
 		 * Note: Do not access the function of this helper directly but via <code>sap.ui.table.TableUtils.Menu...</code>
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 * @namespace
 		 * @name sap.ui.table.TableMenuUtils
 		 * @private
@@ -534,7 +534,7 @@ sap.ui.define("sap/ui/table/TablePersoController",['jquery.sap.global', 'sap/ui/
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @since 1.21.1
 	 *
 	 * @constructor
@@ -971,7 +971,7 @@ sap.ui.define("sap/ui/table/TableRendererUtils",['jquery.sap.global', 'sap/ui/co
 	 * Static collection of utility functions related to the sap.ui.table.TableRenderer
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @namespace
 	 * @name sap.ui.table.TableRendererUtils
 	 * @private
@@ -1168,7 +1168,7 @@ sap.ui.define("sap/ui/table/library",['jquery.sap.global', 'sap/ui/core/Core', '
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.table",
-		version: "1.50.6",
+		version: "1.50.8",
 		dependencies : ["sap.ui.core","sap.ui.unified"],
 		types: [
 			"sap.ui.table.NavigationMode",
@@ -1217,7 +1217,7 @@ sap.ui.define("sap/ui/table/library",['jquery.sap.global', 'sap/ui/core/Core', '
 	 * @namespace
 	 * @alias sap.ui.table
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @public
 	 */
 	var thisLib = sap.ui.table;
@@ -1225,7 +1225,7 @@ sap.ui.define("sap/ui/table/library",['jquery.sap.global', 'sap/ui/core/Core', '
 	/**
 	 * Navigation mode of the table
 	 *
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
@@ -1253,7 +1253,7 @@ sap.ui.define("sap/ui/table/library",['jquery.sap.global', 'sap/ui/core/Core', '
 	/**
 	 * Row Action types.
 	 *
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
@@ -1284,7 +1284,7 @@ sap.ui.define("sap/ui/table/library",['jquery.sap.global', 'sap/ui/core/Core', '
 	/**
 	 * Selection behavior of the table
 	 *
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
@@ -1315,7 +1315,7 @@ sap.ui.define("sap/ui/table/library",['jquery.sap.global', 'sap/ui/core/Core', '
 	/**
 	 * Selection mode of the table
 	 *
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
@@ -1353,7 +1353,7 @@ sap.ui.define("sap/ui/table/library",['jquery.sap.global', 'sap/ui/core/Core', '
 	/**
 	 * Sort order of a column
 	 *
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
@@ -1378,7 +1378,7 @@ sap.ui.define("sap/ui/table/library",['jquery.sap.global', 'sap/ui/core/Core', '
 	/**
 	 * VisibleRowCountMode of the table
 	 *
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
@@ -1414,7 +1414,7 @@ sap.ui.define("sap/ui/table/library",['jquery.sap.global', 'sap/ui/core/Core', '
 	 *
 	 * Contains IDs of shared DOM references, which should be accessible to inheriting controls via getDomRef() function.
 	 *
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @enum {string}
 	 * @public
 	 */
@@ -1484,7 +1484,7 @@ sap.ui.define("sap/ui/table/library",['jquery.sap.global', 'sap/ui/core/Core', '
 	/**
 	 * Different modes for setting the auto expand mode on tree or analytical bindings.
 	 *
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @enum {string}
 	 * @public
 	 * @borrows sap.ui.model.TreeAutoExpandMode.Sequential as Sequential
@@ -1538,7 +1538,7 @@ sap.ui.define("sap/ui/table/RowActionItem",['sap/ui/core/Element', './library', 
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @since 1.45.0
 	 *
 	 * @constructor
@@ -1760,7 +1760,7 @@ sap.ui.define("sap/ui/table/TableColumnUtils",['jquery.sap.global', 'sap/ui/core
 		 * Note: Do not access the function of this helper directly but via <code>sap.ui.table.TableUtils.Column...</code>
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 * @namespace
 		 * @name sap.ui.table.TableColumnUtils
 		 * @private
@@ -2507,7 +2507,7 @@ sap.ui.define("sap/ui/table/TableGrouping",['jquery.sap.global', 'sap/ui/core/El
 	 * Note: Do not access the function of this helper directly but via <code>sap.ui.table.TableUtils.Grouping...</code>
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @namespace
 	 * @name sap.ui.table.TableGrouping
 	 * @private
@@ -3219,7 +3219,7 @@ sap.ui.define("sap/ui/table/TableUtils",[
 	 * Static collection of utility functions related to the sap.ui.table.Table, ...
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @namespace
 	 * @name sap.ui.table.TableUtils
 	 * @private
@@ -4318,7 +4318,7 @@ sap.ui.define("sap/ui/table/ColumnMenu",['jquery.sap.global', 'sap/ui/core/Rende
 	 * @class
 	 * The column menu provides all common actions that can be performed on a column.
 	 * @extends sap.ui.unified.Menu
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -4846,7 +4846,7 @@ sap.ui.define("sap/ui/table/Row",['jquery.sap.global', 'sap/ui/core/Element', 's
 	 * @class
 	 * The row.
 	 * @extends sap.ui.core.Element
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -5201,7 +5201,7 @@ function(jQuery, Control, TableUtils, library, Icon, Menu, Popup, RowActionItem)
 	 * If more action items are available as the available space allows to display an overflow mechanism is provided.
 	 * This control must only be used in the context of the <code>sap.ui.table.Table</code> control to define row actions.
 	 * @extends sap.ui.core.Control
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -5645,7 +5645,7 @@ sap.ui.define("sap/ui/table/RowSettings",[
 	 * The <code>RowSettings</code> control allows you to configure a row.
 	 * You can only use this control in the context of the <code>sap.ui.table.Table</code> control to define row settings.
 	 * @extends sap.ui.core.Element
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -5790,7 +5790,7 @@ sap.ui.define("sap/ui/table/TableExtension",[
 	 * @abstract
 	 * @extends sap.ui.base.Object
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @constructor
 	 * @private
 	 * @alias sap.ui.table.TableExtension
@@ -6071,7 +6071,7 @@ sap.ui.define("sap/ui/table/TableKeyboardDelegate2",[
 	 *
 	 * @extends sap.ui.base.Object
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @constructor
 	 * @private
 	 * @alias sap.ui.table.TableKeyboardDelegate2
@@ -8273,7 +8273,7 @@ sap.ui.define("sap/ui/table/TableKeyboardExtension",[
 	 * @class Extension for sap.ui.table.Table which handles keyboard related things.
 	 * @extends sap.ui.table.TableExtension
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @constructor
 	 * @private
 	 * @alias sap.ui.table.TableKeyboardExtension
@@ -9491,7 +9491,7 @@ sap.ui.define("sap/ui/table/TablePointerExtension",[
 	 * @class Extension for sap.ui.table.Table which handles mouse and touch related things.
 	 * @extends sap.ui.table.TableExtension
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @constructor
 	 * @private
 	 * @alias sap.ui.table.TablePointerExtension
@@ -11309,7 +11309,7 @@ sap.ui.define("sap/ui/table/TableScrollExtension",[
 	 * @class Extension for sap.ui.table.Table which handles scrolling.
 	 * @extends sap.ui.table.TableExtension
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @constructor
 	 * @private
 	 * @alias sap.ui.table.TableScrollExtension
@@ -11614,7 +11614,7 @@ sap.ui.define("sap/ui/table/AnalyticalColumnMenu",['jquery.sap.global', './Colum
 	 * @extends sap.ui.table.ColumnMenu
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -11765,7 +11765,7 @@ function(jQuery, Element, coreLibrary, Popup, RenderManager, Filter, FilterOpera
 	 * @class
 	 * The column allows you to define column specific properties that will be applied when rendering the table.
 	 * @extends sap.ui.core.Element
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -12824,7 +12824,7 @@ sap.ui.define("sap/ui/table/TableAccRenderExtension",[
 	 * @class Extension for sap.ui.table.TableRenderer which handles ACC related things.
 	 * @extends sap.ui.table.TableExtension
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @constructor
 	 * @private
 	 * @alias sap.ui.table.TableAccRenderExtension
@@ -13029,7 +13029,7 @@ sap.ui.define("sap/ui/table/TableDragDropExtension",[
 	 *
 	 * @extends sap.ui.table.TableExtension
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @constructor
 	 * @private
 	 * @alias sap.ui.table.TableDragDropExtension
@@ -13127,7 +13127,7 @@ sap.ui.define("sap/ui/table/AnalyticalColumn",['jquery.sap.global', './Column', 
 	 * @extends sap.ui.table.Column
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -14325,7 +14325,7 @@ sap.ui.define("sap/ui/table/TableAccExtension",[
 	 * @class Extension for sap.ui.table.Table which handles ACC related things.
 	 * @extends sap.ui.table.TableExtension
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @constructor
 	 * @private
 	 * @alias sap.ui.table.TableAccExtension
@@ -14872,7 +14872,7 @@ sap.ui.define("sap/ui/table/Table",['jquery.sap.global', 'sap/ui/Device',
 	 *
 	 *
 	 * @extends sap.ui.core.Control
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -16084,7 +16084,7 @@ sap.ui.define("sap/ui/table/Table",['jquery.sap.global', 'sap/ui/Device',
 			this._iRowHeightsDelta = this._getRowHeightsDelta(this._aRowHeights);
 		}
 
-		var iRowContentSpace = 0;
+		var iRowContentSpace = null;
 		if (!bSkipHandleRowCountMode && this.getVisibleRowCountMode() == VisibleRowCountMode.Auto) {
 			iRowContentSpace = this._determineAvailableSpace();
 			// if no height is granted we do not need to do any further row adjustment or layout sync.
@@ -16187,7 +16187,7 @@ sap.ui.define("sap/ui/table/Table",['jquery.sap.global', 'sap/ui/Device',
 
 		if (this.getVisibleRowCountMode() == VisibleRowCountMode.Auto) {
 			//if visibleRowCountMode is auto change the visibleRowCount according to the parents container height
-			var iRows = this._calculateRowsToDisplay(iRowContentSpace);
+			var iRows = this._calculateRowsToDisplay(iRowContentSpace != null ? iRowContentSpace : this._determineAvailableSpace());
 			// if minAutoRowCount has reached, table should use block this height.
 			// In case row > minAutoRowCount, the table height is 0, because ResizeTrigger must detect any changes of the table parent.
 			if (iRows == this._determineMinAutoRowCount()) {
@@ -16199,6 +16199,7 @@ sap.ui.define("sap/ui/table/Table",['jquery.sap.global', 'sap/ui/Device',
 
 		this._updateHSb(oTableSizes);
 		this._updateVSbTop();
+		this._toggleVSb();
 
 		var $this = this.$();
 
@@ -18575,8 +18576,6 @@ sap.ui.define("sap/ui/table/Table",['jquery.sap.global', 'sap/ui/Device',
 				jQuery(this.getDomRef("tableCtrlCnt")).css("height", this._iTableRowContentHeight + "px");
 			}
 		}
-
-		this._toggleVSb();
 	};
 
 	/**
@@ -19029,7 +19028,7 @@ sap.ui.define("sap/ui/table/TreeTable",['jquery.sap.global', './Table', 'sap/ui/
 	 * @class
 	 * The TreeTable control provides a comprehensive set of features to display hierarchical data.
 	 * @extends sap.ui.table.Table
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -19780,7 +19779,7 @@ sap.ui.define("sap/ui/table/AnalyticalTable",['jquery.sap.global', './Analytical
 	 * @see http://scn.sap.com/docs/DOC-44986
 	 *
 	 * @extends sap.ui.table.Table
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public

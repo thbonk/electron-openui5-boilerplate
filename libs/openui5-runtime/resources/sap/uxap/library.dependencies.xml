@@ -214,7 +214,7 @@
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/uxap/ObjectPageLayout.js" size="96411" compressedSize="40281">
+  <module name="sap/uxap/ObjectPageLayout.js" size="96445" compressedSize="40309">
     <description>Provides control sap.uxap.ObjectPageLayout.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -244,7 +244,7 @@
       <module name="sap/uxap/AnchorBar.js"/>
     </requires>
   </module>
-  <module name="sap/uxap/ObjectPageLayoutRenderer.js" size="9288" compressedSize="4361">
+  <module name="sap/uxap/ObjectPageLayoutRenderer.js" size="9419" compressedSize="4415">
     <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -489,7 +489,7 @@
   </module>
   <module name="sap/uxap/i18n/i18n_zh_TW.properties" size="2443">
   </module>
-  <module name="sap/uxap/library-preload.js" size="170411">
+  <module name="sap/uxap/library-preload.js" size="170493">
     <requires>
       <module name="jquery.sap.global.js"/>
       <module name="sap/m/ActionSheet.js"/>

@@ -65,7 +65,7 @@ sap.ui.define([
 	 *
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -3366,7 +3366,7 @@ sap.ui.define([
 	 * @private
 	 */
 	ODataModel.prototype._processChange = function(sKey, oData, sUpdateMethod) {
-		var oPayload, oEntityType, mParams, sMethod, sETag, sUrl, mHeaders, aUrlParams, oRequest, oUnModifiedEntry, that = this;
+		var oPayload, oEntityType, mParams, sMethod, sETag, sUrl, bCreated, mHeaders, aUrlParams, oRequest, oUnModifiedEntry, that = this;
 
 		// delete expand properties = navigation properties
 		oEntityType = this.oMetadata._getEntityTypeByPath(sKey);
@@ -3382,6 +3382,7 @@ sap.ui.define([
 		if (oData.__metadata && oData.__metadata.created){
 			sMethod = oData.__metadata.created.method ? oData.__metadata.created.method : "POST";
 			sKey = oData.__metadata.created.key;
+			bCreated = true;
 			mParams = oData.__metadata.created;
 			if (oData.__metadata.created.functionImport){
 				// update request url params with changed data from payload
@@ -3449,6 +3450,11 @@ sap.ui.define([
 		sUrl = this._createRequestUrl('/' + sKey, null, aUrlParams, this.bUseBatch);
 
 		oRequest = this._createRequest(sUrl, sMethod, mHeaders, oPayload, sETag);
+
+		//for createEntry requests we need to flag request again
+		if (bCreated) {
+			oRequest.created = true;
+		}
 
 		if (this.bUseBatch) {
 			oRequest.requestUri = oRequest.requestUri.replace(this.sServiceUrl + '/','');
@@ -4924,7 +4930,7 @@ sap.ui.define([
 			});
 			that._removeEntity(sKey);
 			//cleanup Messages for created Entry
-			sap.ui.getCore().getMessageManager().removeMessages(this.getMessagesByPath(oContext.getPath() + '/'));
+			sap.ui.getCore().getMessageManager().removeMessages(this.getMessagesByEntity(oContext.getPath(), true));
 		}
 	};
 
@@ -5686,6 +5692,42 @@ sap.ui.define([
 			return this.bRefreshAfterChange;
 		}
 		return bRefreshAfterChange;
+	};
+
+	/**
+	 * Get all messages for an entity path.
+	 *
+	 * @param {string} sEntity The entity path or key
+	 * @param {boolean} bExcludePersistent If set true persitent flagged messages are excluded.
+	 * @private
+	 */
+	ODataModel.prototype.getMessagesByEntity = function(sEntity, bExcludePersistent) {
+		var sEntityPath = sEntity,
+			aMessages = [],
+			sPath;
+
+		function filterMessages(aMessages) {
+			var aFilteredMessages = [];
+			for (var i = 0; i < aMessages.length; i++) {
+				if (!bExcludePersistent || (bExcludePersistent && !aMessages[i].persistent)) {
+					aFilteredMessages.push(aMessages[i]);
+				}
+			}
+			return aFilteredMessages;
+		}
+		//normalize Key
+		if (!jQuery.sap.startsWith(sEntityPath, '/')) {
+			sEntityPath = '/' + sEntityPath;
+		}
+		if (this.mMessages) {
+			for (sPath in this.mMessages) {
+				if (jQuery.sap.startsWith(sPath, sEntityPath)) {
+					aMessages = aMessages.concat(filterMessages(this.mMessages[sPath]));
+				}
+			}
+			return aMessages;
+		}
+		return null;
 	};
 
 	return ODataModel;

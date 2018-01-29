@@ -81,7 +81,7 @@ sap.ui.define("sap/ui/layout/DynamicSideContent",['jquery.sap.global', 'sap/ui/c
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 *
 		 * @constructor
 		 * @public
@@ -988,7 +988,7 @@ sap.ui.define("sap/ui/layout/GridRenderer",['jquery.sap.global'],
 	/**
 	 * @author SAP SE
 	 * @version
-	 * 1.50.6
+	 * 1.50.8
 	 * @namespace
 	 */
 	var GridRenderer = {};
@@ -1992,7 +1992,7 @@ sap.ui.define("sap/ui/layout/changeHandler/AddFormContainer",[
 		 * Change handler for adding a form group.
 		 * @alias sap.ui.layout.changeHandler.AddFormContainer
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 * @experimental Since 1.48.0
 		 */
 		var AddGroup = { };
@@ -2105,7 +2105,7 @@ sap.ui.define("sap/ui/layout/changeHandler/AddSimpleFormField",[
 	 *
 	 * @author SAP SE
 	 *
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @experimental Since 1.49.0 This class is experimental and provides only limited functionality. Also the API might be
 	 *               changed in future.
@@ -2308,7 +2308,7 @@ sap.ui.define("sap/ui/layout/changeHandler/AddSimpleFormGroup",[
 		 * Change handler for adding a simple form group.
 		 * @alias sap.ui.layout.changeHandler.AddSimpleFormGroup
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 * @experimental Since 1.27.0
 		 */
 		var AddSimpleFormGroup = {};
@@ -2491,7 +2491,7 @@ sap.ui.define("sap/ui/layout/changeHandler/HideSimpleForm",[
 	 * Change handler for hiding of a control.
 	 * @alias sap.ui.fl.changeHandler.HideControl
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.27.0
 	 */
 	var HideForm = { };
@@ -2655,7 +2655,7 @@ sap.ui.define("sap/ui/layout/changeHandler/MoveSimpleForm",["jquery.sap.global",
 			 *
 			 * @alias sap.ui.fl.changeHandler.MoveElements
 			 * @author SAP SE
-			 * @version 1.50.6
+			 * @version 1.50.8
 			 * @experimental Since 1.34.0
 			 */
 			var MoveSimpleForm = {};
@@ -3034,7 +3034,7 @@ sap.ui.define("sap/ui/layout/changeHandler/RenameFormContainer",[
 	 *
 	 * @alias sap.ui.layout.changeHandler.RenameFormContainer
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @since 1.48
 	 * @private
 	 * @experimental Since 1.48. This class is experimental and provides only limited functionality. Also the API might be changed in future.
@@ -3134,7 +3134,7 @@ sap.ui.define("sap/ui/layout/changeHandler/RenameSimpleForm",[
 	 *
 	 * @alias sap.ui.layout.changeHandler.RenameForm
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @since 1.40
 	 * @private
 	 * @experimental Since 1.40. This class is experimental and provides only limited functionality. Also the API might be changed in future.
@@ -3240,7 +3240,7 @@ sap.ui.define("sap/ui/layout/changeHandler/UnhideSimpleForm",[
 	 * Change handler for hiding of a control.
 	 * @alias sap.ui.fl.changeHandler.HideControl
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.27.0
 	 */
 	var UnhideForm = { };
@@ -5027,14 +5027,14 @@ sap.ui.define("sap/ui/layout/library",['jquery.sap.global', 'sap/ui/base/DataTyp
 	 * @namespace
 	 * @name sap.ui.layout
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @public
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.layout",
-		version: "1.50.6",
+		version: "1.50.8",
 		dependencies : ["sap.ui.core"],
 		types: [
 			"sap.ui.layout.BackgroundDesign",
@@ -5582,7 +5582,7 @@ sap.ui.define("sap/ui/layout/AlignedFlowLayout",['sap/ui/core/Control', './libra
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 *
 		 * @constructor
 		 * @private
@@ -6108,7 +6108,7 @@ sap.ui.define("sap/ui/layout/BlockLayout",['sap/ui/core/Control', './library'],
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 *
 		 * @constructor
 		 * @public
@@ -6162,8 +6162,8 @@ sap.ui.define("sap/ui/layout/BlockLayout",['sap/ui/core/Control', './library'],
 		 */
 		BlockLayout.prototype.onAfterRendering = function () {
 			this._onParentResize();
+			this._notifySizeListeners();
 		};
-
 		/**
 		 * Changes background type
 		 *
@@ -6199,23 +6199,24 @@ sap.ui.define("sap/ui/layout/BlockLayout",['sap/ui/core/Control', './library'],
 				mSizes = BlockLayout.CONSTANTS.SIZES;
 
 			this._detachResizeHandler();
-			this._removeBreakpointClasses();
-
 			// Put additional styles according to SAP_STANDARD_EXTENDED from sap.ui.Device.media.RANGESETS
 			// Not possible to use sap.ui.Device directly as it calculates window size, but here is needed parent's size
-			for (sProp in mSizes) {
-				if (mSizes.hasOwnProperty(sProp) && (mSizes[sProp] === null || mSizes[sProp] > iWidth)) {
-					if (this._currentBreakpoint != sProp) {
-						this._currentBreakpoint = sProp;
-						this._notifySizeListeners();
-					}
+			if (iWidth > 0){
+				this._removeBreakpointClasses();
+				for (sProp in mSizes) {
+					if (mSizes.hasOwnProperty(sProp) && (mSizes[sProp] === null || mSizes[sProp] > iWidth)) {
+						if (this._currentBreakpoint != sProp) {
+							this._currentBreakpoint = sProp;
+							this._notifySizeListeners();
+						}
 
-					this.addStyleClass("sapUiBlockLayoutSize" + sProp, true);
-					break;
+						this.addStyleClass("sapUiBlockLayoutSize" + sProp, true);
+						break;
+					}
 				}
 			}
 
-			jQuery.sap.delayedCall(0, this, "_attachResizeHandler");
+			this._attachResizeHandler();
 		};
 
 		BlockLayout.prototype._notifySizeListeners = function () {
@@ -6298,7 +6299,7 @@ sap.ui.define("sap/ui/layout/BlockLayoutCell",['sap/ui/core/Control', './library
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 *
 		 * @constructor
 		 * @public
@@ -6428,7 +6429,7 @@ sap.ui.define("sap/ui/layout/BlockLayoutCellData",['jquery.sap.global', 'sap/ui/
 	 * @class
 	 * Holds layout data for the BlockLayoutCells contents.
 	 * @extends sap.ui.core.LayoutData
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @constructor
 	 * @public
 	 * @since 1.50.0
@@ -6725,7 +6726,7 @@ sap.ui.define("sap/ui/layout/BlockLayoutRow",['jquery.sap.global', 'sap/ui/core/
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 *
 		 * @constructor
 		 * @public
@@ -7210,15 +7211,14 @@ sap.ui.define("sap/ui/layout/BlockLayoutRowRenderer",['jquery.sap.global', './li
 					oBlockLayoutRow._processAccentCellStyles(aAccentedCells, aContent);
 					break;
 			}
-
 			var arrangement = oBlockLayoutRow._getCellArangementForCurrentSize();
-			if (bScrollable || !arrangement) {
+			if (bScrollable) {
 				/**
 				 * The arrangement is passed from the BlockLayout to the BlockLayoutRow after the BlockLayout is rendered.
 				 * This means that we need to rerender the BlockLayoutRow after its initial rendering, because the size was previously unknown
 				 */
 				aContent.forEach(oRm.renderControl);
-			} else {
+			} else if (arrangement) {
 				for (var i = 0; i < arrangement.length; i++) {
 					var aSubRow = arrangement[i];
 					oRm.write("<div ");
@@ -7298,7 +7298,7 @@ sap.ui.define("sap/ui/layout/FixFlex",["jquery.sap.global", "sap/ui/core/Control
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 *
 		 * @constructor
 		 * @public
@@ -7626,7 +7626,7 @@ sap.ui.define("sap/ui/layout/Grid",['jquery.sap.global', 'sap/ui/core/Control', 
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -7938,7 +7938,7 @@ sap.ui.define("sap/ui/layout/GridData",['jquery.sap.global', 'sap/ui/core/Layout
 	 * @extends sap.ui.core.LayoutData
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -8395,7 +8395,7 @@ sap.ui.define("sap/ui/layout/HorizontalLayout",['jquery.sap.global', 'sap/ui/cor
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -8467,7 +8467,7 @@ sap.ui.define("sap/ui/layout/ResponsiveFlowLayoutData",['jquery.sap.global', 'sa
 	 * @extends sap.ui.core.LayoutData
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -8579,7 +8579,7 @@ sap.ui.define("sap/ui/layout/ResponsiveSplitterPage",["jquery.sap.global", "./li
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -8652,7 +8652,7 @@ sap.ui.define("sap/ui/layout/SplitPane",['jquery.sap.global', './library', 'sap/
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -8743,7 +8743,7 @@ sap.ui.define("sap/ui/layout/Splitter",['jquery.sap.global', 'sap/ui/core/Contro
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -9948,7 +9948,7 @@ sap.ui.define("sap/ui/layout/SplitterLayoutData",['jquery.sap.global', 'sap/ui/c
 	 * (The CSS value "auto" is used internally to recalculate the size of the content
 	 * dynamically and is not directly set as style property.)
 	 * @extends sap.ui.core.LayoutData
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -10014,7 +10014,7 @@ sap.ui.define("sap/ui/layout/VerticalLayout",['jquery.sap.global', 'sap/ui/core/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -10121,7 +10121,7 @@ sap.ui.define("sap/ui/layout/form/Form",['jquery.sap.global', 'sap/ui/core/Contr
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -10353,7 +10353,7 @@ sap.ui.define("sap/ui/layout/form/FormContainer",['jquery.sap.global', 'sap/ui/c
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -10652,7 +10652,7 @@ sap.ui.define("sap/ui/layout/form/FormElement",['jquery.sap.global', 'sap/ui/cor
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -11077,7 +11077,7 @@ sap.ui.define("sap/ui/layout/form/FormLayout",['jquery.sap.global', 'sap/ui/core
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -11985,7 +11985,7 @@ sap.ui.define("sap/ui/layout/form/GridContainerData",['jquery.sap.global', 'sap/
 	 * @extends sap.ui.core.LayoutData
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -12044,7 +12044,7 @@ sap.ui.define("sap/ui/layout/form/GridElementData",['jquery.sap.global', 'sap/ui
 	 * @extends sap.ui.core.LayoutData
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -12123,7 +12123,7 @@ sap.ui.define("sap/ui/layout/form/GridLayout",['jquery.sap.global', './FormLayou
 	 * @extends sap.ui.layout.form.FormLayout
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -12380,7 +12380,7 @@ sap.ui.define("sap/ui/layout/form/ResponsiveGridLayout",['jquery.sap.global', 's
 	 *
 	 * This control cannot be used stand-alone, it just renders a <code>Form</code>, so it must be assigned to a <code>Form</code> using the <code>layout</code> aggregation.
 	 * @extends sap.ui.layout.form.FormLayout
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -13734,7 +13734,7 @@ sap.ui.define("sap/ui/layout/form/SimpleForm",['jquery.sap.global', 'sap/ui/core
 	 *
 	 * <b>Note:</b> If a more complex form is needed, use <code>Form</code> instead.
 	 * @extends sap.ui.core.Control
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -15319,7 +15319,7 @@ sap.ui.define("sap/ui/layout/AssociativeSplitter",['./Splitter', './SplitterRend
 	 * @extends sap.ui.layout.Splitter
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -15873,7 +15873,7 @@ sap.ui.define("sap/ui/layout/PaneContainer",['jquery.sap.global', './library', '
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -16024,7 +16024,7 @@ sap.ui.define("sap/ui/layout/ResponsiveFlowLayout",['jquery.sap.global', 'sap/ui
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -16814,10 +16814,12 @@ sap.ui.define("sap/ui/layout/ResponsiveSplitter",["jquery.sap.global", "./librar
 	 * <li>On touch-enabled devices, the splitters show explicit handles with larger touch areas.</li>
 	 * <li>Double-clicking on a splitter will collapse or expand it back to its original position.</li>
 	 * </ul>
+	 *
+	 * <b>Note:</b> We don't recommend dynamically inserting/removing panes into/from the PaneContainer since this might lead to inconsistent layout. If it is necessary, you need to ensure the sum of all sizes of the SplitPanes doesn't exceed the width of the PaneContainer.
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -17542,7 +17544,7 @@ sap.ui.define("sap/ui/layout/form/ResponsiveLayout",['jquery.sap.global', 'sap/u
 	 * @extends sap.ui.layout.form.FormLayout
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public

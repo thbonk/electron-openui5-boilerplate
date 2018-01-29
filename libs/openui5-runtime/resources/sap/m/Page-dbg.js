@@ -42,7 +42,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 		 * @extends sap.ui.core.Control
 		 * @mixes sap.ui.core.ContextMenuSupport
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 *
 		 * @public
 		 * @alias sap.m.Page
@@ -102,7 +102,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 
 					/**
 					 * Enable vertical scrolling of page contents. Page headers and footers are fixed and do not scroll.
-					 * If set to false, there will be no scrolling at all.
+					 * If set to false, there will be no vertical scrolling at all.
 					 *
 					 * The Page only allows vertical scrolling because horizontal scrolling is discouraged in general for full-page content. If it still needs to be achieved, disable the Page scrolling and use a ScrollContainer as full-page content of the Page. This allows you to freely configure scrolling. It can also be used to create horizontally-scrolling sub-areas of (vertically-scrolling) Pages.
 					 */
@@ -352,8 +352,10 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 				this.setProperty("showFooter", bShowFooter);
 				return this;
 			}
+
 			this.setProperty("showFooter", bShowFooter,true);
 
+			$footer.removeClass("sapUiHidden");
 			$footer.toggleClass("sapMPageFooterControlShow", bShowFooter);
 			$footer.toggleClass("sapMPageFooterControlHide", !bShowFooter);
 
@@ -364,8 +366,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 			if (useAnimation) {
 				jQuery.sap.delayedCall(Page.FOOTER_ANIMATION_DURATION, this, function () {
 					$footer.toggleClass("sapUiHidden", bShowFooter);
-			});
-
+				});
 			} else {
 				$footer.toggleClass("sapUiHidden", bShowFooter);
 			}

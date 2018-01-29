@@ -19,7 +19,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 * <b><i>Note:</i></b>It is protected and should ony be used within the framework itself.
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @extends sap.ui.core.Control
 	 * @constructor

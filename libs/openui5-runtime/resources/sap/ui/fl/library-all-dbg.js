@@ -18,7 +18,7 @@ sap.ui.define("sap/ui/fl/EventHistory",function () {
 	 * @alias sap.ui.fl.EventHistory
 	 * @experimental Since 1.47.0
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 */
 	var EventHistory = function () {
 	};
@@ -108,7 +108,7 @@ sap.ui.define("sap/ui/fl/FakeLrepLocalStorage",[], function() {
 	 * @class
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @private
 	 * @static
@@ -292,7 +292,7 @@ sap.ui.define("sap/ui/fl/Preprocessor",[
 	 * @class
 	 * @constructor
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.27.0
 	 * @implements sap.ui.core.mvc.View.Preprocessor
 	 */
@@ -334,7 +334,7 @@ sap.ui.define("sap/ui/fl/Utils",[
 	 * @namespace
 	 * @alias sap.ui.fl.Utils
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.25.0
 	 */
 	var Utils = {
@@ -344,7 +344,7 @@ sap.ui.define("sap/ui/fl/Utils",[
 		_sTopLayer : aLayers[aLayers.length - 1],
 		_sMaxLayer : aLayers[aLayers.length - 1],
 		DEFAULT_APP_VERSION : "DEFAULT_APP_VERSION",
-		APP_ID_AT_DESIGN_TIME : "sap.ui.fl",
+		APP_ID_AT_DESIGN_TIME : "${pro" + "ject.art" + "ifactId}", //avoid replaced by content of sap.ui.fl placeholder at build steps
 		/**
 		 * log object exposes available log functions
 		 *
@@ -1289,7 +1289,7 @@ sap.ui.define("sap/ui/fl/changeHandler/Base",function() {
 	 * Base functionality for all change handler which provides some reuse methods
 	 * @alias sap.ui.fl.changeHandler.Base
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.27.0
 	 *
 	 */
@@ -1342,7 +1342,7 @@ sap.ui.define("sap/ui/fl/changeHandler/BaseRename",[
 	 * @constructor
 	 * @alias sap.ui.fl.changeHandler.BaseRename
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.46
 	 */
 	var BaseRename = {
@@ -1608,7 +1608,7 @@ sap.ui.define("sap/ui/fl/changeHandler/ChangeHandlerMediator",[
 	 *
 	 * @private
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @experimental Since 1.49.0 This class is experimental and provides only limited functionality. Also the API might be
 	 *               changed in future.
@@ -1805,7 +1805,7 @@ sap.ui.define("sap/ui/fl/changeHandler/HideControl",[
 	 * Change handler for hiding of a control.
 	 * @alias sap.ui.fl.changeHandler.HideControl
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.27.0
 	 */
 	var HideControl = {};
@@ -2167,7 +2167,7 @@ function(
 	 *
 	 * @alias sap.ui.fl.changeHandler.MoveControls
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.46
 	 */
 	var MoveControls = { };
@@ -2484,7 +2484,7 @@ sap.ui.define("sap/ui/fl/changeHandler/MoveElements",[
 		 *
 		 * @alias sap.ui.fl.changeHandler.MoveElements
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 * @experimental Since 1.34.0
 		 */
 		var MoveElements = { };
@@ -2638,7 +2638,7 @@ sap.ui.define("sap/ui/fl/changeHandler/PropertyBindingChange",[
 	 *
 	 * @alias sap.ui.fl.changeHandler.PropertyBindingChange
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @since 1.38
 	 * @private
 	 * @experimental Since 1.38. This class is experimental and provides only limited functionality. Also the API might be changed in future.
@@ -2740,7 +2740,7 @@ sap.ui.define("sap/ui/fl/changeHandler/PropertyChange",[
 	 *
 	 * @alias sap.ui.fl.changeHandler.PropertyChange
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @since 1.36
 	 * @private
 	 * @experimental Since 1.36. This class is experimental and provides only limited functionality. Also the API might be changed in future.
@@ -2853,7 +2853,7 @@ sap.ui.define("sap/ui/fl/changeHandler/StashControl",[
 	 * Change handler for stashing of a control.
 	 * @alias sap.ui.fl.changeHandler.StashControl
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.27.0
 	 */
 	var StashControl = {};
@@ -2937,7 +2937,7 @@ sap.ui.define("sap/ui/fl/changeHandler/UnhideControl",[
 	 * Change handler for unhiding of a control.
 	 * @alias sap.ui.fl.changeHandler.UnhideControl
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.27.0
 	 */
 	var UnhideControl = {};
@@ -3020,7 +3020,7 @@ sap.ui.define("sap/ui/fl/changeHandler/UnstashControl",[
 	 * Change handler for unstashing of a control.
 	 * @alias sap.ui.fl.changeHandler.UnstashControl
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.27.0
 	 */
 	var UnstashControl = { };
@@ -3130,8 +3130,13 @@ sap.ui.define("sap/ui/fl/changeHandler/XmlTreeModifier",["sap/ui/fl/changeHandle
 				return this.getProperty(oControl, "visible");
 			},
 
-			setStashed: function (oControl, oPropertyValue) {
-				this.setProperty(oControl, "stashed", oPropertyValue);
+			setStashed: function (oControl, bStashed) {
+				if (!bStashed) {
+					oControl.removeAttribute("stashed");
+				} else {
+					this.setProperty(oControl, "stashed", bStashed);
+				}
+				this.setVisible(oControl, !bStashed);
 			},
 
 			getStashed: function (oControl) {
@@ -3412,8 +3417,8 @@ sap.ui.define("sap/ui/fl/changeHandler/XmlTreeModifier",["sap/ui/fl/changeHandle
 
 			getBindingTemplate: function (oControl, sAggregationName) {
 				var oAggregationNode = this._findAggregationNode(oControl, sAggregationName);
-				if (oAggregationNode && oAggregationNode.childNodes.length === 1) {
-					return oAggregationNode.childNodes[0];
+				if (oAggregationNode && this._children(oAggregationNode).length === 1) {
+					return this._children(oAggregationNode)[0];
 				}
 
 			},
@@ -3454,7 +3459,7 @@ sap.ui.define("sap/ui/fl/context/BaseContextProvider",['sap/ui/base/ManagedObjec
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -3531,7 +3536,7 @@ sap.ui.define("sap/ui/fl/context/Context",['sap/ui/base/ManagedObject'], functio
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -3744,7 +3749,7 @@ sap.ui.define("sap/ui/fl/context/DeviceContextProvider",["sap/ui/fl/context/Base
 	 * @extends sap.ui.fl.context.BaseContextProvider
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -3804,7 +3809,7 @@ sap.ui.define("sap/ui/fl/core/FlexVisualizer",[
 	 * @alias sap.ui.fl.core.FlexVisualizer
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.27.0
 	 *
 	 */
@@ -3924,7 +3929,7 @@ sap.ui.define("sap/ui/fl/fieldExt/Access",["jquery.sap.storage"], function(Stora
 	 * @alias sap.ui.fl.fieldExt.Access
 	 * @experimental Since 1.25.0
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 */
 	var Access = {};
 
@@ -4411,7 +4416,7 @@ sap.ui.define("sap/ui/fl/registry/ChangeRegistryItem",[
 	 * @alias sap.ui.fl.registry.ChangeRegistryItem
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.27.0
 	 *
 	 */
@@ -4526,7 +4531,7 @@ sap.ui.define("sap/ui/fl/registry/ChangeTypeMetadata",[
 	 * @alias sap.ui.fl.registry.ChangeTypeMetadata
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.27.0
 	 *
 	 */
@@ -4654,7 +4659,7 @@ sap.ui.define("sap/ui/fl/registry/SimpleChanges",[
 	 * @alias sap.ui.fl.registry.SimpleChanges
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.27.0
 	 *
 	 */
@@ -4771,7 +4776,7 @@ sap.ui.define("sap/ui/fl/variants/VariantModel",[
 	 * @class Variant Model implementation for JSON format
 	 * @extends sap.ui.model.json.JSONModel
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @param {object} oData either the URL where to load the JSON from or a JS object
 	 * @param {object} oFlexController the FlexController instance for the component which uses the variant model
 	 * @param {object} oComponent Component instance that is currently loading
@@ -4882,7 +4887,7 @@ sap.ui.define("sap/ui/fl/Cache",["sap/ui/fl/Utils"], function (Utils) {
 	 * @alias sap.ui.fl.Cache
 	 * @experimental Since 1.25.0
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 */
 	var Cache = function () {
 	};
@@ -5182,7 +5187,7 @@ sap.ui.define("sap/ui/fl/LrepConnector",[
 	 * @private
 	 * @sap-restricted
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 */
 	var Connector = function(mParameters) {
 		this._initClientParam();
@@ -6016,7 +6021,7 @@ sap.ui.define("sap/ui/fl/context/ContextManager",["sap/ui/fl/LrepConnector", "sa
 	 * @alias sap.ui.fl.context.ContextManager
 	 * @since 1.38.0
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 */
 	var ContextManager;
 
@@ -6289,7 +6294,7 @@ sap.ui.define("sap/ui/fl/context/SwitchContextProvider",["sap/ui/fl/context/Base
 	 * @extends sap.ui.fl.context.BaseContextProvider
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @private
@@ -6351,7 +6356,7 @@ sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorInlineChangeFactory",["
 	 * @constructor
 	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorInlineChange
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @private
 	 * @sap-restricted
 	 */
@@ -6382,7 +6387,7 @@ sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorInlineChangeFactory",["
 	 * @namespace
 	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorInlineChangeFactory
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @private
 	 * @sap-restricted
 	 */
@@ -7457,7 +7462,7 @@ sap.ui.define("sap/ui/fl/transport/Transports",[
 	 * @constructor
 	 * @alias sap.ui.fl.transport.Transports
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @since 1.38.0
 	 */
 	var Transports = function() {
@@ -7601,7 +7606,7 @@ sap.ui.define("sap/ui/fl/Change",[
 	 * @class Change class.
 	 * @extends sap.ui.base.ManagedObject
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @alias sap.ui.fl.Change
 	 * @experimental Since 1.25.0
 	 */
@@ -8358,7 +8363,7 @@ sap.ui.define("sap/ui/fl/DefaultVariant",[
 	 * @alias sap.ui.fl.DefaultVariant
 	 * @author SAP SE
 	 *
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @experimental Since 1.25.0
 	 */
@@ -8543,7 +8548,7 @@ sap.ui.define("sap/ui/fl/StandardVariant",[
 	 * @alias sap.ui.fl.StandardVariant
 	 * @author SAP SE
 	 *
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @experimental Since 1.38.0
 	 */
@@ -8727,7 +8732,7 @@ sap.ui.define("sap/ui/fl/codeExt/CodeExtManager",[
 	 * @alias sap.ui.fl.codeExt.CodeExtManager
 	 * @since 1.40.0
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 */
 	var CodeExtManager;
 
@@ -8871,7 +8876,7 @@ sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorVariantFactory",[
 	 * @constructor
 	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorVariant
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @private
 	 * @sap-restricted
 	 */
@@ -9082,7 +9087,7 @@ sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorVariantFactory",[
 	 * @namespace
 	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorVariantFactory
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @private
 	 * @sap-restricted
 	 */
@@ -9216,7 +9221,7 @@ sap.ui.define("sap/ui/fl/registry/ChangeRegistry",[
 	 * @alias sap.ui.fl.registry.ChangeRegistry
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.27.0
 	 *
 	 */
@@ -10196,7 +10201,7 @@ sap.ui.define("sap/ui/fl/transport/TransportSelection",[	"jquery.sap.global", "s
 	 * @alias sap.ui.fl.transport.TransportSelection
 	 * @constructor
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @since 1.38.0
 	 * Helper object to select an ABAP transport for an LREP object. This is not a generic utility to select a transport request, but part
 	 *        of the SmartVariant control.
@@ -10567,7 +10572,7 @@ sap.ui.define("sap/ui/fl/variants/VariantController",[
 	 * @alias sap.ui.fl.variants.VariantController
 	 * @experimental Since 1.50.0
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 */
 	var VariantController = function (sComponentName, sAppVersion, oChangeFileContent) {
 		this._sComponentName = sComponentName || "";
@@ -13117,7 +13122,7 @@ sap.ui.define("sap/ui/fl/ChangePersistenceFactory",[
 	 * @alias sap.ui.fl.ChangePersistenceFactory
 	 * @experimental Since 1.27.0
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 */
 	var ChangePersistenceFactory = {};
 
@@ -13341,7 +13346,7 @@ sap.ui.define("sap/ui/fl/FakeLrepConnector",[
 	 * @alias sap.ui.fl.FakeLrepConnector
 	 * @experimental Since 1.27.0
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 */
 	function FakeLrepConnector(sInitialComponentJsonPath){
 		this.sInitialComponentJsonPath = sInitialComponentJsonPath;
@@ -13559,7 +13564,7 @@ sap.ui.define("sap/ui/fl/FakeLrepConnectorLocalStorage",[
 	 * @class
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @private
 	 * @static
@@ -13795,7 +13800,7 @@ sap.ui.define("sap/ui/fl/Persistence",[
 	 * @param {string} [sStableIdPropertyName='id'] the stable id
 	 * @alias sap.ui.fl.Persistence
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.25.0
 	 */
 	var Persistence = function(oControl, sStableIdPropertyName) {
@@ -14502,7 +14507,7 @@ sap.ui.define("sap/ui/fl/core/EventDelegate",[
 	 * @alias sap.ui.fl.core.EventDelegate
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.27.0
 	 * @private
 	 *
@@ -14641,7 +14646,7 @@ sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorChangeFactory",[
 	 * @namespace
 	 * @name sap.ui.fl.descriptorRelated
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @private
 	 * @sap-restricted
 	 */
@@ -14651,7 +14656,7 @@ sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorChangeFactory",[
 	 * @namespace
 	 * @name sap.ui.fl.descriptorRelated.api
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @private
 	 * @sap-restricted
 	 */
@@ -14666,7 +14671,7 @@ sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorChangeFactory",[
 	 * @constructor
 	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorChange
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @private
 	 * @sap-restricted
 	 */
@@ -14801,7 +14806,7 @@ sap.ui.define("sap/ui/fl/descriptorRelated/api/DescriptorChangeFactory",[
 	 * @constructor
 	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorChangeFactory
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @private
 	 * @sap-restricted
 	 */
@@ -14951,7 +14956,7 @@ sap.ui.define("sap/ui/fl/FlexController",[
 	 * @alias sap.ui.fl.FlexController
 	 * @experimental Since 1.27.0
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 */
 	var FlexController = function (sComponentName, sAppVersion) {
 		this._oChangePersistence = undefined;
@@ -15837,7 +15842,7 @@ sap.ui.define("sap/ui/fl/FlexControllerFactory",[
 	 * @alias sap.ui.fl.FlexControllerFactory
 	 * @experimental Since 1.27.0
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 */
 	var FlexControllerFactory = {};
 
@@ -15932,7 +15937,7 @@ sap.ui.define("sap/ui/fl/PreprocessorImpl",[
 	 * @class
 	 * @constructor
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.27.0
 	 */
 	var PreprocessorImpl = function(){
@@ -16025,7 +16030,7 @@ sap.ui.define("sap/ui/fl/RegistrationDelegator",[
 	 * @class
 	 * @constructor
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.43.0
 	 */
 	var RegistrationDelegator = {
@@ -16134,7 +16139,7 @@ sap.ui.define("sap/ui/fl/XmlPreprocessorImpl",[
 	 * @class
 	 * @constructor
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.27.0
 	 */
 	var XmlPreprocessorImpl = function(){
@@ -16245,14 +16250,14 @@ sap.ui.define("sap/ui/fl/library",[
 	 * @namespace
 	 * @name sap.ui.fl
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @private
 	 * @sap-restricted
 	 */
 
 	sap.ui.getCore().initLibrary({
 		name: "sap.ui.fl",
-		version: "1.50.6",
+		version: "1.50.8",
 		dependencies: [
 			"sap.ui.core", "sap.m"
 		],

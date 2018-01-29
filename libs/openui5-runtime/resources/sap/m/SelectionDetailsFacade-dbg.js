@@ -13,7 +13,7 @@
  * @alias sap.m.SelectionDetailsFacade
  * @public
  * @author SAP SE
- * @version 1.50.6
+ * @version 1.50.8
  * @borrows sap.ui.core.Element#addCustomData as addCustomData
  * @borrows sap.ui.core.Element#getCustomData as getCustomData
  * @borrows sap.ui.core.Element#indexOfCustomData as indexOfCustomData
@@ -49,7 +49,7 @@
  * @alias sap.m.SelectionDetailsItemFacade
  * @public
  * @author SAP SE
- * @version 1.50.6
+ * @version 1.50.8
  * @borrows sap.ui.core.Element#addCustomData as addCustomData
  * @borrows sap.ui.core.Element#getCustomData as getCustomData
  * @borrows sap.ui.core.Element#indexOfCustomData as indexOfCustomData

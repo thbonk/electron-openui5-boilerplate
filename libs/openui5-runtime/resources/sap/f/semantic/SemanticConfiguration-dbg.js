@@ -32,7 +32,7 @@ sap.ui.define([
 	* @class
 	* Defines the visual properties and placement for each supported semantic type.
 	*
-	* @version 1.50.6
+	* @version 1.50.8
 	* @private
 	* @since 1.46.0
 	* @alias sap.f.semantic.SemanticConfiguration

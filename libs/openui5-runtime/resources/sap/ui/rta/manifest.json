@@ -8,7 +8,7 @@
       "appVariant/manageApps/webapp"
     ],
     "applicationVersion": {
-      "version": "1.50.6"
+      "version": "1.50.8"
     },
     "title": "SAPUI5 library with RTA controls.",
     "description": "SAPUI5 library with RTA controls.",
@@ -30,19 +30,19 @@
       "minUI5Version": "1.50",
       "libs": {
         "sap.ui.core": {
-          "minVersion": "1.50.6"
+          "minVersion": "1.50.8"
         },
         "sap.ui.layout": {
-          "minVersion": "1.50.6"
+          "minVersion": "1.50.8"
         },
         "sap.m": {
-          "minVersion": "1.50.6"
+          "minVersion": "1.50.8"
         },
         "sap.ui.fl": {
-          "minVersion": "1.50.6"
+          "minVersion": "1.50.8"
         },
         "sap.ui.dt": {
-          "minVersion": "1.50.6"
+          "minVersion": "1.50.8"
         }
       }
     }

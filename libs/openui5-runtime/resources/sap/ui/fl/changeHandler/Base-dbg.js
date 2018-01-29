@@ -11,7 +11,7 @@ sap.ui.define(function() {
 	 * Base functionality for all change handler which provides some reuse methods
 	 * @alias sap.ui.fl.changeHandler.Base
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @experimental Since 1.27.0
 	 *
 	 */

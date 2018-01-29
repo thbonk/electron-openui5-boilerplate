@@ -24,7 +24,7 @@ sap.ui.define(['jquery.sap.global', './BarInPageEnabler', './library', 'sap/ui/c
 	 * @implements sap.m.IBar
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -412,8 +412,7 @@ sap.ui.define(['jquery.sap.global', './BarInPageEnabler', './library', 'sap/ui/c
 	BarInAnyContentEnabler.mContexts = {
 		dialogFooter : {
 			contextClass : "sapMFooter-CTX",
-			tag : "Footer",
-			internalAriaLabel: "BAR_ARIA_DESCRIPTION_FOOTER"
+			tag : "Footer"
 		}
 	};
 

@@ -664,14 +664,14 @@ sap.ui.define("sap/f/library",["jquery.sap.global",
 	 * @namespace
 	 * @name sap.f
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @public
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.f",
-		version: "1.50.6",
+		version: "1.50.8",
 		dependencies : ["sap.ui.core", "sap.m"],
 		types: [
 			"sap.f.LayoutType",
@@ -1391,7 +1391,7 @@ sap.ui.define("sap/f/semantic/SemanticConfiguration",[
 	* @class
 	* Defines the visual properties and placement for each supported semantic type.
 	*
-	* @version 1.50.6
+	* @version 1.50.8
 	* @private
 	* @since 1.46.0
 	* @alias sap.f.semantic.SemanticConfiguration
@@ -2038,7 +2038,7 @@ sap.ui.define("sap/f/semantic/SemanticControl",[
 	* @abstract
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -3579,7 +3579,7 @@ sap.ui.define("sap/f/Avatar",[
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -3968,7 +3968,7 @@ sap.ui.define("sap/f/DynamicPage",[
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -5403,7 +5403,7 @@ sap.ui.define("sap/f/DynamicPageHeader",["jquery.sap.global", "./library", "sap/
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 *
 		 * @constructor
 		 * @public
@@ -5641,7 +5641,7 @@ sap.ui.define("sap/f/DynamicPageTitle",["jquery.sap.global", "./library", "sap/u
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -6022,7 +6022,7 @@ sap.ui.define("sap/f/FlexibleColumnLayout",[
 	 *
 	 * @extends sap.ui.core.Control
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -7854,7 +7854,7 @@ sap.ui.define("sap/f/FlexibleColumnLayoutSemanticHelper",[
 	 *
 	 * For more information, see {@link sap.f.FlexibleColumnLayoutSemanticHelper#getCurrentUIState} and {@link sap.f.FlexibleColumnLayoutSemanticHelper#getNextUIState}
 	 *
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 * @param {sap.f.FlexibleColumnLayout} oFlexibleColumnLayout
 	 * The <code>sap.f.FlexibleColumnLayout</code> object whose state will be manipulated.
 	 *
@@ -8744,7 +8744,7 @@ sap.ui.define("sap/f/semantic/SemanticButton",[
 	* @abstract
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -8909,7 +8909,7 @@ sap.ui.define("sap/f/semantic/SemanticPage",[
 	* @extends sap.ui.core.Control
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -9816,7 +9816,7 @@ sap.ui.define("sap/f/semantic/SemanticToggleButton",[
 	* @abstract
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -9940,7 +9940,7 @@ sap.ui.define("sap/f/semantic/SendEmailAction",['sap/f/semantic/SemanticButton']
 	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -9981,7 +9981,7 @@ sap.ui.define("sap/f/semantic/SendMessageAction",['sap/f/semantic/SemanticButton
 	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -10022,7 +10022,7 @@ sap.ui.define("sap/f/semantic/ShareInJamAction",['sap/f/semantic/SemanticButton'
 	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -10183,7 +10183,7 @@ sap.ui.define("sap/f/semantic/AddAction",['sap/f/semantic/SemanticButton'], func
 	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -10223,7 +10223,7 @@ sap.ui.define("sap/f/semantic/CloseAction",['./SemanticButton'], function(Semant
 	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -10263,7 +10263,7 @@ sap.ui.define("sap/f/semantic/CopyAction",['./SemanticButton'], function(Semanti
 	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -10304,7 +10304,7 @@ sap.ui.define("sap/f/semantic/DeleteAction",['sap/f/semantic/SemanticButton'], f
 	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -10345,7 +10345,7 @@ sap.ui.define("sap/f/semantic/DiscussInJamAction",['sap/f/semantic/SemanticButto
 	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -10384,7 +10384,7 @@ sap.ui.define("sap/f/semantic/EditAction",['./SemanticButton'], function(Semanti
 	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -10424,7 +10424,7 @@ sap.ui.define("sap/f/semantic/ExitFullScreenAction",['./SemanticButton'], functi
 	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -10465,7 +10465,7 @@ sap.ui.define("sap/f/semantic/FavoriteAction",['./SemanticToggleButton'], functi
 	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -10506,7 +10506,7 @@ sap.ui.define("sap/f/semantic/FlagAction",['./SemanticToggleButton'], function(S
 	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -10546,7 +10546,7 @@ sap.ui.define("sap/f/semantic/FullScreenAction",['./SemanticButton'], function(S
 	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -10586,7 +10586,7 @@ sap.ui.define("sap/f/semantic/MainAction",['sap/f/semantic/SemanticButton'], fun
 	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -10634,7 +10634,7 @@ sap.ui.define("sap/f/semantic/MessagesIndicator",['./SemanticButton'], function(
 	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -10675,7 +10675,7 @@ sap.ui.define("sap/f/semantic/NegativeAction",['sap/f/semantic/SemanticButton'],
 	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -10724,7 +10724,7 @@ sap.ui.define("sap/f/semantic/PositiveAction",['sap/f/semantic/SemanticButton'],
 	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -10773,7 +10773,7 @@ sap.ui.define("sap/f/semantic/PrintAction",['sap/f/semantic/SemanticButton'], fu
 	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -10814,7 +10814,7 @@ sap.ui.define("sap/f/semantic/TitleMainAction",["./MainAction"], function(MainAc
 	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public
@@ -10855,7 +10855,7 @@ sap.ui.define("sap/f/semantic/FooterMainAction",["./MainAction"], function(MainA
 	* @extends sap.f.semantic.SemanticButton
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.50.8
 	*
 	* @constructor
 	* @public

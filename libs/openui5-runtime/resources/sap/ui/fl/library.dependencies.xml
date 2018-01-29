@@ -165,7 +165,7 @@
       <module name="sap/ui/fl/Change.js"/>
     </requires>
   </module>
-  <module name="sap/ui/fl/Utils.js" size="29990" compressedSize="9142">
+  <module name="sap/ui/fl/Utils.js" size="30080" compressedSize="9160">
     <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -277,7 +277,7 @@
       <module name="jquery.sap.global.js"/>
     </requires>
   </module>
-  <module name="sap/ui/fl/changeHandler/XmlTreeModifier.js" size="11836" compressedSize="4330" dynamicDependencies="true">
+  <module name="sap/ui/fl/changeHandler/XmlTreeModifier.js" size="11959" compressedSize="4405" dynamicDependencies="true">
     <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
     <requires>
       <module name="jquery.sap.global.js"/>
@@ -392,7 +392,7 @@
       <module name="jquery.sap.storage.js"/>
     </requires>
   </module>
-  <module name="sap/ui/fl/library-preload.js" size="186799" dynamicDependencies="true">
+  <module name="sap/ui/fl/library-preload.js" size="186892" dynamicDependencies="true">
     <requires>
       <module name="jquery.sap.global.js"/>
       <module name="jquery.sap.storage.js"/>

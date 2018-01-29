@@ -1230,6 +1230,7 @@
 			"isDebug": true,
 			"required": [
 				"jquery.sap.global.js",
+				"sap/ui/Device.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/LocaleData.js",
 				"sap/ui/core/delegate/ItemNavigation.js",
@@ -1248,6 +1249,7 @@
 			"module": "sap/ui/unified/calendar/Month.js",
 			"required": [
 				"jquery.sap.global.js",
+				"sap/ui/Device.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/LocaleData.js",
 				"sap/ui/core/delegate/ItemNavigation.js",
@@ -1263,6 +1265,7 @@
 			"isDebug": true,
 			"required": [
 				"jquery.sap.global.js",
+				"sap/ui/Device.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/LocaleData.js",
 				"sap/ui/core/delegate/ItemNavigation.js",
@@ -1278,6 +1281,7 @@
 			"module": "sap/ui/unified/calendar/MonthPicker.js",
 			"required": [
 				"jquery.sap.global.js",
+				"sap/ui/Device.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/LocaleData.js",
 				"sap/ui/core/delegate/ItemNavigation.js",
@@ -1476,6 +1480,7 @@
 			"isDebug": true,
 			"required": [
 				"jquery.sap.global.js",
+				"sap/ui/Device.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/date/UniversalDate.js",
 				"sap/ui/core/delegate/ItemNavigation.js",
@@ -1494,6 +1499,7 @@
 			"module": "sap/ui/unified/calendar/YearPicker.js",
 			"required": [
 				"jquery.sap.global.js",
+				"sap/ui/Device.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/date/UniversalDate.js",
 				"sap/ui/core/delegate/ItemNavigation.js",

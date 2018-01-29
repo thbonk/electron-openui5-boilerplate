@@ -75,7 +75,7 @@ sap.ui.define(['jquery.sap.global', './NavContainer', './library', 'sap/ui/core/
 	 *
 	 * @extends sap.ui.core.Control
 	 * @implements sap.ui.core.IShrinkable
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -1034,6 +1034,7 @@ sap.ui.define(['jquery.sap.global', './NavContainer', './library', 'sap/ui/core/
 			if (oList.getWordWrap()) {
 				oPopover.setContentWidth("30%");
 			}
+
 			oList._applySearch();
 		}
 		return this;
@@ -1131,8 +1132,13 @@ sap.ui.define(['jquery.sap.global', './NavContainer', './library', 'sap/ui/core/
 	 * @private
 	 */
 	FacetFilter.prototype._setButtonText = function(oList) {
-
 		var oButton = this._buttons[oList.getId()];
+
+		//store the full count of list items initially and when there's items
+		if (oList._iAllItemsCount === undefined && oList.getMaxItemsCount()) {
+			oList._iAllItemsCount = oList.getMaxItemsCount();
+		}
+
 		if (oButton) { // Button may not be created yet if FFL.setTitle() is called before the button is rendered the first time
 
 			var sText = "";
@@ -1142,7 +1148,7 @@ sap.ui.define(['jquery.sap.global', './NavContainer', './library', 'sap/ui/core/
 			if (iLength === 1) { // Use selected item value for button label if only one selected
 				var sSelectedItemText = oList._oSelectedKeys[aSelectedKeyNames[0]];
 				sText = this._bundle.getText("FACETFILTER_ITEM_SELECTION", [oList.getTitle(), sSelectedItemText]);
-			} else if (iLength > 0 && iLength === oList._getNonGroupItems().length) {
+			} else if (iLength > 0 && iLength === (oList._iAllItemsCount ? oList._iAllItemsCount : 0) ) { //if iAllItemsCount is undefined we must be sure that the check is between integers
 				sText = this._bundle.getText("FACETFILTER_ALL_SELECTED", [oList.getTitle()]);
 			} else if (iLength > 0) {
 				sText = this._bundle.getText("FACETFILTER_ITEM_SELECTION", [oList.getTitle(), iLength]);
@@ -1429,6 +1435,7 @@ sap.ui.define(['jquery.sap.global', './NavContainer', './library', 'sap/ui/core/
 						var oList = that._restoreListFromDisplayContainer(oFilterItemsPage);
 						oList._updateActiveState();
 						oList._fireListCloseEvent();
+						oList._search("");
 					}
 
 					// Destroy the nav container and all it contains so that the dialog content is initialized new each
@@ -1665,6 +1672,7 @@ sap.ui.define(['jquery.sap.global', './NavContainer', './library', 'sap/ui/core/
 
 		oList._updateActiveState();
 		oList._fireListCloseEvent();
+		oList._search("");
 		this._selectedFacetItem.setCounter(oList.getAllCount());
 		oNavContainer.backToTop();
 	};
@@ -2081,16 +2089,21 @@ sap.ui.define(['jquery.sap.global', './NavContainer', './library', 'sap/ui/core/
 		var sTargetId = oEvent.target.id;
 
 		if (sTargetId) {
-			var sId = this.getId();
+			var sId = this.getId(),
+				oTarget = oEvent.target;
 
 			// Prevent IE from firing beforeunload event -> see CSN 4378288 2012
 			oEvent.preventDefault();
 
 			if (sTargetId == sId + "-arrowScrollLeft") {
 				// scroll back/left button
+				oTarget.tabIndex = -1;
+				oTarget.focus();
 				this._scroll(-FacetFilter.SCROLL_STEP, 500);
 			} else if (sTargetId == sId + "-arrowScrollRight") {
 				// scroll forward/right button
+				oTarget.tabIndex = -1;
+				oTarget.focus();
 				this._scroll(FacetFilter.SCROLL_STEP, 500);
 			}
 		}

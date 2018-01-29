@@ -37,7 +37,7 @@ sap.ui.define("sap/ui/codeeditor/CodeEditor",[
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.50.8
 	 *
 	 * @constructor
 	 * @public
@@ -418,7 +418,7 @@ sap.ui.define("sap/ui/codeeditor/library",['sap/ui/core/Core'],
 		],
 		elements: [],
 		noLibraryCSS: false,
-		version: "1.50.6"
+		version: "1.50.8"
 	});
 
 

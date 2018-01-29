@@ -25,7 +25,7 @@ sap.ui.define([],
 		 * @name sap.ui.support.CoreFacade
 		 * @memberof sap.ui.support
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.50.8
 		 * @param {object} oCore Core object as available in core plugins
 		 * @returns {object} Instance of the <code>CoreFacade</code>
 		 */
