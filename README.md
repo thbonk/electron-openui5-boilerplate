@@ -30,7 +30,7 @@ This repository contains a boilerplate for developing
   `EMAIL_PLACEHOLDER`            | Your email address
   
 * In the terminal, issue the following commands:
-  * `npm install --only=dev`
+  * `npm install`
   * `node rename-project.js`
 * You're ready to go!
   * You can now delete the files `rename-project.js` and `README.md`
