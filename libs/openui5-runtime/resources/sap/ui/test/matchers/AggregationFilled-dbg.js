@@ -1,10 +1,14 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './Matcher'], function ($, Matcher) {
+sap.ui.define([
+	"sap/ui/test/matchers/Matcher",
+	"sap/base/strings/capitalize",
+	"sap/ui/thirdparty/jquery"
+], function(Matcher, capitalize, jQueryDOM) {
 	"use strict";
 
 	/**
@@ -41,16 +45,18 @@ sap.ui.define(['jquery.sap.global', './Matcher'], function ($, Matcher) {
 		 */
 		isMatching : function (oControl) {
 			var sAggregationName = this.getName(),
-				fnAggregation = oControl["get" + $.sap.charToUpperCase(sAggregationName, 0)];
+				fnAggregation = oControl["get" + capitalize(sAggregationName, 0)];
 
 			if (!fnAggregation) {
 				this._oLogger.error("Control '" + oControl + "' does not have an aggregation called '" + sAggregationName + "'");
 				return false;
 			}
 
-			var bFilled = !!fnAggregation.call(oControl).length;
+			var vAggregation = fnAggregation.call(oControl);
+			var aAggregation = jQueryDOM.isArray(vAggregation) ? vAggregation : [vAggregation];
+			var bFilled = !!aAggregation.length;
 			if (!bFilled) {
-				this._oLogger.debug("Control '" + oControl + "' has an empty aggregation '" + sAggregationName + "'");
+				this._oLogger.debug("Control '" + oControl + "' aggregation '" + sAggregationName + "' is empty");
 			}
 
 			return bFilled;

@@ -1,15 +1,50 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.unified.Menu.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap/ui/core/Popup', './MenuItemBase', './library', 'jquery.sap.script'],
-	function(jQuery, Control, Device, Popup, MenuItemBase, library/* , jQuerySap */) {
+sap.ui.define([
+	'sap/ui/core/Element',
+	'sap/ui/core/Control',
+	'sap/ui/Device',
+	'sap/ui/core/Popup',
+	'./MenuItemBase',
+	'./library',
+	'sap/ui/core/library',
+	'sap/ui/unified/MenuRenderer',
+	"sap/ui/dom/containsOrEquals",
+	"sap/ui/thirdparty/jquery",
+	"sap/ui/events/KeyCodes",
+	"sap/base/Log",
+	"sap/ui/events/ControlEvents",
+	"sap/ui/events/PseudoEvents",
+	"sap/ui/events/checkMouseEnterOrLeave"
+], function(
+	Element,
+	Control,
+	Device,
+	Popup,
+	MenuItemBase,
+	library,
+	coreLibrary,
+	MenuRenderer,
+	containsOrEquals,
+	jQuery,
+	KeyCodes,
+	Log,
+	ControlEvents,
+	PseudoEvents,
+	checkMouseEnterOrLeave
+) {
 	"use strict";
 
+	// shortcut for sap.ui.core.Popup.Dock
+	var Dock = Popup.Dock;
 
+	// shortcut for sap.ui.core.OpenState
+	var OpenState = coreLibrary.OpenState;
 
 	/**
 	 * Constructor for a new Menu control.
@@ -24,7 +59,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 	 * @implements sap.ui.core.IContextMenu
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @since 1.21.0
 	 *
 	 * @constructor
@@ -47,7 +82,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 
 			/**
 			 * Accessible label / description of the menu for assistive technologies like screenreaders.
-			 * @deprecated Since version 1.27.0 Please use association <code>ariaLabelledBy</code> instead.
+			 * @deprecated as of version 1.27.0, replaced by <code>ariaLabelledBy</code> association
 			 */
 			ariaDescription : {type : "string", group : "Accessibility", defaultValue : null},
 
@@ -120,6 +155,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 		this.oOpenedSubMenu = null;
 		this.oHoveredItem = null;
 		this.oPopup = null; // Will be created lazily
+		this._bOpenedAsContextMenu = false; // defines whether the menu is opened as a context menu
 		this.fAnyEventHandlerProxy = jQuery.proxy(function(oEvent){
 			var oRoot = this.getRootMenu();
 			if (oRoot != this || !this.bOpen || !this.getDomRef() || (oEvent.type != "mousedown" && oEvent.type != "touchstart")) {
@@ -131,6 +167,32 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 			that.close();
 		};
 		this.bUseTopStyle = false;
+	};
+
+	/*
+	 * Allows for any custom function to be called back when accessibility attributes
+	 * of the menu are about to be rendered.
+	 * The function is called once per MenuItem.
+	 *
+	 * @param {function} fn The callback function
+	 * @protected
+	 * @sap-restricted sap.m.Menu
+	 * @returns void
+	 */
+	Menu.prototype._setCustomEnhanceAccStateFunction = function(fn) {
+		this._fnCustomEnhanceAccStateFunction = fn;
+	};
+
+	/*
+	 * Enables any consumer of the menu to enhance its accessibility state by calling
+	 * back its custom provided function Menu#_setCustomEnhanceAccStateFunction.
+	 *
+	 * @overrides sap.ui.core.Element.prototype.enhanceAccessibilityState
+	 */
+	Menu.prototype.enhanceAccessibilityState = function(oElement, mAriaProps) {
+		var bIsAccFunctionValid = typeof this._fnCustomEnhanceAccStateFunction === "function";
+
+		return bIsAccFunctionValid ? this._fnCustomEnhanceAccStateFunction(oElement, mAriaProps) : mAriaProps;
 	};
 
 	/**
@@ -145,7 +207,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 			delete this.oPopup;
 		}
 
-		jQuery.sap.unbindAnyEvent(this.fAnyEventHandlerProxy);
+		ControlEvents.unbindAnyEvent(this.fAnyEventHandlerProxy);
 		if (this._bOrientationChangeBound) {
 			jQuery(window).unbind("orientationchange", this.fOrientationChangeHandler);
 			this._bOrientationChangeBound = false;
@@ -153,10 +215,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 
 		// Cleanup
 		this._resetDelayedRerenderItems();
+		this._detachResizeHandler();
 	};
 
 	/**
 	 * Called when the control or its children are changed.
+	 * @param {sap.ui.core.Control} The originating control
 	 * @private
 	 */
 	Menu.prototype.invalidate = function(oOrigin){
@@ -181,7 +245,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 	 */
 	Menu.prototype.onAfterRendering = function() {
 		if (this.$().parent().attr("id") != "sap-ui-static") {
-			jQuery.sap.log.error("sap.ui.unified.Menu: The Menu is popup based and must not be rendered directly as content of the page.");
+			Log.error("sap.ui.unified.Menu: The Menu is popup based and must not be rendered directly as content of the page.");
 			this.close();
 			this.$().remove();
 		}
@@ -206,7 +270,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 	 * @private
 	 */
 	Menu.prototype.onThemeChanged = function(){
-		if (this.getDomRef() && this.getPopup().getOpenState() === sap.ui.core.OpenState.OPEN) {
+		if (this.getDomRef() && this.getPopup().getOpenState() === OpenState.OPEN) {
 			checkAndLimitHeight(this);
 			this.getPopup()._applyPosition(this.getPopup()._oLastPosition);
 		}
@@ -259,17 +323,17 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 		this._resetDelayedRerenderItems();
 		this._discardOpenSubMenuDelayed();
 
-		this._itemRerenderTimer = jQuery.sap.delayedCall(0, this, function(){
+		this._itemRerenderTimer = setTimeout(function(){
 			var oDomRef = this.getDomRef();
 			if (oDomRef) {
 				var oRm = sap.ui.getCore().createRenderManager();
-				sap.ui.unified.MenuRenderer.renderItems(oRm, this);
+				MenuRenderer.renderItems(oRm, this);
 				oRm.flush(oDomRef);
 				oRm.destroy();
 				this.onAfterRendering();
 				this.getPopup()._applyPosition(this.getPopup()._oLastPosition);
 			}
-		});
+		}.bind(this), 0);
 	};
 
 	/**
@@ -277,12 +341,23 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 	 */
 	Menu.prototype._resetDelayedRerenderItems = function(){
 		if (this._itemRerenderTimer) {
-			jQuery.sap.clearDelayedCall(this._itemRerenderTimer);
+			clearTimeout(this._itemRerenderTimer);
 			delete this._itemRerenderTimer;
 		}
 	};
 
-
+	/**
+	 * Called when the resize handler should be detached (e.g. on exit and close).
+	 * @private
+	 */
+	Menu.prototype._detachResizeHandler = function(){
+		// detach listener in case it is not detached in close
+		// in IE when destroy is called both close and exit were called and detach was called twice
+		if (this._hasResizeListener) {
+			Device.resize.detachHandler(this._handleResizeChange, this);
+			this._hasResizeListener = false;
+		}
+	};
 
 	/**
 	 * Opens the menu at the specified position.
@@ -297,7 +372,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 	 * @param {sap.ui.core.Dock} my The reference docking location of the menu for positioning the menu on the screen
 	 * @param {sap.ui.core.Dock} at The 'of' element's reference docking location for positioning the menu on the screen
 	 * @param {sap.ui.core.Element|DOMRef} of The menu is positioned relatively to this element based on the given dock locations
-	 * @param {string} [offset] The offset relative to the docking point, specified as a string with space-separated pixel values (e.g. "0 10" to move the popup 10 pixels to the right)
+	 * @param {string} [offset] The offset relative to the docking point, specified as a string with space-separated pixel values (e.g. "10 0" to move the popup 10 pixels to the right)
 	 * @param {sap.ui.core.Collision} [collision] The collision defines how the position of the menu should be adjusted in case it overflows the window in some direction
 	 *
 	 * @type {void}
@@ -320,6 +395,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 		this.bOpen = true;
 
 		Device.resize.attachHandler(this._handleResizeChange, this);
+		// mark that the resize handler is attach so we know to detach it later on
+		this._hasResizeListener = true;
 
 		// Set the tab index of the menu and focus
 		var oDomRef = this.getDomRef();
@@ -330,8 +407,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 			this.setHoveredItem(this.getNextSelectableItem(-1));
 		}
 
-		jQuery.sap.bindAnyEvent(this.fAnyEventHandlerProxy);
-		if (sap.ui.Device.support.orientation && this.getRootMenu() === this) {
+		ControlEvents.bindAnyEvent(this.fAnyEventHandlerProxy);
+		if (Device.support.orientation && this.getRootMenu() === this) {
 			jQuery(window).bind("orientationchange", this.fOrientationChangeHandler);
 			this._bOrientationChangeBound = true;
 		}
@@ -343,18 +420,83 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 
 	/**
 	 * Opens the menu as a context menu.
+	 * @param {jQuery.Event | object} oEvent The event object or an object containing offsetX, offsetY
+	 * values and left, top values of the element's position
+	 * @param {sap.ui.core.Element|HTMLElement} oOpenerRef - Might be UI5 Element or DOM Element
 	 */
 	Menu.prototype.openAsContextMenu = function(oEvent, oOpenerRef) {
-		var x = oEvent.pageX - jQuery(oOpenerRef.getDomRef()).offset().left,
-			y = oEvent.pageY - jQuery(oOpenerRef.getDomRef()).offset().top,
-			bRTL = sap.ui.getCore().getConfiguration().getRTL(),
-			eDock = sap.ui.core.Popup.Dock;
+			var iOffsetX, iOffsetY, bRTL, eDock, oOpenerRefOffset;
 
-		if (bRTL) {
-			x = oOpenerRef.getDomRef().clientWidth - x;
+			oOpenerRef = oOpenerRef instanceof Element ? oOpenerRef.getDomRef() : oOpenerRef;
+
+			if (oEvent instanceof jQuery.Event) {
+				oOpenerRefOffset = jQuery(oOpenerRef).offset();
+				iOffsetX = oEvent.pageX - oOpenerRefOffset.left;
+				iOffsetY = oEvent.pageY - oOpenerRefOffset.top;
+				this._iX = oEvent.clientX;
+				this._iY = oEvent.clientY;
+			} else {
+				// for explicit position coordinates
+				iOffsetX = oEvent.offsetX || 0;
+				iOffsetY = oEvent.offsetY || 0;
+				this._iX = oEvent.left || 0;
+				this._iY = oEvent.top || 0;
+			}
+
+			bRTL = sap.ui.getCore().getConfiguration().getRTL();
+			eDock = Dock;
+
+			if (bRTL) {
+				iOffsetX = oOpenerRef.clientWidth - iOffsetX;
+			}
+			this._bOpenedAsContextMenu = true;
+			this.open(true, oOpenerRef, eDock.BeginTop, eDock.BeginTop, oOpenerRef, iOffsetX + " " + iOffsetY, 'fit');
+	};
+
+	Menu.prototype._handleOpened = function () {
+		var $Menu, $Window, iCalcedX, iCalcedY,
+			iRight, iBottom, bRTL, bRecalculate,
+			iMenuWidth, iMenuHeight;
+
+		if (!this._bOpenedAsContextMenu) {
+			return;
 		}
 
-		this.open(true, oOpenerRef, eDock.BeginTop, eDock.BeginTop, oOpenerRef,  x + " " + y, 'flip');
+		$Menu = this.$();
+		$Window = jQuery(window);
+		iCalcedX = this._iX;
+		iCalcedY = this._iY;
+		iRight = $Window.scrollLeft() + $Window.width();
+		iBottom = $Window.scrollTop() + $Window.height();
+		bRTL = sap.ui.getCore().getConfiguration().getRTL();
+		bRecalculate = false;
+		iMenuWidth = $Menu.width();
+		iMenuHeight = $Menu.height();
+
+		if (iCalcedY + iMenuHeight > iBottom) {
+			iCalcedY = iCalcedY - iMenuHeight;
+			bRecalculate = true;
+		}
+
+		if (bRTL) {
+			if ((iRight - iCalcedX) + iMenuWidth > iRight) {
+				iCalcedX = iRight - (iCalcedX + iMenuWidth);
+				bRecalculate = true;
+			} else {
+				iCalcedX = iRight - iCalcedX;
+				bRecalculate = true;
+			}
+		} else {
+			if (iCalcedX + iMenuWidth > iRight) {
+				iCalcedX = iCalcedX - iMenuWidth;
+				bRecalculate = true;
+			}
+		}
+
+		// set the flag to initial state as same menu could be used as a context menu or a normal menu
+		this._bOpenedAsContextMenu = false;
+
+		bRecalculate && this.oPopup.setPosition("begin top", "begin top", $Window, iCalcedX + " " + iCalcedY, "flip");
 	};
 
 	/**
@@ -376,7 +518,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 		// Remove fixed flag if it existed
 		delete this._bFixed;
 
-		jQuery.sap.unbindAnyEvent(this.fAnyEventHandlerProxy);
+		ControlEvents.unbindAnyEvent(this.fAnyEventHandlerProxy);
 		if (this._bOrientationChangeBound) {
 			jQuery(window).unbind("orientationchange", this.fOrientationChangeHandler);
 			this._bOrientationChangeBound = false;
@@ -395,7 +537,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 		// Close the sap.ui.core.Popup
 		this.getPopup().close(0);
 
-		Device.resize.detachHandler(this._handleResizeChange, this);
+		this._detachResizeHandler();
 
 		//Remove the Menus DOM after it is closed
 		this._resetDelayedRerenderItems();
@@ -420,7 +562,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 				try {
 					this.oOpenerRef.focus();
 				} catch (e) {
-					jQuery.sap.log.warning("Menu.close cannot restore the focus on opener " + this.oOpenerRef + ", " + e);
+					Log.warning("Menu.close cannot restore the focus on opener " + this.oOpenerRef + ", " + e);
 				}
 			}
 			this.oOpenerRef = undefined;
@@ -438,7 +580,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 
 	Menu.prototype.onsapnext = function(oEvent){
 		//right or down (RTL: left or down)
-		if (oEvent.keyCode != jQuery.sap.KeyCodes.ARROW_DOWN) {
+		if (oEvent.keyCode != KeyCodes.ARROW_DOWN) {
 			//Go to sub menu if available
 			if (this.oHoveredItem && this.oHoveredItem.getSubmenu() && this.checkEnabled(this.oHoveredItem)) {
 				this.openSubmenu(this.oHoveredItem, true);
@@ -456,7 +598,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 
 	Menu.prototype.onsapprevious = function(oEvent){
 		//left or up (RTL: right or up)
-		if (oEvent.keyCode != jQuery.sap.KeyCodes.ARROW_UP) {
+		if (oEvent.keyCode != KeyCodes.ARROW_UP) {
 			//Go to parent menu if this is a sub menu
 			if (this.isSubMenu()) {
 				this.close();
@@ -533,6 +675,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 	};
 
 	Menu.prototype.onkeyup = function(oEvent){
+		// focus menuItems
+		if (this.oHoveredItem && (jQuery(oEvent.target).prop("tagName") != "INPUT")) {
+			var oDomRef = this.oHoveredItem.getDomRef();
+			jQuery(oDomRef).attr("tabIndex", 0).focus();
+		}
+
 		//like sapselect but on keyup:
 		//Using keydown has the following side effect:
 		//If the selection leads to a close of the menu and the focus is restored to the caller (e.g. a button)
@@ -544,7 +692,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 		} else {
 			this._sapSelectOnKeyDown = false;
 		}
-		if (!jQuery.sap.PseudoEvents.sapselect.fnCheck(oEvent)) {
+		if (!PseudoEvents.events.sapselect.fnCheck(oEvent)) {
 			return;
 		}
 		this.selectItem(this.oHoveredItem, true, false);
@@ -569,7 +717,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 	Menu.prototype.onsaptabprevious = Menu.prototype.onsapescape;
 
 	Menu.prototype.onmouseover = function(oEvent){
-		if (!sap.ui.Device.system.desktop) {
+		if (!Device.system.desktop) {
 			return;
 		}
 		var oItem = this.getItemByDomRef(oEvent.target);
@@ -577,16 +725,22 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 			return;
 		}
 
-		if (this.oOpenedSubMenu && jQuery.sap.containsOrEquals(this.oOpenedSubMenu.getDomRef(), oEvent.target)) {
+		if (this.oOpenedSubMenu && containsOrEquals(this.oOpenedSubMenu.getDomRef(), oEvent.target)) {
 			return;
 		}
 
 		this.setHoveredItem(oItem);
 
-		if (jQuery.sap.checkMouseEnterOrLeave(oEvent, this.getDomRef())) {
+		if (checkMouseEnterOrLeave(oEvent, this.getDomRef())) {
+			/* TODO remove after 1.62 version */
 			if (!Device.browser.msie && !Device.browser.edge) { //for IE & Edge skip it, otherwise it will move the focus out of the hovered item set before
 				this.getDomRef().focus();
 			}
+		}
+
+		/* TODO remove after 1.62 version */
+		if (Device.browser.msie) {
+			this.getDomRef().focus();
 		}
 
 		this._openSubMenuDelayed(oItem);
@@ -598,32 +752,29 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 			return;
 		}
 		this._discardOpenSubMenuDelayed();
-		this._delayedSubMenuTimer = jQuery.sap.delayedCall(
-			oItem.getSubmenu() && this.checkEnabled(oItem) ? Menu._DELAY_SUBMENU_TIMER : Menu._DELAY_SUBMENU_TIMER_EXT,
-			this,
-			function(){
-				this.closeSubmenu();
-				if (!oItem.getSubmenu() || !this.checkEnabled(oItem)) {
-					return;
-				}
-				this.setHoveredItem(oItem);
-				this.openSubmenu(oItem, false, true);
-		});
+		this._delayedSubMenuTimer = setTimeout(function(){
+			this.closeSubmenu();
+			if (!oItem.getSubmenu() || !this.checkEnabled(oItem)) {
+				return;
+			}
+			this.setHoveredItem(oItem);
+			this.openSubmenu(oItem, false, true);
+	}.bind(this), oItem.getSubmenu() && this.checkEnabled(oItem) ? Menu._DELAY_SUBMENU_TIMER : Menu._DELAY_SUBMENU_TIMER_EXT);
 	};
 
 	Menu.prototype._discardOpenSubMenuDelayed = function(oItem){
 		if (this._delayedSubMenuTimer) {
-			jQuery.sap.clearDelayedCall(this._delayedSubMenuTimer);
+			clearTimeout(this._delayedSubMenuTimer);
 			this._delayedSubMenuTimer = null;
 		}
 	};
 
 	Menu.prototype.onmouseout = function(oEvent){
-		if (!sap.ui.Device.system.desktop) {
+		if (!Device.system.desktop) {
 			return;
 		}
 
-		if (jQuery.sap.checkMouseEnterOrLeave(oEvent, this.getDomRef())) {
+		if (checkMouseEnterOrLeave(oEvent, this.getDomRef())) {
 			if (!this.oOpenedSubMenu || !(this.oOpenedSubMenu.getParent() === this.oHoveredItem)) {
 				this.setHoveredItem(null);
 			}
@@ -652,7 +803,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 		//-> This function and all its callers are obsolete when switching later to standard popup autoclose
 		//   (all needed further code locations for that change are marked with "TBD: standard popup autoclose")
 		var isInMenuHierarchy = false,
-			touchEnabled = this.getPopup().touchEnabled;
+		// before we were relaying on Popup.touchEnabled, but the logic in the Popup was changed
+		// and touchEnabled wasn't valid anymore for Combi devices, which caused the Menu to close automatically right after it was opened
+			touchEnabled = Device.support.touch;
 
 		this.bIgnoreOpenerDOMRef = false;
 
@@ -663,7 +816,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 			}
 			var that = this;
 			while (that && !isInMenuHierarchy) {
-				if (jQuery.sap.containsOrEquals(that.getDomRef(), oEvent.target)) {
+				if (containsOrEquals(that.getDomRef(), oEvent.target)) {
 					isInMenuHierarchy = true;
 				}
 				that = that.oOpenedSubMenu;
@@ -676,7 +829,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 				var that = this;
 				while (that && !isInMenuHierarchy) {
 					if ((that.oOpenedSubMenu && that.oOpenedSubMenu.getId() == oEvent.relatedControlId)
-							|| jQuery.sap.containsOrEquals(that.getDomRef(), jQuery.sap.byId(oEvent.relatedControlId).get(0))) {
+							|| containsOrEquals(that.getDomRef(), jQuery(document.getElementById(oEvent.relatedControlId)).get(0))) {
 						isInMenuHierarchy = true;
 					}
 					that = that.oOpenedSubMenu;
@@ -698,7 +851,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 		for (var i = 0;i < iLength;i++) {
 			var oItem = oItems[i],
 				oItemRef = oItem.getDomRef();
-			if (jQuery.sap.containsOrEquals(oItemRef, oDomRef)) {
+			if (containsOrEquals(oItemRef, oDomRef)) {
 				return oItem;
 			}
 		}
@@ -716,7 +869,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 			// This is a normal item -> Close all menus and fire event.
 			this.getRootMenu().close();
 		} else {
-			if (!sap.ui.Device.system.desktop && this.oOpenedSubMenu === oSubMenu) {
+			if (!Device.system.desktop && this.oOpenedSubMenu === oSubMenu) {
 				this.closeSubmenu();
 			} else {
 				// Item with sub menu was triggered -> Open sub menu and fire event.
@@ -755,6 +908,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 			this.oPopup = new Popup(this, false, true, false); // content, modal, shadow, autoclose (TBD: standard popup autoclose)
 			this.oPopup.setDurations(0, 0);
 			this.oPopup.attachClosed(this._menuClosed, this);
+
+			this.oPopup.attachOpened(this._handleOpened, this);
 		}
 		return this.oPopup;
 	};
@@ -884,7 +1039,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 	Menu.prototype._bringToFront = function() {
 		// This is a hack. We "simulate" a mouse-down-event on the submenu so that it brings itself
 		// to the front.
-		jQuery.sap.byId(this.getPopup().getId()).mousedown();
+		jQuery(document.getElementById(this.getPopup().getId())).mousedown();
 	};
 
 	Menu.prototype.checkEnabled = function(oItem){
@@ -1262,4 +1417,4 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/Device', 'sap
 
 	return Menu;
 
-}, /* bExport= */ true);
+});

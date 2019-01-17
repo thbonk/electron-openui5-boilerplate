@@ -1,11 +1,14 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define(["sap/m/library"],
+	function(library) {
 	"use strict";
+
+	// shortcut for sap.m.ToolbarDesign
+	var ToolbarDesign = library.ToolbarDesign;
 
 	/**
 	 * Panel renderer
@@ -32,7 +35,7 @@ sap.ui.define(['jquery.sap.global'],
 	};
 
 	PanelRenderer.startPanel = function (oRm, oControl) {
-		oRm.write("<section");
+		oRm.write("<div");
 		oRm.writeControlData(oControl);
 		oRm.addClass("sapMPanel");
 		oRm.writeClasses();
@@ -84,7 +87,7 @@ sap.ui.define(['jquery.sap.global'],
 		var sHeaderText = oControl.getHeaderText();
 
 		if (oHeaderTBar) {
-			oHeaderTBar.setDesign(sap.m.ToolbarDesign.Transparent, true);
+			oHeaderTBar.setDesign(ToolbarDesign.Transparent, true);
 			oHeaderTBar.addStyleClass("sapMPanelHeaderTB");
 			oRm.renderControl(oHeaderTBar);
 
@@ -111,7 +114,7 @@ sap.ui.define(['jquery.sap.global'],
 			}
 
 			// render infoBar
-			oInfoTBar.setDesign(sap.m.ToolbarDesign.Info, true);
+			oInfoTBar.setDesign(ToolbarDesign.Info, true);
 			oInfoTBar.addStyleClass("sapMPanelInfoTB");
 			oRm.renderControl(oInfoTBar);
 		}
@@ -127,6 +130,7 @@ sap.ui.define(['jquery.sap.global'],
 
 	PanelRenderer.startContent = function (oRm, oControl) {
 		oRm.write("<div");
+		oRm.writeAttribute("id", oControl.getId() + "-content");
 		oRm.addClass("sapMPanelContent");
 		oRm.addClass("sapMPanelBG" + oControl.getBackgroundDesign());
 
@@ -136,11 +140,18 @@ sap.ui.define(['jquery.sap.global'],
 		}
 
 		oRm.writeClasses();
+
+		if (sap.ui.Device.browser.firefox) {
+			// ensure that the content is not included in the tab chain
+			// this happens in FF, when we have a scrollable content
+			oRm.writeAttribute('tabindex', '-1');
+		}
+
 		oRm.write(">");
 	};
 
 	PanelRenderer.renderChildren = function (oRm, aChildren) {
-		aChildren.forEach(oRm.renderControl);
+		aChildren.forEach(oRm.renderControl, oRm);
 	};
 
 	PanelRenderer.endContent = function (oRm) {
@@ -148,7 +159,7 @@ sap.ui.define(['jquery.sap.global'],
 	};
 
 	PanelRenderer.endPanel = function (oRm) {
-		oRm.write("</section>");
+		oRm.write("</div>");
 	};
 
 	return PanelRenderer;

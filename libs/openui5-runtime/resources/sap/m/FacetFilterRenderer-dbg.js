@@ -1,12 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define(["sap/m/library", "sap/ui/Device", "sap/ui/core/InvisibleText"],
+	function(library, Device, InvisibleText) {
 	"use strict";
+
+
+	// shortcut for sap.m.FacetFilterType
+	var FacetFilterType = library.FacetFilterType;
 
 
 	/**
@@ -15,8 +19,6 @@ sap.ui.define(['jquery.sap.global'],
 	 */
 	var FacetFilterRenderer = {
 	};
-	// create ARIA announcements
-	var mAriaAnnouncements = {};
 
 
 	/**
@@ -28,11 +30,11 @@ sap.ui.define(['jquery.sap.global'],
 	FacetFilterRenderer.render = function(oRm, oControl){
 		switch (oControl.getType()) {
 
-		case sap.m.FacetFilterType.Simple:
+		case FacetFilterType.Simple:
 			FacetFilterRenderer.renderSimpleFlow(oRm, oControl);
 			break;
 
-		case sap.m.FacetFilterType.Light:
+		case FacetFilterType.Light:
 			FacetFilterRenderer.renderSummaryBar(oRm, oControl);
 			break;
 		}
@@ -49,6 +51,9 @@ sap.ui.define(['jquery.sap.global'],
 		oRm.write("<div");
 		oRm.writeControlData(oControl);
 		oRm.addClass("sapMFF");
+		oRm.writeAccessibilityState(oControl, {
+			"role": "toolbar"
+		});
 
 		if (oControl.getShowSummaryBar()) {
 
@@ -72,7 +77,7 @@ sap.ui.define(['jquery.sap.global'],
 			oRm.write(">");
 
 
-			if (sap.ui.Device.system.desktop) {
+			if (Device.system.desktop) {
 				oRm.renderControl(oControl._getScrollingArrow("left"));
 			}
 			// Render the div for the carousel
@@ -88,7 +93,7 @@ sap.ui.define(['jquery.sap.global'],
 				oRm.renderControl(oControl.getAggregation("addFacetButton"));
 			}
 			oRm.write("</div>"); // Close carousel div
-			if (sap.ui.Device.system.desktop) {
+			if (Device.system.desktop) {
 				oRm.renderControl(oControl._getScrollingArrow("right"));
 			}
 
@@ -138,16 +143,7 @@ sap.ui.define(['jquery.sap.global'],
 	 * @protected
 	 */
 	FacetFilterRenderer.getAriaAnnouncement = function(sKey, sBundleText) {
-		if (mAriaAnnouncements[sKey]) {
-			return mAriaAnnouncements[sKey];
-		}
-
-		sBundleText = sBundleText || "FACETFILTER_" + sKey.toUpperCase();
-		mAriaAnnouncements[sKey] = new sap.ui.core.InvisibleText({
-			text : sap.ui.getCore().getLibraryResourceBundle("sap.m").getText(sBundleText)
-		}).toStatic().getId();
-
-		return mAriaAnnouncements[sKey];
+		return InvisibleText.getStaticId("sap.m", sBundleText || "FACETFILTER_" + sKey.toUpperCase());
 	};
 
 
@@ -205,7 +201,7 @@ sap.ui.define(['jquery.sap.global'],
 
 			//get current position
 			sPosition = sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("FACETFILTERLIST_ARIA_POSITION", [(i + 1), iLength]);
-			oAccText = new sap.ui.core.InvisibleText( {text: sFacetFilterText + " " + sPosition}).toStatic();
+			oAccText = new InvisibleText( {text: sFacetFilterText + " " + sPosition}).toStatic();
 			oControl._aOwnedLabels.push(oAccText.getId());
 			oButton.addAriaDescribedBy(oAccText);
 			aNewAriaDescribedBy.push(oAccText.getId());

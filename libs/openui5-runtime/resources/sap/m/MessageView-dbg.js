@@ -1,33 +1,70 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
 	"jquery.sap.global",
 	"sap/ui/core/Control",
+	"sap/ui/core/CustomData",
 	"sap/ui/core/IconPool",
 	"sap/ui/core/HTML",
 	"sap/ui/core/Icon",
 	"./Button",
 	"./Toolbar",
 	"./ToolbarSpacer",
-	"./Bar",
 	"./List",
-	"./StandardListItem",
+	"./MessageListItem",
 	"./library",
 	"./Text",
 	"./SegmentedButton",
 	"./Page",
 	"./NavContainer",
 	"./Link",
-	"./Popover",
 	"./MessageItem",
-	"./GroupHeaderListItem"
-], function (jQuery, Control, IconPool, HTML, Icon, Button, Toolbar, ToolbarSpacer, Bar, List, StandardListItem,
-			 library, Text, SegmentedButton, Page, NavContainer, Link, Popover, MessageItem, GroupHeaderListItem) {
+	"./GroupHeaderListItem",
+	"sap/ui/core/library",
+	"sap/ui/base/ManagedObject",
+	"./MessageViewRenderer",
+	"sap/ui/events/KeyCodes",
+	"sap/base/Log",
+	"sap/base/security/URLWhitelist",
+	"sap/ui/thirdparty/caja-html-sanitizer"
+], function(
+	jQuery,
+	Control,
+	CustomData,
+	IconPool,
+	HTML,
+	Icon,
+	Button,
+	Toolbar,
+	ToolbarSpacer,
+	List,
+	MessageListItem,
+	library,
+	Text,
+	SegmentedButton,
+	Page,
+	NavContainer,
+	Link,
+	MessageItem,
+	GroupHeaderListItem,
+	coreLibrary,
+	ManagedObject,
+	MessageViewRenderer,
+	KeyCodes,
+	Log,
+	URLWhitelist
+) {
 	"use strict";
+
+	// shortcut for sap.ui.core.ValueState
+	var ValueState = coreLibrary.ValueState;
+
+	// shortcut for sap.ui.core.MessageType
+	var MessageType = coreLibrary.MessageType;
 
 	// shortcut for sap.m.ListType
 	var ListType = library.ListType;
@@ -44,9 +81,12 @@ sap.ui.define([
 	 * A {@link sap.m.MessageView} is used to display a summarized list of different types of messages (errors, warnings, success and information).
 	 * It provides a handy and systemized way to navigate and explore details for every message.
 	 * It is meant to be embedded into container controls.
+	 * If the MessageView contains only one item, which has either description, markupDescription or longTextUrl, its details page will be displayed initially.
 	 * <br><br>
 	 * <strong>Notes:</strong>
 	 * <ul>
+	 * <li>If your application changes its model between two interactions with the MessageView, this could lead to outdated messages being shown.
+	 * To avoid this, you need to call <code>navigateBack</code> on the MessageView BEFORE opening its container.</li>
 	 * <li> Messages can have descriptions pre-formatted with HTML markup. In this case, the <code>markupDescription</code> has to be set to <code>true</code>. </li>
 	 * <li> If the message cannot be fully displayed or includes a long description, the MessageView provides navigation to the detailed description. </li>
 	 * </ul>
@@ -60,18 +100,23 @@ sap.ui.define([
 	 * <li> type - The type of message </li>
 	 * <li> title/subtitle - The title and subtitle of the message</li>
 	 * <li> description - The long text description of the message</li>
+	 * <li> activeTitle - Determines whether the title of the item is interactive</li>
 	 * </ul>
 	 * <strong><i>Usage</i></strong>
 	 * <br><br>
 	 * As part of the messaging concept, MessageView provides a way to centrally manage messages and show them to the user without additional work for the developer.
+	 *
+	 * It also exposes an event {@link sap.m.MessageView#activeTitlePress}, which can be used for navigation from a message to the source of the issue.
 	 * <br><br>
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
+	 * @extends sap.ui.core.Control
 	 * @constructor
 	 * @public
 	 * @since 1.46
 	 * @alias sap.m.MessageView
+	 * @see {@link fiori:https://experience.sap.com/fiori-design-web/message-view/ Message View}
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var MessageView = Control.extend("sap.m.MessageView", /** @lends sap.m.MessageView.prototype */ {
@@ -104,19 +149,30 @@ sap.ui.define([
 				/**
 				 * Defines whether the MessageItems are grouped or not
 				 */
-				groupItems: { type: "boolean", group: "Behavior", defaultValue: false }
+				groupItems: { type: "boolean", group: "Behavior", defaultValue: false },
+
+				/**
+				 * Defines whether the header of details page will be shown
+				 */
+				showDetailsPageHeader: { type: "boolean", group: "Behavior", defaultValue: true }
 			},
 			defaultAggregation: "items",
 			aggregations: {
 				/**
-				 * A list with message items
+				 * A list with message items.
+				 * If only one item is provided, the initial page will be the details page for the item.
 				 */
-				items: {type: "sap.m.MessageItem", multiple: true, singularName: "item"},
+				items: { type: "sap.m.MessageItem", multiple: true, singularName: "item" },
 
 				/**
 				 * A custom header button
 				 */
-				headerButton: {type: "sap.m.Button", multiple: false}
+				headerButton: { type: "sap.m.Button", multiple: false },
+
+				/**
+				 * A navContainer that contains both details and list pages
+				 */
+				_navContainer: { type: "sap.m.NavContainer", multiple: false, visibility : "hidden" }
 			},
 			events: {
 				/**
@@ -164,7 +220,20 @@ sap.ui.define([
 				/**
 				 * This event will be fired when a validation of a URL from long text description is ready
 				 */
-				urlValidated: {}
+				urlValidated: {},
+
+				/**
+				 * This event will be fired when an active title of a MessageItem is pressed
+				 * @since 1.58
+				 */
+				activeTitlePress: {
+					parameters: {
+						/**
+						 * Refers to the message item that contains the active Title
+						 */
+						item: { type: "sap.m.MessageItem" }
+					}
+				}
 			}
 		}
 	});
@@ -199,7 +268,7 @@ sap.ui.define([
 					},
 					error: function () {
 						var sError = "A request has failed for long text data. URL: " + sLongTextUrl;
-						jQuery.sap.log.error(sError);
+						Log.error(sError);
 						config.promise.reject(sError);
 					}
 				});
@@ -212,8 +281,8 @@ sap.ui.define([
 	 * @static
 	 * @protected
 	 * @param {object} mDefaultHandlers An object setting default callbacks
-	 * @param {function} mDefaultHandlers.asyncDescriptionHandler
-	 * @param {function} mDefaultHandlers.asyncURLHandler
+	 * @param {function} mDefaultHandlers.asyncDescriptionHandler The description handler
+	 * @param {function} mDefaultHandlers.asyncURLHandler The URL handler
 	 */
 	MessageView.setDefaultHandlers = function (mDefaultHandlers) {
 		ASYNC_HANDLER_NAMES.forEach(function (sFuncName) {
@@ -230,7 +299,9 @@ sap.ui.define([
 	 * @private
 	 */
 	MessageView.prototype.init = function () {
+
 		var that = this;
+		this._bHasHeaderButton = false;
 
 		this._oResourceBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m");
 
@@ -245,38 +316,71 @@ sap.ui.define([
 		});
 	};
 
+	/**
+	 * Handles navigate event of the NavContainer
+	 *
+	 * @private
+	 */
+	MessageView.prototype._afterNavigate = function () {
+		setTimeout(this["_restoreFocus"].bind(this), 0);
+	};
+
+	/**
+	 * Restores the focus after navigation
+	 *
+	 * @private
+	 */
+	MessageView.prototype._restoreFocus = function () {
+		if (this._isListPage() && this.getItems().length) {
+			this._oLists[this._sCurrentList || 'all'].focus();
+		} else if (this._oBackButton){
+			this._oBackButton.focus();
+		}
+	};
+
 	MessageView.prototype.onBeforeRendering = function () {
-		var oGroupedItems;
+		var oGroupedItems,
+			aItems = this.getItems();
 
 		this._clearLists();
+		this._detailsPage.setShowHeader(this.getShowDetailsPageHeader());
 
 		if (this.getGroupItems()) {
-			oGroupedItems = this._groupItems(this.getItems());
+			oGroupedItems = this._groupItems(aItems);
 
 			this._fillGroupedLists(oGroupedItems);
 		} else {
-			this._fillLists(this.getItems());
+			this._fillLists(aItems);
+		}
+
+		var headerButton = this.getHeaderButton();
+
+		if (headerButton) {
+			this._bHasHeaderButton = true;
+			this._oListHeader.insertContent(headerButton, 2);
 		}
 
 		this._clearSegmentedButton();
 		this._fillSegmentedButton();
 		this._fnFilterList(this._getCurrentMessageTypeFilter() || "all");
 
-		var headerButton = this.getHeaderButton();
+		if (aItems.length === 1 && this._oLists.all.getItems()[0].getType()  === ListType.Navigation) {
 
-		if (headerButton) {
-			this._oListHeader.insertContent(headerButton, 2);
+			this._fnHandleForwardNavigation(this._oLists.all.getItems()[0], "show");
+
+			// TODO: adopt this to NavContainer's public API once a parameter for back navigation transition name is available
+			this._navContainer._pageStack[this._navContainer._pageStack.length - 1].transition = "slide";
 		}
 
 		// Bind automatically to the MessageModel if no items are bound
-		if (!this.getBindingInfo("items") && !this.getItems().length) {
+		if (!this.getBindingInfo("items") && !aItems.length) {
 			this._makeAutomaticBinding();
 		}
 	};
 
 	/**
 	 * Fills grouped items in the lists
-	 *
+	 * @param {sap.m.MessageItem[]} oGroupedItems An array of items
 	 * @private
 	 */
 	MessageView.prototype._fillGroupedLists = function(oGroupedItems) {
@@ -323,10 +427,6 @@ sap.ui.define([
 	 * @private
 	 */
 	MessageView.prototype.exit = function () {
-		if (this._navContainer) {
-			this._navContainer.destroy();
-		}
-
 		if (this._oLists) {
 			this._destroyLists();
 		}
@@ -373,7 +473,8 @@ sap.ui.define([
 
 	/**
 	 * Groups items in an object of keys and correspoding array of items
-	 *
+	 * @param {sap.m.MessageItem[]} aItems An array of items
+	 * @returns {object} Item object
 	 * @private
 	 */
 	MessageView.prototype._groupItems = function (aItems) {
@@ -403,8 +504,8 @@ sap.ui.define([
 	 * @private
 	 */
 	MessageView.prototype._onkeypress = function (oEvent) {
-		if (oEvent.shiftKey && oEvent.keyCode == jQuery.sap.KeyCodes.ENTER) {
-			this._fnHandleBackPress();
+		if (oEvent.shiftKey && oEvent.keyCode == KeyCodes.ENTER) {
+			this.navigateBack();
 		}
 	};
 
@@ -478,7 +579,7 @@ sap.ui.define([
 
 		this._oBackButton = new Button({
 			icon: ICONS["back"],
-			press: this._fnHandleBackPress.bind(this),
+			press: this.navigateBack.bind(this),
 			ariaLabelledBy: oBackBtnARIAHiddenDescr,
 			tooltip: sBackBtnTooltipDescr
 		}).addStyleClass(CSS_CLASS + "BackBtn");
@@ -524,8 +625,11 @@ sap.ui.define([
 		// Initialize nav container with two main pages
 		this._navContainer = new NavContainer(this.getId() + "-navContainer", {
 			initialPage: this.getId() + "listPage",
-			pages: [this._listPage, this._detailsPage]
+			pages: [this._listPage, this._detailsPage],
+			afterNavigate: this._afterNavigate.bind(this)
 		});
+
+		this.setAggregation("_navContainer", this._navContainer);
 
 		return this;
 	};
@@ -599,10 +703,10 @@ sap.ui.define([
 	};
 
 	/**
-	 * Map a MessageItem to StandardListItem
+	 * Map a MessageItem to MessageListItem
 	 *
 	 * @param {sap.m.MessageItem} oMessageItem Base information to generate the list items
-	 * @returns {sap.m.StandardListItem | null} oListItem List item which will be displayed
+	 * @returns {sap.m.MessageListItem | null} oListItem List item which will be displayed
 	 * @private
 	 */
 	MessageView.prototype._mapItemToListItem = function (oMessageItem) {
@@ -611,26 +715,37 @@ sap.ui.define([
 		}
 
 		var sType = oMessageItem.getType(),
+			that = this,
 			listItemType = this._getItemType(oMessageItem),
-			oListItem = new StandardListItem({
-				title: oMessageItem.getTitle(),
-				description: oMessageItem.getSubtitle(),
+			oListItem = new MessageListItem({
+				title: ManagedObject.escapeSettingsValue(oMessageItem.getTitle()),
+				description: ManagedObject.escapeSettingsValue(oMessageItem.getSubtitle()),
 				counter: oMessageItem.getCounter(),
 				icon: this._mapIcon(sType),
 				infoState: this._mapInfoState(sType),
 				info: "\r", // There should be a content in the info property in order to use the info states
-				type: listItemType
-			}).addStyleClass(CSS_CLASS + "Item").addStyleClass(CSS_CLASS + "Item" + sType);
+				type: listItemType,
+				messageType: oMessageItem.getType(),
+				activeTitle: oMessageItem.getActiveTitle(),
+				activeTitlePress: function () {
+					that.fireActiveTitlePress({ item: oMessageItem });
+				}
+			}).addStyleClass(CSS_CLASS + "Item")
+				.addStyleClass(CSS_CLASS + "Item" + sType)
+				.toggleStyleClass(CSS_CLASS + "ItemActive", oMessageItem.getActiveTitle());
 
 		if (listItemType !== ListType.Navigation) {
 			oListItem.addEventDelegate({
 				onAfterRendering: function () {
-					var oItemDomRef = this.getDomRef().querySelector(".sapMSLITitleDiv > div");
+					var oItemDomRef = oListItem.getDomRef().querySelector(".sapMSLITitleDiv > div");
 					if (oItemDomRef.offsetWidth < oItemDomRef.scrollWidth) {
-						this.setType(ListType.Navigation);
+						oListItem.setType(ListType.Navigation);
+						if (this.getItems().length === 1) {
+							this._fnHandleForwardNavigation(oListItem, "show");
+						}
 					}
 				}
-			}, oListItem);
+			}, this);
 		}
 
 		oListItem._oMessageItem = oMessageItem;
@@ -649,8 +764,6 @@ sap.ui.define([
 		if (!sType) {
 			return null;
 		}
-		var MessageType = sap.ui.core.MessageType,
-			ValueState = sap.ui.core.ValueState;
 
 		switch (sType) {
 			case MessageType.Warning:
@@ -663,7 +776,7 @@ sap.ui.define([
 			case MessageType.None:
 				return ValueState.None;
 			default:
-				jQuery.sap.log.warning("The provided MessageType is not mapped to a specific ValueState", sType);
+				Log.warning("The provided MessageType is not mapped to a specific ValueState", sType);
 				return null;
 		}
 	};
@@ -718,13 +831,15 @@ sap.ui.define([
 
 		LIST_TYPES.forEach(function (sListName) {
 			var oList = this._oLists[sListName],
+				sBundleText = sListName == "all" ? "MESSAGEPOPOVER_ALL" : "MESSAGEVIEW_BUTTON_TOOLTIP_" + sListName.toUpperCase(),
 				iCount = oList.getItems().filter(function(oItem) {
-					return (oItem instanceof StandardListItem);
+					return (oItem instanceof MessageListItem);
 				}).length, oButton;
 
 			if (iCount > 0) {
 				oButton = new Button(this.getId() + "-" + sListName, {
-					text: sListName == "all" ? this._oResourceBundle.getText("MESSAGEPOPOVER_ALL") : iCount,
+					text: sListName == "all" ? this._oResourceBundle.getText(sBundleText) : iCount,
+					tooltip: this._oResourceBundle.getText(sBundleText),
 					icon: ICONS[sListName],
 					press: pressClosure(sListName)
 				}).addStyleClass(CSS_CLASS + "Btn" + sListName.charAt(0).toUpperCase() + sListName.slice(1));
@@ -733,13 +848,31 @@ sap.ui.define([
 			}
 		}, this);
 
+		// If there is only the always-present 'all' button and a single group button
+		// no need for a segmented button
+		var bSegmentedButtonVisible = this._oSegmentedButton.getButtons().length > 2;
+		this._oSegmentedButton.setVisible(bSegmentedButtonVisible);
+		// If there's only one group reset filter and highlight the "All" button from the SegmentedButton list.
+		// Otherwise if the user has filtered and the model changes, he could be stuck to a "no data" page without a way
+		// to navigate back and see the remaining messages
+		if (!bSegmentedButtonVisible) {
+			this._oSegmentedButton.setSelectedButton(this._oSegmentedButton.getButtons()[0]);
+			this._fnFilterList('all');
+		}
+
+		// If SegmentedButton should not be visible,
+		// and there is no custom button - hide the initial page's header
+		var bListPageHeaderVisible = bSegmentedButtonVisible || this._bHasHeaderButton;
+		this._listPage.setShowHeader(bListPageHeaderVisible);
+
+
 		return this;
 	};
 
 	/**
 	 * Sets icon in details page
-	 * @param {sap.m.MessageItem} oMessageItem
-	 * @param {sap.m.StandardListItem} oListItem
+	 * @param {sap.m.MessageItem} oMessageItem The message item
+	 * @param {sap.m.MessageListItem} oListItem The list item
 	 * @private
 	 */
 	MessageView.prototype._setIcon = function (oMessageItem, oListItem) {
@@ -755,20 +888,37 @@ sap.ui.define([
 
 	/**
 	 * Sets title part of details page
-	 * @param {sap.m.MessageItem} oMessageItem
+	 * @param {sap.m.MessageItem} oMessageItem The message item
 	 * @private
 	 */
-	MessageView.prototype._setTitle = function (oMessageItem) {
-		this._oMessageTitleText = new Text(this.getId() + "MessageTitleText", {
-			text: oMessageItem.getTitle()
-		}).addStyleClass("sapMMsgViewTitleText");
-		this._detailsPage.addAggregation("content", this._oMessageTitleText);
+	MessageView.prototype._setTitle = function (oMessageItem, oListItem) {
+		var bActive = oMessageItem.getActiveTitle(),
+			oDetailsContent, that = this,
+			sText = ManagedObject.escapeSettingsValue(oMessageItem.getTitle()),
+			sId = this.getId() + "MessageTitleText";
+
+		if (bActive) {
+			oDetailsContent = new Link(sId, {
+				text: sText,
+				ariaDescribedBy: oListItem.getId() + "-link",
+				press: function () {
+					that.fireActiveTitlePress({ item: oMessageItem });
+				}
+			});
+		} else {
+			oDetailsContent = new Text(sId, {
+				text: sText
+			});
+		}
+
+		oDetailsContent.addStyleClass("sapMMsgViewTitleText");
+		this._detailsPage.addAggregation("content", oDetailsContent);
 	};
 
 	/**
 	 * Sets description text part of details page
 	 * When markup description is used it is sanitized within it's container's setter method (MessageItem)
-	 * @param {sap.m.MessageItem} oMessageItem
+	 * @param {sap.m.MessageItem} oMessageItem The message item
 	 * @private
 	 */
 	MessageView.prototype._setDescription = function (oMessageItem) {
@@ -777,29 +927,57 @@ sap.ui.define([
 		if (oMessageItem.getMarkupDescription()) {
 			// description is sanitized in MessageItem.setDescription()
 			this._oMessageDescriptionText = new HTML(this.getId() + "MarkupDescription", {
-				content: "<div class='sapMMsgViewDescriptionText'>" + oMessageItem.getDescription() + "</div>"
+				content: "<div class='sapMMsgViewDescriptionText'>" + ManagedObject.escapeSettingsValue(oMessageItem.getDescription()) + "</div>"
 			});
 		} else {
 			this._oMessageDescriptionText = new Text(this.getId() + "MessageDescriptionText", {
-				text: oMessageItem.getDescription()
+				text: ManagedObject.escapeSettingsValue(oMessageItem.getDescription())
 			}).addStyleClass("sapMMsgViewDescriptionText");
 		}
 
 		this._detailsPage.addContent(this._oMessageDescriptionText);
+
 		if (oLink) {
-			this._detailsPage.addContent(oLink);
-			oLink.addStyleClass("sapMMsgViewDescriptionLink");
+			var oLinkClone = this._createLinkCopy(oLink);
+			this._detailsPage.addContent(oLinkClone);
+			oLinkClone.addStyleClass("sapMMsgViewDescriptionLink");
 		}
+	};
+
+	MessageView.prototype._createLinkCopy = function (oLink) {
+		var aLinkProperties,
+			oLinkClone = oLink.clone("", "", {
+				cloneChildren: false,
+				cloneBindings: false
+			}),
+			aCustomData = oLink.getCustomData() || [];
+
+		aLinkProperties = Object.keys(oLink.getMetadata().getProperties());
+		aLinkProperties.forEach(function(sProp){
+			oLinkClone.setProperty(sProp, oLink.getProperty(sProp));
+		});
+
+		oLinkClone.destroyCustomData();
+		aCustomData.forEach(function(oCustomData){
+			var oCustomDataCopy = new CustomData({
+				key: oCustomData.getKey(),
+				value: oCustomData.getValue()
+			});
+
+			oLinkClone.addCustomData(oCustomDataCopy);
+		});
+
+		return oLinkClone;
 	};
 
 	MessageView.prototype._iNextValidationTaskId = 0;
 
 	MessageView.prototype._validateURL = function (sUrl) {
-		if (jQuery.sap.validateUrl(sUrl)) {
+		if (URLWhitelist.validate(sUrl)) {
 			return sUrl;
 		}
 
-		jQuery.sap.log.warning("You have entered invalid URL");
+		Log.warning("You have entered invalid URL");
 
 		return "";
 	};
@@ -902,12 +1080,12 @@ sap.ui.define([
 				oValidation
 					.then(function (result) {
 						// Update link in output
-						var $link = jQuery.sap.byId("sap-ui-" + that.getId() + "-link-under-validation-" + result.id);
+						var $link = jQuery(document.getElementById("sap-ui-" + that.getId() + "-link-under-validation-" + result.id));
 
 						if (result.allowed) {
-							jQuery.sap.log.info("Allow link " + href);
+							Log.info("Allow link " + href);
 						} else {
-							jQuery.sap.log.info("Disallow link " + href);
+							Log.info("Disallow link " + href);
 						}
 
 						// Adapt the link style
@@ -917,7 +1095,7 @@ sap.ui.define([
 						that.fireUrlValidated();
 					})
 					.catch(function () {
-						jQuery.sap.log.warning("Async URL validation could not be performed.");
+						Log.warning("Async URL validation could not be performed.");
 					});
 			}
 
@@ -927,12 +1105,10 @@ sap.ui.define([
 
 	/**
 	 * Perform description sanitization based on Caja HTML sanitizer
-	 * @param {sap.m.MessageItem} oMessageItem
+	 * @param {sap.m.MessageItem} oMessageItem The item to be sanitized
 	 * @private
 	 */
 	MessageView.prototype._sanitizeDescription = function (oMessageItem) {
-		jQuery.sap.require("jquery.sap.encoder");
-		jQuery.sap.require("sap.ui.thirdparty.caja-html-sanitizer");
 		var sDescription = oMessageItem.getDescription();
 
 		if (oMessageItem.getMarkupDescription()) {
@@ -946,29 +1122,16 @@ sap.ui.define([
 	};
 
 	/**
-	 * Handles click of the ListItems
+	 * Handles click on a list item
 	 *
-	 * @param {jQuery.Event} oEvent ListItem click event object
+	 * @param {sap.m.MessageListItem} oListItem ListItem that is pressed
+	 * @param {String} sTransiotionName name of transition could be slide, show, flip or fade
 	 * @private
 	 */
-	MessageView.prototype._fnHandleItemPress = function (oEvent) {
-		var oListItem = oEvent.getParameter("listItem"),
-			oMessageItem = oListItem._oMessageItem,
-			aDetailsPageContent = this._detailsPage.getContent() || [];
-
-		var asyncDescHandler = this.getAsyncDescriptionHandler();
-
-		var loadAndNavigateToDetailsPage = function (suppressNavigate) {
-			this._setTitle(oMessageItem);
-			this._sanitizeDescription(oMessageItem);
-			this._setIcon(oMessageItem, oListItem);
-			this._detailsPage.rerender();
-			this.fireLongtextLoaded();
-
-			if (!suppressNavigate) {
-				this._navContainer.to(this._detailsPage);
-			}
-		}.bind(this);
+	MessageView.prototype._fnHandleForwardNavigation = function (oListItem, sTransiotionName) {
+		var oMessageItem = oListItem._oMessageItem,
+			aDetailsPageContent = this._detailsPage.getContent() || [],
+			asyncDescHandler = this.getAsyncDescriptionHandler();
 
 		this._previousIconTypeClass = this._previousIconTypeClass || "";
 
@@ -977,15 +1140,7 @@ sap.ui.define([
 			messageTypeFilter: this._getCurrentMessageTypeFilter()
 		});
 
-		aDetailsPageContent.forEach(function (oControl) {
-			if (oControl instanceof Link) {
-				// Move the Link back to the MessageItem
-				this._oLastSelectedItem.setLink(oControl);
-				oControl.removeAllAriaLabelledBy();
-			} else {
-				oControl.destroy();
-			}
-		}, this);
+		this._clearDetailsPage.call(this, aDetailsPageContent);
 
 		if (typeof asyncDescHandler === "function" && !!oMessageItem.getLongtextUrl()) {
 			// Set markupDescription to true as markup description should be processed as markup
@@ -1000,13 +1155,13 @@ sap.ui.define([
 
 			var proceed = function () {
 				this._detailsPage.setBusy(false);
-				loadAndNavigateToDetailsPage(true);
+				this._navigateToDetails.call(this, oMessageItem, oListItem, sTransiotionName, true);
 			}.bind(this);
 
 			oPromise
 				.then(proceed)
 				.catch(function () {
-					jQuery.sap.log.warning("Async description loading could not be performed.");
+					Log.warning("Async description loading could not be performed.");
 					proceed();
 				});
 
@@ -1019,18 +1174,51 @@ sap.ui.define([
 				item: oMessageItem
 			});
 		} else {
-			loadAndNavigateToDetailsPage();
+			this._navigateToDetails.call(this, oMessageItem, oListItem, sTransiotionName, false);
 		}
 
 		this._listPage.$().attr("aria-hidden", "true");
 	};
 
 	/**
-	 * Handles click of the BackButton
+	 * Handles click of the ListItems
 	 *
+	 * @param {jQuery.Event} oEvent ListItem click event object
 	 * @private
 	 */
-	MessageView.prototype._fnHandleBackPress = function () {
+	MessageView.prototype._fnHandleItemPress = function (oEvent) {
+		this._fnHandleForwardNavigation(oEvent.getParameter("listItem"), "slide");
+	};
+
+	MessageView.prototype._navigateToDetails = function(oMessageItem, oListItem, sTransiotionName, bSuppressNavigate) {
+		this._setTitle(oMessageItem, oListItem);
+		this._sanitizeDescription(oMessageItem);
+		this._setIcon(oMessageItem, oListItem);
+		this._detailsPage.rerender();
+		this.fireLongtextLoaded();
+
+		if (!bSuppressNavigate) {
+			this._navContainer.to(this._detailsPage, sTransiotionName);
+		}
+	};
+
+	/**
+	 * Destroys the content of details page
+	 * @param {sap.ui.core.Control} aDetailsPageContent The details page content
+	 * @private
+	 */
+	MessageView.prototype._clearDetailsPage = function (aDetailsPageContent) {
+		aDetailsPageContent.forEach(function (oControl) {
+			oControl.destroy();
+		}, this);
+	};
+
+	/**
+	 * Navigates back to the list page
+	 *
+	 * @public
+	 */
+	MessageView.prototype.navigateBack = function () {
 		this._listPage.$().removeAttr("aria-hidden");
 		this._navContainer.back();
 	};
@@ -1051,8 +1239,6 @@ sap.ui.define([
 
 		this._sCurrentList = sCurrentListName;
 		this._oLists[sCurrentListName].setVisible(true);
-
-		this._listPage.rerender();
 
 		this.fireListSelect({messageTypeFilter: this._getCurrentMessageTypeFilter()});
 	};
@@ -1079,4 +1265,4 @@ sap.ui.define([
 
 	return MessageView;
 
-}, /* bExport= */ true);
+});

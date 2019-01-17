@@ -1,29 +1,29 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.SegmentedButtonItem.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Item', 'sap/m/Button', 'sap/ui/core/CustomStyleClassSupport'],
-	function(jQuery, library, Item, Button, CustomStyleClassSupport) {
+sap.ui.define(['./library', 'sap/ui/core/Item', 'sap/m/Button', 'sap/ui/core/CustomStyleClassSupport'],
+	function(library, Item, Button, CustomStyleClassSupport) {
 		"use strict";
 
 
 
 		/**
-		 * Constructor for a new SegmentedButtonItem.
+		 * Constructor for a new <code>SegmentedButtonItem</code>.
 		 *
 		 * @param {string} [sId] ID for the new control, generated automatically if no ID is given
 		 * @param {object} [mSettings] Initial settings for the new control
 		 *
 		 * @class
-		 * The SegmentedButtonItem control is used for creating buttons for the sap.m.SegmentedButton.
-		 * It is derived from a core sap.ui.core.Item.
+		 * Used for creating buttons for the {@link sap.m.SegmentedButton}.
+		 * It is derived from the {@link sap.ui.core.Item}.
 		 * @extends sap.ui.core.Item
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.61.2
 		 *
 		 * @constructor
 		 * @public
@@ -108,9 +108,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Item', 'sap/m/Butt
 		 * @protected
 		 */
 		SegmentedButtonItem.prototype.exit = function () {
-			// Destroy button only in case of standalone use
-			// In case the element is set as aggregation of the SegmentedButton the latter one takes care for the cleanup
-			if (this.oButton && !(this.oButton.getParent() instanceof sap.m.SegmentedButton)) {
+			if (this.oButton) {
 				this.oButton.destroy();
 				this.oButton = null;
 			}
@@ -168,4 +166,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Item', 'sap/m/Butt
 
 		return SegmentedButtonItem;
 
-	}, /* bExport= */ true);
+	});

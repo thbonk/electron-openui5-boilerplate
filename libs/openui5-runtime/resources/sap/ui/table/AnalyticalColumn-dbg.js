@@ -1,19 +1,38 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.table.AnalyticalColumn.
-sap.ui.define(['jquery.sap.global', './Column', './library', 'sap/ui/core/Element',
-		'sap/ui/model/type/Boolean', 'sap/ui/model/type/DateTime', 'sap/ui/model/type/Float',
-		'sap/ui/model/type/Integer', 'sap/ui/model/type/Time', './TableUtils', './AnalyticalColumnMenu'
-	],
-	function(jQuery, Column, library, Element, BooleanType, DateTime, Float, Integer, Time, TableUtils, AnalyticalColumnMenu) {
+sap.ui.define([
+	'./Column',
+	'./library',
+	'sap/ui/core/Element',
+	'sap/ui/model/type/Boolean',
+	'sap/ui/model/type/DateTime',
+	'sap/ui/model/type/Float',
+	'sap/ui/model/type/Integer',
+	'sap/ui/model/type/Time',
+	'./TableUtils',
+	'./AnalyticalColumnMenu'
+],
+	function(
+		Column,
+		library,
+		Element,
+		BooleanType,
+		DateTime,
+		Float,
+		Integer,
+		Time,
+		TableUtils,
+		AnalyticalColumnMenu
+	) {
 	"use strict";
 
 	function isInstanceOfAnalyticalTable(oControl) {
-		return TableUtils.isInstanceOf(oControl, "sap/ui/table/AnalyticalTable");
+		return TableUtils.isA(oControl, "sap.ui.table.AnalyticalTable");
 	}
 
 	/**
@@ -27,7 +46,7 @@ sap.ui.define(['jquery.sap.global', './Column', './library', 'sap/ui/core/Elemen
 	 * @extends sap.ui.table.Column
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -81,13 +100,13 @@ sap.ui.define(['jquery.sap.global', './Column', './library', 'sap/ui/core/Elemen
 		"DateTime": new DateTime({UTC: true}),
 		"Float": new Float(),
 		"Integer": new Integer(),
-		"Boolean": new Boolean()
+		"Boolean": new BooleanType()
 	};
 
 	/*
 	 * Factory method. Creates the column menu.
 	 *
-	 * @return {sap.ui.table.AnalyticalColumnMenu} The created column menu.
+	 * @returns {sap.ui.table.AnalyticalColumnMenu} The created column menu.
 	 */
 	AnalyticalColumn.prototype._createMenu = function() {
 		return new AnalyticalColumnMenu(this.getId() + "-menu");
@@ -137,16 +156,9 @@ sap.ui.define(['jquery.sap.global', './Column', './library', 'sap/ui/core/Elemen
 					var oBinding = oParent.getBinding("rows");
 					if (oBinding) {
 						this._oBindingLabel = library.TableHelper.createLabel();
-						var oModel = oBinding.getModel();
-						// if the metadata of the underlying odatamodel is not yet loaded -> the setting of the text of the label must be delayed
-						if (oModel.oMetadata && oModel.oMetadata.isLoaded()) {
+						TableUtils.Binding.metadataLoaded(oParent).then(function() {
 							this._oBindingLabel.setText(oBinding.getPropertyLabel(this.getLeadingProperty()));
-						} else {
-							var that = this;
-							oModel.attachMetadataLoaded(function () {
-								that._oBindingLabel.setText(oBinding.getPropertyLabel(that.getLeadingProperty()));
-							});
-						}
+						}.bind(this));
 					}
 				}
 			}
@@ -165,7 +177,7 @@ sap.ui.define(['jquery.sap.global', './Column', './library', 'sap/ui/core/Elemen
 			if (isInstanceOfAnalyticalTable(oParent)) {
 				var oBinding = oParent.getBinding("rows");
 				var sLeadingProperty = this.getLeadingProperty();
-				if (oBinding && jQuery.inArray(sLeadingProperty, oBinding.getFilterablePropertyNames()) > -1) {
+				if (oBinding && oBinding.getFilterablePropertyNames().indexOf(sLeadingProperty) > -1) {
 					sProperty = sLeadingProperty;
 				}
 			}
@@ -183,7 +195,7 @@ sap.ui.define(['jquery.sap.global', './Column', './library', 'sap/ui/core/Elemen
 			if (isInstanceOfAnalyticalTable(oParent)) {
 				var oBinding = oParent.getBinding("rows");
 				var sLeadingProperty = this.getLeadingProperty();
-				if (oBinding && jQuery.inArray(sLeadingProperty, oBinding.getSortablePropertyNames()) > -1) {
+				if (oBinding && oBinding.getSortablePropertyNames().indexOf(sLeadingProperty) > -1) {
 					sProperty = sLeadingProperty;
 				}
 			}
@@ -201,7 +213,7 @@ sap.ui.define(['jquery.sap.global', './Column', './library', 'sap/ui/core/Elemen
 			if (isInstanceOfAnalyticalTable(oParent)) {
 				var oBinding = oParent.getBinding("rows");
 				var sLeadingProperty = this.getLeadingProperty(),
-				    oProperty = oBinding && oBinding.getProperty(sLeadingProperty);
+					oProperty = oBinding && oBinding.getProperty(sLeadingProperty);
 				if (oProperty) {
 					switch (oProperty.type) {
 						case "Edm.Time":
@@ -254,7 +266,7 @@ sap.ui.define(['jquery.sap.global', './Column', './library', 'sap/ui/core/Elemen
 	};
 
 	AnalyticalColumn.prototype.shouldRender = function() {
-		if (!this.getVisible() || this.getTemplate() == null) {
+		if (!this.getVisible() || !this.getTemplate()) {
 			return false;
 		}
 		return (!this.getGrouped() || this._bLastGroupAndGrouped || this.getShowIfGrouped()) && (!this._bDependendGrouped || this._bLastGroupAndGrouped);
@@ -274,7 +286,7 @@ sap.ui.define(['jquery.sap.global', './Column', './library', 'sap/ui/core/Elemen
 
 	/**
 	 * Checks whether or not the menu has items
-	 * @return {Boolean} True if the menu has or could have items.
+	 * @returns {Boolean} True if the menu has or could have items.
 	 */
 	AnalyticalColumn.prototype._menuHasItems = function() {
 		var fnMenuHasItems = function() {
@@ -297,7 +309,6 @@ sap.ui.define(['jquery.sap.global', './Column', './library', 'sap/ui/core/Elemen
 	 * - filterProperty must be defined or it must be possible to derive it from the leadingProperty + filterable = true in the metadata
 	 * - showFilterMenuEntry must be true (which is the default)
 	 * - The filter property must be a property of the bound collection however it may differ from the leading property
-	 * - With OData v1 and v2 the filter property must not be a measure
 	 * - The analytical column must be a child of an AnalyticalTable
 	 *
 	 * @returns {boolean}
@@ -316,9 +327,12 @@ sap.ui.define(['jquery.sap.global', './Column', './library', 'sap/ui/core/Elemen
 			// metadata must be evaluated which can only be done when the collection is known and the metadata is loaded
 			// this is usually the case when a binding exists.
 			if (oBinding) {
-				// OData v2 does not allow to proper filter for measures
-				if (jQuery.inArray(sFilterProperty, oBinding.getFilterablePropertyNames()) > -1 &&
-					!oBinding.isMeasure(sFilterProperty) &&
+				// The OData4SAP specification defines in section 3.3.3.2.2.3 how a filter condition on a measure property has to be used for data selection at runtime:
+				// “Conditions on measure properties refer to the aggregated measure value based on the selected dimensions”
+				// Although the generic OData providers (BW, SADL) do not support filtering measures, there may be specialized implementations that do support it.
+				// Conclusion for a fix therefore is to make sure that the AnalyticalTable solely checks sap:filterable=”false” for providing the filter function.
+				// Check for measure is hence removed. For more details, see BCP: 1770355530
+				if (oBinding.getFilterablePropertyNames().indexOf(sFilterProperty) > -1 &&
 					oBinding.getProperty(sFilterProperty)) {
 					return true;
 				}
@@ -329,28 +343,28 @@ sap.ui.define(['jquery.sap.global', './Column', './library', 'sap/ui/core/Elemen
 	};
 
 	/**
-	 * This function checks whether a grouping column menu item will be created.
+	 * Returns the information whether the column is groupable.
 	 *
-	 * Since a property of the table must be checked, this function will return false when the column is not a child of a table.
+	 * The column is groupable only if the following conditions are fulfilled:
+	 * <ul>
+	 *   <li>The column must be child of an <code>AnalyticalTable</code>.</li>
+	 *   <li>The <code>rows</code> aggregation of the table must be bound.</li>
+	 *   <li>The metadata of the model must be loaded.</li>
+	 *   <li>The column's <code>leadingProperty</code> must be a sortable and filterable dimension.</li>
+	 * </ul>
 	 *
-	 * For Columns the following applies:
-	 * - table must be bound
-	 * - column must be child of an AnalyticalTable
-	 * - metadata must be loaded
-	 * - leadingProperty must be sortable
-	 * - leadingProperty must be filterable
-	 *
-	 * @returns {boolean}
+	 * @protected
+	 * @return {boolean} <code>true</code> if the column is groupable
 	 */
-	AnalyticalColumn.prototype.isGroupableByMenu = function() {
+	AnalyticalColumn.prototype.isGroupable = function() {
 		var oParent = this.getParent();
 		if (isInstanceOfAnalyticalTable(oParent)) {
 			var oBinding = oParent.getBinding("rows");
 			if (oBinding) {
 				var oResultSet = oBinding.getAnalyticalQueryResult();
 				if (oResultSet && oResultSet.findDimensionByPropertyName(this.getLeadingProperty())
-					&& jQuery.inArray(this.getLeadingProperty(), oBinding.getSortablePropertyNames()) > -1
-					&& jQuery.inArray(this.getLeadingProperty(), oBinding.getFilterablePropertyNames()) > -1) {
+					&& oBinding.getSortablePropertyNames().indexOf(this.getLeadingProperty()) > -1
+					&& oBinding.getFilterablePropertyNames().indexOf(this.getLeadingProperty()) > -1) {
 					return true;
 				}
 			}

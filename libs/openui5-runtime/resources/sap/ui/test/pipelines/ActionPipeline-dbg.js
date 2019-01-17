@@ -1,15 +1,14 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-		'jquery.sap.global',
-		'sap/ui/base/Object',
-		'./PipelineFactory'
-	],
-	function($, UI5Object, PipelineFactory) {
+	'sap/ui/base/Object',
+	'sap/ui/test/pipelines/PipelineFactory',
+	"sap/ui/thirdparty/jquery"
+], function(UI5Object, PipelineFactory, jQueryDOM) {
 		"use strict";
 		var oPipelineFactory = new PipelineFactory({
 			name: "Action",
@@ -41,7 +40,7 @@ sap.ui.define([
 
 				var aActions = oPipelineFactory.create(oOptions.actions);
 
-				if (!$.isArray(vControl)) {
+				if (!jQueryDOM.isArray(vControl)) {
 					aControls = [vControl];
 				} else {
 					aControls = vControl;

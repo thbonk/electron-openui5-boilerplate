@@ -1,12 +1,17 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sap/ui/core/date/UniversalDate'],
-	function(jQuery, CalendarUtils, UniversalDate) {
-	"use strict";
+sap.ui.define(['sap/ui/unified/calendar/CalendarUtils', 'sap/ui/core/date/UniversalDate', 'sap/ui/unified/CalendarLegendRenderer',
+		'sap/ui/unified/library', "sap/base/Log"],
+	function(CalendarUtils, UniversalDate, CalendarLegendRenderer, library, Log) {
+		"use strict";
+
+
+	// shortcut for sap.ui.unified.CalendarDayType
+	var CalendarDayType = library.CalendarDayType;
 
 
 	/**
@@ -170,12 +175,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sa
 				if (!(oLegend instanceof sap.ui.unified.CalendarLegend)) {
 					throw new Error(oLegend + " is not an sap.ui.unified.CalendarLegend. " + oTimesRow);
 				}
-				oHelper.aTypes = oLegend.getItems();
+				oHelper.oLegend = oLegend;
 			} else {
-				jQuery.sap.log.warning("CalendarLegend " + sLegendId + " does not exist!", oTimesRow);
+				Log.warning("CalendarLegend " + sLegendId + " does not exist!", oTimesRow);
 			}
-		} else {
-			oHelper.aTypes = [];
 		}
 
 		return oHelper;
@@ -185,7 +188,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sa
 	TimesRowRenderer.renderTime = function(oRm, oTimesRow, oDate, oHelper, sWidth, sAmPm){
 
 		var mAccProps = {
-				role: "gridcell",
+				role: oTimesRow._getAriaRole(),
 				selected: false,
 				label: "",
 				describedby: ""
@@ -230,7 +233,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sa
 			mAccProps["describedby"] = mAccProps["describedby"] + " " + oHelper.sId + "-End";
 		}
 
-		if (oType && oType.type != sap.ui.unified.CalendarDayType.None) {
+		if (oType && oType.type != CalendarDayType.None) {
 			oRm.addClass("sapUiCalItem" + oType.type);
 			if (oType.tooltip) {
 				oRm.writeAttributeEscaped('title', oType.tooltip);
@@ -246,15 +249,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sa
 		oRm.writeAttribute("data-sap-time", sYyyyMMddHHmm);
 		mAccProps["label"] = mAccProps["label"] + oHelper.oFormatLong.format(oDate, true);
 
-		if (oType && oType.type != sap.ui.unified.CalendarDayType.None) {
-			// as legend must not be rendered add text of type
-			for (var i = 0; i < oHelper.aTypes.length; i++) {
-				var oLegendType = oHelper.aTypes[i];
-				if (oLegendType.getType() == oType.type) {
-					mAccProps["label"] = mAccProps["label"] + "; " + oLegendType.getText();
-					break;
-				}
-			}
+		if (oType && oType.type != CalendarDayType.None) {
+			CalendarLegendRenderer.addCalendarTypeAccInfo(mAccProps, oType.type, oHelper.oLegend);
 		}
 
 		oRm.writeAccessibilityState(null, mAccProps);
@@ -267,7 +263,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sa
 		oRm.writeClasses();
 		oRm.write(">"); // span
 		oRm.write(oHelper.oFormatTime.format(oDate, true));
-//		oRm.write("</span>");
+	//		oRm.write("</span>");
 
 		if (sAmPm) {
 			oRm.write("<span");

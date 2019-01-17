@@ -1,12 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.core.support.plugins.Debugging
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
-	function(jQuery, Plugin) {
+sap.ui.define([
+	'sap/ui/core/support/Plugin',
+	"sap/base/security/encodeXML",
+	"sap/ui/events/KeyCodes"
+],
+	function(Plugin, encodeXML, KeyCodes) {
 		"use strict";
 
 
@@ -151,8 +155,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 					rm.write(' class="selected"');
 				}
 
-				rm.write('><div><span class="className">' + jQuery.sap.escapeHTML(oValue + "") + '</span>' +
-						 '<span class="breakpoints">' + jQuery.sap.escapeHTML(bpCountText + "") + '</span></div>' +
+				rm.write('><div><span class="className">' + encodeXML(oValue + "") + '</span>' +
+						 '<span class="breakpoints">' + encodeXML(bpCountText + "") + '</span></div>' +
 						 '<img class="remove-class" style="cursor:pointer;margin-left:5px" ' +
 						 'src="../../debug/images/delete.gif" alt="X"></li>');
 			});
@@ -200,7 +204,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 					return;
 				}
 
-				rm.write('<li data-method-type="' + jQuery.sap.escapeHTML(oValue.type + "") + '"><span>' + jQuery.sap.escapeHTML(oValue.name + "") + '</span>' +
+				rm.write('<li data-method-type="' + encodeXML(oValue.type + "") + '"><span>' + encodeXML(oValue.name + "") + '</span>' +
 						 '<img class="remove-breakpoint" style="cursor:pointer;margin-left:5px" ' +
 						 'src="../../debug/images/delete.gif" alt="Remove"></li>');
 			});
@@ -241,7 +245,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 
 			var $input = $(oEvent.target);
 
-			if (oEvent.keyCode == jQuery.sap.KeyCodes.ENTER) {
+			if (oEvent.keyCode == KeyCodes.ENTER) {
 				this._updateSelectOptions(oEvent);
 
 				if ($input.attr('id') === "sapUiSupportDebuggingClassInput") {
@@ -252,7 +256,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 
 			}
 
-			if (oEvent.keyCode >= jQuery.sap.KeyCodes.ARROW_LEFT && oEvent.keyCode <= jQuery.sap.KeyCodes.ARROW_DOWN) {
+			if (oEvent.keyCode >= KeyCodes.ARROW_LEFT && oEvent.keyCode <= KeyCodes.ARROW_DOWN) {
 				return;
 			}
 
@@ -276,7 +280,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 
 					var iCurrentStart = $input.cursorPos();
 
-					if (oEvent.keyCode == jQuery.sap.KeyCodes.BACKSPACE) {
+					if (oEvent.keyCode == KeyCodes.BACKSPACE) {
 						iCurrentStart--;
 					}
 
@@ -408,7 +412,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 				className: className,
 				methodName: methodName,
 				active: active,
-				type: parseInt(type, 10),
+				type: parseInt(type),
 				callback: this.getId() + "ReceiveClassMethods"
 			});
 		};
@@ -422,7 +426,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 				// unfortunately we are not allowed to add the known internal URLs here
 				"https://openui5.hana.ondemand.com/resources/sap-ui-core.js": "Public OpenUI5 server",
 				"https://openui5beta.hana.ondemand.com/resources/sap-ui-core.js": "Public OpenUI5 PREVIEW server",
-				"https://sapui5.hana.ondemand.com/sdk/resources/sap-ui-core.js": "Public SAPUI5 server",
+				"https://sapui5.hana.ondemand.com/resources/sap-ui-core.js": "Public SAPUI5 server",
 				"http://localhost:8080/testsuite/resources/sap-ui-core.js": "Localhost (port 8080), /testsuite ('grunt serve' URL)",
 				"http://localhost:8080/sapui5/resources/sap-ui-core.js": "Localhost (port 8080), /sapui5 (maven URL)"
 			};
@@ -469,7 +473,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 			for (var i = 0; i < aUserUrls.length; i++) {
 				var sUrl = aUserUrls[i];
 				if (sUrl && !this._mRebootUrls[sUrl]) {
-					mUrls[sUrl] = jQuery.sap.encodeHTML(sUrl) + " (user-defined URL)";
+					mUrls[sUrl] = encodeXML(sUrl) + " (user-defined URL)";
 				}
 			}
 

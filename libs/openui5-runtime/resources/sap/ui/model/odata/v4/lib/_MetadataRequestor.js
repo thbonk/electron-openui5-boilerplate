@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(["jquery.sap.global","./_Helper","./_V2MetadataConverter","./_V4MetadataConverter"],function(q,_,a,b){"use strict";return{create:function(h,o,Q){var s=_.buildQuery(Q);return{read:function(u,A){return new Promise(function(r,R){q.ajax(A?u:u+s,{method:"GET",headers:h}).then(function(d,t,j){var c=o==="4.0"||A?b:a,J=c.convertXMLMetadata(d,u),l=j.getResponseHeader("Last-Modified")||j.getResponseHeader("Date");if(l){J.$LastModified=l;}r(J);},function(j,t,e){var E=_.createError(j);q.sap.log.error("GET "+u,E.message,"sap.ui.model.odata.v4.lib._MetadataRequestor");R(E);});});}};}};},false);
+sap.ui.define(["./_Helper","./_V2MetadataConverter","./_V4MetadataConverter","sap/base/Log","sap/ui/thirdparty/jquery"],function(_,a,b,L,q){"use strict";return{create:function(h,o,Q){var u={},s=_.buildQuery(Q);return{read:function(U,A,p){var P;function c(j){var C=o==="4.0"||A?b:a,d=j.$XML;delete j.$XML;return q.extend(new C().convertXMLMetadata(d,U),j);}if(U in u){if(p){throw new Error("Must not prefetch twice: "+U);}P=u[U].then(c);delete u[U];}else{P=new Promise(function(r,R){q.ajax(A?U:U+s,{method:"GET",headers:h}).then(function(d,t,j){var D=j.getResponseHeader("Date"),e=j.getResponseHeader("ETag"),J={$XML:d},l=j.getResponseHeader("Last-Modified");if(D){J.$Date=D;}if(e){J.$ETag=e;}if(l){J.$LastModified=l;}r(J);},function(j,t,e){var E=_.createError(j);L.error("GET "+U,E.message,"sap.ui.model.odata.v4.lib._MetadataRequestor");R(E);});});if(p){u[U]=P;}else{P=P.then(c);}}return P;}};}};},false);

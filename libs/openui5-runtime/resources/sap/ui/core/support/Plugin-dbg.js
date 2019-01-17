@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.core.support.Plugin
-sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'jquery.sap.dom', 'jquery.sap.script'],
-	function(jQuery, BaseObject/* , jQuerySap1, jQuerySap */) {
+sap.ui.define(['sap/ui/base/Object', "sap/ui/thirdparty/jquery", "sap/base/util/uid"],
+	function(BaseObject, jQueryDOM, uid) {
 	"use strict";
 
 
@@ -17,8 +17,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'jquery.sap.dom', 'jqu
 	 *
 	 * @abstract
 	 * @extends sap.ui.base.Object
-	 * @version 1.50.6
-	 * @constructor
+	 * @version 1.61.2
 	 * @private
 	 * @sap-restricted
 	 * @alias sap.ui.core.support.Plugin
@@ -26,7 +25,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'jquery.sap.dom', 'jqu
 	var Plugin = BaseObject.extend("sap.ui.core.support.Plugin", {
 		constructor : function(sId, sTitle, oStub) {
 			BaseObject.apply(this);
-			this._id = sId ? sId : jQuery.sap.uid();
+			this._id = sId ? sId : uid();
 			this._title = sTitle ? sTitle : "";
 			this._bActive = false;
 			this._aEventIds = [];
@@ -169,7 +168,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'jquery.sap.dom', 'jqu
 	 */
 	Plugin.prototype.$ = function(sSuffix){
 		if (this.isToolPlugin()) {
-			var jRef = jQuery.sap.byId(sSuffix ? this.getId() + "-" + sSuffix : this.getId());
+			var jRef = jQueryDOM(document.getElementById(sSuffix ? this.getId() + "-" + sSuffix : this.getId()));
 			if (jRef.length == 0 && !sSuffix) {
 				jRef = jQuery("<DIV/>", {id:this.getId()});
 				jRef.appendTo(jQuery(".sapUiSupportCntnt"));
@@ -196,7 +195,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'jquery.sap.dom', 'jqu
 		if (!sCssResourcePath) {
 			return;
 		}
-		var sPath = jQuery.sap.getResourcePath(sCssResourcePath + ".css"),
+		var sPath = sap.ui.require.toUrl(sCssResourcePath + ".css"),
 			oCssDomLink = document.createElement("link");
 		oCssDomLink.setAttribute("rel", "stylesheet");
 		oCssDomLink.setAttribute("type", "text/css");

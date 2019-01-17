@@ -1,12 +1,12 @@
 /*!
 
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './BarInPageEnabler'],
-	function(jQuery, BarInPageEnabler) {
+sap.ui.define(['./BarInPageEnabler', 'sap/ui/Device', "sap/base/Log"],
+	function(BarInPageEnabler, Device, Log) {
 	"use strict";
 
 
@@ -46,7 +46,7 @@ sap.ui.define(['jquery.sap.global', './BarInPageEnabler'],
 			"role": oControl._getRootAccessibilityRole()
 		});
 
-		if (oControl.getTranslucent() && (sap.ui.Device.support.touch  || jQuery.sap.simulateMobileOnDesktop)) {
+		if (oControl.getTranslucent() && Device.support.touch) {
 			oRM.addClass("sapMBarTranslucent");
 		}
 
@@ -140,7 +140,7 @@ sap.ui.define(['jquery.sap.global', './BarInPageEnabler'],
 	 */
 	BarRenderer.renderAllControls = function (aControls, oRM, oBar) {
 		aControls.forEach(function (oControl) {
-			sap.m.BarInPageEnabler.addChildClassTo(oControl, oBar);
+			BarInPageEnabler.addChildClassTo(oControl, oBar);
 
 			oRM.renderControl(oControl);
 		});
@@ -199,7 +199,7 @@ sap.ui.define(['jquery.sap.global', './BarInPageEnabler'],
 				}
 				break;
 			default:
-				jQuery.sap.log.error("Cannot determine which of the three content aggregations is alone");
+				Log.error("Cannot determine which of the three content aggregations is alone");
 		}
 	}
 

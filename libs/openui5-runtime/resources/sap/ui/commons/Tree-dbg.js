@@ -1,13 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.Tree.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
-	function(jQuery, library, Control) {
+sap.ui.define(['sap/ui/thirdparty/jquery', 'sap/base/Log', './library', 'sap/ui/core/Control', './TreeRenderer', './Button'],
+	function(jQuery, Log, library, Control, TreeRenderer, Button) {
 	"use strict";
+
+
+
+	// shortcut for sap.ui.commons.TreeSelectionMode
+	var TreeSelectionMode = library.TreeSelectionMode;
 
 
 
@@ -20,11 +25,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * @class
 	 * Simple tree to display item in a hierarchical way
 	 * @extends sap.ui.core.Control
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
-	 * @deprecated Since version 1.38.
+	 * @deprecated as of version 1.38, replaced by {@link sap.m.Tree}
 	 * @alias sap.ui.commons.Tree
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -71,7 +76,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 			/**
 			 * Selection mode of the Tree.
 			 */
-			selectionMode : {type : "sap.ui.commons.TreeSelectionMode", group : "Behavior", defaultValue : sap.ui.commons.TreeSelectionMode.Legacy}
+			selectionMode : {type : "sap.ui.commons.TreeSelectionMode", group : "Behavior", defaultValue : TreeSelectionMode.Legacy}
 		},
 		defaultAggregation : "nodes",
 		aggregations : {
@@ -137,8 +142,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 		//Create Buttons for Header
 
 		var oResourceBundle = sap.ui.getCore().getLibraryResourceBundle("sap.ui.commons");
-		this.oCollapseAllButton = new sap.ui.commons.Button(this.getId() + "-CollapseAll", { icon: this.getIconPrefix() + "CollapseAll.png", tooltip: oResourceBundle.getText("TREE_COLLAPSE_ALL"), lite: true });
-		this.oExpandAllButton	= new sap.ui.commons.Button(this.getId() + "-ExpandAll", { icon: this.getIconPrefix() + "ExpandAll.png", tooltip: oResourceBundle.getText("TREE_EXPAND_ALL"), lite: true });
+		this.oCollapseAllButton = new Button(this.getId() + "-CollapseAll", { icon: this.getIconPrefix() + "CollapseAll.png", tooltip: oResourceBundle.getText("TREE_COLLAPSE_ALL"), lite: true });
+		this.oExpandAllButton	= new Button(this.getId() + "-ExpandAll", { icon: this.getIconPrefix() + "ExpandAll.png", tooltip: oResourceBundle.getText("TREE_EXPAND_ALL"), lite: true });
 		this.oCollapseAllButton.attachPress(this.onCollapseAll,this);
 		this.oExpandAllButton.attachPress(this.onExpandAll,this);
 		this.oCollapseAllButton.addStyleClass("sapUiTreeCol");
@@ -737,6 +742,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 			// Clear current selection, whenever the selectionmode changes
 			this._delSelection();
 		}
+		return this;
 	};
 
 	/** Returns the selected node in the tree. If not selection, returns null.
@@ -764,11 +770,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 
 		if (bDoSelect) {
 			switch (this.getSelectionMode()) {
-				case sap.ui.commons.TreeSelectionMode.Legacy:
-				case sap.ui.commons.TreeSelectionMode.Single:
+				case TreeSelectionMode.Legacy:
+				case TreeSelectionMode.Single:
 					this._setSelectedNode(oNode, bSuppressEvent);
 					break;
-				case sap.ui.commons.TreeSelectionMode.Multi:
+				case TreeSelectionMode.Multi:
 					if (sType == Tree.SelectionType.Range) {
 						this._setSelectedNodeMapRange(oNode, bSuppressEvent);
 					} else if (sType == Tree.SelectionType.Toggle) {
@@ -777,7 +783,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 						this._setSelectedNode(oNode, bSuppressEvent);
 					}
 					break;
-				case sap.ui.commons.TreeSelectionMode.None:
+				case TreeSelectionMode.None:
 					break;
 			}
 		}
@@ -823,7 +829,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 		var sPath;
 		if (oContext && oContext.sPath) {
 			sPath = oContext.sPath;
-			if (this.getSelectionMode() === sap.ui.commons.TreeSelectionMode.Multi) {
+			if (this.getSelectionMode() === TreeSelectionMode.Multi) {
 				if (!(sPath in this.mSelectedContexts)) {
 					this.mSelectedContexts[sPath] = oContext;
 				}
@@ -843,28 +849,28 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 		jQuery.each(oNode._getNodes(), function(i, oNode) {
 			if (oNode.getIsSelected()) {
 				switch (that.getSelectionMode()) {
-					case sap.ui.commons.TreeSelectionMode.None:
-						jQuery.sap.log.warning("Added selected nodes in a tree with disabled selection");
+					case TreeSelectionMode.None:
+						Log.warning("Added selected nodes in a tree with disabled selection");
 						oNode.setIsSelected(false);
 						break;
-					case sap.ui.commons.TreeSelectionMode.Legacy:
+					case TreeSelectionMode.Legacy:
 						if (jQuery.isEmptyObject(that.mSelectedNodes)) {
 							that.mSelectedNodes[oNode.getId()] = oNode;
 							that._addSelectedNodeContext(that.getNodeContext(oNode));
 						}
 						break;
-					case sap.ui.commons.TreeSelectionMode.Single:
+					case TreeSelectionMode.Single:
 						if (jQuery.isEmptyObject(that.mSelectedNodes) == false) {
-							jQuery.sap.log.warning("Added multiple selected nodes in single select tree");
+							Log.warning("Added multiple selected nodes in single select tree");
 							oNode.setIsSelected(false);
 						} else {
 							that.mSelectedNodes[oNode.getId()] = oNode;
 							that._addSelectedNodeContext(that.getNodeContext(oNode));
 						}
 						break;
-					case sap.ui.commons.TreeSelectionMode.Multi:
+					case TreeSelectionMode.Multi:
 						if (!bExpanded) {
-							jQuery.sap.log.warning("Added selected node inside collapsed node in multi select tree");
+							Log.warning("Added selected node inside collapsed node in multi select tree");
 							oNode.setIsSelected(false);
 						} else {
 							that.mSelectedNodes[oNode.getId()] = oNode;
@@ -954,7 +960,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 			aSelectedNodeContexts = [],
 			oVisibleNode;
 
-		if (this.getSelectionMode() == sap.ui.commons.TreeSelectionMode.Single) {
+		if (this.getSelectionMode() == TreeSelectionMode.Single) {
 			if (bIsSelected) {
 				var oSelectedNode = this.getSelection();
 				this._setSelectedNode(oNode, bSuppressEvent);
@@ -1045,4 +1051,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 
 	return Tree;
 
-}, /* bExport= */ true);
+});

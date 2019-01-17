@@ -1,13 +1,24 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.tnt.ToolHeader
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control',
-		'sap/m/OverflowToolbar', 'sap/m/OverflowToolbarAssociativePopover'],
-	function(jQuery, library, Control, OverflowToolbar, OverflowToolbarAssociativePopover) {
+sap.ui.define([
+	'./library',
+	'sap/ui/core/Control',
+	'sap/m/OverflowToolbar',
+	'sap/m/OverflowToolbarAssociativePopover',
+	"./ToolHeaderRenderer"
+],
+	function(
+		library,
+		Control,
+		OverflowToolbar,
+		OverflowToolbarAssociativePopover,
+		ToolHeaderRenderer
+	) {
 		"use strict";
 
 
@@ -31,12 +42,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control',
 		 * @extends sap.m.OverflowToolbar
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.61.2
 		 *
 		 * @constructor
 		 * @public
 		 * @since 1.34
 		 * @alias sap.tnt.ToolHeader
+		 * @see {@link fiori:https://experience.sap.com/fiori-design-web/tool-header/ Tool Header}
 		 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 		 */
 		var ToolHeader = OverflowToolbar.extend("sap.tnt.ToolHeader", /** @lends sap.tnt.ToolHeader.prototype */ {
@@ -60,8 +72,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control',
 			OverflowToolbar.prototype.init.apply(this, arguments);
 
 			this.addStyleClass('sapTntToolHeader sapContrast sapContrastPlus');
-
-			this.setHTMLTag(sap.m.IBarHTMLTag.Header);
 		};
 
 		/**

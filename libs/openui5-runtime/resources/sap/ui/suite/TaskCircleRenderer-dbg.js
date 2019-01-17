@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // provides default renderer for sap.ui.suite.TaskCircle
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Core', './library'],
-	function(jQuery, Core, library) {
+sap.ui.define(['sap/ui/core/Core', './library'],
+	function(Core, library) {
 	"use strict";
 
 
@@ -78,7 +78,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Core', './library'],
 	    }
 	    var plarge = 62;
 
-	    var circlesize = parseInt(Math.sqrt((value - minvalue) / (maxvalue - minvalue) * (plarge * plarge - psmall * psmall) + psmall * psmall), 10);
+	    var circlesize = parseInt(Math.sqrt((value - minvalue) / (maxvalue - minvalue) * (plarge * plarge - psmall * psmall) + psmall * psmall));
 
 	    var digits = (value + '').length;
 	    var fontsize = circlesize * 0.55;
@@ -110,7 +110,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Core', './library'],
 		rm.addStyle("width", circlesize + "px");
 		rm.addStyle("height", circlesize + "px");
 		rm.addStyle("line-height", circlesize + "px");
-		rm.addStyle("font-size", parseInt(fontsize, 10) + "px");
+		rm.addStyle("font-size", parseInt(fontsize) + "px");
 		rm.addStyle("border-radius", circlesize + "px");
 		rm.addStyle("-moz-border-radius", circlesize + "px");
 	    rm.writeClasses();

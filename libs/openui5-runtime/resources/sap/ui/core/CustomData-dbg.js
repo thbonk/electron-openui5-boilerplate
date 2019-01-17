@@ -1,12 +1,17 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.core.CustomData.
-sap.ui.define(['jquery.sap.global', './Element', './library'],
-	function(jQuery, Element, library) {
+sap.ui.define([
+	'./Element',
+	'./library',
+	"sap/ui/events/F6Navigation",
+	"sap/base/Log"
+],
+	function(Element, library, F6Navigation, Log) {
 	"use strict";
 
 	// shortcut for sap.ui.core.ID
@@ -22,9 +27,8 @@ sap.ui.define(['jquery.sap.global', './Element', './library'],
 	 * @class
 	 * Contains a single key/value pair of custom data attached to an Element. See method data().
 	 * @extends sap.ui.core.Element
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
-	 * @constructor
 	 * @public
 	 * @alias sap.ui.core.CustomData
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
@@ -58,7 +62,7 @@ sap.ui.define(['jquery.sap.global', './Element', './library'],
 			 */
 			writeToDom : {type : "boolean", group : "Data", defaultValue : false}
 		},
-		designTime: true
+		designtime: "sap/ui/core/designtime/CustomData.designtime"
 	}});
 
 	CustomData.prototype.setValue = function(oValue) {
@@ -84,19 +88,19 @@ sap.ui.define(['jquery.sap.global', './Element', './library'],
 		var value = this.getValue();
 
 		if (typeof value != "string") {
-			jQuery.sap.log.error("CustomData with key " + key + " should be written to HTML of " + oRelated + " but the value is not a string.");
+			Log.error("CustomData with key " + key + " should be written to HTML of " + oRelated + " but the value is not a string.");
 			return null;
 		}
 
 		if (!(ID.isValid(key)) || (key.indexOf(":") != -1)) {
-			jQuery.sap.log.error("CustomData with key " + key + " should be written to HTML of " + oRelated + " but the key is not valid (must be a valid sap.ui.core.ID without any colon).");
+			Log.error("CustomData with key " + key + " should be written to HTML of " + oRelated + " but the key is not valid (must be a valid sap.ui.core.ID without any colon).");
 			return null;
 		}
 
-		if (key == jQuery.sap._FASTNAVIGATIONKEY) {
+		if (key == F6Navigation.fastNavigationKey) {
 			value = /^\s*(x|true)\s*$/i.test(value) ? "true" : "false"; // normalize values
 		} else if (key.indexOf("sap-ui") == 0) {
-			jQuery.sap.log.error("CustomData with key " + key + " should be written to HTML of " + oRelated + " but the key is not valid (may not start with 'sap-ui').");
+			Log.error("CustomData with key " + key + " should be written to HTML of " + oRelated + " but the key is not valid (may not start with 'sap-ui').");
 			return null;
 		}
 

@@ -2,7 +2,7 @@
 
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -31,13 +31,43 @@
 /* Belize High Contrast Black theme   */
 /* ================================== */
 
-.sapFDynamicPageActualFooterControl.sapMTB {
-	box-shadow: @sapUiShadowLevel2;
-	border-bottom: 0 none;
+.sapFDynamicPage {
+	/* DynamicPageTitle and Toggle Header Visual Indicator hover state */
+	&.sapFDynamicPageTitleClickEnabled {
+		.sapFDynamicPageTitle:hover,
+		&.sapFDynamicPageTitleForceHovered .sapFDynamicPageTitle {
+			background: @sapUiHighlight;
+			box-shadow: @sapUiShadowHeader;
+		}
+		&.sapFDynamicPageTitleForceHovered {
+			.sapFDynamicPageToggleHeaderIndicator {
+				.sapMBtnInner {
+					background-color: @sapUiHighlight;
+				}
+			}
+		}
+	}
+
+	// Footer
+	.sapFDynamicPageFooter {
+		opacity: 1;
+
+		.sapFDynamicPageActualFooterControl.sapMTB {
+			box-shadow: @sapUiShadowLevel2;
+			border-bottom: 0 none;
+		}
+	}
 }
 
-.sapFDynamicPageFooter {
-	opacity: 1;
+.sapFDynamicPageHeaderPinButton > .sapMBtnInner {
+	border: 0.0625rem solid;
+	&:not(.sapMToggleBtnPressed) {
+		background-color: @sapHC_StandardBackground;
+	}
+}
+
+.sapFDynamicPageHeaderPinButton:hover > .sapMBtnInner {
+	background-color: @sapUiHighlight;
 }
 /* END "DynamicPage.less" */
 
@@ -52,23 +82,28 @@
 	box-shadow: none;
 }
 
-.sapFDynamicPageTitle:focus {
+.sapFDynamicPageTitle.sapFDynamicPageTitleFocus {
 	outline-width: 0.125rem;
-	outline-offset: -0.125rem;
+	outline-offset: -0.25rem; // due to bottom border overlapping
+}
+
+.sapFDynamicPageTitle .sapFDynamicPageTitleActionsBar {
+	background: none;
 }
 
 /* IE and Edge ignores outline-offset. Use an overlay: */
+/* TODO remove after 1.62 version */
 html[data-sap-ui-browser^="ie"].sap-desktop,
 html[data-sap-ui-browser^="ed"].sap-desktop {
-	.sapFDynamicPageTitle:focus {
+	.sapFDynamicPageTitle.sapFDynamicPageTitleFocus {
 		outline: none;
 		position: relative;
 	}
-	.sapFDynamicPageTitle:focus:before {
+	.sapFDynamicPageTitle.sapFDynamicPageTitleFocus:before {
 		content: " ";
 		box-sizing: border-box;
 		width: 100%;
-		height: 100%;
+		height: 98%; // due to bottom border overlapping
 		position: absolute;
 		left: 0;
 		top: 0;
@@ -79,15 +114,15 @@ html[data-sap-ui-browser^="ed"].sap-desktop {
 
 /* Firefox fix due to focus cut out from top and left */
 html[data-sap-ui-browser^="ff"].sap-desktop {
-	.sapFDynamicPageTitle:focus {
+	.sapFDynamicPageTitle.sapFDynamicPageTitleFocus {
 		outline: none;
 		position: relative;
 	}
-	.sapFDynamicPageTitle:focus:before {
+	.sapFDynamicPageTitle.sapFDynamicPageTitleFocus:before {
 		content: " ";
 		box-sizing: border-box;
 		width: 100%;
-		height: 100%;
+		height: 98%; // due to bottom border overlapping
 		position: absolute;
 		left: 0;
 		top: 0;
@@ -128,6 +163,10 @@ html[data-sap-ui-browser^="ff"].sap-desktop {
 
 .sapFFCL {
 	.sapFFCLNavigationButton {
+		.sapMBtnInner .sapMBtnIcon {
+			width: auto;
+		}
+
 		&.sapFFCLNavigationButtonLeft {
 			.sapMBtnInner {
 				border: 1px solid @sapUiButtonBorderColor;
@@ -144,3 +183,34 @@ html[data-sap-ui-browser^="ff"].sap-desktop {
 	}
 }
 /* END "FlexibleColumnLayout.less" */
+
+/* START "Card.less" */
+/* ============================= */
+/* CSS for control sap.f/Card  */
+/* High Contrast Black theme     */
+/* ============================= */
+
+.sapFCard .sapFCardHeader {
+  border-bottom: 1px solid @sapUiTileBorderColor;
+  &:hover{
+    background: @sapUiHighlight;
+  }
+
+  &:active{
+    background: @sapUiHighlight;
+  }
+
+  &:hover .sapFCardIcon.sapFAvatar:not(.sapFAvatarImage):not(.sapFAvatarInitials ){
+    background: @sapUiHighlight;
+  }
+
+  &:active .sapFCardIcon.sapFAvatar:not(.sapFAvatarImage):not(.sapFAvatarInitials ){
+    background: @sapUiHighlight;
+  }
+  .sapFCardIcon.sapFAvatar{
+    .sapUiIcon {
+      color: @sapUiContentIconColor;
+    }
+  }
+}
+/* END "Card.less" */

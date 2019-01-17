@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides default renderer for the sap.ui.ux3.DataSet
-sap.ui.define(['jquery.sap.global'],
+sap.ui.define(["sap/ui/thirdparty/jquery"],
 	function(jQuery) {
 	"use strict";
 
@@ -21,13 +21,12 @@ sap.ui.define(['jquery.sap.global'],
 	/**
 	 * Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
 	 *
-	 * @param {sap.ui.core.RenderManager} oRenderManager The RenderManager that can be used for writing to the Render-Output-Buffer
+	 * @param {sap.ui.core.RenderManager} rm The RenderManager that can be used for writing to the Render-Output-Buffer
 	 * @param {sap.ui.core.Control} oControl An object representation of the control that should be rendered
 	 */
-	DataSetRenderer.render = function(oRenderManager, oControl){
+	DataSetRenderer.render = function(rm, oControl){
 		// convenience variable
-		var rm = oRenderManager,
-			oView = null;
+		var oView = null;
 
 		oControl.prepareRendering();
 
@@ -70,14 +69,13 @@ sap.ui.define(['jquery.sap.global'],
 	 * Renders the HTML for the DataSet Toolbar
 	 *
 	 * @param {sap.ui.core.RenderManager}
-	 *            oRenderManager The RenderManager that can be used for writing to
+	 *            rm The RenderManager that can be used for writing to
 	 *            the Render-Output-Buffer
 	 * @param {sap.ui.core.Control}
 	 *            oControl An object representation of the control that should be
 	 *            rendered
 	 */
-	DataSetRenderer.renderToolbar = function(oRenderManager,oControl) {
-		var rm = oRenderManager;
+	DataSetRenderer.renderToolbar = function(rm,oControl) {
 		if (oControl.getShowToolbar()) {
 			rm.renderControl(oControl._getToolbar());
 		}
@@ -87,14 +85,14 @@ sap.ui.define(['jquery.sap.global'],
 	 * Renders the HTML for the DataSet FilterArea
 	 *
 	 * @param {sap.ui.core.RenderManager}
-	 *            oRenderManager The RenderManager that can be used for writing to
+	 *            rm The RenderManager that can be used for writing to
 	 *            the Render-Output-Buffer
 	 * @param {sap.ui.core.Control}
 	 *            oControl An object representation of the control that should be
 	 *            rendered
 	 */
-	DataSetRenderer.renderFilterArea = function(oRenderManager,oControl) {
-		var rm = oRenderManager, aFilter = oControl.getFilter();
+	DataSetRenderer.renderFilterArea = function(rm,oControl) {
+		var aFilter = oControl.getFilter();
 		if (oControl.getShowFilter()) {
 			jQuery.each(aFilter,function(i, oFilter){
 				rm.renderControl(oFilter);

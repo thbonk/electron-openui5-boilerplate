@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides the XML model implementation of a list binding
-sap.ui.define(['jquery.sap.global', 'sap/ui/model/ClientTreeBinding'],
-	function(jQuery, ClientTreeBinding) {
+sap.ui.define(['sap/ui/model/ClientTreeBinding', "sap/ui/thirdparty/jquery"],
+	function(ClientTreeBinding, jQuery) {
 	"use strict";
 
 
@@ -44,10 +44,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ClientTreeBinding'],
 
 		var sContextPath = oContext.getPath();
 
-		if (!jQuery.sap.endsWith(sContextPath,"/")) {
+		if (!sContextPath.endsWith("/")) {
 			sContextPath = sContextPath + "/";
 		}
-		if (!jQuery.sap.startsWith(sContextPath,"/")) {
+		if (!sContextPath.startsWith("/")) {
 			sContextPath = "/" + sContextPath;
 		}
 
@@ -67,8 +67,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ClientTreeBinding'],
 				sChildPath = sContextPath + oChild.nodeName + "/" + mNodeIndices[oChild.nodeName];
 				oChildContext = that.oModel.getContext(sChildPath);
 				// check if there is a filter on this level applied
-				if (that.aAllFilters && !that.bIsFiltering) {
-					if (jQuery.inArray(oChildContext, that.filterInfo.aFilteredContexts) != -1) {
+				if (that.oCombinedFilter && !that.bIsFiltering) {
+					if (that.filterInfo.aFilteredContexts && that.filterInfo.aFilteredContexts.indexOf(oChildContext) != -1) {
 						aContexts.push(oChildContext);
 					}
 				} else {

@@ -1,12 +1,15 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define([ "sap/m/library" ],
-	function(library) {
+sap.ui.define(["sap/m/library", "sap/base/security/encodeCSS"],
+	function(library, encodeCSS) {
 	"use strict";
+
+	// shortcut for sap.m.GenericTileMode
+	var GenericTileMode = library.GenericTileMode;
 
 	// shortcut for sap.m.GenericTileScope
 	var GenericTileScope = library.GenericTileScope;
@@ -30,12 +33,13 @@ sap.ui.define([ "sap/m/library" ],
 		// Write the HTML into the render manager.
 		var sTooltipText = oControl._getTooltipText();
 		var sAriaText = oControl._getAriaText();
+        sAriaText = "GenericTile" + "\n" + sAriaText;
 		var sHeaderImage = oControl.getHeaderImage();
 		var bHasPress = oControl.hasListeners("press");
 		var sState = oControl.getState();
 		var sScope = oControl.getScope();
-		var sStateClass = jQuery.sap.encodeCSS("sapMGTState" + sState);
-		var sScopeClass = jQuery.sap.encodeCSS("sapMGTScope" + sScope);
+		var sStateClass = encodeCSS("sapMGTState" + sState);
+		var sScopeClass = encodeCSS("sapMGTScope" + sScope);
 
 		oRm.write("<div");
 		oRm.writeControlData(oControl);
@@ -66,7 +70,7 @@ sap.ui.define([ "sap/m/library" ],
 			oRm.write(");'");
 			oRm.addClass("sapMGTBackgroundImage");
 		}
-		if (oControl.getMode() === sap.m.GenericTileMode.HeaderMode) {
+		if (oControl.getMode() === GenericTileMode.HeaderMode) {
 			oRm.addClass("sapMGTHeaderMode");
 		}
 		oRm.writeClasses();
@@ -223,7 +227,7 @@ sap.ui.define([ "sap/m/library" ],
 		oRm.writeClasses();
 		oRm.writeAttribute("id", oControl.getId() + "-subHdr-text");
 		oRm.write(">");
-		oRm.writeEscaped(oControl.getSubheader());
+		oRm.renderControl(oControl._oSubTitle);
 		oRm.write("</div>");
 	};
 

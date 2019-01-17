@@ -1,10 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/DatesRow', 'sap/ui/unified/calendar/CalendarUtils', 'sap/ui/unified/calendar/CalendarDate', 'sap/ui/unified/library'],
-	function(jQuery, DatesRow, CalendarUtils, CalendarDate, library) {
+sap.ui.define([
+	'sap/ui/unified/calendar/DatesRow',
+	'sap/ui/unified/calendar/CalendarUtils',
+	'sap/ui/unified/calendar/CalendarDate',
+	'sap/ui/unified/library',
+	"./OneMonthDatesRowRenderer"
+],
+	function(DatesRow, CalendarUtils, CalendarDate, library, OneMonthDatesRowRenderer) {
 		"use strict";
 
 	/*
@@ -27,8 +33,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/DatesRow', 'sap/ui/
 	 * </ul>
 	 * Other usages are not supported.
 	 *
-	 * @extends sap.ui.core.Control
-	 * @version 1.50.6
+	 * @extends sap.ui.unified.calendar.DatesRow
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @private
@@ -164,4 +170,4 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/DatesRow', 'sap/ui/
 
 	return OneMonthDatesRow;
 
-}, /* bExport=  */ true);
+});

@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/core/ValueStateSupport'],
-	function(jQuery, coreLibrary, ValueStateSupport) {
+sap.ui.define(['sap/ui/core/library', 'sap/ui/core/ValueStateSupport', 'sap/ui/Device'],
+	function(coreLibrary, ValueStateSupport, Device) {
 	"use strict";
 
 
@@ -31,10 +31,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/core/ValueSta
 		// get control properties
 		var sId = oCheckBox.getId(),
 			bEnabled = oCheckBox.getEnabled(),
+			bDisplayOnly = oCheckBox.getDisplayOnly(),
 			bEditable = oCheckBox.getEditable(),
+			bInteractive = bEnabled && !bDisplayOnly,
+			bDisplayOnlyApplied = bEnabled && bDisplayOnly,
 			oCbLabel = oCheckBox.getAggregation("_label"),
-			bInErrorState = ValueState.Error === oCheckBox.getValueState(),
-			bInWarningState = ValueState.Warning === oCheckBox.getValueState();
+			sValueState = oCheckBox.getValueState(),
+			bInErrorState = ValueState.Error === sValueState,
+			bInWarningState = ValueState.Warning === sValueState,
+			bInInformationState = ValueState.Information === sValueState,
+			bUseEntireWidth = oCheckBox.getUseEntireWidth();
 
 		// CheckBox wrapper
 		oRm.write("<div");
@@ -42,6 +48,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/core/ValueSta
 
 		if (!bEditable) {
 			oRm.addClass("sapMCbRo");
+		}
+
+		if (bDisplayOnlyApplied) {
+			oRm.addClass("sapMCbDisplayOnly");
 		}
 
 		if (!bEnabled) {
@@ -52,21 +62,32 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/core/ValueSta
 			oRm.addClass("sapMCbErr");
 		} else if (bInWarningState) {
 			oRm.addClass("sapMCbWarn");
+		} else if (bInInformationState) {
+			oRm.addClass("sapMCbInfo");
 		}
 
 		if (oCheckBox.getText()) {
 			oRm.addClass("sapMCbHasLabel");
 		}
 
+		if (oCheckBox.getWrapping()) {
+			oRm.addClass("sapMCbWrapped");
+		}
+
 		oRm.writeControlData(oCheckBox);
 		oRm.writeClasses();
+
+		if (bUseEntireWidth) {
+			oRm.addStyle("width", oCheckBox.getWidth());
+			oRm.writeStyles();
+		}
 
 		var sTooltip = ValueStateSupport.enrichTooltip(oCheckBox, oCheckBox.getTooltip_AsString());
 		if (sTooltip) {
 			oRm.writeAttributeEscaped("title", sTooltip);
 		}
 
-		if (bEnabled) {
+		if (bInteractive) {
 			oRm.writeAttribute("tabindex", oCheckBox.getTabIndex());
 		}
 
@@ -74,9 +95,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/core/ValueSta
 		oRm.writeAccessibilityState(oCheckBox, {
 			role: "checkbox",
 			selected: null,
-			checked: oCheckBox.getSelected(),
+			checked: oCheckBox._getAriaChecked(),
 			describedby: sTooltip ? sId + "-Descr" : undefined
 		});
+
+		if (bDisplayOnlyApplied) {
+			oRm.writeAttribute("aria-readonly", true);
+		}
 
 		oRm.write(">");		// DIV element
 
@@ -87,7 +112,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/core/ValueSta
 		// CheckBox style class
 		oRm.addClass("sapMCbBg");
 
-		if (bEnabled && bEditable && sap.ui.Device.system.desktop) {
+		if (bInteractive && bEditable && Device.system.desktop) {
 			oRm.addClass("sapMCbHoverable");
 		}
 
@@ -100,6 +125,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/core/ValueSta
 		if (oCheckBox.getSelected()) {
 			oRm.addClass("sapMCbMarkChecked");
 		}
+
+		if (oCheckBox.getPartiallySelected()) {
+			oRm.addClass("sapMCbMarkPartiallyChecked");
+		}
+
 		oRm.writeClasses();
 
 		oRm.write(">");		// DIV element

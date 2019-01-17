@@ -1,10 +1,10 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define([],
+	function() {
 	"use strict";
 
 
@@ -33,13 +33,7 @@ sap.ui.define(['jquery.sap.global'],
 	};
 
 	BusyIndicatorRenderer.startBusyIndicator = function (oRm, oBusyInd) {
-		var mAccState = {
-			role: "progressbar",
-			valuemin: "0",
-			valuemax: "100"
-		};
-
-		oRm.write("<div tabindex='0' ");
+		oRm.write("<div ");
 		oRm.writeControlData(oBusyInd);
 
 		oRm.addClass("sapMBusyIndicator");
@@ -48,7 +42,7 @@ sap.ui.define(['jquery.sap.global'],
 		oRm.addStyle("font-size", oBusyInd.getSize());
 		oRm.writeStyles();
 
-		oRm.writeAccessibilityState(oBusyInd, mAccState);
+		oRm.writeAccessibilityState(oBusyInd);
 		this.renderTooltip(oRm, oBusyInd.getTooltip_AsString());
 
 		oRm.write(">");

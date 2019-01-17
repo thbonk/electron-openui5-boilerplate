@@ -1,13 +1,42 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.ux3.Exact.
-sap.ui.define(['jquery.sap.global', 'sap/ui/commons/Button', 'sap/ui/commons/Menu', 'sap/ui/commons/SearchField', 'sap/ui/commons/TextView', 'sap/ui/core/Control', './ExactArea', './ExactAttribute', './ExactBrowser', './library'],
-	function(jQuery, Button, Menu, SearchField, TextView, Control, ExactArea, ExactAttribute, ExactBrowser, library) {
+sap.ui.define([
+    'sap/ui/commons/Button',
+    'sap/ui/commons/Menu',
+    'sap/ui/commons/SearchField',
+    'sap/ui/commons/TextView',
+    'sap/ui/core/Control',
+    './ExactArea',
+    './ExactAttribute',
+    './ExactBrowser',
+    './library',
+    './ExactRenderer',
+    'sap/ui/commons/library'
+],
+	function(
+		Button,
+		Menu,
+		SearchField,
+		TextView,
+		Control,
+		ExactArea,
+		ExactAttribute,
+		ExactBrowser,
+		library,
+		ExactRenderer,
+		commonsLibrary
+	) {
 	"use strict";
+
+
+
+	// shortcut for sap.ui.commons.TextViewDesign
+	var TextViewDesign = commonsLibrary.TextViewDesign;
 
 
 
@@ -23,7 +52,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/Button', 'sap/ui/commons/Men
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -49,12 +78,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/Button', 'sap/ui/commons/Men
 			/**
 			 * Defines the 'Settings' button in the browse section tool bar
 			 */
-			settingsMenu : {type : "sap.ui.commons.Menu", multiple : false},
+			settingsMenu : {type : "sap.ui.commons.Menu", multiple : false, forwarding: {idSuffix: "-browser", aggregation: "optionsMenu"}},
 
 			/**
 			 * The attributes which shall be available to refine the search
 			 */
-			attributes : {type : "sap.ui.ux3.ExactAttribute", multiple : true, singularName : "attribute"},
+			attributes : {type : "sap.ui.ux3.ExactAttribute", multiple : true, singularName : "attribute", forwarding: {idSuffix: "-browser", aggregation: "attributes"}},
 
 			/**
 			 * Controls managed by the Exact control
@@ -103,14 +132,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/Button', 'sap/ui/commons/Men
 
 
 
-
-
-
-
-
-
-	(function() {
-
 	/**
 	 * Does the setup when the Exact is created.
 	 * @private
@@ -143,7 +164,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/Button', 'sap/ui/commons/Men
 		this._resultArea = new ExactArea(this.getId() + "-resultArea");
 		this.addAggregation("controls", this._resultArea);
 
-		this._resultText = new TextView(this.getId() + "-resultAreaTitle", {design: sap.ui.commons.TextViewDesign.Bold});
+		this._resultText = new TextView(this.getId() + "-resultAreaTitle", {design: TextViewDesign.Bold});
 		this._resultText.addStyleClass("sapUiUx3ExactViewTitle");
 		this.addAggregation("controls", this._resultText);
 
@@ -152,24 +173,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/Button', 'sap/ui/commons/Men
 
 
 	//*** Overridden API functions ***
-
-
-	Exact.prototype.getSettingsMenu = function() {
-		return this._browser.getOptionsMenu();
-	};
-
-
-	Exact.prototype.setSettingsMenu = function(oSettingsMenu) {
-		this._browser.setOptionsMenu(oSettingsMenu);
-		return this;
-	};
-
-
-	Exact.prototype.destroySettingsMenu = function() {
-		this._browser.destroyOptionsMenu();
-		return this;
-	};
-
 
 	Exact.prototype.getResultText = function() {
 		return this._resultText.getText();
@@ -180,45 +183,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/Button', 'sap/ui/commons/Men
 		this._resultText.setText(sResultText);
 		return this;
 	};
-
-
-	Exact.prototype.getAttributes = function() {
-		return this._browser.getAttributes();
-	};
-
-
-	Exact.prototype.insertAttribute = function(oAttribute, iIndex) {
-		this._browser.insertAttribute(oAttribute, iIndex);
-		return this;
-	};
-
-
-	Exact.prototype.addAttribute = function(oAttribute) {
-		this._browser.addAttribute(oAttribute);
-		return this;
-	};
-
-
-	Exact.prototype.removeAttribute = function(vElement) {
-		return this._browser.removeAttribute(vElement);
-	};
-
-
-	Exact.prototype.removeAllAttributes = function() {
-		return this._browser.removeAllAttributes();
-	};
-
-
-	Exact.prototype.indexOfAttribute = function(oAttribute) {
-		return this._browser.indexOfAttribute(oAttribute);
-	};
-
-
-	Exact.prototype.destroyAttributes = function() {
-		this._browser.destroyAttributes();
-		return this;
-	};
-
 
 
 	/**
@@ -273,8 +237,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/Button', 'sap/ui/commons/Men
 	};
 
 
-	}());
-
 	return Exact;
 
-}, /* bExport= */ true);
+});

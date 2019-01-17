@@ -1,13 +1,17 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides default renderer for control sap.m.RadioButtonGroup
-sap.ui.define([],
-	function() {
+sap.ui.define(["sap/ui/core/library"],
+	function(coreLibrary) {
 	"use strict";
+
+
+	// shortcut for sap.ui.core.TextDirection
+	var TextDirection = coreLibrary.TextDirection;
 
 
 	/**
@@ -65,7 +69,7 @@ sap.ui.define([],
 		}
 
 		// check global rtl config and textDirection property and add "dir" attribute
-		if (!bGlobalTextDir && sControlTextDir != sap.ui.core.TextDirection.Inherit) {
+		if (!bGlobalTextDir && sControlTextDir != TextDirection.Inherit) {
 			rm.writeAttribute("dir", sControlTextDir.toLowerCase());
 		}
 

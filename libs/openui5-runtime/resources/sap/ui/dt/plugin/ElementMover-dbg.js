@@ -1,13 +1,23 @@
 /*
  * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.dt.plugin.ElementMover.
-sap.ui.define(['sap/ui/base/ManagedObject', 'sap/ui/dt/ElementUtil', 'sap/ui/dt/OverlayUtil',
-		'sap/ui/dt/OverlayRegistry'], function(ManagedObject, ElementUtil, OverlayUtil,
-		OverlayRegistry) {
+sap.ui.define([
+	"sap/ui/base/Object",
+	"sap/ui/base/ManagedObject",
+	"sap/ui/dt/ElementUtil",
+	"sap/ui/dt/DOMUtil",
+	"sap/ui/dt/OverlayUtil"
+], function(
+	BaseObject,
+	ManagedObject,
+	ElementUtil,
+	DOMUtil,
+	OverlayUtil
+) {
 	"use strict";
 
 	/**
@@ -20,7 +30,7 @@ sap.ui.define(['sap/ui/base/ManagedObject', 'sap/ui/dt/ElementUtil', 'sap/ui/dt/
 	 * @class The ElementMover enables movement of UI5 elements based on aggregation types, which can be used by drag and
 	 *        drop or cut and paste behavior.
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -61,7 +71,7 @@ sap.ui.define(['sap/ui/base/ManagedObject', 'sap/ui/dt/ElementUtil', 'sap/ui/dt/
 		var aMovableTypes = this._getMovableTypes();
 
 		return aMovableTypes.some(function(sType) {
-			return ElementUtil.isInstanceOf(oElement, sType);
+			return BaseObject.isA(oElement, sType);
 		});
 	};
 
@@ -123,12 +133,23 @@ sap.ui.define(['sap/ui/base/ManagedObject', 'sap/ui/dt/ElementUtil', 'sap/ui/dt/
 	/**
 	 * @protected
 	 */
-	ElementMover.prototype.checkTargetZone = function(oAggregationOverlay) {
-		if (!oAggregationOverlay.$().is(":visible")) {
+	ElementMover.prototype.checkTargetZone = function(oAggregationOverlay, oOverlay, bOverlayNotInDom) {
+		var oMovedOverlay = oOverlay ? oOverlay : this.getMovedOverlay();
+		var oGeometry = oAggregationOverlay.getGeometry();
+		var bGeometryVisible = oGeometry && oGeometry.size.height > 0 && oGeometry.size.width > 0;
+
+		// this function can get called on overlay registration, when there are no overlays in dom yet. In this case, DOMUtil.isVisible is always false.
+		if ((bOverlayNotInDom && !bGeometryVisible)
+			|| !bOverlayNotInDom && !DOMUtil.isVisible(oAggregationOverlay.getDomRef())
+			|| !(oAggregationOverlay.getElement().getVisible && oAggregationOverlay.getElement().getVisible())) {
 			return false;
 		}
-		var oParentElement = oAggregationOverlay.getElementInstance();
-		var oMovedElement = this.getMovedOverlay().getElementInstance();
+		var oParentElement = oAggregationOverlay.getElement();
+		// an aggregation can still have visible = true even if it has been removed from its parent
+		if (!oParentElement.getParent()){
+			return false;
+		}
+		var oMovedElement = oMovedOverlay.getElement();
 		var sAggregationName = oAggregationOverlay.getAggregationName();
 
 		if (ElementUtil.isValidForAggregation(oParentElement, sAggregationName, oMovedElement)) {
@@ -196,7 +217,7 @@ sap.ui.define(['sap/ui/base/ManagedObject', 'sap/ui/dt/ElementUtil', 'sap/ui/dt/
 	 * @param  {sap.ui.dt.Overlay} oTargetElementOverlay The overlay of the target element for the move
 	 */
 	ElementMover.prototype.repositionOn = function(oMovedOverlay, oTargetElementOverlay) {
-		var oMovedElement = oMovedOverlay.getElementInstance();
+		var oMovedElement = oMovedOverlay.getElement();
 		var oTargetParentInformation = OverlayUtil.getParentInformation(oTargetElementOverlay);
 		var oAggregationDesignTimeMetadata;
 
@@ -230,8 +251,8 @@ sap.ui.define(['sap/ui/base/ManagedObject', 'sap/ui/dt/ElementUtil', 'sap/ui/dt/
 	 * @param  {sap.ui.dt.Overlay} oTargetAggregationOverlay The overlay of the target aggregation for the move
 	 */
 	ElementMover.prototype.insertInto = function(oMovedOverlay, oTargetAggregationOverlay) {
-		var oMovedElement = oMovedOverlay.getElementInstance();
-		var oTargetParentElement = oTargetAggregationOverlay.getElementInstance();
+		var oMovedElement = oMovedOverlay.getElement();
+		var oTargetParentElement = oTargetAggregationOverlay.getElement();
 		var oAggregationDesignTimeMetadata;
 
 		var oParentAggregationOverlay = oMovedOverlay.getParentAggregationOverlay();
@@ -243,7 +264,7 @@ sap.ui.define(['sap/ui/base/ManagedObject', 'sap/ui/dt/ElementUtil', 'sap/ui/dt/
 			oAggregationDesignTimeMetadata = oParentElementOverlay.getDesignTimeMetadata().getAggregation(sAggregationName);
 		}
 
-		var aTargetAggregationItems = ElementUtil.getAggregation(oTargetAggregationOverlay.getElementInstance(), oTargetAggregationOverlay.getAggregationName());
+		var aTargetAggregationItems = ElementUtil.getAggregation(oTargetAggregationOverlay.getElement(), oTargetAggregationOverlay.getAggregationName());
 		var iIndex = aTargetAggregationItems.indexOf(oMovedElement);
 		// Don't do anything when the element is already in the aggregation and is the last element
 		if (!(iIndex > -1 && iIndex === aTargetAggregationItems.length - 1)) {

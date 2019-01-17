@@ -1,13 +1,19 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides default renderer for control sap.f.Avatar
-sap.ui.define([],
-	function () {
+sap.ui.define(["sap/f/library", "sap/base/security/encodeXML"],
+	function (library, encodeXML) {
 		"use strict";
+
+		// shortcut for sap.f.AvatarSize
+		var AvatarSize = library.AvatarSize;
+
+		// shortcut for sap.f.AvatarType
+		var AvatarType = library.AvatarType;
 
 		/**
 		 * <code>Avatar</code> renderer.
@@ -30,8 +36,14 @@ sap.ui.define([],
 				sImageFitType = oAvatar.getImageFitType(),
 				sCustomDisplaySize = oAvatar.getCustomDisplaySize(),
 				sCustomFontSize = oAvatar.getCustomFontSize(),
-				sSrc = oAvatar.getSrc(),
-				sAvatarClass = "sapFAvatar";
+				sSrc = oAvatar._getEscapedSrc(),
+				sAvatarClass = "sapFAvatar",
+				sTooltip = oAvatar.getTooltip_AsString(),
+				sDefaultTooltip = oAvatar._getDefaultTooltip(),
+				aLabelledBy = oAvatar.getAriaLabelledBy(),
+				aDescribedBy = oAvatar.getAriaDescribedBy(),
+				sAriaLabelTooltip = sTooltip && sInitials ? sDefaultTooltip + " " + sTooltip : sDefaultTooltip,
+				sAriLabelInitials = sInitials ? sDefaultTooltip + " " + sInitials : sDefaultTooltip;
 
 			oRm.write("<span");
 			oRm.writeControlData(oAvatar);
@@ -42,26 +54,40 @@ sap.ui.define([],
 			if (oAvatar.hasListeners("press")) {
 				oRm.addClass("sapMPointer");
 				oRm.addClass("sapFAvatarFocusable");
-				oRm.writeAccessibilityState(oAvatar, {
-					"role": "button"
-				});
+				oRm.writeAttribute("role", "button");
 				oRm.writeAttribute("tabIndex", 0);
+			} else {
+				oRm.writeAttribute("role", "img");
 			}
-			if (sActualDisplayType === sap.f.AvatarType.Image) {
+			if (sActualDisplayType === AvatarType.Image) {
 				oRm.addClass(sAvatarClass + sActualDisplayType + sImageFitType);
-				oRm.addStyle("background-image", "url('" + jQuery.sap.encodeHTML(sSrc) + "')");
+				oRm.addStyle("background-image", "url('" + encodeXML(sSrc) + "')");
 			}
-			if (sDisplaySize === sap.f.AvatarSize.Custom) {
+			if (sDisplaySize === AvatarSize.Custom) {
 				oRm.addStyle("width", sCustomDisplaySize);
 				oRm.addStyle("height", sCustomDisplaySize);
 				oRm.addStyle("font-size", sCustomFontSize);
 			}
+			if (sTooltip) {
+				oRm.writeAttributeEscaped("title", sTooltip);
+				oRm.writeAttributeEscaped("aria-label", sAriaLabelTooltip);
+			} else {
+				oRm.writeAttributeEscaped("aria-label", sAriLabelInitials);
+			}
+			// aria-labelledby references
+			if (aLabelledBy && aLabelledBy.length > 0) {
+				oRm.writeAttributeEscaped("aria-labelledby", aLabelledBy.join(" "));
+			}
+			// aria-describedby references
+			if (aDescribedBy && aDescribedBy.length > 0) {
+				oRm.writeAttributeEscaped("aria-describedby", aDescribedBy.join(" "));
+			}
 			oRm.writeClasses();
 			oRm.writeStyles();
 			oRm.write(">");
-			if (sActualDisplayType === sap.f.AvatarType.Icon) {
+			if (sActualDisplayType === AvatarType.Icon) {
 				oRm.renderControl(oAvatar._getIcon());
-			} else if (sActualDisplayType === sap.f.AvatarType.Initials){
+			} else if (sActualDisplayType === AvatarType.Initials){
 				oRm.write("<span");
 				oRm.addClass(sAvatarClass + "InitialsHolder");
 				oRm.writeClasses();

@@ -1,12 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.core.search.OpenSearchProvider.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', './SearchProvider', 'jquery.sap.encoder'],
-	function(jQuery, library, SearchProvider/* , jQuerySap */) {
+sap.ui.define([
+	'sap/ui/core/library',
+	'./SearchProvider',
+	"sap/base/Log",
+	"sap/base/security/encodeURL",
+	"sap/ui/thirdparty/jquery"
+],
+	function(library, SearchProvider, Log, encodeURL, jQuery) {
 	"use strict";
 
 
@@ -20,9 +26,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', './SearchProvider', '
 	 * @class
 	 * A SearchProvider which uses the OpenSearch protocol (either JSON or XML).
 	 * @extends sap.ui.core.search.SearchProvider
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
-	 * @constructor
 	 * @public
 	 * @alias sap.ui.core.search.OpenSearchProvider
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
@@ -60,7 +65,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', './SearchProvider', '
 		if (!sUrl) {
 			return;
 		}
-		sUrl = sUrl.replace("{searchTerms}", jQuery.sap.encodeURL(sValue));
+		sUrl = sUrl.replace("{searchTerms}", encodeURL(sValue));
 
 		var sType = this.getSuggestType();
 		var fSuccess;
@@ -89,7 +94,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', './SearchProvider', '
 			dataType: sType,
 			success: fSuccess,
 			error: function(XMLHttpRequest, textStatus, errorThrown) {
-				jQuery.sap.log.fatal("The following problem occurred: " + textStatus, XMLHttpRequest.responseText + ","
+				Log.fatal("The following problem occurred: " + textStatus, XMLHttpRequest.responseText + ","
 						+ XMLHttpRequest.status);
 			}
 		});

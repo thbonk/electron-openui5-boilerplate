@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -14,15 +14,13 @@
  *
  */
 sap.ui.define([
-	'jquery.sap.global', 'sap/ui/core/ElementMetadata', 'sap/ui/core/XMLTemplateProcessor'
-], function (jQuery, ElementMetadata, XMLTemplateProcessor) {
+	'sap/ui/core/ElementMetadata',
+	'sap/ui/core/XMLTemplateProcessor',
+	"sap/base/Log"
+], function(ElementMetadata, XMLTemplateProcessor, Log) {
 	"use strict";
 
-	var InvalidationMode = {
-		Render: true,
-		Template: "template",
-		None: false
-	};
+	var mFragmentCache = {};
 
 	/*
 	 *
@@ -32,12 +30,19 @@ sap.ui.define([
 	 * @param {object} oClassInfo static info to construct the metadata from
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @since 1.50.0
 	 * @alias sap.ui.core.XMLCompositeMetadata
-	 * @private
+	 *
+	 * @public
+	 * @experimental
 	 */
 	var XMLCompositeMetadata = function (sClassName, oClassInfo) {
+		this.InvalidationMode = {
+				Render: true,
+				None: false
+			};
+
 		if (!oClassInfo.hasOwnProperty("renderer")) {
 			oClassInfo.renderer = "sap.ui.core.XMLCompositeRenderer";
 		}
@@ -56,14 +61,24 @@ sap.ui.define([
 			}
 			if (!this._fragment && oClassInfo.fragment) {
 				try {
-					this._fragment = XMLTemplateProcessor.loadTemplate(oClassInfo.fragment, "control");
+					if (!this._fragment) {
+						if (oClassInfo.fragmentContent) { // content provided directly, do NOT load XML from file
+							if (typeof oClassInfo.fragmentContent === "string") { // parse if not already an XML document
+								var oParser = new DOMParser();
+								oClassInfo.fragmentContent = oParser.parseFromString(oClassInfo.fragmentContent, "text/xml").documentElement;
+							}
+							this._fragment = oClassInfo.fragmentContent; // otherwise assume XML
+						} else {
+							this._fragment = this._loadFragment(oClassInfo.fragment, "control");
+						}
+					}
 				} catch (e) {
 					if (!oClassInfo.fragmentUnspecified) {
 						// fragment xml was explicitly specified so we expect to find something !
 						throw (e);
 					} else {
 						// should the class perhaps have been abstract ...
-						jQuery.sap.log.warning("Implicitly inferred fragment xml " + oClassInfo.fragment + " not found. " + sClassName + " is not abstract!");
+						Log.warning("Implicitly inferred fragment xml " + oClassInfo.fragment + " not found. " + sClassName + " is not abstract!");
 					}
 				}
 			}
@@ -77,6 +92,13 @@ sap.ui.define([
 
 	XMLCompositeMetadata.prototype = Object.create(ElementMetadata.prototype);
 	XMLCompositeMetadata.uid = ElementMetadata.uid;
+
+	XMLCompositeMetadata.extend = function(mSettings) {
+		for (var key in mSettings) {
+			XMLCompositeMetadata[key] = mSettings[key];
+		}
+		return XMLCompositeMetadata;
+	};
 
 	XMLCompositeMetadata.prototype.getCompositeAggregationName = function () {
 		return this._sCompositeAggregation || "_content";
@@ -117,29 +139,12 @@ sap.ui.define([
 		}
 		if (!oMember.appData) {
 			oMember.appData = {};
-			oMember.appData.invalidate = InvalidationMode.None;
+			oMember.appData.invalidate = this.InvalidationMode.None;
 		}
-		if (oMember && oMember.appData && oMember.appData.invalidate === InvalidationMode.Render) {
+		if (oMember && oMember.appData && oMember.appData.invalidate === this.InvalidationMode.Render) {
 			return false;
 		}
-		return true; // i.e. invalidate = InvalidationMode.None || InvalidationMode.Template
-	};
-
-	XMLCompositeMetadata.prototype._requestFragmentRetemplatingCheck = function (oControl, oMember, bForce) {
-		if (!oControl._bIsInitializing && oMember && oMember.appData && oMember.appData.invalidate === InvalidationMode.Template &&
-			!oControl._requestFragmentRetemplatingPending) {
-			if (oControl.requestFragmentRetemplating) {
-				oControl._requestFragmentRetemplatingPending = true;
-				// to avoid several separate re-templating requests we collect them
-				// in a timeout
-				setTimeout(function () {
-					oControl.requestFragmentRetemplating(bForce);
-					oControl._requestFragmentRetemplatingPending = false;
-				}, 0);
-			} else {
-				throw new Error("Function requestFragmentRetemplating not available although invalidationMode was set to template");
-			}
-		}
+		return true;
 	};
 
 	XMLCompositeMetadata.prototype.getMandatoryAggregations = function () {
@@ -154,6 +159,15 @@ sap.ui.define([
 			this._mMandatoryAggregations = mMandatory;
 		}
 		return this._mMandatoryAggregations;
+	};
+
+	XMLCompositeMetadata.prototype._loadFragment = function (sFragmentName, sExtension) {
+		var sFragmentKey = sExtension + "$" + sFragmentName;
+		if (!mFragmentCache[sFragmentKey]) {
+			mFragmentCache[sFragmentKey] = XMLTemplateProcessor.loadTemplate(sFragmentName, sExtension);
+		}
+
+		return mFragmentCache[sFragmentKey];
 	};
 
 	return XMLCompositeMetadata;

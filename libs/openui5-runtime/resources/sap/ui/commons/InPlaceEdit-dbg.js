@@ -1,13 +1,45 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.InPlaceEdit.
-sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 'sap/ui/core/Control', 'sap/ui/core/ValueStateSupport', 'sap/ui/core/theming/Parameters'],
-	function(jQuery, TextField, TextView, library, Control, ValueStateSupport, Parameters) {
+sap.ui.define([
+    './TextField',
+    './TextView',
+    './library',
+    'sap/ui/core/Control',
+    'sap/ui/core/ValueStateSupport',
+    'sap/ui/core/theming/Parameters',
+    './InPlaceEditRenderer',
+    'sap/ui/core/library',
+    'sap/ui/Device',
+    './Button',
+    'sap/ui/dom/containsOrEquals',
+    'sap/ui/events/KeyCodes'
+],
+	function(
+		TextField,
+		TextView,
+		library,
+		Control,
+		ValueStateSupport,
+		Parameters,
+		InPlaceEditRenderer,
+		coreLibrary,
+		Device,
+		Button,
+		containsOrEquals,
+		KeyCodes
+	) {
 	"use strict";
+
+	// shortcut for sap.ui.commons.TextViewDesign
+	var TextViewDesign = library.TextViewDesign;
+
+	// shortcut for sap.ui.core.ValueState
+	var ValueState = coreLibrary.ValueState;
 
 	/**
 	 * Constructor for a new InPlaceEdit.
@@ -18,12 +50,12 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 	 * @class
 	 * The InPlaceEdit is a functionality to have text in display mode that can be changed in place.
 	 * @extends sap.ui.core.Control
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.8.0
-	 * @deprecated Since version 1.38.
+	 * @deprecated as of version 1.38, replaced by {@link sap.m.Input}
 	 * @alias sap.ui.commons.InPlaceEdit
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -36,7 +68,7 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 			 * Visualizes warnings or errors related to the InPlaceEdit. Possible values: Warning, Error, Success.
 			 * If the content control has an own valueState property this will be used.
 			 */
-			valueState : {type : "sap.ui.core.ValueState", group : "Data", defaultValue : sap.ui.core.ValueState.None},
+			valueState : {type : "sap.ui.core.ValueState", group : "Data", defaultValue : ValueState.None},
 
 			/**
 			 * If undo is enabled after changing the text an undo button appears.
@@ -48,7 +80,7 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 			 * Currently this is not supported for Labels.
 			 * @since 1.9.0
 			 */
-			design : {type : "sap.ui.commons.TextViewDesign", group : "Data", defaultValue : sap.ui.commons.TextViewDesign.Standard}
+			design : {type : "sap.ui.commons.TextViewDesign", group : "Data", defaultValue : TextViewDesign.Standard}
 		},
 		defaultAggregation : "content",
 		aggregations : {
@@ -105,8 +137,6 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 	 * The focusDomRef is in display mode the display control, in edit mode the edit control.
 	 * So as the control often rerenders and changes the focusDomRef be careful if you put the control in an ItemNavigation. (Update the DomRefs!)
 	 */
-
-	(function() {
 
 		InPlaceEdit.prototype.init = function(){
 
@@ -209,7 +239,7 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 			} else {
 				var $DisplayControl = this._oDisplayControl.$();
 				$DisplayControl.css("width", "100%");
-				if (!this._iHeight && this._iHeight != 0 && this.getDesign() != sap.ui.commons.TextViewDesign.Standard) {
+				if (!this._iHeight && this._iHeight != 0 && this.getDesign() != TextViewDesign.Standard) {
 					// check if TextView is higher than inPlaceEdits standards height (Header design) ->
 					// set to this new height even in edit mode to avoid flickering
 					// special case: standard TextView has line height of textFields height in most themes
@@ -238,12 +268,14 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 			}
 
 			if (this._delayedCallId) {
-				jQuery.sap.clearDelayedCall(this._delayedCallId);
+				clearTimeout(this._delayedCallId);
 				this._delayedCallId = null;
 			}
 
-			if (this.getValueState() == sap.ui.core.ValueState.Success) {
-				this._delayedCallId = jQuery.sap.delayedCall(3000, this, "removeValidVisualization");
+			if (this.getValueState() == ValueState.Success) {
+				this._delayedCallId = setTimeout(function() {
+					this.removeValidVisualization();
+				}.bind(this), 3000);
 			}
 
 		};
@@ -315,7 +347,7 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 				// Escape fires no keypress in webkit
 				// In Firefox value can not be changed in keydown (onsapescape) event
 				// So the escape event is stored in this._bEsc and the value in this._sValue
-				if (!sap.ui.Device.browser.firefox) {
+				if (!Device.browser.firefox) {
 					var that = this;
 					undoTextChange(that);
 				} else {
@@ -345,7 +377,7 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 
 		InPlaceEdit.prototype.onkeydown = function(oEvent){
 
-			if (oEvent.keyCode == jQuery.sap.KeyCodes.F2 && !this._bEditMode) {
+			if (oEvent.keyCode == KeyCodes.F2 && !this._bEditMode) {
 				var that = this;
 				switchToEditMode(that);
 				this.$().addClass("sapUiIpeFocus");
@@ -365,7 +397,7 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 				this.$().addClass("sapUiIpeFocus");
 			} else if (this._focusDelay) {
 				// foucusout handling not finished and focus again in control -> just stay in edit mode
-				jQuery.sap.clearDelayedCall(this._focusDelay);
+				clearTimeout(this._focusDelay);
 				this._focusDelay = null;
 			}
 
@@ -374,7 +406,7 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 		InPlaceEdit.prototype.ontap = function(oEvent){
 
 			// on iOS no focusin event is fired
-			if (sap.ui.Device.os.name == "iOS") {
+			if (Device.os.name == "iOS") {
 				this.onfocusin(oEvent);
 			}
 
@@ -383,17 +415,19 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 		InPlaceEdit.prototype.onfocusout = function(oEvent){
 
 			if (this._focusDelay) {
-				jQuery.sap.clearDelayedCall(this._focusDelay);
+				clearTimeout(this._focusDelay);
 				this._focusDelay = null;
 			}
-			this._focusDelay = jQuery.sap.delayedCall(200, this, "_handleFocusOut", arguments); // check delayed because click of ComboBox Expander (shorter than 200 sometimes don't work)
+			this._focusDelay = setTimeout(function() {
+				this._handleFocusOut(oEvent); // check delayed because click of ComboBox Expander (shorter than 200 sometimes don't work)
+			}.bind(this), 200);
 
 		};
 
 		InPlaceEdit.prototype._handleFocusOut = function(oEvent){
 
 			var oFocusedDom = document.activeElement;
-			if (!jQuery.sap.containsOrEquals(this.getDomRef(), oFocusedDom)) {
+			if (!containsOrEquals(this.getDomRef(), oFocusedDom)) {
 				// focus is not inside of the InPlaceEdit
 				// in display mode focus is on displayControl -> simulate focus on outer DIV
 				if (!this._bEditMode) {
@@ -455,7 +489,7 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 			} else {
 				this.setProperty("valueState", oValueState);
 			}
-
+			return this;
 		};
 
 		InPlaceEdit.prototype.getValueState = function(){
@@ -535,6 +569,7 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 			this.setProperty("design", sDesign);
 			this._iHeight = undefined;
 
+			return this;
 		};
 
 		InPlaceEdit.prototype.clone = function(){
@@ -791,7 +826,7 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 		function createUndoButton(oInPlaceEdit){
 
 			if (!oInPlaceEdit._oUndoButton && oInPlaceEdit.getUndoEnabled()) {
-				oInPlaceEdit._oUndoButton = new sap.ui.commons.Button(oInPlaceEdit.getId() + "--X",{
+				oInPlaceEdit._oUndoButton = new Button(oInPlaceEdit.getId() + "--X",{
 					lite: true
 				}).setParent(oInPlaceEdit);
 				iconForUndoButton(oInPlaceEdit);
@@ -868,7 +903,7 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 		function createEditButton(oInPlaceEdit){
 
 			if (!oInPlaceEdit._oEditButton) {
-				oInPlaceEdit._oEditButton = new sap.ui.commons.Button(oInPlaceEdit.getId() + "--Edit",{
+				oInPlaceEdit._oEditButton = new Button(oInPlaceEdit.getId() + "--Edit",{
 					lite: true
 				}).setParent(oInPlaceEdit);
 				oInPlaceEdit._oEditButton.addStyleClass("sapUiIpeEBtn");
@@ -944,21 +979,21 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 			} else {
 				//if valueState changes -> class must be adopted on outer DIV but do not rerender
 				switch (this.getValueState()) {
-				case (sap.ui.core.ValueState.Error) :
+				case (ValueState.Error) :
 					if (!this.$().hasClass('sapUiIpeErr')) {
 						this.$().addClass('sapUiIpeErr');
 						this.$().removeClass('sapUiIpeWarn');
 						this.$().removeClass('sapUiIpeSucc');
 					}
 				break;
-				case (sap.ui.core.ValueState.Success) :
+				case (ValueState.Success) :
 					if (!this.$().hasClass('sapUiIpeSucc')) {
 						this.$().addClass('sapUiIpeSucc');
 						this.$().removeClass('sapUiIpeErr');
 						this.$().removeClass('sapUiIpeWarn');
 					}
 				break;
-				case (sap.ui.core.ValueState.Warning) :
+				case (ValueState.Warning) :
 					if (!this.$().hasClass('sapUiIpeWarn')) {
 						this.$().addClass('sapUiIpeWarn');
 						this.$().removeClass('sapUiIpeErr');
@@ -975,8 +1010,6 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 
 		}
 
-	}());
-
 	return InPlaceEdit;
 
-}, /* bExport= */ true);
+});

@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -8,12 +8,10 @@
 * Provides a private class <code>sap.f.semantic.SemanticContainer</code>.
 */
 sap.ui.define([
-	"jquery.sap.global",
 	"sap/ui/base/Metadata",
-	"sap/ui/core/CustomData",
-	"sap/m/ToolbarSpacer",
-	"./SemanticConfiguration"
-], function(jQuery, Metadata, CustomData, ToolBarSpacer, SemanticConfiguration) {
+	"./SemanticConfiguration",
+	"sap/base/Log"
+], function(Metadata, SemanticConfiguration, Log) {
 	"use strict";
 
 	/**
@@ -29,7 +27,7 @@ sap.ui.define([
 	var SemanticContainer = Metadata.createClass("sap.f.semantic.SemanticContainer", {
 		constructor : function(oContainer, oParent) {
 			if (!oContainer) {
-				jQuery.sap.log.error("SemanticContainer :: missing argument - container reference", this);
+				Log.error("SemanticContainer :: missing argument - container reference", this);
 				return;
 			}
 

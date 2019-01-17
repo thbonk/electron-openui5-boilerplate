@@ -1,12 +1,13 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
+
+//Provides class sap.ui.model.odata.v4.AnnotationHelper
 sap.ui.define([
-	"../_AnnotationHelperBasics",
 	"./_AnnotationHelperExpression"
-], function (Basics, Expression) {
+], function (Expression) {
 	"use strict";
 
 	var rBadChars = /[\\\{\}:]/, // @see sap.ui.base.BindingParser: rObject, rBindingChars
@@ -24,51 +25,6 @@ sap.ui.define([
 		 * @since 1.43.0
 		 */
 		AnnotationHelper = {
-			/**
-			 * Returns the value for the label of a
-			 * <code>com.sap.vocabularies.UI.v1.DataFieldAbstract</code> from the meta model. If no
-			 * <code>Label</code> property is available, but the data field has a <code>Value</code>
-			 * property with an <code>edm:Path</code> expression as value, the label will be taken
-			 * from the <code>com.sap.vocabularies.UI.v1.Label</code> annotation of the path's
-			 * target property.
-			 *
-			 * Example:
-			 * <pre>
-			 * &lt;Label text="{meta>@@sap.ui.model.odata.v4.AnnotationHelper.label}" />
-			 * </pre>
-			 *
-			 * @param {any} vRawValue
-			 *   The raw value from the meta model
-			 * @param {object} oDetails
-			 *   The details object
-			 * @param {sap.ui.model.Context} oDetails.context
-			 *   Points to the given raw value, that is
-			 *   <code>oDetails.context.getProperty("") === vRawValue</code>
-			 * @returns {string}
-			 *   A data binding or a fixed text or a sequence thereof or <code>undefined</code>
-			 *
-			 * @public
-			 * @since 1.49.0
-			 */
-			label : function (vRawValue, oDetails) {
-				var oNewContext;
-
-				if (vRawValue.Label) {
-					return AnnotationHelper.value(vRawValue.Label, {
-						context : oDetails.context.getModel()
-							.createBindingContext("Label", oDetails.context)
-					});
-				}
-
-				if (vRawValue.Value && vRawValue.Value.$Path) {
-					oNewContext = oDetails.context.getModel().createBindingContext(
-						"Value/$Path@com.sap.vocabularies.Common.v1.Label", oDetails.context);
-					return AnnotationHelper.value(oNewContext.getObject(""), {
-						context : oNewContext
-					});
-				}
-			},
-
 			/**
 			 * Returns a data binding according to the result of {@link #getNavigationPath}.
 			 *
@@ -136,7 +92,7 @@ sap.ui.define([
 					sPath = sPath.slice(0, -1);
 				}
 
-				if (sPath.indexOf(".")) {
+				if (sPath.indexOf(".") > -1) {
 					sPath = sPath.split("/")
 						.filter(function (sSegment) { // remove type casts
 							return sSegment.indexOf(".") < 0;
@@ -154,16 +110,22 @@ sap.ui.define([
 			 *   a property (relative to <code>oDetails.schemaChildName</code>)
 			 * @param {object} oDetails
 			 *   The details object
+			 * @param {boolean} [oDetails.$$valueAsPromise]
+			 *   Whether a <code>Promise</code> may be returned if the needed metadata is not yet
+			 *   loaded (since 1.57.0)
 			 * @param {sap.ui.model.Context} oDetails.context
 			 *   Points to the given path, that is
 			 *   <code>oDetails.context.getProperty("") === vRawValue</code>
 			 * @param {string} oDetails.schemaChildName
 			 *   The qualified name of the schema child where the computed annotation has been
 			 *   found, for example "name.space.EntityType"
-			 * @returns {sap.ui.model.odata.v4.ValueListType}
-			 *   The type of the value list
+			 * @returns {sap.ui.model.odata.v4.ValueListType|Promise}
+			 *   The type of the value list or a <code>Promise</code> resolving with the type of the
+			 *   value list or rejected if the property cannot be found in the metadata
 			 * @throws {Error}
-			 *   If the property cannot be found in the metadata
+			 *   If the property cannot be found in the metadata, or if
+			 *   <code>$$valueAsPromise</code> is not set to <code>true</code> and the metadata is
+			 *   not yet loaded
 			 *
 			 * @public
 			 * @since 1.47.0
@@ -173,7 +135,9 @@ sap.ui.define([
 						? "/" + oDetails.schemaChildName + "/" + vRawValue
 						: oDetails.context.getPath();
 
-				return oDetails.context.getModel().getValueListType(sPath);
+				return oDetails.$$valueAsPromise
+					? oDetails.context.getModel().fetchValueListType(sPath).unwrap()
+					: oDetails.context.getModel().getValueListType(sPath);
 			},
 
 			/**
@@ -200,21 +164,31 @@ sap.ui.define([
 			 *   "@com.sap.vocabularies.UI.v1.FieldGroup#Dimensions"
 			 * @param {object} oDetails
 			 *   The details object
+			 * @param {boolean} [oDetails.$$valueAsPromise]
+			 *   Whether a <code>Promise</code> may be returned if the needed metadata is not yet
+			 *   loaded (since 1.57.0)
 			 * @param {sap.ui.model.Context} oDetails.context
 			 *   Points to the given path, that is
 			 *   <code>oDetails.context.getProperty("") === sPath</code>
 			 * @param {string} oDetails.schemaChildName
 			 *   The qualified name of the schema child where the computed annotation has been
 			 *   found, for example "name.space.EntityType"
-			 * @returns {boolean}
+			 * @returns {boolean|Promise}
 			 *   <code>true</code> if the given path ends with "$count" or with a multi-valued
-			 *   structural or navigation property, <code>false</code> otherwise
+			 *   structural or navigation property, <code>false</code> otherwise. If
+			 *   <code>oDetails.$$valueAsPromise</code> is <code>true</code> a <code>Promise</code>
+			 *   may be returned resolving with the boolean value.
 			 *
 			 * @public
 			 * @since 1.43.0
 			 */
 			isMultiple : function (sPath, oDetails) {
 				var iIndexOfAt;
+
+				// Whether the given value is exactly <code>true</code>
+				function isTrue (vValue) {
+					return vValue === true;
+				}
 
 				if (!sPath || sPath[0] === "@") {
 					return false;
@@ -231,7 +205,67 @@ sap.ui.define([
 					sPath += "/";
 				}
 				sPath = "/" + oDetails.schemaChildName + "/" + sPath + "$isCollection";
-				return oDetails.context.getObject(sPath) === true;
+				return oDetails.$$valueAsPromise
+					? oDetails.context.getModel().fetchObject(sPath).then(isTrue).unwrap()
+					: oDetails.context.getObject(sPath) === true;
+			},
+
+			/**
+			 * Returns the value for the label of a
+			 * <code>com.sap.vocabularies.UI.v1.DataFieldAbstract</code> from the meta model. If no
+			 * <code>Label</code> property is available, but the data field has a <code>Value</code>
+			 * property with an <code>edm:Path</code> expression as value, the label will be taken
+			 * from the <code>com.sap.vocabularies.Common.v1.Label</code> annotation of the path's
+			 * target property.
+			 *
+			 * Example:
+			 * <pre>
+			 * &lt;Label text="{meta>@@sap.ui.model.odata.v4.AnnotationHelper.label}" />
+			 * </pre>
+			 *
+			 * @param {any} vRawValue
+			 *   The raw value from the meta model
+			 * @param {object} oDetails
+			 *   The details object
+			 * @param {boolean} [oDetails.$$valueAsPromise]
+			 *   Whether a <code>Promise</code> may be returned if the needed metadata is not yet
+			 *   loaded (since 1.57.0)
+			 * @param {sap.ui.model.Context} oDetails.context
+			 *   Points to the given raw value, that is
+			 *   <code>oDetails.context.getProperty("") === vRawValue</code>
+			 * @returns {string|Promise}
+			 *   A data binding or a fixed text or a sequence thereof or <code>undefined</code>. If
+			 *   <code>oDetails.$$valueAsPromise</code> is <code>true</code> a <code>Promise</code>
+			 *   may be returned resolving with the value for the label.
+			 *
+			 * @public
+			 * @since 1.49.0
+			 */
+			label : function (vRawValue, oDetails) {
+				var oNewContext;
+
+				if (vRawValue.Label) {
+					return AnnotationHelper.value(vRawValue.Label, {
+						context : oDetails.context.getModel()
+							.createBindingContext("Label", oDetails.context)
+					});
+				}
+
+				if (vRawValue.Value && vRawValue.Value.$Path) {
+					oNewContext = oDetails.context.getModel().createBindingContext(
+						"Value/$Path@com.sap.vocabularies.Common.v1.Label", oDetails.context);
+					if (oDetails.$$valueAsPromise) {
+						return oNewContext.getModel().fetchObject("", oNewContext)
+							.then(function (oRawValue0) {
+								return AnnotationHelper.value(oRawValue0, {
+									context : oNewContext
+								});
+							}).unwrap();
+					}
+					return AnnotationHelper.value(oNewContext.getObject(""), {
+						context : oNewContext
+					});
+				}
 			},
 
 			/**

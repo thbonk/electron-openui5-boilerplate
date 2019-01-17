@@ -1,11 +1,33 @@
 /*!
 * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
 */
 
 // Provides control sap.ui.layout.ResponsiveSplitter.
-sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "./ResponsiveSplitterUtilities", "./ResponsiveSplitterPage", "./PaneContainer", "./SplitPane", "sap/ui/core/delegate/ItemNavigation"], function (jQuery, library, Control, RSUtil, ResponsiveSplitterPage, PaneContainer, SplitPane, ItemNavigation) {
+sap.ui.define([
+	"./library",
+	"sap/ui/core/Control",
+	"./ResponsiveSplitterUtilities",
+	"./ResponsiveSplitterPage",
+	"./PaneContainer",
+	"./SplitPane",
+	"sap/ui/core/delegate/ItemNavigation",
+	"sap/ui/core/ResizeHandler",
+	"./ResponsiveSplitterRenderer",
+	"sap/ui/thirdparty/jquery"
+], function(
+	library,
+	Control,
+	RSUtil,
+	ResponsiveSplitterPage,
+	PaneContainer,
+	SplitPane,
+	ItemNavigation,
+	ResizeHandler,
+	ResponsiveSplitterRenderer,
+	jQuery
+) {
 	"use strict";
 
 	/**
@@ -39,15 +61,18 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "./Respo
 	 * <li>On touch-enabled devices, the splitters show explicit handles with larger touch areas.</li>
 	 * <li>Double-clicking on a splitter will collapse or expand it back to its original position.</li>
 	 * </ul>
+	 *
+	 * <b>Note:</b> We don't recommend dynamically inserting/removing panes into/from the PaneContainer since this might lead to inconsistent layout. If it is necessary, you need to ensure the sum of all sizes of the SplitPanes doesn't exceed the width of the PaneContainer.
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.38
 	 * @alias sap.ui.layout.ResponsiveSplitter
+	 * @see {@link fiori:https://experience.sap.com/fiori-design-web/responsive-splitter/ Responsive Splitter}
 	 */
 	var ResponsiveSplitter = Control.extend("sap.ui.layout.ResponsiveSplitter", /** @lends sap.ui.layout.ResponsiveSplitter.prototype */ {
 		metadata: {
@@ -119,7 +144,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "./Respo
 	};
 
 	ResponsiveSplitter.prototype.onAfterRendering = function () {
-		this._parentResizeHandler = sap.ui.core.ResizeHandler.register(this, this._onParentResize.bind(this));
+		this._parentResizeHandler = ResizeHandler.register(this, this._onParentResize.bind(this));
 		var oRootContainer = this.getRootPaneContainer();
 		if (oRootContainer) {
 			this._onParentResize();
@@ -141,8 +166,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "./Respo
 	ResponsiveSplitter.prototype._setSplitterBarsTooltips = function (oContent, iParent) {
 		var	aSplitterBars = oContent.$().find(" > .sapUiLoSplitterBar"),
 			aContentAreas = oContent.$().find(" > .sapUiLoSplitterContent"),
-			sBaseTooltip = this._oResourceBundle.getText("RESPONSIVE_SPLITTER_RESIZE") + " ",
-			sTooltip = sBaseTooltip,
+			sTooltip = "",
 			iCurrentPaneIndex, iNextPaneIndex, oAreaContent, sContentId;
 
 		for (var i = 0; i < aContentAreas.length; i++) {
@@ -152,14 +176,14 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "./Respo
 			iNextPaneIndex = i + 2;
 
 			if (iParent) {
-				sTooltip += this._oResourceBundle.getText("RESPONSIVE_SPLITTER_PANES", [iParent + "." + iCurrentPaneIndex, iParent + "." + iNextPaneIndex]);
+				sTooltip += this._oResourceBundle.getText("RESPONSIVE_SPLITTER_RESIZE", [iParent + "." + iCurrentPaneIndex, iParent + "." + iNextPaneIndex]);
 			} else {
-				sTooltip += this._oResourceBundle.getText("RESPONSIVE_SPLITTER_PANES", [iCurrentPaneIndex, iNextPaneIndex]);
+				sTooltip += this._oResourceBundle.getText("RESPONSIVE_SPLITTER_RESIZE", [iCurrentPaneIndex, iNextPaneIndex]);
 			}
 
 			if (aSplitterBars[i]) {
 				aSplitterBars[i].setAttribute("title", sTooltip);
-				sTooltip = sBaseTooltip;
+				sTooltip = "";
 			}
 			if (oAreaContent instanceof sap.ui.layout.Splitter) {
 				this._setSplitterBarsTooltips(oAreaContent, iCurrentPaneIndex);
@@ -213,7 +237,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "./Respo
 		var iOldFocusedIndex = this._oItemNavigation.getFocusedIndex();
 		if (jQuery(oEvent.target).hasClass("sapUiResponsiveSplitterPaginatorButton")) {
 			jQuery(oEvent.target).attr("tabindex", 0);
-			var iPageIndex = parseInt(jQuery(oEvent.target).attr("page-index"), 10);
+			var iPageIndex = parseInt(jQuery(oEvent.target).attr("page-index"));
 			this.getAggregation("_pages").forEach(function (page) {
 				page.setVisible(false);
 			});
@@ -224,7 +248,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "./Respo
 				iPageIndex = this._currentInterval.aPages.indexOf(aDemandPanes[iPageIndex - 1]);
 			}
 
-			this._activatePage(iPageIndex, parseInt(jQuery(oEvent.target).attr("page-index"), 10));
+			this._activatePage(iPageIndex, parseInt(jQuery(oEvent.target).attr("page-index")));
 		}
 
 		if (jQuery(oEvent.target).hasClass("sapUiResponsiveSplitterPaginatorNavButton")) {
@@ -337,7 +361,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "./Respo
 	 */
 	ResponsiveSplitter.prototype._detachResizeHandler = function () {
 		if (this._parentResizeHandler) {
-			sap.ui.core.ResizeHandler.deregister(this._parentResizeHandler);
+			ResizeHandler.deregister(this._parentResizeHandler);
 			this._parentResizeHandler = null;
 		}
 	};
@@ -355,7 +379,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "./Respo
 
 		RSUtil.visitPanes(this.getRootPaneContainer(), function (oPane) {
 			var iRequiredWidth = oPane.getRequiredParentWidth();
-			if (jQuery.inArray(iRequiredWidth, aBreakpoints) == -1) {
+			if (aBreakpoints.indexOf(iRequiredWidth) == -1) {
 				aBreakpoints.push(iRequiredWidth);
 			}
 		});
@@ -667,4 +691,4 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "./Respo
 
 	return ResponsiveSplitter;
 
-}, /* bExport= */ true);
+});

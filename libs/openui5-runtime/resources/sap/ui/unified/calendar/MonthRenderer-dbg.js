@@ -1,12 +1,20 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sap/ui/unified/calendar/CalendarDate', 'sap/ui/unified/CalendarLegend'],
-	function(jQuery, CalendarUtils, CalendarDate, CalendarLegend) {
+sap.ui.define(['sap/ui/unified/calendar/CalendarUtils', 'sap/ui/unified/calendar/CalendarDate', 'sap/ui/unified/CalendarLegend', 'sap/ui/unified/CalendarLegendRenderer',
+	'sap/ui/core/library', 'sap/ui/unified/library', "sap/base/Log"],
+	function(CalendarUtils, CalendarDate, CalendarLegend, CalendarLegendRenderer, coreLibrary, library, Log) {
 	"use strict";
+
+
+	// shortcut for sap.ui.unified.CalendarDayType
+	var CalendarDayType = library.CalendarDayType;
+
+	// shortcut for sap.ui.core.CalendarType
+	var CalendarType = coreLibrary.CalendarType;
 
 
 	/**
@@ -33,7 +41,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sa
 
 		oRm.write("<div");
 		oRm.writeControlData(oMonth);
-		oRm.addClass(this.getClass(oMonth));
+		oRm.addClass(this.getClass(oRm, oMonth));
 		if (oMonth._getSecondaryCalendarType()) {
 			oRm.addClass("sapUiCalMonthSecType");
 		}
@@ -84,13 +92,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sa
 
 	};
 
-	MonthRenderer.getClass = function(oMonth){
+	MonthRenderer.getClass = function(oRm, oMonth){
 
 		var sClasses = "sapUiCalMonthView",
 			sCalendarType = oMonth.getPrimaryCalendarType(),
 			bShowWeekNumbers = oMonth.getShowWeekNumbers();
 
-		if (sCalendarType == sap.ui.core.CalendarType.Islamic || !bShowWeekNumbers) {
+		if (sCalendarType == CalendarType.Islamic || !bShowWeekNumbers) {
 			// on Islamic calendar week numbers are not used
 			sClasses = sClasses + " sapUiCalNoWeekNum";
 		}
@@ -144,6 +152,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sa
 
 		oRm.write("<div");
 		oRm.writeAccessibilityState(null, {role: "row"});
+		oRm.addStyle("overflow", "hidden");
+		oRm.writeStyles();
 		oRm.write(">"); // div
 
 		this.renderDayNames(oRm, oMonth, oLocaleData, iFirstDayOfWeek, 7, true, undefined);
@@ -246,7 +256,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sa
 
 		bShowWeekNumbers = oMonth.getShowWeekNumbers();
 
-		bWeekNum = oMonth.getPrimaryCalendarType() !== sap.ui.core.CalendarType.Islamic && bShowWeekNumbers; // on Islamic calendar week numbers are not used
+		bWeekNum = oMonth.getPrimaryCalendarType() !== CalendarType.Islamic && bShowWeekNumbers; // on Islamic calendar week numbers are not used
 
 		iLength = aDays.length;
 		for (i = 0; i < iLength; i++) {
@@ -292,7 +302,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sa
 				}
 				oHelper.oLegend = oLegend;
 			} else {
-				jQuery.sap.log.warning("CalendarLegend " + sLegendId + " does not exist!", oMonth);
+				Log.warning("CalendarLegend " + sLegendId + " does not exist!", oMonth);
 			}
 		}
 
@@ -315,17 +325,18 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sa
 		CalendarUtils._checkCalendarDate(oDay);
 		var oSecondaryDay = new CalendarDate(oDay, oHelper.sSecondaryCalendarType),
 			mAccProps = {
-				role: "gridcell",
+				role: oMonth._getAriaRole(),
 				selected: false,
 				label: "",
 				describedby: ""
 			},
-			bBeforeFirstYear = oDay._bBeforeFirstYear;
+			bBeforeFirstYear = oDay._bBeforeFirstYear,
+			sAriaType = "";
 
 		var sYyyymmdd = oMonth._oFormatYyyymmdd.format(oDay.toUTCJSDate(), true);
 		var iWeekDay = oDay.getDay();
 		var iSelected = oMonth._checkDateSelected(oDay);
-		var oType = oMonth._getDateType(oDay);
+		var aDayTypes = oMonth._getDateTypes(oDay);
 		var bEnabled = oMonth._checkDateEnabled(oDay);
 		var i = 0;
 
@@ -390,19 +401,23 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sa
 			mAccProps["describedby"] = mAccProps["describedby"] + " " + oHelper.sId + "-End";
 		}
 
-		if (oType && oType.type != sap.ui.unified.CalendarDayType.None) {
-			if (oType.type === sap.ui.unified.CalendarDayType.NonWorking) {
-				oRm.addClass("sapUiCalItemWeekEnd");
-			} else {
-				oRm.addClass("sapUiCalItem" + oType.type);
-				if (oType.tooltip) {
-					oRm.writeAttributeEscaped('title', oType.tooltip);
+		aDayTypes.forEach(function(oDayType) {
+			if (oDayType.type != CalendarDayType.None) {
+				if (oDayType.type === CalendarDayType.NonWorking) {
+					oRm.addClass("sapUiCalItemWeekEnd");
+					return;
+				}
+				oRm.addClass("sapUiCalItem" + oDayType.type);
+				sAriaType = oDayType.type;
+				if (oDayType.tooltip) {
+					oRm.writeAttributeEscaped('title', oDayType.tooltip);
 				}
 			}
-		}
+		});
+
 
 		//oMonth.getDate() is a public date object, so it is always considered local timezones.
-		if (oMonth.getParent() && oMonth.getParent().getMetadata().getName() === "CalendarOneMonthInterval" && oDay.getMonth() !== oMonth.getStartDate().getMonth()){
+		if (oMonth.getParent() && oMonth.getParent().getMetadata().getName() === "sap.ui.unified.CalendarOneMonthInterval" && oDay.getMonth() !== oMonth.getStartDate().getMonth()){
 			oRm.addClass("sapUiCalItemOtherMonth");
 		}
 
@@ -430,30 +445,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sa
 		}
 		mAccProps["label"] = mAccProps["label"] + oHelper.oFormatLong.format(oDay.toUTCJSDate(), true);
 
-		if (oType && oType.type != sap.ui.unified.CalendarDayType.None) {
-			var sTypeLabelId,
-				oStaticLabel;
-
-			// as legend must not be rendered add text of type
-			if (oHelper.oLegend) {
-				var oLegendItem = oHelper.oLegend._getItemByType(oType.type);
-				if (oLegendItem) {
-					sTypeLabelId = oLegendItem.getId() + "-Text";
-				}
-			}
-
-			if (!sTypeLabelId) {
-				//use static invisible labels - "Type 1", "Type 2"
-				oStaticLabel = CalendarLegend.getTypeAriaText(oType.type);
-				if (oStaticLabel) {
-					sTypeLabelId = oStaticLabel.getId();
-				}
-			}
-
-			if (sTypeLabelId) {
-				mAccProps["describedby"] += " " + sTypeLabelId;
-			}
+		if (sAriaType !== "") {
+			CalendarLegendRenderer.addCalendarTypeAccInfo(mAccProps, sAriaType, oHelper.oLegend);
 		}
+
 		if (oHelper.sSecondaryCalendarType) {
 			mAccProps["label"] = mAccProps["label"] + " " + oMonth._oFormatSecondaryLong.format(oSecondaryDay.toUTCJSDate(), true);
 		}

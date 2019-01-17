@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.core.service.Service
-sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object'],
-	function(jQuery, BaseObject) {
+sap.ui.define(['sap/ui/base/Object', "sap/base/assert", "sap/base/Log"],
+	function(BaseObject, assert, Log) {
 	"use strict";
 
 
@@ -71,7 +71,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object'],
 	 *
 	 * @extends sap.ui.base.Object
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @alias sap.ui.core.service.Service
 	 * @abstract
 	 * @private
@@ -92,8 +92,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object'],
 			// Service context can either be undefined or null
 			// or an object with the properties scopeObject and scopeType
 			if (oServiceContext) {
-				jQuery.sap.assert(typeof oServiceContext.scopeObject === "object", "The service context requires a scope object!");
-				jQuery.sap.assert(typeof oServiceContext.scopeType === "string", "The service context requires a scope type!");
+				assert(typeof oServiceContext.scopeObject === "object", "The service context requires a scope object!");
+				assert(typeof oServiceContext.scopeType === "string", "The service context requires a scope type!");
 			}
 
 			this._oServiceContext = oServiceContext;
@@ -145,7 +145,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object'],
 				if (!sMember.match(/^(metadata|constructor|getContext|destroy)$/)) {
 					this[sMember] = oServiceInfo[sMember];
 				} else {
-					jQuery.sap.log.warning("The member " + sMember + " is not allowed for anonymous service declaration and will be ignored!");
+					Log.warning("The member " + sMember + " is not allowed for anonymous service declaration and will be ignored!");
 				}
 			}
 			Service.apply(this, arguments);

@@ -1,0 +1,91 @@
+{
+	"_version": "1.1.0",
+	"resources": [
+		{
+			"name": ".theme",
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": ".theming",
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "BrowserScrollbar.less",
+			"designtime": true,
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "DatePicker.less",
+			"designtime": true,
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "Icon.less",
+			"designtime": true,
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "base.less",
+			"designtime": true,
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "fonts/72-Bold.woff",
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "fonts/72-Bold.woff2",
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "fonts/72-Regular.woff",
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "fonts/72-Regular.woff2",
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "global.less",
+			"designtime": true,
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "library-RTL-dbg.css",
+			"isDebug": true,
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "library-RTL.css",
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "library-dbg.css",
+			"isDebug": true,
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "library-parameters.json",
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "library.css",
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "library.less",
+			"designtime": true,
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "library.source.less",
+			"designtime": true,
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "shared.less",
+			"designtime": true,
+			"theme": "sap_fiori_3"
+		}
+	]
+}

@@ -1,13 +1,17 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides default renderer for control sap.ui.commons.RowRepeater
-sap.ui.define(['jquery.sap.global', './Button', './Paginator', './Toolbar'],
-	function(jQuery, Button, Paginator, Toolbar) {
+sap.ui.define(['./Button', './Paginator', './Toolbar', './library'],
+	function(Button, Paginator, Toolbar, library) {
 	"use strict";
+
+
+	// shortcut for sap.ui.commons.RowRepeaterDesign
+	var RowRepeaterDesign = library.RowRepeaterDesign;
 
 
 	/**
@@ -34,7 +38,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Paginator', './Toolbar'],
 		oRenderManager.write(">");
 
 		// render the row repeater header (not in BARESHELL design)
-		if ( oControl.getDesign() !== sap.ui.commons.RowRepeaterDesign.BareShell) {
+		if ( oControl.getDesign() !== RowRepeaterDesign.BareShell) {
 			this.renderHeader(oRenderManager, oControl);
 		}
 
@@ -42,7 +46,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Paginator', './Toolbar'],
 		this.renderBody(oRenderManager, oControl);
 
 		// render the row repeater footer (not in BARESHELL design)
-		if ( oControl.getDesign() !== sap.ui.commons.RowRepeaterDesign.BareShell) {
+		if ( oControl.getDesign() !== RowRepeaterDesign.BareShell) {
 			this.renderFooter(oRenderManager, oControl);
 		}
 

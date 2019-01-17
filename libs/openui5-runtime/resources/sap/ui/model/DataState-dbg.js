@@ -1,10 +1,10 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define([ 'jquery.sap.global', '../base/Object' ], function(jQuery, BaseObject) {
+sap.ui.define(["sap/ui/thirdparty/jquery", '../base/Object', "sap/base/util/deepEqual"], function(jQuery, BaseObject, deepEqual) {
 	"use strict";
 
 	/**
@@ -52,9 +52,8 @@ sap.ui.define([ 'jquery.sap.global', '../base/Object' ], function(jQuery, BaseOb
 	 * @extends sap.ui.base.Object
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
-	 * @constructor
 	 * @public
 	 * @alias sap.ui.model.DataState
 	 */
@@ -75,7 +74,7 @@ sap.ui.define([ 'jquery.sap.global', '../base/Object' ], function(jQuery, BaseOb
 
 			};
 			//the resolved path of the binding to check for binding context changes
-			this.mChangedProperties = jQuery.sap.extend({},this.mProperties);
+			this.mChangedProperties = Object.assign({},this.mProperties);
 		}
 	});
 
@@ -109,7 +108,7 @@ sap.ui.define([ 'jquery.sap.global', '../base/Object' ], function(jQuery, BaseOb
 		for (var sProperty in this.mChangedProperties) {
 			var vChangedValue = this.mChangedProperties[sProperty].value;
 
-			if (!jQuery.sap.equal(this.mProperties[sProperty], vChangedValue)) {
+			if (!deepEqual(this.mProperties[sProperty], vChangedValue)) {
 				if (Array.isArray(vChangedValue)) {
 					vChangedValue = vChangedValue.slice(0);
 				}
@@ -225,7 +224,7 @@ sap.ui.define([ 'jquery.sap.global', '../base/Object' ], function(jQuery, BaseOb
 		var vOriginalValue = this.mChangedProperties["originalValue"];
 		var bControlDirty = this.mChangedProperties["invalidValue"] !== undefined;
 
-		return bControlDirty || !jQuery.sap.equal(vValue, vOriginalValue);
+		return bControlDirty || !deepEqual(vValue, vOriginalValue);
 	};
 
 	/**
@@ -241,7 +240,7 @@ sap.ui.define([ 'jquery.sap.global', '../base/Object' ], function(jQuery, BaseOb
 
 	/**
 	 * Returns whether the data state is in laundering.
-	 * If data is send to the server the data state becomes laundering until the
+	 * If data is sent to the server, the data state becomes laundering until the
 	 * data was accepted or rejected.
 	 *
 	 * @returns {boolean} true if the data is laundering
@@ -345,9 +344,9 @@ sap.ui.define([ 'jquery.sap.global', '../base/Object' ], function(jQuery, BaseOb
 	DataState.prototype.changed = function(bNewState) {
 		if (bNewState === false) {
 			//clear the changed properties as changed was reset;
-			this.mProperties = jQuery.sap.extend({},this.mChangedProperties);
+			this.mProperties = Object.assign({},this.mChangedProperties);
 		}
-		return !jQuery.sap.equal(this.mChangedProperties,this.mProperties);
+		return !deepEqual(this.mChangedProperties,this.mProperties);
 	};
 
 	/**
@@ -368,7 +367,7 @@ sap.ui.define([ 'jquery.sap.global', '../base/Object' ], function(jQuery, BaseOb
 	DataState.prototype.getChanges = function() {
 		var mChanges = {};
 		jQuery.each(this.mChangedProperties,function(sProperty, vValue) {
-			if (!jQuery.sap.equal(this.mChangedProperties[sProperty],this.mProperties[sProperty])) {
+			if (!deepEqual(this.mChangedProperties[sProperty],this.mProperties[sProperty])) {
 				mChanges[sProperty] = {};
 				mChanges[sProperty].value = this.mChangedProperties[sProperty];
 				mChanges[sProperty].oldValue = this.mProperties[sProperty];

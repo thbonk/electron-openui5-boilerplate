@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.table.RowActionItem.
-sap.ui.define(['sap/ui/core/Element', './library', 'sap/ui/unified/MenuItem'],
-	function(Element, library, MenuItem) {
+sap.ui.define(['sap/ui/core/Element', './library', 'sap/ui/unified/MenuItem', "sap/ui/table/TableUtils"],
+	function(Element, library, MenuItem, TableUtils) {
 	"use strict";
 
 	// shortcuts
@@ -25,7 +25,7 @@ sap.ui.define(['sap/ui/core/Element', './library', 'sap/ui/unified/MenuItem'],
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @since 1.45.0
 	 *
 	 * @constructor
@@ -189,10 +189,10 @@ sap.ui.define(['sap/ui/core/Element', './library', 'sap/ui/unified/MenuItem'],
 			return sText;
 		}
 		if (this.getType() == RowActionType.Navigation) {
-			return this.getParent()._oResBundle.getText("TBL_ROW_ACTION_NAVIGATE");
+			return TableUtils.getResourceText("TBL_ROW_ACTION_NAVIGATE");
 		}
 		if (this.getType() == RowActionType.Delete) {
-			return this.getParent()._oResBundle.getText("TBL_ROW_ACTION_DELETE");
+			return TableUtils.getResourceText("TBL_ROW_ACTION_DELETE");
 		}
 		return null;
 	};
@@ -209,8 +209,8 @@ sap.ui.define(['sap/ui/core/Element', './library', 'sap/ui/unified/MenuItem'],
 
 	/**
 	 * Informs the parent RowAction control about changes of this item.
-	 * @see sap.ui.table.RowAction#_updateIcons
 	 * @param {boolean} bForce Whether the list of visible items needs to be determined or cache can be used.
+	 * @see sap.ui.table.RowAction#_updateIcons
 	 * @private
 	 */
 	Item.prototype._updateRowAction = function(bForce) {

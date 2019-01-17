@@ -1,11 +1,15 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define(["sap/ui/core/library"],
+	function(coreLibrary) {
 	"use strict";
+
+
+	// shortcut for sap.ui.core.TextDirection
+	var TextDirection = coreLibrary.TextDirection;
 
 
 	/**
@@ -13,6 +17,10 @@ sap.ui.define(['jquery.sap.global'],
 	 * @namespace
 	 */
 	var ObjectAttributeRenderer = {
+		MAX_LINES: {
+			SINGLE_LINE: 1,
+			MULTI_LINE: 2
+		}
 	};
 
 	/**
@@ -26,14 +34,22 @@ sap.ui.define(['jquery.sap.global'],
 			sTooltip = oOA.getTooltip_AsString();
 
 		if (oOA._isEmpty()) {
+			oRm.write("<div");
+			oRm.writeControlData(oOA);
+			oRm.addClass("sapMObjectAttributeDiv");
+			oRm.addClass("sapUiHidden");
+			oRm.writeClasses();
+			oRm.write(">");
+			oRm.write("</div>");
 			return;
 		}
 
 		oRm.write("<div");
 		oRm.writeControlData(oOA);
 		oRm.addClass("sapMObjectAttributeDiv");
-		// add tabindex, "active" class and ARIA only on a simulated link
-		if (oOA._isSimulatedLink()) {
+		// add tabindex, "active" class and ARIA only when the ObjectAttribute is clickable
+		// e.g. when is active ot the CustomContent is sap.m.Link
+		if (oOA._isClickable()) {
 			oRm.addClass("sapMObjectAttributeActive");
 			oRm.writeAttribute("tabindex", "0");
 			oRm.writeAccessibilityState(oOA, {
@@ -48,9 +64,10 @@ sap.ui.define(['jquery.sap.global'],
 
 		oRm.write(">");
 
-		// If the attribute is active only the "text" should be clickable, so render title, colon and text in different spans
-		// For the ObjectHeader the rendering of the parts of the ObjectAttribute is always in separate spans
-		if (oOA.getActive() || (oParent instanceof sap.m.ObjectHeader)) {
+		// If the attribute is link (active or customContent is Link) only the "text" should be clickable,
+		// so render title, colon and text in different spans.
+		// For the ObjectHeader the rendering of the parts of the ObjectAttribute is always in separate spans, even when it is not active.
+		if (oOA._isClickable() || oParent instanceof sap.m.ObjectHeader) {
 			this.renderActiveTitle(oRm, oOA);
 			this.renderActiveText(oRm, oOA, oParent);
 		} else {
@@ -84,7 +101,7 @@ sap.ui.define(['jquery.sap.global'],
 		oRm.write("<span id=\"" + oOA.getId() + "-text\"");
 		oRm.addClass("sapMObjectAttributeText");
 
-		if (sTextDir && sTextDir !== sap.ui.core.TextDirection.Inherit) {
+		if (sTextDir && sTextDir !== TextDirection.Inherit) {
 			oRm.writeAttribute("dir", sTextDir.toLowerCase());
 		}
 
@@ -93,9 +110,9 @@ sap.ui.define(['jquery.sap.global'],
 
 		if (oAttrAggregation && oParent) {
 			if ((oParent instanceof sap.m.ObjectHeader) && !oOA.getParent().getResponsive()) {
-				oOA._setControlWrapping(oAttrAggregation, true, sap.m.ObjectAttribute.MAX_LINES.MULTI_LINE);
+				oOA._setControlWrapping(oAttrAggregation, true, ObjectAttributeRenderer.MAX_LINES.MULTI_LINE);
 			} else {
-				oOA._setControlWrapping(oAttrAggregation, false, sap.m.ObjectAttribute.MAX_LINES.SINGLE_LINE);
+				oOA._setControlWrapping(oAttrAggregation, false, ObjectAttributeRenderer.MAX_LINES.SINGLE_LINE);
 			}
 			oRm.renderControl(oAttrAggregation);
 		} else {

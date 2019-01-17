@@ -1,16 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
 	'./Base',
-	'sap/m/ToolbarSpacer'
+	'sap/m/Button'
 ],
 function(
 	Base,
-	ToolbarSpacer
+	Button
 ) {
 	"use strict";
 
@@ -22,7 +22,7 @@ function(
 	 * @extends sap.ui.rta.toolbar.Base
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @private
@@ -41,20 +41,23 @@ function(
 				"exit": {},
 				"restore": {}
 			}
+		},
+		constructor: function() {
+			Base.apply(this, arguments);
+			this.setJustifyContent("End");
 		}
 	});
 
 	Personalization.prototype.buildControls = function() {
 		var aControls = [
-			new ToolbarSpacer(),
-			new sap.m.Button({
+			new Button({
 				type: "Transparent",
 				text: this.getTextResources().getText("BTN_RESTORE"),
 				tooltip: this.getTextResources().getText("BTN_RESTORE"),
 				visible: true,
 				press: this.eventHandler.bind(this, 'Restore')
 			}).data('name', 'restore'),
-			new sap.m.Button({
+			new Button({
 				type:"Emphasized",
 				text: this.getTextResources().getText("BTN_DONE"),
 				tooltip: this.getTextResources().getText("BTN_DONE_TOOLTIP"),
@@ -76,5 +79,4 @@ function(
 	};
 
 	return Personalization;
-
 }, true);

@@ -1,16 +1,22 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides object sap.ui.dt.test.Element.
 sap.ui.define([
-	'jquery.sap.global',
-	'sap/ui/dt/ElementUtil',
-	'sap/ui/dt/OverlayRegistry'
+	"sap/ui/thirdparty/jquery",
+	"sap/ui/dt/ElementUtil",
+	"sap/ui/dt/DOMUtil",
+	"sap/ui/dt/OverlayRegistry"
 ],
-function(jQuery, ElementUtil, OverlayRegistry) {
+function(
+	jQuery,
+	ElementUtil,
+	DOMUtil,
+	OverlayRegistry
+) {
 	"use strict";
 
 	/**
@@ -20,7 +26,7 @@ function(jQuery, ElementUtil, OverlayRegistry) {
 	 * Utility functionality for Element tests
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @private
 	 * @static
@@ -75,10 +81,10 @@ function(jQuery, ElementUtil, OverlayRegistry) {
 		if (oDesignTimeMetadata && !oDesignTimeMetadata.isIgnored(oElement)) {
 			mAggregationTest.ignored = false;
 			mAggregationTest.domRefDeclared = !!oDesignTimeMetadata.getDomRef();
-			var oAggregationDomRef = oAggregationOverlay.getAssociatedDomRef();
-			if (oAggregationDomRef) {
+			var $AggregationDomRef = oAggregationOverlay.getAssociatedDomRef();
+			if ($AggregationDomRef) {
 				mAggregationTest.domRefFound = true;
-				mAggregationTest.domRefVisible = jQuery(oAggregationDomRef).is(":visible");
+				mAggregationTest.domRefVisible = DOMUtil.isVisible($AggregationDomRef.get(0));
 			}
 
 			var mGeometry = oAggregationOverlay.getGeometry();
@@ -86,7 +92,7 @@ function(jQuery, ElementUtil, OverlayRegistry) {
 				var mSize = mGeometry.size;
 				mAggregationTest.overlayTooSmall = (mSize.width <= MIN_SIZE || mSize.height <= MIN_SIZE);
 				mAggregationTest.overlayGeometryCalculatedByChildren = !mGeometry.domRef;
-				mAggregationTest.overlayVisible = oAggregationOverlay.$().is(":visible");
+				mAggregationTest.overlayVisible = mGeometry.visible;
 			}
 		}
 

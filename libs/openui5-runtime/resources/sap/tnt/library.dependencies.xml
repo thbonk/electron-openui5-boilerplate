@@ -1,98 +1,127 @@
 <?xml version="1.0" ?>
 <library  version="2.0" name="sap.tnt">
-  <module name="sap/tnt/NavigationList.js" size="6775" compressedSize="3516">
+  <module name="sap/tnt/InfoLabel.js" size="6728" compressedSize="2029">
+    <description>Provides control sap.tnt.InfoLabel</description>
+    <requires>
+      <module name="sap/base/Log.js"/>
+      <module name="sap/tnt/InfoLabelRenderer.js"/>
+      <module name="sap/tnt/library.js"/>
+      <module name="sap/ui/core/Control.js"/>
+      <module name="sap/ui/core/library.js"/>
+      <module name="ui5loader-autoconfig.js"/>
+    </requires>
+  </module>
+  <module name="sap/tnt/InfoLabelRenderer.js" size="2418" compressedSize="1199">
+    <description>Provides the default renderer for control sap.tnt.InfoLabel</description>
+    <requires>
+      <module name="sap/tnt/library.js"/>
+      <module name="sap/ui/core/Renderer.js"/>
+      <module name="sap/ui/core/library.js"/>
+      <module name="ui5loader-autoconfig.js"/>
+    </requires>
+  </module>
+  <module name="sap/tnt/NavigationList.js" size="8777" compressedSize="4433">
     <description>Provides control sap.tnt.NavigationList</description>
     <requires>
       <module name="jquery.sap.global.js"/>
+      <module name="sap/base/Log.js"/>
       <module name="sap/m/Popover.js"/>
+      <module name="sap/tnt/NavigationListItem.js" conditional="true"/>
+      <module name="sap/tnt/NavigationListRenderer.js"/>
       <module name="sap/tnt/library.js"/>
       <module name="sap/ui/core/Control.js"/>
       <module name="sap/ui/core/InvisibleText.js"/>
       <module name="sap/ui/core/delegate/ItemNavigation.js"/>
+      <module name="ui5loader-autoconfig.js"/>
     </requires>
   </module>
-  <module name="sap/tnt/NavigationListItem.js" size="16904" compressedSize="9078">
+  <module name="sap/tnt/NavigationListItem.js" size="18028" compressedSize="9366">
     <description>Provides control sap.tnt.NavigationListItem.</description>
     <requires>
-      <module name="jquery.sap.global.js"/>
       <module name="sap/tnt/NavigationList.js"/>
       <module name="sap/tnt/library.js"/>
       <module name="sap/ui/core/Icon.js"/>
       <module name="sap/ui/core/IconPool.js"/>
       <module name="sap/ui/core/Item.js"/>
       <module name="sap/ui/core/Renderer.js"/>
+      <module name="sap/ui/events/KeyCodes.js"/>
+      <module name="ui5loader-autoconfig.js"/>
     </requires>
   </module>
-  <module name="sap/tnt/NavigationListRenderer.js" size="1620" compressedSize="691">
+  <module name="sap/tnt/NavigationListRenderer.js" size="1794" compressedSize="716">
     <description>Provides the default renderer for control sap.tnt.NavigationList</description>
     <requires>
-      <module name="jquery.sap.global.js"/>
       <module name="sap/ui/core/Renderer.js"/>
+      <module name="ui5loader-autoconfig.js"/>
     </requires>
   </module>
-  <module name="sap/tnt/SideNavigation.js" size="9683" compressedSize="5087">
+  <module name="sap/tnt/SideNavigation.js" size="12348" compressedSize="5961">
     <description>Provides control sap.t.SideNavigation.</description>
     <requires>
-      <module name="jquery.sap.global.js"/>
+      <module name="sap/tnt/SideNavigationRenderer.js"/>
       <module name="sap/tnt/library.js"/>
       <module name="sap/ui/core/Control.js"/>
       <module name="sap/ui/core/Icon.js"/>
       <module name="sap/ui/core/ResizeHandler.js"/>
       <module name="sap/ui/core/delegate/ScrollEnablement.js"/>
+      <module name="ui5loader-autoconfig.js"/>
     </requires>
   </module>
   <module name="sap/tnt/SideNavigationRenderer.js" size="4185" compressedSize="1995">
-    <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
+    <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2018 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
     <requires>
-      <module name="jquery.sap.global.js"/>
+      <module name="ui5loader-autoconfig.js"/>
     </requires>
   </module>
-  <module name="sap/tnt/ToolHeader.js" size="4420" compressedSize="1757">
+  <module name="sap/tnt/ToolHeader.js" size="4498" compressedSize="1718">
     <description>Provides control sap.tnt.ToolHeader</description>
     <requires>
-      <module name="jquery.sap.global.js"/>
       <module name="sap/m/OverflowToolbar.js"/>
       <module name="sap/m/OverflowToolbarAssociativePopover.js"/>
+      <module name="sap/tnt/ToolHeaderRenderer.js"/>
       <module name="sap/tnt/library.js"/>
       <module name="sap/ui/core/Control.js"/>
+      <module name="ui5loader-autoconfig.js"/>
     </requires>
   </module>
   <module name="sap/tnt/ToolHeaderRenderer.js" size="1286" compressedSize="696">
-    <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
+    <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2018 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
     <requires>
-      <module name="jquery.sap.global.js"/>
       <module name="sap/m/BarInPageEnabler.js"/>
       <module name="sap/m/OverflowToolbarRenderer.js"/>
       <module name="sap/ui/core/Renderer.js"/>
+      <module name="ui5loader-autoconfig.js"/>
     </requires>
   </module>
-  <module name="sap/tnt/ToolHeaderUtilitySeparator.js" size="1390" compressedSize="432">
+  <module name="sap/tnt/ToolHeaderUtilitySeparator.js" size="1360" compressedSize="410">
     <description>Provides control sap.tnt.ToolHeaderUtilitySeparator.</description>
     <requires>
-      <module name="jquery.sap.global.js"/>
       <module name="sap/tnt/library.js"/>
       <module name="sap/ui/core/Control.js"/>
+      <module name="ui5loader-autoconfig.js"/>
     </requires>
   </module>
-  <module name="sap/tnt/ToolPage.js" size="5518" compressedSize="2453">
+  <module name="sap/tnt/ToolPage.js" size="5608" compressedSize="2494">
     <description>Provides control sap.t.ToolPage.</description>
     <requires>
-      <module name="jquery.sap.global.js"/>
+      <module name="sap/tnt/ToolPageRenderer.js"/>
       <module name="sap/tnt/library.js"/>
       <module name="sap/ui/Device.js"/>
       <module name="sap/ui/core/Control.js"/>
       <module name="sap/ui/core/ResizeHandler.js"/>
+      <module name="ui5loader-autoconfig.js"/>
     </requires>
   </module>
-  <module name="sap/tnt/ToolPageRenderer.js" size="3061" compressedSize="1659">
-    <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2017 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
+  <module name="sap/tnt/ToolPageRenderer.js" size="3172" compressedSize="1734">
+    <description>! UI development toolkit for HTML5 (OpenUI5) (c) Copyright 2009-2018 SAP SE or an SAP affiliate company. Licensed under the Apache License, Version 2.0 - see LICENSE.txt.</description>
     <requires>
-      <module name="jquery.sap.global.js"/>
+      <module name="ui5loader-autoconfig.js"/>
     </requires>
   </module>
-  <module name="sap/tnt/library-preload.js" size="27795">
+  <module name="sap/tnt/library-h2-preload.js" size="3252">
     <requires>
       <module name="jquery.sap.global.js"/>
+      <module name="sap/base/Log.js"/>
       <module name="sap/m/BarInPageEnabler.js"/>
       <module name="sap/m/OverflowToolbar.js"/>
       <module name="sap/m/OverflowToolbarAssociativePopover.js"/>
@@ -110,8 +139,53 @@
       <module name="sap/ui/core/delegate/ItemNavigation.js"/>
       <module name="sap/ui/core/delegate/ScrollEnablement.js"/>
       <module name="sap/ui/core/library.js"/>
+      <module name="sap/ui/events/KeyCodes.js"/>
+      <module name="ui5loader-autoconfig.js"/>
     </requires>
     <includes>
+      <module name="sap/tnt/library.js"/>
+      <module name="sap/tnt/manifest.json"/>
+      <module name="sap/tnt/InfoLabel.js"/>
+      <module name="sap/tnt/InfoLabelRenderer.js"/>
+      <module name="sap/tnt/NavigationList.js"/>
+      <module name="sap/tnt/NavigationListItem.js"/>
+      <module name="sap/tnt/NavigationListRenderer.js"/>
+      <module name="sap/tnt/SideNavigation.js"/>
+      <module name="sap/tnt/SideNavigationRenderer.js"/>
+      <module name="sap/tnt/ToolHeader.js"/>
+      <module name="sap/tnt/ToolHeaderRenderer.js"/>
+      <module name="sap/tnt/ToolHeaderUtilitySeparator.js"/>
+      <module name="sap/tnt/ToolPage.js"/>
+      <module name="sap/tnt/ToolPageRenderer.js"/>
+    </includes>
+  </module>
+  <module name="sap/tnt/library-preload.js" size="32868">
+    <requires>
+      <module name="jquery.sap.global.js"/>
+      <module name="sap/base/Log.js"/>
+      <module name="sap/m/BarInPageEnabler.js"/>
+      <module name="sap/m/OverflowToolbar.js"/>
+      <module name="sap/m/OverflowToolbarAssociativePopover.js"/>
+      <module name="sap/m/OverflowToolbarRenderer.js"/>
+      <module name="sap/m/Popover.js"/>
+      <module name="sap/m/library.js"/>
+      <module name="sap/ui/Device.js"/>
+      <module name="sap/ui/core/Control.js"/>
+      <module name="sap/ui/core/Icon.js"/>
+      <module name="sap/ui/core/IconPool.js"/>
+      <module name="sap/ui/core/InvisibleText.js"/>
+      <module name="sap/ui/core/Item.js"/>
+      <module name="sap/ui/core/Renderer.js"/>
+      <module name="sap/ui/core/ResizeHandler.js"/>
+      <module name="sap/ui/core/delegate/ItemNavigation.js"/>
+      <module name="sap/ui/core/delegate/ScrollEnablement.js"/>
+      <module name="sap/ui/core/library.js"/>
+      <module name="sap/ui/events/KeyCodes.js"/>
+      <module name="ui5loader-autoconfig.js"/>
+    </requires>
+    <includes>
+      <module name="sap/tnt/InfoLabel.js"/>
+      <module name="sap/tnt/InfoLabelRenderer.js"/>
       <module name="sap/tnt/NavigationList.js"/>
       <module name="sap/tnt/NavigationListItem.js"/>
       <module name="sap/tnt/NavigationListRenderer.js"/>
@@ -129,6 +203,7 @@
   <module name="sap/tnt/library-preload.json" size="0">
     <requires>
       <module name="jquery.sap.global.js"/>
+      <module name="sap/base/Log.js"/>
       <module name="sap/m/BarInPageEnabler.js"/>
       <module name="sap/m/OverflowToolbar.js"/>
       <module name="sap/m/OverflowToolbarAssociativePopover.js"/>
@@ -148,8 +223,12 @@
       <module name="sap/ui/core/delegate/ScrollEnablement.js"/>
       <module name="sap/ui/core/library-preload.json"/>
       <module name="sap/ui/core/library.js"/>
+      <module name="sap/ui/events/KeyCodes.js"/>
+      <module name="ui5loader-autoconfig.js"/>
     </requires>
     <includes>
+      <module name="sap/tnt/InfoLabel.js"/>
+      <module name="sap/tnt/InfoLabelRenderer.js"/>
       <module name="sap/tnt/NavigationList.js"/>
       <module name="sap/tnt/NavigationListItem.js"/>
       <module name="sap/tnt/NavigationListRenderer.js"/>
@@ -164,14 +243,98 @@
       <module name="sap/tnt/manifest.json"/>
     </includes>
   </module>
-  <module name="sap/tnt/library.js" size="1024" compressedSize="606">
+  <module name="sap/tnt/library.js" size="1502" compressedSize="676">
     <description>Initialization Code and shared classes of library sap.tnt.</description>
     <requires>
-      <module name="jquery.sap.global.js"/>
       <module name="sap/m/library.js"/>
       <module name="sap/ui/core/library.js"/>
+      <module name="ui5loader-autoconfig.js"/>
     </requires>
   </module>
-  <module name="sap/tnt/manifest.json" size="782">
+  <module name="sap/tnt/manifest.json" size="1203">
+  </module>
+  <module name="sap/tnt/messagebundle.properties" size="288">
+  </module>
+  <module name="sap/tnt/messagebundle_ar.properties" size="385">
+  </module>
+  <module name="sap/tnt/messagebundle_bg.properties" size="463">
+  </module>
+  <module name="sap/tnt/messagebundle_ca.properties" size="254">
+  </module>
+  <module name="sap/tnt/messagebundle_cs.properties" size="292">
+  </module>
+  <module name="sap/tnt/messagebundle_da.properties" size="222">
+  </module>
+  <module name="sap/tnt/messagebundle_de.properties" size="223">
+  </module>
+  <module name="sap/tnt/messagebundle_el.properties" size="439">
+  </module>
+  <module name="sap/tnt/messagebundle_en.properties" size="222">
+  </module>
+  <module name="sap/tnt/messagebundle_en_US_sappsd.properties" size="421">
+  </module>
+  <module name="sap/tnt/messagebundle_en_US_saptrc.properties" size="268">
+  </module>
+  <module name="sap/tnt/messagebundle_es.properties" size="263">
+  </module>
+  <module name="sap/tnt/messagebundle_et.properties" size="224">
+  </module>
+  <module name="sap/tnt/messagebundle_fi.properties" size="231">
+  </module>
+  <module name="sap/tnt/messagebundle_fr.properties" size="257">
+  </module>
+  <module name="sap/tnt/messagebundle_hi.properties" size="355">
+  </module>
+  <module name="sap/tnt/messagebundle_hr.properties" size="239">
+  </module>
+  <module name="sap/tnt/messagebundle_hu.properties" size="244">
+  </module>
+  <module name="sap/tnt/messagebundle_it.properties" size="245">
+  </module>
+  <module name="sap/tnt/messagebundle_iw.properties" size="331">
+  </module>
+  <module name="sap/tnt/messagebundle_ja.properties" size="274">
+  </module>
+  <module name="sap/tnt/messagebundle_kk.properties" size="397">
+  </module>
+  <module name="sap/tnt/messagebundle_ko.properties" size="284">
+  </module>
+  <module name="sap/tnt/messagebundle_lt.properties" size="270">
+  </module>
+  <module name="sap/tnt/messagebundle_lv.properties" size="267">
+  </module>
+  <module name="sap/tnt/messagebundle_ms.properties" size="231">
+  </module>
+  <module name="sap/tnt/messagebundle_nl.properties" size="219">
+  </module>
+  <module name="sap/tnt/messagebundle_no.properties" size="222">
+  </module>
+  <module name="sap/tnt/messagebundle_pl.properties" size="244">
+  </module>
+  <module name="sap/tnt/messagebundle_pt.properties" size="228">
+  </module>
+  <module name="sap/tnt/messagebundle_ro.properties" size="243">
+  </module>
+  <module name="sap/tnt/messagebundle_ru.properties" size="463">
+  </module>
+  <module name="sap/tnt/messagebundle_sh.properties" size="225">
+  </module>
+  <module name="sap/tnt/messagebundle_sk.properties" size="277">
+  </module>
+  <module name="sap/tnt/messagebundle_sl.properties" size="223">
+  </module>
+  <module name="sap/tnt/messagebundle_sv.properties" size="222">
+  </module>
+  <module name="sap/tnt/messagebundle_th.properties" size="370">
+  </module>
+  <module name="sap/tnt/messagebundle_tr.properties" size="231">
+  </module>
+  <module name="sap/tnt/messagebundle_uk.properties" size="445">
+  </module>
+  <module name="sap/tnt/messagebundle_vi.properties" size="263">
+  </module>
+  <module name="sap/tnt/messagebundle_zh_CN.properties" size="250">
+  </module>
+  <module name="sap/tnt/messagebundle_zh_TW.properties" size="256">
   </module>
 </library>

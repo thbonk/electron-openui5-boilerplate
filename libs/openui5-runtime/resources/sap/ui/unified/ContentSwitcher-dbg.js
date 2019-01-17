@@ -1,13 +1,22 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.unified.ContentSwitcher.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
-	function(jQuery, Control, library) {
+sap.ui.define([
+	'sap/ui/core/Control',
+	'./library',
+	"./ContentSwitcherRenderer",
+	"sap/base/Log"
+], function(Control, library, ContentSwitcherRenderer, Log) {
 	"use strict";
+
+
+
+	// shortcut for sap.ui.unified.ContentSwitcherAnimation
+	var ContentSwitcherAnimation = library.ContentSwitcherAnimation;
 
 
 
@@ -22,7 +31,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -113,21 +122,21 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 
 	//////////////////////////////////////// Overridden Methods ////////////////////////////////////////
 
-	    ///////////////////////////////// Property "activeContent" /////////////////////////////////
+		///////////////////////////////// Property "activeContent" /////////////////////////////////
 
 	ContentSwitcher.prototype.setActiveContent = function(iNumber) {
-		iNumber = parseInt(iNumber, 10);
+		iNumber = parseInt(iNumber);
 
 		if (isNaN(iNumber) || iNumber < 1) {
 			iNumber = 1;
 
-			jQuery.sap.log.warning(
+			Log.warning(
 				"setActiveContent argument must be either 1 or 2. Active content set to 1."
 			);
 		} else if (iNumber > 2) {
 			iNumber = 2;
 
-			jQuery.sap.log.warning(
+			Log.warning(
 				"setActiveContent argument must be either 1 or 2. Active content set to 2."
 			);
 		}
@@ -140,14 +149,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	};
 
 
-	    /////////////////////////////////// Property "animation" ///////////////////////////////////
+		/////////////////////////////////// Property "animation" ///////////////////////////////////
 
 	ContentSwitcher.prototype.setAnimation = function(sAnimation, bSuppressInvalidate){
 		if (typeof (sAnimation) !== "string") {
-			sAnimation = sap.ui.unified.ContentSwitcherAnimation.None;
-			jQuery.sap.log.warning(
+			sAnimation = ContentSwitcherAnimation.None;
+			Log.warning(
 				"setAnimation argument must be a string. Animation was set to \"" +
-				sap.ui.unified.ContentSwitcherAnimation.None + "\"."
+				ContentSwitcherAnimation.None + "\"."
 			);
 		}
 
@@ -174,12 +183,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	};
 
 
-	    //////////////////////////////////////// Event "xxx" ///////////////////////////////////////
-	    ///////////////////////////////////// Aggregation "xxx" ////////////////////////////////////
-	    ///////////////////////////////////// Association "xxx" ////////////////////////////////////
+		//////////////////////////////////////// Event "xxx" ///////////////////////////////////////
+		///////////////////////////////////// Aggregation "xxx" ////////////////////////////////////
+		///////////////////////////////////// Association "xxx" ////////////////////////////////////
 
 	})(window);
 
 	return ContentSwitcher;
 
-}, /* bExport= */ true);
+});

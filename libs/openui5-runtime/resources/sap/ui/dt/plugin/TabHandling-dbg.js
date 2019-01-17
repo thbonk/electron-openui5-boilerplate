@@ -1,12 +1,22 @@
 /*
  * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-	'jquery.sap.global', 'sap/ui/dt/Plugin', 'sap/ui/dt/Overlay'
-], function(jQuery, Plugin, Overlay) {
+	"sap/ui/thirdparty/jquery",
+	'sap/ui/dt/Plugin',
+	'sap/ui/dt/Overlay',
+	'sap/ui/dt/OverlayRegistry',
+	// jQuery custom selectors ":focusable"
+	"sap/ui/dom/jquery/Selectors"
+], function(
+	jQuery,
+	Plugin,
+	Overlay,
+	OverlayRegistry
+) {
 	"use strict";
 
 	/**
@@ -17,7 +27,7 @@ sap.ui.define([
 	 * @class The TabHandling plugin adjusts the tabindex for the elements.
 	 * @extends sap.ui.dt.Plugin
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @constructor
 	 * @private
 	 * @since 1.38
@@ -76,12 +86,15 @@ sap.ui.define([
 	TabHandling.prototype.removeTabIndex = function() {
 		var oDesignTime = this.getDesignTime();
 		var aRootElements = oDesignTime.getRootElements();
-		aRootElements.forEach(function(sRootElement) {
-			var oRootDom = sap.ui.getCore().byId(sRootElement).getDomRef();
-			jQuery(oRootDom).find(":focusable:not([tabIndex=-1], #overlay-container *)").each(function(iIndex, oNode) {
-				oNode.setAttribute("data-sap-ui-dt-tabindex", oNode.tabIndex);
-				oNode.setAttribute("tabIndex", -1);
-			});
+		aRootElements.forEach(function(oRootElement) {
+			var oRootOverlay = OverlayRegistry.getOverlay(oRootElement);
+			var $RootElement = oRootOverlay && oRootOverlay.getAssociatedDomRef();
+			if ($RootElement){
+				$RootElement.find(":focusable:not([tabIndex=-1], #overlay-container *)").each(function(iIndex, oNode) {
+					oNode.setAttribute("data-sap-ui-dt-tabindex", oNode.tabIndex);
+					oNode.setAttribute("tabIndex", -1);
+				});
+			}
 		});
 	};
 

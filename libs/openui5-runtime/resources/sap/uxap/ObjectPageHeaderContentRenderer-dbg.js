@@ -1,13 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
 	"./ObjectPageHeaderRenderer",
-	"./ObjectPageLayout",
-	"./ObjectImageHelper"], function (ObjectPageHeaderRenderer, ObjectPageLayout, ObjectImageHelper) {
+	"./ObjectImageHelper"], function (ObjectPageHeaderRenderer, ObjectImageHelper) {
 	"use strict";
 
 	/**
@@ -18,9 +17,9 @@ sap.ui.define([
 
 	ObjectPageHeaderContentRenderer.render = function (oRm, oControl) {
 		var oParent = oControl.getParent(),
-			bParentLayout = (oParent instanceof ObjectPageLayout),
+			bParentLayout = oParent && oParent.isA("sap.uxap.ObjectPageLayout"),
 			oHeader = (oParent && bParentLayout) ? oParent.getHeaderTitle() : undefined,
-			bRenderTitle = (oParent && bParentLayout) ? ((oParent instanceof ObjectPageLayout)
+			bRenderTitle = (oParent && bParentLayout) ? (oParent.isA("sap.uxap.ObjectPageLayout")
 				&& oParent.getShowTitleInHeaderContent()) : false,
 			bRenderEditBtn = bParentLayout && oParent.getShowEditHeaderButton() && oControl.getContent() && oControl.getContent().length > 0;
 
@@ -45,6 +44,7 @@ sap.ui.define([
 				oRm.addClass('sapUxAPObjectPageContentObjectImage-' + oHeader.getObjectImageShape());
 			}
 		}
+		oRm.addClass("sapContrastPlus");
 		oRm.addClass("ui-helper-clearfix");
 		oRm.addClass("sapUxAPObjectPageHeaderContent");
 
@@ -127,7 +127,7 @@ sap.ui.define([
 			oRm.write(">");
 
 			if (bHasSeparatorBefore) {
-				oRm.write("<span class=\"sapUxAPObjectPageHeaderSeparatorBefore\"/>");
+				oRm.write("<span class=\"sapUxAPObjectPageHeaderSeparatorBefore\"></span>");
 			}
 
 			if (bIsFirstControl && bRenderTitle) { // render title inside the first contentItem
@@ -145,7 +145,7 @@ sap.ui.define([
 		oRm.renderControl(oHeaderContentItem);
 
 		if (bHasSeparatorAfter) {
-			oRm.write("<span class=\"sapUxAPObjectPageHeaderSeparatorAfter\"/>");
+			oRm.write("<span class=\"sapUxAPObjectPageHeaderSeparatorAfter\"></span>");
 		}
 
 		if (oLayoutData || (bIsFirstControl && bRenderTitle)) {

@@ -1,14 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 sap.ui.define([
-  'jquery.sap.global',
-  './Matcher',
-  './I18NText',
-  'sap/ui/test/Opa5'
-], function (jQuery, Matcher, I18NText, Opa5) {
+  'sap/ui/test/matchers/Matcher',
+  'sap/ui/test/matchers/I18NText'
+], function (Matcher, I18NText) {
   "use strict";
 
   var oI18nMatcher = new I18NText();
@@ -87,7 +85,8 @@ sap.ui.define([
      */
     isMatching : function (oControl) {
       var bIsMatching;
-      var oPlugin = Opa5.getPlugin();
+      // depend on globally defined Opa5, to avoid circular dependency: opa5 > plugin > matcherfactory > labelfor > opa5
+      var oPlugin = sap.ui.test.Opa5.getPlugin();
       var sModelName = this.getModelName();
       var sLabelText = this.getText();
       var aParameters = this.getParameters();
@@ -95,9 +94,12 @@ sap.ui.define([
       var sKey = this.getKey();
 
       if (sLabelText && sKey) {
-        throw new Error("Combination of text and key properties is not possible");
-      } else if (!sLabelText && !sKey) {
-        throw new Error("No label text or key found");
+        this._oLogger.error("Combination of text and key properties is not allowed");
+        return false;
+      }
+      if (!sLabelText && !sKey) {
+        this._oLogger.error("Text and key properties are not defined but exactly one is required");
+        return false;
       }
 
       var aLabelsInPage = oPlugin.getMatchingControls({controlType: "sap.m.Label", visible: false});
@@ -118,8 +120,8 @@ sap.ui.define([
       });
 
       if (!bIsMatching) {
-        var sPropertyType = sKey ? "key: " + sKey : "text: " + sLabelText;
-        this._oLogger.debug("No label with " + sPropertyType + " for control: " + oControl);
+        var sPropertyType = sKey ? "I18N text key " + sKey : "text " + sLabelText;
+        this._oLogger.debug("Control '" + oControl + "' does not have an associated label with " + sPropertyType);
       }
 
       return bIsMatching;
@@ -127,4 +129,4 @@ sap.ui.define([
   });
 
   return LabelFor;
-}, /* bExport= */ true);
+});

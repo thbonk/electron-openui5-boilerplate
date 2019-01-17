@@ -1,10 +1,10 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './InputBaseRenderer'],
-	function(jQuery, Renderer, InputBaseRenderer) {
+sap.ui.define(['sap/ui/core/Renderer', './InputBaseRenderer'],
+	function(Renderer, InputBaseRenderer) {
 	"use strict";
 
 
@@ -13,49 +13,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './InputBaseRenderer
 	 * @namespace
 	 */
 	var DatePickerRenderer = Renderer.extend(InputBaseRenderer);
-
-	/**
-	 * Adds control specific class
-	 *
-	 * @param {sap.ui.core.RenderManager} oRm the RenderManager that can be used for writing to the render output buffer
-	 * @param {sap.m.DatePicker} oDP an object representation of the control that should be rendered
-	 */
-	DatePickerRenderer.addOuterClasses = function(oRm, oDP) {
-
-		oRm.addClass("sapMDP");
-		if (oDP.getEnabled() && oDP.getEditable()) {
-			oRm.addClass("sapMInputVH"); // just reuse styling of value help icon
-		}
-
-	};
-
-	/**
-	 * add extra content to Input
-	 *
-	 * @param {sap.ui.core.RenderManager} oRm the RenderManager that can be used for writing to the render output buffer
-	 * @param {sap.m.DatePicker} oDP an object representation of the control that should be rendered
-	 */
-	DatePickerRenderer.writeDecorations = function(oRm, oDP) {
-
-		if (oDP.getEnabled() && oDP.getEditable()) {
-			var aClasses = ["sapMInputValHelpInner"];
-			var mAttributes = {};
-
-			mAttributes["id"] = oDP.getId() + "-icon";
-			mAttributes["tabindex"] = "-1"; // to get focus events on it, needed for popup autoclose handling
-			mAttributes["title"] = null;
-			oRm.write('<div class="sapMInputValHelp">');
-			oRm.writeIcon(this._getIcon(), aClasses, mAttributes);
-			oRm.write("</div>");
-		}
-
-	};
-
-	DatePickerRenderer._getIcon = function() {
-
-		return "sap-icon://appointment-2";
-
-	};
 
 	/**
 	 * Write the value of the input.
@@ -81,17 +38,15 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './InputBaseRenderer
 	 */
 	DatePickerRenderer.writeInnerAttributes = function(oRm, oDP) {
 		oRm.writeAttribute("type", "text");
+
 		if (oDP._bMobile) {
 			// prevent keyboard in mobile devices
 			oRm.writeAttribute("readonly", "readonly");
 		}
-
 	};
 
 	DatePickerRenderer.getAriaRole = function(oDP) {
-
 		return "combobox";
-
 	};
 
 	DatePickerRenderer.getDescribedByAnnouncement = function(oDP) {

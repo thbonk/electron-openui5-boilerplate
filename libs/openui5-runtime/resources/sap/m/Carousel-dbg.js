@@ -1,13 +1,50 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.Carousel.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/thirdparty/mobify-carousel'],
-	function(jQuery, library, Control, mobifycarousel) {
+sap.ui.define([
+	'./library',
+	'sap/ui/core/Control',
+	'sap/ui/Device',
+	'sap/ui/core/ResizeHandler',
+	'sap/ui/core/library',
+	'./CarouselRenderer',
+	"sap/ui/events/KeyCodes",
+	"sap/base/Log",
+	"sap/ui/events/F6Navigation",
+	"sap/ui/thirdparty/jquery",
+	'sap/ui/thirdparty/mobify-carousel',
+	'sap/ui/core/IconPool'
+],
+function(
+	library,
+	Control,
+	Device,
+	ResizeHandler,
+	coreLibrary,
+	CarouselRenderer,
+	KeyCodes,
+	Log,
+	F6Navigation,
+	jQuery
+	/*, mobifycarousel, IconPool (indirect dependency, kept for compatibility with tests, to be fixed in ImageHelper) */
+) {
 	"use strict";
+
+	//shortcut for sap.ui.core.BusyIndicatorSize
+	var BusyIndicatorSize = coreLibrary.BusyIndicatorSize;
+
+	// shortcut for sap.m.ImageHelper
+	var ImageHelper = library.ImageHelper;
+
+	// shortcut for sap.m.CarouselArrowsPlacement
+	var CarouselArrowsPlacement = library.CarouselArrowsPlacement;
+
+	// shortcut for sap.m.PlacementType
+	var PlacementType = library.PlacementType;
 
 
 
@@ -57,16 +94,18 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
 	 * @alias sap.m.Carousel
+	 * @see {@link fiori:https://experience.sap.com/fiori-design-web/carousel/ Carousel}
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var Carousel = Control.extend("sap.m.Carousel", /** @lends sap.m.Carousel.prototype */ { metadata : {
 
 		library : "sap.m",
+		designtime: "sap/m/designtime/Carousel.designtime",
 		properties : {
 
 			/**
@@ -92,7 +131,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			/**
 			 * Defines where the carousel's page indicator is displayed. Possible values are sap.m.PlacementType.Top, sap.m.PlacementType.Bottom. Other values are ignored and the default value will be applied. The default value is sap.m.PlacementType.Bottom.
 			 */
-			pageIndicatorPlacement : {type : "sap.m.PlacementType", group : "Appearance", defaultValue : sap.m.PlacementType.Bottom},
+			pageIndicatorPlacement : {type : "sap.m.PlacementType", group : "Appearance", defaultValue : PlacementType.Bottom},
 
 			/**
 			 * Show or hide busy indicator in the carousel when loading pages after swipe.
@@ -102,18 +141,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			showBusyIndicator : {type : "boolean", group : "Appearance", defaultValue : true, deprecated: true},
 
 			/**
-			 * Size of the busy indicators which can be displayed in the carousel.
-			 * @deprecated Since version 1.18.7.
-			 * Since 1.18.7 pages are no longer loaded or unloaded. Therefore busy indicator is not necessary any longer.
-			 */
-			busyIndicatorSize : {type : "sap.ui.core.CSSSize", group : "Dimension", defaultValue : '6em', deprecated: true},
-
-			/**
 			 * Defines where the carousel's arrows are placed. Default is <code>sap.m.CarouselArrowsPlacement.Content</code> used to
 			 * place the arrows on the sides of the carousel. Alternatively <code>sap.m.CarouselArrowsPlacement.PageIndicator</code> can
 			 * be used to place the arrows on the sides of the page indicator.
 			 */
-			arrowsPlacement : {type : "sap.m.CarouselArrowsPlacement", group : "Appearance", defaultValue : sap.m.CarouselArrowsPlacement.Content}
+			arrowsPlacement : {type : "sap.m.CarouselArrowsPlacement", group : "Appearance", defaultValue : CarouselArrowsPlacement.Content}
 		},
 		defaultAggregation : "pages",
 		aggregations : {
@@ -193,10 +225,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	Carousel._LEFTMOST_CLASS = "sapMCrslLeftmost";
 	Carousel._RIGHTMOST_CLASS = "sapMCrslRightmost";
 	Carousel._LATERAL_CLASSES = "sapMCrslLeftmost sapMCrslRightmost";
-	Carousel._bIE9 = (sap.ui.Device.browser.internet_explorer && sap.ui.Device.browser.version < 10);
 	Carousel._MODIFIERNUMBERFORKEYBOARDHANDLING = 10; // The number 10 is by keyboard specification
 	Carousel._BULLETS_TO_NUMBERS_THRESHOLD = 9; //The number 9 is by visual specification. Less than 9 pages - bullets for page indicator. 9 or more pages - numeric page indicator.
-
+	Carousel._PREVIOUS_CLASS_ARROW = "sapMCrslPrev";
+	Carousel._NEXT_CLASS_ARROW = "sapMCrslNext";
 	/**
 	 * Initialize member variables which are needed later on.
 	 *
@@ -239,7 +271,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		}
 
 		if (this._sResizeListenerId) {
-			sap.ui.core.ResizeHandler.deregister(this._sResizeListenerId);
+			ResizeHandler.deregister(this._sResizeListenerId);
 			this._sResizeListenerId = null;
 		}
 		this.$().off('afterSlide');
@@ -260,7 +292,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		var oScrollCont;
 		while (this._aScrollContainers && this._aScrollContainers.length > 0) {
 			oScrollCont = this._aScrollContainers.pop();
-			oScrollCont.removeAllContent();
+			oScrollCont.destroyContent();
 			if (oScrollCont && typeof oScrollCont.destroy === 'function') {
 				oScrollCont.destroy();
 			}
@@ -315,7 +347,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			this.setAssociation("activePage", this.getPages()[0].getId(), true);
 		}
 		if (this._sResizeListenerId) {
-			sap.ui.core.ResizeHandler.deregister(this._sResizeListenerId);
+			ResizeHandler.deregister(this._sResizeListenerId);
 			this._sResizeListenerId = null;
 		}
 
@@ -369,7 +401,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				// BCP: 1580078315
 				if (sap.zen && sap.zen.commons && this.getParent() instanceof sap.zen.commons.layout.PositionContainer) {
 					if (this._isCarouselUsedWithCommonsLayout === undefined){
-						jQuery.sap.delayedCall(0, this, "invalidate");
+						setTimeout(this["invalidate"].bind(this), 0);
 						this._isCarouselUsedWithCommonsLayout = true;
 					}
 				}
@@ -394,9 +426,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 		this._$InnerDiv = this.$().find(Carousel._INNER_SELECTOR)[0];
 
-		this._sResizeListenerId = sap.ui.core.ResizeHandler.register(this._$InnerDiv, this._fnAdjustAfterResize);
+		this._sResizeListenerId = ResizeHandler.register(this._$InnerDiv, this._fnAdjustAfterResize);
 
-		// Fixes wrong focusing in IE
+		// Fixes wrong focusing in IE// TODO remove after 1.62 version
 		// BCP: 1670008915
 		this.$().find('.sapMCrslItemTableCell').focus(function(e) {
 
@@ -476,25 +508,21 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		var sOldActivePageId = this.getActivePage();
 		var sNewActivePageId = this.getPages()[iNewPageIndex - 1].getId();
 		this.setAssociation("activePage", sNewActivePageId, true);
-		var sTextBetweenNumbers = sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("CAROUSEL_PAGE_INDICATOR_TEXT");
-		var sId = this.getId() + '-' + 'slide-number';
-		var sNewPageNumber = iNewPageIndex + ' ' + sTextBetweenNumbers + ' ' + this.getPages().length;
+		var sTextBetweenNumbers = sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("CAROUSEL_PAGE_INDICATOR_TEXT", [iNewPageIndex, this.getPages().length]);
 
-		jQuery.sap.log.debug("sap.m.Carousel: firing pageChanged event: old page: " + sOldActivePageId
+		Log.debug("sap.m.Carousel: firing pageChanged event: old page: " + sOldActivePageId
 				+ ", new page: " + sNewActivePageId);
 
 		// close the soft keyboard
-		if (sap.ui.Device.system.tablet || sap.ui.Device.system.phone) {
+		if (!Device.system.desktop) {
 			jQuery(document.activeElement).blur();
 		}
 
 		this.firePageChanged( { oldActivePageId: sOldActivePageId,
 			newActivePageId: sNewActivePageId});
 
-		//change the number in the page indicator
-		if (document.getElementById(sId)) {
-			document.getElementById(sId).innerHTML = sNewPageNumber;
-		}
+		// change the number in the page indicator
+		this.$('slide-number').text(sTextBetweenNumbers);
 	};
 
 	/**
@@ -505,18 +533,35 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 *
 	 */
 	Carousel.prototype._adjustHUDVisibility = function(iNextSlide) {
-		if (sap.ui.Device.system.desktop && !this.getLoop() && this.getPages().length > 1) {
+		if (Device.system.desktop && !this.getLoop() && this.getPages().length > 1) {
 			//update HUD arrow visibility for left- and
 			//rightmost pages
 			var $HUDContainer = this.$('hud');
+
 			//clear marker classes first
 			$HUDContainer.removeClass(Carousel._LATERAL_CLASSES);
 
 			if (iNextSlide === 1) {
 				$HUDContainer.addClass(Carousel._LEFTMOST_CLASS);
+				this._focusCarouselContainer($HUDContainer, Carousel._PREVIOUS_CLASS_ARROW);
 			} else if (iNextSlide === this.getPages().length) {
 				$HUDContainer.addClass(Carousel._RIGHTMOST_CLASS);
+				this._focusCarouselContainer($HUDContainer, Carousel._NEXT_CLASS_ARROW);
 			}
+		}
+	};
+
+	/*
+	 * Focus Carousel container.
+	 * Focus is moved to carousel container if clicked arrow is first or last from carousel
+	 * @param {object} $HUDContainer Arrow container inside Carousel
+	 * @param {string} sArrowClassName Arrow class name
+	 * @private
+	 *
+	 */
+	Carousel.prototype._focusCarouselContainer = function($HUDContainer, sArrowClassName) {
+		if ($HUDContainer.find('.' + sArrowClassName)[0] === document.activeElement) {
+			this.focus();
 		}
 	};
 
@@ -611,7 +656,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @returns icon of the requested arrow
 	 */
 	Carousel.prototype._getNavigationArrow = function(sName) {
-		jQuery.sap.require("sap.ui.core.IconPool");
 		var mProperties = {
 			src: "sap-icon://slim-arrow-" + sName,
 			useIconTooltip : false
@@ -619,12 +663,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 		if (sName === "left") {
 			if (!this._oArrowLeft) {
-				this._oArrowLeft = sap.m.ImageHelper.getImageControl(this.getId() + "-arrowScrollLeft", this._oArrowLeft, this, mProperties);
+				this._oArrowLeft = ImageHelper.getImageControl(this.getId() + "-arrowScrollLeft", this._oArrowLeft, this, mProperties);
 			}
 			return this._oArrowLeft;
 		} else if (sName === "right") {
 			if (!this._oArrowRight) {
-				this._oArrowRight = sap.m.ImageHelper.getImageControl(this.getId() + "-arrowScrollRight", this._oArrowRight, this, mProperties);
+				this._oArrowRight = ImageHelper.getImageControl(this.getId() + "-arrowScrollRight", this._oArrowRight, this, mProperties);
 			}
 			return this._oArrowRight;
 		}
@@ -642,7 +686,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 */
 	Carousel.prototype._createScrollContainer = function (oPage) {
 		var imgClass;
-		var bShowIndicatorArrows = sap.ui.Device.system.desktop && this.getArrowsPlacement() === sap.m.CarouselArrowsPlacement.PageIndicator;
+		var bShowIndicatorArrows = Device.system.desktop && this.getArrowsPlacement() === CarouselArrowsPlacement.PageIndicator;
 		if (bShowIndicatorArrows) {
 			imgClass = "sapMCrslImg";
 		} else {
@@ -659,6 +703,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				var rm = sap.ui.getCore().createRenderManager();
 				rm.render(oPage, this.getDomRef().firstChild);
 				rm.destroy();
+				oPage = null;
 			}
 		});
 
@@ -685,7 +730,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		if (this._oMobifyCarousel) {
 			this._oMobifyCarousel.prev();
 		} else {
-			jQuery.sap.log.warning("Unable to execute sap.m.Carousel.previous: carousel must be rendered first.");
+			Log.warning("Unable to execute sap.m.Carousel.previous: carousel must be rendered first.");
 		}
 		return this;
 	};
@@ -701,7 +746,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		if (this._oMobifyCarousel) {
 			this._oMobifyCarousel.next();
 		} else {
-			jQuery.sap.log.warning("Unable to execute sap.m.Carousel.next: carousel must be rendered first.");
+			Log.warning("Unable to execute sap.m.Carousel.next: carousel must be rendered first.");
 		}
 		return this;
 	};
@@ -724,9 +769,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		return result;
 	};
 
-	 //================================================================================
-	 // Keyboard handling
-	 //================================================================================
+	//================================================================================
+	// Keyboard handling
+	//================================================================================
 
 	/**
 	 * Handler for 'tab previous' key event.
@@ -791,7 +836,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 */
 	Carousel.prototype.onkeydown = function(oEvent) {
 
-		if (oEvent.keyCode == jQuery.sap.KeyCodes.F7) {
+		if (oEvent.keyCode == KeyCodes.F7) {
 			this._handleF7Key(oEvent);
 			return;
 		}
@@ -806,13 +851,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			// Minus keys
 			// TODO  jQuery.sap.KeyCodes.MINUS is not returning 189
 			case 189:
-			case jQuery.sap.KeyCodes.NUMPAD_MINUS:
+			case KeyCodes.NUMPAD_MINUS:
 				this._fnSkipToIndex(oEvent, -1);
 				break;
 
 			// Plus keys
-			case jQuery.sap.KeyCodes.PLUS:
-			case jQuery.sap.KeyCodes.NUMPAD_PLUS:
+			case KeyCodes.PLUS:
+			case KeyCodes.NUMPAD_PLUS:
 				this._fnSkipToIndex(oEvent, 1);
 				break;
 		}
@@ -999,10 +1044,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		this.$().focus();
 
 		oEventF6.target = oEvent.target;
-		oEventF6.keyCode = jQuery.sap.KeyCodes.F6;
+		oEventF6.keyCode = KeyCodes.F6;
 		oEventF6.shiftKey = bShiftKey;
 
-		jQuery.sap.handleF6GroupNavigation(oEventF6);
+		F6Navigation.handleF6GroupNavigation(oEventF6);
 	};
 
 	/**
@@ -1069,7 +1114,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	Carousel.prototype._handleF7Key = function (oEvent) {
 		var oActivePageLastFocusedElement;
 
-		// Needed for IE
+		// Needed for IE// TODO remove after 1.62 version
 		oEvent.preventDefault();
 
 		oActivePageLastFocusedElement = this._getActivePageLastFocusedElement();
@@ -1096,7 +1141,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @public
 	 */
 	Carousel.prototype.setShowBusyIndicator = function() {
-		jQuery.sap.log.warning("sap.m.Carousel: Deprecated function 'setShowBusyIndicator' called. Does nothing.");
+		Log.warning("sap.m.Carousel: Deprecated function 'setShowBusyIndicator' called. Does nothing.");
 		return this;
 	};
 
@@ -1108,34 +1153,23 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @public
 	 */
 	Carousel.prototype.getShowBusyIndicator = function() {
-		jQuery.sap.log.warning("sap.m.Carousel: Deprecated function 'getShowBusyIndicator' called. Does nothing.");
+		Log.warning("sap.m.Carousel: Deprecated function 'getShowBusyIndicator' called. Does nothing.");
 		return false;
 	};
 
 	/*
-	 * API method to set the carousel's busy indicator size.
-	 * This property has been deprecated since 1.18.7. Does nothing and returns the carousel reference.
+	 * @see sap.ui.core.Control#setBusyIndicatorSize
+	 * Original property was depracated so we removed it, but made it failsafe
+	 * by mapping a 'wrong' input value to the new enum.
 	 *
-	 * @deprecated
 	 * @public
 	 */
-	Carousel.prototype.setBusyIndicatorSize = function() {
-		jQuery.sap.log.warning("sap.m.Carousel: Deprecated function 'setBusyIndicatorSize' called. Does nothing.");
-		return this;
-	};
-
-	/*
-	 * API method to retrieve the carousel's busy indicator size.
-	 * This property has been deprecated since 1.18.6. Always returns an empty string.
-	 *
-	 * @deprecated
-	 * @public
-	 */
-	Carousel.prototype.getBusyIndicatorSize = function() {
-		jQuery.sap.log.warning("sap.m.Carousel: Deprecated function 'getBusyIndicatorSize' called. Does nothing.");
-		return "";
+	Carousel.prototype.setBusyIndicatorSize = function(sSize) {
+		if (!(sSize in BusyIndicatorSize)) {
+			sSize = BusyIndicatorSize.Medium;
+		}
+		return Control.prototype.setBusyIndicatorSize.call(this, sSize);
 	};
 
 	return Carousel;
-
-}, /* bExport= */ true);
+});

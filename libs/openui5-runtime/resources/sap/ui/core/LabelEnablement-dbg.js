@@ -1,25 +1,20 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides helper sap.ui.core.LabelEnablement
-sap.ui.define(['jquery.sap.global', '../base/ManagedObject'],
-	function(jQuery, ManagedObject) {
+sap.ui.define(['../base/ManagedObject', "sap/base/assert"],
+	function(ManagedObject, assert) {
 	"use strict";
-
-	function lazyInstanceof(o, sModule) {
-		var FNClass = sap.ui.require(sModule);
-		return typeof FNClass === 'function' && (o instanceof FNClass);
-	}
 
 	// Mapping between controls and labels
 	var CONTROL_TO_LABELS_MAPPING = {};
 
 	// The controls which should not be referenced by a "for" attribute (Specified in the HTML standard).
 	// Extend when needed.
-	var NON_LABELABLE_CONTROLS = ["sap.m.Link", "sap.m.Select", "sap.m.Label", "sap.m.Text"];
+	var NON_LABELABLE_CONTROLS = ["sap.ui.comp.navpopover.SmartLink", "sap.m.Link", "sap.m.Label", "sap.m.Text"];
 
 	// Returns the control for the given id (if available) and invalidates it if desired
 	function toControl(sId, bInvalidate) {
@@ -30,18 +25,24 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject'],
 		var oControl = sap.ui.getCore().byId(sId);
 		// a control must only be invalidated if there is already a DOM Ref. If there is no DOM Ref yet, it will get
 		// rendered later in any case. Elements must always be invalidated because they have no own renderer.
-		if (oControl && bInvalidate && (!lazyInstanceof(oControl, 'sap/ui/core/Control') || oControl.getDomRef())) {
+		if (oControl && bInvalidate && (!oControl.isA('sap.ui.core.Control') || oControl.getDomRef())) {
 			oControl.invalidate();
 		}
 
 		return oControl;
 	}
 
+	function findLabelForControl(label) {
+		var sId = label.getLabelFor() || label._sAlternativeId || '';
+
+		return sId;
+	}
+
 	// Updates the mapping tables for the given label, in destroy case only a cleanup is done
 	function refreshMapping(oLabel, bDestroy){
 		var sLabelId = oLabel.getId();
 		var sOldId = oLabel.__sLabeledControl;
-		var sNewId = bDestroy ? null : oLabel.getLabelForRendering();
+		var sNewId = bDestroy ? null : findLabelForControl(oLabel);
 
 		if (sOldId == sNewId) {
 			return;
@@ -128,7 +129,7 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject'],
 	 * @see sap.ui.core.LabelEnablement#enrich
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @protected
 	 * @alias sap.ui.core.LabelEnablement
 	 * @namespace
@@ -269,7 +270,7 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject'],
 			if (sId instanceof ManagedObject) {
 				sId = sId.getId();
 			} else if (sId != null && typeof sId !== "string") {
-				jQuery.sap.assert(false, "setAlternativeLabelFor(): sId must be a string, an instance of sap.ui.base.ManagedObject or null");
+				assert(false, "setAlternativeLabelFor(): sId must be a string, an instance of sap.ui.base.ManagedObject or null");
 				return this;
 			}
 
@@ -316,6 +317,47 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject'],
 			// have a getRequired method, this is treated like a return value of "false".
 			var oFor = toControl(this.getLabelForRendering(), false);
 			return checkRequired(this) || checkRequired(oFor);
+
+		};
+
+		/**
+		 * Checks whether the <code>Label</code> should be rendered in display only mode.
+		 *
+		 * In the standard case it just uses the DisplayOnly property of the <code>Label</code>.
+		 *
+		 * In the Form another type of logic is used.
+		 * Maybe later on also the labeled controls might be used to determine the rendering.
+		 *
+		 * @protected
+		 * @returns {boolean} Returns if the Label should be rendered in display only mode
+		 */
+		oControl.isDisplayOnly = function(){
+
+			if (this.getDisplayOnly) {
+				return this.getDisplayOnly();
+			} else {
+				return false;
+			}
+
+		};
+
+		/**
+		 * Checks whether the <code>Label</code> should be rendered wrapped instead of trucated.
+		 *
+		 * In the standard case it just uses the <code>Wrapping</code> property of the <code>Label</code>.
+		 *
+		 * In the Form another type of logic is used.
+		 *
+		 * @protected
+		 * @returns {boolean} Returns if the Label should be rendered in display only mode
+		 */
+		oControl.isWrapping = function(){
+
+			if (this.getWrapping) {
+				return this.getWrapping();
+			} else {
+				return false;
+			}
 
 		};
 

@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -37,9 +37,11 @@ sap.ui.define(['jquery.sap.global'], function(jQuery) {
 			container += '<tr id="' + groupId + '_rule_' + ruleNumber + '" >';
 			container += '<td>';
 			container += '<div class="expandable-control collapsed-content" data-expandableElement="' + groupId + '_rule_' + ruleNumber + '_content">';
-			container += '<div class="expandable-title"> ' + ruleNumber + '. ' + getEscapedString(issue.name) + ' <span class="rule-issue-number">(' + issues.length + ' issues)</span></div></div>';
-			container += '<div id="' + groupId + '_rule_' + ruleNumber + '_content">';
+			container += '<div class="expandable-title">' + ruleNumber + '. ' + getEscapedString(issue.name) + ' <span class="rule-issue-number">(' + issues.length + ' issues)</span></div></div>';
+			container += '<div class="sapUiIssueGroupContent" id="' + groupId + '_rule_' + ruleNumber + '_content">';
 			container += '<div><span class="sapUiSupportLabel">Description: </span>' + getEscapedString(issue.description) + '</div>';
+			container += '<div><span class="sapUiSupportLabel">Min version: </span>' + getEscapedString(issue.minVersion) + '</div>';
+			container += '<div><span class="sapUiSupportLabel">Async: </span>' + getEscapedString(issue.async.toString()) + '</div>';
 			container += '<div><span class="sapUiSupportLabel">Resolution: </span>' + getEscapedString(issue.resolution) + '</div>';
 			container += '<div>';
 			if (issue.resolutionUrls) {
@@ -72,7 +74,7 @@ sap.ui.define(['jquery.sap.global'], function(jQuery) {
 
 		content += '<tr>';
 		content += '<td colspan="100" class="expandable-control ' + expandedClass + '" data-expandableElement="' + groupId + '" data-groupName="' + groupName + '" data-groupNumber="' + groupNumber + '">';
-		content += '<span class="sapUiSupportLabel expandable-title"> ' + groupNumber + '. ' + groupName + ' (' + (ruleNumber - 1) + ' rules, ' + totalIssues + ' issues)</span>';
+		content += '<span class="sapUiSupportLabel expandable-title">' + groupNumber + '. ' + groupName + ' (' + (ruleNumber - 1) + ' rules, ' + totalIssues + ' issues)</span>';
 		content += '</td></tr><tbody id="' + groupId + '">';
 		content += container;
 		content += '</tbody>';
@@ -89,7 +91,7 @@ sap.ui.define(['jquery.sap.global'], function(jQuery) {
 		}
 
 		try {
-			content += '<table class="sapUiTable"><tr><th>Title</th><th>Categories</th><th>Audiences</th></tr>';
+			content += '<table class="sapUiTable"><tr><th>Name</th><th>Categories</th><th>Audiences</th></tr>';
 
 			for (var group in groups) {
 				content += renderGroup(group, groups[group], 'group' + groupNumber, groupNumber);

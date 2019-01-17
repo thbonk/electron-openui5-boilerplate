@@ -5,6 +5,9 @@
 			"name": ".library"
 		},
 		{
+			"name": ".supportrc"
+		},
+		{
 			"name": ".theming"
 		},
 		{
@@ -12,22 +15,28 @@
 			"module": "sap/ui/codeeditor/CodeEditor.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
 				"sap/ui/codeeditor/js/ace/ace.js",
+				"sap/ui/codeeditor/js/ace/ext-beautify.js",
+				"sap/ui/codeeditor/js/ace/ext-language_tools.js",
 				"sap/ui/codeeditor/js/ace/mode-javascript.js",
 				"sap/ui/codeeditor/js/ace/mode-json.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/ResizeHandler.js"
 			]
 		},
 		{
 			"name": "CodeEditor.js",
 			"module": "sap/ui/codeeditor/CodeEditor.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
 				"sap/ui/codeeditor/js/ace/ace.js",
+				"sap/ui/codeeditor/js/ace/ext-beautify.js",
+				"sap/ui/codeeditor/js/ace/ext-language_tools.js",
 				"sap/ui/codeeditor/js/ace/mode-javascript.js",
 				"sap/ui/codeeditor/js/ace/mode-json.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/ResizeHandler.js"
 			]
 		},
 		{
@@ -482,6 +491,13 @@
 			"name": "js/ace/mode-golang.js"
 		},
 		{
+			"name": "js/ace/mode-graphqlschema-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/mode-graphqlschema.js"
+		},
+		{
 			"name": "js/ace/mode-groovy-dbg.js",
 			"isDebug": true
 		},
@@ -853,6 +869,13 @@
 			"name": "js/ace/mode-php.js"
 		},
 		{
+			"name": "js/ace/mode-pig-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/mode-pig.js"
+		},
+		{
 			"name": "js/ace/mode-plain_text-dbg.js",
 			"isDebug": true
 		},
@@ -1028,6 +1051,13 @@
 			"name": "js/ace/mode-space.js"
 		},
 		{
+			"name": "js/ace/mode-sparql-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/mode-sparql.js"
+		},
+		{
 			"name": "js/ace/mode-sql-dbg.js",
 			"isDebug": true
 		},
@@ -1110,6 +1140,13 @@
 		},
 		{
 			"name": "js/ace/mode-tsx.js"
+		},
+		{
+			"name": "js/ace/mode-turtle-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/mode-turtle.js"
 		},
 		{
 			"name": "js/ace/mode-twig-dbg.js",
@@ -1483,6 +1520,13 @@
 			"name": "js/ace/snippets/golang.js"
 		},
 		{
+			"name": "js/ace/snippets/graphqlschema-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/snippets/graphqlschema.js"
+		},
+		{
 			"name": "js/ace/snippets/groovy-dbg.js",
 			"isDebug": true
 		},
@@ -1847,6 +1891,13 @@
 			"name": "js/ace/snippets/php.js"
 		},
 		{
+			"name": "js/ace/snippets/pig-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/snippets/pig.js"
+		},
+		{
 			"name": "js/ace/snippets/plain_text-dbg.js",
 			"isDebug": true
 		},
@@ -2022,6 +2073,13 @@
 			"name": "js/ace/snippets/space.js"
 		},
 		{
+			"name": "js/ace/snippets/sparql-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/snippets/sparql.js"
+		},
+		{
 			"name": "js/ace/snippets/sql-dbg.js",
 			"isDebug": true
 		},
@@ -2106,6 +2164,13 @@
 			"name": "js/ace/snippets/tsx.js"
 		},
 		{
+			"name": "js/ace/snippets/turtle-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/snippets/turtle.js"
+		},
+		{
 			"name": "js/ace/snippets/twig-dbg.js",
 			"isDebug": true
 		},
@@ -2183,6 +2248,202 @@
 			"name": "js/ace/snippets/yaml.js"
 		},
 		{
+			"name": "js/ace/theme-ambiance-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-ambiance.js"
+		},
+		{
+			"name": "js/ace/theme-chaos-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-chaos.js"
+		},
+		{
+			"name": "js/ace/theme-chrome-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-chrome.js"
+		},
+		{
+			"name": "js/ace/theme-clouds-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-clouds.js"
+		},
+		{
+			"name": "js/ace/theme-clouds_midnight-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-clouds_midnight.js"
+		},
+		{
+			"name": "js/ace/theme-cobalt-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-cobalt.js"
+		},
+		{
+			"name": "js/ace/theme-crimson_editor-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-crimson_editor.js"
+		},
+		{
+			"name": "js/ace/theme-dawn-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-dawn.js"
+		},
+		{
+			"name": "js/ace/theme-dreamweaver-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-dreamweaver.js"
+		},
+		{
+			"name": "js/ace/theme-eclipse-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-eclipse.js"
+		},
+		{
+			"name": "js/ace/theme-github-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-github.js"
+		},
+		{
+			"name": "js/ace/theme-gob-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-gob.js"
+		},
+		{
+			"name": "js/ace/theme-gruvbox-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-gruvbox.js"
+		},
+		{
+			"name": "js/ace/theme-idle_fingers-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-idle_fingers.js"
+		},
+		{
+			"name": "js/ace/theme-iplastic-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-iplastic.js"
+		},
+		{
+			"name": "js/ace/theme-katzenmilch-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-katzenmilch.js"
+		},
+		{
+			"name": "js/ace/theme-kr_theme-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-kr_theme.js"
+		},
+		{
+			"name": "js/ace/theme-kuroir-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-kuroir.js"
+		},
+		{
+			"name": "js/ace/theme-merbivore-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-merbivore.js"
+		},
+		{
+			"name": "js/ace/theme-merbivore_soft-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-merbivore_soft.js"
+		},
+		{
+			"name": "js/ace/theme-mono_industrial-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-mono_industrial.js"
+		},
+		{
+			"name": "js/ace/theme-monokai-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-monokai.js"
+		},
+		{
+			"name": "js/ace/theme-pastel_on_dark-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-pastel_on_dark.js"
+		},
+		{
+			"name": "js/ace/theme-solarized_dark-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-solarized_dark.js"
+		},
+		{
+			"name": "js/ace/theme-solarized_light-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-solarized_light.js"
+		},
+		{
+			"name": "js/ace/theme-sqlserver-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-sqlserver.js"
+		},
+		{
+			"name": "js/ace/theme-terminal-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-terminal.js"
+		},
+		{
+			"name": "js/ace/theme-textmate-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-textmate.js"
+		},
+		{
 			"name": "js/ace/theme-tomorrow-dbg.js",
 			"isDebug": true
 		},
@@ -2216,6 +2477,27 @@
 		},
 		{
 			"name": "js/ace/theme-tomorrow_night_eighties.js"
+		},
+		{
+			"name": "js/ace/theme-twilight-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-twilight.js"
+		},
+		{
+			"name": "js/ace/theme-vibrant_ink-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-vibrant_ink.js"
+		},
+		{
+			"name": "js/ace/theme-xcode-dbg.js",
+			"isDebug": true
+		},
+		{
+			"name": "js/ace/theme-xcode.js"
 		},
 		{
 			"name": "js/ace/worker-coffee-dbg.js",
@@ -2281,33 +2563,78 @@
 			"name": "js/ace/worker-xquery.js"
 		},
 		{
-			"name": "library-all-dbg.js",
-			"isDebug": true,
-			"merged": true
-		},
-		{
-			"name": "library-all.js",
-			"merged": true
-		},
-		{
 			"name": "library-dbg.js",
 			"module": "sap/ui/codeeditor/library.js",
 			"isDebug": true,
 			"required": [
-				"sap/ui/core/Core.js"
+				"sap/ui/core/Core.js",
+				"sap/ui/core/library.js"
 			]
+		},
+		{
+			"name": "library-h2-preload-dbg.js",
+			"module": "sap/ui/codeeditor/library-h2-preload.js",
+			"isDebug": true,
+			"merged": true,
+			"required": [
+				"sap/ui/Device.js",
+				"sap/ui/codeeditor/js/ace/ace.js",
+				"sap/ui/codeeditor/js/ace/ext-beautify.js",
+				"sap/ui/codeeditor/js/ace/ext-language_tools.js",
+				"sap/ui/codeeditor/js/ace/mode-javascript.js",
+				"sap/ui/codeeditor/js/ace/mode-json.js",
+				"sap/ui/core/Control.js",
+				"sap/ui/core/Core.js",
+				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/core/library.js"
+			],
+			"included": [
+				"sap/ui/codeeditor/library.js",
+				"sap/ui/codeeditor/manifest.json",
+				"sap/ui/codeeditor/CodeEditor.js"
+			]
+		},
+		{
+			"name": "library-h2-preload.js",
+			"module": "sap/ui/codeeditor/library-h2-preload.js",
+			"merged": true,
+			"required": [
+				"sap/ui/Device.js",
+				"sap/ui/codeeditor/js/ace/ace.js",
+				"sap/ui/codeeditor/js/ace/ext-beautify.js",
+				"sap/ui/codeeditor/js/ace/ext-language_tools.js",
+				"sap/ui/codeeditor/js/ace/mode-javascript.js",
+				"sap/ui/codeeditor/js/ace/mode-json.js",
+				"sap/ui/core/Control.js",
+				"sap/ui/core/Core.js",
+				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/core/library.js"
+			],
+			"included": [
+				"sap/ui/codeeditor/library.js",
+				"sap/ui/codeeditor/manifest.json",
+				"sap/ui/codeeditor/CodeEditor.js"
+			]
+		},
+		{
+			"name": "library-h2-preload.js.map",
+			"isDebug": true
 		},
 		{
 			"name": "library-preload.js",
 			"module": "sap/ui/codeeditor/library-preload.js",
 			"merged": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
 				"sap/ui/codeeditor/js/ace/ace.js",
+				"sap/ui/codeeditor/js/ace/ext-beautify.js",
+				"sap/ui/codeeditor/js/ace/ext-language_tools.js",
 				"sap/ui/codeeditor/js/ace/mode-javascript.js",
 				"sap/ui/codeeditor/js/ace/mode-json.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/Core.js"
+				"sap/ui/core/Core.js",
+				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/core/library.js"
 			],
 			"included": [
 				"sap/ui/codeeditor/CodeEditor.js",
@@ -2324,13 +2651,17 @@
 			"module": "sap/ui/codeeditor/library-preload.json",
 			"merged": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
 				"sap/ui/codeeditor/js/ace/ace.js",
+				"sap/ui/codeeditor/js/ace/ext-beautify.js",
+				"sap/ui/codeeditor/js/ace/ext-language_tools.js",
 				"sap/ui/codeeditor/js/ace/mode-javascript.js",
 				"sap/ui/codeeditor/js/ace/mode-json.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/Core.js",
-				"sap/ui/core/library-preload.json"
+				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/core/library-preload.json",
+				"sap/ui/core/library.js"
 			],
 			"included": [
 				"sap/ui/codeeditor/CodeEditor.js",
@@ -2350,7 +2681,8 @@
 			"name": "library.js",
 			"module": "sap/ui/codeeditor/library.js",
 			"required": [
-				"sap/ui/core/Core.js"
+				"sap/ui/core/Core.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{

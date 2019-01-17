@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -8,24 +8,18 @@
  * Provides a private class <code>sap.f.semantic.SemanticShareMenu</code>.
  */
 sap.ui.define([
-	"jquery.sap.global",
 	"sap/ui/core/IconPool",
 	"sap/ui/base/EventProvider",
-	"sap/m/Button",
 	"sap/m/library",
 	"sap/m/OverflowToolbarButton",
 	"sap/m/OverflowToolbarLayoutData",
-	"./SemanticConfiguration",
 	"./SemanticContainer"
 ], function(
-	jQuery,
 	IconPool,
 	EventProvider,
-	Button,
 	mobileLibrary,
 	OverflowToolbarButton,
 	OverflowToolbarLayoutData,
-	SemanticConfiguration,
 	SemanticContainer) {
 	"use strict";
 
@@ -363,4 +357,4 @@ sap.ui.define([
 
 	return SemanticShareMenu;
 
-}, /* bExport= */ false);
+});

@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-	'jquery.sap.global'
+	"sap/ui/thirdparty/jquery"
 ],
 function(jQuery) {
 	"use strict";
@@ -16,7 +16,7 @@ function(jQuery) {
 	 * CSS Transition helper
 	 * @param {jQuery} $element - jQuery element(s)
 	 * @param {Function} fnCallback - The function should start animation process (e.g. by adding class to the element)
-	 * @return {Promise}
+	 * @return {Promise} Returns a Promise performing the animation
 	 */
 	module.waitTransition = function ($element, fnCallback) {
 		if (!($element instanceof jQuery)) {

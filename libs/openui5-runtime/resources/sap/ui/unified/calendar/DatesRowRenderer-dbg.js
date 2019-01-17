@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', 'sap/ui/unified/calendar/CalendarUtils', 'sap/ui/unified/calendar/CalendarDate', './MonthRenderer'],
-	function(jQuery, Renderer, CalendarUtils, CalendarDate, MonthRenderer) {
+sap.ui.define(['sap/ui/core/Renderer', 'sap/ui/unified/calendar/CalendarDate', './MonthRenderer'],
+	function(Renderer, CalendarDate, MonthRenderer) {
 	"use strict";
 
 	/*
@@ -25,7 +25,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', 'sap/ui/unified/cale
 
 	};
 
-	DatesRowRenderer.getClass = function(oDatesRow){
+	DatesRowRenderer.getClass = function(oRm, oDatesRow){
 
 		var sClasses = "sapUiCalDatesRow sapUiCalRow";
 
@@ -35,6 +35,53 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', 'sap/ui/unified/cale
 
 		return sClasses;
 
+	};
+
+	DatesRowRenderer.renderMonth = function(oRm, oDatesRow, oDate) {
+		MonthRenderer.renderMonth.apply(this, arguments);
+		this.renderWeekNumbers(oRm, oDatesRow);
+	};
+
+	/**
+	 * Renders the week numbers in their own container.
+	 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer
+	 * @param {sap.ui.unified.calendar.DatesRow} oDatesRow The row which will be rendered
+	 * @since 1.52
+	 */
+	DatesRowRenderer.renderWeekNumbers = function (oRm, oDatesRow) {
+		var oResourceBundle,
+			iDays,
+			iDaysWidth,
+			aWeekNumbers;
+
+		if (oDatesRow.getShowWeekNumbers() && oDatesRow.getPrimaryCalendarType() === sap.ui.core.CalendarType.Gregorian) {
+			oResourceBundle = sap.ui.getCore().getLibraryResourceBundle("sap.ui.unified");
+
+			oRm.write("<div id=\"" + oDatesRow.getId() + "-weeks\"");
+			oRm.addClass("sapUiCalRowWeekNumbers");
+			oRm.writeClasses();
+			oRm.write(">");
+
+			iDays = oDatesRow.getDays();
+			iDaysWidth = 100 / iDays;
+			aWeekNumbers = oDatesRow.getWeekNumbers();
+
+			aWeekNumbers.forEach(function(oWeek) {
+				oRm.write("<div");
+
+				oRm.addClass('sapUiCalRowWeekNumber');
+				oRm.writeClasses();
+
+				oRm.addStyle("width", oWeek.len * iDaysWidth + "%");
+				oRm.writeStyles();
+
+				oRm.writeAttribute("data-sap-ui-week", oWeek.number);
+
+				oRm.write(">" + oResourceBundle.getText('CALENDAR_DATES_ROW_WEEK_NUMBER', [oWeek.number]) + "</div>");
+			});
+
+			oRm.write("</div>");
+		}
 	};
 
 	/**

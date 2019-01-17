@@ -1,30 +1,39 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define("sap/ui/test/TestUtils", [
-		"jquery.sap.global",
-		"sap/ui/core/Core",
-		"sap/ui/thirdparty/URI",
-		"jquery.sap.script",
-		"jquery.sap.sjax"
-], function(jQuery, Core, URI/*, jQuerySapScript, jQuerySapSjax */) {
+sap.ui.define([
+	"jquery.sap.sjax",
+	"sap/base/Log",
+	"sap/base/util/UriParameters",
+	"sap/ui/core/Core",
+	"sap/ui/thirdparty/URI"
+], function (jQuery, Log, UriParameters, Core, URI) {
 	"use strict";
 	/*global QUnit, sinon */
 	// Note: The dependency to Sinon.JS has been omitted deliberately. Most test files load it via
 	// <script> anyway and declaring the dependency would cause it to be loaded twice.
 
 	var rBatch = /\/\$batch($|\?)/,
+		rContentId = /(?:^|\r\n)Content-Id\s*:\s*(\S+)/i,
+		rHeaderLine = /^(.*)?:\s*(.*)$/,
 		sJson = "application/json;charset=UTF-8;IEEE754Compatible=true",
 		mMessageForPath = {}, // a cache for files, see useFakeServer
 		sMimeHeaders = "\r\nContent-Type: application/http\r\n"
-			+ "Content-Transfer-Encoding: binary\r\n\r\nHTTP/1.1 ",
-		sRealOData = jQuery.sap.getUriParameters().get("realOData"),
+			+ "Content-Transfer-Encoding: binary\r\n",
+		rMultipartHeader = /^Content-Type:\s*multipart\/mixed;\s*boundary=/i,
+		oUriParameters = new UriParameters(window.location.href),
+		sAutoRespondAfter = oUriParameters.get("autoRespondAfter"),
+		sRealOData = oUriParameters.get("realOData"),
+		rRequestKey = /^(\S+) (\S+)$/,
 		rRequestLine = /^(GET|DELETE|PATCH|POST) (\S+) HTTP\/1\.1$/,
+		mData = {},
+		rODataHeaders = /^(OData-Version|DataServiceVersion)$/i,
 		bProxy = sRealOData === "true" || sRealOData === "proxy",
 		bRealOData = bProxy || sRealOData === "direct",
+		bSupportAssistant = oUriParameters.get("supportAssistant") === "true",
 		TestUtils;
 
 	if (bRealOData) {
@@ -37,9 +46,9 @@ sap.ui.define("sap/ui/test/TestUtils", [
 	 *
 	 * @param {object} oActual
 	 *   the actual value to be tested
-	 * @param {object} oExpected
+	 * @param {object|RegExp} oExpected
 	 *   the expected value which needs to be contained structurally (as a subset) within the
-	 *   actual value
+	 *   actual value, or a regular expression which must match the actual string(!) value
 	 * @param {string} sPath
 	 *   path to the values under investigation
 	 * @throws {Error}
@@ -50,6 +59,14 @@ sap.ui.define("sap/ui/test/TestUtils", [
 		var sActualType = QUnit.objectType(oActual),
 			sExpectedType = QUnit.objectType(oExpected),
 			sName;
+
+		if (sActualType === "string" && sExpectedType === "regexp") {
+			if (!oExpected.test(oActual)) {
+				throw new Error(sPath + ": actual value " + oActual
+					+ " does not match expected regular expression " + oExpected);
+			}
+			return;
+		}
 
 		if (sActualType !== sExpectedType) {
 			throw new Error(sPath + ": actual type " + sActualType
@@ -91,10 +108,19 @@ sap.ui.define("sap/ui/test/TestUtils", [
 	function pushDeeplyContains(oActual, oExpected, sMessage, bExpectSuccess) {
 		try {
 			deeplyContains(oActual, oExpected, "/");
-			QUnit.assert.push(bExpectSuccess, oActual, oExpected, sMessage);
+			QUnit.assert.pushResult({
+				result: bExpectSuccess,
+				actual:oActual,
+				expected : oExpected,
+				message : sMessage
+			});
 		} catch (ex) {
-			QUnit.assert.push(!bExpectSuccess, oActual, oExpected,
-				(sMessage || "") + " failed because of " + ex.message);
+			QUnit.assert.pushResult({
+				result : !bExpectSuccess,
+				actual : oActual,
+				expected : oExpected,
+				message : (sMessage || "") + " failed because of " + ex.message
+			});
 		}
 	}
 
@@ -106,6 +132,29 @@ sap.ui.define("sap/ui/test/TestUtils", [
 	 * @since 1.27.1
 	 */
 	TestUtils = /** @lends sap.ui.test.TestUtils */ {
+		/**
+		 * If the UI5 core is dirty, the function returns a promise that waits until the rendering
+		 * is finished.
+		 *
+		 * @returns {Promise|undefined}
+		 *   An optional promise that is resolved when the UI5 core is no longer dirty
+		 */
+		awaitRendering : function () {
+			if (sap.ui.getCore().getUIDirty()) {
+				return new Promise(function (resolve) {
+					function check() {
+						if (sap.ui.getCore().getUIDirty()) {
+							setTimeout(check, 1);
+						} else {
+							resolve();
+						}
+					}
+
+					check();
+				});
+			}
+		},
+
 		/**
 		 * Companion to <code>QUnit.deepEqual</code> which only tests for the existence of expected
 		 * properties, not the absence of others.
@@ -141,7 +190,7 @@ sap.ui.define("sap/ui/test/TestUtils", [
 
 		/**
 		 * Activates a sinon fake server in the given sandbox. The fake server responds to those
-		 * GET requests given in the fixture, and to all DELETE, PATCH and POST requests regardless
+		 * requests given in the fixture, and to all DELETE, PATCH and POST requests regardless
 		 * of the path. It is automatically restored when the sandbox is restored.
 		 *
 		 * The function uses <a href="http://sinonjs.org/docs/">Sinon.js</a> and expects that it
@@ -150,17 +199,29 @@ sap.ui.define("sap/ui/test/TestUtils", [
 		 * POST requests ending on "/$batch" are handled automatically. They are expected to be
 		 * multipart-mime requests where each part is a DELETE, GET, PATCH or POST request.
 		 * The response has a multipart-mime message containing responses to these inner requests.
-		 * If an inner request is not a DELETE, PATCH or POST with any URL,
-		 * a GET and its URL is not found in the fixture, or its message is not JSON, it is
-		 * responded with an error code. The batch itself is always responded with code 200.
+		 * If an inner request is not a DELETE, a PATCH or a POST and it is not found in the
+		 * fixture, or its message is not JSON, it is responded with an error code.
+		 * The batch itself is always responded with code 200.
 		 *
-		 * All other POST requests are responded with code 200, the body is simply echoed.
+		 * "$batch" requests with an OData change set are supported, too. For each request in the
+		 * change set a response is searched in the fixture. As long as all responses are success
+		 * responses (code less than 400) a change set response is returned. Otherwise the first
+		 * error message is the response for the whole change set.
 		 *
-		 * DELETE requests are always responded with code 204 ("No Data").
+		 * All other POST requests with no matching response in the fixture are responded with code
+		 * 200, the body is simply echoed.
 		 *
-		 * PATCH requests are always responded with 200, the body is simply echoed.
+		 * DELETE requests with no matching response in the fixture are responded with code 204 ("No
+		 * Content").
 		 *
-		 * Note: $batch with multiple changesets are not supported
+		 * PATCH requests with no matching response in the fixture are responded with code 200, the
+		 * body is simply echoed.
+		 *
+		 * Direct HEAD requests with no matching response in the fixture are responded with code 200
+		 * and no content.
+		 *
+		 * The headers "OData-Version" and "DataserviceVersion" are copied from the request to the
+		 * response unless specified in the fixture.
 		 *
 		 * @param {object} oSandbox
 		 *   A Sinon sandbox as created using <code>sinon.sandbox.create()</code>
@@ -169,108 +230,93 @@ sap.ui.define("sap/ui/test/TestUtils", [
 		 *   project's test folder, typically it should start with "sap".
 		 *   Example: <code>"sap/ui/core/qunit/model"</code>
 		 * @param {map} mFixture
-		 *   The fixture. Each key represents a URL to respond to. The value is an object that may
-		 *   have the following properties:
+		 *   The fixture. Each key represents a method and a URL to respond to, in the form
+		 *   "METHOD URL". The method "GET" may be omitted. The value is an array or single response
+		 *   object that may have the following properties:
 		 *   <ul>
 		 *   <li>{number} <code>code</code>: The response code (<code>200</code> if not given)
-		 *   <li>{map} <code>headers</code>: A list of headers to set in the response
+		 *   <li>{map} <code>headers</code>: A map of headers to set in the response
+		 *   <li>{RegExp} <code>ifMatch</code>: A regular expression the request body is matched
+		 *     against to select the response. If not given, all requests match. The first match in
+		 *     the list wins.
 		 *   <li>{string} <code>message</code>: The response message
 		 *   <li>{string} <code>source</code>: The path of a file relative to <code>sBase</code> to
 		 *     be used for the response message. It will be read synchronously in advance. In this
 		 *     case the header <code>Content-Type</code> is determined from the source name's
-		 *     extension. This has precedence over <code>message</code>.
+		 *     extension unless specified. This has precedence over <code>message</code>.
 		 *   </ul>
 		 */
 		useFakeServer : function (oSandbox, sBase, mFixture) {
+			// a map from "method path" incl. service URL to a list of response objects with
+			// properties code, headers, ifMatch and message
+			var mUrlToResponses;
 
 			/*
 			 * OData batch handler
 			 *
 			 * @param {string} sServiceBase
 			 *   the service base URL
-			 * @param {map} mUrls
-			 *   a map from path (incl. service URL) to response data (an array with response code,
-			 *   headers, message)
 			 * @param {object} oRequest
 			 *   the Sinon request object
 			 */
-			function batch(sServiceBase, mUrls, oRequest) {
-				var sBody = oRequest.requestBody,
-					sBoundary,
-					aResponseParts = [""];
+			function batch(sServiceBase, oRequest) {
+				var oMultipart = multipart(sServiceBase, oRequest.requestBody),
+					mODataHeaders = getODataHeaders(oRequest);
 
-				sBoundary = firstLine(sBody);
-				sBody.split(sBoundary).slice(1, -1).forEach(function (sRequestPart) {
-					var aMatches,
-						sRequestLine,
-						aResponse,
-						sResponse;
-
-					sRequestPart = sRequestPart.slice(sRequestPart.indexOf("\r\n\r\n") + 4);
-					sRequestLine = firstLine(sRequestPart);
-					aMatches = rRequestLine.exec(sRequestLine);
-					if (!aMatches) {
-						sResponse = notFound(sRequestLine);
-					} else if (aMatches[1] === "DELETE") {
-						sResponse = "204 No Data\r\n\r\n\r\n";
-					} else if (aMatches[1] === "POST" || aMatches[1] === "PATCH") {
-						sResponse = "200 OK\r\nContent-Type: " + sJson + "\r\n\r\n"
-							+ message(sRequestPart);
-					} else {
-						aResponse = mUrls[sServiceBase + aMatches[2]];
-						if (aResponse) {
-							try {
-								sResponse = "200 OK\r\nContent-Type: " + sJson + "\r\n\r\n"
-									+ JSON.stringify(JSON.parse(aResponse[2]))
-									+ "\r\n";
-								jQuery.sap.log.info(sRequestLine, null, "sap.ui.test.TestUtils");
-							} catch (e) {
-								sResponse = error(sRequestLine, 500, "Internal Error",
-									"Invalid JSON");
-							}
-						} else {
-							sResponse = notFound(sRequestLine);
-						}
-					}
-					aResponseParts.push(sMimeHeaders + sResponse);
-				});
-				aResponseParts.push("--\r\n");
-				oRequest.respond(200, {
-					"Content-Type" : "multipart/mixed;boundary=" + sBoundary.slice(2)
-				}, aResponseParts.join(sBoundary));
+				oRequest.respond(200,
+					jQuery.extend({}, mODataHeaders, {
+						"Content-Type" : "multipart/mixed;boundary=" + oMultipart.boundary
+					}),
+					formatMultipart(oMultipart, mODataHeaders));
 			}
 
-			function error(sRequestLine, iCode, sStatus, sMessage) {
-				jQuery.sap.log.error(sRequestLine, sMessage, "sap.ui.test.TestUtils");
-				return iCode + " " + sStatus + "\r\nContent-Type: text/plain\r\n\r\n"
-					+ sMessage + "\r\n";
+			/*
+			 * Builds a responses from mFixture. Reads the source synchronously and caches it.
+			 * @returns {object} a resource object with code, headers, ifMatch and message
+			 */
+			function buildResponse(oFixtureResponse) {
+				var oResponse = {
+						code : oFixtureResponse.code || 200,
+						headers : oFixtureResponse.headers || {},
+						ifMatch : oFixtureResponse.ifMatch
+					};
+
+				if (oFixtureResponse.source) {
+					oResponse.message = readMessage(sBase + oFixtureResponse.source);
+					oResponse.headers["Content-Type"] = oResponse.headers["Content-Type"]
+						|| contentType(oFixtureResponse.source);
+				} else {
+					oResponse.message = oFixtureResponse.message;
+				}
+				return oResponse;
 			}
 
 			/*
 			 * Builds the responses from mFixture. Reads the sources synchronously and caches them.
+			 * @returns {map}
+			 *   a map from "method path" (incl. service URL) to a list of response objects (with
+			 *   properties code, headers, ifMatch and message)
 			 */
 			function buildResponses() {
-				var oHeaders,
-					sMessage,
-					oResponse,
+				var oFixtureResponse,
 					sUrl,
 					mUrls = {};
 
 				for (sUrl in mFixture) {
-					oResponse = mFixture[sUrl];
-					oHeaders = oResponse.headers || {};
-					if (oResponse.source) {
-						sMessage = readMessage(sBase + oResponse.source);
-						oHeaders["Content-Type"] = oHeaders["Content-Type"]
-							|| contentType(oResponse.source);
-					} else {
-						sMessage = oResponse.message || "";
+					oFixtureResponse = mFixture[sUrl];
+					if (!sUrl.includes(" ")) {
+						sUrl = "GET " + sUrl;
 					}
-					mUrls[sUrl] = [oResponse.code || 200, oHeaders, sMessage];
+					if (Array.isArray(oFixtureResponse)) {
+						mUrls[sUrl] = oFixtureResponse.map(buildResponse);
+					} else {
+						mUrls[sUrl] = [buildResponse(oFixtureResponse)];
+					}
 				}
 				return mUrls;
 			}
 
+			// calculates the context type from the given resource name
 			function contentType(sName) {
 				if (/\.xml$/.test(sName)) {
 					return "application/xml";
@@ -281,70 +327,253 @@ sap.ui.define("sap/ui/test/TestUtils", [
 				return "application/x-octet-stream";
 			}
 
-			function echo(oRequest) {
-				oRequest.respond(200, {"Content-Type" : sJson}, oRequest.requestBody);
+			// Logs and returns a response for the given error
+			function error(iCode, oRequest, sMessage) {
+				Log.error(oRequest.requestLine, sMessage, "sap.ui.test.TestUtils");
+
+				return {
+					code : iCode,
+					headers : {"Content-Type" : "text/plain"},
+					message : sMessage
+				};
 			}
 
+			// returns the first line (containing method and url)
 			function firstLine(sText) {
 				return sText.slice(0, sText.indexOf("\r\n"));
 			}
 
-			function message(sText) {
-				return sText.slice(sText.indexOf("\n\r\n") + 3);
+			/*
+			 * Formats a multipart object into the message body.
+			 *
+			 * @param {object} oMultipart The multipart object with boundary and parts
+			 * @param {map} mODataHeaders The OData headers to copy into the response parts
+			 */
+			function formatMultipart(oMultipart, mODataHeaders) {
+				var aResponseParts = [""];
+
+				oMultipart.parts.forEach(function (oPart) {
+					aResponseParts.push(oPart.boundary
+						? "\r\nContent-Type: multipart/mixed;boundary=" + oPart.boundary
+							+ "\r\n\r\n" + formatMultipart(oPart, mODataHeaders)
+						: formatResponse(oPart, mODataHeaders));
+				});
+				aResponseParts.push("--\r\n");
+				return aResponseParts.join("--" + oMultipart.boundary);
 			}
 
-			function post(mUrls, oRequest) {
+			/*
+			 * Formats the response to be inserted into the batch
+			 *
+			 * @param {object} oResponse The response with code, headers, message
+			 * @param {map} mODataHeaders The OData headers from the batch to copy into the response
+			 * @returns {string} The response to be inserted into the batch
+			 */
+			function formatResponse(oResponse, mODataHeaders) {
+				var mHeaders = jQuery.extend({}, mODataHeaders, oResponse.headers);
+
+				return sMimeHeaders
+					+ (oResponse.contentId ? "Content-ID: " + oResponse.contentId + "\r\n" : "")
+					+ "\r\nHTTP/1.1 " + oResponse.code + "\r\n"
+					+ Object.keys(mHeaders).map(function (sHeader) {
+							return sHeader + ": " + mHeaders[sHeader];
+						}).join("\r\n")
+					+ "\r\n\r\n" + (oResponse.message || "") + "\r\n";
+			}
+
+			/*
+			 * Returns a map with only the OData headers that have to be copied to the response
+			 *
+			 * @param {object} oRequest The request to take the headers from
+			 */
+			function getODataHeaders(oRequest) {
+				var sKey,
+					mODataHeaders = {};
+
+				for (sKey in oRequest.requestHeaders) {
+					if (rODataHeaders.test(sKey)) {
+						mODataHeaders[sKey] = oRequest.requestHeaders[sKey];
+					}
+				}
+
+				return mODataHeaders;
+			}
+
+			/*
+			 * Determines the matching response for the request. Returns an error response if no
+			 * match was found.
+			 *
+			 * @param {object} oRequest The Sinon request object
+			 * @param {string} [sContentId] The content ID
+			 */
+			function getResponseFromFixture(oRequest, sContentId) {
+				var oResponse,
+					aResponses = mUrlToResponses[oRequest.method + " " + oRequest.url];
+
+				aResponses = (aResponses || []).filter(function (oResponse) {
+					if (typeof oResponse.ifMatch === "function") {
+						return oResponse.ifMatch(oRequest);
+					}
+					return !oResponse.ifMatch || oResponse.ifMatch.test(oRequest.requestBody);
+				});
+				if (aResponses.length) {
+					oResponse = aResponses[0];
+				} else {
+					switch (oRequest.method) {
+						case "HEAD":
+							oResponse = {code : 200};
+							break;
+						case "DELETE":
+							oResponse = {
+								code : 204,
+								headers : {"Content-Type" : "text/plain;charset=utf-8"}
+							};
+							break;
+						case "PATCH":
+						case "POST":
+							oResponse = {
+								code : 200,
+								headers : {"Content-Type" : sJson},
+								message : oRequest.requestBody
+							};
+							break;
+						default:
+							oResponse = error(404, oRequest, "No mock data found");
+					}
+				}
+				oResponse = {
+					code : oResponse.code,
+					headers : jQuery.extend({}, getODataHeaders(oRequest), oResponse.headers),
+					message : oResponse.message
+				};
+				if (sContentId && oResponse.code < 300) {
+					oResponse.contentId = sContentId;
+				}
+				return oResponse;
+			}
+
+			/*
+			 * Processes a multipart message (body or change set)
+			 *
+			 * @param {string} sServiceBase The service base URL
+			 * @param {string} sBody The body
+			 * @returns {object} An object with the properties boundary and parts
+			 */
+			function multipart(sServiceBase, sBody) {
+				var sBoundary = firstLine(sBody);
+
+				return {
+					boundary : firstLine(sBody).slice(2),
+					parts : sBody.split(sBoundary).slice(1, -1).map(function (sRequestPart) {
+						var aFailures, sFirstLine, aMatch, oMultipart, oRequest, iRequestStart;
+
+						sRequestPart = sRequestPart.slice(2);
+						sFirstLine = firstLine(sRequestPart);
+						if (rMultipartHeader.test(sFirstLine)) {
+							oMultipart = multipart(sServiceBase,
+								sRequestPart.slice(sFirstLine.length + 4));
+							aFailures = oMultipart.parts.filter(function (oPart) {
+								return oPart.code >= 300;
+							});
+							return aFailures.length ? aFailures[0] : oMultipart;
+						}
+						iRequestStart = sRequestPart.indexOf("\r\n\r\n") + 4;
+						oRequest = parseRequest(sServiceBase, sRequestPart.slice(iRequestStart));
+						aMatch = rContentId.exec(sRequestPart.slice(0, iRequestStart));
+						return getResponseFromFixture(oRequest, aMatch && aMatch[1]);
+					})
+				};
+			}
+
+			// Parses the request string of a batch into an object matching the Sinon request object
+			function parseRequest(sServiceBase, sRequest) {
+				var iBodySeparator = sRequest.indexOf("\r\n\r\n"),
+					aLines,
+					aMatches,
+					oRequest = {requestHeaders : {}};
+
+				oRequest.requestBody = sRequest.slice(iBodySeparator + 4, sRequest.length - 2);
+				sRequest = sRequest.slice(0, iBodySeparator);
+				aLines = sRequest.split("\r\n");
+				oRequest.requestLine = aLines.shift();
+				aMatches = rRequestLine.exec(oRequest.requestLine);
+				if (aMatches) {
+					oRequest.method = aMatches[1];
+					oRequest.url = sServiceBase + aMatches[2];
+					aLines.forEach(function (sLine) {
+						var aMatches = rHeaderLine.exec(sLine);
+						if (aMatches) {
+							oRequest.requestHeaders[aMatches[1]] = aMatches[2];
+						}
+					});
+				}
+				return oRequest;
+			}
+
+			// POST handler which recognizes a $batch
+			function post(oRequest) {
 				var sUrl = oRequest.url;
 				if (rBatch.test(sUrl)) {
-					batch(sUrl.slice(0, sUrl.indexOf("/$batch") + 1), mUrls, oRequest);
+					batch(sUrl.slice(0, sUrl.indexOf("/$batch") + 1), oRequest);
 				} else {
-					// respond each POST request with code 200 and the message simply echoed
-					echo(oRequest);
+					respondFromFixture(oRequest);
 				}
-			}
-
-			function notFound(sRequestLine) {
-				return error(sRequestLine, 404, "Not Found", "No mock data found");
 			}
 
 			/*
 			 * Reads and caches the source for the given path.
 			 */
 			function readMessage(sPath) {
-				var sMessage = mMessageForPath[sPath],
-					oResult;
+				var sMessage = mMessageForPath[sPath];
 
 				if (!sMessage) {
-					oResult = jQuery.sap.sjax({
+					jQuery.ajax({
+						async : false,
 						url : sPath,
-						dataType : "text"
+						dataType : "text",
+						success : function (sBody) {
+							sMessage = sBody;
+						}
 					});
-					if (!oResult.success) {
+					if (!sMessage) {
 						throw new Error(sPath + ": resource not found");
 					}
-					mMessageForPath[sPath] = sMessage = oResult.data;
+					mMessageForPath[sPath] = sMessage;
 				}
 				return sMessage;
 			}
 
+			/*
+			 * Searches the response in the fixture and responds.
+			 *
+			 * @param {object} oRequest The Sinon request object
+			 */
+			function respondFromFixture(oRequest) {
+				var oResponse = getResponseFromFixture(oRequest);
+
+				oRequest.respond(oResponse.code, oResponse.headers, oResponse.message);
+			}
+
 			function setupServer() {
-				var fnRestore,
-					oServer,
-					mUrls = buildResponses(),
-					sUrl;
+				var fnRestore, oServer;
+
+				// build the fixture
+				mUrlToResponses = buildResponses();
 
 				// set up the fake server
-				oServer = oSandbox.useFakeServer();
+				oServer = sinon.fakeServer.create();
+				oSandbox.add(oServer);
 				oServer.autoRespond = true;
-
-				for (sUrl in mUrls) {
-					oServer.respondWith("GET", sUrl, mUrls[sUrl]);
+				if (sAutoRespondAfter) {
+					oServer.autoRespondAfter = parseInt(sAutoRespondAfter);
 				}
-				oServer.respondWith("DELETE", /.*/, [204, {}, ""]);
-				// for PATCH/POST we simply echo the body, in real scenarios the server would
-				// respond with different data (generated keys, side-effects, ETag)
-				oServer.respondWith("PATCH", /.*/, echo);
-				oServer.respondWith("POST", /.*/, post.bind(null, mUrls));
+
+				// Send all requests except $batch through respondFromFixture
+				oServer.respondWith("GET", /./, respondFromFixture);
+				oServer.respondWith("DELETE", /./, respondFromFixture);
+				oServer.respondWith("HEAD", /./, respondFromFixture);
+				oServer.respondWith("PATCH", /./, respondFromFixture);
+				oServer.respondWith("POST", /./, post);
 
 				// wrap oServer.restore to also clear the filter
 				fnRestore = oServer.restore;
@@ -360,16 +589,15 @@ sap.ui.define("sap/ui/test/TestUtils", [
 				sinon.FakeXMLHttpRequest.useFilters = true;
 				sinon.FakeXMLHttpRequest.addFilter(function (sMethod, sUrl) {
 					// must return true if the request is NOT processed by the fake server
-					return sMethod !== "DELETE" && sMethod !== "PATCH" && sMethod !== "POST" &&
-						!(sMethod === "GET" && sUrl in mUrls);
+					return sMethod !== "DELETE" && sMethod !== "HEAD" && sMethod !== "PATCH"
+						&& sMethod !== "POST" && !(sMethod + " " + sUrl in mUrlToResponses);
 				});
 			}
 
 			// ensure to always search the fake data in test-resources, remove cache buster token
-			sBase = jQuery.sap.getResourcePath(sBase)
+			sBase = sap.ui.require.toUrl(sBase)
 				.replace(/(^|\/)resources\/(~[-a-zA-Z0-9_.]*~\/)?/, "$1test-resources/") + "/";
 			setupServer();
-
 		},
 
 		/**
@@ -418,11 +646,13 @@ sap.ui.define("sap/ui/test/TestUtils", [
 		 * @since 1.27.1
 		 */
 		withNormalizedMessages : function (fnCodeUnderTest) {
-			sinon.test(function () {
+			var oSandbox = sinon.sandbox.create();
+
+			try {
 				var oCore = sap.ui.getCore(),
 					fnGetBundle = oCore.getLibraryResourceBundle;
 
-				this.stub(oCore, "getLibraryResourceBundle").returns({
+				oSandbox.stub(oCore, "getLibraryResourceBundle").returns({
 					getText : function (sKey, aArgs) {
 						var sResult = sKey,
 							sText = fnGetBundle.call(oCore).getText(sKey),
@@ -438,8 +668,9 @@ sap.ui.define("sap/ui/test/TestUtils", [
 				});
 
 				fnCodeUnderTest.apply(this);
-
-			}).apply({}); // give Sinon a "this" to enrich
+			} finally {
+				oSandbox.verifyAndRestore();
+			}
 		},
 
 		/**
@@ -451,9 +682,17 @@ sap.ui.define("sap/ui/test/TestUtils", [
 		},
 
 		/**
+		 * @returns {boolean}
+		 *   <code>true</code> if the support assistant shall be used.
+		 */
+		isSupportAssistant : function () {
+			return bSupportAssistant;
+		},
+
+		/**
 		 * Returns the realOData query parameter so that it can be forwarded to an embedded test
 		 *
-		 * @returns {String}
+		 * @returns {string}
 		 *  the realOData query parameter or "" if none was given
 		 */
 		getRealOData : function () {
@@ -491,8 +730,37 @@ sap.ui.define("sap/ui/test/TestUtils", [
 			if (!bProxy) {
 				return sAbsolutePath;
 			}
-			sProxyUrl = jQuery.sap.getResourcePath("sap/ui").replace("resources/sap/ui", "proxy");
+			sProxyUrl = sap.ui.require.toUrl("sap/ui").replace("resources/sap/ui", "proxy");
 			return new URI(sProxyUrl + sAbsolutePath, TestUtils.getBaseUri()).pathname().toString();
+		},
+
+		/**
+		 * Returns the value which has been stored with the given key using {@link #setData} and
+		 * resets it.
+		 *
+		 * @param {string} sKey
+		 *   The key
+		 * @returns {object}
+		 *   The value
+		 */
+		retrieveData : function (sKey) {
+			var vValue = mData[sKey];
+
+			delete mData[sKey];
+			return vValue;
+		},
+
+		/**
+		 * Stores the given value under the given key so that it can be used by a test at a later
+		 * point in time.
+		 *
+		 * @param {string} sKey
+		 *   The key
+		 * @param {object} vValue
+		 *   The value
+		 */
+		setData : function (sKey, vValue) {
+			mData[sKey] = vValue;
 		},
 
 		/**
@@ -534,9 +802,22 @@ sap.ui.define("sap/ui/test/TestUtils", [
 			} else if (sFilterBase.slice(-1) !== "/") {
 				sFilterBase += "/";
 			}
-			Object.keys(mFixture).forEach(function (sUrl) {
-				var sAbsoluteUrl = sUrl[0] === "/" ? sUrl : sFilterBase + sUrl;
-				mResultingFixture[sAbsoluteUrl] = mFixture[sUrl];
+			Object.keys(mFixture).forEach(function (sRequest) {
+				var aMatches = rRequestKey.exec(sRequest),
+					sMethod,
+					sUrl;
+
+				if (aMatches) {
+					sMethod = aMatches[1] || "GET";
+					sUrl = aMatches[2];
+				} else {
+					sMethod = "GET";
+					sUrl = sRequest;
+				}
+				if (!sUrl.startsWith("/")) {
+					sUrl = sFilterBase + sUrl;
+				}
+				mResultingFixture[sMethod + " " + sUrl] = mFixture[sRequest];
 			});
 			TestUtils.useFakeServer(oSandbox, sSourceBase || "sap/ui/core/qunit/odata/v4/data",
 				mResultingFixture);

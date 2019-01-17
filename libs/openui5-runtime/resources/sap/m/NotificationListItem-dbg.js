@@ -1,13 +1,31 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './NotificationListBase', 'sap/ui/core/InvisibleText'],
-	function (jQuery, library, Control, NotificationListBase, InvisibleText) {
-
+sap.ui.define([
+	'./library',
+	'./NotificationListBase',
+	'sap/ui/core/InvisibleText',
+	'sap/ui/core/IconPool',
+	'sap/ui/core/ResizeHandler',
+	'sap/m/Button',
+	'./NotificationListItemRenderer'
+],
+function(
+	library,
+	NotificationListBase,
+	InvisibleText,
+	IconPool,
+	ResizeHandler,
+	Button,
+	NotificationListItemRenderer
+	) {
 	'use strict';
+
+	// shortcut for sap.m.ButtonType
+	var ButtonType = library.ButtonType;
 
 	/**
 	 * Constructor for a new NotificationListItem.
@@ -28,7 +46,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 	 * @extends sap.m.NotificationListBase
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -51,7 +69,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 				truncate: {type: 'boolean', group: 'Appearance', defaultValue: true},
 
 				/**
-				 * Determines it the "Show More" button should be hidden.
+				 * Determines if the "Show More" button should be hidden.
 				 */
 				hideShowMoreButton: {type: 'boolean', group: 'Appearance', defaultValue: false}
 			},
@@ -69,8 +87,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 		}
 	});
 
+	/**
+	 * Sets initial values for the control.
+	 *
+	 * @public
+	 */
 	NotificationListItem.prototype.init = function () {
-		sap.m.NotificationListBase.prototype.init.call(this);
+		NotificationListBase.prototype.init.call(this);
 
 		var resourceBundle = sap.ui.getCore().getLibraryResourceBundle('sap.m');
 		this._expandText = resourceBundle.getText('NOTIFICATION_LIST_ITEM_SHOW_MORE');
@@ -84,9 +107,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 		 * @type {sap.m.Button}
 		 * @private
 		 */
-		var _closeButton = new sap.m.Button(this.getId() + '-closeButton', {
-			type: sap.m.ButtonType.Transparent,
-			icon: sap.ui.core.IconPool.getIconURI('decline'),
+		var _closeButton = new Button(this.getId() + '-closeButton', {
+			type: ButtonType.Transparent,
+			icon: IconPool.getIconURI('decline'),
 			tooltip: this._closeText,
 			press: function () {
 				this.close();
@@ -99,8 +122,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 		 * @type {sap.m.Button}
 		 * @private
 		 */
-		var _collapseButton = new sap.m.Button({
-			type: sap.m.ButtonType.Transparent,
+		var _collapseButton = new Button({
+			type: ButtonType.Transparent,
 			text: this.getTruncate() ? this._expandText : this._collapseText,
 			id: this.getId() + '-expandCollapseButton',
 			press: function () {
@@ -130,6 +153,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 	// Overwritten setters and getters
 	//================================================================================
 
+	/**
+	 * Sets the description.
+	 *
+	 * @public
+	 * @param {string} description Description.
+	 * @returns {sap.m.NotificationListItem} NotificationListItem reference for chaining.
+	 */
 	NotificationListItem.prototype.setDescription = function (description) {
 		var result = this.setProperty('description', description);
 
@@ -138,13 +168,27 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 		return result;
 	};
 
+	/**
+	 * Sets the DateTime.
+	 *
+	 * @public
+	 * @param {object} dateTime DateTime.
+	 * @returns {sap.m.NotificationListBase} NotificationListBase reference for chaining.
+	 */
 	NotificationListItem.prototype.setDatetime = function (dateTime) {
-		var result = sap.m.NotificationListBase.prototype.setDatetime.call(this, dateTime);
+		var result = NotificationListBase.prototype.setDatetime.call(this, dateTime);
 		this._updateAriaAdditionalInfo();
 
 		return result;
 	};
 
+	/**
+	 * Sets the unread text.
+	 *
+	 * @public
+	 * @param {boolean} unread Indication of unread list item.
+	 * @returns {sap.m.NotificationListItem} NotificationListItem reference for chaining.
+	 */
 	NotificationListItem.prototype.setUnread = function (unread) {
 		/* @type {sap.m.NotificationListItem} Reference to <code>this</code> to allow method chaining */
 		var result = this.setProperty('unread', unread, true);
@@ -157,6 +201,14 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 		return result;
 	};
 
+	/**
+	 * Sets the priority of the list item.
+	 *
+	 * @public
+	 * @param {string} priority Priority of the list item.
+	 * @param {boolean} suppressInvalidation Indication for suppressing invalidation.
+	 * @returns {sap.m.NotificationListItem} NotificationListItem reference for chaining.
+	 */
 	NotificationListItem.prototype.setPriority = function (priority, suppressInvalidation) {
 		var result = this.setProperty('priority', priority, suppressInvalidation);
 
@@ -165,6 +217,14 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 		return result;
 	};
 
+	/**
+	 * Sets the author picture for list item.
+	 *
+	 * @public
+	 * @param {string} authorPicture Picture url in string format.
+	 * @param {boolean} suppressInvalidation Indication for suppressing invalidation.
+	 * @returns {sap.m.NotificationListItem} NotificationListItem reference for chaining.
+	 */
 	NotificationListItem.prototype.setAuthorPicture = function (authorPicture, suppressInvalidation) {
 		var result = this.setProperty('authorPicture', authorPicture, suppressInvalidation);
 
@@ -173,19 +233,25 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 		return result;
 	};
 
-	NotificationListItem.prototype.clone = function () {
-		return NotificationListBase.prototype.clone.apply(this, arguments);
-	};
-
 	//================================================================================
 	// Control methods
 	//================================================================================
 
+	/**
+	 * Overwrites onBeforeRendering
+	 *
+	 * @public
+	 */
 	NotificationListItem.prototype.onBeforeRendering = function () {
 		this._updateAriaAdditionalInfo();
 		this._deregisterResize();
 	};
 
+	/**
+	 * Overwrites onAfterRendering
+	 *
+	 * @public
+	 */
 	NotificationListItem.prototype.onAfterRendering = function () {
 		this._registerResize();
 	};
@@ -210,8 +276,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 
 	/**
 	 * Returns the sap.m.Text control used in the NotificationListItem's description.
-	 * @returns {sap.m.Text} The notification description text
+	 *
 	 * @private
+	 * @returns {sap.m.Text} The notification description text
 	 */
 	NotificationListItem.prototype._getDescriptionText = function () {
 		var bodyText = this.getAggregation('_bodyText');
@@ -235,6 +302,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 
 	/**
 	 * Overrides the ListItemBase class toggling.
+	 *
 	 * @private
 	 */
 	NotificationListItem.prototype._activeHandling = function () {
@@ -243,6 +311,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 
 	/**
 	 * Updates the hidden text, used for the ARIA support.
+	 *
 	 * @private
 	 */
 	NotificationListItem.prototype._updateAriaAdditionalInfo = function () {
@@ -264,8 +333,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 
 	/**
 	 * Returns true if the text in the title or the text in the description is longer than two lines.
-	 * @returns {boolean} Whether the control should be truncated.
+	 *
 	 * @private
+	 * @returns {boolean} Whether the control should be truncated.
 	 */
 	NotificationListItem.prototype._canTruncate = function () {
 		var titleHeight = this.getDomRef('title').offsetHeight;
@@ -281,11 +351,15 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 		return textHeight > textWrapperHeight || titleHeight > titleWrapperHeight;
 	};
 
+	/**
+	 * Shows and hides truncate button.
+	 *
+	 * @private
+	 */
 	NotificationListItem.prototype._showHideTruncateButton = function () {
 		var notificationDomRef = this.getDomRef();
 
 		if (this._canTruncate() && (!this.getHideShowMoreButton())) { // if the Notification has long text
-
 			// show the truncate button
 			this.getDomRef('expandCollapseButton').classList.remove('sapMNLI-CollapseButtonHide');
 
@@ -319,13 +393,23 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 		}
 	};
 
+	/**
+	 * Deregisters resize handler.
+	 *
+	 * @private
+	 */
 	NotificationListItem.prototype._deregisterResize = function () {
 		if (this._sNotificationResizeHandler) {
-			sap.ui.core.ResizeHandler.deregister(this._sNotificationResizeHandler);
+			ResizeHandler.deregister(this._sNotificationResizeHandler);
 			this._sNotificationResizeHandler = null;
 		}
 	};
 
+	/**
+	 * Registers resize handler.
+	 *
+	 * @public
+	 */
 	NotificationListItem.prototype._registerResize = function () {
 		var that = this;
 		var notificationDomRef = this.getDomRef();
@@ -336,13 +420,14 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 
 		that._resizeNotification();
 
-		this._sNotificationResizeHandler = sap.ui.core.ResizeHandler.register(notificationDomRef, function () {
+		this._sNotificationResizeHandler = ResizeHandler.register(notificationDomRef, function () {
 			that._resizeNotification();
 		});
 	};
 
 	/**
 	 * Resize handler for the NotificationListItem.
+	 *
 	 * @private
 	 */
 	NotificationListItem.prototype._resizeNotification = function () {
@@ -369,4 +454,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Notif
 	};
 
 	return NotificationListItem;
-}, /* bExport= */ true);
+});

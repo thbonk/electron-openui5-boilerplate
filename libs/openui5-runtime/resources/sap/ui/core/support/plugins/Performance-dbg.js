@@ -1,12 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.core.support.plugins.Performance
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
-	function (jQuery, Plugin) {
+sap.ui.define([
+	'sap/ui/core/support/Plugin',
+	"sap/ui/performance/Measurement",
+	"sap/base/security/encodeXML"
+],
+	function(Plugin, Measurement, encodeXML) {
 		"use strict";
 
 		var _rawdata = [];
@@ -50,10 +54,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 		 *
 		 * With this plugIn the performance measurements are displayed
 		 *
-		 * @abstract
 		 * @extends sap.ui.core.support.Plugin
-		 * @version 1.50.6
-		 * @constructor
+		 * @version 1.61.2
 		 * @private
 		 * @alias sap.ui.core.support.plugins.Performance
 		 */
@@ -114,7 +116,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 
 		function getPerformanceData(oSupportStub) {
 			//var bActive = jQuery.sap.measure.getActive();
-			var aMeasurements = jQuery.sap.measure.getAllMeasurements(true);
+			var aMeasurements = Measurement.getAllMeasurements(true);
 
 			this._oStub.sendEvent(this.getId() + "SetMeasurements", {"measurements": aMeasurements});
 		}
@@ -149,7 +151,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 		 * @private
 		 */
 		Performance.prototype.onsapUiSupportPerfClear = function (oEvent) {
-			jQuery.sap.measure.clear();
+			Measurement.clear();
 			this._oStub.sendEvent(this.getId() + "SetMeasurements", {"measurements": []});
 		};
 
@@ -160,7 +162,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 		 * @private
 		 */
 		Performance.prototype.onsapUiSupportPerfStart = function (oEvent) {
-			jQuery.sap.measure.start(this.getId() + "-perf", "Measurement by support tool");
+			Measurement.start(this.getId() + "-perf", "Measurement by support tool");
 		};
 
 		/**
@@ -170,7 +172,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 		 * @private
 		 */
 		Performance.prototype.onsapUiSupportPerfEnd = function (oEvent) {
-			jQuery.sap.measure.end(this.getId() + "-perf");
+			Measurement.end(this.getId() + "-perf");
 			getPerformanceData.call(this);
 		};
 
@@ -181,7 +183,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 		 * @private
 		 */
 		Performance.prototype.onsapUiSupportPerfActivate = function (oEvent) {
-			jQuery.sap.measure.setActive(true);
+			Measurement.setActive(true);
 		};
 
 		/* =============================================================================================================
@@ -577,7 +579,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 		}
 
 		function _getBarTitle(bar) {
-			return jQuery.sap.escapeHTML(bar.info + '\nduration: ' + bar.duration.toFixed(2) + ' ms. \ntime: ' + bar.time.toFixed(2) + ' ms. \nstart: ' + bar.start.toFixed(2) + ' ms.\nend: ' + bar.end.toFixed(2) + ' ms.');
+			return encodeXML(bar.info + '\nduration: ' + bar.duration.toFixed(2) + ' ms. \ntime: ' + bar.time.toFixed(2) + ' ms. \nstart: ' + bar.start.toFixed(2) + ' ms.\nend: ' + bar.end.toFixed(2) + ' ms.');
 		}
 
 		function _formatInfo(bar) {
@@ -587,7 +589,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 			barInfo = barInfo.substring(barInfo.lastIndexOf('sap.m.'), barInfo.length);
 			barInfo = barInfo.replace('Rendering of ', '');
 
-			return jQuery.sap.escapeHTML(barInfo);
+			return encodeXML(barInfo);
 		}
 
 		function _getBarClassType(category) {
@@ -604,7 +606,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 			}
 
 			//escaping is not needed
-			return jQuery.sap.escapeHTML(className);
+			return encodeXML(className);
 		}
 
 		function _getBarColor(time) {
@@ -811,7 +813,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 			var allCategories = _getBarCategories(_rawdata);
 
 			allCategories.forEach(function (category) {
-				category = jQuery.sap.escapeHTML(category);
+				category = encodeXML(category);
 				categoriesHTML += '<label title="' + category + '"><input class="' + _getBarClassType(category) + '" checked type="checkbox" name="' + category + '" />' + category + '</label>';
 			});
 
@@ -827,7 +829,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 			var gridParent = document.getElementById('sapUiSupportPerfHeaderTimelineBarWrapper');
 			var gridLineNumbers = Math.round(gridParent.offsetWidth / 10);
 			var filteredDuration = filterOptions.filterByTime.end - filterOptions.filterByTime.start;
-			var gridLineStepInTime = parseInt(filteredDuration / gridLineNumbers, 10);
+			var gridLineStepInTime = parseInt(filteredDuration / gridLineNumbers);
 
 			if (document.getElementById('grid')) {
 				document.getElementById('grid').parentNode.removeChild(document.getElementById('grid'));
@@ -842,7 +844,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 				var divForText = document.createElement('div');
 
 				if (i % 5 === 0 || i === 1) {
-					var time = parseInt(filterOptions.filterByTime.start, 10);
+					var time = parseInt(filterOptions.filterByTime.start);
 
 					if (i !== 1) {
 						time += i * gridLineStepInTime;
@@ -883,7 +885,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 			var handleComputedWidth = window.getComputedStyle(_sliderVars.nodes.handle).width;
 			var oldSliderWidth = _sliderVars.sizes.width;
 
-			_sliderVars.sizes.handleWidth = parseInt(handleComputedWidth, 10);
+			_sliderVars.sizes.handleWidth = parseInt(handleComputedWidth);
 			_sliderVars.sizes.width = _sliderVars.nodes.slider.offsetWidth;
 
 			if (_sliderVars.sizes.width !== _sliderVars.sizes.handleWidth) {
@@ -970,7 +972,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 		function _updateUI() {
 			var handleComputedWidth = window.getComputedStyle(_sliderVars.nodes.handle).width;
 
-			_sliderVars.sizes.handleWidth = parseInt(handleComputedWidth, 10);
+			_sliderVars.sizes.handleWidth = parseInt(handleComputedWidth);
 			_sliderVars.drag.handleOffsetLeft = _sliderVars.nodes.handle.offsetLeft;
 
 			//var filteredOptions = _getFilterOptions();

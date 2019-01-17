@@ -1,11 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/Text', 'sap/ui/Device' ],
-	function(jQuery, library, Control, Text, Device) {
+sap.ui.define([
+	'./library',
+	'sap/ui/core/Control',
+	'sap/m/Text',
+	'sap/ui/Device',
+	'./NewsContentRenderer',
+	"sap/ui/events/KeyCodes"
+],
+	function(library, Control, Text, Device, NewsContentRenderer, KeyCodes) {
 	"use strict";
 
 	/**
@@ -18,7 +25,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @since 1.34
 	 *
 	 * @public
@@ -28,6 +35,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	var NewsContent = Control.extend("sap.m.NewsContent", /** @lends sap.m.NewsContent.prototype */ {
 		metadata : {
 			library : "sap.m",
+			designtime: "sap/m/designtime/NewsContent.designtime",
 			properties : {
 				/**
 				 * Updates the size of the chart. If not set then the default size is applied based on the device tile.
@@ -176,7 +184,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 * @param {sap.ui.base.Event} oEvent which was triggered
 	 */
 	NewsContent.prototype.onkeydown = function(oEvent) {
-		if (oEvent.which === jQuery.sap.KeyCodes.ENTER || oEvent.which === jQuery.sap.KeyCodes.SPACE) {
+		if (oEvent.which === KeyCodes.ENTER || oEvent.which === KeyCodes.SPACE) {
 			this.firePress();
 			oEvent.preventDefault();
 		}

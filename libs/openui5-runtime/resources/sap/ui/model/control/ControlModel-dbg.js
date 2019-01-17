@@ -1,20 +1,26 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 /**
- * Control-based DataBinding
+ * Control-based DataBinding.
+ *
+ * <strong>Note</strong>: Although this namespace was declared as 'public', the contained classes never
+ * have been declared 'public' and are not supported. We do not recommended to use them. As of 1.58, the
+ * {@link sap.ui.model.base.ManagedObjectModel} can be tested as an alternative. It is much more powerful,
+ * but still in an experimental state.
  *
  * @namespace
  * @name sap.ui.model.control
+ * @deprecated As of 1.58, test the still experimental {@link sap.ui.model.base.ManagedObjectModel} as an alternative.
  * @public
  */
 
 // Provides the JSON object based model implementation
-sap.ui.define(['jquery.sap.global', 'sap/ui/model/Model', './ControlPropertyBinding'],
-	function(jQuery, Model, ControlPropertyBinding) {
+sap.ui.define(['sap/ui/model/Model', './ControlPropertyBinding', "sap/ui/thirdparty/jquery"],
+	function(Model, ControlPropertyBinding, jQuery) {
 	"use strict";
 
 	/**
@@ -26,10 +32,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Model', './ControlPropertyBind
 	 * @extends sap.ui.model.Model
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
-	 * @constructor
 	 * @alias sap.ui.model.control.ControlModel
+	 * @private
 	 */
 	var ControlModel = Model.extend("sap.ui.model.control.ControlModel", /** @lends sap.ui.model.control.ControlModel.prototype */ {
 
@@ -49,7 +55,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Model', './ControlPropertyBind
 
 	/**	 */
 	ControlModel.prototype.addFacadeComponent = function(oElement) {
-		var i = jQuery.inArray(oElement, this.oElements);
+		var i = this.oElements.indexOf(oElement);
 		if ( i < 0 ) {
 			this.oElements.push(oElement);
 			oElement.attachEvent("_change", this.checkUpdate, this);
@@ -58,7 +64,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/Model', './ControlPropertyBind
 
 	/**	 */
 	ControlModel.prototype.removeFacadeComponent = function(oElement) {
-		var i = jQuery.inArray(oElement, this.oElements);
+		var i = this.oElements.indexOf(oElement);
 		if ( i >= 0 ) {
 			this.oElements.splice(i, 1);
 			oElement.detachEvent("_change", this.checkUpdate, this);

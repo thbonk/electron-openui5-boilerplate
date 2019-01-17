@@ -1,11 +1,13 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/ui/model/odata/type/DateTimeBase'],
-	function(jQuery, DateTimeBase) {
+sap.ui.define([
+	"sap/base/Log",
+	"sap/ui/model/odata/type/DateTimeBase"
+], function (Log, DateTimeBase) {
 	"use strict";
 
 	/**
@@ -29,7 +31,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/odata/type/DateTimeBase'],
 			case undefined:
 				break;
 			default:
-				jQuery.sap.log.warning("Illegal displayFormat: " + oConstraints.displayFormat,
+				Log.warning("Illegal displayFormat: " + oConstraints.displayFormat,
 					null, oType.getName());
 			}
 			oAdjustedConstraints.nullable = oConstraints.nullable;
@@ -52,12 +54,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/odata/type/DateTimeBase'],
 	 *
 	 * In {@link sap.ui.model.odata.v2.ODataModel} this type is represented as a
 	 * <code>Date</code>. With the constraint <code>displayFormat: "Date"</code>, the time zone is
-	 * UTF and the time part is ignored, otherwise it is a date/time value in local time.
+	 * UTC and the time part is ignored, otherwise it is a date/time value in local time.
 	 *
 	 * @extends sap.ui.model.odata.type.DateTimeBase
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @alias sap.ui.model.odata.type.DateTime
 	 * @param {object} [oFormatOptions]

@@ -1,12 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.ValueHelpField.
-sap.ui.define(['jquery.sap.global', './TextField', './library', 'sap/ui/core/IconPool', 'sap/ui/core/theming/Parameters'],
-	function(jQuery, TextField, library, IconPool, Parameters) {
+sap.ui.define([
+    './TextField',
+    './library',
+    'sap/ui/core/IconPool',
+    'sap/ui/core/theming/Parameters',
+    './ValueHelpFieldRenderer'
+],
+	function(TextField, library, IconPool, Parameters, ValueHelpFieldRenderer) {
 	"use strict";
 
 
@@ -22,7 +28,7 @@ sap.ui.define(['jquery.sap.global', './TextField', './library', 'sap/ui/core/Ico
 	 * @extends sap.ui.commons.TextField
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -79,15 +85,13 @@ sap.ui.define(['jquery.sap.global', './TextField', './library', 'sap/ui/core/Ico
 			} else {
 				this.sIconHoverUrl = "sap-icon://value-help";
 			}
-			var oIcon = jQuery.sap.byId(oEvent.target.id);
-			oIcon.attr( 'src', this.sIconHoverUrl );
+			oEvent.target.setAttribute( 'src', this.sIconHoverUrl );
 		}
 	};
 
 	ValueHelpField.prototype.onmouseout = function (oEvent) {
 		if (oEvent.target.id == this.getId() + '-icon' && this.getEnabled() && this.getEditable() && !this.bIsIconURI) {
-			var oIcon = jQuery.sap.byId(oEvent.target.id);
-			oIcon.attr( 'src', this.sIconRegularUrl );
+			oEvent.target.setAttribute( 'src', this.sIconRegularUrl );
 		}
 	};
 
@@ -113,6 +117,7 @@ sap.ui.define(['jquery.sap.global', './TextField', './library', 'sap/ui/core/Ico
 				oIcon.addClass('sapUiTfValueHelpDsblIcon');
 			}
 		}
+		return this;
 	};
 
 	ValueHelpField.prototype.setEditable = function(bEditable) {
@@ -129,6 +134,7 @@ sap.ui.define(['jquery.sap.global', './TextField', './library', 'sap/ui/core/Ico
 				oIcon.addClass('sapUiTfValueHelpDsblIcon');
 			}
 		}
+		return this;
 	};
 
 	/**
@@ -179,4 +185,4 @@ sap.ui.define(['jquery.sap.global', './TextField', './library', 'sap/ui/core/Ico
 
 	return ValueHelpField;
 
-}, /* bExport= */ true);
+});

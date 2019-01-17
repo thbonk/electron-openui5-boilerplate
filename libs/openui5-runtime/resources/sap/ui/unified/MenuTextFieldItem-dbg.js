@@ -1,13 +1,35 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.unified.MenuTextFieldItem.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport', './MenuItemBase', './library'],
-	function(jQuery, ValueStateSupport, MenuItemBase, library) {
+sap.ui.define([
+	'sap/ui/core/ValueStateSupport',
+	'./MenuItemBase',
+	'./library',
+	'sap/ui/core/library',
+	'sap/ui/Device',
+	'sap/base/Log',
+	'sap/ui/events/PseudoEvents',
+	'sap/ui/dom/jquery/cursorPos' // jQuery Plugin "cursorPos"
+],
+	function(
+		ValueStateSupport,
+		MenuItemBase,
+		library,
+		coreLibrary,
+		Device,
+		Log,
+		PseudoEvents
+	) {
 	"use strict";
+
+
+
+	// shortcut for sap.ui.core.ValueState
+	var ValueState = coreLibrary.ValueState;
 
 
 
@@ -23,7 +45,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport', './MenuItem
 	 * @extends sap.ui.unified.MenuItemBase
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @since 1.21.0
 	 *
 	 * @constructor
@@ -54,7 +76,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport', './MenuItem
 			/**
 			 * Defines the value state of the text field of the item. This allows you to visualize e.g. warnings or errors.
 			 */
-			valueState : {type : "sap.ui.core.ValueState", group : "Appearance", defaultValue : sap.ui.core.ValueState.None}
+			valueState : {type : "sap.ui.core.ValueState", group : "Appearance", defaultValue : ValueState.None}
 		}
 	}});
 
@@ -137,7 +159,20 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport', './MenuItem
 
 		if (bHovered && oMenu.checkEnabled(this)) {
 			oMenu.closeSubmenu(false, true);
-			this.$("tf").focus();
+			/* TODO remove after 1.62 version */
+			if (Device.browser.msie) {
+				setTimeout(function () {
+					var fnMethod = function () {
+						this.$("tf").focus();
+					}.bind(this);
+					if (typeof fnMethod === "string" || fnMethod instanceof String) {
+						fnMethod = this[fnMethod];
+					}
+					fnMethod.apply(this, []);
+				}.bind(this), 0);
+			} else {
+				this.$("tf").focus();
+			}
 		}
 	};
 
@@ -203,7 +238,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport', './MenuItem
 
 	MenuTextFieldItem.prototype.onclick = function(oEvent){
 		this.getParent().closeSubmenu(false, true);
-		if (!sap.ui.Device.system.desktop && this.getParent().checkEnabled(this)) {
+		if (!Device.system.desktop && this.getParent().checkEnabled(this)) {
 			this.focus();
 		}
 		oEvent.stopPropagation();
@@ -212,7 +247,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport', './MenuItem
 
 	MenuTextFieldItem.prototype.onkeyup = function(oEvent){
 		//like sapenter but on keyup -> see Menu.prototype.onkeyup
-		if (!jQuery.sap.PseudoEvents.sapenter.fnCheck(oEvent)) {
+		if (!PseudoEvents.events.sapenter.fnCheck(oEvent)) {
 			return;
 		}
 		var sValue = this.$("tf").val();
@@ -231,7 +266,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport', './MenuItem
 	 * @return {sap.ui.unified.Menu}
 	 * @public
 	 * @name sap.ui.unified.MenuTextFieldItem#getSubmenu
-	 * @deprecated The aggregation <code>submenu</code> (inherited from parent class) is not supported for this type of menu item.
+	 * @deprecated As of version 1.21, the aggregation <code>submenu</code> (inherited from parent class) is not supported for this type of menu item.
 	 * @function
 	 */
 
@@ -241,7 +276,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport', './MenuItem
 	 * @return {sap.ui.unified.MenuTextFieldItem} <code>this</code> to allow method chaining
 	 * @public
 	 * @name sap.ui.unified.MenuTextFieldItem#destroySubmenu
-	 * @deprecated The aggregation <code>submenu</code> (inherited from parent class) is not supported for this type of menu item.
+	 * @deprecated As of version 1.21, the aggregation <code>submenu</code> (inherited from parent class) is not supported for this type of menu item.
 	 * @function
 	 */
 
@@ -251,10 +286,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport', './MenuItem
 	 * @param {sap.ui.unified.Menu} oMenu The menu to which the sap.ui.unified.Submenu should be set
 	 * @return {sap.ui.unified.MenuTextFieldItem} <code>this</code> to allow method chaining
 	 * @public
-	 * @deprecated The aggregation <code>submenu</code> (inherited from parent class) is not supported for this type of menu item.
+	 * @deprecated As of version 1.21, the aggregation <code>submenu</code> (inherited from parent class) is not supported for this type of menu item.
 	 */
 	MenuTextFieldItem.prototype.setSubmenu = function(oMenu){
-		jQuery.sap.log.warning("The aggregation 'submenu' is not supported for this type of menu item.", "", "sap.ui.unified.MenuTextFieldItem");
+		Log.warning("The aggregation 'submenu' is not supported for this type of menu item.", "", "sap.ui.unified.MenuTextFieldItem");
 		return this;
 	};
 
@@ -278,8 +313,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport', './MenuItem
 	MenuTextFieldItem.prototype.setValueState = function(sValueState){
 		this.setProperty("valueState", sValueState, true);
 		var $tf = this.$("tf");
-		$tf.toggleClass("sapUiMnuTfItemTfErr", sValueState == sap.ui.core.ValueState.Error);
-		$tf.toggleClass("sapUiMnuTfItemTfWarn", sValueState == sap.ui.core.ValueState.Warning);
+		$tf.toggleClass("sapUiMnuTfItemTfErr", sValueState == ValueState.Error);
+		$tf.toggleClass("sapUiMnuTfItemTfWarn", sValueState == ValueState.Warning);
 		var sTooltip = ValueStateSupport.enrichTooltip(this, this.getTooltip_AsString());
 		this.$().attr("title", sTooltip ? sTooltip : "");
 		return this;
@@ -329,4 +364,4 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport', './MenuItem
 
 	return MenuTextFieldItem;
 
-}, /* bExport= */ true);
+});

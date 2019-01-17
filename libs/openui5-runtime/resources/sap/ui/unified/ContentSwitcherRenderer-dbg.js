@@ -1,11 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define([
+	'sap/ui/unified/library',
+	"sap/base/security/encodeXML"
+],
+	function(library, encodeXML) {
 	"use strict";
+
+
+	// shortcut for sap.ui.unified.ContentSwitcherAnimation
+	var ContentSwitcherAnimation = library.ContentSwitcherAnimation;
 
 
 	/**
@@ -27,7 +34,7 @@ sap.ui.define(['jquery.sap.global'],
 		var sId            = oControl.getId();
 		var sAnimation     = oControl.getAnimation();
 		if (!sap.ui.getCore().getConfiguration().getAnimation()) {
-			sAnimation = sap.ui.unified.ContentSwitcherAnimation.None;
+			sAnimation = ContentSwitcherAnimation.None;
 		}
 
 		var iActiveContent = oControl.getActiveContent();
@@ -35,7 +42,7 @@ sap.ui.define(['jquery.sap.global'],
 		oRm.write("<div");
 		oRm.writeControlData(oControl);
 		oRm.addClass("sapUiUfdCSwitcher");
-		oRm.addClass("sapUiUfdCSwitcherAnimation" + jQuery.sap.encodeHTML(sAnimation));
+		oRm.addClass("sapUiUfdCSwitcherAnimation" + encodeXML(sAnimation));
 		oRm.writeClasses();
 		oRm.write(">");
 

@@ -24,9 +24,10 @@
 		"ar": "아랍어",
 		"ar_001": "현대 표준 아랍어",
 		"arc": "아람어",
-		"arn": "아라우칸어",
+		"arn": "마푸둥군어",
 		"arp": "아라파호어",
 		"arq": "알제리 아랍어",
+		"ars": "아랍어(나즈디)",
 		"arw": "아라와크어",
 		"ary": "모로코 아랍어",
 		"arz": "이집트 아랍어",
@@ -76,6 +77,7 @@
 		"car": "카리브어",
 		"cay": "카유가어",
 		"cch": "앗삼어",
+		"ccp": "ccp",
 		"ce": "체첸어",
 		"ceb": "세부아노어",
 		"cgg": "치가어",
@@ -156,6 +158,7 @@
 		"fr": "프랑스어",
 		"fr_CA": "프랑스어(캐나다)",
 		"fr_CH": "프랑스어(스위스)",
+		"frc": "케이준 프랑스어",
 		"frm": "중세 프랑스어",
 		"fro": "고대 프랑스어",
 		"frr": "북부 프리지아어",
@@ -288,6 +291,7 @@
 		"ln": "링갈라어",
 		"lo": "라오어",
 		"lol": "몽고어",
+		"lou": "루이지애나 크리올어",
 		"loz": "로지어",
 		"lrc": "북부 루리어",
 		"lt": "리투아니아어",
@@ -583,6 +587,7 @@
 		"Cyrl": "키릴 문자",
 		"Cyrs": "고대교회슬라브어 키릴문자",
 		"Deva": "데바나가리 문자",
+		"Dogr": "Dogr",
 		"Dsrt": "디저렛 문자",
 		"Dupl": "듀플로이안 문자",
 		"Egyd": "고대 이집트 민중문자",
@@ -593,6 +598,8 @@
 		"Geok": "그루지야 쿠츠리 문자",
 		"Geor": "조지아 문자",
 		"Glag": "글라골 문자",
+		"Gong": "Gong",
+		"Gonm": "Gonm",
 		"Goth": "고트 문자",
 		"Gran": "그란타 문자",
 		"Grek": "그리스 문자",
@@ -642,10 +649,12 @@
 		"Lyci": "리키아 문자",
 		"Lydi": "리디아 문자",
 		"Mahj": "마하자니 문자",
+		"Maka": "Maka",
 		"Mand": "만다이아 문자",
 		"Mani": "마니교 문자",
 		"Marc": "Marc",
 		"Maya": "마야 상형 문자",
+		"Medf": "Medf",
 		"Mend": "멘데 문자",
 		"Merc": "메로에 필기체",
 		"Mero": "메로에 문자",
@@ -679,7 +688,9 @@
 		"Phnx": "페니키아 문자",
 		"Plrd": "폴라드 표음 문자",
 		"Prti": "명문 파라티아 문자",
+		"Qaag": "Qaag",
 		"Rjng": "레장 문자",
+		"Rohg": "Rohg",
 		"Roro": "롱고롱고",
 		"Runr": "룬 문자",
 		"Samr": "사마리아 문자",
@@ -692,7 +703,10 @@
 		"Sidd": "실담자",
 		"Sind": "쿠다와디 문자",
 		"Sinh": "신할라 문자",
+		"Sogd": "Sogd",
+		"Sogo": "Sogo",
 		"Sora": "소라 솜펭 문자",
+		"Soyo": "Soyo",
 		"Sund": "순다 문자",
 		"Sylo": "실헤티 나가리",
 		"Syrc": "시리아 문자",
@@ -722,6 +736,7 @@
 		"Xpeo": "고대 페르시아 문자",
 		"Xsux": "수메르-아카드어 설형문자",
 		"Yiii": "이 문자",
+		"Zanb": "Zanb",
 		"Zinh": "구전 문자",
 		"Zmth": "수학 기호",
 		"Zsye": "이모티콘",
@@ -738,6 +753,7 @@
 		"151": "동유럽",
 		"154": "북유럽",
 		"155": "서유럽",
+		"202": "사하라 사막 이남 아프리카",
 		"419": "라틴 아메리카",
 		"001": "세계",
 		"002": "아프리카",
@@ -822,7 +838,7 @@
 		"CX": "크리스마스섬",
 		"CY": "키프로스",
 		"CZ": "체코",
-		"CZ-alt-variant": "CZ",
+		"CZ-alt-variant": "체코 공화국",
 		"DE": "독일",
 		"DG": "디에고 가르시아",
 		"DJ": "지부티",
@@ -839,7 +855,7 @@
 		"ES": "스페인",
 		"ET": "에티오피아",
 		"EU": "유럽 연합",
-		"EZ": "EZ",
+		"EZ": "유로존",
 		"FI": "핀란드",
 		"FJ": "피지",
 		"FK": "포클랜드 제도",
@@ -1001,7 +1017,7 @@
 		"TJ": "타지키스탄",
 		"TK": "토켈라우",
 		"TL": "동티모르",
-		"TL-alt-variant": "TL",
+		"TL-alt-variant": "티모르레스테",
 		"TM": "투르크메니스탄",
 		"TN": "튀니지",
 		"TO": "통가",
@@ -1028,6 +1044,8 @@
 		"VU": "바누아투",
 		"WF": "왈리스-푸투나 제도",
 		"WS": "사모아",
+		"XA": "XA",
+		"XB": "XB",
 		"XK": "코소보",
 		"YE": "예멘",
 		"YT": "마요트",
@@ -1056,8 +1074,13 @@
 			"medium": "{1} {0}",
 			"short": "{1} {0}",
 			"availableFormats": {
+				"Bh": "B h시",
+				"Bhm": "B h:mm",
+				"Bhms": "B h:mm:ss",
 				"d": "d일",
 				"E": "ccc",
+				"EBhm": "(E) B h:mm",
+				"EBhms": "(E) B h:mm:ss",
 				"Ed": "d일 (E)",
 				"EEEEd": "d일 EEEE",
 				"Ehm": "(E) a h:mm",
@@ -1105,7 +1128,7 @@
 				"yQQQ": "y년 QQQ",
 				"yQQQQ": "y년 QQQQ",
 				"MMMMW": "MMM W번째 주",
-				"yw": "y년 w번째 주"
+				"yw": "Y년 w번째 주"
 			},
 			"appendItems": {
 				"Day": "{0} ({2}: {1})",
@@ -1124,6 +1147,44 @@
 				"intervalFormatFallback": "{0} ~ {1}",
 				"d": {
 					"d": "d일~d일"
+				},
+				"Gy": {
+					"G": "G y – G y",
+					"y": "G y–y"
+				},
+				"GyM": {
+					"G": "GGGGG y-MM – GGGGG y-MM",
+					"M": "GGGGG y-MM – y-MM",
+					"y": "GGGGG y-MM – y-MM"
+				},
+				"GyMd": {
+					"d": "GGGGG y-MM-dd – y-MM-dd",
+					"G": "GGGGG y-MM-dd – GGGGG y-MM-dd",
+					"M": "GGGGG y-MM-dd – y-MM-dd",
+					"y": "GGGGG y-MM-dd – y-MM-dd"
+				},
+				"GyMEd": {
+					"d": "GGGGG y-MM-dd, E – y-MM-dd, E",
+					"G": "GGGGG y-MM-dd, E – GGGGG y-MM-dd, E",
+					"M": "GGGGG y-MM-dd, E – y-MM-dd, E",
+					"y": "GGGGG y-MM-dd, E – y-MM-dd, E"
+				},
+				"GyMMM": {
+					"G": "G y MMM – G y MMM",
+					"M": "G y MMM–MMM",
+					"y": "G y MMM – y MMM"
+				},
+				"GyMMMd": {
+					"d": "G y MMM d–d",
+					"G": "G y MMM d – G y MMM d",
+					"M": "G y MMM d – MMM d",
+					"y": "G y MMM d – y MMM d"
+				},
+				"GyMMMEd": {
+					"d": "G y MMM d, E – MMM d, E",
+					"G": "G y MMM d, E – G y MMM d, E",
+					"M": "G y MMM d, E – MMM d, E",
+					"y": "G y MMM d, E – y MMM d, E"
 				},
 				"h": {
 					"a": "a h시 ~ a h시",
@@ -1496,13 +1557,18 @@
 			"medium": "{1} {0}",
 			"short": "{1} {0}",
 			"availableFormats": {
+				"Bh": "B h시",
+				"Bhm": "B h:mm",
+				"Bhms": "B h:mm:ss",
 				"d": "d일",
 				"E": "ccc",
+				"EBhm": "E B h:mm",
+				"EBhms": "E B h:mm:ss",
 				"Ed": "d일 (E)",
 				"EEEEd": "d일 EEEE",
-				"Ehm": "E h:mm a",
+				"Ehm": "E a h:mm",
 				"EHm": "E HH:mm",
-				"Ehms": "E h:mm:ss a",
+				"Ehms": "E a h:mm:ss",
 				"EHms": "E HH:mm:ss",
 				"Gy": "G y년",
 				"GyMMM": "G y년 MMM월",
@@ -1515,7 +1581,7 @@
 				"hm": "a h:mm",
 				"Hm": "HH:mm",
 				"hms": "a h:mm:ss",
-				"Hms": "H시 m분 s초",
+				"Hms": "HH:mm:ss",
 				"M": "M월",
 				"Md": "M. d.",
 				"MEd": "M. d. (E)",
@@ -1524,7 +1590,7 @@
 				"MMMd": "MMM월 d일",
 				"MMMEd": "MMM월 d일 (E)",
 				"MMMEEEEd": "MMM월 d일 EEEE",
-				"MMMMd": "MMMM월 d일",
+				"MMMMd": "MMMM d일",
 				"ms": "mm:ss",
 				"y": "G y년",
 				"yyyy": "G y년",
@@ -1536,7 +1602,7 @@
 				"yyyyMMMd": "G y년 MMM월 d일",
 				"yyyyMMMEd": "G y년 MMM월 d일 (E)",
 				"yyyyMMMEEEEd": "G y년 MMM월 d일 EEEE",
-				"yyyyMMMM": "G y년 MMMM월",
+				"yyyyMMMM": "G y년 MMMM",
 				"yyyyQQQ": "G y년 QQQ",
 				"yyyyQQQQ": "G y년 QQQQ"
 			},
@@ -1557,6 +1623,44 @@
 				"intervalFormatFallback": "{0} ~ {1}",
 				"d": {
 					"d": "d일 ~ d일"
+				},
+				"Gy": {
+					"G": "G y – G y",
+					"y": "G y–y"
+				},
+				"GyM": {
+					"G": "GGGGG y-MM – GGGGG y-MM",
+					"M": "GGGGG y-MM – y-MM",
+					"y": "GGGGG y-MM – y-MM"
+				},
+				"GyMd": {
+					"d": "GGGGG y-MM-dd – y-MM-dd",
+					"G": "GGGGG y-MM-dd – GGGGG y-MM-dd",
+					"M": "GGGGG y-MM-dd – y-MM-dd",
+					"y": "GGGGG y-MM-dd – y-MM-dd"
+				},
+				"GyMEd": {
+					"d": "GGGGG y-MM-dd, E – y-MM-dd, E",
+					"G": "GGGGG y-MM-dd, E – GGGGG y-MM-dd, E",
+					"M": "GGGGG y-MM-dd, E – y-MM-dd, E",
+					"y": "GGGGG y-MM-dd, E – y-MM-dd, E"
+				},
+				"GyMMM": {
+					"G": "G y MMM – G y MMM",
+					"M": "G y MMM–MMM",
+					"y": "G y MMM – y MMM"
+				},
+				"GyMMMd": {
+					"d": "G y MMM d–d",
+					"G": "G y MMM d – G y MMM d",
+					"M": "G y MMM d – MMM d",
+					"y": "G y MMM d – y MMM d"
+				},
+				"GyMMMEd": {
+					"d": "G y MMM d, E – MMM d, E",
+					"G": "G y MMM d, E – G y MMM d, E",
+					"M": "G y MMM d, E – MMM d, E",
+					"y": "G y MMM d, E – y MMM d, E"
 				},
 				"h": {
 					"a": "a h시 ~ a h시",
@@ -1902,7 +2006,7 @@
 			}
 		},
 		"era-wide": {
-			"0": "AH"
+			"0": "히즈라력"
 		},
 		"era-abbreviated": {
 			"0": "AH"
@@ -1930,35 +2034,40 @@
 			"medium": "{1} {0}",
 			"short": "{1} {0}",
 			"availableFormats": {
+				"Bh": "B h시",
+				"Bhm": "B h:mm",
+				"Bhms": "B h:mm:ss",
 				"d": "d일",
 				"E": "ccc",
+				"EBhm": "E B h:mm",
+				"EBhms": "E B h:mm:ss",
 				"Ed": "d일 (E)",
 				"EEEEd": "d일 EEEE",
-				"Ehm": "E h:mm a",
+				"Ehm": "E a h:mm",
 				"EHm": "E HH:mm",
-				"Ehms": "E h:mm:ss a",
+				"Ehms": "E a h:mm:ss",
 				"EHms": "E HH:mm:ss",
 				"Gy": "G y년",
-				"GyMMM": "G y년 MMM월",
-				"GyMMMd": "G y년 MMM월 d일",
-				"GyMMMEd": "G y년 MMM월 d일 (E)",
-				"GyMMMEEEEd": "G y년 MMM월 d일 EEEE",
+				"GyMMM": "G y년 MMM",
+				"GyMMMd": "G y년 MMM d일",
+				"GyMMMEd": "G y년 MMM d일 (E)",
+				"GyMMMEEEEd": "G y년 MMM d일 EEEE",
 				"h": "a h시",
 				"H": "H시",
 				"HHmmss": "HH:mm:ss",
 				"hm": "a h:mm",
 				"Hm": "HH:mm",
 				"hms": "a h:mm:ss",
-				"Hms": "H시 m분 s초",
+				"Hms": "HH:mm:ss",
 				"M": "M월",
 				"Md": "M. d.",
 				"MEd": "M. d. (E)",
 				"MEEEEd": "M. d. EEEE",
 				"MMM": "LLL",
-				"MMMd": "MMM월 d일",
-				"MMMEd": "MMM월 d일 (E)",
-				"MMMEEEEd": "MMM월 d일 EEEE",
-				"MMMMd": "MMMM월 d일",
+				"MMMd": "MMM d일",
+				"MMMEd": "MMM d일 (E)",
+				"MMMEEEEd": "MMM d일 EEEE",
+				"MMMMd": "MMMM d일",
 				"ms": "mm:ss",
 				"y": "G y년",
 				"yyyy": "G y년",
@@ -1966,11 +2075,11 @@
 				"yyyyMd": "G y. M. d.",
 				"yyyyMEd": "G y. M. d. (E)",
 				"yyyyMEEEEd": "G y. M. d. EEEE",
-				"yyyyMMM": "G y년 MMM월",
-				"yyyyMMMd": "G y년 MMM월 d일",
-				"yyyyMMMEd": "G y년 MMM월 d일 (E)",
-				"yyyyMMMEEEEd": "G y년 MMM월 d일 EEEE",
-				"yyyyMMMM": "G y년 MMMM월",
+				"yyyyMMM": "G y년 MMM",
+				"yyyyMMMd": "G y년 MMM d일",
+				"yyyyMMMEd": "G y년 MMM d일 (E)",
+				"yyyyMMMEEEEd": "G y년 MMM d일 EEEE",
+				"yyyyMMMM": "G y년 MMMM",
 				"yyyyQQQ": "G y년 QQQ",
 				"yyyyQQQQ": "G y년 QQQQ"
 			},
@@ -1991,6 +2100,44 @@
 				"intervalFormatFallback": "{0} ~ {1}",
 				"d": {
 					"d": "d일 ~ d일"
+				},
+				"Gy": {
+					"G": "G y – G y",
+					"y": "G y–y"
+				},
+				"GyM": {
+					"G": "GGGGG y-MM – GGGGG y-MM",
+					"M": "GGGGG y-MM – y-MM",
+					"y": "GGGGG y-MM – y-MM"
+				},
+				"GyMd": {
+					"d": "GGGGG y-MM-dd – y-MM-dd",
+					"G": "GGGGG y-MM-dd – GGGGG y-MM-dd",
+					"M": "GGGGG y-MM-dd – y-MM-dd",
+					"y": "GGGGG y-MM-dd – y-MM-dd"
+				},
+				"GyMEd": {
+					"d": "GGGGG y-MM-dd, E – y-MM-dd, E",
+					"G": "GGGGG y-MM-dd, E – GGGGG y-MM-dd, E",
+					"M": "GGGGG y-MM-dd, E – y-MM-dd, E",
+					"y": "GGGGG y-MM-dd, E – y-MM-dd, E"
+				},
+				"GyMMM": {
+					"G": "G y MMM – G y MMM",
+					"M": "G y MMM–MMM",
+					"y": "G y MMM – y MMM"
+				},
+				"GyMMMd": {
+					"d": "G y MMM d–d",
+					"G": "G y MMM d – G y MMM d",
+					"M": "G y MMM d – MMM d",
+					"y": "G y MMM d – y MMM d"
+				},
+				"GyMMMEd": {
+					"d": "G y MMM d, E – MMM d, E",
+					"G": "G y MMM d, E – G y MMM d, E",
+					"M": "G y MMM d, E – MMM d, E",
+					"y": "G y MMM d, E – y MMM d, E"
 				},
 				"h": {
 					"a": "a h시 ~ a h시",
@@ -2373,13 +2520,18 @@
 			"medium": "{1} {0}",
 			"short": "{1} {0}",
 			"availableFormats": {
+				"Bh": "B h시",
+				"Bhm": "B h:mm",
+				"Bhms": "B h:mm:ss",
 				"d": "d일",
 				"E": "ccc",
+				"EBhm": "E B h:mm",
+				"EBhms": "E B h:mm:ss",
 				"Ed": "d일 (E)",
 				"EEEEd": "d일 EEEE",
-				"Ehm": "E h:mm a",
+				"Ehm": "E a h:mm",
 				"EHm": "E HH:mm",
-				"Ehms": "E h:mm:ss a",
+				"Ehms": "E a h:mm:ss",
 				"EHms": "E HH:mm:ss",
 				"Gy": "G y년",
 				"GyMMM": "G y년 MMM월",
@@ -2392,7 +2544,7 @@
 				"hm": "a h:mm",
 				"Hm": "HH:mm",
 				"hms": "a h:mm:ss",
-				"Hms": "H시 m분 s초",
+				"Hms": "HH:mm:ss",
 				"M": "M월",
 				"Md": "M. d.",
 				"MEd": "M. d. (E)",
@@ -2434,6 +2586,44 @@
 				"intervalFormatFallback": "{0} ~ {1}",
 				"d": {
 					"d": "d일 ~ d일"
+				},
+				"Gy": {
+					"G": "G y – G y",
+					"y": "G y–y"
+				},
+				"GyM": {
+					"G": "GGGGG y-MM – GGGGG y-MM",
+					"M": "GGGGG y-MM – y-MM",
+					"y": "GGGGG y-MM – y-MM"
+				},
+				"GyMd": {
+					"d": "GGGGG y-MM-dd – y-MM-dd",
+					"G": "GGGGG y-MM-dd – GGGGG y-MM-dd",
+					"M": "GGGGG y-MM-dd – y-MM-dd",
+					"y": "GGGGG y-MM-dd – y-MM-dd"
+				},
+				"GyMEd": {
+					"d": "GGGGG y-MM-dd, E – y-MM-dd, E",
+					"G": "GGGGG y-MM-dd, E – GGGGG y-MM-dd, E",
+					"M": "GGGGG y-MM-dd, E – y-MM-dd, E",
+					"y": "GGGGG y-MM-dd, E – y-MM-dd, E"
+				},
+				"GyMMM": {
+					"G": "G y MMM – G y MMM",
+					"M": "G y MMM–MMM",
+					"y": "G y MMM – y MMM"
+				},
+				"GyMMMd": {
+					"d": "G y MMM d–d",
+					"G": "G y MMM d – G y MMM d",
+					"M": "G y MMM d – MMM d",
+					"y": "G y MMM d – y MMM d"
+				},
+				"GyMMMEd": {
+					"d": "G y MMM d, E – MMM d, E",
+					"G": "G y MMM d, E – G y MMM d, E",
+					"M": "G y MMM d, E – MMM d, E",
+					"y": "G y MMM d, E – y MMM d, E"
 				},
 				"h": {
 					"a": "a h시 ~ a h시",
@@ -2786,6 +2976,483 @@
 		},
 		"era-narrow": {
 			"0": "AP"
+		}
+	},
+	"ca-buddhist": {
+		"dateFormats": {
+			"full": "G y년 M월 d일 EEEE",
+			"long": "G y년 M월 d일",
+			"medium": "G y. M. d.",
+			"short": "G y. M. d."
+		},
+		"timeFormats": {
+			"full": "a h시 m분 s초 zzzz",
+			"long": "a h시 m분 s초 z",
+			"medium": "a h:mm:ss",
+			"short": "a h:mm"
+		},
+		"dateTimeFormats": {
+			"full": "{1} {0}",
+			"long": "{1} {0}",
+			"medium": "{1} {0}",
+			"short": "{1} {0}",
+			"availableFormats": {
+				"Bh": "B h시",
+				"Bhm": "B h:mm",
+				"Bhms": "B h:mm:ss",
+				"d": "d일",
+				"E": "ccc",
+				"EBhm": "E B h:mm",
+				"EBhms": "E B h:mm:ss",
+				"Ed": "d일 (E)",
+				"EEEEd": "d일 EEEE",
+				"Ehm": "E a h:mm",
+				"EHm": "E HH:mm",
+				"Ehms": "E a h:mm:ss",
+				"EHms": "E HH:mm:ss",
+				"Gy": "G y년",
+				"GyMMM": "G y년 MMM",
+				"GyMMMd": "G y년 MMM d일",
+				"GyMMMEd": "G y년 MMM d일 (E)",
+				"GyMMMEEEEd": "G y년 MMM d일 EEEE",
+				"h": "a h시",
+				"H": "H시",
+				"HHmmss": "HH:mm:ss",
+				"hm": "a h:mm",
+				"Hm": "HH:mm",
+				"hms": "a h:mm:ss",
+				"Hms": "HH:mm:ss",
+				"M": "M월",
+				"Md": "M. d.",
+				"MEd": "M. d. (E)",
+				"MEEEEd": "M. d. EEEE",
+				"MMM": "LLL",
+				"MMMd": "MMM d일",
+				"MMMEd": "MMM d일 (E)",
+				"MMMEEEEd": "MMM d일 EEEE",
+				"MMMMd": "MMMM d일",
+				"ms": "mm:ss",
+				"y": "G y년",
+				"yyyy": "G y년",
+				"yyyyM": "G y. M.",
+				"yyyyMd": "G y. M. d.",
+				"yyyyMEd": "G y. M. d. (E)",
+				"yyyyMEEEEd": "G y. M. d. EEEE",
+				"yyyyMMM": "G y년 MMM",
+				"yyyyMMMd": "G y년 MMM d일",
+				"yyyyMMMEd": "G y년 MMM d일 (E)",
+				"yyyyMMMEEEEd": "G y년 MMM d일 EEEE",
+				"yyyyMMMM": "G y년 MMMM",
+				"yyyyQQQ": "G y년 QQQ",
+				"yyyyQQQQ": "G y년 QQQQ"
+			},
+			"appendItems": {
+				"Day": "{0} ({2}: {1})",
+				"Day-Of-Week": "{0} {1}",
+				"Era": "{1} {0}",
+				"Hour": "{0} ({2}: {1})",
+				"Minute": "{0} ({2}: {1})",
+				"Month": "{0} ({2}: {1})",
+				"Quarter": "{0} ({2}: {1})",
+				"Second": "{0} ({2}: {1})",
+				"Timezone": "{0} {1}",
+				"Week": "{0} ({2}: {1})",
+				"Year": "{1} {0}"
+			},
+			"intervalFormats": {
+				"intervalFormatFallback": "{0} ~ {1}",
+				"d": {
+					"d": "d일 ~ d일"
+				},
+				"Gy": {
+					"G": "G y – G y",
+					"y": "G y–y"
+				},
+				"GyM": {
+					"G": "GGGGG y-MM – GGGGG y-MM",
+					"M": "GGGGG y-MM – y-MM",
+					"y": "GGGGG y-MM – y-MM"
+				},
+				"GyMd": {
+					"d": "GGGGG y-MM-dd – y-MM-dd",
+					"G": "GGGGG y-MM-dd – GGGGG y-MM-dd",
+					"M": "GGGGG y-MM-dd – y-MM-dd",
+					"y": "GGGGG y-MM-dd – y-MM-dd"
+				},
+				"GyMEd": {
+					"d": "GGGGG y-MM-dd, E – y-MM-dd, E",
+					"G": "GGGGG y-MM-dd, E – GGGGG y-MM-dd, E",
+					"M": "GGGGG y-MM-dd, E – y-MM-dd, E",
+					"y": "GGGGG y-MM-dd, E – y-MM-dd, E"
+				},
+				"GyMMM": {
+					"G": "G y MMM – G y MMM",
+					"M": "G y MMM–MMM",
+					"y": "G y MMM – y MMM"
+				},
+				"GyMMMd": {
+					"d": "G y MMM d–d",
+					"G": "G y MMM d – G y MMM d",
+					"M": "G y MMM d – MMM d",
+					"y": "G y MMM d – y MMM d"
+				},
+				"GyMMMEd": {
+					"d": "G y MMM d, E – MMM d, E",
+					"G": "G y MMM d, E – G y MMM d, E",
+					"M": "G y MMM d, E – MMM d, E",
+					"y": "G y MMM d, E – y MMM d, E"
+				},
+				"h": {
+					"a": "a h시 ~ a h시",
+					"h": "a h시 ~ h시"
+				},
+				"H": {
+					"H": "HH ~ HH시"
+				},
+				"hm": {
+					"a": "a h:mm ~ a h:mm",
+					"h": "a h:mm~h:mm",
+					"m": "a h:mm~h:mm"
+				},
+				"Hm": {
+					"H": "HH:mm ~ HH:mm",
+					"m": "HH:mm ~ HH:mm"
+				},
+				"hmv": {
+					"a": "a h:mm ~ a h:mm v",
+					"h": "a h:mm~h:mm v",
+					"m": "a h:mm~h:mm v"
+				},
+				"Hmv": {
+					"H": "HH:mm ~ HH:mm v",
+					"m": "HH:mm ~ HH:mm v"
+				},
+				"hv": {
+					"a": "a h시 ~ a h시(v)",
+					"h": "a h시 ~ h시(v)"
+				},
+				"Hv": {
+					"H": "HH ~ HH시 v"
+				},
+				"M": {
+					"M": "M월 ~ M월"
+				},
+				"Md": {
+					"d": "M. d ~ M. d",
+					"M": "M. d ~ M. d"
+				},
+				"MEd": {
+					"d": "M. d (E) ~ M. d (E)",
+					"M": "M. d (E) ~ M. d (E)"
+				},
+				"MMM": {
+					"M": "MMM ~ MMM"
+				},
+				"MMMd": {
+					"d": "M월 d일 ~ d일",
+					"M": "M월 d일 ~ M월 d일"
+				},
+				"MMMEd": {
+					"d": "M월 d일 (E) ~ d일 (E)",
+					"M": "M월 d일 (E) ~ M월 d일 (E)"
+				},
+				"MMMEEEEd": {
+					"d": "M월 d일 EEEE ~ d일 EEEE",
+					"M": "M월 d일 EEEE ~ M월 d일 EEEE"
+				},
+				"MMMM": {
+					"M": "LLLL ~ LLLL"
+				},
+				"y": {
+					"y": "G y년 ~ y년"
+				},
+				"yM": {
+					"M": "G y. M ~ y. M",
+					"y": "G y. M ~ y. M"
+				},
+				"yMd": {
+					"d": "G y. M. d. ~ y. M. d.",
+					"M": "G y. M. d. ~ y. M. d.",
+					"y": "G y. M. d. ~ y. M. d."
+				},
+				"yMEd": {
+					"d": "G y. M. d. (E) ~ y. M. d. (E)",
+					"M": "G y. M. d. (E) ~ y. M. d. (E)",
+					"y": "G y. M. d. (E) ~ y. M. d. (E)"
+				},
+				"yMMM": {
+					"M": "G y년 M월~M월",
+					"y": "G y년 M월 ~ y년 M월"
+				},
+				"yMMMd": {
+					"d": "G y년 M월 d일~d일",
+					"M": "G y년 M월 d일 ~ M월 d일",
+					"y": "G y년 M월 d일 ~ y년 M월 d일"
+				},
+				"yMMMEd": {
+					"d": "G y년 M월 d일 (E) ~ d일 (E)",
+					"M": "G y년 M월 d일 (E) ~ M월 d일 (E)",
+					"y": "G y년 M월 d일 (E) ~ y년 M월 d일 (E)"
+				},
+				"yMMMEEEEd": {
+					"d": "G y년 M월 d일 EEEE ~ d일 EEEE",
+					"M": "G y년 M월 d일 EEEE ~ M월 d일 EEEE",
+					"y": "G y년 M월 d일 EEEE ~ y년 M월 d일 EEEE"
+				},
+				"yMMMM": {
+					"M": "G y년 MM월 ~ MM월",
+					"y": "G y년 MM월 ~ y년 MM월"
+				}
+			}
+		},
+		"months": {
+			"format": {
+				"abbreviated": [
+					"1월",
+					"2월",
+					"3월",
+					"4월",
+					"5월",
+					"6월",
+					"7월",
+					"8월",
+					"9월",
+					"10월",
+					"11월",
+					"12월"
+				],
+				"narrow": [
+					"1월",
+					"2월",
+					"3월",
+					"4월",
+					"5월",
+					"6월",
+					"7월",
+					"8월",
+					"9월",
+					"10월",
+					"11월",
+					"12월"
+				],
+				"wide": [
+					"1월",
+					"2월",
+					"3월",
+					"4월",
+					"5월",
+					"6월",
+					"7월",
+					"8월",
+					"9월",
+					"10월",
+					"11월",
+					"12월"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"1월",
+					"2월",
+					"3월",
+					"4월",
+					"5월",
+					"6월",
+					"7월",
+					"8월",
+					"9월",
+					"10월",
+					"11월",
+					"12월"
+				],
+				"narrow": [
+					"1월",
+					"2월",
+					"3월",
+					"4월",
+					"5월",
+					"6월",
+					"7월",
+					"8월",
+					"9월",
+					"10월",
+					"11월",
+					"12월"
+				],
+				"wide": [
+					"1월",
+					"2월",
+					"3월",
+					"4월",
+					"5월",
+					"6월",
+					"7월",
+					"8월",
+					"9월",
+					"10월",
+					"11월",
+					"12월"
+				]
+			}
+		},
+		"days": {
+			"format": {
+				"abbreviated": [
+					"일",
+					"월",
+					"화",
+					"수",
+					"목",
+					"금",
+					"토"
+				],
+				"narrow": [
+					"일",
+					"월",
+					"화",
+					"수",
+					"목",
+					"금",
+					"토"
+				],
+				"short": [
+					"일",
+					"월",
+					"화",
+					"수",
+					"목",
+					"금",
+					"토"
+				],
+				"wide": [
+					"일요일",
+					"월요일",
+					"화요일",
+					"수요일",
+					"목요일",
+					"금요일",
+					"토요일"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"일",
+					"월",
+					"화",
+					"수",
+					"목",
+					"금",
+					"토"
+				],
+				"narrow": [
+					"일",
+					"월",
+					"화",
+					"수",
+					"목",
+					"금",
+					"토"
+				],
+				"short": [
+					"일",
+					"월",
+					"화",
+					"수",
+					"목",
+					"금",
+					"토"
+				],
+				"wide": [
+					"일요일",
+					"월요일",
+					"화요일",
+					"수요일",
+					"목요일",
+					"금요일",
+					"토요일"
+				]
+			}
+		},
+		"quarters": {
+			"format": {
+				"abbreviated": [
+					"1분기",
+					"2분기",
+					"3분기",
+					"4분기"
+				],
+				"narrow": [
+					"1",
+					"2",
+					"3",
+					"4"
+				],
+				"wide": [
+					"제 1/4분기",
+					"제 2/4분기",
+					"제 3/4분기",
+					"제 4/4분기"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"1분기",
+					"2분기",
+					"3분기",
+					"4분기"
+				],
+				"narrow": [
+					"1",
+					"2",
+					"3",
+					"4"
+				],
+				"wide": [
+					"제 1/4분기",
+					"제 2/4분기",
+					"제 3/4분기",
+					"제 4/4분기"
+				]
+			}
+		},
+		"dayPeriods": {
+			"format": {
+				"abbreviated": [
+					"AM",
+					"PM"
+				],
+				"narrow": [
+					"AM",
+					"PM"
+				],
+				"wide": [
+					"오전",
+					"오후"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"AM",
+					"PM"
+				],
+				"narrow": [
+					"AM",
+					"PM"
+				],
+				"wide": [
+					"오전",
+					"오후"
+				]
+			}
+		},
+		"era-wide": {
+			"0": "불기"
+		},
+		"era-abbreviated": {
+			"0": "불기"
+		},
+		"era-narrow": {
+			"0": "BE"
 		}
 	},
 	"dateFields": {
@@ -3177,32 +3844,644 @@
 		"XAF": "FCFA",
 		"XCD": "EC$",
 		"XOF": "CFA",
-		"XPF": "CFPF"
+		"XPF": "CFPF",
+		"XXX": "¤"
 	},
 	"rtl": false,
+	"listPattern-standard-wide": {
+		"2": "{0} 및 {1}",
+		"start": "{0}, {1}",
+		"middle": "{0}, {1}",
+		"end": "{0} 및 {1}"
+	},
+	"listPattern-or-wide": {
+		"2": "{0} 또는 {1}",
+		"start": "{0}, {1}",
+		"middle": "{0}, {1}",
+		"end": "{0} 또는 {1}"
+	},
+	"listPattern-or-short": {
+		"2": "{0} 또는 {1}",
+		"start": "{0}, {1}",
+		"middle": "{0}, {1}",
+		"end": "{0} 또는 {1}"
+	},
+	"listPattern-standard-short": {
+		"2": "{0} 및 {1}",
+		"start": "{0}, {1}",
+		"middle": "{0}, {1}",
+		"end": "{0} 및 {1}"
+	},
+	"units": {
+		"short": {
+			"per": {
+				"compoundUnitPattern": "{0}/{1}"
+			},
+			"acceleration-g-force": {
+				"displayName": "g-force",
+				"unitPattern-count-other": "{0}G"
+			},
+			"acceleration-meter-per-second-squared": {
+				"displayName": "m/s²",
+				"unitPattern-count-other": "{0}m/s²"
+			},
+			"angle-revolution": {
+				"displayName": "rev",
+				"unitPattern-count-other": "{0}rev"
+			},
+			"angle-radian": {
+				"displayName": "rad",
+				"unitPattern-count-other": "{0}rad"
+			},
+			"angle-degree": {
+				"displayName": "°",
+				"unitPattern-count-other": "{0}°"
+			},
+			"angle-arc-minute": {
+				"displayName": "′",
+				"unitPattern-count-other": "{0}′"
+			},
+			"angle-arc-second": {
+				"displayName": "″",
+				"unitPattern-count-other": "{0}″"
+			},
+			"area-square-kilometer": {
+				"displayName": "km²",
+				"unitPattern-count-other": "{0}km²",
+				"perUnitPattern": "{0}/km²"
+			},
+			"area-hectare": {
+				"displayName": "ha",
+				"unitPattern-count-other": "{0}ha"
+			},
+			"area-square-meter": {
+				"displayName": "m²",
+				"unitPattern-count-other": "{0}m²",
+				"perUnitPattern": "{0}/m²"
+			},
+			"area-square-centimeter": {
+				"displayName": "cm²",
+				"unitPattern-count-other": "{0}cm²",
+				"perUnitPattern": "{0}/cm²"
+			},
+			"area-square-mile": {
+				"displayName": "mi²",
+				"unitPattern-count-other": "{0}mi²",
+				"perUnitPattern": "{0}/mi²"
+			},
+			"area-acre": {
+				"displayName": "ac",
+				"unitPattern-count-other": "{0}ac"
+			},
+			"area-square-yard": {
+				"displayName": "yd²",
+				"unitPattern-count-other": "{0}yd²"
+			},
+			"area-square-foot": {
+				"displayName": "ft²",
+				"unitPattern-count-other": "{0}ft²"
+			},
+			"area-square-inch": {
+				"displayName": "in²",
+				"unitPattern-count-other": "{0}in²",
+				"perUnitPattern": "{0}/in²"
+			},
+			"concentr-karat": {
+				"displayName": "kt",
+				"unitPattern-count-other": "{0}kt"
+			},
+			"concentr-milligram-per-deciliter": {
+				"displayName": "mg/dL",
+				"unitPattern-count-other": "{0}mg/dL"
+			},
+			"concentr-millimole-per-liter": {
+				"displayName": "mmol/L",
+				"unitPattern-count-other": "{0}mmol/L"
+			},
+			"concentr-part-per-million": {
+				"displayName": "ppm",
+				"unitPattern-count-other": "{0}ppm"
+			},
+			"concentr-percent": {
+				"displayName": "%",
+				"unitPattern-count-other": "{0}%"
+			},
+			"concentr-permille": {
+				"displayName": "‰",
+				"unitPattern-count-other": "{0}‰"
+			},
+			"consumption-liter-per-kilometer": {
+				"displayName": "L/km",
+				"unitPattern-count-other": "{0}L/km"
+			},
+			"consumption-liter-per-100kilometers": {
+				"displayName": "L/100km",
+				"unitPattern-count-other": "{0}L/100km"
+			},
+			"consumption-mile-per-gallon": {
+				"displayName": "mpg",
+				"unitPattern-count-other": "{0}mpg"
+			},
+			"consumption-mile-per-gallon-imperial": {
+				"displayName": "mpg Imp.",
+				"unitPattern-count-other": "{0}mpg Imp."
+			},
+			"digital-petabyte": {
+				"displayName": "PB",
+				"unitPattern-count-other": "{0}PB"
+			},
+			"digital-terabyte": {
+				"displayName": "TB",
+				"unitPattern-count-other": "{0}TB"
+			},
+			"digital-terabit": {
+				"displayName": "Tb",
+				"unitPattern-count-other": "{0}Tb"
+			},
+			"digital-gigabyte": {
+				"displayName": "GB",
+				"unitPattern-count-other": "{0}GB"
+			},
+			"digital-gigabit": {
+				"displayName": "Gb",
+				"unitPattern-count-other": "{0}Gb"
+			},
+			"digital-megabyte": {
+				"displayName": "MB",
+				"unitPattern-count-other": "{0}MB"
+			},
+			"digital-megabit": {
+				"displayName": "Mb",
+				"unitPattern-count-other": "{0}Mb"
+			},
+			"digital-kilobyte": {
+				"displayName": "kB",
+				"unitPattern-count-other": "{0}kB"
+			},
+			"digital-kilobit": {
+				"displayName": "kb",
+				"unitPattern-count-other": "{0}kb"
+			},
+			"digital-byte": {
+				"displayName": "byte",
+				"unitPattern-count-other": "{0}byte"
+			},
+			"digital-bit": {
+				"displayName": "bit",
+				"unitPattern-count-other": "{0}bit"
+			},
+			"duration-century": {
+				"displayName": "C",
+				"unitPattern-count-other": "{0}C"
+			},
+			"duration-year": {
+				"displayName": "년",
+				"unitPattern-count-other": "{0}년",
+				"perUnitPattern": "{0}/년"
+			},
+			"duration-month": {
+				"displayName": "개월",
+				"unitPattern-count-other": "{0}개월",
+				"perUnitPattern": "{0}/월"
+			},
+			"duration-week": {
+				"displayName": "주",
+				"unitPattern-count-other": "{0}주",
+				"perUnitPattern": "{0}/주"
+			},
+			"duration-day": {
+				"displayName": "일",
+				"unitPattern-count-other": "{0}일",
+				"perUnitPattern": "{0}/일"
+			},
+			"duration-hour": {
+				"displayName": "시간",
+				"unitPattern-count-other": "{0}시간",
+				"perUnitPattern": "{0}/h"
+			},
+			"duration-minute": {
+				"displayName": "분",
+				"unitPattern-count-other": "{0}분",
+				"perUnitPattern": "{0}/min"
+			},
+			"duration-second": {
+				"displayName": "초",
+				"unitPattern-count-other": "{0}초",
+				"perUnitPattern": "{0}/s"
+			},
+			"duration-millisecond": {
+				"displayName": "밀리초",
+				"unitPattern-count-other": "{0}ms"
+			},
+			"duration-microsecond": {
+				"displayName": "μs",
+				"unitPattern-count-other": "{0}μs"
+			},
+			"duration-nanosecond": {
+				"displayName": "ns",
+				"unitPattern-count-other": "{0}ns"
+			},
+			"electric-ampere": {
+				"displayName": "amp",
+				"unitPattern-count-other": "{0}A"
+			},
+			"electric-milliampere": {
+				"displayName": "mA",
+				"unitPattern-count-other": "{0}mA"
+			},
+			"electric-ohm": {
+				"displayName": "ohm",
+				"unitPattern-count-other": "{0}Ω"
+			},
+			"electric-volt": {
+				"displayName": "V",
+				"unitPattern-count-other": "{0}V"
+			},
+			"energy-kilocalorie": {
+				"displayName": "kcal",
+				"unitPattern-count-other": "{0}kcal"
+			},
+			"energy-calorie": {
+				"displayName": "cal",
+				"unitPattern-count-other": "{0}cal"
+			},
+			"energy-foodcalorie": {
+				"displayName": "Cal",
+				"unitPattern-count-other": "{0}Cal"
+			},
+			"energy-kilojoule": {
+				"displayName": "kJ",
+				"unitPattern-count-other": "{0}kJ"
+			},
+			"energy-joule": {
+				"displayName": "줄",
+				"unitPattern-count-other": "{0}줄"
+			},
+			"energy-kilowatt-hour": {
+				"displayName": "kWh",
+				"unitPattern-count-other": "{0}kWh"
+			},
+			"frequency-gigahertz": {
+				"displayName": "GHz",
+				"unitPattern-count-other": "{0}GHz"
+			},
+			"frequency-megahertz": {
+				"displayName": "MHz",
+				"unitPattern-count-other": "{0}MHz"
+			},
+			"frequency-kilohertz": {
+				"displayName": "kHz",
+				"unitPattern-count-other": "{0}kHz"
+			},
+			"frequency-hertz": {
+				"displayName": "Hz",
+				"unitPattern-count-other": "{0}Hz"
+			},
+			"length-kilometer": {
+				"displayName": "km",
+				"unitPattern-count-other": "{0}km",
+				"perUnitPattern": "{0}/km"
+			},
+			"length-meter": {
+				"displayName": "m",
+				"unitPattern-count-other": "{0}m",
+				"perUnitPattern": "{0}/m"
+			},
+			"length-decimeter": {
+				"displayName": "dm",
+				"unitPattern-count-other": "{0}dm"
+			},
+			"length-centimeter": {
+				"displayName": "cm",
+				"unitPattern-count-other": "{0}cm",
+				"perUnitPattern": "{0}/cm"
+			},
+			"length-millimeter": {
+				"displayName": "mm",
+				"unitPattern-count-other": "{0}mm"
+			},
+			"length-micrometer": {
+				"displayName": "µm",
+				"unitPattern-count-other": "{0}µm"
+			},
+			"length-nanometer": {
+				"displayName": "nm",
+				"unitPattern-count-other": "{0}nm"
+			},
+			"length-picometer": {
+				"displayName": "pm",
+				"unitPattern-count-other": "{0}pm"
+			},
+			"length-mile": {
+				"displayName": "mi",
+				"unitPattern-count-other": "{0}mi"
+			},
+			"length-yard": {
+				"displayName": "yd",
+				"unitPattern-count-other": "{0}야드"
+			},
+			"length-foot": {
+				"displayName": "ft",
+				"unitPattern-count-other": "{0}ft",
+				"perUnitPattern": "{0}/ft"
+			},
+			"length-inch": {
+				"displayName": "in",
+				"unitPattern-count-other": "{0}in",
+				"perUnitPattern": "{0}/in"
+			},
+			"length-parsec": {
+				"displayName": "pc",
+				"unitPattern-count-other": "{0}pc"
+			},
+			"length-light-year": {
+				"displayName": "ly",
+				"unitPattern-count-other": "{0}ly"
+			},
+			"length-astronomical-unit": {
+				"displayName": "au",
+				"unitPattern-count-other": "{0}au"
+			},
+			"length-furlong": {
+				"displayName": "fur",
+				"unitPattern-count-other": "{0}fur"
+			},
+			"length-fathom": {
+				"displayName": "fm",
+				"unitPattern-count-other": "{0}fth"
+			},
+			"length-nautical-mile": {
+				"displayName": "nmi",
+				"unitPattern-count-other": "{0}nmi"
+			},
+			"length-mile-scandinavian": {
+				"displayName": "smi",
+				"unitPattern-count-other": "{0}smi"
+			},
+			"length-point": {
+				"displayName": "pt",
+				"unitPattern-count-other": "{0}pt"
+			},
+			"light-lux": {
+				"displayName": "lx",
+				"unitPattern-count-other": "{0}lx"
+			},
+			"mass-metric-ton": {
+				"displayName": "t",
+				"unitPattern-count-other": "{0}t"
+			},
+			"mass-kilogram": {
+				"displayName": "kg",
+				"unitPattern-count-other": "{0}kg",
+				"perUnitPattern": "{0}/kg"
+			},
+			"mass-gram": {
+				"displayName": "그램",
+				"unitPattern-count-other": "{0}g",
+				"perUnitPattern": "{0}/g"
+			},
+			"mass-milligram": {
+				"displayName": "mg",
+				"unitPattern-count-other": "{0}mg"
+			},
+			"mass-microgram": {
+				"displayName": "µg",
+				"unitPattern-count-other": "{0}µg"
+			},
+			"mass-ton": {
+				"displayName": "tn",
+				"unitPattern-count-other": "{0}tn"
+			},
+			"mass-stone": {
+				"displayName": "st",
+				"unitPattern-count-other": "{0}st"
+			},
+			"mass-pound": {
+				"displayName": "lb",
+				"unitPattern-count-other": "{0}lb",
+				"perUnitPattern": "{0}/lb"
+			},
+			"mass-ounce": {
+				"displayName": "oz",
+				"unitPattern-count-other": "{0}oz",
+				"perUnitPattern": "{0}/oz"
+			},
+			"mass-ounce-troy": {
+				"displayName": "oz t",
+				"unitPattern-count-other": "{0}oz t"
+			},
+			"mass-carat": {
+				"displayName": "CD",
+				"unitPattern-count-other": "{0}CD"
+			},
+			"power-gigawatt": {
+				"displayName": "GW",
+				"unitPattern-count-other": "{0}GW"
+			},
+			"power-megawatt": {
+				"displayName": "MW",
+				"unitPattern-count-other": "{0}MW"
+			},
+			"power-kilowatt": {
+				"displayName": "kW",
+				"unitPattern-count-other": "{0}kW"
+			},
+			"power-watt": {
+				"displayName": "w",
+				"unitPattern-count-other": "{0}W"
+			},
+			"power-milliwatt": {
+				"displayName": "mW",
+				"unitPattern-count-other": "{0}mW"
+			},
+			"power-horsepower": {
+				"displayName": "hp",
+				"unitPattern-count-other": "{0}hp"
+			},
+			"pressure-hectopascal": {
+				"displayName": "hPa",
+				"unitPattern-count-other": "{0}hPa"
+			},
+			"pressure-millimeter-of-mercury": {
+				"displayName": "mmHg",
+				"unitPattern-count-other": "{0}mmHg"
+			},
+			"pressure-pound-per-square-inch": {
+				"displayName": "psi",
+				"unitPattern-count-other": "{0}psi"
+			},
+			"pressure-inch-hg": {
+				"displayName": "inHg",
+				"unitPattern-count-other": "{0}inHg"
+			},
+			"pressure-millibar": {
+				"displayName": "mbar",
+				"unitPattern-count-other": "{0}mb"
+			},
+			"pressure-atmosphere": {
+				"displayName": "atm",
+				"unitPattern-count-other": "{0}atm"
+			},
+			"speed-kilometer-per-hour": {
+				"displayName": "km/h",
+				"unitPattern-count-other": "{0}km/h"
+			},
+			"speed-meter-per-second": {
+				"displayName": "m/s",
+				"unitPattern-count-other": "{0}m/s"
+			},
+			"speed-mile-per-hour": {
+				"displayName": "mi/h",
+				"unitPattern-count-other": "{0}mi/h"
+			},
+			"speed-knot": {
+				"displayName": "kn",
+				"unitPattern-count-other": "{0}kn"
+			},
+			"temperature-generic": {
+				"displayName": "°",
+				"unitPattern-count-other": "{0}°"
+			},
+			"temperature-celsius": {
+				"displayName": "°C",
+				"unitPattern-count-other": "{0}°C"
+			},
+			"temperature-fahrenheit": {
+				"displayName": "°F",
+				"unitPattern-count-other": "{0}°F"
+			},
+			"temperature-kelvin": {
+				"displayName": "K",
+				"unitPattern-count-other": "{0}K"
+			},
+			"volume-cubic-kilometer": {
+				"displayName": "km³",
+				"unitPattern-count-other": "{0}km³"
+			},
+			"volume-cubic-meter": {
+				"displayName": "m³",
+				"unitPattern-count-other": "{0}m³",
+				"perUnitPattern": "{0}/m³"
+			},
+			"volume-cubic-centimeter": {
+				"displayName": "cm³",
+				"unitPattern-count-other": "{0}cm³",
+				"perUnitPattern": "{0}/cm³"
+			},
+			"volume-cubic-mile": {
+				"displayName": "mi³",
+				"unitPattern-count-other": "{0}mi³"
+			},
+			"volume-cubic-yard": {
+				"displayName": "yd³",
+				"unitPattern-count-other": "{0}yd³"
+			},
+			"volume-cubic-foot": {
+				"displayName": "ft³",
+				"unitPattern-count-other": "{0}ft³"
+			},
+			"volume-cubic-inch": {
+				"displayName": "in³",
+				"unitPattern-count-other": "{0}in³"
+			},
+			"volume-megaliter": {
+				"displayName": "ML",
+				"unitPattern-count-other": "{0}ML"
+			},
+			"volume-hectoliter": {
+				"displayName": "hL",
+				"unitPattern-count-other": "{0}hL"
+			},
+			"volume-liter": {
+				"displayName": "리터",
+				"unitPattern-count-other": "{0}L",
+				"perUnitPattern": "{0}/L"
+			},
+			"volume-deciliter": {
+				"displayName": "dL",
+				"unitPattern-count-other": "{0}dL"
+			},
+			"volume-centiliter": {
+				"displayName": "cL",
+				"unitPattern-count-other": "{0}cL"
+			},
+			"volume-milliliter": {
+				"displayName": "mL",
+				"unitPattern-count-other": "{0}mL"
+			},
+			"volume-pint-metric": {
+				"displayName": "mpt",
+				"unitPattern-count-other": "{0}mpt"
+			},
+			"volume-cup-metric": {
+				"displayName": "mcup",
+				"unitPattern-count-other": "{0}mc"
+			},
+			"volume-acre-foot": {
+				"displayName": "ac ft",
+				"unitPattern-count-other": "{0}ac ft"
+			},
+			"volume-bushel": {
+				"displayName": "bu",
+				"unitPattern-count-other": "{0} bu"
+			},
+			"volume-gallon": {
+				"displayName": "gal",
+				"unitPattern-count-other": "{0}gal",
+				"perUnitPattern": "{0}/gal"
+			},
+			"volume-gallon-imperial": {
+				"displayName": "Imp. gal",
+				"unitPattern-count-other": "{0}gal Imp.",
+				"perUnitPattern": "{0}/gal Imp."
+			},
+			"volume-quart": {
+				"displayName": "qt",
+				"unitPattern-count-other": "{0}qt"
+			},
+			"volume-pint": {
+				"displayName": "pt",
+				"unitPattern-count-other": "{0}pt"
+			},
+			"volume-cup": {
+				"displayName": "컵",
+				"unitPattern-count-other": "{0}컵"
+			},
+			"volume-fluid-ounce": {
+				"displayName": "fl oz",
+				"unitPattern-count-other": "{0}fl oz"
+			},
+			"volume-tablespoon": {
+				"displayName": "tbsp",
+				"unitPattern-count-other": "{0}tbsp"
+			},
+			"volume-teaspoon": {
+				"displayName": "tsp",
+				"unitPattern-count-other": "{0}tsp"
+			},
+			"coordinateUnit": {
+				"displayName": "쪽",
+				"east": "{0}E",
+				"north": "{0}N",
+				"south": "{0}S",
+				"west": "{0}W"
+			}
+		}
+	},
 	"currencyDigits": {
 		"ADP": 0,
 		"AFN": 0,
 		"ALL": 0,
-		"AMD": 0,
 		"BHD": 3,
 		"BIF": 0,
-		"BYN": 2,
 		"BYR": 0,
-		"CAD": 2,
-		"CHF": 2,
 		"CLF": 4,
 		"CLP": 0,
-		"COP": 0,
-		"CRC": 0,
-		"CZK": 0,
 		"DEFAULT": 2,
 		"DJF": 0,
 		"ESP": 0,
 		"GNF": 0,
-		"GYD": 0,
 		"HUF": 0,
-		"IDR": 0,
 		"IQD": 0,
 		"IRR": 0,
 		"ISK": 0,
@@ -3220,11 +4499,8 @@
 		"MGA": 0,
 		"MGF": 0,
 		"MMK": 0,
-		"MNT": 0,
 		"MRO": 0,
-		"MUR": 0,
 		"OMR": 3,
-		"PKR": 0,
 		"PYG": 0,
 		"RSD": 0,
 		"RWF": 0,
@@ -3236,10 +4512,9 @@
 		"TND": 3,
 		"TRL": 0,
 		"TWD": 0,
-		"TZS": 0,
 		"UGX": 0,
 		"UYI": 0,
-		"UZS": 0,
+		"UYW": 4,
 		"VND": 0,
 		"VUV": 0,
 		"XAF": 0,
@@ -3274,6 +4549,11 @@
 	"eras-persian": {
 		"0": {
 			"_start": "622-01-01"
+		}
+	},
+	"eras-buddhist": {
+		"0": {
+			"_start": "-542-01-01"
 		}
 	},
 	"eras-japanese": {

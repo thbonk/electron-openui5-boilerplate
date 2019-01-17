@@ -12,9 +12,11 @@
 			"module": "sap/ui/commons/Accordion.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/AccordionRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
+				"sap/ui/dom/jquery/control.js",
+				"sap/ui/thirdparty/jquery.js",
 				"sap/ui/thirdparty/jqueryui/jquery-ui-core.js",
 				"sap/ui/thirdparty/jqueryui/jquery-ui-mouse.js",
 				"sap/ui/thirdparty/jqueryui/jquery-ui-sortable.js",
@@ -29,9 +31,11 @@
 			"name": "Accordion.js",
 			"module": "sap/ui/commons/Accordion.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/AccordionRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
+				"sap/ui/dom/jquery/control.js",
+				"sap/ui/thirdparty/jquery.js",
 				"sap/ui/thirdparty/jqueryui/jquery-ui-core.js",
 				"sap/ui/thirdparty/jqueryui/jquery-ui-mouse.js",
 				"sap/ui/thirdparty/jqueryui/jquery-ui-sortable.js",
@@ -43,14 +47,16 @@
 			"module": "sap/ui/commons/AccordionRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js"
+				"sap/ui/Device.js",
+				"sap/ui/commons/AccordionSection.js"
 			]
 		},
 		{
 			"name": "AccordionRenderer.js",
 			"module": "sap/ui/commons/AccordionRenderer.js",
 			"required": [
-				"jquery.sap.global.js"
+				"sap/ui/Device.js",
+				"sap/ui/commons/AccordionSection.js"
 			]
 		},
 		{
@@ -58,7 +64,6 @@
 			"module": "sap/ui/commons/AccordionSection.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Element.js"
 			]
@@ -71,7 +76,6 @@
 			"name": "AccordionSection.js",
 			"module": "sap/ui/commons/AccordionSection.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Element.js"
 			]
@@ -81,12 +85,13 @@
 			"module": "sap/ui/commons/ApplicationHeader.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/ApplicationHeaderRenderer.js",
 				"sap/ui/commons/Button.js",
 				"sap/ui/commons/Image.js",
 				"sap/ui/commons/TextView.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -97,12 +102,13 @@
 			"name": "ApplicationHeader.js",
 			"module": "sap/ui/commons/ApplicationHeader.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/ApplicationHeaderRenderer.js",
 				"sap/ui/commons/Button.js",
 				"sap/ui/commons/Image.js",
 				"sap/ui/commons/TextView.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -110,9 +116,6 @@
 			"module": "sap/ui/commons/ApplicationHeaderRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js"
-			],
-			"condRequired": [
 				"sap/ui/core/theming/Parameters.js"
 			]
 		},
@@ -120,9 +123,6 @@
 			"name": "ApplicationHeaderRenderer.js",
 			"module": "sap/ui/commons/ApplicationHeaderRenderer.js",
 			"required": [
-				"jquery.sap.global.js"
-			],
-			"condRequired": [
 				"sap/ui/core/theming/Parameters.js"
 			]
 		},
@@ -131,9 +131,10 @@
 			"module": "sap/ui/commons/Area.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Element.js"
+				"sap/ui/core/Element.js",
+				"sap/ui/dom/jquery/control.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -144,9 +145,10 @@
 			"name": "Area.js",
 			"module": "sap/ui/commons/Area.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Element.js"
+				"sap/ui/core/Element.js",
+				"sap/ui/dom/jquery/control.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -154,10 +156,13 @@
 			"module": "sap/ui/commons/AutoComplete.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"jquery.sap.strings.js",
+				"sap/ui/commons/AutoCompleteRenderer.js",
 				"sap/ui/commons/ComboBox.js",
-				"sap/ui/commons/library.js"
+				"sap/ui/commons/TextField.js",
+				"sap/ui/commons/library.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -168,10 +173,13 @@
 			"name": "AutoComplete.js",
 			"module": "sap/ui/commons/AutoComplete.js",
 			"required": [
-				"jquery.sap.global.js",
 				"jquery.sap.strings.js",
+				"sap/ui/commons/AutoCompleteRenderer.js",
 				"sap/ui/commons/ComboBox.js",
-				"sap/ui/commons/library.js"
+				"sap/ui/commons/TextField.js",
+				"sap/ui/commons/library.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -179,18 +187,18 @@
 			"module": "sap/ui/commons/AutoCompleteRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/ComboBoxRenderer.js",
-				"sap/ui/core/Renderer.js"
+				"sap/ui/core/Renderer.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
 			"name": "AutoCompleteRenderer.js",
 			"module": "sap/ui/commons/AutoCompleteRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/ComboBoxRenderer.js",
-				"sap/ui/core/Renderer.js"
+				"sap/ui/core/Renderer.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -198,7 +206,8 @@
 			"module": "sap/ui/commons/Button.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/ButtonRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/EnabledPropagator.js",
@@ -213,7 +222,8 @@
 			"name": "Button.js",
 			"module": "sap/ui/commons/Button.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/ButtonRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/EnabledPropagator.js",
@@ -225,14 +235,20 @@
 			"module": "sap/ui/commons/ButtonRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js"
+				"sap/base/security/encodeXML.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/library.js",
+				"sap/ui/core/IconPool.js"
 			]
 		},
 		{
 			"name": "ButtonRenderer.js",
 			"module": "sap/ui/commons/ButtonRenderer.js",
 			"required": [
-				"jquery.sap.global.js"
+				"sap/base/security/encodeXML.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/library.js",
+				"sap/ui/core/IconPool.js"
 			]
 		},
 		{
@@ -244,8 +260,8 @@
 			"module": "sap/ui/commons/Callout.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/CalloutBase.js",
+				"sap/ui/commons/CalloutRenderer.js",
 				"sap/ui/commons/library.js"
 			]
 		},
@@ -257,8 +273,8 @@
 			"name": "Callout.js",
 			"module": "sap/ui/commons/Callout.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/CalloutBase.js",
+				"sap/ui/commons/CalloutRenderer.js",
 				"sap/ui/commons/library.js"
 			]
 		},
@@ -267,9 +283,15 @@
 			"module": "sap/ui/commons/CalloutBase.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/CalloutBaseRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/TooltipBase.js"
+				"sap/ui/core/Popup.js",
+				"sap/ui/core/TooltipBase.js",
+				"sap/ui/dom/jquery/Focusable.js",
+				"sap/ui/dom/jquery/control.js",
+				"sap/ui/events/ControlEvents.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -280,32 +302,31 @@
 			"name": "CalloutBase.js",
 			"module": "sap/ui/commons/CalloutBase.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/CalloutBaseRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/TooltipBase.js"
+				"sap/ui/core/Popup.js",
+				"sap/ui/core/TooltipBase.js",
+				"sap/ui/dom/jquery/Focusable.js",
+				"sap/ui/dom/jquery/control.js",
+				"sap/ui/events/ControlEvents.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "CalloutBaseRenderer-dbg.js",
 			"module": "sap/ui/commons/CalloutBaseRenderer.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"isDebug": true
 		},
 		{
 			"name": "CalloutBaseRenderer.js",
-			"module": "sap/ui/commons/CalloutBaseRenderer.js",
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"module": "sap/ui/commons/CalloutBaseRenderer.js"
 		},
 		{
 			"name": "CalloutRenderer-dbg.js",
 			"module": "sap/ui/commons/CalloutRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/CalloutBaseRenderer.js",
 				"sap/ui/core/Renderer.js"
 			]
@@ -314,7 +335,6 @@
 			"name": "CalloutRenderer.js",
 			"module": "sap/ui/commons/CalloutRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/CalloutBaseRenderer.js",
 				"sap/ui/core/Renderer.js"
 			]
@@ -324,11 +344,17 @@
 			"module": "sap/ui/commons/Carousel.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/base/strings/capitalize.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/CarouselRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/ResizeHandler.js",
-				"sap/ui/core/delegate/ItemNavigation.js"
+				"sap/ui/core/delegate/ItemNavigation.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -339,36 +365,38 @@
 			"name": "Carousel.js",
 			"module": "sap/ui/commons/Carousel.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/base/strings/capitalize.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/CarouselRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/ResizeHandler.js",
-				"sap/ui/core/delegate/ItemNavigation.js"
+				"sap/ui/core/delegate/ItemNavigation.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "CarouselRenderer-dbg.js",
 			"module": "sap/ui/commons/CarouselRenderer.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"isDebug": true
 		},
 		{
 			"name": "CarouselRenderer.js",
-			"module": "sap/ui/commons/CarouselRenderer.js",
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"module": "sap/ui/commons/CarouselRenderer.js"
 		},
 		{
 			"name": "CheckBox-dbg.js",
 			"module": "sap/ui/commons/CheckBox.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/CheckBoxRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -379,9 +407,11 @@
 			"name": "CheckBox.js",
 			"module": "sap/ui/commons/CheckBox.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/CheckBoxRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -389,16 +419,16 @@
 			"module": "sap/ui/commons/CheckBoxRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/core/ValueStateSupport.js"
+				"sap/ui/core/ValueStateSupport.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
 			"name": "CheckBoxRenderer.js",
 			"module": "sap/ui/commons/CheckBoxRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/core/ValueStateSupport.js"
+				"sap/ui/core/ValueStateSupport.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -406,9 +436,8 @@
 			"module": "sap/ui/commons/ColorPicker.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js",
 				"sap/ui/unified/ColorPicker.js"
 			]
 		},
@@ -420,9 +449,8 @@
 			"name": "ColorPicker.js",
 			"module": "sap/ui/commons/ColorPicker.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js",
 				"sap/ui/unified/ColorPicker.js"
 			]
 		},
@@ -431,11 +459,20 @@
 			"module": "sap/ui/commons/ComboBox.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"jquery.sap.strings.js",
+				"sap/ui/Device.js",
+				"sap/ui/base/Event.js",
+				"sap/ui/commons/ComboBoxRenderer.js",
+				"sap/ui/commons/ListBox.js",
 				"sap/ui/commons/TextField.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Popup.js"
+				"sap/ui/core/Popup.js",
+				"sap/ui/core/library.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/dom/jquery/selectText.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/events/jquery/EventExtension.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -446,11 +483,20 @@
 			"name": "ComboBox.js",
 			"module": "sap/ui/commons/ComboBox.js",
 			"required": [
-				"jquery.sap.global.js",
 				"jquery.sap.strings.js",
+				"sap/ui/Device.js",
+				"sap/ui/base/Event.js",
+				"sap/ui/commons/ComboBoxRenderer.js",
+				"sap/ui/commons/ListBox.js",
 				"sap/ui/commons/TextField.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Popup.js"
+				"sap/ui/core/Popup.js",
+				"sap/ui/core/library.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/dom/jquery/selectText.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/events/jquery/EventExtension.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -458,18 +504,18 @@
 			"module": "sap/ui/commons/ComboBoxRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/TextFieldRenderer.js",
-				"sap/ui/core/Renderer.js"
+				"sap/ui/core/Renderer.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
 			"name": "ComboBoxRenderer.js",
 			"module": "sap/ui/commons/ComboBoxRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/TextFieldRenderer.js",
-				"sap/ui/core/Renderer.js"
+				"sap/ui/core/Renderer.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -477,15 +523,21 @@
 			"module": "sap/ui/commons/DatePicker.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/DatePickerRenderer.js",
 				"sap/ui/commons/TextField.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/date/UniversalDate.js",
-				"sap/ui/model/type/Date.js"
-			],
-			"condRequired": [
+				"sap/ui/core/Locale.js",
+				"sap/ui/core/LocaleData.js",
 				"sap/ui/core/Popup.js",
-				"sap/ui/unified/library.js"
+				"sap/ui/core/date/UniversalDate.js",
+				"sap/ui/core/format/DateFormat.js",
+				"sap/ui/core/library.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/dom/jquery/cursorPos.js",
+				"sap/ui/model/type/Date.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -496,15 +548,21 @@
 			"name": "DatePicker.js",
 			"module": "sap/ui/commons/DatePicker.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/DatePickerRenderer.js",
 				"sap/ui/commons/TextField.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/date/UniversalDate.js",
-				"sap/ui/model/type/Date.js"
-			],
-			"condRequired": [
+				"sap/ui/core/Locale.js",
+				"sap/ui/core/LocaleData.js",
 				"sap/ui/core/Popup.js",
-				"sap/ui/unified/library.js"
+				"sap/ui/core/date/UniversalDate.js",
+				"sap/ui/core/format/DateFormat.js",
+				"sap/ui/core/library.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/dom/jquery/cursorPos.js",
+				"sap/ui/model/type/Date.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -512,18 +570,20 @@
 			"module": "sap/ui/commons/DatePickerRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/commons/DatePicker.js",
-				"sap/ui/commons/TextFieldRenderer.js"
+				"sap/ui/commons/TextFieldRenderer.js",
+				"sap/ui/core/Renderer.js",
+				"sap/ui/core/ValueStateSupport.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
 			"name": "DatePickerRenderer.js",
 			"module": "sap/ui/commons/DatePickerRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/commons/DatePicker.js",
-				"sap/ui/commons/TextFieldRenderer.js"
+				"sap/ui/commons/TextFieldRenderer.js",
+				"sap/ui/core/Renderer.js",
+				"sap/ui/core/ValueStateSupport.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -531,11 +591,18 @@
 			"module": "sap/ui/commons/Dialog.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/ui/commons/DialogRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/Popup.js",
-				"sap/ui/core/RenderManager.js"
+				"sap/ui/core/RenderManager.js",
+				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/core/library.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/dom/jquery/Selectors.js",
+				"sap/ui/dom/jquery/control.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -546,38 +613,49 @@
 			"name": "Dialog.js",
 			"module": "sap/ui/commons/Dialog.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/ui/commons/DialogRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/Popup.js",
-				"sap/ui/core/RenderManager.js"
+				"sap/ui/core/RenderManager.js",
+				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/core/library.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/dom/jquery/Selectors.js",
+				"sap/ui/dom/jquery/control.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "DialogRenderer-dbg.js",
 			"module": "sap/ui/commons/DialogRenderer.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"isDebug": true
 		},
 		{
 			"name": "DialogRenderer.js",
-			"module": "sap/ui/commons/DialogRenderer.js",
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"module": "sap/ui/commons/DialogRenderer.js"
 		},
 		{
 			"name": "DropdownBox-dbg.js",
 			"module": "sap/ui/commons/DropdownBox.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/ui/Device.js",
 				"sap/ui/commons/ComboBox.js",
+				"sap/ui/commons/DropdownBoxRenderer.js",
+				"sap/ui/commons/TextField.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/History.js",
-				"sap/ui/core/SeparatorItem.js"
+				"sap/ui/core/ListItem.js",
+				"sap/ui/core/SeparatorItem.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/dom/jquery/cursorPos.js",
+				"sap/ui/dom/jquery/selectText.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/events/jquery/EventExtension.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -588,11 +666,21 @@
 			"name": "DropdownBox.js",
 			"module": "sap/ui/commons/DropdownBox.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/ui/Device.js",
 				"sap/ui/commons/ComboBox.js",
+				"sap/ui/commons/DropdownBoxRenderer.js",
+				"sap/ui/commons/TextField.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/History.js",
-				"sap/ui/core/SeparatorItem.js"
+				"sap/ui/core/ListItem.js",
+				"sap/ui/core/SeparatorItem.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/dom/jquery/cursorPos.js",
+				"sap/ui/dom/jquery/selectText.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/events/jquery/EventExtension.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -600,16 +688,18 @@
 			"module": "sap/ui/commons/DropdownBoxRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/commons/ComboBoxRenderer.js"
+				"sap/ui/commons/ComboBoxRenderer.js",
+				"sap/ui/core/Renderer.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
 			"name": "DropdownBoxRenderer.js",
 			"module": "sap/ui/commons/DropdownBoxRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/commons/ComboBoxRenderer.js"
+				"sap/ui/commons/ComboBoxRenderer.js",
+				"sap/ui/core/Renderer.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -617,8 +707,10 @@
 			"module": "sap/ui/commons/FileUploader.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/ui/commons/FileUploaderRenderer.js",
 				"sap/ui/commons/library.js",
+				"sap/ui/core/Core.js",
 				"sap/ui/unified/FileUploader.js"
 			]
 		},
@@ -630,8 +722,10 @@
 			"name": "FileUploader.js",
 			"module": "sap/ui/commons/FileUploader.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/ui/commons/FileUploaderRenderer.js",
 				"sap/ui/commons/library.js",
+				"sap/ui/core/Core.js",
 				"sap/ui/unified/FileUploader.js"
 			]
 		},
@@ -640,7 +734,7 @@
 			"module": "sap/ui/commons/FileUploaderParameter.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/unified/FileUploaderParameter.js"
 			]
@@ -653,7 +747,7 @@
 			"name": "FileUploaderParameter.js",
 			"module": "sap/ui/commons/FileUploaderParameter.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/unified/FileUploaderParameter.js"
 			]
@@ -663,7 +757,6 @@
 			"module": "sap/ui/commons/FileUploaderRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/unified/FileUploaderRenderer.js"
 			]
@@ -672,7 +765,6 @@
 			"name": "FileUploaderRenderer.js",
 			"module": "sap/ui/commons/FileUploaderRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/unified/FileUploaderRenderer.js"
 			]
@@ -682,9 +774,12 @@
 			"module": "sap/ui/commons/FormattedTextView.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/base/security/sanitizeHTML.js",
+				"sap/ui/commons/FormattedTextViewRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -695,9 +790,12 @@
 			"name": "FormattedTextView.js",
 			"module": "sap/ui/commons/FormattedTextView.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/base/security/sanitizeHTML.js",
+				"sap/ui/commons/FormattedTextViewRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -709,14 +807,14 @@
 			"module": "sap/ui/commons/FormattedTextViewRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js"
+				"sap/base/Log.js"
 			]
 		},
 		{
 			"name": "FormattedTextViewRenderer.js",
 			"module": "sap/ui/commons/FormattedTextViewRenderer.js",
 			"required": [
-				"jquery.sap.global.js"
+				"sap/base/Log.js"
 			]
 		},
 		{
@@ -724,7 +822,7 @@
 			"module": "sap/ui/commons/HorizontalDivider.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/HorizontalDividerRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js"
 			]
@@ -737,7 +835,7 @@
 			"name": "HorizontalDivider.js",
 			"module": "sap/ui/commons/HorizontalDivider.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/HorizontalDividerRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js"
 			]
@@ -749,17 +847,11 @@
 		{
 			"name": "HorizontalDividerRenderer-dbg.js",
 			"module": "sap/ui/commons/HorizontalDividerRenderer.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"isDebug": true
 		},
 		{
 			"name": "HorizontalDividerRenderer.js",
-			"module": "sap/ui/commons/HorizontalDividerRenderer.js",
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"module": "sap/ui/commons/HorizontalDividerRenderer.js"
 		},
 		{
 			"name": "HorizontalDividerType.type",
@@ -770,7 +862,7 @@
 			"module": "sap/ui/commons/Image.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/ImageRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js"
 			]
@@ -783,7 +875,7 @@
 			"name": "Image.js",
 			"module": "sap/ui/commons/Image.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/ImageRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js"
 			]
@@ -793,10 +885,13 @@
 			"module": "sap/ui/commons/ImageMap.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/Area.js",
+				"sap/ui/commons/ImageMapRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/delegate/ItemNavigation.js"
+				"sap/ui/core/delegate/ItemNavigation.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -807,54 +902,50 @@
 			"name": "ImageMap.js",
 			"module": "sap/ui/commons/ImageMap.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/Area.js",
+				"sap/ui/commons/ImageMapRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/delegate/ItemNavigation.js"
+				"sap/ui/core/delegate/ItemNavigation.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "ImageMapRenderer-dbg.js",
 			"module": "sap/ui/commons/ImageMapRenderer.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"isDebug": true
 		},
 		{
 			"name": "ImageMapRenderer.js",
-			"module": "sap/ui/commons/ImageMapRenderer.js",
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"module": "sap/ui/commons/ImageMapRenderer.js"
 		},
 		{
 			"name": "ImageRenderer-dbg.js",
 			"module": "sap/ui/commons/ImageRenderer.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"isDebug": true
 		},
 		{
 			"name": "ImageRenderer.js",
-			"module": "sap/ui/commons/ImageRenderer.js",
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"module": "sap/ui/commons/ImageRenderer.js"
 		},
 		{
 			"name": "InPlaceEdit-dbg.js",
 			"module": "sap/ui/commons/InPlaceEdit.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/Button.js",
+				"sap/ui/commons/InPlaceEditRenderer.js",
 				"sap/ui/commons/TextField.js",
 				"sap/ui/commons/TextView.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/ValueStateSupport.js",
-				"sap/ui/core/theming/Parameters.js"
+				"sap/ui/core/library.js",
+				"sap/ui/core/theming/Parameters.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/events/KeyCodes.js"
 			]
 		},
 		{
@@ -865,13 +956,18 @@
 			"name": "InPlaceEdit.js",
 			"module": "sap/ui/commons/InPlaceEdit.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/Button.js",
+				"sap/ui/commons/InPlaceEditRenderer.js",
 				"sap/ui/commons/TextField.js",
 				"sap/ui/commons/TextView.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/ValueStateSupport.js",
-				"sap/ui/core/theming/Parameters.js"
+				"sap/ui/core/library.js",
+				"sap/ui/core/theming/Parameters.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/events/KeyCodes.js"
 			]
 		},
 		{
@@ -879,14 +975,18 @@
 			"module": "sap/ui/commons/InPlaceEditRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js"
+				"sap/base/Log.js",
+				"sap/ui/core/ValueStateSupport.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
 			"name": "InPlaceEditRenderer.js",
 			"module": "sap/ui/commons/InPlaceEditRenderer.js",
 			"required": [
-				"jquery.sap.global.js"
+				"sap/base/Log.js",
+				"sap/ui/core/ValueStateSupport.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -894,11 +994,11 @@
 			"module": "sap/ui/commons/Label.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/LabelRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/LabelEnablement.js",
-				"sap/ui/core/Popup.js"
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -909,11 +1009,11 @@
 			"name": "Label.js",
 			"module": "sap/ui/commons/Label.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/LabelRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/LabelEnablement.js",
-				"sap/ui/core/Popup.js"
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -925,14 +1025,20 @@
 			"module": "sap/ui/commons/LabelRenderer.js",
 			"isDebug": true,
 			"required": [
-				"sap/ui/core/Renderer.js"
+				"sap/ui/commons/library.js",
+				"sap/ui/core/LabelEnablement.js",
+				"sap/ui/core/Renderer.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
 			"name": "LabelRenderer.js",
 			"module": "sap/ui/commons/LabelRenderer.js",
 			"required": [
-				"sap/ui/core/Renderer.js"
+				"sap/ui/commons/library.js",
+				"sap/ui/core/LabelEnablement.js",
+				"sap/ui/core/Renderer.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -940,7 +1046,7 @@
 			"module": "sap/ui/commons/Link.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/LinkRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/EnabledPropagator.js",
@@ -955,7 +1061,7 @@
 			"name": "Link.js",
 			"module": "sap/ui/commons/Link.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/LinkRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/EnabledPropagator.js",
@@ -965,28 +1071,24 @@
 		{
 			"name": "LinkRenderer-dbg.js",
 			"module": "sap/ui/commons/LinkRenderer.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"isDebug": true
 		},
 		{
 			"name": "LinkRenderer.js",
-			"module": "sap/ui/commons/LinkRenderer.js",
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"module": "sap/ui/commons/LinkRenderer.js"
 		},
 		{
 			"name": "ListBox-dbg.js",
 			"module": "sap/ui/commons/ListBox.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
-				"jquery.sap.strings.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/ListBoxRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/delegate/ItemNavigation.js"
+				"sap/ui/core/delegate/ItemNavigation.js",
+				"sap/ui/core/library.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -997,11 +1099,13 @@
 			"name": "ListBox.js",
 			"module": "sap/ui/commons/ListBox.js",
 			"required": [
-				"jquery.sap.global.js",
-				"jquery.sap.strings.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/ListBoxRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/delegate/ItemNavigation.js"
+				"sap/ui/core/delegate/ItemNavigation.js",
+				"sap/ui/core/library.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1009,20 +1113,24 @@
 			"module": "sap/ui/commons/ListBoxRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"jquery.sap.strings.js",
+				"sap/base/security/encodeXML.js",
+				"sap/ui/Device.js",
 				"sap/ui/core/IconPool.js",
-				"sap/ui/core/Renderer.js"
+				"sap/ui/core/Renderer.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "ListBoxRenderer.js",
 			"module": "sap/ui/commons/ListBoxRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
 				"jquery.sap.strings.js",
+				"sap/base/security/encodeXML.js",
+				"sap/ui/Device.js",
 				"sap/ui/core/IconPool.js",
-				"sap/ui/core/Renderer.js"
+				"sap/ui/core/Renderer.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1030,8 +1138,8 @@
 			"module": "sap/ui/commons/Menu.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/MenuItemBase.js",
+				"sap/ui/commons/MenuRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/unified/Menu.js"
 			]
@@ -1044,8 +1152,8 @@
 			"name": "Menu.js",
 			"module": "sap/ui/commons/Menu.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/MenuItemBase.js",
+				"sap/ui/commons/MenuRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/unified/Menu.js"
 			]
@@ -1055,12 +1163,17 @@
 			"module": "sap/ui/commons/MenuBar.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/Menu.js",
+				"sap/ui/commons/MenuBarRenderer.js",
 				"sap/ui/commons/MenuItem.js",
 				"sap/ui/commons/MenuItemBase.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/Popup.js",
+				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/events/checkMouseEnterOrLeave.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1071,12 +1184,17 @@
 			"name": "MenuBar.js",
 			"module": "sap/ui/commons/MenuBar.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/Menu.js",
+				"sap/ui/commons/MenuBarRenderer.js",
 				"sap/ui/commons/MenuItem.js",
 				"sap/ui/commons/MenuItemBase.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/Popup.js",
+				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/events/checkMouseEnterOrLeave.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1088,14 +1206,14 @@
 			"module": "sap/ui/commons/MenuBarRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js"
+				"sap/ui/commons/library.js"
 			]
 		},
 		{
 			"name": "MenuBarRenderer.js",
 			"module": "sap/ui/commons/MenuBarRenderer.js",
 			"required": [
-				"jquery.sap.global.js"
+				"sap/ui/commons/library.js"
 			]
 		},
 		{
@@ -1103,11 +1221,13 @@
 			"module": "sap/ui/commons/MenuButton.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/Button.js",
 				"sap/ui/commons/Menu.js",
+				"sap/ui/commons/MenuButtonRenderer.js",
 				"sap/ui/commons/MenuItemBase.js",
-				"sap/ui/commons/library.js"
+				"sap/ui/commons/library.js",
+				"sap/ui/core/Popup.js",
+				"sap/ui/events/checkMouseEnterOrLeave.js"
 			]
 		},
 		{
@@ -1118,11 +1238,13 @@
 			"name": "MenuButton.js",
 			"module": "sap/ui/commons/MenuButton.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/Button.js",
 				"sap/ui/commons/Menu.js",
+				"sap/ui/commons/MenuButtonRenderer.js",
 				"sap/ui/commons/MenuItemBase.js",
-				"sap/ui/commons/library.js"
+				"sap/ui/commons/library.js",
+				"sap/ui/core/Popup.js",
+				"sap/ui/events/checkMouseEnterOrLeave.js"
 			]
 		},
 		{
@@ -1130,7 +1252,6 @@
 			"module": "sap/ui/commons/MenuButtonRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/ButtonRenderer.js",
 				"sap/ui/core/Renderer.js"
 			]
@@ -1139,7 +1260,6 @@
 			"name": "MenuButtonRenderer.js",
 			"module": "sap/ui/commons/MenuButtonRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/ButtonRenderer.js",
 				"sap/ui/core/Renderer.js"
 			]
@@ -1149,7 +1269,6 @@
 			"module": "sap/ui/commons/MenuItem.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/MenuItemBase.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/unified/MenuItem.js"
@@ -1163,7 +1282,6 @@
 			"name": "MenuItem.js",
 			"module": "sap/ui/commons/MenuItem.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/MenuItemBase.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/unified/MenuItem.js"
@@ -1174,7 +1292,8 @@
 			"module": "sap/ui/commons/MenuItemBase.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js"
+				"sap/base/Log.js",
+				"sap/ui/core/Core.js"
 			],
 			"condRequired": [
 				"sap/ui/unified/MenuItemBase.js"
@@ -1184,7 +1303,8 @@
 			"name": "MenuItemBase.js",
 			"module": "sap/ui/commons/MenuItemBase.js",
 			"required": [
-				"jquery.sap.global.js"
+				"sap/base/Log.js",
+				"sap/ui/core/Core.js"
 			],
 			"condRequired": [
 				"sap/ui/unified/MenuItemBase.js"
@@ -1195,7 +1315,6 @@
 			"module": "sap/ui/commons/MenuRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/unified/MenuRenderer.js"
 			]
@@ -1204,7 +1323,6 @@
 			"name": "MenuRenderer.js",
 			"module": "sap/ui/commons/MenuRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/unified/MenuRenderer.js"
 			]
@@ -1214,7 +1332,6 @@
 			"module": "sap/ui/commons/MenuTextFieldItem.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/MenuItemBase.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/unified/MenuTextFieldItem.js"
@@ -1228,7 +1345,6 @@
 			"name": "MenuTextFieldItem.js",
 			"module": "sap/ui/commons/MenuTextFieldItem.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/MenuItemBase.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/unified/MenuTextFieldItem.js"
@@ -1239,10 +1355,12 @@
 			"module": "sap/ui/commons/Message.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/Button.js",
 				"sap/ui/commons/Dialog.js",
+				"sap/ui/commons/MessageRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1253,10 +1371,12 @@
 			"name": "Message.js",
 			"module": "sap/ui/commons/Message.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/Button.js",
 				"sap/ui/commons/Dialog.js",
+				"sap/ui/commons/MessageRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1264,12 +1384,14 @@
 			"module": "sap/ui/commons/MessageBar.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/ui/commons/MessageBarRenderer.js",
 				"sap/ui/commons/MessageList.js",
 				"sap/ui/commons/MessageToast.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/Popup.js"
+				"sap/ui/core/Popup.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1280,12 +1402,14 @@
 			"name": "MessageBar.js",
 			"module": "sap/ui/commons/MessageBar.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/ui/commons/MessageBarRenderer.js",
 				"sap/ui/commons/MessageList.js",
 				"sap/ui/commons/MessageToast.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/Popup.js"
+				"sap/ui/core/Popup.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1293,7 +1417,6 @@
 			"module": "sap/ui/commons/MessageBarRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Popup.js"
 			]
 		},
@@ -1301,7 +1424,6 @@
 			"name": "MessageBarRenderer.js",
 			"module": "sap/ui/commons/MessageBarRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Popup.js"
 			]
 		},
@@ -1310,7 +1432,6 @@
 			"module": "sap/ui/commons/MessageBox.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/Button.js",
 				"sap/ui/commons/Dialog.js",
 				"sap/ui/commons/Image.js",
@@ -1320,14 +1441,14 @@
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/ElementMetadata.js",
-				"sap/ui/core/library.js"
+				"sap/ui/core/library.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "MessageBox.js",
 			"module": "sap/ui/commons/MessageBox.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/Button.js",
 				"sap/ui/commons/Dialog.js",
 				"sap/ui/commons/Image.js",
@@ -1337,7 +1458,8 @@
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/ElementMetadata.js",
-				"sap/ui/core/library.js"
+				"sap/ui/core/library.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1345,10 +1467,11 @@
 			"module": "sap/ui/commons/MessageList.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/MessageListRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/Popup.js"
+				"sap/ui/core/Popup.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1359,40 +1482,35 @@
 			"name": "MessageList.js",
 			"module": "sap/ui/commons/MessageList.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/MessageListRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/Popup.js"
+				"sap/ui/core/Popup.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "MessageListRenderer-dbg.js",
 			"module": "sap/ui/commons/MessageListRenderer.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"isDebug": true
 		},
 		{
 			"name": "MessageListRenderer.js",
-			"module": "sap/ui/commons/MessageListRenderer.js",
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"module": "sap/ui/commons/MessageListRenderer.js"
 		},
 		{
 			"name": "MessageRenderer-dbg.js",
 			"module": "sap/ui/commons/MessageRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js"
+				"sap/ui/commons/Link.js"
 			]
 		},
 		{
 			"name": "MessageRenderer.js",
 			"module": "sap/ui/commons/MessageRenderer.js",
 			"required": [
-				"jquery.sap.global.js"
+				"sap/ui/commons/Link.js"
 			]
 		},
 		{
@@ -1400,10 +1518,13 @@
 			"module": "sap/ui/commons/MessageToast.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/MessageToastRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/thirdparty/jqueryui/jquery-ui-core.js"
+				"sap/ui/core/Popup.js",
+				"sap/ui/thirdparty/jquery.js",
+				"sap/ui/thirdparty/jqueryui/jquery-ui-core.js",
+				"sap/ui/thirdparty/jqueryui/jquery-ui-position.js"
 			]
 		},
 		{
@@ -1414,26 +1535,23 @@
 			"name": "MessageToast.js",
 			"module": "sap/ui/commons/MessageToast.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/MessageToastRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/thirdparty/jqueryui/jquery-ui-core.js"
+				"sap/ui/core/Popup.js",
+				"sap/ui/thirdparty/jquery.js",
+				"sap/ui/thirdparty/jqueryui/jquery-ui-core.js",
+				"sap/ui/thirdparty/jqueryui/jquery-ui-position.js"
 			]
 		},
 		{
 			"name": "MessageToastRenderer-dbg.js",
 			"module": "sap/ui/commons/MessageToastRenderer.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"isDebug": true
 		},
 		{
 			"name": "MessageToastRenderer.js",
-			"module": "sap/ui/commons/MessageToastRenderer.js",
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"module": "sap/ui/commons/MessageToastRenderer.js"
 		},
 		{
 			"name": "MessageType.type",
@@ -1444,9 +1562,10 @@
 			"module": "sap/ui/commons/Paginator.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/PaginatorRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1457,9 +1576,10 @@
 			"name": "Paginator.js",
 			"module": "sap/ui/commons/Paginator.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/PaginatorRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1471,16 +1591,14 @@
 			"module": "sap/ui/commons/PaginatorRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.encoder.js",
-				"jquery.sap.global.js"
+				"sap/base/security/encodeXML.js"
 			]
 		},
 		{
 			"name": "PaginatorRenderer.js",
 			"module": "sap/ui/commons/PaginatorRenderer.js",
 			"required": [
-				"jquery.sap.encoder.js",
-				"jquery.sap.global.js"
+				"sap/base/security/encodeXML.js"
 			]
 		},
 		{
@@ -1488,9 +1606,13 @@
 			"module": "sap/ui/commons/Panel.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/assert.js",
+				"sap/ui/commons/PanelRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/core/Title.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1501,9 +1623,13 @@
 			"name": "Panel.js",
 			"module": "sap/ui/commons/Panel.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/assert.js",
+				"sap/ui/commons/PanelRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/core/Title.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1511,14 +1637,16 @@
 			"module": "sap/ui/commons/PanelRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js"
+				"sap/base/security/encodeXML.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
 			"name": "PanelRenderer.js",
 			"module": "sap/ui/commons/PanelRenderer.js",
 			"required": [
-				"jquery.sap.global.js"
+				"sap/base/security/encodeXML.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -1526,9 +1654,11 @@
 			"module": "sap/ui/commons/PasswordField.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/PasswordFieldRenderer.js",
 				"sap/ui/commons/TextField.js",
-				"sap/ui/commons/library.js"
+				"sap/ui/commons/library.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1539,9 +1669,11 @@
 			"name": "PasswordField.js",
 			"module": "sap/ui/commons/PasswordField.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/PasswordFieldRenderer.js",
 				"sap/ui/commons/TextField.js",
-				"sap/ui/commons/library.js"
+				"sap/ui/commons/library.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1549,16 +1681,18 @@
 			"module": "sap/ui/commons/PasswordFieldRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/commons/TextFieldRenderer.js"
+				"sap/ui/Device.js",
+				"sap/ui/commons/TextFieldRenderer.js",
+				"sap/ui/core/Renderer.js"
 			]
 		},
 		{
 			"name": "PasswordFieldRenderer.js",
 			"module": "sap/ui/commons/PasswordFieldRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/commons/TextFieldRenderer.js"
+				"sap/ui/Device.js",
+				"sap/ui/commons/TextFieldRenderer.js",
+				"sap/ui/core/Renderer.js"
 			]
 		},
 		{
@@ -1566,9 +1700,11 @@
 			"module": "sap/ui/commons/ProgressIndicator.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/ProgressIndicatorRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/library.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1579,34 +1715,33 @@
 			"name": "ProgressIndicator.js",
 			"module": "sap/ui/commons/ProgressIndicator.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/ProgressIndicatorRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/library.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "ProgressIndicatorRenderer-dbg.js",
 			"module": "sap/ui/commons/ProgressIndicatorRenderer.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"isDebug": true
 		},
 		{
 			"name": "ProgressIndicatorRenderer.js",
-			"module": "sap/ui/commons/ProgressIndicatorRenderer.js",
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"module": "sap/ui/commons/ProgressIndicatorRenderer.js"
 		},
 		{
 			"name": "RadioButton-dbg.js",
 			"module": "sap/ui/commons/RadioButton.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/RadioButtonRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/library.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1617,9 +1752,12 @@
 			"name": "RadioButton.js",
 			"module": "sap/ui/commons/RadioButton.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/RadioButtonRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/library.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1627,10 +1765,13 @@
 			"module": "sap/ui/commons/RadioButtonGroup.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/ui/commons/RadioButton.js",
+				"sap/ui/commons/RadioButtonGroupRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/delegate/ItemNavigation.js"
+				"sap/ui/core/delegate/ItemNavigation.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -1641,36 +1782,45 @@
 			"name": "RadioButtonGroup.js",
 			"module": "sap/ui/commons/RadioButtonGroup.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/ui/commons/RadioButton.js",
+				"sap/ui/commons/RadioButtonGroupRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/delegate/ItemNavigation.js"
+				"sap/ui/core/delegate/ItemNavigation.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
 			"name": "RadioButtonGroupRenderer-dbg.js",
 			"module": "sap/ui/commons/RadioButtonGroupRenderer.js",
-			"isDebug": true
+			"isDebug": true,
+			"required": [
+				"sap/ui/core/library.js"
+			]
 		},
 		{
 			"name": "RadioButtonGroupRenderer.js",
-			"module": "sap/ui/commons/RadioButtonGroupRenderer.js"
+			"module": "sap/ui/commons/RadioButtonGroupRenderer.js",
+			"required": [
+				"sap/ui/core/library.js"
+			]
 		},
 		{
 			"name": "RadioButtonRenderer-dbg.js",
 			"module": "sap/ui/commons/RadioButtonRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/core/ValueStateSupport.js"
+				"sap/ui/core/ValueStateSupport.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
 			"name": "RadioButtonRenderer.js",
 			"module": "sap/ui/commons/RadioButtonRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/core/ValueStateSupport.js"
+				"sap/ui/core/ValueStateSupport.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -1678,7 +1828,7 @@
 			"module": "sap/ui/commons/RangeSlider.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/RangeSliderRenderer.js",
 				"sap/ui/commons/Slider.js",
 				"sap/ui/commons/library.js"
 			]
@@ -1691,7 +1841,7 @@
 			"name": "RangeSlider.js",
 			"module": "sap/ui/commons/RangeSlider.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/RangeSliderRenderer.js",
 				"sap/ui/commons/Slider.js",
 				"sap/ui/commons/library.js"
 			]
@@ -1701,7 +1851,6 @@
 			"module": "sap/ui/commons/RangeSliderRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/SliderRenderer.js",
 				"sap/ui/core/Renderer.js"
 			]
@@ -1710,7 +1859,6 @@
 			"name": "RangeSliderRenderer.js",
 			"module": "sap/ui/commons/RangeSliderRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/SliderRenderer.js",
 				"sap/ui/core/Renderer.js"
 			]
@@ -1720,10 +1868,13 @@
 			"module": "sap/ui/commons/RatingIndicator.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/RatingIndicatorRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/theming/Parameters.js"
+				"sap/ui/core/theming/Parameters.js",
+				"sap/ui/events/checkMouseEnterOrLeave.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1734,10 +1885,13 @@
 			"name": "RatingIndicator.js",
 			"module": "sap/ui/commons/RatingIndicator.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/RatingIndicatorRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/theming/Parameters.js"
+				"sap/ui/core/theming/Parameters.js",
+				"sap/ui/events/checkMouseEnterOrLeave.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1745,14 +1899,14 @@
 			"module": "sap/ui/commons/RatingIndicatorRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js"
+				"sap/ui/core/theming/Parameters.js"
 			]
 		},
 		{
 			"name": "RatingIndicatorRenderer.js",
 			"module": "sap/ui/commons/RatingIndicatorRenderer.js",
 			"required": [
-				"jquery.sap.global.js"
+				"sap/ui/core/theming/Parameters.js"
 			]
 		},
 		{
@@ -1764,7 +1918,7 @@
 			"module": "sap/ui/commons/ResponsiveContainer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/ResponsiveContainerRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/ResizeHandler.js"
@@ -1778,7 +1932,7 @@
 			"name": "ResponsiveContainer.js",
 			"module": "sap/ui/commons/ResponsiveContainer.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/ResponsiveContainerRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/ResizeHandler.js"
@@ -1789,7 +1943,6 @@
 			"module": "sap/ui/commons/ResponsiveContainerRange.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Element.js"
 			]
@@ -1802,7 +1955,6 @@
 			"name": "ResponsiveContainerRange.js",
 			"module": "sap/ui/commons/ResponsiveContainerRange.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Element.js"
 			]
@@ -1810,26 +1962,23 @@
 		{
 			"name": "ResponsiveContainerRenderer-dbg.js",
 			"module": "sap/ui/commons/ResponsiveContainerRenderer.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"isDebug": true
 		},
 		{
 			"name": "ResponsiveContainerRenderer.js",
-			"module": "sap/ui/commons/ResponsiveContainerRenderer.js",
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"module": "sap/ui/commons/ResponsiveContainerRenderer.js"
 		},
 		{
 			"name": "RichTooltip-dbg.js",
 			"module": "sap/ui/commons/RichTooltip.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/FormattedTextView.js",
+				"sap/ui/commons/RichTooltipRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/TooltipBase.js"
+				"sap/ui/core/TooltipBase.js",
+				"sap/ui/dom/jquery/control.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1840,9 +1989,12 @@
 			"name": "RichTooltip.js",
 			"module": "sap/ui/commons/RichTooltip.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/FormattedTextView.js",
+				"sap/ui/commons/RichTooltipRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/TooltipBase.js"
+				"sap/ui/core/TooltipBase.js",
+				"sap/ui/dom/jquery/control.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1850,16 +2002,16 @@
 			"module": "sap/ui/commons/RichTooltipRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/core/ValueStateSupport.js"
+				"sap/ui/core/ValueStateSupport.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
 			"name": "RichTooltipRenderer.js",
 			"module": "sap/ui/commons/RichTooltipRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/core/ValueStateSupport.js"
+				"sap/ui/core/ValueStateSupport.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -1867,9 +2019,12 @@
 			"module": "sap/ui/commons/RoadMap.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/RoadMapRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1880,9 +2035,12 @@
 			"name": "RoadMap.js",
 			"module": "sap/ui/commons/RoadMap.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/RoadMapRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1890,14 +2048,20 @@
 			"module": "sap/ui/commons/RoadMapRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js"
+				"sap/base/security/encodeXML.js",
+				"sap/ui/Device.js",
+				"sap/ui/thirdparty/jquery.js",
+				"sap/ui/thirdparty/jqueryui/jquery-ui-position.js"
 			]
 		},
 		{
 			"name": "RoadMapRenderer.js",
 			"module": "sap/ui/commons/RoadMapRenderer.js",
 			"required": [
-				"jquery.sap.global.js"
+				"sap/base/security/encodeXML.js",
+				"sap/ui/Device.js",
+				"sap/ui/thirdparty/jquery.js",
+				"sap/ui/thirdparty/jqueryui/jquery-ui-position.js"
 			]
 		},
 		{
@@ -1905,9 +2069,10 @@
 			"module": "sap/ui/commons/RoadMapStep.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/RoadMapRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Element.js"
+				"sap/ui/core/Element.js",
+				"sap/ui/dom/containsOrEquals.js"
 			]
 		},
 		{
@@ -1918,9 +2083,10 @@
 			"name": "RoadMapStep.js",
 			"module": "sap/ui/commons/RoadMapStep.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/RoadMapRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Element.js"
+				"sap/ui/core/Element.js",
+				"sap/ui/dom/containsOrEquals.js"
 			]
 		},
 		{
@@ -1928,9 +2094,14 @@
 			"module": "sap/ui/commons/RowRepeater.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/Button.js",
+				"sap/ui/commons/Paginator.js",
+				"sap/ui/commons/RowRepeaterRenderer.js",
+				"sap/ui/commons/Toolbar.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/model/FilterType.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1941,9 +2112,14 @@
 			"name": "RowRepeater.js",
 			"module": "sap/ui/commons/RowRepeater.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/Button.js",
+				"sap/ui/commons/Paginator.js",
+				"sap/ui/commons/RowRepeaterRenderer.js",
+				"sap/ui/commons/Toolbar.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/model/FilterType.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -1955,7 +2131,6 @@
 			"module": "sap/ui/commons/RowRepeaterFilter.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Element.js"
 			]
@@ -1968,7 +2143,6 @@
 			"name": "RowRepeaterFilter.js",
 			"module": "sap/ui/commons/RowRepeaterFilter.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Element.js"
 			]
@@ -1978,20 +2152,20 @@
 			"module": "sap/ui/commons/RowRepeaterRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/Button.js",
 				"sap/ui/commons/Paginator.js",
-				"sap/ui/commons/Toolbar.js"
+				"sap/ui/commons/Toolbar.js",
+				"sap/ui/commons/library.js"
 			]
 		},
 		{
 			"name": "RowRepeaterRenderer.js",
 			"module": "sap/ui/commons/RowRepeaterRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/Button.js",
 				"sap/ui/commons/Paginator.js",
-				"sap/ui/commons/Toolbar.js"
+				"sap/ui/commons/Toolbar.js",
+				"sap/ui/commons/library.js"
 			]
 		},
 		{
@@ -1999,7 +2173,6 @@
 			"module": "sap/ui/commons/RowRepeaterSorter.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Element.js"
 			]
@@ -2012,7 +2185,6 @@
 			"name": "RowRepeaterSorter.js",
 			"module": "sap/ui/commons/RowRepeaterSorter.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Element.js"
 			]
@@ -2022,20 +2194,25 @@
 			"module": "sap/ui/commons/SearchField.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.dom.js",
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/Button.js",
 				"sap/ui/commons/ComboBox.js",
 				"sap/ui/commons/ComboBoxRenderer.js",
 				"sap/ui/commons/ListBox.js",
+				"sap/ui/commons/SearchFieldRenderer.js",
 				"sap/ui/commons/TextField.js",
 				"sap/ui/commons/TextFieldRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/History.js",
-				"sap/ui/core/Renderer.js"
-			],
-			"condRequired": [
-				"sap/ui/commons/Button.js"
+				"sap/ui/core/ListItem.js",
+				"sap/ui/core/Renderer.js",
+				"sap/ui/core/SeparatorItem.js",
+				"sap/ui/core/library.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/dom/jquery/getSelectedText.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -2046,43 +2223,41 @@
 			"name": "SearchField.js",
 			"module": "sap/ui/commons/SearchField.js",
 			"required": [
-				"jquery.sap.dom.js",
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/Button.js",
 				"sap/ui/commons/ComboBox.js",
 				"sap/ui/commons/ComboBoxRenderer.js",
 				"sap/ui/commons/ListBox.js",
+				"sap/ui/commons/SearchFieldRenderer.js",
 				"sap/ui/commons/TextField.js",
 				"sap/ui/commons/TextFieldRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/History.js",
-				"sap/ui/core/Renderer.js"
-			],
-			"condRequired": [
-				"sap/ui/commons/Button.js"
+				"sap/ui/core/ListItem.js",
+				"sap/ui/core/Renderer.js",
+				"sap/ui/core/SeparatorItem.js",
+				"sap/ui/core/library.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/dom/jquery/getSelectedText.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "SearchFieldRenderer-dbg.js",
 			"module": "sap/ui/commons/SearchFieldRenderer.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"isDebug": true
 		},
 		{
 			"name": "SearchFieldRenderer.js",
-			"module": "sap/ui/commons/SearchFieldRenderer.js",
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"module": "sap/ui/commons/SearchFieldRenderer.js"
 		},
 		{
 			"name": "SearchProvider-dbg.js",
 			"module": "sap/ui/commons/SearchProvider.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/search/OpenSearchProvider.js"
 			]
@@ -2095,7 +2270,6 @@
 			"name": "SearchProvider.js",
 			"module": "sap/ui/commons/SearchProvider.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/search/OpenSearchProvider.js"
 			]
@@ -2105,9 +2279,10 @@
 			"module": "sap/ui/commons/SegmentedButton.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/SegmentedButtonRenderer.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/delegate/ItemNavigation.js"
+				"sap/ui/core/delegate/ItemNavigation.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -2118,36 +2293,35 @@
 			"name": "SegmentedButton.js",
 			"module": "sap/ui/commons/SegmentedButton.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/SegmentedButtonRenderer.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/delegate/ItemNavigation.js"
+				"sap/ui/core/delegate/ItemNavigation.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "SegmentedButtonRenderer-dbg.js",
 			"module": "sap/ui/commons/SegmentedButtonRenderer.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"isDebug": true
 		},
 		{
 			"name": "SegmentedButtonRenderer.js",
-			"module": "sap/ui/commons/SegmentedButtonRenderer.js",
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"module": "sap/ui/commons/SegmentedButtonRenderer.js"
 		},
 		{
 			"name": "Slider-dbg.js",
 			"module": "sap/ui/commons/Slider.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/ui/commons/SliderRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/EnabledPropagator.js",
-				"sap/ui/core/ResizeHandler.js"
+				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/events/ControlEvents.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -2158,27 +2332,25 @@
 			"name": "Slider.js",
 			"module": "sap/ui/commons/Slider.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/ui/commons/SliderRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/EnabledPropagator.js",
-				"sap/ui/core/ResizeHandler.js"
+				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/events/ControlEvents.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "SliderRenderer-dbg.js",
 			"module": "sap/ui/commons/SliderRenderer.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"isDebug": true
 		},
 		{
 			"name": "SliderRenderer.js",
-			"module": "sap/ui/commons/SliderRenderer.js",
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"module": "sap/ui/commons/SliderRenderer.js"
 		},
 		{
 			"name": "Splitter-dbg.js",
@@ -2186,13 +2358,14 @@
 			"isDebug": true,
 			"required": [
 				"jquery.sap.events.js",
-				"jquery.sap.global.js",
-				"jquery.sap.keycodes.js",
+				"sap/ui/commons/SplitterRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/Popup.js",
 				"sap/ui/core/ResizeHandler.js",
-				"sap/ui/core/delegate/ItemNavigation.js"
+				"sap/ui/core/delegate/ItemNavigation.js",
+				"sap/ui/core/library.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -2204,13 +2377,14 @@
 			"module": "sap/ui/commons/Splitter.js",
 			"required": [
 				"jquery.sap.events.js",
-				"jquery.sap.global.js",
-				"jquery.sap.keycodes.js",
+				"sap/ui/commons/SplitterRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/Popup.js",
 				"sap/ui/core/ResizeHandler.js",
-				"sap/ui/core/delegate/ItemNavigation.js"
+				"sap/ui/core/delegate/ItemNavigation.js",
+				"sap/ui/core/library.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -2218,14 +2392,14 @@
 			"module": "sap/ui/commons/SplitterRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js"
+				"sap/ui/core/library.js"
 			]
 		},
 		{
 			"name": "SplitterRenderer.js",
 			"module": "sap/ui/commons/SplitterRenderer.js",
 			"required": [
-				"jquery.sap.global.js"
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -2237,9 +2411,9 @@
 			"module": "sap/ui/commons/Tab.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/Panel.js",
-				"sap/ui/commons/library.js"
+				"sap/ui/commons/library.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -2250,9 +2424,9 @@
 			"name": "Tab.js",
 			"module": "sap/ui/commons/Tab.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/Panel.js",
-				"sap/ui/commons/library.js"
+				"sap/ui/commons/library.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -2260,13 +2434,22 @@
 			"module": "sap/ui/commons/TabStrip.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
 				"sap/ui/Device.js",
+				"sap/ui/commons/Tab.js",
+				"sap/ui/commons/TabStripRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/Icon.js",
+				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/core/Title.js",
 				"sap/ui/core/delegate/ItemNavigation.js",
-				"sap/ui/core/delegate/ScrollEnablement.js"
+				"sap/ui/core/delegate/ScrollEnablement.js",
+				"sap/ui/dom/jquery/parentByAttribute.js",
+				"sap/ui/dom/jquery/zIndex.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/thirdparty/jquery.js",
+				"sap/ui/thirdparty/jqueryui/jquery-ui-position.js"
 			]
 		},
 		{
@@ -2277,13 +2460,22 @@
 			"name": "TabStrip.js",
 			"module": "sap/ui/commons/TabStrip.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
 				"sap/ui/Device.js",
+				"sap/ui/commons/Tab.js",
+				"sap/ui/commons/TabStripRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
 				"sap/ui/core/Icon.js",
+				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/core/Title.js",
 				"sap/ui/core/delegate/ItemNavigation.js",
-				"sap/ui/core/delegate/ScrollEnablement.js"
+				"sap/ui/core/delegate/ScrollEnablement.js",
+				"sap/ui/dom/jquery/parentByAttribute.js",
+				"sap/ui/dom/jquery/zIndex.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/thirdparty/jquery.js",
+				"sap/ui/thirdparty/jqueryui/jquery-ui-position.js"
 			]
 		},
 		{
@@ -2291,14 +2483,14 @@
 			"module": "sap/ui/commons/TabStripRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js"
+				"sap/base/Log.js"
 			]
 		},
 		{
 			"name": "TabStripRenderer.js",
 			"module": "sap/ui/commons/TabStripRenderer.js",
 			"required": [
-				"jquery.sap.global.js"
+				"sap/base/Log.js"
 			]
 		},
 		{
@@ -2306,9 +2498,14 @@
 			"module": "sap/ui/commons/TextArea.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/TextAreaRenderer.js",
 				"sap/ui/commons/TextField.js",
-				"sap/ui/commons/library.js"
+				"sap/ui/commons/library.js",
+				"sap/ui/dom/jquery/cursorPos.js",
+				"sap/ui/dom/jquery/selectText.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -2319,9 +2516,14 @@
 			"name": "TextArea.js",
 			"module": "sap/ui/commons/TextArea.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/TextAreaRenderer.js",
 				"sap/ui/commons/TextField.js",
-				"sap/ui/commons/library.js"
+				"sap/ui/commons/library.js",
+				"sap/ui/dom/jquery/cursorPos.js",
+				"sap/ui/dom/jquery/selectText.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -2329,18 +2531,20 @@
 			"module": "sap/ui/commons/TextAreaRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
 				"sap/ui/commons/TextFieldRenderer.js",
-				"sap/ui/core/Renderer.js"
+				"sap/ui/core/Renderer.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
 			"name": "TextAreaRenderer.js",
 			"module": "sap/ui/commons/TextAreaRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
 				"sap/ui/commons/TextFieldRenderer.js",
-				"sap/ui/core/Renderer.js"
+				"sap/ui/core/Renderer.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -2348,10 +2552,16 @@
 			"module": "sap/ui/commons/TextField.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/TextFieldRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/ValueStateSupport.js"
+				"sap/ui/core/ValueStateSupport.js",
+				"sap/ui/core/library.js",
+				"sap/ui/dom/jquery/cursorPos.js",
+				"sap/ui/dom/jquery/selectText.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -2362,10 +2572,16 @@
 			"name": "TextField.js",
 			"module": "sap/ui/commons/TextField.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/TextFieldRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/ValueStateSupport.js"
+				"sap/ui/core/ValueStateSupport.js",
+				"sap/ui/core/library.js",
+				"sap/ui/dom/jquery/cursorPos.js",
+				"sap/ui/dom/jquery/selectText.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -2373,18 +2589,20 @@
 			"module": "sap/ui/commons/TextFieldRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
 				"sap/ui/core/Renderer.js",
-				"sap/ui/core/ValueStateSupport.js"
+				"sap/ui/core/ValueStateSupport.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
 			"name": "TextFieldRenderer.js",
 			"module": "sap/ui/commons/TextFieldRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
 				"sap/ui/core/Renderer.js",
-				"sap/ui/core/ValueStateSupport.js"
+				"sap/ui/core/ValueStateSupport.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -2392,9 +2610,11 @@
 			"module": "sap/ui/commons/TextView.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/security/encodeXML.js",
+				"sap/ui/commons/TextViewRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -2405,9 +2625,11 @@
 			"name": "TextView.js",
 			"module": "sap/ui/commons/TextView.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/security/encodeXML.js",
+				"sap/ui/commons/TextViewRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -2423,7 +2645,7 @@
 			"module": "sap/ui/commons/TextViewRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/library.js",
 				"sap/ui/core/Renderer.js"
 			]
 		},
@@ -2431,7 +2653,7 @@
 			"name": "TextViewRenderer.js",
 			"module": "sap/ui/commons/TextViewRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/library.js",
 				"sap/ui/core/Renderer.js"
 			]
 		},
@@ -2440,7 +2662,6 @@
 			"module": "sap/ui/commons/Title.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Title.js"
 			]
@@ -2453,7 +2674,6 @@
 			"name": "Title.js",
 			"module": "sap/ui/commons/Title.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Title.js"
 			]
@@ -2463,8 +2683,8 @@
 			"module": "sap/ui/commons/ToggleButton.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/commons/Button.js"
+				"sap/ui/commons/Button.js",
+				"sap/ui/commons/ToggleButtonRenderer.js"
 			]
 		},
 		{
@@ -2475,8 +2695,8 @@
 			"name": "ToggleButton.js",
 			"module": "sap/ui/commons/ToggleButton.js",
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/commons/Button.js"
+				"sap/ui/commons/Button.js",
+				"sap/ui/commons/ToggleButtonRenderer.js"
 			]
 		},
 		{
@@ -2484,7 +2704,6 @@
 			"module": "sap/ui/commons/ToggleButtonRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/ButtonRenderer.js",
 				"sap/ui/core/Renderer.js"
 			]
@@ -2493,7 +2712,6 @@
 			"name": "ToggleButtonRenderer.js",
 			"module": "sap/ui/commons/ToggleButtonRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/ButtonRenderer.js",
 				"sap/ui/core/Renderer.js"
 			]
@@ -2503,12 +2721,17 @@
 			"module": "sap/ui/commons/Toolbar.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/assert.js",
 				"sap/ui/commons/ToolbarRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
+				"sap/ui/core/Element.js",
 				"sap/ui/core/Popup.js",
-				"sap/ui/core/delegate/ItemNavigation.js"
+				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/core/delegate/ItemNavigation.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -2519,12 +2742,17 @@
 			"name": "Toolbar.js",
 			"module": "sap/ui/commons/Toolbar.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/assert.js",
 				"sap/ui/commons/ToolbarRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
+				"sap/ui/core/Element.js",
 				"sap/ui/core/Popup.js",
-				"sap/ui/core/delegate/ItemNavigation.js"
+				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/core/delegate/ItemNavigation.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -2540,14 +2768,22 @@
 			"module": "sap/ui/commons/ToolbarRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js"
+				"sap/base/Log.js",
+				"sap/base/assert.js",
+				"sap/ui/commons/ToolbarSeparator.js",
+				"sap/ui/commons/library.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "ToolbarRenderer.js",
 			"module": "sap/ui/commons/ToolbarRenderer.js",
 			"required": [
-				"jquery.sap.global.js"
+				"sap/base/Log.js",
+				"sap/base/assert.js",
+				"sap/ui/commons/ToolbarSeparator.js",
+				"sap/ui/commons/library.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -2555,7 +2791,6 @@
 			"module": "sap/ui/commons/ToolbarSeparator.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Element.js"
 			]
@@ -2568,7 +2803,6 @@
 			"name": "ToolbarSeparator.js",
 			"module": "sap/ui/commons/ToolbarSeparator.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Element.js"
 			]
@@ -2582,9 +2816,12 @@
 			"module": "sap/ui/commons/Tree.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/ui/commons/Button.js",
+				"sap/ui/commons/TreeRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -2595,9 +2832,12 @@
 			"name": "Tree.js",
 			"module": "sap/ui/commons/Tree.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/ui/commons/Button.js",
+				"sap/ui/commons/TreeRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -2605,10 +2845,11 @@
 			"module": "sap/ui/commons/TreeNode.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/Tree.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/CustomStyleClassSupport.js",
-				"sap/ui/core/Element.js"
+				"sap/ui/core/Element.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -2619,26 +2860,21 @@
 			"name": "TreeNode.js",
 			"module": "sap/ui/commons/TreeNode.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/Tree.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/CustomStyleClassSupport.js",
-				"sap/ui/core/Element.js"
+				"sap/ui/core/Element.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "TreeRenderer-dbg.js",
 			"module": "sap/ui/commons/TreeRenderer.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"isDebug": true
 		},
 		{
 			"name": "TreeRenderer.js",
-			"module": "sap/ui/commons/TreeRenderer.js",
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"module": "sap/ui/commons/TreeRenderer.js"
 		},
 		{
 			"name": "TreeSelectionMode.type",
@@ -2649,9 +2885,11 @@
 			"module": "sap/ui/commons/TriStateCheckBox.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/TriStateCheckBoxRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -2662,9 +2900,11 @@
 			"name": "TriStateCheckBox.js",
 			"module": "sap/ui/commons/TriStateCheckBox.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/TriStateCheckBoxRenderer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -2672,16 +2912,16 @@
 			"module": "sap/ui/commons/TriStateCheckBoxRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/core/ValueStateSupport.js"
+				"sap/ui/core/ValueStateSupport.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
 			"name": "TriStateCheckBoxRenderer.js",
 			"module": "sap/ui/commons/TriStateCheckBoxRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/core/ValueStateSupport.js"
+				"sap/ui/core/ValueStateSupport.js",
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -2693,8 +2933,8 @@
 			"module": "sap/ui/commons/ValueHelpField.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/TextField.js",
+				"sap/ui/commons/ValueHelpFieldRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/IconPool.js",
 				"sap/ui/core/theming/Parameters.js"
@@ -2708,8 +2948,8 @@
 			"name": "ValueHelpField.js",
 			"module": "sap/ui/commons/ValueHelpField.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/TextField.js",
+				"sap/ui/commons/ValueHelpFieldRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/IconPool.js",
 				"sap/ui/core/theming/Parameters.js"
@@ -2720,16 +2960,18 @@
 			"module": "sap/ui/commons/ValueHelpFieldRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/commons/TextFieldRenderer.js"
+				"sap/ui/commons/TextFieldRenderer.js",
+				"sap/ui/core/IconPool.js",
+				"sap/ui/core/Renderer.js"
 			]
 		},
 		{
 			"name": "ValueHelpFieldRenderer.js",
 			"module": "sap/ui/commons/ValueHelpFieldRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/commons/TextFieldRenderer.js"
+				"sap/ui/commons/TextFieldRenderer.js",
+				"sap/ui/core/IconPool.js",
+				"sap/ui/core/Renderer.js"
 			]
 		},
 		{
@@ -2749,7 +2991,7 @@
 			"module": "sap/ui/commons/form/Form.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/form/FormRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/form/Form.js"
 			]
@@ -2762,7 +3004,7 @@
 			"name": "form/Form.js",
 			"module": "sap/ui/commons/form/Form.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/form/FormRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/form/Form.js"
 			]
@@ -2772,7 +3014,6 @@
 			"module": "sap/ui/commons/form/FormContainer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/form/FormContainer.js"
 			]
@@ -2785,7 +3026,6 @@
 			"name": "form/FormContainer.js",
 			"module": "sap/ui/commons/form/FormContainer.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/form/FormContainer.js"
 			]
@@ -2795,7 +3035,6 @@
 			"module": "sap/ui/commons/form/FormElement.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/form/FormElement.js"
 			]
@@ -2808,7 +3047,6 @@
 			"name": "form/FormElement.js",
 			"module": "sap/ui/commons/form/FormElement.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/form/FormElement.js"
 			]
@@ -2818,7 +3056,7 @@
 			"module": "sap/ui/commons/form/FormLayout.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/form/FormLayoutRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/form/FormLayout.js"
 			]
@@ -2831,7 +3069,7 @@
 			"name": "form/FormLayout.js",
 			"module": "sap/ui/commons/form/FormLayout.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/form/FormLayoutRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/form/FormLayout.js"
 			]
@@ -2841,7 +3079,6 @@
 			"module": "sap/ui/commons/form/FormLayoutRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/layout/form/FormLayoutRenderer.js"
 			]
@@ -2850,7 +3087,6 @@
 			"name": "form/FormLayoutRenderer.js",
 			"module": "sap/ui/commons/form/FormLayoutRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/layout/form/FormLayoutRenderer.js"
 			]
@@ -2860,7 +3096,6 @@
 			"module": "sap/ui/commons/form/FormRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/layout/form/FormRenderer.js"
 			]
@@ -2869,7 +3104,6 @@
 			"name": "form/FormRenderer.js",
 			"module": "sap/ui/commons/form/FormRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/layout/form/FormRenderer.js"
 			]
@@ -2879,7 +3113,6 @@
 			"module": "sap/ui/commons/form/GridContainerData.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/form/GridContainerData.js"
 			]
@@ -2892,7 +3125,6 @@
 			"name": "form/GridContainerData.js",
 			"module": "sap/ui/commons/form/GridContainerData.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/form/GridContainerData.js"
 			]
@@ -2902,7 +3134,6 @@
 			"module": "sap/ui/commons/form/GridElementData.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/form/GridElementData.js"
 			]
@@ -2915,7 +3146,6 @@
 			"name": "form/GridElementData.js",
 			"module": "sap/ui/commons/form/GridElementData.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/form/GridElementData.js"
 			]
@@ -2925,7 +3155,7 @@
 			"module": "sap/ui/commons/form/GridLayout.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/form/GridLayoutRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/form/GridLayout.js"
 			]
@@ -2938,7 +3168,7 @@
 			"name": "form/GridLayout.js",
 			"module": "sap/ui/commons/form/GridLayout.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/form/GridLayoutRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/form/GridLayout.js"
 			]
@@ -2948,7 +3178,6 @@
 			"module": "sap/ui/commons/form/GridLayoutRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/layout/form/GridLayoutRenderer.js"
 			]
@@ -2957,7 +3186,6 @@
 			"name": "form/GridLayoutRenderer.js",
 			"module": "sap/ui/commons/form/GridLayoutRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/layout/form/GridLayoutRenderer.js"
 			]
@@ -2967,7 +3195,7 @@
 			"module": "sap/ui/commons/form/ResponsiveLayout.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/form/ResponsiveLayoutRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/form/ResponsiveLayout.js"
 			]
@@ -2980,7 +3208,7 @@
 			"name": "form/ResponsiveLayout.js",
 			"module": "sap/ui/commons/form/ResponsiveLayout.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/form/ResponsiveLayoutRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/form/ResponsiveLayout.js"
 			]
@@ -2990,7 +3218,6 @@
 			"module": "sap/ui/commons/form/ResponsiveLayoutRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/layout/form/ResponsiveLayoutRenderer.js"
 			]
@@ -2999,7 +3226,6 @@
 			"name": "form/ResponsiveLayoutRenderer.js",
 			"module": "sap/ui/commons/form/ResponsiveLayoutRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/layout/form/ResponsiveLayoutRenderer.js"
 			]
@@ -3009,7 +3235,7 @@
 			"module": "sap/ui/commons/form/SimpleForm.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/form/SimpleFormRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/form/SimpleForm.js"
 			]
@@ -3022,7 +3248,7 @@
 			"name": "form/SimpleForm.js",
 			"module": "sap/ui/commons/form/SimpleForm.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/form/SimpleFormRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/form/SimpleForm.js"
 			]
@@ -3032,7 +3258,6 @@
 			"module": "sap/ui/commons/form/SimpleFormRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/layout/form/SimpleFormRenderer.js"
 			]
@@ -3041,7 +3266,6 @@
 			"name": "form/SimpleFormRenderer.js",
 			"module": "sap/ui/commons/form/SimpleFormRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/layout/form/SimpleFormRenderer.js"
 			]
@@ -3057,10 +3281,12 @@
 			"module": "sap/ui/commons/layout/AbsoluteLayout.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/layout/AbsoluteLayoutRenderer.js",
 				"sap/ui/commons/layout/PositionContainer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/library.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -3071,10 +3297,12 @@
 			"name": "layout/AbsoluteLayout.js",
 			"module": "sap/ui/commons/layout/AbsoluteLayout.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/layout/AbsoluteLayoutRenderer.js",
 				"sap/ui/commons/layout/PositionContainer.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Control.js"
+				"sap/ui/core/Control.js",
+				"sap/ui/core/library.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -3082,14 +3310,14 @@
 			"module": "sap/ui/commons/layout/AbsoluteLayoutRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js"
+				"sap/ui/core/library.js"
 			]
 		},
 		{
 			"name": "layout/AbsoluteLayoutRenderer.js",
 			"module": "sap/ui/commons/layout/AbsoluteLayoutRenderer.js",
 			"required": [
-				"jquery.sap.global.js"
+				"sap/ui/core/library.js"
 			]
 		},
 		{
@@ -3101,7 +3329,9 @@
 			"module": "sap/ui/commons/layout/BorderLayout.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/assert.js",
+				"sap/ui/commons/layout/BorderLayoutArea.js",
+				"sap/ui/commons/layout/BorderLayoutRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js"
 			]
@@ -3114,7 +3344,9 @@
 			"name": "layout/BorderLayout.js",
 			"module": "sap/ui/commons/layout/BorderLayout.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/assert.js",
+				"sap/ui/commons/layout/BorderLayoutArea.js",
+				"sap/ui/commons/layout/BorderLayoutRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js"
 			]
@@ -3124,7 +3356,6 @@
 			"module": "sap/ui/commons/layout/BorderLayoutArea.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/CustomStyleClassSupport.js",
 				"sap/ui/core/Element.js"
@@ -3138,7 +3369,6 @@
 			"name": "layout/BorderLayoutArea.js",
 			"module": "sap/ui/commons/layout/BorderLayoutArea.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/CustomStyleClassSupport.js",
 				"sap/ui/core/Element.js"
@@ -3153,16 +3383,18 @@
 			"module": "sap/ui/commons/layout/BorderLayoutRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.encoder.js",
-				"jquery.sap.global.js"
+				"sap/base/assert.js",
+				"sap/base/security/encodeXML.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "layout/BorderLayoutRenderer.js",
 			"module": "sap/ui/commons/layout/BorderLayoutRenderer.js",
 			"required": [
-				"jquery.sap.encoder.js",
-				"jquery.sap.global.js"
+				"sap/base/assert.js",
+				"sap/base/security/encodeXML.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -3174,7 +3406,7 @@
 			"module": "sap/ui/commons/layout/HorizontalLayout.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/layout/HorizontalLayoutRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/HorizontalLayout.js"
 			]
@@ -3187,7 +3419,7 @@
 			"name": "layout/HorizontalLayout.js",
 			"module": "sap/ui/commons/layout/HorizontalLayout.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/layout/HorizontalLayoutRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/HorizontalLayout.js"
 			]
@@ -3197,7 +3429,6 @@
 			"module": "sap/ui/commons/layout/HorizontalLayoutRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/layout/HorizontalLayoutRenderer.js"
 			]
@@ -3206,7 +3437,6 @@
 			"name": "layout/HorizontalLayoutRenderer.js",
 			"module": "sap/ui/commons/layout/HorizontalLayoutRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/layout/HorizontalLayoutRenderer.js"
 			]
@@ -3216,12 +3446,14 @@
 			"module": "sap/ui/commons/layout/MatrixLayout.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/TextView.js",
 				"sap/ui/commons/layout/MatrixLayoutCell.js",
+				"sap/ui/commons/layout/MatrixLayoutRenderer.js",
 				"sap/ui/commons/layout/MatrixLayoutRow.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/EnabledPropagator.js"
+				"sap/ui/core/EnabledPropagator.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -3232,12 +3464,14 @@
 			"name": "layout/MatrixLayout.js",
 			"module": "sap/ui/commons/layout/MatrixLayout.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/TextView.js",
 				"sap/ui/commons/layout/MatrixLayoutCell.js",
+				"sap/ui/commons/layout/MatrixLayoutRenderer.js",
 				"sap/ui/commons/layout/MatrixLayoutRow.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/Control.js",
-				"sap/ui/core/EnabledPropagator.js"
+				"sap/ui/core/EnabledPropagator.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -3245,7 +3479,6 @@
 			"module": "sap/ui/commons/layout/MatrixLayoutCell.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/CustomStyleClassSupport.js",
 				"sap/ui/core/Element.js"
@@ -3259,7 +3492,6 @@
 			"name": "layout/MatrixLayoutCell.js",
 			"module": "sap/ui/commons/layout/MatrixLayoutCell.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/CustomStyleClassSupport.js",
 				"sap/ui/core/Element.js"
@@ -3270,14 +3502,18 @@
 			"module": "sap/ui/commons/layout/MatrixLayoutRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js"
+				"sap/base/assert.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/library.js"
 			]
 		},
 		{
 			"name": "layout/MatrixLayoutRenderer.js",
 			"module": "sap/ui/commons/layout/MatrixLayoutRenderer.js",
 			"required": [
-				"jquery.sap.global.js"
+				"sap/base/assert.js",
+				"sap/ui/Device.js",
+				"sap/ui/commons/library.js"
 			]
 		},
 		{
@@ -3285,7 +3521,6 @@
 			"module": "sap/ui/commons/layout/MatrixLayoutRow.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/CustomStyleClassSupport.js",
 				"sap/ui/core/Element.js"
@@ -3299,7 +3534,6 @@
 			"name": "layout/MatrixLayoutRow.js",
 			"module": "sap/ui/commons/layout/MatrixLayoutRow.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/core/CustomStyleClassSupport.js",
 				"sap/ui/core/Element.js"
@@ -3314,9 +3548,10 @@
 			"module": "sap/ui/commons/layout/PositionContainer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Element.js"
+				"sap/ui/core/Element.js",
+				"sap/ui/core/ResizeHandler.js"
 			]
 		},
 		{
@@ -3327,9 +3562,10 @@
 			"name": "layout/PositionContainer.js",
 			"module": "sap/ui/commons/layout/PositionContainer.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
 				"sap/ui/commons/library.js",
-				"sap/ui/core/Element.js"
+				"sap/ui/core/Element.js",
+				"sap/ui/core/ResizeHandler.js"
 			]
 		},
 		{
@@ -3337,7 +3573,7 @@
 			"module": "sap/ui/commons/layout/ResponsiveFlowLayout.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/layout/ResponsiveFlowLayoutRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/ResponsiveFlowLayout.js"
 			]
@@ -3350,7 +3586,7 @@
 			"name": "layout/ResponsiveFlowLayout.js",
 			"module": "sap/ui/commons/layout/ResponsiveFlowLayout.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/layout/ResponsiveFlowLayoutRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/ResponsiveFlowLayout.js"
 			]
@@ -3360,7 +3596,6 @@
 			"module": "sap/ui/commons/layout/ResponsiveFlowLayoutData.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/ResponsiveFlowLayoutData.js"
 			]
@@ -3373,7 +3608,6 @@
 			"name": "layout/ResponsiveFlowLayoutData.js",
 			"module": "sap/ui/commons/layout/ResponsiveFlowLayoutData.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/ResponsiveFlowLayoutData.js"
 			]
@@ -3383,7 +3617,6 @@
 			"module": "sap/ui/commons/layout/ResponsiveFlowLayoutRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/layout/ResponsiveFlowLayoutRenderer.js"
 			]
@@ -3392,7 +3625,6 @@
 			"name": "layout/ResponsiveFlowLayoutRenderer.js",
 			"module": "sap/ui/commons/layout/ResponsiveFlowLayoutRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/layout/ResponsiveFlowLayoutRenderer.js"
 			]
@@ -3410,7 +3642,7 @@
 			"module": "sap/ui/commons/layout/VerticalLayout.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/layout/VerticalLayoutRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/VerticalLayout.js"
 			]
@@ -3423,7 +3655,7 @@
 			"name": "layout/VerticalLayout.js",
 			"module": "sap/ui/commons/layout/VerticalLayout.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/commons/layout/VerticalLayoutRenderer.js",
 				"sap/ui/commons/library.js",
 				"sap/ui/layout/VerticalLayout.js"
 			]
@@ -3433,7 +3665,6 @@
 			"module": "sap/ui/commons/layout/VerticalLayoutRenderer.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/layout/VerticalLayoutRenderer.js"
 			]
@@ -3442,48 +3673,44 @@
 			"name": "layout/VerticalLayoutRenderer.js",
 			"module": "sap/ui/commons/layout/VerticalLayoutRenderer.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/core/Renderer.js",
 				"sap/ui/layout/VerticalLayoutRenderer.js"
 			]
-		},
-		{
-			"name": "library-all-dbg.js",
-			"isDebug": true,
-			"merged": true
-		},
-		{
-			"name": "library-all.js",
-			"merged": true
 		},
 		{
 			"name": "library-dbg.js",
 			"module": "sap/ui/commons/library.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/util/ObjectPath.js",
 				"sap/ui/base/DataType.js",
 				"sap/ui/core/library.js",
-				"sap/ui/layout/library.js"
+				"sap/ui/layout/library.js",
+				"sap/ui/unified/library.js"
 			],
 			"condRequired": [
 				"sap/ui/commons/Button.js"
 			]
 		},
 		{
-			"name": "library-preload.js",
-			"module": "sap/ui/commons/library-preload.js",
+			"name": "library-h2-preload-dbg.js",
+			"module": "sap/ui/commons/library-h2-preload.js",
+			"isDebug": true,
 			"merged": true,
 			"required": [
-				"jquery.sap.dom.js",
-				"jquery.sap.encoder.js",
 				"jquery.sap.events.js",
-				"jquery.sap.global.js",
-				"jquery.sap.keycodes.js",
 				"jquery.sap.strings.js",
+				"sap/base/Log.js",
+				"sap/base/assert.js",
+				"sap/base/security/encodeXML.js",
+				"sap/base/security/sanitizeHTML.js",
+				"sap/base/strings/capitalize.js",
+				"sap/base/util/ObjectPath.js",
 				"sap/ui/Device.js",
 				"sap/ui/base/DataType.js",
+				"sap/ui/base/Event.js",
 				"sap/ui/core/Control.js",
+				"sap/ui/core/Core.js",
 				"sap/ui/core/CustomStyleClassSupport.js",
 				"sap/ui/core/Element.js",
 				"sap/ui/core/ElementMetadata.js",
@@ -3492,6 +3719,9 @@
 				"sap/ui/core/Icon.js",
 				"sap/ui/core/IconPool.js",
 				"sap/ui/core/LabelEnablement.js",
+				"sap/ui/core/ListItem.js",
+				"sap/ui/core/Locale.js",
+				"sap/ui/core/LocaleData.js",
 				"sap/ui/core/Popup.js",
 				"sap/ui/core/RenderManager.js",
 				"sap/ui/core/Renderer.js",
@@ -3503,9 +3733,23 @@
 				"sap/ui/core/date/UniversalDate.js",
 				"sap/ui/core/delegate/ItemNavigation.js",
 				"sap/ui/core/delegate/ScrollEnablement.js",
+				"sap/ui/core/format/DateFormat.js",
 				"sap/ui/core/library.js",
 				"sap/ui/core/search/OpenSearchProvider.js",
 				"sap/ui/core/theming/Parameters.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/dom/jquery/Focusable.js",
+				"sap/ui/dom/jquery/Selectors.js",
+				"sap/ui/dom/jquery/control.js",
+				"sap/ui/dom/jquery/cursorPos.js",
+				"sap/ui/dom/jquery/getSelectedText.js",
+				"sap/ui/dom/jquery/parentByAttribute.js",
+				"sap/ui/dom/jquery/selectText.js",
+				"sap/ui/dom/jquery/zIndex.js",
+				"sap/ui/events/ControlEvents.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/events/checkMouseEnterOrLeave.js",
+				"sap/ui/events/jquery/EventExtension.js",
 				"sap/ui/layout/HorizontalLayout.js",
 				"sap/ui/layout/HorizontalLayoutRenderer.js",
 				"sap/ui/layout/ResponsiveFlowLayout.js",
@@ -3528,9 +3772,12 @@
 				"sap/ui/layout/form/SimpleForm.js",
 				"sap/ui/layout/form/SimpleFormRenderer.js",
 				"sap/ui/layout/library.js",
+				"sap/ui/model/FilterType.js",
 				"sap/ui/model/type/Date.js",
+				"sap/ui/thirdparty/jquery.js",
 				"sap/ui/thirdparty/jqueryui/jquery-ui-core.js",
 				"sap/ui/thirdparty/jqueryui/jquery-ui-mouse.js",
+				"sap/ui/thirdparty/jqueryui/jquery-ui-position.js",
 				"sap/ui/thirdparty/jqueryui/jquery-ui-sortable.js",
 				"sap/ui/thirdparty/jqueryui/jquery-ui-widget.js",
 				"sap/ui/unified/ColorPicker.js",
@@ -3540,11 +3787,533 @@
 				"sap/ui/unified/Menu.js",
 				"sap/ui/unified/MenuItem.js",
 				"sap/ui/unified/MenuRenderer.js",
-				"sap/ui/unified/MenuTextFieldItem.js"
+				"sap/ui/unified/MenuTextFieldItem.js",
+				"sap/ui/unified/library.js"
 			],
 			"condRequired": [
-				"sap/ui/unified/MenuItemBase.js",
+				"sap/ui/unified/MenuItemBase.js"
+			],
+			"included": [
+				"sap/ui/commons/library.js",
+				"sap/ui/commons/manifest.json",
+				"sap/ui/commons/Accordion.js",
+				"sap/ui/commons/AccordionRenderer.js",
+				"sap/ui/commons/AccordionSection.js",
+				"sap/ui/commons/ApplicationHeader.js",
+				"sap/ui/commons/ApplicationHeaderRenderer.js",
+				"sap/ui/commons/Area.js",
+				"sap/ui/commons/AutoComplete.js",
+				"sap/ui/commons/AutoCompleteRenderer.js",
+				"sap/ui/commons/Button.js",
+				"sap/ui/commons/ButtonRenderer.js",
+				"sap/ui/commons/Callout.js",
+				"sap/ui/commons/CalloutBase.js",
+				"sap/ui/commons/CalloutBaseRenderer.js",
+				"sap/ui/commons/CalloutRenderer.js",
+				"sap/ui/commons/Carousel.js",
+				"sap/ui/commons/CarouselRenderer.js",
+				"sap/ui/commons/CheckBox.js",
+				"sap/ui/commons/CheckBoxRenderer.js",
+				"sap/ui/commons/ColorPicker.js",
+				"sap/ui/commons/ComboBox.js",
+				"sap/ui/commons/ComboBoxRenderer.js",
+				"sap/ui/commons/DatePicker.js",
+				"sap/ui/commons/DatePickerRenderer.js",
+				"sap/ui/commons/Dialog.js",
+				"sap/ui/commons/DialogRenderer.js",
+				"sap/ui/commons/DropdownBox.js",
+				"sap/ui/commons/DropdownBoxRenderer.js",
+				"sap/ui/commons/FileUploader.js",
+				"sap/ui/commons/FileUploaderParameter.js",
+				"sap/ui/commons/FileUploaderRenderer.js",
+				"sap/ui/commons/FormattedTextView.js",
+				"sap/ui/commons/FormattedTextViewRenderer.js",
+				"sap/ui/commons/HorizontalDivider.js",
+				"sap/ui/commons/HorizontalDividerRenderer.js",
+				"sap/ui/commons/Image.js",
+				"sap/ui/commons/ImageMap.js",
+				"sap/ui/commons/ImageMapRenderer.js",
+				"sap/ui/commons/ImageRenderer.js",
+				"sap/ui/commons/InPlaceEdit.js",
+				"sap/ui/commons/InPlaceEditRenderer.js",
+				"sap/ui/commons/Label.js",
+				"sap/ui/commons/LabelRenderer.js",
+				"sap/ui/commons/Link.js",
+				"sap/ui/commons/LinkRenderer.js",
+				"sap/ui/commons/ListBox.js",
+				"sap/ui/commons/ListBoxRenderer.js",
+				"sap/ui/commons/Menu.js",
+				"sap/ui/commons/MenuBar.js",
+				"sap/ui/commons/MenuBarRenderer.js",
+				"sap/ui/commons/MenuButton.js",
+				"sap/ui/commons/MenuButtonRenderer.js",
+				"sap/ui/commons/MenuItem.js",
+				"sap/ui/commons/MenuItemBase.js",
+				"sap/ui/commons/MenuRenderer.js",
+				"sap/ui/commons/MenuTextFieldItem.js",
+				"sap/ui/commons/Message.js",
+				"sap/ui/commons/MessageBar.js",
+				"sap/ui/commons/MessageBarRenderer.js",
+				"sap/ui/commons/MessageBox.js",
+				"sap/ui/commons/MessageList.js",
+				"sap/ui/commons/MessageListRenderer.js",
+				"sap/ui/commons/MessageRenderer.js",
+				"sap/ui/commons/MessageToast.js",
+				"sap/ui/commons/MessageToastRenderer.js",
+				"sap/ui/commons/Paginator.js",
+				"sap/ui/commons/PaginatorRenderer.js",
+				"sap/ui/commons/Panel.js",
+				"sap/ui/commons/PanelRenderer.js",
+				"sap/ui/commons/PasswordField.js",
+				"sap/ui/commons/PasswordFieldRenderer.js",
+				"sap/ui/commons/ProgressIndicator.js",
+				"sap/ui/commons/ProgressIndicatorRenderer.js",
+				"sap/ui/commons/RadioButton.js",
+				"sap/ui/commons/RadioButtonGroup.js",
+				"sap/ui/commons/RadioButtonGroupRenderer.js",
+				"sap/ui/commons/RadioButtonRenderer.js",
+				"sap/ui/commons/RangeSlider.js",
+				"sap/ui/commons/RangeSliderRenderer.js",
+				"sap/ui/commons/RatingIndicator.js",
+				"sap/ui/commons/RatingIndicatorRenderer.js",
+				"sap/ui/commons/ResponsiveContainer.js",
+				"sap/ui/commons/ResponsiveContainerRange.js",
+				"sap/ui/commons/ResponsiveContainerRenderer.js",
+				"sap/ui/commons/RichTooltip.js",
+				"sap/ui/commons/RichTooltipRenderer.js",
+				"sap/ui/commons/RoadMap.js",
+				"sap/ui/commons/RoadMapRenderer.js",
+				"sap/ui/commons/RoadMapStep.js",
+				"sap/ui/commons/RowRepeater.js",
+				"sap/ui/commons/RowRepeaterFilter.js",
+				"sap/ui/commons/RowRepeaterRenderer.js",
+				"sap/ui/commons/RowRepeaterSorter.js",
+				"sap/ui/commons/SearchField.js",
+				"sap/ui/commons/SearchFieldRenderer.js",
+				"sap/ui/commons/SearchProvider.js",
+				"sap/ui/commons/SegmentedButton.js",
+				"sap/ui/commons/SegmentedButtonRenderer.js",
+				"sap/ui/commons/Slider.js",
+				"sap/ui/commons/SliderRenderer.js",
+				"sap/ui/commons/Splitter.js",
+				"sap/ui/commons/SplitterRenderer.js",
+				"sap/ui/commons/Tab.js",
+				"sap/ui/commons/TabStrip.js",
+				"sap/ui/commons/TabStripRenderer.js",
+				"sap/ui/commons/TextArea.js",
+				"sap/ui/commons/TextAreaRenderer.js",
+				"sap/ui/commons/TextField.js",
+				"sap/ui/commons/TextFieldRenderer.js",
+				"sap/ui/commons/TextView.js",
+				"sap/ui/commons/TextViewRenderer.js",
+				"sap/ui/commons/Title.js",
+				"sap/ui/commons/ToggleButton.js",
+				"sap/ui/commons/ToggleButtonRenderer.js",
+				"sap/ui/commons/Toolbar.js",
+				"sap/ui/commons/ToolbarRenderer.js",
+				"sap/ui/commons/ToolbarSeparator.js",
+				"sap/ui/commons/Tree.js",
+				"sap/ui/commons/TreeNode.js",
+				"sap/ui/commons/TreeRenderer.js",
+				"sap/ui/commons/TriStateCheckBox.js",
+				"sap/ui/commons/TriStateCheckBoxRenderer.js",
+				"sap/ui/commons/ValueHelpField.js",
+				"sap/ui/commons/ValueHelpFieldRenderer.js",
+				"sap/ui/commons/form/Form.js",
+				"sap/ui/commons/form/FormContainer.js",
+				"sap/ui/commons/form/FormElement.js",
+				"sap/ui/commons/form/FormLayout.js",
+				"sap/ui/commons/form/FormLayoutRenderer.js",
+				"sap/ui/commons/form/FormRenderer.js",
+				"sap/ui/commons/form/GridContainerData.js",
+				"sap/ui/commons/form/GridElementData.js",
+				"sap/ui/commons/form/GridLayout.js",
+				"sap/ui/commons/form/GridLayoutRenderer.js",
+				"sap/ui/commons/form/ResponsiveLayout.js",
+				"sap/ui/commons/form/ResponsiveLayoutRenderer.js",
+				"sap/ui/commons/form/SimpleForm.js",
+				"sap/ui/commons/form/SimpleFormRenderer.js",
+				"sap/ui/commons/layout/AbsoluteLayout.js",
+				"sap/ui/commons/layout/AbsoluteLayoutRenderer.js",
+				"sap/ui/commons/layout/BorderLayout.js",
+				"sap/ui/commons/layout/BorderLayoutArea.js",
+				"sap/ui/commons/layout/BorderLayoutRenderer.js",
+				"sap/ui/commons/layout/HorizontalLayout.js",
+				"sap/ui/commons/layout/HorizontalLayoutRenderer.js",
+				"sap/ui/commons/layout/MatrixLayout.js",
+				"sap/ui/commons/layout/MatrixLayoutCell.js",
+				"sap/ui/commons/layout/MatrixLayoutRenderer.js",
+				"sap/ui/commons/layout/MatrixLayoutRow.js",
+				"sap/ui/commons/layout/PositionContainer.js",
+				"sap/ui/commons/layout/ResponsiveFlowLayout.js",
+				"sap/ui/commons/layout/ResponsiveFlowLayoutData.js",
+				"sap/ui/commons/layout/ResponsiveFlowLayoutRenderer.js",
+				"sap/ui/commons/layout/VerticalLayout.js",
+				"sap/ui/commons/layout/VerticalLayoutRenderer.js"
+			]
+		},
+		{
+			"name": "library-h2-preload.js",
+			"module": "sap/ui/commons/library-h2-preload.js",
+			"merged": true,
+			"required": [
+				"jquery.sap.events.js",
+				"jquery.sap.strings.js",
+				"sap/base/Log.js",
+				"sap/base/assert.js",
+				"sap/base/security/encodeXML.js",
+				"sap/base/security/sanitizeHTML.js",
+				"sap/base/strings/capitalize.js",
+				"sap/base/util/ObjectPath.js",
+				"sap/ui/Device.js",
+				"sap/ui/base/DataType.js",
+				"sap/ui/base/Event.js",
+				"sap/ui/core/Control.js",
+				"sap/ui/core/Core.js",
+				"sap/ui/core/CustomStyleClassSupport.js",
+				"sap/ui/core/Element.js",
+				"sap/ui/core/ElementMetadata.js",
+				"sap/ui/core/EnabledPropagator.js",
+				"sap/ui/core/History.js",
+				"sap/ui/core/Icon.js",
+				"sap/ui/core/IconPool.js",
+				"sap/ui/core/LabelEnablement.js",
+				"sap/ui/core/ListItem.js",
+				"sap/ui/core/Locale.js",
+				"sap/ui/core/LocaleData.js",
+				"sap/ui/core/Popup.js",
+				"sap/ui/core/RenderManager.js",
+				"sap/ui/core/Renderer.js",
+				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/core/SeparatorItem.js",
+				"sap/ui/core/Title.js",
+				"sap/ui/core/TooltipBase.js",
+				"sap/ui/core/ValueStateSupport.js",
+				"sap/ui/core/date/UniversalDate.js",
+				"sap/ui/core/delegate/ItemNavigation.js",
+				"sap/ui/core/delegate/ScrollEnablement.js",
+				"sap/ui/core/format/DateFormat.js",
+				"sap/ui/core/library.js",
+				"sap/ui/core/search/OpenSearchProvider.js",
+				"sap/ui/core/theming/Parameters.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/dom/jquery/Focusable.js",
+				"sap/ui/dom/jquery/Selectors.js",
+				"sap/ui/dom/jquery/control.js",
+				"sap/ui/dom/jquery/cursorPos.js",
+				"sap/ui/dom/jquery/getSelectedText.js",
+				"sap/ui/dom/jquery/parentByAttribute.js",
+				"sap/ui/dom/jquery/selectText.js",
+				"sap/ui/dom/jquery/zIndex.js",
+				"sap/ui/events/ControlEvents.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/events/checkMouseEnterOrLeave.js",
+				"sap/ui/events/jquery/EventExtension.js",
+				"sap/ui/layout/HorizontalLayout.js",
+				"sap/ui/layout/HorizontalLayoutRenderer.js",
+				"sap/ui/layout/ResponsiveFlowLayout.js",
+				"sap/ui/layout/ResponsiveFlowLayoutData.js",
+				"sap/ui/layout/ResponsiveFlowLayoutRenderer.js",
+				"sap/ui/layout/VerticalLayout.js",
+				"sap/ui/layout/VerticalLayoutRenderer.js",
+				"sap/ui/layout/form/Form.js",
+				"sap/ui/layout/form/FormContainer.js",
+				"sap/ui/layout/form/FormElement.js",
+				"sap/ui/layout/form/FormLayout.js",
+				"sap/ui/layout/form/FormLayoutRenderer.js",
+				"sap/ui/layout/form/FormRenderer.js",
+				"sap/ui/layout/form/GridContainerData.js",
+				"sap/ui/layout/form/GridElementData.js",
+				"sap/ui/layout/form/GridLayout.js",
+				"sap/ui/layout/form/GridLayoutRenderer.js",
+				"sap/ui/layout/form/ResponsiveLayout.js",
+				"sap/ui/layout/form/ResponsiveLayoutRenderer.js",
+				"sap/ui/layout/form/SimpleForm.js",
+				"sap/ui/layout/form/SimpleFormRenderer.js",
+				"sap/ui/layout/library.js",
+				"sap/ui/model/FilterType.js",
+				"sap/ui/model/type/Date.js",
+				"sap/ui/thirdparty/jquery.js",
+				"sap/ui/thirdparty/jqueryui/jquery-ui-core.js",
+				"sap/ui/thirdparty/jqueryui/jquery-ui-mouse.js",
+				"sap/ui/thirdparty/jqueryui/jquery-ui-position.js",
+				"sap/ui/thirdparty/jqueryui/jquery-ui-sortable.js",
+				"sap/ui/thirdparty/jqueryui/jquery-ui-widget.js",
+				"sap/ui/unified/ColorPicker.js",
+				"sap/ui/unified/FileUploader.js",
+				"sap/ui/unified/FileUploaderParameter.js",
+				"sap/ui/unified/FileUploaderRenderer.js",
+				"sap/ui/unified/Menu.js",
+				"sap/ui/unified/MenuItem.js",
+				"sap/ui/unified/MenuRenderer.js",
+				"sap/ui/unified/MenuTextFieldItem.js",
 				"sap/ui/unified/library.js"
+			],
+			"condRequired": [
+				"sap/ui/unified/MenuItemBase.js"
+			],
+			"included": [
+				"sap/ui/commons/library.js",
+				"sap/ui/commons/manifest.json",
+				"sap/ui/commons/Accordion.js",
+				"sap/ui/commons/AccordionRenderer.js",
+				"sap/ui/commons/AccordionSection.js",
+				"sap/ui/commons/ApplicationHeader.js",
+				"sap/ui/commons/ApplicationHeaderRenderer.js",
+				"sap/ui/commons/Area.js",
+				"sap/ui/commons/AutoComplete.js",
+				"sap/ui/commons/AutoCompleteRenderer.js",
+				"sap/ui/commons/Button.js",
+				"sap/ui/commons/ButtonRenderer.js",
+				"sap/ui/commons/Callout.js",
+				"sap/ui/commons/CalloutBase.js",
+				"sap/ui/commons/CalloutBaseRenderer.js",
+				"sap/ui/commons/CalloutRenderer.js",
+				"sap/ui/commons/Carousel.js",
+				"sap/ui/commons/CarouselRenderer.js",
+				"sap/ui/commons/CheckBox.js",
+				"sap/ui/commons/CheckBoxRenderer.js",
+				"sap/ui/commons/ColorPicker.js",
+				"sap/ui/commons/ComboBox.js",
+				"sap/ui/commons/ComboBoxRenderer.js",
+				"sap/ui/commons/DatePicker.js",
+				"sap/ui/commons/DatePickerRenderer.js",
+				"sap/ui/commons/Dialog.js",
+				"sap/ui/commons/DialogRenderer.js",
+				"sap/ui/commons/DropdownBox.js",
+				"sap/ui/commons/DropdownBoxRenderer.js",
+				"sap/ui/commons/FileUploader.js",
+				"sap/ui/commons/FileUploaderParameter.js",
+				"sap/ui/commons/FileUploaderRenderer.js",
+				"sap/ui/commons/FormattedTextView.js",
+				"sap/ui/commons/FormattedTextViewRenderer.js",
+				"sap/ui/commons/HorizontalDivider.js",
+				"sap/ui/commons/HorizontalDividerRenderer.js",
+				"sap/ui/commons/Image.js",
+				"sap/ui/commons/ImageMap.js",
+				"sap/ui/commons/ImageMapRenderer.js",
+				"sap/ui/commons/ImageRenderer.js",
+				"sap/ui/commons/InPlaceEdit.js",
+				"sap/ui/commons/InPlaceEditRenderer.js",
+				"sap/ui/commons/Label.js",
+				"sap/ui/commons/LabelRenderer.js",
+				"sap/ui/commons/Link.js",
+				"sap/ui/commons/LinkRenderer.js",
+				"sap/ui/commons/ListBox.js",
+				"sap/ui/commons/ListBoxRenderer.js",
+				"sap/ui/commons/Menu.js",
+				"sap/ui/commons/MenuBar.js",
+				"sap/ui/commons/MenuBarRenderer.js",
+				"sap/ui/commons/MenuButton.js",
+				"sap/ui/commons/MenuButtonRenderer.js",
+				"sap/ui/commons/MenuItem.js",
+				"sap/ui/commons/MenuItemBase.js",
+				"sap/ui/commons/MenuRenderer.js",
+				"sap/ui/commons/MenuTextFieldItem.js",
+				"sap/ui/commons/Message.js",
+				"sap/ui/commons/MessageBar.js",
+				"sap/ui/commons/MessageBarRenderer.js",
+				"sap/ui/commons/MessageBox.js",
+				"sap/ui/commons/MessageList.js",
+				"sap/ui/commons/MessageListRenderer.js",
+				"sap/ui/commons/MessageRenderer.js",
+				"sap/ui/commons/MessageToast.js",
+				"sap/ui/commons/MessageToastRenderer.js",
+				"sap/ui/commons/Paginator.js",
+				"sap/ui/commons/PaginatorRenderer.js",
+				"sap/ui/commons/Panel.js",
+				"sap/ui/commons/PanelRenderer.js",
+				"sap/ui/commons/PasswordField.js",
+				"sap/ui/commons/PasswordFieldRenderer.js",
+				"sap/ui/commons/ProgressIndicator.js",
+				"sap/ui/commons/ProgressIndicatorRenderer.js",
+				"sap/ui/commons/RadioButton.js",
+				"sap/ui/commons/RadioButtonGroup.js",
+				"sap/ui/commons/RadioButtonGroupRenderer.js",
+				"sap/ui/commons/RadioButtonRenderer.js",
+				"sap/ui/commons/RangeSlider.js",
+				"sap/ui/commons/RangeSliderRenderer.js",
+				"sap/ui/commons/RatingIndicator.js",
+				"sap/ui/commons/RatingIndicatorRenderer.js",
+				"sap/ui/commons/ResponsiveContainer.js",
+				"sap/ui/commons/ResponsiveContainerRange.js",
+				"sap/ui/commons/ResponsiveContainerRenderer.js",
+				"sap/ui/commons/RichTooltip.js",
+				"sap/ui/commons/RichTooltipRenderer.js",
+				"sap/ui/commons/RoadMap.js",
+				"sap/ui/commons/RoadMapRenderer.js",
+				"sap/ui/commons/RoadMapStep.js",
+				"sap/ui/commons/RowRepeater.js",
+				"sap/ui/commons/RowRepeaterFilter.js",
+				"sap/ui/commons/RowRepeaterRenderer.js",
+				"sap/ui/commons/RowRepeaterSorter.js",
+				"sap/ui/commons/SearchField.js",
+				"sap/ui/commons/SearchFieldRenderer.js",
+				"sap/ui/commons/SearchProvider.js",
+				"sap/ui/commons/SegmentedButton.js",
+				"sap/ui/commons/SegmentedButtonRenderer.js",
+				"sap/ui/commons/Slider.js",
+				"sap/ui/commons/SliderRenderer.js",
+				"sap/ui/commons/Splitter.js",
+				"sap/ui/commons/SplitterRenderer.js",
+				"sap/ui/commons/Tab.js",
+				"sap/ui/commons/TabStrip.js",
+				"sap/ui/commons/TabStripRenderer.js",
+				"sap/ui/commons/TextArea.js",
+				"sap/ui/commons/TextAreaRenderer.js",
+				"sap/ui/commons/TextField.js",
+				"sap/ui/commons/TextFieldRenderer.js",
+				"sap/ui/commons/TextView.js",
+				"sap/ui/commons/TextViewRenderer.js",
+				"sap/ui/commons/Title.js",
+				"sap/ui/commons/ToggleButton.js",
+				"sap/ui/commons/ToggleButtonRenderer.js",
+				"sap/ui/commons/Toolbar.js",
+				"sap/ui/commons/ToolbarRenderer.js",
+				"sap/ui/commons/ToolbarSeparator.js",
+				"sap/ui/commons/Tree.js",
+				"sap/ui/commons/TreeNode.js",
+				"sap/ui/commons/TreeRenderer.js",
+				"sap/ui/commons/TriStateCheckBox.js",
+				"sap/ui/commons/TriStateCheckBoxRenderer.js",
+				"sap/ui/commons/ValueHelpField.js",
+				"sap/ui/commons/ValueHelpFieldRenderer.js",
+				"sap/ui/commons/form/Form.js",
+				"sap/ui/commons/form/FormContainer.js",
+				"sap/ui/commons/form/FormElement.js",
+				"sap/ui/commons/form/FormLayout.js",
+				"sap/ui/commons/form/FormLayoutRenderer.js",
+				"sap/ui/commons/form/FormRenderer.js",
+				"sap/ui/commons/form/GridContainerData.js",
+				"sap/ui/commons/form/GridElementData.js",
+				"sap/ui/commons/form/GridLayout.js",
+				"sap/ui/commons/form/GridLayoutRenderer.js",
+				"sap/ui/commons/form/ResponsiveLayout.js",
+				"sap/ui/commons/form/ResponsiveLayoutRenderer.js",
+				"sap/ui/commons/form/SimpleForm.js",
+				"sap/ui/commons/form/SimpleFormRenderer.js",
+				"sap/ui/commons/layout/AbsoluteLayout.js",
+				"sap/ui/commons/layout/AbsoluteLayoutRenderer.js",
+				"sap/ui/commons/layout/BorderLayout.js",
+				"sap/ui/commons/layout/BorderLayoutArea.js",
+				"sap/ui/commons/layout/BorderLayoutRenderer.js",
+				"sap/ui/commons/layout/HorizontalLayout.js",
+				"sap/ui/commons/layout/HorizontalLayoutRenderer.js",
+				"sap/ui/commons/layout/MatrixLayout.js",
+				"sap/ui/commons/layout/MatrixLayoutCell.js",
+				"sap/ui/commons/layout/MatrixLayoutRenderer.js",
+				"sap/ui/commons/layout/MatrixLayoutRow.js",
+				"sap/ui/commons/layout/PositionContainer.js",
+				"sap/ui/commons/layout/ResponsiveFlowLayout.js",
+				"sap/ui/commons/layout/ResponsiveFlowLayoutData.js",
+				"sap/ui/commons/layout/ResponsiveFlowLayoutRenderer.js",
+				"sap/ui/commons/layout/VerticalLayout.js",
+				"sap/ui/commons/layout/VerticalLayoutRenderer.js"
+			]
+		},
+		{
+			"name": "library-h2-preload.js.map",
+			"isDebug": true
+		},
+		{
+			"name": "library-preload.js",
+			"module": "sap/ui/commons/library-preload.js",
+			"merged": true,
+			"required": [
+				"jquery.sap.events.js",
+				"jquery.sap.strings.js",
+				"sap/base/Log.js",
+				"sap/base/assert.js",
+				"sap/base/security/encodeXML.js",
+				"sap/base/security/sanitizeHTML.js",
+				"sap/base/strings/capitalize.js",
+				"sap/base/util/ObjectPath.js",
+				"sap/ui/Device.js",
+				"sap/ui/base/DataType.js",
+				"sap/ui/base/Event.js",
+				"sap/ui/core/Control.js",
+				"sap/ui/core/Core.js",
+				"sap/ui/core/CustomStyleClassSupport.js",
+				"sap/ui/core/Element.js",
+				"sap/ui/core/ElementMetadata.js",
+				"sap/ui/core/EnabledPropagator.js",
+				"sap/ui/core/History.js",
+				"sap/ui/core/Icon.js",
+				"sap/ui/core/IconPool.js",
+				"sap/ui/core/LabelEnablement.js",
+				"sap/ui/core/ListItem.js",
+				"sap/ui/core/Locale.js",
+				"sap/ui/core/LocaleData.js",
+				"sap/ui/core/Popup.js",
+				"sap/ui/core/RenderManager.js",
+				"sap/ui/core/Renderer.js",
+				"sap/ui/core/ResizeHandler.js",
+				"sap/ui/core/SeparatorItem.js",
+				"sap/ui/core/Title.js",
+				"sap/ui/core/TooltipBase.js",
+				"sap/ui/core/ValueStateSupport.js",
+				"sap/ui/core/date/UniversalDate.js",
+				"sap/ui/core/delegate/ItemNavigation.js",
+				"sap/ui/core/delegate/ScrollEnablement.js",
+				"sap/ui/core/format/DateFormat.js",
+				"sap/ui/core/library.js",
+				"sap/ui/core/search/OpenSearchProvider.js",
+				"sap/ui/core/theming/Parameters.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/dom/jquery/Focusable.js",
+				"sap/ui/dom/jquery/Selectors.js",
+				"sap/ui/dom/jquery/control.js",
+				"sap/ui/dom/jquery/cursorPos.js",
+				"sap/ui/dom/jquery/getSelectedText.js",
+				"sap/ui/dom/jquery/parentByAttribute.js",
+				"sap/ui/dom/jquery/selectText.js",
+				"sap/ui/dom/jquery/zIndex.js",
+				"sap/ui/events/ControlEvents.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/events/checkMouseEnterOrLeave.js",
+				"sap/ui/events/jquery/EventExtension.js",
+				"sap/ui/layout/HorizontalLayout.js",
+				"sap/ui/layout/HorizontalLayoutRenderer.js",
+				"sap/ui/layout/ResponsiveFlowLayout.js",
+				"sap/ui/layout/ResponsiveFlowLayoutData.js",
+				"sap/ui/layout/ResponsiveFlowLayoutRenderer.js",
+				"sap/ui/layout/VerticalLayout.js",
+				"sap/ui/layout/VerticalLayoutRenderer.js",
+				"sap/ui/layout/form/Form.js",
+				"sap/ui/layout/form/FormContainer.js",
+				"sap/ui/layout/form/FormElement.js",
+				"sap/ui/layout/form/FormLayout.js",
+				"sap/ui/layout/form/FormLayoutRenderer.js",
+				"sap/ui/layout/form/FormRenderer.js",
+				"sap/ui/layout/form/GridContainerData.js",
+				"sap/ui/layout/form/GridElementData.js",
+				"sap/ui/layout/form/GridLayout.js",
+				"sap/ui/layout/form/GridLayoutRenderer.js",
+				"sap/ui/layout/form/ResponsiveLayout.js",
+				"sap/ui/layout/form/ResponsiveLayoutRenderer.js",
+				"sap/ui/layout/form/SimpleForm.js",
+				"sap/ui/layout/form/SimpleFormRenderer.js",
+				"sap/ui/layout/library.js",
+				"sap/ui/model/FilterType.js",
+				"sap/ui/model/type/Date.js",
+				"sap/ui/thirdparty/jquery.js",
+				"sap/ui/thirdparty/jqueryui/jquery-ui-core.js",
+				"sap/ui/thirdparty/jqueryui/jquery-ui-mouse.js",
+				"sap/ui/thirdparty/jqueryui/jquery-ui-position.js",
+				"sap/ui/thirdparty/jqueryui/jquery-ui-sortable.js",
+				"sap/ui/thirdparty/jqueryui/jquery-ui-widget.js",
+				"sap/ui/unified/ColorPicker.js",
+				"sap/ui/unified/FileUploader.js",
+				"sap/ui/unified/FileUploaderParameter.js",
+				"sap/ui/unified/FileUploaderRenderer.js",
+				"sap/ui/unified/Menu.js",
+				"sap/ui/unified/MenuItem.js",
+				"sap/ui/unified/MenuRenderer.js",
+				"sap/ui/unified/MenuTextFieldItem.js",
+				"sap/ui/unified/library.js"
+			],
+			"condRequired": [
+				"sap/ui/unified/MenuItemBase.js"
 			],
 			"included": [
 				"sap/ui/commons/Accordion.js",
@@ -3714,15 +4483,19 @@
 			"module": "sap/ui/commons/library-preload.json",
 			"merged": true,
 			"required": [
-				"jquery.sap.dom.js",
-				"jquery.sap.encoder.js",
 				"jquery.sap.events.js",
-				"jquery.sap.global.js",
-				"jquery.sap.keycodes.js",
 				"jquery.sap.strings.js",
+				"sap/base/Log.js",
+				"sap/base/assert.js",
+				"sap/base/security/encodeXML.js",
+				"sap/base/security/sanitizeHTML.js",
+				"sap/base/strings/capitalize.js",
+				"sap/base/util/ObjectPath.js",
 				"sap/ui/Device.js",
 				"sap/ui/base/DataType.js",
+				"sap/ui/base/Event.js",
 				"sap/ui/core/Control.js",
+				"sap/ui/core/Core.js",
 				"sap/ui/core/CustomStyleClassSupport.js",
 				"sap/ui/core/Element.js",
 				"sap/ui/core/ElementMetadata.js",
@@ -3731,6 +4504,9 @@
 				"sap/ui/core/Icon.js",
 				"sap/ui/core/IconPool.js",
 				"sap/ui/core/LabelEnablement.js",
+				"sap/ui/core/ListItem.js",
+				"sap/ui/core/Locale.js",
+				"sap/ui/core/LocaleData.js",
 				"sap/ui/core/Popup.js",
 				"sap/ui/core/RenderManager.js",
 				"sap/ui/core/Renderer.js",
@@ -3742,10 +4518,24 @@
 				"sap/ui/core/date/UniversalDate.js",
 				"sap/ui/core/delegate/ItemNavigation.js",
 				"sap/ui/core/delegate/ScrollEnablement.js",
+				"sap/ui/core/format/DateFormat.js",
 				"sap/ui/core/library-preload.json",
 				"sap/ui/core/library.js",
 				"sap/ui/core/search/OpenSearchProvider.js",
 				"sap/ui/core/theming/Parameters.js",
+				"sap/ui/dom/containsOrEquals.js",
+				"sap/ui/dom/jquery/Focusable.js",
+				"sap/ui/dom/jquery/Selectors.js",
+				"sap/ui/dom/jquery/control.js",
+				"sap/ui/dom/jquery/cursorPos.js",
+				"sap/ui/dom/jquery/getSelectedText.js",
+				"sap/ui/dom/jquery/parentByAttribute.js",
+				"sap/ui/dom/jquery/selectText.js",
+				"sap/ui/dom/jquery/zIndex.js",
+				"sap/ui/events/ControlEvents.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/events/checkMouseEnterOrLeave.js",
+				"sap/ui/events/jquery/EventExtension.js",
 				"sap/ui/layout/HorizontalLayout.js",
 				"sap/ui/layout/HorizontalLayoutRenderer.js",
 				"sap/ui/layout/ResponsiveFlowLayout.js",
@@ -3769,9 +4559,12 @@
 				"sap/ui/layout/form/SimpleFormRenderer.js",
 				"sap/ui/layout/library-preload.json",
 				"sap/ui/layout/library.js",
+				"sap/ui/model/FilterType.js",
 				"sap/ui/model/type/Date.js",
+				"sap/ui/thirdparty/jquery.js",
 				"sap/ui/thirdparty/jqueryui/jquery-ui-core.js",
 				"sap/ui/thirdparty/jqueryui/jquery-ui-mouse.js",
+				"sap/ui/thirdparty/jqueryui/jquery-ui-position.js",
 				"sap/ui/thirdparty/jqueryui/jquery-ui-sortable.js",
 				"sap/ui/thirdparty/jqueryui/jquery-ui-widget.js",
 				"sap/ui/unified/ColorPicker.js",
@@ -3782,11 +4575,11 @@
 				"sap/ui/unified/MenuItem.js",
 				"sap/ui/unified/MenuRenderer.js",
 				"sap/ui/unified/MenuTextFieldItem.js",
-				"sap/ui/unified/library-preload.json"
+				"sap/ui/unified/library-preload.json",
+				"sap/ui/unified/library.js"
 			],
 			"condRequired": [
-				"sap/ui/unified/MenuItemBase.js",
-				"sap/ui/unified/library.js"
+				"sap/ui/unified/MenuItemBase.js"
 			],
 			"included": [
 				"sap/ui/commons/Accordion.js",
@@ -3959,10 +4752,11 @@
 			"name": "library.js",
 			"module": "sap/ui/commons/library.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/util/ObjectPath.js",
 				"sap/ui/base/DataType.js",
 				"sap/ui/core/library.js",
-				"sap/ui/layout/library.js"
+				"sap/ui/layout/library.js",
+				"sap/ui/unified/library.js"
 			],
 			"condRequired": [
 				"sap/ui/commons/Button.js"

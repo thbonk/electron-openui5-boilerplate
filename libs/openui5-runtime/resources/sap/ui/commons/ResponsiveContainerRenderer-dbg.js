@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides default renderer for control sap.ui.commons.ResponsiveContainer
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define([],
+	function() {
 	"use strict";
 
 
@@ -20,12 +20,11 @@ sap.ui.define(['jquery.sap.global'],
 	/**
 	 * Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
 	 *
-	 * @param {sap.ui.core.RenderManager} oRenderManager The RenderManager that can be used for writing to the Render-Output-Buffer
+	 * @param {sap.ui.core.RenderManager} oRM The RenderManager that can be used for writing to the Render-Output-Buffer
 	 * @param {sap.ui.core.Control} oContainer An object representation of the control that should be rendered
 	 */
-	ResponsiveContainerRenderer.render = function(oRenderManager, oContainer) {
-		var oRM = oRenderManager,
-			oContent = oContainer.getAggregation("content");
+	ResponsiveContainerRenderer.render = function(oRM, oContainer) {
+		var oContent = oContainer.getAggregation("content");
 		oRM.write("<div ");
 		oRM.writeControlData(oContainer);
 		oRM.addStyle("width", oContainer.getWidth());
@@ -43,7 +42,7 @@ sap.ui.define(['jquery.sap.global'],
 		oRM.addStyle("overflow", "hidden");
 		oRM.writeStyles();
 		oRM.write(">");
-		jQuery.each(oContainer.getRanges(), function(i, oRange) {
+		oContainer.getRanges().forEach(function(oRange) {
 			oRM.write("<div ");
 			oRM.writeElementData(oRange);
 			oRM.addStyle("width", oRange.getWidth());

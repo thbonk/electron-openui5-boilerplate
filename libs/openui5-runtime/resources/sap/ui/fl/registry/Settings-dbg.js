@@ -1,13 +1,13 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 /*global Error */
 
 sap.ui.define([
-	"jquery.sap.global", "sap/ui/fl/LrepConnector", "sap/ui/fl/Cache", "sap/ui/fl/Utils", "sap/ui/base/EventProvider"
-], function(jQuery, LrepConnector, Cache, Utils, EventProvider) {
+	"sap/ui/fl/LrepConnector", "sap/ui/fl/Cache", "sap/ui/fl/Utils", "sap/ui/base/EventProvider", "sap/base/util/UriParameters"
+], function(LrepConnector, Cache, Utils, EventProvider, UriParameters) {
 	"use strict";
 
 	/**
@@ -45,11 +45,16 @@ sap.ui.define([
 			};
 		}
 
+		// By default, variant sharing is enabled
+		if (!(Settings._IS_VARIANT_SHARING_ENABLED in oSettings)) {
+			oSettings.isVariantSharingEnabled = true;
+		}
+
 		this._oSettings = oSettings;
 		this._hasMergeErrorOccured = false;
 	};
 
-	Settings.prototype = jQuery.sap.newObject(EventProvider.prototype);
+	Settings.prototype = Object.create(EventProvider.prototype || null);
 
 	Settings.events = {
 		flexibilityAdaptationButtonAllowedChanged: "flexibilityAdaptationButtonAllowedChanged",
@@ -60,6 +65,7 @@ sap.ui.define([
 	Settings._bFlexChangeMode = true;
 	Settings._bFlexibilityAdaptationButtonAllowed = false;
 	Settings._oEventProvider = new EventProvider();
+	Settings._IS_VARIANT_SHARING_ENABLED = "isVariantSharingEnabled";
 
 	/**
 	 * fires the passed event via its event provider
@@ -101,27 +107,26 @@ sap.ui.define([
 	 * Returns a settings instance after reading the settings from the back end if not already done. There is only one instance of settings during a
 	 * session.
 	 *
-	 * @param {string} [sComponentName] - Current SAPUI5 component name
-	 * @param {string} [sAppVersion] - Current application version
-	 * @param {map} [mPropertyBag] - Contains additional data needed for reading changes
-	 * @param {object} [mPropertyBag.appDescriptor] - App descriptor belonging to actual component
-	 * @param {string} [mPropertyBag.siteId] - Side ID that belongs to actual component
 	 * @returns {Promise} with parameter <code>oInstance</code> of type {sap.ui.fl.registry.Settings}
 	 * @public
 	 */
-	Settings.getInstance = function(sComponentName, sAppVersion, mPropertyBag) {
+	Settings.getInstance = function() {
 		if (Settings._instance) {
 			return Promise.resolve(Settings._instance);
 		}
-		if (sComponentName) {
-			sAppVersion = sAppVersion || Utils.DEFAULT_APP_VERSION;
-			return Cache.getChangesFillingCache(LrepConnector.createConnector(), { name: sComponentName, appVersion: sAppVersion }, mPropertyBag)
-				.then(function (oFileContent) {
+		var oPromise = Cache.getFlexDataPromise();
+		if (oPromise) {
+			return oPromise.then(
+				function (oFileContent) {
 					var oSettings = {};
 					if (oFileContent.changes && oFileContent.changes.settings) {
 						oSettings = oFileContent.changes.settings;
 					}
 					return Settings._storeInstance(oSettings);
+				},
+				function () {
+					// In case /flex/data request failed, send /flex/settings as a fallback
+					return Settings._loadSettings();
 				});
 		}
 		return Settings._loadSettings();
@@ -192,13 +197,11 @@ sap.ui.define([
 	 */
 	Settings._isFlexChangeModeFromUrl = function() {
 		var bFlexChangeMode;
-		var oUriParams = jQuery.sap.getUriParameters();
-		if (oUriParams && oUriParams.mParams && oUriParams.mParams['sap-ui-fl-changeMode'] && oUriParams.mParams['sap-ui-fl-changeMode'][0]) {
-			if (oUriParams.mParams['sap-ui-fl-changeMode'][0] === 'true') {
-				bFlexChangeMode = true;
-			} else if (oUriParams.mParams['sap-ui-fl-changeMode'][0] === 'false') {
-				bFlexChangeMode = false;
-			}
+		var oUriParams = new UriParameters(window.location.href);
+		if (oUriParams.get('sap-ui-fl-changeMode') === 'true') {
+			bFlexChangeMode = true;
+		} else if (oUriParams.get('sap-ui-fl-changeMode') === 'false') {
+			bFlexChangeMode = false;
 		}
 		return bFlexChangeMode;
 	};
@@ -295,17 +298,28 @@ sap.ui.define([
 	};
 
 	/**
+	 * Reads boolean property of settings.
+	 *
+	 * @param {string} sPropertyName name of property
+	 * @returns {boolean} true if the property exists and is true.
+	 * @public
+	 */
+	Settings.prototype._getBooleanProperty = function(sPropertyName) {
+		var bValue = false;
+		if (this._oSettings[sPropertyName]) {
+			bValue = this._oSettings[sPropertyName];
+		}
+		return bValue;
+	};
+
+	/**
 	 * Returns the key user status of the current user.
 	 *
 	 * @returns {boolean} true if the user is a flexibility key user, false if not supported.
 	 * @public
 	 */
 	Settings.prototype.isKeyUser = function() {
-		var bIsKeyUser = false;
-		if (this._oSettings.isKeyUser) {
-			bIsKeyUser = this._oSettings.isKeyUser;
-		}
-		return bIsKeyUser;
+		return  this._getBooleanProperty("isKeyUser");
 	};
 
 	/**
@@ -315,11 +329,7 @@ sap.ui.define([
 	 * @public
 	 */
 	Settings.prototype.isModelS = function() {
-		var bIsModelS = false;
-		if (this._oSettings.isAtoAvailable) {
-			bIsModelS = this._oSettings.isAtoAvailable;
-		}
-		return bIsModelS;
+		return  this._getBooleanProperty("isAtoAvailable");
 	};
 
 	/**
@@ -329,11 +339,7 @@ sap.ui.define([
 	 * @public
 	 */
 	Settings.prototype.isAtoEnabled = function() {
-		var bIsAtoEnabled = false;
-		if (this._oSettings.isAtoEnabled) {
-			bIsAtoEnabled = this._oSettings.isAtoEnabled;
-		}
-		return bIsAtoEnabled;
+		return  this._getBooleanProperty("isAtoEnabled");
 	};
 
 	/**
@@ -343,11 +349,7 @@ sap.ui.define([
 	 * @public
 	 */
 	Settings.prototype.isAtoAvailable = function() {
-		var bIsAtoAvailable = false;
-		if (this._oSettings.isAtoAvailable) {
-			bIsAtoAvailable = this._oSettings.isAtoAvailable;
-		}
-		return bIsAtoAvailable;
+		return this._getBooleanProperty("isAtoAvailable");
 	};
 
 	/**
@@ -357,18 +359,34 @@ sap.ui.define([
 	 * @returns {boolean} true if system is productive system
 	 */
 	Settings.prototype.isProductiveSystem = function() {
-		var bIsProductiveSystem = false;
-		if (this._oSettings.isProductiveSystem) {
-			bIsProductiveSystem = this._oSettings.isProductiveSystem;
-		}
-		return bIsProductiveSystem;
+		return  this._getBooleanProperty("isProductiveSystem");
+	};
+
+	/**
+	 * Checks whether the current tenant is a trial tenant.
+	 *
+	 * @public
+	 * @returns {boolean} true if tenant is a trial tenant
+	 */
+	Settings.prototype.isTrial = function() {
+		return this._getBooleanProperty("isTrial");
+	};
+
+	/**
+	 * Checks whether sharing of variants is enabled.
+	 *
+	 * @public
+	 * @returns {boolean} true if sharing of variants is enabled
+	 */
+	Settings.prototype.isVariantSharingEnabled = function() {
+		return (this._oSettings.isVariantSharingEnabled === true);
 	};
 
 	Settings.prototype.setMergeErrorOccured = function(bErrorOccured) {
 		this._hasMergeErrorOccoured = bErrorOccured;
 	};
 	/**
-	 * Checks if a merge error occured during merging changes into the view on startup
+	 * Checks if a merge error occurred during merging changes into the view on startup
 	 */
 	Settings.prototype.hasMergeErrorOccured = function() {
 		return this._hasMergeErrorOccured;

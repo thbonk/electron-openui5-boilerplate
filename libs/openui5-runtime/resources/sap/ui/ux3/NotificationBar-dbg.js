@@ -1,13 +1,43 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.ux3.NotificationBar.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate/ItemNavigation', 'sap/ui/core/theming/Parameters', './library'],
-	function(jQuery, Control, ItemNavigation, Parameters, library) {
-	"use strict";
+sap.ui.define([
+    "sap/ui/thirdparty/jquery",
+    'sap/ui/core/Control',
+    'sap/ui/core/delegate/ItemNavigation',
+    'sap/ui/core/theming/Parameters',
+    './library',
+    "./NotificationBarRenderer",
+    "sap/ui/core/Message",
+    "sap/ui/core/library",
+    "sap/ui/Device",
+    "sap/base/Log"
+],
+	function(
+	    jQuery,
+		Control,
+		ItemNavigation,
+		Parameters,
+		library,
+		NotificationBarRenderer,
+		Message,
+		coreLibrary,
+		Device,
+		Log
+	) {
+    "use strict";
+
+
+
+	// shortcut for sap.ui.core.MessageType
+	var MessageType = coreLibrary.MessageType;
+
+	// shortcut for sap.ui.ux3.NotificationBarStatus
+	var NotificationBarStatus = library.NotificationBarStatus;
 
 
 
@@ -26,7 +56,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -43,7 +73,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 			/**
 			 * This property displays the bar corresponding to given status
 			 */
-			visibleStatus : {type : "sap.ui.ux3.NotificationBarStatus", group : "Misc", defaultValue : sap.ui.ux3.NotificationBarStatus.Default},
+			visibleStatus : {type : "sap.ui.ux3.NotificationBarStatus", group : "Misc", defaultValue : NotificationBarStatus.Default},
 
 			/**
 			 * This property enables the bar to be resized by the user.
@@ -239,7 +269,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 				iVisibleItems = this.getVisibleItems();
 
 			if (iChildrenMessagesCount > iVisibleItems) {
-				jQuery.sap.delayedCall(0, this, this._fnAfterRenderingCallback, [$aChildrenMessages, $viewContent, iVisibleItems]);
+				setTimeout(this._fnAfterRenderingCallback.bind(this, $aChildrenMessages, $viewContent, iVisibleItems), 0);
 			}
 		},
 
@@ -337,7 +367,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 		}
 	});
 
-	(function() {
 		var fnChangeVisibility = function(that) {
 			var bShouldBeVisible = that.hasItems();
 			var sStatus = that.getVisibleStatus();
@@ -358,7 +387,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 			var aSortMessages = oNotifier.getMessages().concat([]);
 			if (aSortMessages.length > 0) {
 				// sort ascending the messages via their level
-				aSortMessages.sort(sap.ui.core.Message.compareByType);
+				aSortMessages.sort(Message.compareByType);
 
 				var iIndex = aSortMessages.length - 1;
 				that._sSeverestMessageLevel = aSortMessages[iIndex].getLevel();
@@ -504,8 +533,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 			this._oItemNavigation.setCycling(true);
 			this.addDelegate(this._oItemNavigation);
 
-			this._iCalloutWidth = parseInt(250, 10);
-			this._iCalloutHeight = parseInt(200, 10);
+			this._iCalloutWidth = parseInt(250);
+			this._iCalloutHeight = parseInt(200);
 
 			this._visibleItems = 5;
 
@@ -517,7 +546,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 			this._togglerPosition = "50%";
 			this._gapMessageArea = "5";
 
-			this._sSeverestMessageLevel = sap.ui.core.MessageType.None;
+			this._sSeverestMessageLevel = MessageType.None;
 
 			// TODO maybe the ResizeHandler should be used
 			/*
@@ -593,7 +622,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 			oMessageView._message = oMessage;
 
 			if (oNotifier.sParentAggregationName == "messageNotifier") {
-				if (oNotiBar.getVisibleStatus() == sap.ui.ux3.NotificationBarStatus.Max) {
+				if (oNotiBar.getVisibleStatus() == NotificationBarStatus.Max) {
 					oMessageView.setIcon(oMessage.getIcon() || oMessage.getDefaultIcon("32x32"));
 				} else {
 					oMessageView.setIcon(oMessage.getIcon() || oMessage.getDefaultIcon());
@@ -638,7 +667,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 		 */
 		NotificationBar.prototype.addNotifier = function(oNotifier) {
 			if (oNotifier) {
-				var bSuppress = (this.getVisibleStatus() == sap.ui.ux3.NotificationBarStatus.None) ? true : false;
+				var bSuppress = (this.getVisibleStatus() == NotificationBarStatus.None) ? true : false;
 				this.addAggregation("notifiers", oNotifier, bSuppress);
 				fnRegisterNotifierToEvents(this, oNotifier);
 			}
@@ -742,11 +771,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 			var $That = that.$();
 
 			switch (sStatus) {
-			case sap.ui.ux3.NotificationBarStatus.Min:
+			case NotificationBarStatus.Min:
 				$That.addClass("sapUiNotificationBarMinimized");
 				break;
 
-			case sap.ui.ux3.NotificationBarStatus.Max:
+			case NotificationBarStatus.Max:
 				var sHeight = that.getHeightOfStatus(that.getVisibleStatus());
 
 				$That.addClass("sapUiNotificationBarMaximized");
@@ -756,13 +785,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 				$containers.css("max-height", sHeight);
 				break;
 
-			case sap.ui.ux3.NotificationBarStatus.None:
+			case NotificationBarStatus.None:
 				if (!that._resizeTo) {
 					$That.css("display", "none");
 				}
 				break;
 
-			case sap.ui.ux3.NotificationBarStatus.Default:
+			case NotificationBarStatus.Default:
 			default:
 				$That.removeClass("sapUiNotificationBarMaximized");
 				$That.removeClass("sapUiNotificationBarMinimized");
@@ -823,9 +852,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 			if (that.getMessageNotifier() && that.getMessageNotifier().hasItems()) {
 				var $messageArea;
 				var sId = that.getId() + "-notifiers";
-				var $domRef = jQuery.sap.byId(sId);
+				var $domRef = jQuery(document.getElementById(sId));
 				if ($domRef.length > 0) {
-					var iTotalWidth = parseInt($domRef.width(), 10);
+					var iTotalWidth = parseInt($domRef.width());
 
 					var $children = $domRef.children();
 
@@ -858,7 +887,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 			this._oItemNavigation.setRootDomRef(this.getDomRef());
 
 			var aItemDomRefs = [];
-			var bIsMaximized = this.getVisibleStatus() === sap.ui.ux3.NotificationBarStatus.Max;
+			var bIsMaximized = this.getVisibleStatus() === NotificationBarStatus.Max;
 
 			// use different elements for navigation in maximized-mode
 			if (bIsMaximized) {
@@ -871,7 +900,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 					var sId = oMessageNotifier.getId() + "-messageNotifierView-messageView-";
 
 					for (var i = aMessages.length - 1; i >= 0; i--) {
-						var oDomRef = jQuery.sap.domById(sId + aMessages[i].getId());
+						var oDomRef = document.getElementById(sId + aMessages[i].getId());
 						if (oDomRef) {
 							aItemDomRefs.push(oDomRef);
 						}
@@ -884,7 +913,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 					var sId = aNotifiers[i].getId() + "-notifierView-messageView-";
 
 					for (var j = aMessages.length - 1; j >= 0; j--) {
-						var oDomRef = jQuery.sap.domById(sId + aMessages[j].getId());
+						var oDomRef = document.getElementById(sId + aMessages[j].getId());
 						if (oDomRef) {
 							aItemDomRefs.push(oDomRef);
 						}
@@ -938,10 +967,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 			fnSetItemsDescription(this);
 
 			// set toggler always to visible if running on a mobile device
-			if (sap.ui.Device.browser.mobile) {
+			if (Device.browser.mobile) {
 				var $toggler = this.$("toggler");
 
-				if (this.getVisibleStatus() !== sap.ui.ux3.NotificationBarStatus.None) {
+				if (this.getVisibleStatus() !== NotificationBarStatus.None) {
 					$toggler.css("display", "block");
 				} else {
 					$toggler.css("display", "none");
@@ -1065,11 +1094,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 			/*
 			 * These cases are only mentioned to prevent running into default
 			 */
-			case sap.ui.ux3.NotificationBarStatus.Max:
-			case sap.ui.ux3.NotificationBarStatus.None:
+			case NotificationBarStatus.Max:
+			case NotificationBarStatus.None:
 				break;
 
-			case sap.ui.ux3.NotificationBarStatus.Min:
+			case NotificationBarStatus.Min:
 				/*
 				 * Since minimizing doesn't need any re-rendering all necessary
 				 * stuff can be done here
@@ -1089,7 +1118,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 				break;
 
 			default:
-			case sap.ui.ux3.NotificationBarStatus.Default:
+			case NotificationBarStatus.Default:
 				/*
 				 * If bar should be resized from maximized to default a re-rendering
 				 * is needed. Otherwise a simple animation and CSS exchange is
@@ -1232,11 +1261,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 		NotificationBar.prototype.getHeightOfStatus = function(sStatus) {
 			var sParam = "";
 
-			if (sStatus == sap.ui.ux3.NotificationBarStatus.Min) {
+			if (sStatus == NotificationBarStatus.Min) {
 				sParam = "sapUiNotificationBarHeightMinimized";
-			} else if (sStatus == sap.ui.ux3.NotificationBarStatus.Default) {
+			} else if (sStatus == NotificationBarStatus.Default) {
 				sParam = "sapUiNotificationBarHeight";
-			} else if (sStatus == sap.ui.ux3.NotificationBarStatus.Max) {
+			} else if (sStatus == NotificationBarStatus.Max) {
 				sParam = "sapUiNotificationBarHeightMaximized";
 				sParam = Parameters.get(sParam);
 
@@ -1244,19 +1273,19 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 				if (iIndex != -1) {
 					var iPercentage = sParam.substring(0, iIndex);
 					var iHeight = jQuery(window).height();
-					iHeight = parseInt(iHeight / 100 * iPercentage, 10);
+					iHeight = parseInt(iHeight / 100 * iPercentage);
 
 					// Ensure that the MaxHeight is at least 1 px larger than the
 					// Default
 					// Maybe disabling the resize feature would be the better
 					// approach in this case
-					var _iHeight = parseInt(this.getHeightOfStatus(sap.ui.ux3.NotificationBarStatus.Default), 10);
+					var _iHeight = parseInt(this.getHeightOfStatus(NotificationBarStatus.Default));
 					if (iHeight < _iHeight) {
 						iHeight = _iHeight + 1;
 					}
 				} else {
 					var sMessage = "No valid percantage value given for maximized size. 400px is used";
-					jQuery.sap.log.warning(sMessage);
+					Log.warning(sMessage);
 
 					iHeight = 400;
 				}
@@ -1276,7 +1305,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 
 			// skip setting the property if 'toStatus' equals the current status
 			if (this._resizeFrom !== this._resizeTo) {
-				if (toStatus === sap.ui.ux3.NotificationBarStatus.None) {
+				if (toStatus === NotificationBarStatus.None) {
 					fnCloseAllCallouts(this);
 
 					if (this.getDomRef()) {
@@ -1295,6 +1324,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 					status : toStatus
 				});
 			}
+			return this;
 		};
 
 		/**
@@ -1306,7 +1336,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 		 */
 		NotificationBar.prototype.setAlwaysShowToggler = function(bAlwaysShow) {
 			// set toggler always to visible if running on a mobile device
-			if (sap.ui.Device.browser.mobile) {
+			if (Device.browser.mobile) {
 				bAlwaysShow = true;
 			}
 
@@ -1318,9 +1348,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 			} else {
 				$toggler.css("display", "none");
 			}
+			return this;
 		};
-	}());
 
 	return NotificationBar;
 
-}, /* bExport= */ true);
+});

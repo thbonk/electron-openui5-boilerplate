@@ -1,12 +1,30 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', './ListRenderer', 'sap/ui/core/Renderer'],
-	function(jQuery, ListItemBaseRenderer, ListRenderer, Renderer) {
+sap.ui.define([
+	"sap/ui/core/Renderer",
+	"sap/ui/core/library",
+	"sap/ui/Device",
+	"./library",
+	"./ListItemBaseRenderer",
+	"./Label",
+	"sap/base/Log",
+	"sap/base/security/encodeXML"
+],
+	function(Renderer, coreLibrary, Device, library, ListItemBaseRenderer, Label, Log, encodeXML) {
 	"use strict";
+
+	// shortcut for sap.m.PopinDisplay
+	var PopinDisplay = library.PopinDisplay;
+
+	// shortcut for sap.ui.core.VerticalAlign
+	var VerticalAlign = coreLibrary.VerticalAlign;
+
+	// shortcut for sap.m.PopinLayout
+	var PopinLayout = library.PopinLayout;
 
 	/**
 	 * ColumnListItem renderer.
@@ -80,8 +98,16 @@ sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', './ListRenderer', 
 	ColumnListItemRenderer.renderLIAttributes = function(rm, oLI) {
 		rm.addClass("sapMListTblRow");
 		var vAlign = oLI.getVAlign();
-		if (vAlign != sap.ui.core.VerticalAlign.Inherit) {
+		if (vAlign != VerticalAlign.Inherit) {
 			rm.addClass("sapMListTblRow" + vAlign);
+		}
+
+		var oTable = oLI.getTable();
+		if (oTable && oTable.getAlternateRowColors()) {
+			var iPos = oTable.indexOfItem(oLI);
+			if (iPos % 2 == 0) {
+				rm.addClass("sapMListTblRowAlternate");
+			}
 		}
 	};
 
@@ -121,11 +147,12 @@ sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', './ListRenderer', 
 			rm.write("<td");
 			rm.addClass("sapMListTblCell");
 			rm.writeAttribute("id", oLI.getId() + "_cell" + i);
+			rm.writeAttribute("data-sap-ui-column", oColumn.getId());
 
 			// check column properties
 			if (oColumn) {
 				cls = oColumn.getStyleClass(true);
-				cls && rm.addClass(jQuery.sap.encodeHTML(cls));
+				cls && rm.addClass(encodeXML(cls));
 
 				// aria for virtual keyboard mode
 				oHeader = oColumn.getHeader();
@@ -141,20 +168,21 @@ sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', './ListRenderer', 
 						sFuncName = aFuncWithParam[0];
 
 					if (typeof oCell[sFuncName] != "function") {
-						jQuery.sap.log.warning("mergeFunctionName property is defined on " + oColumn + " but this is not function of " + oCell);
-					} else {
+						Log.warning("mergeFunctionName property is defined on " + oColumn + " but this is not function of " + oCell);
+					} else if (oTable._bRendering || !oCell.bOutput) {
 						var lastColumnValue = oColumn.getLastValue(),
 							cellValue = oCell[sFuncName](sFuncParam);
 
 						if (lastColumnValue === cellValue) {
-							// it is not necessary to render cell content but
-							// screen readers need content to announce it
+							// it is not necessary to render the cell content but screen readers need the content to announce it
 							bRenderCell = sap.ui.getCore().getConfiguration().getAccessibility();
 							oCell.addStyleClass("sapMListTblCellDupCnt");
 							rm.addClass("sapMListTblCellDup");
 						} else {
 							oColumn.setLastValue(cellValue);
 						}
+					} else if (oCell.hasStyleClass("sapMListTblCellDupCnt")) {
+						rm.addClass("sapMListTblCellDup");
 					}
 				}
 
@@ -172,7 +200,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', './ListRenderer', 
 
 			if (bRenderCell) {
 				this.applyAriaLabelledBy(oHeader, oCell);
-				rm.renderControl(oColumn.applyAlignTo(oCell));
+				rm.renderControl(oCell);
 			}
 
 			rm.write("</td>");
@@ -180,19 +208,18 @@ sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', './ListRenderer', 
 	};
 
 	ColumnListItemRenderer.applyAriaLabelledBy = function(oHeader, oCell) {
-		if (oCell) {
-			oCell.removeAssociation("ariaLabelledBy", oCell.data("ariaLabelledBy") || undefined, true);
+		if (oCell && oCell.removeAriaLabelledBy) {
+			oCell.removeAriaLabelledBy(oCell.data("ariaLabelledBy") || undefined);
 		}
 
 		/* add the header as an aria-labelled by association for the cells */
 		/* only set the header text to the aria-labelled association if the header is a textual control and is visible */
 		if (oHeader &&
 			oHeader.getText &&
-			oCell.getAriaLabelledBy &&
+			oCell.addAriaLabelledBy &&
 			oHeader.getVisible()) {
 
-			// suppress the invalidation during the rendering
-			oCell.addAssociation("ariaLabelledBy", oHeader, true);
+			oCell.addAriaLabelledBy(oHeader);
 			oCell.data("ariaLabelledBy", oHeader.getId());
 		}
 	};
@@ -229,7 +256,17 @@ sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', './ListRenderer', 
 		rm.write("<td");
 		rm.writeAttribute("id", oLI.getId() + "-subcell");
 		rm.writeAttribute("colspan", oTable.getColSpan());
-		rm.write("><div class='sapMListTblSubCnt'>");
+
+		var sPopinLayout = oTable.getPopinLayout();
+		// overwrite sPopinLayout=Block to avoid additional margin-top in IE and Edge
+		if (Device.browser.msie || (Device.browser.edge && Device.browser.version < 16)) {
+			sPopinLayout = PopinLayout.Block;
+		}
+		rm.write("><div");
+		rm.addClass("sapMListTblSubCnt");
+		rm.addClass("sapMListTblSubCnt" + sPopinLayout);
+		rm.writeClasses();
+		rm.write(">");
 
 		var aCells = oLI.getCells(),
 			aColumns = oTable.getColumns(true);
@@ -252,20 +289,27 @@ sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', './ListRenderer', 
 			/* row start */
 			rm.write("<div");
 			rm.addClass("sapMListTblSubCntRow");
-			sStyleClass && rm.addClass(jQuery.sap.encodeHTML(sStyleClass));
+			sStyleClass && rm.addClass(encodeXML(sStyleClass));
 			rm.writeClasses();
 			rm.write(">");
 
 			/* header cell */
-			if (oHeader && sPopinDisplay != sap.m.PopinDisplay.WithoutHeader) {
+			if (oHeader && sPopinDisplay != PopinDisplay.WithoutHeader) {
 				rm.write("<div");
 				rm.addClass("sapMListTblSubCntHdr");
 				rm.writeClasses();
 				rm.write(">");
-				oHeader = oHeader.clone();
+
+				var fnColumnHeaderClass = sap.ui.require("sap/m/ColumnHeader");
+				if (typeof fnColumnHeaderClass == "function" && oHeader instanceof fnColumnHeaderClass) {
+					var sColumnHeaderTitle = oHeader.getText();
+					oHeader = new Label({text: sColumnHeaderTitle});
+				} else {
+					oHeader = oHeader.clone();
+				}
+
 				oColumn.addDependent(oHeader);
 				oLI._addClonedHeader(oHeader);
-				oColumn.applyAlignTo(oHeader, "Begin");
 				rm.renderControl(oHeader);
 				rm.write("</div>");
 
@@ -280,7 +324,6 @@ sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', './ListRenderer', 
 				rm.addClass("sapMListTblSubCntVal" + sPopinDisplay);
 				rm.writeClasses();
 				rm.write(">");
-				oColumn.applyAlignTo(oCell, "Begin");
 				this.applyAriaLabelledBy(oHeader, oCell);
 				rm.renderControl(oCell);
 				rm.write("</div>");

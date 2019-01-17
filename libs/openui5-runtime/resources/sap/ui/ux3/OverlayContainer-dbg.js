@@ -1,12 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.ux3.OverlayContainer.
-sap.ui.define(['jquery.sap.global', './Overlay', './library'],
-	function(jQuery, Overlay, library) {
+sap.ui.define([
+    './Overlay',
+    './library',
+    './OverlayContainerRenderer',
+    // jQuery Plugin "lastFocusableDomRef"
+	'sap/ui/dom/jquery/Focusable'
+],
+	function(Overlay, library, OverlayContainerRenderer) {
 	"use strict";
 
 
@@ -22,7 +28,7 @@ sap.ui.define(['jquery.sap.global', './Overlay', './library'],
 	 * @extends sap.ui.ux3.Overlay
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -49,13 +55,17 @@ sap.ui.define(['jquery.sap.global', './Overlay', './library'],
 	 * @private
 	 */
 	OverlayContainer.prototype._setFocusLast = function() {
+	    // jQuery Plugin "lastFocusableDomRef"
 		var oFocus = this.$("content").lastFocusableDomRef();
 		if (!oFocus && this.getCloseButtonVisible()) {
 			oFocus = this.getDomRef("close");
 		} else if (!oFocus && this.getOpenButtonVisible()) {
 			oFocus = this.getDomRef("openNew");
 		}
-		jQuery.sap.focus(oFocus);
+
+		if (oFocus) {
+		    oFocus.focus();
+		}
 	};
 
 	/**
@@ -65,14 +75,20 @@ sap.ui.define(['jquery.sap.global', './Overlay', './library'],
 	 */
 	OverlayContainer.prototype._setFocusFirst = function() {
 		if (this.getOpenButtonVisible()) {
-			jQuery.sap.focus(this.getDomRef("openNew"));
+			if (this.getDomRef("openNew")) {
+				this.getDomRef("openNew").focus();
+			}
 		} else if (this.getCloseButtonVisible()) {
-			jQuery.sap.focus(this.getDomRef("close"));
+			if (this.getDomRef("close")) {
+				this.getDomRef("close").focus();
+			}
 		} else {
-			jQuery.sap.focus(this.$("content").firstFocusableDomRef());
+			if (this.$("content").firstFocusableDomRef()) {
+				this.$("content").firstFocusableDomRef().focus();
+			}
 		}
 	};
 
 	return OverlayContainer;
 
-}, /* bExport= */ true);
+});

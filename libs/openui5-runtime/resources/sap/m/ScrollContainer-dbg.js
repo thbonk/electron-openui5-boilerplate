@@ -1,12 +1,26 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.ScrollContainer
-sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/core/delegate/ScrollEnablement"],
-	function (jQuery, library, Control, ScrollEnablement) {
+sap.ui.define([
+	"./library",
+	"sap/ui/core/Control",
+	"sap/ui/core/delegate/ScrollEnablement",
+	"sap/ui/core/Element",
+	"./ScrollContainerRenderer",
+	"sap/ui/dom/denormalizeScrollBeginRTL"
+],
+	function(
+		library,
+		Control,
+		ScrollEnablement,
+		Element,
+		ScrollContainerRenderer,
+		denormalizeScrollBeginRTL
+	) {
 		"use strict";
 
 
@@ -23,7 +37,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.61.2
 		 *
 		 * @constructor
 		 * @public
@@ -77,7 +91,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 					 */
 					content: {type: "sap.ui.core.Control", multiple: true, singularName: "content"}
 				},
-				designTime: true
+				designtime: "sap/m/designtime/ScrollContainer.designtime"
 			}
 		});
 
@@ -108,7 +122,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 
 		/**
 		 * Returns the sap.ui.core.ScrollEnablement delegate which is used with this control.
-		 *
+		 * @rerurns {sap.ui.core.ScrollEnablementDelegate} The scroll delegate instance
 		 * @private
 		 */
 		ScrollContainer.prototype.getScrollDelegate = function () {
@@ -133,7 +147,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 		 * @param {int} time
 		 *         The duration of animated scrolling.
 		 *         To scroll immediately without animation, give 0 as value. 0 is also the default value, when this optional parameter is omitted.
-		 * @type sap.m.ScrollContainer
+		 * @returns {sap.m.ScrollContainer} <code>this</code> to facilitate method chaining
 		 * @public
 		 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 		 */
@@ -144,7 +158,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 				if (oDomRef) {
 					// only if rendered
 					if (sap.ui.getCore().getConfiguration().getRTL()) {
-						x = jQuery.sap.denormalizeScrollBeginRTL(x, oDomRef);
+						x = denormalizeScrollBeginRTL(x, oDomRef);
 					}
 					this._oScroller.scrollTo(x, y, time);
 				} else {
@@ -165,7 +179,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 		 * @public
 		 */
 		ScrollContainer.prototype.scrollToElement = function (element, time) {
-			if (element instanceof sap.ui.core.Element) {
+			if (element instanceof Element) {
 				element = element.getDomRef();
 			}
 
@@ -187,4 +201,4 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 
 		return ScrollContainer;
 
-	}, /* bExport= */ true);
+	});

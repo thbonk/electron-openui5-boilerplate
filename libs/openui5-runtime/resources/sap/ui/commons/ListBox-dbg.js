@@ -1,13 +1,24 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.ListBox.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/delegate/ItemNavigation', 'jquery.sap.strings'],
-	function(jQuery, library, Control, ItemNavigation/* , jQuerySap */) {
+sap.ui.define([
+    'sap/ui/thirdparty/jquery',
+    './library',
+    'sap/ui/core/Control',
+    'sap/ui/core/delegate/ItemNavigation',
+    './ListBoxRenderer',
+    'sap/ui/core/library',
+    'sap/ui/Device'
+],
+	function(jQuery, library, Control, ItemNavigation, ListBoxRenderer, coreLibrary, Device) {
 	"use strict";
+
+	// shortcut for sap.ui.core.TextAlign
+	var TextAlign = coreLibrary.TextAlign;
 
 	/**
 	 * Constructor for a new ListBox.
@@ -23,7 +34,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -89,12 +100,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			/**
 			 * Determines the text alignment in the primary ListBox column.
 			 */
-			valueTextAlign : {type : "sap.ui.core.TextAlign", group : "Appearance", defaultValue : sap.ui.core.TextAlign.Begin},
+			valueTextAlign : {type : "sap.ui.core.TextAlign", group : "Appearance", defaultValue : TextAlign.Begin},
 
 			/**
 			 * Determines the text alignment in the secondary ListBox text column (if available).
 			 */
-			secondaryValueTextAlign : {type : "sap.ui.core.TextAlign", group : "Appearance", defaultValue : sap.ui.core.TextAlign.Begin},
+			secondaryValueTextAlign : {type : "sap.ui.core.TextAlign", group : "Appearance", defaultValue : TextAlign.Begin},
 
 			/**
 			 * Determines the minimum width of the ListBox. If not set, there is no minimum width.
@@ -251,7 +262,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			var div = document.createElement("div");
 			div.id = "sap-ui-commons-ListBox-sizeDummy";
 			div.innerHTML = '<div class="sapUiLbx sapUiLbxFlexWidth sapUiLbxStd"><ul><li class="sapUiLbxI"><span class="sapUiLbxITxt">&nbsp;</span></li></ul></div>';
-			if (sap.ui.Device.browser.safari) {
+			if (Device.browser.safari) {
 				oStaticArea.insertBefore(div, oStaticArea.firstChild);
 			} else {
 				oStaticArea.appendChild(div);
@@ -260,7 +271,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			ListBox._fItemHeight = oItemDomRef.offsetHeight;
 
 			// subpixel rendering strategy in IE >= 9 can lead to the total being larger than the sum of heights
-			if (!!sap.ui.Device.browser.internet_explorer && (document.documentMode == 9 || document.documentMode == 10)) { // TODO: browser version check... not good...
+			if (Device.browser.msie && (document.documentMode == 9 || document.documentMode == 10)) { // TODO: browser version check... not good...
 				var cs = document.defaultView.getComputedStyle(oItemDomRef.firstChild, "");
 				var h = parseFloat(cs.getPropertyValue("height").split("px")[0]);
 				if (!(typeof h === "number") || !(h > 0)) { // sometimes cs.getPropertyValue("height") seems to return "auto"
@@ -605,12 +616,15 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	/* --- user interaction handling methods --- */
 
 	ListBox.prototype.onmousedown = function(oEvent) {
-		if (!!sap.ui.Device.browser.webkit && oEvent.target && oEvent.target.id === this.getId()) { // ListBox scrollbar has been clicked; webkit completely removes the focus, which breaks autoclose popups
+		if (Device.browser.webkit && oEvent.target && oEvent.target.id === this.getId()) { // ListBox scrollbar has been clicked; webkit completely removes the focus, which breaks autoclose popups
 			var idToFocus = document.activeElement ? document.activeElement.id : this.getId();
 			var that = this;
-			window.setTimeout(function(){
+			setTimeout(function(){
 				var scrollPos = that.getDomRef().scrollTop; // yes, this scrollPosition is the right one to use. The one before setTimeout works for the scrollbar grip, but not for the arrows
-				jQuery.sap.focus(jQuery.sap.domById(idToFocus)); // re-set the focus
+				var oFocusElem = idToFocus ? document.getElementById(idToFocus) : null;
+				if ( oFocusElem ) {
+					oFocusElem.focus(); // re-set the focus
+				}
 				that.getDomRef().scrollTop = scrollPos; // re-apply the scroll position (otherwise the focus() call would scroll the focused element into view)
 			},0);
 		}
@@ -648,7 +662,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		}
 
 		var oSource = oEvent.target;
-		if (oSource.id === "" || jQuery.sap.endsWith(oSource.id, "-txt")) {
+		if (oSource.id === "" || (oSource.id && oSource.id.endsWith("-txt")) ) {
 			oSource = oSource.parentNode;
 			if (oSource.id === "") { // could be the image inside the first cell
 				oSource = oSource.parentNode;
@@ -656,7 +670,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		}
 		var attr = jQuery(oSource).attr("data-sap-ui-lbx-index");
 		if (typeof attr == "string" && attr.length > 0) {
-			var iIndex = parseInt(attr, 10); // Get the selected index from the HTML
+			var iIndex = parseInt(attr); // Get the selected index from the HTML
 
 			var aItems = this.getItems();
 			var oItem = aItems[iIndex]; // oItem could be a separator, though!
@@ -1313,7 +1327,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		this._bNoItemInvalidateEvent = true;
 		// fire change event asynchrounusly to be sure all binding update is done
 		if (!this._bItemsChangedAfterUpdate) {
-			this._bItemsChangedAfterUpdate = jQuery.sap.delayedCall(0, this, "_itemsChangedAfterUpdate");
+			this._bItemsChangedAfterUpdate = setTimeout(function() {
+				this._itemsChangedAfterUpdate();
+			}.bind(this), 0);
 		}
 
 	};
@@ -1341,7 +1357,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		}
 
 		if (this._bItemsChangedAfterUpdate) {
-			jQuery.sap.clearDelayedCall(this._bItemsChangedAfterUpdate);
+			clearTimeout(this._bItemsChangedAfterUpdate);
 			this._bItemsChangedAfterUpdate = undefined;
 			this._bNoItemsChangeEvent = undefined;
 			this._bNoItemInvalidateEvent = undefined;
@@ -1379,4 +1395,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 	return ListBox;
 
-}, /* bExport= */ true);
+});

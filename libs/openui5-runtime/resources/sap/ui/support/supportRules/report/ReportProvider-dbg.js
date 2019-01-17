@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -53,6 +53,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/thirdparty/handlebars', 'sap/ui/supp
 				});
 				buffer.push("</table>");
 			});
+		},
+		subheader: function (buffer, title) {
+			buffer.push("<tr class='sapUiSupportTitle'><td valign='top' colspan='2'>", "<label class='sapUiSupportLabel'>",
+				jQuery.sap.escapeHTML(title || ""), "</label></td></tr>");
 		}
 	};
 
@@ -89,6 +93,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/thirdparty/handlebars', 'sap/ui/supp
 			var html = ["<div class='sapUiSupportToolbar'>",
 						"<div><div class='sapUiSupportTechInfoCntnt'>",
 						"<table border='0' cellpadding='3'>"];
+			techInfoRenderer.subheader(html, "Support Assistant Information");
+			techInfoRenderer.line(html, true, true, "Location", technicalInfo.supportAssistant.location);
+			techInfoRenderer.line(html, true, true, "Version", technicalInfo.supportAssistant.versionAsString);
+			techInfoRenderer.subheader(html, "Application Information");
 			techInfoRenderer.line(html, true, true, "SAPUI5 Version", function(buffer){
 				var sapUI5Version = technicalInfo.sapUi5Version;
 				if (sapUI5Version && sapUI5Version.version) {
@@ -254,7 +262,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/thirdparty/handlebars', 'sap/ui/supp
 		try {
 			var groupNumber = 1;
 
-			content += '<table class="sapUiTable"><tbody><tr><th>Name</th><th>Description</th></tr></tbody>';
+			content += '<table class="sapUiTable"><tbody><tr><th>Name</th><th>Description</th><th>Categories</th><th>Audiences</th></tr></tbody>';
 
 			for (var group in groups) {
 				var rules = groups[group];
@@ -266,17 +274,22 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/thirdparty/handlebars', 'sap/ui/supp
 				}
 
 				var groupIssueCountElement = groups[group].selected ? ' (' + groups[group].issueCount + ' issues)' : '';
-				var checkedGroup = '<span class="checked" style="' + (groups[group].selected ? '' : 'visibility: hidden;') + '"> &#10004; </span>';
+				var checkedGroup = '<span class="' + (groups[group].selected ? 'checked' : 'unchecked') + '"></span>';
 				content += '<tbody><tr><td colspan="100" ';
 				content += 'class="expandable-control ' + expandedClass + '" data-expandableElement="section-selected-rules-group' + groupNumber + '">' + checkedGroup;
-				content += '<span class="sapUiSupportLabel expandable-title"> ' + group + groupIssueCountElement + '</span>';
+				content += '<span class="sapUiSupportLabel expandable-title">' + group + groupIssueCountElement + '</span>';
 				content += '</td></tr></tbody>';
 				var rulesTable = '';
 
 				for (var rule in rules) {
 					var issueCountElement = rules[rule].selected ? ' (' + rules[rule].issueCount + ' issues)' : '';
-					var checked = '<span class="checked" style="' + (rules[rule].selected ? '' : 'visibility: hidden;') + '"> &#10004; </span>';
-					rulesTable += '<tr><td>' + checked + rules[rule].title + issueCountElement + '</td><td>' + rules[rule].description + '</td></tr>';
+					var checked = '<span class="' + (rules[rule].selected ? 'checked' : 'unchecked') + '"></span>';
+					rulesTable += '<tr>';
+					rulesTable += '<td>' + checked + rules[rule].title + issueCountElement + '</td>';
+					rulesTable += '<td>' + rules[rule].description + '</td>';
+					rulesTable += '<td>' + rules[rule].categories.join(', ') + '</td>';
+					rulesTable += '<td>' + rules[rule].audiences.join(', ') + '</td>';
+					rulesTable += '</tr>';
 				}
 
 				content += '<tbody id="section-selected-rules-group' + groupNumber + '">' + rulesTable + '</tbody>';
@@ -362,12 +375,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/thirdparty/handlebars', 'sap/ui/supp
 				issues: oData.issues,
 				appInfo: oData.application,
 				rules: oData.rules,
+				rulePreset: oData.rulePreset,
 				metadata: {
 					title: oData.name + ' Analysis Results',
 					title_TechnicalInfo: 'Technical Information',
 					title_Issues: 'Issues',
 					title_AppInfo: 'Application Information',
-					title_SelectedRules: 'Available and (<span class="checked">&#10004;</span>) Executed Rules',
+					title_SelectedRules: 'Available and (<span class="checked"></span>) Selected Rules',
 					timestamp: new Date(),
 					scope: oData.scope,
 					analysisDuration: oData.analysisDuration,
@@ -396,6 +410,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/thirdparty/handlebars', 'sap/ui/supp
 			archiver.add('issues.json', issues, 'json');
 			archiver.add('appInfos.json', appInfos, 'json');
 			archiver.add('report.html', report);
+			archiver.add('abap.json', oData.abap, 'json');
 			archiver.download("SupportAssistantReport");
 			archiver.clear();
 		});

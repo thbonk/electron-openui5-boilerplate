@@ -1,12 +1,15 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './Bar', './Button', './SuggestionsList', './SuggestionItem'],
-	function(jQuery, Bar, Button, SuggestionsList, SuggestionItem) {
+sap.ui.define(['jquery.sap.global', './Bar', './Button', './SuggestionsList', './SuggestionItem', 'sap/ui/Device', 'sap/m/library'],
+	function(jQuery, Bar, Button, SuggestionsList, SuggestionItem, Device, library) {
 	"use strict";
+
+	// shortcut for sap.m.PlacementType
+	var PlacementType = library.PlacementType;
 
 	/**
 	 * <code>sap.m.Suggest</code> provides the functionality to display suggestion lists for the user entry
@@ -31,11 +34,12 @@ sap.ui.define(['jquery.sap.global', './Bar', './Button', './SuggestionsList', '.
 			picker, 				// either or popover or a dialog with the list of suggestion items
 			list,					// SuggestionsList with suggestions
 			listUpdateTimeout,		// list is updated after a timeout to accumulate simultaneous updates
-			bUseDialog = sap.ui.Device.system.phone,
+			bUseDialog = Device.system.phone,
 			self = this;
 
 		// 1. Conditional loading depending on the device type.
 		// 2. Resolve circular dependency Dialog -> OverflowToolbar -> SearchField:
+		//TODO: global jquery call found
 		jQuery.sap.require(bUseDialog ? "sap.m.Dialog" : "sap.m.Popover");
 
 		/* =========================================================== */
@@ -134,11 +138,11 @@ sap.ui.define(['jquery.sap.global', './Bar', './Button', './SuggestionsList', '.
 		}
 
 		function createPopover() {
-			var popover = new (sap.ui.require('sap/m/Popover'))({
+			var popover = self._oPopover =  new (sap.ui.require('sap/m/Popover'))({
 				showArrow: false,
 				showHeader: false,
 				horizontalScrolling: false,
-				placement: sap.m.PlacementType.Vertical,
+				placement: PlacementType.Vertical,
 				offsetX: 0,
 				offsetY: 0,
 				initialFocus: parent,
@@ -158,13 +162,8 @@ sap.ui.define(['jquery.sap.global', './Bar', './Button', './SuggestionsList', '.
 				return this.openBy(parent);
 			};
 
-			function setMinWidth() {
-				var w = (oInput.$().outerWidth() / parseFloat(sap.m.BaseFontSize)) + "rem";
-				popover.getDomRef().style.minWidth = w;
-			}
-
 			popover.addEventDelegate({
-					onAfterRendering: setMinWidth,
+					onAfterRendering: self.setPopoverMinWidth.bind(self),
 					ontap: ontap
 				}, oInput);
 
@@ -188,6 +187,14 @@ sap.ui.define(['jquery.sap.global', './Bar', './Button', './SuggestionsList', '.
 		/* =========================================================== */
 		/* API functions                                               */
 		/* =========================================================== */
+
+		this.setPopoverMinWidth = function() {
+			var oPopoverDomRef = self._oPopover.getDomRef();
+			if (oPopoverDomRef) {
+				var w = (oInput.$().outerWidth() / parseFloat(library.BaseFontSize)) + "rem";
+				oPopoverDomRef.style.minWidth = w;
+			}
+		};
 
 		this.destroy = function() {
 			if (picker) {
@@ -268,7 +275,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './Button', './SuggestionsList', '.
 			return getList().selectByIndex(index, bRelative);
 		};
 
-	} /* Suggest */
+	}/* Suggest */
 
 	return Suggest;
 

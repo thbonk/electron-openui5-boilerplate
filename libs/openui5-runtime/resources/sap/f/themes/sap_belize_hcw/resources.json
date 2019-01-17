@@ -11,6 +11,11 @@
 			"theme": "sap_belize_hcw"
 		},
 		{
+			"name": "Card.less",
+			"designtime": true,
+			"theme": "sap_belize_hcw"
+		},
+		{
 			"name": "DynamicPage.less",
 			"designtime": true,
 			"theme": "sap_belize_hcw"

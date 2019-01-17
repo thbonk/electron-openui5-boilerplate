@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.MenuItem.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Item'],
-	function(jQuery, library, Item) {
+sap.ui.define(['./library', 'sap/ui/core/Item'],
+	function(library, Item) {
 		"use strict";
 
 
@@ -23,7 +23,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Item'],
 		 * @extends sap.ui.core.Item
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.61.2
 		 *
 		 * @constructor
 		 * @public
@@ -163,6 +163,16 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Item'],
 			return Item.prototype.destroyAggregation.apply(this, arguments);
 		};
 
+		MenuItem.prototype.destroy = function() {
+			var oVisualControl = sap.ui.getCore().byId(this._getVisualControl());
+
+			if (oVisualControl) {
+				oVisualControl.destroy();
+			}
+
+			return Item.prototype.destroy.apply(this, arguments);
+		};
+
 		//Internal methods used to identify the item in the Menu's hierarchy.
 
 		/**
@@ -223,4 +233,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Item'],
 
 		return MenuItem;
 
-	}, /* bExport= */ true);
+	});

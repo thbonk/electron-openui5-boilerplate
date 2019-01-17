@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.layout.BlockLayoutCellData.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/LayoutData', './library'],
-	function(jQuery, LayoutData, library) {
+sap.ui.define(['sap/ui/core/LayoutData', './library'],
+	function(LayoutData, library) {
 	"use strict";
 
 	/**
@@ -18,7 +18,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/LayoutData', './library'],
 	 * @class
 	 * Holds layout data for the BlockLayoutCells contents.
 	 * @extends sap.ui.core.LayoutData
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @constructor
 	 * @public
 	 * @since 1.50.0
@@ -96,4 +96,4 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/LayoutData', './library'],
 
 	return BlockLayoutCellData;
 
-}, /* bExport= */ true);
+});

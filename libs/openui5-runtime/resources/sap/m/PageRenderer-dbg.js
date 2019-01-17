@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['sap/m/PageAccessibleLandmarkInfo', 'sap/ui/Device'],
-	function(PageAccessibleLandmarkInfo, Device) {
+sap.ui.define([],
+	function() {
 	"use strict";
 
 
@@ -24,6 +24,7 @@ sap.ui.define(['sap/m/PageAccessibleLandmarkInfo', 'sap/ui/Device'],
 	PageRenderer.render = function(oRm, oPage) {
 		var oHeader = null,
 			oFooter = null,
+			bShowFooter = oPage.getShowFooter(),
 			oSubHeader = null,
 			bLightHeader  = this._isLightHeader(oPage),
 			oLandmarkInfo = oPage.getLandmarkInfo();
@@ -36,9 +37,8 @@ sap.ui.define(['sap/m/PageAccessibleLandmarkInfo', 'sap/ui/Device'],
 			oSubHeader = oPage.getSubHeader();
 		}
 
-		if (oPage.getShowFooter()) {
-			oFooter = oPage.getFooter();
-		}
+		oFooter = oPage.getFooter();
+
 		oRm.write("<div");
 		oRm.writeControlData(oPage);
 		oRm.addClass("sapMPage");
@@ -53,7 +53,7 @@ sap.ui.define(['sap/m/PageAccessibleLandmarkInfo', 'sap/ui/Device'],
 			oRm.addClass("sapMPageWithSubHeader");
 		}
 
-		if (oFooter) {
+		if (oFooter && bShowFooter) {
 			// it is used in the PopOver to remove additional margin bottom for page with footer
 			oRm.addClass("sapMPageWithFooter");
 		}
@@ -62,7 +62,7 @@ sap.ui.define(['sap/m/PageAccessibleLandmarkInfo', 'sap/ui/Device'],
 			oRm.addClass("sapMPageBusyCoversAll");
 		}
 
-		if (oPage.getFloatingFooter() && oPage.getShowFooter()) {
+		if (oPage.getFloatingFooter()) {
 			oRm.addClass("sapMPageFloatingFooter");
 		}
 
@@ -134,6 +134,9 @@ sap.ui.define(['sap/m/PageAccessibleLandmarkInfo', 'sap/ui/Device'],
 		oRm.write("</section>");
 
 		// render footer Element
+		// if a footer is defined, it should always be rendered
+		// otherwise animation on show/hide won't work always
+
 		if (oFooter) {
 			var sFooterTag = oPage._getFooterTag(oLandmarkInfo);
 
@@ -158,7 +161,7 @@ sap.ui.define(['sap/m/PageAccessibleLandmarkInfo', 'sap/ui/Device'],
 	 * Renders the bar control if it is defined. Also adds classes to it.
 	 *
 	 * @param {sap.ui.core.RenderManager} oRm the RenderManager that can be used for writing to the Render-Output-Buffer
-	 * @param {sap.m.Page} oPage
+	 * @param {sap.m.Page} oPage The Page containing the bar
 	 * @param {sap.m.IBar} oBarControl the RenderManager that can be used for writing to the Render-Output-Buffer
 	 * @param {object} oOptions object containing the tag, contextClass and styleClass added to the bar
 	 */
@@ -178,7 +181,7 @@ sap.ui.define(['sap/m/PageAccessibleLandmarkInfo', 'sap/ui/Device'],
 	 *	Check whether THIS page is used in scenario where its header should be light
 	 *	Important for Belize styling
 	 *
-	 * @param {sap.m.Page} oPage
+	 * @param {sap.m.Page} oPage The Page containing the bar
 	 * @returns {boolean}
 	 * @private
 	 */
@@ -194,8 +197,11 @@ sap.ui.define(['sap/m/PageAccessibleLandmarkInfo', 'sap/ui/Device'],
 			sParentName = (oParent && oParent.getMetadata().getName()) || "";
 			sChildName = oChild.getMetadata().getName();
 
-			if ((sParentName === "sap.m.Popover" || sParentName === "sap.m.Dialog")
-				&& sChildName === "sap.m.NavContainer") {
+			if (((sParentName === "sap.m.Popover" || sParentName === "sap.m.Dialog")
+				&& sChildName === "sap.m.NavContainer")
+				|| ((sParentName === "sap.ui.comp.smartvariants.SmartVariantManagement" || sParentName === "sap.ui.comp.smartvariants.SmartVariantManagementUi2"
+				|| sParentName === "sap.ui.comp.variants.VariantManagement" || sParentName === "sap.ui.fl.variants.VariantManagement" )
+				&& sChildName === "sap.m.ResponsivePopover")){
 				return true;
 			}
 

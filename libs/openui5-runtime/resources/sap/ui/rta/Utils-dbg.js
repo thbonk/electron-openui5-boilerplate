@@ -1,23 +1,26 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-// Provides object sap.ui.rta.Utils.
 sap.ui.define([
-	'jquery.sap.global',
-	'sap/ui/fl/Utils',
-	'sap/ui/dt/OverlayUtil',
-	'sap/ui/dt/OverlayRegistry',
-	'sap/ui/fl/registry/Settings'
+	"sap/ui/thirdparty/jquery",
+	"sap/ui/fl/Utils",
+	"sap/ui/fl/registry/Settings",
+	"sap/ui/dt/OverlayUtil",
+	"sap/ui/dt/DOMUtil",
+	"sap/m/MessageBox",
+	"sap/base/Log"
 ],
 function(
 	jQuery,
 	FlexUtils,
+	Settings,
 	OverlayUtil,
-	OverlayRegistry,
-	Settings
+	DOMUtil,
+	MessageBox,
+	Log
 ) {
 	"use strict";
 
@@ -27,7 +30,7 @@ function(
 	 * @class Utility functionality to work with controls, e.g. iterate through aggregations, find parents, etc.
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @private
 	 * @static
@@ -43,7 +46,7 @@ function(
 
 	Utils._sFocusableOverlayClass = ".sapUiDtOverlaySelectable";
 
-	Utils._sRtaStyleClassName = "";
+	Utils._sRtaStyleClassName = '';
 
 	/**
 	 * Returns the rta specific Style Class
@@ -63,11 +66,7 @@ function(
 		if (sLayer === "USER") {
 			Utils._sRtaStyleClassName = "";
 		} else if (FlexUtils.getLayerIndex(sLayer) > -1) {
-			if (sap.ui.getCore().getConfiguration().getTheme() === "sap_belize") {
-				Utils._sRtaStyleClassName = "sapContrast";
-			} else if (sap.ui.getCore().getConfiguration().getTheme() === "sap_belize_plus") {
-				Utils._sRtaStyleClassName = "sapContrastPlus";
-			}
+			Utils._sRtaStyleClassName = "sapContrast sapContrastPlus";
 		}
 	};
 
@@ -91,40 +90,33 @@ function(
 	};
 
 	/**
-	 * Utility function for retrieving designtime metadata from the relevant container for a specified overlay object
-	 *
-	 * @param {sap.ui.dt.Overlay} oOverlay - Overlay object
-	 * @returns {Object|undefined} Metadata object or false if there is no aggregation
-	 */
-	Utils.getRelevantContainerDesigntimeMetadata = function(oOverlay) {
-		var oRelevantContainer = oOverlay.getRelevantContainer();
-		if (!oRelevantContainer || !oOverlay.getParent()) {
-			return undefined;
-		}
-		var oRelevantContainerOverlay = OverlayRegistry.getOverlay(oRelevantContainer);
-		return oRelevantContainerOverlay ? oRelevantContainerOverlay.getDesignTimeMetadata() : undefined;
-	};
-
-	/**
 	 * Utility function to check if the OData service is updated in the meantime
 	 *
 	 * @param {sap.ui.core.Control} oControl - Control to be checked
 	 * @returns {Promise} resolves if service is up to date, rejects otherwise
 	 */
 	Utils.isServiceUpToDate = function(oControl) {
-		return this.isExtensibilityEnabledInSystem(oControl).then(function(bEnabled) {
+		return this.isExtensibilityEnabledInSystem(oControl)
+
+		.then(function(bEnabled) {
 			if (bEnabled) {
-				jQuery.sap.require("sap.ui.fl.fieldExt.Access");
-				var oModel = oControl.getModel();
-				if (oModel) {
-					var bServiceOutdated = sap.ui.fl.fieldExt.Access.isServiceOutdated(oModel.sServiceUrl);
-					if (bServiceOutdated) {
-						sap.ui.fl.fieldExt.Access.setServiceValid(oModel.sServiceUrl);
-						//needs FLP to trigger UI restart popup
-						sap.ui.getCore().getEventBus().publish("sap.ui.core.UnrecoverableClientStateCorruption","RequestReload",{});
-						return Promise.reject();
-					}
-				}
+				return new Promise(function(fnResolve, fnReject) {
+					sap.ui.require([
+						"sap/ui/fl/fieldExt/Access"
+					], function(Access) {
+						var oModel = oControl.getModel();
+						if (oModel) {
+							var bServiceOutdated = Access.isServiceOutdated(oModel.sServiceUrl);
+							if (bServiceOutdated) {
+								Access.setServiceValid(oModel.sServiceUrl);
+								//needs FLP to trigger UI restart popup
+								sap.ui.getCore().getEventBus().publish("sap.ui.core.UnrecoverableClientStateCorruption","RequestReload",{});
+								return fnReject();
+							}
+						}
+						return fnResolve();
+					});
+				});
 			}
 		});
 	};
@@ -133,47 +125,51 @@ function(
 	 * Utility function to check via backend calls if the custom field button shall be enabled or not
 	 *
 	 * @param {sap.ui.core.Control} oControl - Control to be checked
-	 * @returns {Boolean} true if CustomFieldCreation functionality is to be enabled, false if not
+	 * @returns {Promise} Returns <boolean> value - true if CustomFieldCreation functionality is to be enabled, false if not
 	 */
 	Utils.isCustomFieldAvailable = function(oControl) {
-		return this.isExtensibilityEnabledInSystem(oControl).then(function(bShowCreateExtFieldButton) {
+		return this.isExtensibilityEnabledInSystem(oControl)
+
+		.then(function(bShowCreateExtFieldButton) {
 			if (!bShowCreateExtFieldButton) {
 				return false;
 			} else if (!oControl.getModel()) {
 				return false;
 			} else {
-				var sServiceUrl = oControl.getModel().sServiceUrl;
-				var sEntityType = this.getBoundEntityType(oControl).name;
-				try {
-					jQuery.sap.require("sap.ui.fl.fieldExt.Access");
-					var oJQueryDeferred = sap.ui.fl.fieldExt.Access.getBusinessContexts(sServiceUrl,
-							sEntityType);
-					return Promise.resolve(oJQueryDeferred).then(function(oResult) {
-						if (oResult) {
-							if (oResult.BusinessContexts) {
-								if (oResult.BusinessContexts.length > 0) {
-									oResult.EntityType = sEntityType;
-									return oResult;
+				return new Promise(function(fnResolve, fnReject) {
+					sap.ui.require([
+						"sap/ui/fl/fieldExt/Access"
+					], function(Access) {
+						var sServiceUrl = oControl.getModel().sServiceUrl;
+						var sEntityType = this.getBoundEntityType(oControl).name;
+						var $Deferred;
+						try {
+							$Deferred = Access.getBusinessContexts(sServiceUrl, sEntityType);
+						} catch (oError) {
+							Log.error("exception occured in sap.ui.fl.fieldExt.Access.getBusinessContexts", oError);
+							fnResolve(false);
+						}
+
+						return Promise.resolve($Deferred)
+						.then(function(oResult) {
+							if (oResult && Array.isArray(oResult.BusinessContexts) && oResult.BusinessContexts.length > 0) {
+								oResult.EntityType = sEntityType;
+								return fnResolve(oResult);
+							}
+							return fnResolve(false);
+						})
+						.catch(function(oError){
+							if (oError) {
+								if (Array.isArray(oError.errorMessages)) {
+									for (var i = 0; i < oError.errorMessages.length; i++) {
+										Log.error(oError.errorMessages[i].text);
+									}
 								}
 							}
-						} else {
-							return false;
-						}
-					}).catch(function(oError){
-						if (oError) {
-							if (jQuery.isArray(oError.errorMessages)) {
-								for (var i = 0; i < oError.errorMessages.length; i++) {
-									jQuery.sap.log.error(oError.errorMessages[i].text);
-								}
-							}
-						}
-						return false;
-					});
-				} catch (oError) {
-					jQuery.sap.log
-							.error("exception occured in sap.ui.fl.fieldExt.Access.getBusinessContexts", oError);
-					return false;
-				}
+							return fnResolve(false);
+						});
+					}.bind(this), fnReject);
+				}.bind(this));
 			}
 		}.bind(this));
 	};
@@ -246,7 +242,7 @@ function(
 	Utils.isOverlaySelectable = function(oOverlay) {
 		// check the real DOM visibility should be preformed while oOverlay.isVisible() can be true, but if element
 		// has no geometry, overlay will not be visible in UI
-		return oOverlay.isSelectable() && oOverlay.$().is(":visible");
+		return oOverlay.isSelectable() && DOMUtil.isVisible(oOverlay.getDomRef());
 	};
 
 	/**
@@ -322,6 +318,17 @@ function(
 	};
 
 	/**
+	 * Returns the last focusable child overlay. Loop over siblings and parents when no focusable siblings found
+	 *
+	 * @param {sap.ui.dt.ElementOverlay} oOverlay - Target overlay object
+	 * @returns {sap.ui.dt.ElementOverlay} Found overlay object
+	 * @private
+	 */
+	Utils.getLastFocusableDescendantOverlay = function(oOverlay) {
+		return OverlayUtil.getLastDescendantByCondition(oOverlay, this.isOverlaySelectable);
+	};
+
+	/**
 	 * Returns the next focusable sibling overlay
 	 *
 	 * @param {sap.ui.dt.ElementOverlay} oOverlay - Target overlay object
@@ -329,10 +336,14 @@ function(
 	 * @private
 	 */
 	Utils.getNextFocusableSiblingOverlay = function(oOverlay) {
+		var NEXT = true;
 		var oNextFocusableSiblingOverlay = OverlayUtil.getNextSiblingOverlay(oOverlay);
 
 		while (oNextFocusableSiblingOverlay && !this.isOverlaySelectable(oNextFocusableSiblingOverlay)) {
 			oNextFocusableSiblingOverlay = OverlayUtil.getNextSiblingOverlay(oNextFocusableSiblingOverlay);
+		}
+		if (!oNextFocusableSiblingOverlay) {
+			oNextFocusableSiblingOverlay = this._findSiblingOverlay(oOverlay, NEXT);
 		}
 		return oNextFocusableSiblingOverlay;
 	};
@@ -345,13 +356,41 @@ function(
 	 * @private
 	 */
 	Utils.getPreviousFocusableSiblingOverlay = function(oOverlay) {
+		var PREVIOUS = false;
 		var oPreviousFocusableSiblingOverlay = OverlayUtil.getPreviousSiblingOverlay(oOverlay);
 
 		while (oPreviousFocusableSiblingOverlay && !this.isOverlaySelectable(oPreviousFocusableSiblingOverlay)) {
 			oPreviousFocusableSiblingOverlay = OverlayUtil
 					.getPreviousSiblingOverlay(oPreviousFocusableSiblingOverlay);
 		}
+		if (!oPreviousFocusableSiblingOverlay) {
+			oPreviousFocusableSiblingOverlay = this._findSiblingOverlay(oOverlay, PREVIOUS);
+		}
 		return oPreviousFocusableSiblingOverlay;
+	};
+
+	/**
+	 * Returns an element overlay which is sibling to the given element overlay
+	 * @param  {sap.ui.dt.ElementOverlay} oElementOverlay The overlay to get the information from
+	 * @param  {boolean} bNext true for next sibling, false for previous sibling
+	 * @return {sap.ui.dt.ElementOverlay} the element overlay which is sibling to the given overlay
+	 * @private
+	 */
+	Utils._findSiblingOverlay = function(oOverlay, bNext) {
+		var oParentOverlay = oOverlay.getParentElementOverlay();
+		if (oParentOverlay) {
+			var oSiblingOverlay = bNext ?
+				OverlayUtil.getNextSiblingOverlay(oParentOverlay) : OverlayUtil.getPreviousSiblingOverlay(oParentOverlay);
+			if (!oSiblingOverlay) {
+				return this._findSiblingOverlay(oParentOverlay, bNext);
+			} else {
+				var oDescendantOverlay = bNext ?
+					this.getFirstFocusableDescendantOverlay(oSiblingOverlay) : this.getLastFocusableDescendantOverlay(oSiblingOverlay);
+				return oDescendantOverlay;
+			}
+		} else {
+			return undefined;
+		}
 	};
 
 	/**
@@ -398,39 +437,6 @@ function(
 	 */
 	Utils.createFieldLabelId = function(oParentControl, sEntityType, sBindingPath) {
 		return (oParentControl.getId() + "_" + sEntityType + "_" + sBindingPath).replace("/", "_");
-	};
-
-	/**
-	 * Secure extract a label from an element
-	 *
-	 * @param {sap.ui.core.Element} oElement - Any Object
-	 * @param {Function} [fnFunction] - Custom function for retrieving label
-	 * @return {String|undefined} Label string or undefined
-	 */
-	Utils.getLabelForElement = function(oElement, fnFunction) {
-		// if there is a function, only the function is executed
-		if (fnFunction) {
-			return fnFunction(oElement);
-		} else {
-			// first try getText(), then getlabelText(), if not available try getLabel().getText(), then getTitle(), then getId()
-			var sFieldLabel = oElement.getText && oElement.getText();
-			if (!sFieldLabel) {
-				sFieldLabel = oElement.getLabelText && oElement.getLabelText();
-			}
-			if (!sFieldLabel) {
-				sFieldLabel = oElement.getLabel && oElement.getLabel();
-				if (sFieldLabel && sFieldLabel.getText){
-					sFieldLabel = sFieldLabel.getText();
-				}
-			}
-			if (!sFieldLabel) {
-				sFieldLabel = oElement.getTitle && oElement.getTitle();
-			}
-			if (!sFieldLabel) {
-				sFieldLabel = oElement.getId && oElement.getId();
-			}
-			return (typeof sFieldLabel) === "string" ? sFieldLabel : undefined;
-		}
 	};
 
 	/**
@@ -503,13 +509,13 @@ function(
 	};
 
 	/**
-	 * Fetching entity metadata by specified path
+	 * Fetching entity metadata by specified path.
 	 * @param {sap.ui.model.Model} oModel - Model
-	 * @param {String} sPath - Path to resolve
-	 * @returns {Object|null} - Plain object with entity description
+	 * @param {string} sPath Path to resolve
+	 * @returns {Object|null} Plain object with entity description
 	 */
 	Utils.getEntityTypeByPath = function (oModel, sPath) {
-		return oModel.oMetadata._getEntityTypeByPath(sPath);
+		return oModel.oMetadata && oModel.oMetadata._getEntityTypeByPath(sPath);
 	};
 
 	/**
@@ -518,11 +524,15 @@ function(
 	 *
 	 * TODO: replace with lodash.mergeWith when it's available
 	 *
-	 * @param mDestination {Object} - Destionation object
-	 * @param mSource {Object} - Source object
-	 * @param fnCustomizer {Function} - The customizer is invoked with five arguments:
-	 *                                  (vDestinationValue, vSourceValue, sProperty, mDestination, mSource).
-	 * @return {Object} - returns mDestination object
+	 * @param {Object} mDestination Destination object
+	 * @param {Object} mSource Source object
+	 * @param {function} fnCustomizer The customizer is invoked with the following five arguments:
+	 *                                  vDestinationValue: Value of the property in the destination object
+	 *                                  vSourceValue: Value of the property in the source object
+	 *                                  sProperty: Property being processed
+	 *                                  mDestination: Destination object
+	 *                                  mSourve: Source object
+	 * @return {Object} - Returns <code>mDestination</code> object
 	 */
 	Utils.mergeWith = function (mDestination, mSource, fnCustomizer) {
 		if (!(typeof fnCustomizer === "function")) {
@@ -538,8 +548,7 @@ function(
 						sSourceProperty,
 						mDestination,
 						mSource
-						)
-					: mSource[sSourceProperty];
+					) : mSource[sSourceProperty];
 			}
 		}
 
@@ -547,10 +556,39 @@ function(
 	};
 
 	/**
-	 * Returns if the Dom Element is currently visible on the screen
+	 * Extending helper which allows custom function
+	 * for extending.
 	 *
-	 * @param oDomElement {HTMLElement|jQuery} Element to be evaluated
-	 * @return {boolean} - returns if oDomElement is currently visible on the screen.
+	 * @param {Object} mDestination - Destionation object
+	 * @param {Object} mSource - Source object
+	 * @param {Function} fnCustomizer - The customizer is invoked with five arguments:
+	 *                                  (vDestinationValue, vSourceValue, sProperty, mDestination, mSource).
+	 */
+	Utils.extendWith = function (mDestination, mSource, fnCustomizer) {
+		if (!(typeof fnCustomizer === "function")) {
+			throw new Error('In order to use extendWith() utility function fnCustomizer should be provided!');
+		}
+
+		for (var sSourceProperty in mSource) {
+			if (mSource.hasOwnProperty(sSourceProperty)) {
+				if (fnCustomizer(
+						mDestination[sSourceProperty],
+						mSource[sSourceProperty],
+						sSourceProperty,
+						mDestination,
+						mSource)
+				){
+					mDestination[sSourceProperty] = mSource[sSourceProperty];
+				}
+			}
+		}
+	};
+
+	/**
+	 * Returns if the <code>oDomElement</code> is currently visible on the screen.
+	 *
+	 * @param {HTMLElement|jQuery} oDomElement Element to be evaluated
+	 * @return {boolean} - Returns if <code>oDomElement</code> is currently visible on the screen.
 	 */
 	Utils.isElementInViewport = function(oDomElement) {
 		if (oDomElement instanceof jQuery) {
@@ -565,6 +603,52 @@ function(
 			mRect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
 			mRect.right <= (window.innerWidth || document.documentElement.clientWidth)
 		);
+	};
+
+	/**
+	 * Shows a message box.
+	 * @param  {sap.m.MessageBox.Icon|string} oMessageType The type of the message box (icon to be displayed)
+	 * @param  {string} sTitleKey The text key for the title of the message box
+	 * @param  {string} sMessageKey The text key for the message of the message box
+	 * @param  {any} oError Optional - If an error is passed on, the message box text is derived from it
+	 * @param  {string} [sAction] text key for the confirm button default @see sap.m.MessageBox.show
+	 * @return {Promise} Promise displaying the message box; resolves when it is closed
+	 * @private
+	 */
+	Utils._showMessageBox = function(oMessageType, sTitleKey, sMessageKey, oError, sAction) {
+		var oResourceBundle = sap.ui.getCore().getLibraryResourceBundle("sap.ui.rta");
+		var sMessage = oResourceBundle.getText(sMessageKey, oError ? [oError.message || oError] : undefined);
+		var sTitle = oResourceBundle.getText(sTitleKey);
+		var vAction = sAction ? oResourceBundle.getText(sAction) : MessageBox.Action.OK;
+
+		return new Promise(function(resolve) {
+			MessageBox.show(sMessage, {
+				icon: oMessageType,
+				title: sTitle,
+				onClose: resolve,
+				actions: vAction,
+				styleClass: Utils.getRtaStyleClassName()
+			});
+		});
+	};
+
+	/**
+	 * Returns a new object composed of the own and inherited property paths
+	 * of given object which are not in the given array
+	 *
+	 * Example: for obj = { 'a': 1, 'b': '2', 'c': 3 };
+	 * omit(obj, ['a', 'c']); -> Returns { 'b': '2' }
+	 *
+	 * @param  {Object} oObject     Source object
+	 * @param  {string[]} aPropertyPaths Property paths to omit
+	 * @return {Object}             Returns new object
+	 */
+	Utils.omit = function(oObject, aPropertyPaths){
+		var oNewObject = Object.assign({}, oObject);
+		aPropertyPaths.forEach(function (sProperty) {
+			delete oNewObject[sProperty];
+		});
+		return oNewObject;
 	};
 
 	return Utils;

@@ -1,19 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 /**
  * Describes the public facade of the {@link sap.m.SelectionDetails} control.
  * @name sap.m.SelectionDetailsFacade
  * @class The public facade of the {@link sap.m.SelectionDetails} control.
- * @extends sap.ui.base.Interface
  * @since 1.48.0
- * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
- * @alias sap.m.SelectionDetailsFacade
  * @public
  * @author SAP SE
- * @version 1.50.6
+ * @version 1.61.2
  * @borrows sap.ui.core.Element#addCustomData as addCustomData
  * @borrows sap.ui.core.Element#getCustomData as getCustomData
  * @borrows sap.ui.core.Element#indexOfCustomData as indexOfCustomData
@@ -38,18 +35,17 @@
  * @borrows sap.m.SelectionDetails#addActionGroup as addActionGroup
  * @borrows sap.m.SelectionDetails#removeActionGroup as removeActionGroup
  * @borrows sap.m.SelectionDetails#removeAllActionGroups as removeAllActionGroups
+ * @borrows sap.m.SelectionDetails#setWrapLabels as setWrapLabels
+ * @borrows sap.m.SelectionDetails#getWrapLabels as getWrapLabels
  */
 /**
  * Describes the public facade of the {@link sap.m.SelectionDetailsItem} element.
  * @name sap.m.SelectionDetailsItemFacade
  * @class The public facade of the {@link sap.m.SelectionDetailsItem} element.
- * @extends sap.ui.base.Interface
  * @since 1.48.0
- * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
- * @alias sap.m.SelectionDetailsItemFacade
  * @public
  * @author SAP SE
- * @version 1.50.6
+ * @version 1.61.2
  * @borrows sap.ui.core.Element#addCustomData as addCustomData
  * @borrows sap.ui.core.Element#getCustomData as getCustomData
  * @borrows sap.ui.core.Element#indexOfCustomData as indexOfCustomData
@@ -64,4 +60,6 @@
  * @borrows sap.m.SelectionDetailsItem#getEnableNav as getEnableNav
  * @borrows sap.m.SelectionDetailsItem#addAction as addAction
  * @borrows sap.m.SelectionDetailsItem#removeAction as removeAction
+ * @borrows sap.m.SelectionDetails#setWrapLabels as setWrapLabels
+ * @borrows sap.m.SelectionDetails#getWrapLabels as getWrapLabels
  */

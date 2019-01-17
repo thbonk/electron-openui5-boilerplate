@@ -3,8 +3,10 @@
 <Template name="sap.uxap.AnchorBar" alias="AnchorBar,Bar">
 	<jsTemplate><![CDATA[new sap.uxap.AnchorBar({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	width: undefined, // sap.ui.core.CSSSize
@@ -12,11 +14,14 @@
 	enabled: true, // boolean
 	height: "", // sap.ui.core.CSSSize
 	design: sap.m.ToolbarDesign.Auto, // sap.m.ToolbarDesign, since 1.16.8
+	style: sap.m.ToolbarStyle.Standard, // sap.m.ToolbarStyle, since 1.54
 	showPopover: true, // boolean
 	upperCase: false, // boolean
+	backgroundDesign: undefined, // sap.m.BackgroundDesign, since 1.58
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	content: [], // sap.ui.core.Control
 	ariaLabelledBy: [], // sap.ui.core.Control
 	selectedButton: undefined, // sap.m.Button
@@ -30,8 +35,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<AnchorBar xmlns="sap.uxap"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	width=""
@@ -39,14 +46,17 @@
 	enabled="true"
 	height=""
 	design="Auto"
+	style="Standard"
 	showPopover="true"
 	upperCase="false"
+	backgroundDesign=""
 	ariaLabelledBy=""
 	selectedButton=""
 	validateFieldGroup=""
 	press="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<content></content> <!-- sap.ui.core.Control -->
 </AnchorBar>
 ]]></xmlTemplate>
@@ -54,8 +64,10 @@
 <Template name="sap.uxap.BlockBase" alias="BlockBase,Base">
 	<jsTemplate><![CDATA[new sap.uxap.BlockBase({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	mode: undefined, // string
@@ -66,6 +78,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	mappings: [], // sap.uxap.ModelMapping
 	selectedView: undefined, // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
@@ -75,8 +88,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<BlockBase xmlns="sap.uxap"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	mode=""
@@ -88,6 +103,7 @@
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<mappings></mappings> <!-- sap.uxap.ModelMapping -->
 </BlockBase>
 ]]></xmlTemplate>
@@ -95,14 +111,17 @@
 <Template name="sap.uxap.BreadCrumbs" alias="BreadCrumbs,Crumbs">
 	<jsTemplate><![CDATA[new sap.uxap.BreadCrumbs({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	showCurrentLocation: true, // boolean
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	links: [], // sap.m.Link
 	currentLocation: undefined, // sap.m.Text
 	validateFieldGroup: [function (oEvent) {
@@ -112,14 +131,17 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<BreadCrumbs xmlns="sap.uxap"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	showCurrentLocation="true"
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<links></links> <!-- sap.m.Link -->
 		<currentLocation></currentLocation> <!-- sap.m.Text -->
 </BreadCrumbs>
@@ -128,8 +150,10 @@
 <Template name="sap.uxap.HierarchicalSelect" alias="HierarchicalSelect,Select">
 	<jsTemplate><![CDATA[new sap.uxap.HierarchicalSelect({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	name: "", // string
@@ -151,6 +175,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	items: [], // sap.ui.core.Item
 	selectedItem: undefined, // sap.ui.core.Item
 	ariaLabelledBy: [], // sap.ui.core.Control, since 1.27.0
@@ -164,8 +189,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<HierarchicalSelect xmlns="sap.uxap"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	name=""
@@ -190,6 +217,7 @@
 	change="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<items></items> <!-- sap.ui.core.Item -->
 </HierarchicalSelect>
 ]]></xmlTemplate>
@@ -202,7 +230,8 @@
 	externalPath: undefined, // string
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [] // sap.ui.core.Element, since 1.19
+	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [] // sap.ui.core.dnd.DragDropBase, since 1.56
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<ModelMapping xmlns="sap.uxap"
@@ -212,14 +241,154 @@
 	externalPath="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 </ModelMapping>
+]]></xmlTemplate>
+</Template>
+<Template name="sap.uxap.ObjectPageAccessibleLandmarkInfo" alias="ObjectPageAccessibleLandmarkInfo,Info">
+	<jsTemplate><![CDATA[new sap.uxap.ObjectPageAccessibleLandmarkInfo({
+	id: "${id}", // sap.ui.core.ID
+	rootRole: sap.ui.core.AccessibleLandmarkRole.Region, // sap.ui.core.AccessibleLandmarkRole
+	rootLabel: undefined, // string
+	contentRole: sap.ui.core.AccessibleLandmarkRole.None, // sap.ui.core.AccessibleLandmarkRole
+	contentLabel: undefined, // string
+	navigationRole: sap.ui.core.AccessibleLandmarkRole.Navigation, // sap.ui.core.AccessibleLandmarkRole
+	navigationLabel: undefined, // string
+	headerRole: sap.ui.core.AccessibleLandmarkRole.Banner, // sap.ui.core.AccessibleLandmarkRole
+	headerLabel: undefined, // string
+	footerRole: sap.ui.core.AccessibleLandmarkRole.None, // sap.ui.core.AccessibleLandmarkRole
+	footerLabel: undefined, // string
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [] // sap.ui.core.dnd.DragDropBase, since 1.56
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<ObjectPageAccessibleLandmarkInfo xmlns="sap.uxap"
+	id="${id}"
+	rootRole="Region"
+	rootLabel=""
+	contentRole="None"
+	contentLabel=""
+	navigationRole="Navigation"
+	navigationLabel=""
+	headerRole="Banner"
+	headerLabel=""
+	footerRole="None"
+	footerLabel="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
+</ObjectPageAccessibleLandmarkInfo>
+]]></xmlTemplate>
+</Template>
+<Template name="sap.uxap.ObjectPageDynamicHeaderContent" alias="ObjectPageDynamicHeaderContent,Content">
+	<jsTemplate><![CDATA[new sap.uxap.ObjectPageDynamicHeaderContent({
+	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
+	busy: false, // boolean
+	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
+	visible: true, // boolean
+	fieldGroupIds: [], // string[], since 1.31
+	pinnable: true, // boolean
+	backgroundDesign: undefined, // sap.m.BackgroundDesign, since 1.58
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
+	content: [], // sap.ui.core.Control
+	validateFieldGroup: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this]
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<ObjectPageDynamicHeaderContent xmlns="sap.uxap"
+	id="${id}"
+	blocked="false"
+	busy="false"
+	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
+	visible="true"
+	fieldGroupIds=""
+	pinnable="true"
+	backgroundDesign=""
+	validateFieldGroup="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
+		<content></content> <!-- sap.ui.core.Control -->
+</ObjectPageDynamicHeaderContent>
+]]></xmlTemplate>
+</Template>
+<Template name="sap.uxap.ObjectPageDynamicHeaderTitle" alias="ObjectPageDynamicHeaderTitle,Title">
+	<jsTemplate><![CDATA[new sap.uxap.ObjectPageDynamicHeaderTitle({
+	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
+	busy: false, // boolean
+	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
+	visible: true, // boolean
+	fieldGroupIds: [], // string[], since 1.31
+	primaryArea: sap.f.DynamicPageTitleArea.Begin, // sap.f.DynamicPageTitleArea, since 1.50
+	areaShrinkRatio: "1:1.6:1.6", // sap.f.DynamicPageTitleShrinkRatio, since 1.54
+	backgroundDesign: undefined, // sap.m.BackgroundDesign, since 1.58
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
+	heading: undefined, // sap.ui.core.Control
+	snappedHeading: undefined, // sap.ui.core.Control, since 1.52
+	expandedHeading: undefined, // sap.ui.core.Control, since 1.52
+	actions: [], // sap.ui.core.Control
+	navigationActions: [], // sap.m.Button, since 1.52
+	content: [], // sap.ui.core.Control, since 1.50
+	snappedContent: [], // sap.ui.core.Control
+	expandedContent: [], // sap.ui.core.Control
+	breadcrumbs: undefined, // sap.m.IBreadcrumbs, since 1.52
+	validateFieldGroup: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	stateChange: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this] // since 1.54
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<ObjectPageDynamicHeaderTitle xmlns="sap.uxap"
+	id="${id}"
+	blocked="false"
+	busy="false"
+	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
+	visible="true"
+	fieldGroupIds=""
+	primaryArea="Begin"
+	areaShrinkRatio="1:1.6:1.6"
+	backgroundDesign=""
+	validateFieldGroup=""
+	stateChange="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
+		<heading></heading> <!-- sap.ui.core.Control -->
+		<snappedHeading></snappedHeading> <!-- sap.ui.core.Control, since 1.52 -->
+		<expandedHeading></expandedHeading> <!-- sap.ui.core.Control, since 1.52 -->
+		<actions></actions> <!-- sap.ui.core.Control -->
+		<navigationActions></navigationActions> <!-- sap.m.Button, since 1.52 -->
+		<content></content> <!-- sap.ui.core.Control, since 1.50 -->
+		<snappedContent></snappedContent> <!-- sap.ui.core.Control -->
+		<expandedContent></expandedContent> <!-- sap.ui.core.Control -->
+		<breadcrumbs></breadcrumbs> <!-- sap.m.IBreadcrumbs, since 1.52 -->
+</ObjectPageDynamicHeaderTitle>
 ]]></xmlTemplate>
 </Template>
 <Template name="sap.uxap.ObjectPageHeader" alias="ObjectPageHeader,Header">
 	<jsTemplate><![CDATA[new sap.uxap.ObjectPageHeader({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	objectImageURI: undefined, // string
@@ -243,11 +412,13 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	breadcrumbs: undefined, // sap.m.Breadcrumbs, since 1.50
 	breadCrumbsLinks: [], // sap.m.Link
 	navigationBar: undefined, // sap.m.Bar
 	actions: [], // sap.ui.core.Control
 	sideContentButton: undefined, // sap.m.Button, since 1.38.0
+	titleSelectorTooltip: undefined, // sap.ui.core.TooltipBase, since 1.56
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -264,8 +435,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<ObjectPageHeader xmlns="sap.uxap"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	objectImageURI=""
@@ -292,19 +465,23 @@
 	markChangesPress="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<breadcrumbs></breadcrumbs> <!-- sap.m.Breadcrumbs, since 1.50 -->
 		<breadCrumbsLinks></breadCrumbsLinks> <!-- sap.m.Link -->
 		<navigationBar></navigationBar> <!-- sap.m.Bar -->
 		<actions></actions> <!-- sap.ui.core.Control -->
 		<sideContentButton></sideContentButton> <!-- sap.m.Button, since 1.38.0 -->
+		<titleSelectorTooltip></titleSelectorTooltip> <!-- sap.ui.core.TooltipBase, since 1.56 -->
 </ObjectPageHeader>
 ]]></xmlTemplate>
 </Template>
 <Template name="sap.uxap.ObjectPageHeaderActionButton" alias="ObjectPageHeaderActionButton,Button">
 	<jsTemplate><![CDATA[new sap.uxap.ObjectPageHeaderActionButton({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	text: undefined, // string
@@ -322,6 +499,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	ariaDescribedBy: [], // sap.ui.core.Control
 	ariaLabelledBy: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
@@ -337,8 +515,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<ObjectPageHeaderActionButton xmlns="sap.uxap"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	text=""
@@ -360,20 +540,24 @@
 	press="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 </ObjectPageHeaderActionButton>
 ]]></xmlTemplate>
 </Template>
 <Template name="sap.uxap.ObjectPageHeaderContent" alias="ObjectPageHeaderContent,Content">
 	<jsTemplate><![CDATA[new sap.uxap.ObjectPageHeaderContent({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	contentDesign: sap.uxap.ObjectPageHeaderDesign.Light, // sap.uxap.ObjectPageHeaderDesign
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	content: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -382,14 +566,17 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<ObjectPageHeaderContent xmlns="sap.uxap"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	contentDesign="Light"
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<content></content> <!-- sap.ui.core.Control -->
 </ObjectPageHeaderContent>
 ]]></xmlTemplate>
@@ -405,7 +592,8 @@
 	width: "auto", // sap.ui.core.CSSSize
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [] // sap.ui.core.Element, since 1.19
+	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [] // sap.ui.core.dnd.DragDropBase, since 1.56
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<ObjectPageHeaderLayoutData xmlns="sap.uxap"
@@ -418,19 +606,23 @@
 	width="auto">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 </ObjectPageHeaderLayoutData>
 ]]></xmlTemplate>
 </Template>
 <Template name="sap.uxap.ObjectPageLayout" alias="ObjectPageLayout,Layout">
 	<jsTemplate><![CDATA[new sap.uxap.ObjectPageLayout({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	showAnchorBar: true, // boolean
 	showAnchorBarPopover: true, // boolean
 	upperCaseAnchorBar: true, // boolean
+	backgroundDesignAnchorBar: undefined, // sap.m.BackgroundDesign, since 1.58
 	height: "100%", // sap.ui.core.CSSSize
 	enableLazyLoading: false, // boolean
 	subSectionLayout: sap.uxap.ObjectPageSubSectionLayout.TitleOnTop, // sap.uxap.ObjectPageSubSectionLayout
@@ -442,16 +634,21 @@
 	showOnlyHighImportance: false, // boolean, since 1.32.0
 	isChildPage: false, // boolean, since 1.34.0
 	alwaysShowContentHeader: false, // boolean, since 1.34.0
+	headerContentPinnable: true, // boolean, since 1.52
+	toggleHeaderOnTitleClick: true, // boolean, since 1.52
+	preserveHeaderStateOnScroll: false, // boolean, since 1.52
 	showEditHeaderButton: false, // boolean, since 1.34.0
 	flexEnabled: false, // boolean, since 1.34.0
 	showFooter: false, // boolean, since 1.40
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	sections: [], // sap.uxap.ObjectPageSection
-	headerTitle: undefined, // sap.uxap.ObjectPageHeader
+	headerTitle: undefined, // sap.uxap.IHeaderTitle
 	headerContent: [], // sap.ui.core.Control
 	footer: undefined, // sap.m.IBar, since 1.40
+	landmarkInfo: undefined, // sap.uxap.ObjectPageAccessibleLandmarkInfo, since 1.61
 	selectedSection: undefined, // sap.uxap.ObjectPageSection, since 1.44.0
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -469,13 +666,16 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<ObjectPageLayout xmlns="sap.uxap"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	showAnchorBar="true"
 	showAnchorBarPopover="true"
 	upperCaseAnchorBar="true"
+	backgroundDesignAnchorBar=""
 	height="100%"
 	enableLazyLoading="false"
 	subSectionLayout="TitleOnTop"
@@ -487,6 +687,9 @@
 	showOnlyHighImportance="false"
 	isChildPage="false"
 	alwaysShowContentHeader="false"
+	headerContentPinnable="true"
+	toggleHeaderOnTitleClick="true"
+	preserveHeaderStateOnScroll="false"
 	showEditHeaderButton="false"
 	flexEnabled="false"
 	showFooter="false"
@@ -497,10 +700,12 @@
 	navigate="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<sections></sections> <!-- sap.uxap.ObjectPageSection -->
-		<headerTitle></headerTitle> <!-- sap.uxap.ObjectPageHeader -->
+		<headerTitle></headerTitle> <!-- sap.uxap.IHeaderTitle -->
 		<headerContent></headerContent> <!-- sap.ui.core.Control -->
 		<footer></footer> <!-- sap.m.IBar, since 1.40 -->
+		<landmarkInfo></landmarkInfo> <!-- sap.uxap.ObjectPageAccessibleLandmarkInfo, since 1.61 -->
 </ObjectPageLayout>
 ]]></xmlTemplate>
 </Template>
@@ -510,6 +715,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	content: [] // sap.ui.core.Control
 })
 ]]></jsTemplate>
@@ -517,6 +723,7 @@
 	id="${id}">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<content></content> <!-- sap.ui.core.Control -->
 </ObjectPageLazyLoader>
 ]]></xmlTemplate>
@@ -524,8 +731,10 @@
 <Template name="sap.uxap.ObjectPageSection" alias="ObjectPageSection,Section">
 	<jsTemplate><![CDATA[new sap.uxap.ObjectPageSection({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	title: undefined, // string
@@ -537,6 +746,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	customAnchorBarButton: undefined, // sap.m.Button
 	subSections: [], // sap.uxap.ObjectPageSubSection
 	selectedSubSection: undefined, // sap.uxap.ObjectPageSubSection
@@ -547,8 +757,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<ObjectPageSection xmlns="sap.uxap"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	title=""
@@ -561,6 +773,7 @@
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<customAnchorBarButton></customAnchorBarButton> <!-- sap.m.Button -->
 		<subSections></subSections> <!-- sap.uxap.ObjectPageSubSection -->
 </ObjectPageSection>
@@ -569,8 +782,10 @@
 <Template name="sap.uxap.ObjectPageSectionBase" alias="ObjectPageSectionBase,Base">
 	<jsTemplate><![CDATA[new sap.uxap.ObjectPageSectionBase({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	title: undefined, // string
@@ -580,6 +795,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	customAnchorBarButton: undefined, // sap.m.Button
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -588,8 +804,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<ObjectPageSectionBase xmlns="sap.uxap"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	title=""
@@ -599,6 +817,7 @@
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<customAnchorBarButton></customAnchorBarButton> <!-- sap.m.Button -->
 </ObjectPageSectionBase>
 ]]></xmlTemplate>
@@ -606,8 +825,10 @@
 <Template name="sap.uxap.ObjectPageSubSection" alias="ObjectPageSubSection,Section">
 	<jsTemplate><![CDATA[new sap.uxap.ObjectPageSubSection({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	title: undefined, // string
@@ -619,6 +840,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	customAnchorBarButton: undefined, // sap.m.Button
 	blocks: [], // sap.ui.core.Control
 	moreBlocks: [], // sap.ui.core.Control
@@ -630,8 +852,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<ObjectPageSubSection xmlns="sap.uxap"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	title=""
@@ -643,6 +867,7 @@
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<customAnchorBarButton></customAnchorBarButton> <!-- sap.m.Button -->
 		<blocks></blocks> <!-- sap.ui.core.Control -->
 		<moreBlocks></moreBlocks> <!-- sap.ui.core.Control -->

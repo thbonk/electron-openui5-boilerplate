@@ -15,6 +15,22 @@
 			"theme": "sap_belize_plus"
 		},
 		{
+			"name": "fonts/72-Bold.woff",
+			"theme": "sap_belize_plus"
+		},
+		{
+			"name": "fonts/72-Bold.woff2",
+			"theme": "sap_belize_plus"
+		},
+		{
+			"name": "fonts/72-Regular.woff",
+			"theme": "sap_belize_plus"
+		},
+		{
+			"name": "fonts/72-Regular.woff2",
+			"theme": "sap_belize_plus"
+		},
+		{
 			"name": "global.less",
 			"designtime": true,
 			"theme": "sap_belize_plus"

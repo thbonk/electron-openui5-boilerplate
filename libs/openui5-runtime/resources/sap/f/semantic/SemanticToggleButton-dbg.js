@@ -1,14 +1,14 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
 	'./SemanticButton',
-	'./SemanticControl',
-	'sap/m/library'
-], function(SemanticButton, SemanticControl, mobileLibrary) {
+	'sap/m/library',
+	"sap/ui/events/KeyCodes"
+], function(SemanticButton, mobileLibrary, KeyCodes) {
 	"use strict";
 
 	// shortcut for sap.m.ButtonType
@@ -27,7 +27,7 @@ sap.ui.define([
 	* @abstract
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.61.2
 	*
 	* @constructor
 	* @public
@@ -76,7 +76,7 @@ sap.ui.define([
 	*/
 	SemanticToggleButton.prototype._onKeydown = function(oEvent) {
 
-		if (oEvent.which === jQuery.sap.KeyCodes.SPACE || oEvent.which === jQuery.sap.KeyCodes.ENTER) {
+		if (oEvent.which === KeyCodes.SPACE || oEvent.which === KeyCodes.ENTER) {
 			this._onTap(oEvent);
 		}
 	};
@@ -125,4 +125,4 @@ sap.ui.define([
 
 	return SemanticToggleButton;
 
-}, /* bExport= */ false);
+});

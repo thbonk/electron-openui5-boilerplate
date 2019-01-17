@@ -1,13 +1,42 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.ux3.Feed.
-sap.ui.define(['jquery.sap.global', 'sap/ui/commons/DropdownBox', 'sap/ui/commons/MenuButton', 'sap/ui/commons/SearchField', 'sap/ui/commons/ToggleButton', 'sap/ui/core/Control', './Feeder', './library'],
-	function(jQuery, DropdownBox, MenuButton, SearchField, ToggleButton, Control, Feeder, library) {
+sap.ui.define([
+    'sap/ui/commons/DropdownBox',
+    'sap/ui/commons/MenuButton',
+    'sap/ui/commons/SearchField',
+    'sap/ui/commons/ToggleButton',
+    'sap/ui/core/Control',
+    './Feeder',
+    './library',
+    './FeedRenderer',
+    'sap/ui/commons/Menu',
+    'sap/ui/core/theming/Parameters',
+    './FeedChunk'
+],
+	function(
+	    DropdownBox,
+		MenuButton,
+		SearchField,
+		ToggleButton,
+		Control,
+		Feeder,
+		library,
+		FeedRenderer,
+		Menu,
+		Parameters,
+		FeedChunk
+	) {
 	"use strict";
+
+
+
+	// shortcut for sap.ui.ux3.FeederType
+	var FeederType = library.FeederType;
 
 
 
@@ -22,7 +51,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/DropdownBox', 'sap/ui/common
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -161,7 +190,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/DropdownBox', 'sap/ui/common
 
 		// init sub-controls
 		this.oFeeder = new Feeder( this.getId() + '-Feeder', {
-			type: sap.ui.ux3.FeederType.Medium
+			type: FeederType.Medium
 		}).setParent(this);
 		this.oFeeder.attachEvent('submit', this.handleFeederSubmit, this); // attach event this way to have the right this-reference in handler
 
@@ -191,12 +220,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/DropdownBox', 'sap/ui/common
 			this.oToolsButton = new MenuButton( this.getId() + '-toolsButton', {
 				tooltip: this.rb.getText('FEED_TOOLS'),
 				lite: true,
-				menu: new sap.ui.commons.Menu(this.getId() + '-toolsMenu')
+				menu: new Menu(this.getId() + '-toolsMenu')
 			}).setParent(this);
 			this.oToolsButton.attachEvent('itemSelected', this.handleLtoolsButtonSelected, this); // attach event this way to have the right this-reference in handler
 
-			var sIcon = sap.ui.core.theming.Parameters._getThemeImage('_sap_ui_ux3_Feed_ToolsIconUrl');
-			var sIconHover = sap.ui.core.theming.Parameters._getThemeImage('_sap_ui_ux3_Feed_ToolsIconHoverUrl');
+			var sIcon = Parameters._getThemeImage('_sap_ui_ux3_Feed_ToolsIconUrl');
+			var sIconHover = Parameters._getThemeImage('_sap_ui_ux3_Feed_ToolsIconHoverUrl');
 			if (sIcon) {
 				this.oToolsButton.setProperty('icon', sIcon, true);
 			}
@@ -243,7 +272,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/DropdownBox', 'sap/ui/common
 		var oDate = new Date();
 		var sDate = String(oDate);
 
-		var oNewChunk = new sap.ui.ux3.FeedChunk(this.getId() + '-new-' + this.getChunks().length, {
+		var oNewChunk = new FeedChunk(this.getId() + '-new-' + this.getChunks().length, {
 			text: oEvent.getParameter('text'),
 			commentChunk: false,
 			deletionAllowed: true,
@@ -479,4 +508,4 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/DropdownBox', 'sap/ui/common
 
 	return Feed;
 
-}, /* bExport= */ true);
+});

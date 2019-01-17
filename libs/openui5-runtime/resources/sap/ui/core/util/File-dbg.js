@@ -1,21 +1,20 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.core.util.File
-sap.ui.define(['jquery.sap.global'],
+sap.ui.define(["sap/ui/thirdparty/jquery"],
 	function(jQuery) {
 	'use strict';
 
 	/**
 	 * Utility class to handle files.
 	 *
-	 * @class Utility class to handle files
 	 * @author SAP SE
-	 * @version 1.50.6
-	 * @static
+	 * @version 1.61.2
+	 * @namespace
 	 *
 	 * @public
 	 * @since 1.22.0

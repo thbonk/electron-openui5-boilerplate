@@ -1,13 +1,23 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.BusyIndicator.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/theming/Parameters'],
-	function(jQuery, library, Control, Parameters) {
+sap.ui.define([
+	'./library',
+	'sap/ui/core/Control',
+	'sap/ui/core/library',
+	"./BusyIndicatorRenderer"
+],
+	function(library, Control, coreLibrary, BusyIndicatorRenderer) {
 	"use strict";
+
+
+
+	// shortcut for sap.ui.core.TextDirection
+	var TextDirection = coreLibrary.TextDirection;
 
 
 
@@ -38,11 +48,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
 	 * @alias sap.m.BusyIndicator
+	 * @see {@link fiori:https://experience.sap.com/fiori-design-web/busy-indicator/ Busy Indicator}
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var BusyIndicator = Control.extend("sap.m.BusyIndicator", /** @lends sap.m.BusyIndicator.prototype */ { metadata : {
@@ -60,7 +71,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			 * Options for the text direction are RTL and LTR.
 			 * Alternatively, the control can inherit the text direction from its parent container.
 			 */
-			textDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : sap.ui.core.TextDirection.Inherit},
+			textDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : TextDirection.Inherit},
 
 			/**
 			 * Icon URL if an icon is used as the busy indicator.
@@ -236,71 +247,20 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			return;
 		}
 
-		if (jQuery.support.cssAnimations) {
-			var $icon = this._iconImage.$();
-			var sRotationSpeed = this.getCustomIconRotationSpeed() + "ms";
-
-			$icon.css("-webkit-animation-duration", sRotationSpeed)
-				.css("animation-duration", sRotationSpeed);
-
-			//Bug in Chrome: After changing height of image -> changing the rotationspeed will have no affect
-			//chrome needs a rerendering of this element.
-			$icon.css("display", "none");
-			setTimeout(function() {
-				$icon.css("display", "inline");
-			}, 0);
-		} else { // IE9
-			this._rotateCustomIcon();
-		}
-	};
-
-	BusyIndicator.prototype._rotateCustomIcon = function(){
-		if (!this._iconImage) {
-			return;
-		}
 		var $icon = this._iconImage.$();
+		var sRotationSpeed = this.getCustomIconRotationSpeed() + "ms";
 
-		// stop if the custom icon is not available or hidden:
-		if (!$icon[0] || !$icon[0].offsetWidth) {
-			return;
-		}
+		$icon.css("-webkit-animation-duration", sRotationSpeed)
+			.css("animation-duration", sRotationSpeed);
 
-		var iRotationSpeed = this.getCustomIconRotationSpeed();
-		if (!iRotationSpeed) {
-			return;
-		}
-
-		if (!this._fnRotateCustomIcon) {
-			this._fnRotateCustomIcon = jQuery.proxy(this._rotateCustomIcon, this);
-		}
-		var fnRotateCustomIcon = this._fnRotateCustomIcon;
-
-		if (!this._$CustomRotator) {
-			this._$CustomRotator = jQuery({deg: 0});
-		}
-		var $rotator = this._$CustomRotator;
-
-		if ($rotator.running) {
-			return;
-		}
-
-		// restart animation
-		$rotator[0].deg = 0;
-
-		$rotator.animate({deg: 360}, {
-			duration: iRotationSpeed,
-			easing: "linear",
-			step: function(now) {
-				$rotator.running = true;
-				$icon.css("-ms-transform", 'rotate(' + now + 'deg)');
-			},
-			complete: function(){
-				$rotator.running = false;
-				window.setTimeout(fnRotateCustomIcon, 10);
-			}
-		});
+		//Bug in Chrome: After changing height of image -> changing the rotationspeed will have no affect
+		//chrome needs a rerendering of this element.
+		$icon.css("display", "none");
+		setTimeout(function() {
+			$icon.css("display", "inline");
+		}, 0);
 	};
 
 	return BusyIndicator;
 
-}, /* bExport= */ true);
+});

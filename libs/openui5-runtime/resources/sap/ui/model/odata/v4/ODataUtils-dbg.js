@@ -1,9 +1,10 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
+//Provides class sap.ui.model.odata.v4.ODataUtils
 sap.ui.define([
 	"sap/ui/core/format/DateFormat",
 	"sap/ui/model/odata/ODataUtils",
@@ -44,7 +45,7 @@ sap.ui.define([
 			 *   are assumed to be valid "Edm.DateTimeOffset" values and are compared based on the
 			 *   corresponding number of milliseconds since 1 January, 1970 UTC.
 			 *   Otherwise the values are compared with the JavaScript operators <code>===</code>
-			 *   and <code>&gt;</code>.
+			 *   and <code>></code>.
 			 * @return {number}
 			 *   The result of the comparison: <code>0</code> if the values are equal,
 			 *   <code>1</code> if the first value is larger, <code>-1</code> if the second value
@@ -63,6 +64,24 @@ sap.ui.define([
 							ODataUtils.parseDateTimeOffset(vValue2));
 				}
 				return BaseODataUtils.compare(vValue1, vValue2);
+			},
+
+			/**
+			 * Formats the given OData value into a literal suitable for usage in URLs.
+			 *
+			 * @param {any} vValue
+			 *   The value according to "OData JSON Format Version 4.0" section
+			 *   "7.1 Primitive Value"
+			 * @param {string} sType
+			 *   The OData primitive type, e.g. "Edm.String"
+			 * @returns {string}
+			 *   The literal according to "OData Version 4.0 Part 2: URL Conventions" section
+			 *   "5.1.1.6.1 Primitive Literals"
+			 * @throws {Error}
+			 *   If the value is undefined or the type is not supported
+			 */
+			formatLiteral : function (vValue, sType) {
+				return _Helper.formatLiteral(vValue, sType);
 			},
 
 			/**
@@ -159,24 +178,6 @@ sap.ui.define([
 					throw new Error("Not a valid Edm.TimeOfDay value: " + sTimeOfDay);
 				}
 				return oTimeOfDay;
-			},
-
-			/**
-			 * Formats the given OData value into a literal suitable for usage in URLs.
-			 *
-			 * @param {any} vValue
-			 *   The value according to "OData JSON Format Version 4.0" section
-			 *   "7.1 Primitive Value"
-			 * @param {string} sType
-			 *   The OData primitive type, e.g. "Edm.String"
-			 * @returns {string}
-			 *   The literal according to "OData Version 4.0 Part 2: URL Conventions" section
-			 *   "5.1.1.6.1 Primitive Literals"
-			 * @throws {Error}
-			 *   If the value is undefined or the type is not supported
-			 */
-			formatLiteral : function (vValue, sType) {
-				return _Helper.formatLiteral(vValue, sType);
 			}
 		};
 

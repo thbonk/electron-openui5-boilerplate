@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './ListRenderer', 'sap/ui/core/Renderer'],
-	function(jQuery, ListRenderer, Renderer) {
+sap.ui.define(['./ListRenderer', 'sap/ui/core/Renderer', "sap/base/Log"],
+	function(ListRenderer, Renderer, Log) {
 	"use strict";
 
 
@@ -23,7 +23,7 @@ sap.ui.define(['jquery.sap.global', './ListRenderer', 'sap/ui/core/Renderer'],
 		 * we stop rendering to force using List control with growing feature
 		 */
 		if (oControl._isIncompatible()) {
-			jQuery.sap.log.warning("Does not render sap.m.GrowingList#" + oControl.getId() + " when compatibility version is 1.16 or higher. Instead use sap.m.List/Table control with growing feature!");
+			Log.warning("Does not render sap.m.GrowingList#" + oControl.getId() + " when compatibility version is 1.16 or higher. Instead use sap.m.List/Table control with growing feature!");
 		} else {
 			ListRenderer.render.call(this, rm, oControl);
 		}

@@ -1,12 +1,19 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.RichTooltip.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/TooltipBase'],
-	function(jQuery, library, TooltipBase) {
+sap.ui.define([
+    'sap/ui/thirdparty/jquery',
+    './library',
+    'sap/ui/core/TooltipBase',
+    './RichTooltipRenderer',
+    './FormattedTextView',
+    'sap/ui/dom/jquery/control' // jQuery.fn.control
+],
+	function(jQuery, library, TooltipBase, RichTooltipRenderer, FormattedTextView) {
 	"use strict";
 
 
@@ -23,11 +30,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/TooltipBase'],
 	 * @extends sap.ui.core.TooltipBase
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
-	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Popover</code> control.
+	 * @deprecated Since version 1.38. Tf you want to achieve a similar behavior, use a <code>sap.m.Popover</code> control and open it next to your control.
 	 * @alias sap.ui.commons.RichTooltip
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -104,7 +111,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/TooltipBase'],
 			if (oValueStateText) {
 				oValueStateText.setHtmlText(sText);
 			} else {
-				oValueStateText = new sap.ui.commons.FormattedTextView(this.getId() + "-valueStateText", {
+				oValueStateText = new FormattedTextView(this.getId() + "-valueStateText", {
 					htmlText : sText
 				}).addStyleClass("sapUiRttValueStateText").addStyleClass("individual");
 
@@ -116,6 +123,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/TooltipBase'],
 				this.setAggregation("individualStateText", oValueStateText);
 			}
 		}
+		return this;
 	};
 
 	/**
@@ -143,7 +151,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/TooltipBase'],
 	 * @param {string} sText the text that should be shown
 	 */
 	RichTooltip.prototype.setText = function(sText) {
-		if (!!sText) {
+		if (sText) {
 			//replace carriage returns etc. with br tag
 			sText = sText.replace(/(\r\n|\n|\r)/g,"<br />");
 		}
@@ -152,12 +160,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/TooltipBase'],
 		if (oText) {
 			oText.setHtmlText(sText);
 		} else {
-			oText = new sap.ui.commons.FormattedTextView(this.getId() + "-txt");
+			oText = new FormattedTextView(this.getId() + "-txt");
 			oText.setHtmlText(sText);
 			oText.addStyleClass("sapUiRttText");
 			this.setAggregation("formattedText", oText);
 			this.setProperty("text", sText, true);
 		}
+		return this;
 	};
 
 	/**
@@ -212,4 +221,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/TooltipBase'],
 
 	return RichTooltip;
 
-}, /* bExport= */ true);
+});

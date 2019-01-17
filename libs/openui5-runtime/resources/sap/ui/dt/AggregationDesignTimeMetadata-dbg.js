@@ -1,17 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-// Provides class sap.ui.dt.AggregationDesignTimeMetadata.
 sap.ui.define([
-	'jquery.sap.global',
 	'sap/ui/dt/DesignTimeMetadata'
 ],
-function (jQuery, DesignTimeMetadata) {
+function (
+	DesignTimeMetadata
+) {
 	"use strict";
-
 
 	/**
 	 * Constructor for a new AggregationDesignTimeMetadata.
@@ -21,10 +20,10 @@ function (jQuery, DesignTimeMetadata) {
 	 *
 	 * @class
 	 * The AggregationDesignTimeMetadata is a wrapper for the AggregationDesignTimeMetadata of the associated element
-	 * @extends sap.ui.core.DesignTimeMetadata
+	 * @extends sap.ui.dt.DesignTimeMetadata
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @private
@@ -33,52 +32,21 @@ function (jQuery, DesignTimeMetadata) {
 	 * @experimental Since 1.30. This class is experimental and provides only limited functionality. Also the API might be changed in future.
 	 */
 	var AggregationDesignTimeMetadata = DesignTimeMetadata.extend("sap.ui.dt.AggregationDesignTimeMetadata", /** @lends sap.ui.dt.AggregationDesignTimeMetadata.prototype */ {
-		metadata : {
-			// ---- object ----
-
-			// ---- control specific ----
-			library : "sap.ui.dt"
+		metadata: {
+			library: "sap.ui.dt"
 		}
 	});
 
-	AggregationDesignTimeMetadata.prototype.getPropagation = function(oElement, callback) {
-		var mData = this.getData();
-		if (!mData.propagationInfos) {
-			return false;
-		}
-		mData.propagationInfos.some(function(oPropagatedInfo){
-			return callback(oPropagatedInfo);
-		});
-	};
-
-	AggregationDesignTimeMetadata.prototype.getRelevantContainerForPropagation = function(oElement) {
-		var mData = this.getData();
-		var vRelevantContainerElement = false;
-		if (!mData.propagationInfos) {
-			return false;
-		}
-
-		this.getPropagation(oElement, function(oPropagatedInfo){
-			if (oPropagatedInfo.relevantContainerFunction &&
-				oPropagatedInfo.relevantContainerFunction(oElement)) {
-				vRelevantContainerElement = oPropagatedInfo.relevantContainerElement;
-				return true;
-			}
-		});
-
-		return vRelevantContainerElement ? vRelevantContainerElement : false;
-	};
-
-	AggregationDesignTimeMetadata.prototype.getMetadataForPropagation = function(oElement) {
-		var vReturnMetadata = false;
-
-		this.getPropagation(oElement, function(oPropagatedInfo) {
-			if (oPropagatedInfo.metadataFunction) {
-				vReturnMetadata = oPropagatedInfo.metadataFunction(oElement, oPropagatedInfo.relevantContainerElement);
-				return vReturnMetadata ? true : false;
-			}
-		});
-		return vReturnMetadata ? vReturnMetadata : false;
+	/**
+	 * Returns "label" from aggregation designtime metadata
+	 * @param {sap.ui.core.Element} oElement element for which label should be retrieved
+	 * @param {string} [sAggregationName] aggregation name responsible for the aggregation designtime metadata
+	 *
+	 * @return {string|undefined} Returns the label as string or undefined
+	 * @public
+	 */
+	AggregationDesignTimeMetadata.prototype.getLabel = function(oElement, sAggregationName) {
+		return DesignTimeMetadata.prototype.getLabel.apply(this, arguments) || sAggregationName;
 	};
 
 	return AggregationDesignTimeMetadata;

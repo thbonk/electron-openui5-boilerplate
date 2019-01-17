@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.model.SelectionModel
-sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
-	function(jQuery, EventProvider) {
+sap.ui.define(['sap/ui/base/EventProvider', "sap/base/assert"],
+	function(EventProvider, assert) {
 	"use strict";
 
 
@@ -19,11 +19,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 * @extends sap.ui.base.EventProvider
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @param {int} iSelectionMode <code>sap.ui.model.SelectionModel.SINGLE_SELECTION</code> or <code>sap.ui.model.SelectionModel.MULTI_SELECTION</code>
 	 *
-	 * @constructor
 	 * @public
 	 * @alias sap.ui.model.SelectionModel
 	 */
@@ -117,7 +116,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 * @private
 	 */
 	SelectionModel.prototype.setLeadSelectedIndex = function(iLeadIndex) {
-		jQuery.sap.assert(typeof iLeadIndex === "number", "iLeadIndex must be an integer");
+		assert(typeof iLeadIndex === "number", "iLeadIndex must be an integer");
 		// TODO: do we want to have a specific behavior for the lead selection so
 		//       that it could be handled in another way? if yes we should consider
 		//       also to rework the dataset which is using this method
@@ -183,8 +182,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 * @public
 	 */
 	SelectionModel.prototype.setSelectionInterval = function(iFromIndex, iToIndex) {
-		jQuery.sap.assert(typeof iFromIndex === "number", "iFromIndex must be an integer");
-		jQuery.sap.assert(typeof iToIndex === "number", "iToIndex must be an integer");
+		assert(typeof iFromIndex === "number", "iFromIndex must be an integer");
+		assert(typeof iToIndex === "number", "iToIndex must be an integer");
 
 		if (this.iSelectionMode === SelectionModel.SINGLE_SELECTION) {
 			iFromIndex = iToIndex;
@@ -238,8 +237,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 * @public
 	 */
 	SelectionModel.prototype.addSelectionInterval = function(iFromIndex, iToIndex) {
-		jQuery.sap.assert(typeof iFromIndex === "number", "iFromIndex must be an integer");
-		jQuery.sap.assert(typeof iToIndex === "number", "iToIndex must be an integer");
+		assert(typeof iFromIndex === "number", "iFromIndex must be an integer");
+		assert(typeof iToIndex === "number", "iToIndex must be an integer");
 
 		if (this.iSelectionMode === SelectionModel.SINGLE_SELECTION) {
 			return this.setSelectionInterval(iFromIndex, iToIndex);
@@ -277,8 +276,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 * @public
 	 */
 	SelectionModel.prototype.moveSelectionInterval = function(iStartIndex, iMove) {
-		jQuery.sap.assert(typeof iStartIndex === "number", "iFromIndex must be an integer");
-		jQuery.sap.assert(typeof iMove === "number", "iToIndex must be an integer");
+		assert(typeof iStartIndex === "number", "iFromIndex must be an integer");
+		assert(typeof iMove === "number", "iToIndex must be an integer");
 
 		var aChangedRowIndices = [];
 		var aSelectedIndices = this.aSelectedIndices;
@@ -315,8 +314,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 * @public
 	 */
 	SelectionModel.prototype.removeSelectionInterval = function(iFromIndex, iToIndex) {
-		jQuery.sap.assert(typeof iFromIndex === "number", "iFromIndex must be an integer");
-		jQuery.sap.assert(typeof iToIndex === "number", "iToIndex must be an integer");
+		assert(typeof iFromIndex === "number", "iFromIndex must be an integer");
+		assert(typeof iToIndex === "number", "iToIndex must be an integer");
 
 		if (this.iSelectionMode === SelectionModel.SINGLE_SELECTION) {
 			iFromIndex = iToIndex;
@@ -358,8 +357,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 * @public
 	 */
 	SelectionModel.prototype.sliceSelectionInterval = function(iFromIndex, iToIndex) {
-		jQuery.sap.assert(typeof iFromIndex === "number", "iFromIndex must be an integer");
-		jQuery.sap.assert(typeof iToIndex === "number", "iToIndex must be an integer");
+		assert(typeof iFromIndex === "number", "iFromIndex must be an integer");
+		assert(typeof iToIndex === "number", "iToIndex must be an integer");
 
 		var iFrom = Math.min(iFromIndex, iToIndex);
 		var iTo = Math.max(iFromIndex, iToIndex);
@@ -539,7 +538,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 */
 	SelectionModel.prototype.selectAll = function(iToIndex) {
 
-		jQuery.sap.assert(typeof iToIndex === "number", "iToIndex must be an integer");
+		assert(typeof iToIndex === "number", "iToIndex must be an integer");
 
 		// set new selection range, determine set of changed indices
 		var aOldSelectedRowIndices = this.aSelectedIndices.slice();

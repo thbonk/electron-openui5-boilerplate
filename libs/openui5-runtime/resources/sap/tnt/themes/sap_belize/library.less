@@ -2,7 +2,7 @@
 
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -10,6 +10,65 @@
 @import "../../../../../Base/baseLib/sap_belize/base.less"; /* ORIGINAL IMPORT PATH: "../../../../sap/ui/core/themes/sap_belize/base.less" */
 
 @import "../../../../sap/ui/core/themes/sap_belize/global.less";
+/* START "global.less" */
+// ==================================================
+// Global CSS for 'sap_belize' theme for TNT library
+// ==================================================
+
+@_sap_tnt_InfoLabel_BackgroundColor1: lighten(@sapUiAccent1, 6);
+@_sap_tnt_InfoLabel_BackgroundColor2: lighten(saturate(@sapUiAccent2, 10), 20);
+@_sap_tnt_InfoLabel_BackgroundColor3: @sapUiAccent3;
+@_sap_tnt_InfoLabel_BackgroundColor4: @sapUiAccent4;
+@_sap_tnt_InfoLabel_BackgroundColor5: darken(@sapUiAccent5, 8);
+@_sap_tnt_InfoLabel_BackgroundColor6: darken(@sapUiAccent6, 6);
+@_sap_tnt_InfoLabel_BackgroundColor7: darken(@sapUiAccent7, 5);
+@_sap_tnt_InfoLabel_BackgroundColor8: darken(@sapUiAccent8, 4);
+@_sap_tnt_InfoLabel_BackgroundColor9: desaturate(@sapUiAccent4, 68);
+/* END "global.less" */
+
+
+/* START "InfoLabel.less" */
+/* ================================= */
+/* CSS for control sap.tnt/InfoLabel */
+/* Belize theme                      */
+/* ================================= */
+
+/* ==========================================================================
+   Variables and mixins
+   ========================================================================== */
+
+
+   @_sap_tnt_InfoLabel_ColorsArray:
+   @_sap_tnt_InfoLabel_BackgroundColor1,
+   @_sap_tnt_InfoLabel_BackgroundColor2,
+   @_sap_tnt_InfoLabel_BackgroundColor3,
+   @_sap_tnt_InfoLabel_BackgroundColor4,
+   @_sap_tnt_InfoLabel_BackgroundColor5,
+   @_sap_tnt_InfoLabel_BackgroundColor6,
+   @_sap_tnt_InfoLabel_BackgroundColor7,
+   @_sap_tnt_InfoLabel_BackgroundColor8,
+   @_sap_tnt_InfoLabel_BackgroundColor9;
+
+   .create-classes-for-background-color(backgroundColor, @_sap_tnt_InfoLabel_ColorsArray);
+
+   /*Iterate over the InfoLabel ColorsArray and create separate class for each
+   color named with the passed prefix and the number of the color*/
+
+   .create-classes-for-background-color(@prefix, @list) {
+	   .iter(length(@list));
+	   .iter(@i) when (@i > 0) {
+		   .iter(@i - 1);
+		   @value:  extract(@list, @i);
+		   .@{prefix}@{i} {
+			   background-color: @value;
+			   .sapTntInfoLabelInner {
+				   color: contrast(@value, @sapUiBaseText, @sapUiContentContrastTextColor, @sapUiContentContrastTextThreshold);
+			   }
+		   }
+
+	   }
+   }
+/* END "InfoLabel.less" */
 
 /* START "NavigationList.less" */
 /* ======================================= */
@@ -30,9 +89,10 @@
 
 .sapTntToolHeader.sapMTB {
 	background-color: darken(@sapUiPageHeaderBackground, 8);
-	border: 1px solid darken(@sapUiPageHeaderBackground, 8);
+	border: 1px solid darken(@sapUiPageHeaderBorderColor, 8);
 }
 
+.sapTntToolHeader .sapMITH,
 .sapTntToolHeaderPopover.sapMOTAPopover.sapMPopover {
 	background-color: darken(@sapUiPageHeaderBackground, 8);
 }

@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides the base implementation for all model implementations
-sap.ui.define(['sap/ui/base/DataType', './FormatException', './ParseException', './Type', './ValidateException'],
-	function(DataType, FormatException, ParseException, Type, ValidateException) {
+sap.ui.define(['sap/ui/base/DataType', './Type', './FormatException', './ParseException', './ValidateException'],
+	function(DataType, Type /*, kept for compatibility with existing referers: FormatException, ParseException, ValidateException*/) {
 	"use strict";
 
 	var oModelFormat = {
@@ -28,9 +28,8 @@ sap.ui.define(['sap/ui/base/DataType', './FormatException', './ParseException', 
 	 * @extends sap.ui.model.Type
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
-	 * @constructor
 	 * @param {object} [oFormatOptions] options as provided by concrete subclasses
 	 * @param {object} [oConstraints] constraints as supported by concrete subclasses
 	 * @public
@@ -64,7 +63,7 @@ sap.ui.define(['sap/ui/base/DataType', './FormatException', './ParseException', 
 	 * @param {any} oValue the value to be formatted
 	 * @param {string} sInternalType the target type
 	 * @return {any} the formatted output value
-	 *
+	 * @throws {sap.ui.model.FormatException} if a conversion to the target type is not possible
 	 * @public
 	 */
 
@@ -76,7 +75,7 @@ sap.ui.define(['sap/ui/base/DataType', './FormatException', './ParseException', 
 	 * @param {any} oValue the value to be parsed
 	 * @param {string} sInternalType the source type
 	 * @return {any} the parse result
-	 *
+	 * @throws {sap.ui.model.ParseException} if the parsing step (conversion into the expected format) fails
 	 * @public
 	 */
 
@@ -87,7 +86,7 @@ sap.ui.define(['sap/ui/base/DataType', './FormatException', './ParseException', 
 	 * @function
 	 * @name sap.ui.model.SimpleType.prototype.validateValue
 	 * @param {any} oValue the value to be validated
-	 *
+	 * @throws {sap.ui.model.ValidateException} if the validation fails, e.g. when some of the type constraints are not met
 	 * @public
 	 */
 
@@ -114,6 +113,9 @@ sap.ui.define(['sap/ui/base/DataType', './FormatException', './ParseException', 
 	 * @protected
 	 */
 	SimpleType.prototype.getModelFormat = function() {
+		if (this.oInputFormat) {
+			return this.oInputFormat;
+		}
 		return oModelFormat;
 	};
 
@@ -156,6 +158,21 @@ sap.ui.define(['sap/ui/base/DataType', './FormatException', './ParseException', 
 			default:
 				var oInternalType = DataType.getType(sInternalType);
 				return oInternalType && oInternalType.getPrimitiveType().getName();
+		}
+	};
+
+	/**
+	 * Combine message texts.
+	 * Join multiple messages into a combined message text
+	 *
+	 * @param {array} aMessages an array of message strings
+	 * @return {string} the combined message text
+	 */
+	SimpleType.prototype.combineMessages = function(aMessages) {
+		if (aMessages.length === 1) {
+			return aMessages[0];
+		} else {
+			return aMessages.join(". ") + ".";
 		}
 	};
 

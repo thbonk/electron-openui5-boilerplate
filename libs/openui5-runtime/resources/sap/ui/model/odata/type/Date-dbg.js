@@ -1,17 +1,23 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/format/DateFormat',
-		'sap/ui/model/FormatException', 'sap/ui/model/odata/type/ODataType',
-		'sap/ui/model/ParseException', 'sap/ui/model/ValidateException'],
-	function(jQuery, DateFormat, FormatException, ODataType, ParseException, ValidateException) {
+sap.ui.define([
+	"sap/base/Log",
+	"sap/ui/core/format/DateFormat",
+	"sap/ui/model/FormatException",
+	"sap/ui/model/ParseException",
+	"sap/ui/model/ValidateException",
+	"sap/ui/model/odata/type/ODataType",
+	"sap/ui/thirdparty/jquery"
+], function (Log, DateFormat, FormatException, ParseException, ValidateException, ODataType,
+		jQuery) {
 	"use strict";
 
 	var rDate = /\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])/,
-		oDemoDate = "2014-11-27",
+		oDemoDate = new Date().getFullYear() + "-12-31",
 		oModelFormatter;
 
 	/**
@@ -71,13 +77,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/format/DateFormat',
 	 *   constraints, see {@link #constructor}
 	 */
 	function setConstraints(oType, oConstraints) {
-		var vNullable = oConstraints && oConstraints.nullable;
+		var vNullable;
 
 		oType.oConstraints = undefined;
-		if (vNullable === false || vNullable === "false") {
-			oType.oConstraints = {nullable : false};
-		} else if (vNullable !== undefined && vNullable !== true && vNullable !== "true") {
-			jQuery.sap.log.warning("Illegal nullable: " + vNullable, null, oType.getName());
+		if (oConstraints) {
+			vNullable = oConstraints.nullable;
+			if (vNullable === false || vNullable === "false") {
+				oType.oConstraints = {nullable : false};
+			} else if (vNullable !== undefined && vNullable !== true && vNullable !== "true") {
+				Log.warning("Illegal nullable: " + vNullable, null, oType.getName());
+			}
 		}
 	}
 
@@ -89,10 +98,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/format/DateFormat',
 	 * In {@link sap.ui.model.odata.v4.ODataModel} this type is represented as a
 	 * <code>string</code> in the format "yyyy-mm-dd".
 	 *
+	 * <b>Note: For an OData V2 service use {@link sap.ui.model.odata.type.DateTime} with the
+	 * constraint <code>displayFormat: "Date"</code> to display only a date.</b>
+	 *
 	 * @extends sap.ui.model.odata.type.ODataType
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @alias sap.ui.model.odata.type.Date
 	 * @param {object} [oFormatOptions]
@@ -128,7 +140,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/format/DateFormat',
 	/**
 	 * Formats the given value to the given target type.
 	 *
-	 * @param {string} sValue
+	 * @param {string|Date} vValue
 	 *   the value to be formatted
 	 * @param {string} sTargetType
 	 *   the target type; may be "any", "string", or a type with one of these types as its
@@ -141,18 +153,18 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/format/DateFormat',
 	 *   if <code>sTargetType</code> is unsupported
 	 * @public
 	 */
-	EdmDate.prototype.formatValue = function(sValue, sTargetType) {
+	EdmDate.prototype.formatValue = function (vValue, sTargetType) {
 		var oDate;
 
-		if (sValue === undefined || sValue === null) {
+		if (vValue === undefined || vValue === null) {
 			return null;
 		}
 		switch (this.getPrimitiveType(sTargetType)) {
 		case "any":
-			return sValue;
+			return vValue;
 		case "string":
-			oDate = getModelFormatter().parse(sValue);
-			return oDate ? getFormatter(this).format(oDate) : sValue;
+			oDate = vValue instanceof Date ? vValue : getModelFormatter().parse(vValue);
+			return oDate ? getFormatter(this).format(oDate) : vValue;
 		default:
 			throw new FormatException("Don't know how to format " + this.getName() + " to "
 				+ sTargetType);
@@ -170,7 +182,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/format/DateFormat',
 	 * @override
 	 * @protected
 	 */
-	EdmDate.prototype.getModelFormat = function() {
+	EdmDate.prototype.getModelFormat = function () {
 		return getModelFormatter();
 	};
 
@@ -234,7 +246,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/format/DateFormat',
 			if (this.oConstraints && this.oConstraints.nullable === false) {
 				throw new ValidateException(getErrorMessage(this));
 			}
-			return;
 		} else if (typeof sValue !== "string" || !rDate.test(sValue)) {
 			throw new ValidateException("Illegal " + this.getName() + " value: " + sValue);
 		}

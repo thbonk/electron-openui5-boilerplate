@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -11,10 +11,14 @@ sap.ui.define(['sap/ui/base/Exception'],
 
 
 	/**
-	 * ValidateException class
+	 * Creates a new ValidateException.
 	 *
-	 * This exception is thrown, when a validation error occurs while checking the
-	 * defined constraints for a type.
+	 * @class Instances of this exception are thrown when a validation error
+	 * occurs while checking the defined constraints for a type.
+	 *
+	 * @param {string} message Message explaining how the validation failed
+	 * @param {string[]} [violatedConstraints] Names of the constraints that will be violated;
+	 *   names should be the same as documented for the type constructor
 	 * @alias sap.ui.model.ValidateException
 	 * @public
 	 */

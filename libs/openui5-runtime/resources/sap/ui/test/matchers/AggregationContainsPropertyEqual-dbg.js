@@ -1,13 +1,14 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-		'jquery.sap.global',
-		'./Matcher'
-	], function ($, Matcher) {
+	"sap/ui/test/matchers/Matcher",
+	"sap/base/strings/capitalize",
+	"sap/ui/thirdparty/jquery"
+], function(Matcher, capitalize, jQueryDOM) {
 	"use strict";
 
 	/**
@@ -55,21 +56,21 @@ sap.ui.define([
 		 * @public
 		 */
 		isMatching : function (oControl) {
-			var aAggregation,
-				sAggregationName = this.getAggregationName(),
+			var sAggregationName = this.getAggregationName(),
 				sPropertyName = this.getPropertyName(),
 				vPropertyValue = this.getPropertyValue(),
-				fnAggregation = oControl["get" + $.sap.charToUpperCase(sAggregationName, 0)];
+				fnAggregation = oControl["get" + capitalize(sAggregationName, 0)];
 
 			if (!fnAggregation) {
 				this._oLogger.error("Control '" + oControl + "' does not have an aggregation called '" + sAggregationName + "'");
 				return false;
 			}
 
-			aAggregation = fnAggregation.call(oControl);
+			var vAggregation = fnAggregation.call(oControl);
+			var aAggregation = jQueryDOM.isArray(vAggregation) ? vAggregation : [vAggregation];
 
 			var bMatches = aAggregation.some(function (vAggregationItem) {
-				var fnPropertyGetter = vAggregationItem["get" + $.sap.charToUpperCase(sPropertyName, 0)];
+				var fnPropertyGetter = vAggregationItem["get" + capitalize(sPropertyName, 0)];
 
 				//aggregation item does not have such a property
 				if (!fnPropertyGetter) {

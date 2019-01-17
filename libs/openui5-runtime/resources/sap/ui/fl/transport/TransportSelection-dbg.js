@@ -1,17 +1,22 @@
 /*
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define([	"jquery.sap.global", "sap/ui/fl/Utils", "sap/ui/fl/transport/Transports", "sap/ui/fl/transport/TransportDialog", "sap/ui/fl/registry/Settings" ], function(jQuery, Utils, Transports, TransportDialog, FlexSettings) {
+sap.ui.define([
+	"sap/ui/fl/Utils",
+	"sap/ui/fl/transport/Transports",
+	"sap/ui/fl/transport/TransportDialog",
+	"sap/ui/fl/registry/Settings"
+], function(Utils, Transports, TransportDialog, FlexSettings) {
 	"use strict";
 	/**
 	 * @public
 	 * @alias sap.ui.fl.transport.TransportSelection
 	 * @constructor
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @since 1.38.0
 	 * Helper object to select an ABAP transport for an LREP object. This is not a generic utility to select a transport request, but part
 	 *        of the SmartVariant control.
@@ -349,6 +354,55 @@ sap.ui.define([	"jquery.sap.global", "sap/ui/fl/Utils", "sap/ui/fl/transport/Tra
 
 			that.selectTransport(oObject, fnOkay, fnError, false, oControl, sStyleClass);
 		});
+	};
+
+	/**
+	 * Checks transport info object
+	 *
+	 * @param {Object} [oTransportInfo] - transport info object
+	 * @returns {boolean} returns true if transport info is complete
+	 * @public
+	 */
+	TransportSelection.prototype.checkTransportInfo = function(oTransportInfo) {
+		return oTransportInfo && oTransportInfo.transport && oTransportInfo.packageName !== "$TMP";
+	};
+
+	/**
+	 * Prepare all changes and assign them to an existing transport.
+	 *
+	 * @public
+	 * @param {Object} oTransportInfo - object containing the package name and the transport
+	 * @param {string} oTransportInfo.packageName - name of the package
+	 * @param {string} oTransportInfo.transport - ID of the transport
+	 * @param {Array} aAllLocalChanges - array that includes all local changes
+	 * @returns {Promise} Returns a Promise which resolves without parameters
+	 */
+	TransportSelection.prototype._prepareChangesForTransport = function(oTransportInfo, aAllLocalChanges) {
+		if (aAllLocalChanges.length > 0) {
+			// Pass list of changes to be transported with transport request to backend
+			var oTransports = new Transports();
+			var aTransportData = oTransports._convertToChangeTransportData(aAllLocalChanges);
+			var oTransportParams = {};
+			//packageName is '' in CUSTOMER layer (no package input field in transport dialog)
+			oTransportParams.package = oTransportInfo.packageName;
+			oTransportParams.transportId = oTransportInfo.transport;
+			oTransportParams.changeIds = aTransportData;
+
+			return oTransports.makeChangesTransportable(oTransportParams).then(function() {
+
+				// remove the $TMP package from all changes; has been done on the server as well,
+				// but is not reflected in the client cache until the application is reloaded
+				aAllLocalChanges.forEach(function(oChange) {
+
+					if (oChange.getPackage() === '$TMP') {
+						var oDefinition = oChange.getDefinition();
+						oDefinition.packageName = oTransportInfo.packageName;
+						oChange.setResponse(oDefinition);
+					}
+				});
+				return Promise.resolve();
+			});
+		}
 	};
 
 	return TransportSelection;

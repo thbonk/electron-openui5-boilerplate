@@ -1,16 +1,27 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-// Provides control sap.m.FeedInput.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/HTML', 'sap/ui/core/IconPool', 'sap/m/TextArea', 'sap/m/Button'],
-	function(jQuery, library, Control, HTML, IconPool, TextArea, Button) {
+sap.ui.define([
+	"./library",
+	"sap/ui/core/Control",
+	"sap/ui/core/IconPool",
+	"sap/m/TextArea",
+	"sap/m/Button",
+	"./FeedInputRenderer",
+	"sap/ui/thirdparty/jquery"
+],
+	function(library, Control, IconPool, TextArea, Button, FeedInputRenderer, jQuery) {
 	"use strict";
 
+	// shortcut for sap.m.ButtonType
+	var ButtonType = library.ButtonType;
 
-
+	var MAX_ROWS = 15,
+		MIN_ROWS = 2,
+		UNLIMITED_ROWS = 0;
 	/**
 	 * Constructor for a new FeedInput.
 	 *
@@ -22,7 +33,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -33,6 +44,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	var FeedInput = Control.extend("sap.m.FeedInput", /** @lends sap.m.FeedInput.prototype */ { metadata : {
 
 		library : "sap.m",
+		designtime: "sap/m/designtime/FeedInput.designtime",
 		properties : {
 
 			/**
@@ -41,9 +53,36 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			enabled : {type : "boolean", group : "Behavior", defaultValue : true},
 
 			/**
-			 * The maximum length (the maximum number of characters) for the feed input's value. By default this is not limited.
+			 * Defines the number of visible text lines for the control.
+			 * <b>Note:</b> Minimum value is 2, maximum value is 15.
+			 */
+			rows : {type : "int", group : "Appearance", defaultValue : 2},
+
+			/**
+			 * Determines whether the characters, exceeding the maximum allowed character count, are visible in the input field.
+			 *
+			 * If set to <code>false</code>, the user is not allowed to enter more characters than what is set in the <code>maxLength</code> property.
+			 * If set to <code>true</code>, the characters exceeding the <code>maxLength</code> value are selected on paste and the counter below
+			 * the input field displays their number.
+			 */
+			showExceededText: {type: "boolean", group: "Behavior", defaultValue: false},
+
+			/**
+			 * The maximum length (the maximum number of characters) for the feed's input value. By default this is not limited.
 			 */
 			maxLength : {type : "int", group : "Behavior", defaultValue : 0},
+
+			/**
+			 * Indicates the ability of the control to automatically grow and shrink dynamically with its content.
+			 */
+			growing : {type : "boolean", group : "Behavior", defaultValue : false},
+
+			/**
+			 * Defines the maximum number of lines that the control can grow.
+			 * Value is set to 0 by default, which means an unlimited numbers of rows.
+			 * <b>Note:</b> Minimum value to set is equal to the <code>rows</code> property value, maximum value is 15.
+			 */
+			growingMaxLines : {type : "int", group : "Behavior", defaultValue : 0},
 
 			/**
 			 * The placeholder text shown in the input area as long as the user has not entered any text value.
@@ -141,15 +180,58 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 	FeedInput.prototype.setIconDensityAware = function (iIconDensityAware) {
 		this.setProperty("iconDensityAware", iIconDensityAware, true);
-		if (this._getImageControl() instanceof sap.m.Image) {
+		var fnClass = sap.ui.require("sap/m/Image");
+		if (this._getImageControl() instanceof fnClass) {
 			this._getImageControl().setDensityAware(iIconDensityAware);
 		}
+		return this;
+	};
+
+	FeedInput.prototype.setRows = function (iRows) {
+		var iMaxLines = this.getProperty("growingMaxLines");
+		if (iRows > MAX_ROWS) {
+			iRows = MAX_ROWS;
+		} else if (iRows < MIN_ROWS) {
+			iRows = MIN_ROWS;
+		}
+		if (iRows > iMaxLines && iMaxLines !== 0) {
+			this.setProperty("growingMaxLines", iRows, true);
+			this._getTextArea().setGrowingMaxLines(iRows);
+		}
+		this.setProperty("rows", iRows, true);
+		this._getTextArea().setRows(iRows);
+		return this;
+	};
+
+	FeedInput.prototype.setShowExceededText = function (bValue) {
+		this.setProperty("showExceededText", bValue, true);
+		this._getTextArea().setShowExceededText(bValue);
 		return this;
 	};
 
 	FeedInput.prototype.setMaxLength = function (iMaxLength) {
 		this.setProperty("maxLength", iMaxLength, true);
 		this._getTextArea().setMaxLength(iMaxLength);
+		return this;
+	};
+
+	FeedInput.prototype.setGrowing = function (bGrowing) {
+		this.setProperty("growing", bGrowing, true);
+		this._getTextArea().setGrowing(bGrowing);
+		return this;
+	};
+
+	FeedInput.prototype.setGrowingMaxLines = function (iMaxLines) {
+		var iRows = this.getProperty("rows");
+		if (iMaxLines !== UNLIMITED_ROWS) {
+			if (iMaxLines < iRows) {
+				iMaxLines = iRows;
+			} else if (iMaxLines > MAX_ROWS) {
+				iMaxLines = MAX_ROWS;
+			}
+		}
+		this.setProperty("growingMaxLines", iMaxLines, true);
+		this._getTextArea().setGrowingMaxLines(iMaxLines);
 		return this;
 	};
 
@@ -186,13 +268,17 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @returns {sap.m.TextArea} The text area
 	 */
 	FeedInput.prototype._getTextArea = function () {
+		var that = this;
+
 		if (!this._oTextArea) {
 			this._oTextArea = new TextArea(this.getId() + "-textArea", {
-				rows : 3,
-				value : null,
+				value : this.getValue(),
 				maxLength : this.getMaxLength(),
 				placeholder : this.getPlaceholder(),
-				height: "100%",
+				growing : this.getGrowing(),
+				growingMaxLines : this.getGrowingMaxLines(),
+				showExceededText : this.getShowExceededText(),
+				rows : this.getRows(),
 				liveChange : jQuery.proxy(function (oEvt) {
 					var sValue = oEvt.getParameter("value");
 					this.setProperty("value", sValue, true); // update myself without re-rendering
@@ -200,6 +286,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				}, this)
 			});
 			this._oTextArea.setParent(this);
+			this._oTextArea.addEventDelegate({
+				onAfterRendering: function () {
+					that.$("counterContainer").empty();
+					that.$("counterContainer").html(that._oTextArea.getAggregation("_counter").$());
+				}
+			});
 		}
 		return this._oTextArea;
 	};
@@ -212,10 +304,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		if (!this._oButton) {
 			this._oButton = new Button(this.getId() + "-button", {
 				enabled : false,
-				type : sap.m.ButtonType.Default,
+				type : ButtonType.Default,
 				icon : "sap-icon://feeder-arrow",
 				tooltip : this.getButtonTooltip(),
-				press : jQuery.proxy(function (oEvt) {
+				press : jQuery.proxy(function () {
 					this._oTextArea.focus();
 					this.firePost({
 						value : this.getValue()
@@ -272,4 +364,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 	return FeedInput;
 
-}, /* bExport= */ true);
+});

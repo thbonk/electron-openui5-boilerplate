@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -13,8 +13,17 @@
  */
 
 // Provides class sap.ui.model.odata.ODataUtils
-sap.ui.define(['jquery.sap.global', './Filter', 'sap/ui/model/Sorter', 'sap/ui/model/Filter', 'sap/ui/core/format/DateFormat'],
-	function(jQuery, ODataFilter, Sorter, Filter, DateFormat) {
+sap.ui.define([
+	'sap/ui/model/Sorter',
+	'sap/ui/model/FilterProcessor',
+	'sap/ui/core/format/DateFormat',
+	"sap/base/Log",
+	"sap/base/assert",
+	"sap/ui/thirdparty/jquery",
+	"sap/base/security/encodeURL",
+	"sap/ui/core/CalendarType"
+],
+	function(Sorter, FilterProcessor, DateFormat, Log, assert, jQuery, encodeURL, CalendarType ) {
 	"use strict";
 
 	var rDecimal = /^([-+]?)0*(\d+)(\.\d+|)$/,
@@ -49,7 +58,7 @@ sap.ui.define(['jquery.sap.global', './Filter', 'sap/ui/model/Sorter', 'sap/ui/m
 				sSortParam += oSorter.bDescending ? "%20desc" : "%20asc";
 				sSortParam += ",";
 			} else {
-				jQuery.sap.log.error("Trying to use " + oSorter + " as a Sorter, but it is a " + typeof oSorter);
+				Log.error("Trying to use " + oSorter + " as a Sorter, but it is a " + typeof oSorter);
 			}
 		}
 		//remove trailing comma
@@ -61,95 +70,72 @@ sap.ui.define(['jquery.sap.global', './Filter', 'sap/ui/model/Sorter', 'sap/ui/m
 	 * Creates URL parameters strings for filtering.
 	 * The Parameter string is prepended with the "$filter=" system query option to form
 	 * a valid URL part for OData Request.
+	 * In case an array of filters is passed, they will be grouped in a way that filters on the
+	 * same path are ORed and filters on different paths are ANDed with each other
 	 * @see ODataUtils._createFilterParams
-	 * @see {array} aFilters an array of sap.ui.model.Filter
+	 * @param {sap.ui.model.Filter|sap.ui.model.Filter[]} vFilter the root filter or filter array
 	 * @param {object} oEntityType the entity metadata object
 	 * @return {string} the URL encoded filter parameters
 	 * @private
 	 */
-	ODataUtils.createFilterParams = function(aFilters, oMetadata, oEntityType) {
-		if (!aFilters || aFilters.length == 0) {
+	ODataUtils.createFilterParams = function(vFilter, oMetadata, oEntityType) {
+		var oFilter = Array.isArray(vFilter) ? FilterProcessor.groupFilters(vFilter) : vFilter;
+		if (!oFilter) {
 			return;
 		}
-		return "$filter=" + this._createFilterParams(aFilters, oMetadata, oEntityType);
+		return "$filter=" + this._createFilterParams(oFilter, oMetadata, oEntityType);
 	};
 
 	/**
 	 * Creates a string of logically (or/and) linked filter options,
 	 * which will be used as URL query parameters for filtering.
-	 * @param {array} aFilters an array of sap.ui.model.Filter
+	 * @param {sap.ui.model.Filter|sap.ui.model.Filter[]} vFilter the root filter or filter array
 	 * @param {object} oEntityType the entity metadata object
 	 * @return {string} the URL encoded filter parameters
 	 * @private
 	 */
-	ODataUtils._createFilterParams = function(aFilters, oMetadata, oEntityType) {
-		var sFilterParam;
-		if (!aFilters || aFilters.length == 0) {
+	ODataUtils._createFilterParams = function(vFilter, oMetadata, oEntityType) {
+		var that = this,
+			oFilter = Array.isArray(vFilter) ? FilterProcessor.groupFilters(vFilter) : vFilter;
+
+		function create(oFilter, bOmitBrackets) {
+			if (oFilter.aFilters) {
+				return createMulti(oFilter, bOmitBrackets);
+			}
+			return that._createFilterSegment(oFilter.sPath, oMetadata, oEntityType, oFilter.sOperator, oFilter.oValue1, oFilter.oValue2, oFilter.bCaseSensitive);
+		}
+
+		function createMulti(oMultiFilter, bOmitBrackets) {
+			var aFilters = oMultiFilter.aFilters,
+				bAnd = !!oMultiFilter.bAnd,
+				sFilter = "";
+
+			if (aFilters.length === 1) {
+				if (aFilters[0]._bMultiFilter) {
+					return create(aFilters[0]);
+				}
+				return create(aFilters[0], true);
+			}
+
+			if (!bOmitBrackets) {
+				sFilter += "(";
+			}
+			sFilter += create(aFilters[0]);
+			for (var i = 1; i < aFilters.length; i++) {
+				sFilter += bAnd ? "%20and%20" : "%20or%20";
+				sFilter += create(aFilters[i]);
+			}
+			if (!bOmitBrackets) {
+				sFilter += ")";
+			}
+			return sFilter;
+		}
+
+		if (!oFilter) {
 			return;
 		}
-		var oFilterGroups = {},
-			iFilterGroupLength = 0,
-			aFilterGroup,
-			sFilterParam = "",
-			iFilterGroupCount = 0,
-			that = this;
-		//group filters by path
-		jQuery.each(aFilters, function(j, oFilter) {
-			if (oFilter.sPath) {
-				aFilterGroup = oFilterGroups[oFilter.sPath];
-				if (!aFilterGroup) {
-					aFilterGroup = oFilterGroups[oFilter.sPath] = [];
-					iFilterGroupLength++;
-				}
-			} else {
-				aFilterGroup = oFilterGroups["__multiFilter"];
-				if (!aFilterGroup) {
-					aFilterGroup = oFilterGroups["__multiFilter"] = [];
-					iFilterGroupLength++;
-				}
-			}
-			aFilterGroup.push(oFilter);
-		});
-		jQuery.each(oFilterGroups, function(sPath, aFilterGroup) {
-			if (aFilterGroup.length > 1) {
-				sFilterParam += '(';
-			}
-			jQuery.each(aFilterGroup, function(i,oFilter) {
-				if (oFilter instanceof ODataFilter) {
-					if (oFilter.aValues.length > 1) {
-						sFilterParam += '(';
-					}
-					jQuery.each(oFilter.aValues, function(i, oFilterSegment) {
-						if (i > 0) {
-							if (oFilter.bAND) {
-								sFilterParam += "%20and%20";
-							} else {
-								sFilterParam += "%20or%20";
-							}
-						}
-						sFilterParam = that._createFilterSegment(oFilter.sPath, oMetadata, oEntityType, oFilterSegment.operator, oFilterSegment.value1, oFilterSegment.value2, sFilterParam);
-					});
-					if (oFilter.aValues.length > 1) {
-						sFilterParam += ')';
-					}
-				} else if (oFilter._bMultiFilter) {
-					sFilterParam += that._resolveMultiFilter(oFilter, oMetadata, oEntityType);
-				} else {
-					sFilterParam = that._createFilterSegment(oFilter.sPath, oMetadata, oEntityType, oFilter.sOperator, oFilter.oValue1, oFilter.oValue2, sFilterParam);
-				}
-				if (i < aFilterGroup.length - 1) {
-					sFilterParam += "%20or%20";
-				}
-			});
-			if (aFilterGroup.length > 1) {
-				sFilterParam += ')';
-			}
-			if (iFilterGroupCount < iFilterGroupLength - 1) {
-				sFilterParam += "%20and%20";
-			}
-			iFilterGroupCount++;
-		});
-		return sFilterParam;
+
+		return create(oFilter, true);
 	};
 
 	/**
@@ -196,7 +182,7 @@ sap.ui.define(['jquery.sap.global', './Filter', 'sap/ui/model/Sorter', 'sap/ui/m
 			if (jQuery.type(oValue) === "string") {
 				oValue = encodeURIComponent(oValue);
 			}
-			sName = jQuery.sap.startsWith(sName,'$') ? sName : encodeURIComponent(sName);
+			sName = sName.startsWith('$') ? sName : encodeURIComponent(sName);
 			aUrlParams.push(sName + "=" + oValue);
 		});
 		return aUrlParams.join("&");
@@ -253,7 +239,7 @@ sap.ui.define(['jquery.sap.global', './Filter', 'sap/ui/model/Sorter', 'sap/ui/m
 				sClient = vParameters.client;
 				// sanity check
 				if (!sSystem || !sClient) {
-					jQuery.sap.log.warning("ODataUtils.setOrigin: No Client or System ID given for Origin");
+					Log.warning("ODataUtils.setOrigin: No Client or System ID given for Origin");
 					return sServiceURL;
 				}
 				sOrigin = "sid(" + sSystem + "." + sClient + ")";
@@ -326,7 +312,7 @@ sap.ui.define(['jquery.sap.global', './Filter', 'sap/ui/model/Sorter', 'sap/ui/m
 
 		if (iAnnotationIndex >= 0) { // annotation path is there
 			if (sAnnotationURL.indexOf("/$value", iAnnotationIndex) === -1) { // $value missing
-				jQuery.sap.log.warning("ODataUtils.setAnnotationOrigin: Annotation url is missing $value segment.");
+				Log.warning("ODataUtils.setAnnotationOrigin: Annotation url is missing $value segment.");
 				sFinalAnnotationURL = sAnnotationURL;
 			} else {
 				// if the annotation URL is an SAP specific annotation url, we add the origin path segment...
@@ -361,7 +347,7 @@ sap.ui.define(['jquery.sap.global', './Filter', 'sap/ui/model/Sorter', 'sap/ui/m
 				if (oFilter._bMultiFilter) {
 					sFilterParam += that._resolveMultiFilter(oFilter, oMetadata, oEntityType);
 				} else if (oFilter.sPath) {
-					sFilterParam += that._createFilterSegment(oFilter.sPath, oMetadata, oEntityType, oFilter.sOperator, oFilter.oValue1, oFilter.oValue2, "");
+					sFilterParam += that._createFilterSegment(oFilter.sPath, oMetadata, oEntityType, oFilter.sOperator, oFilter.oValue1, oFilter.oValue2, "", oFilter.bCaseSensitive);
 				}
 				if (i < (aFilters.length - 1)) {
 					if (oMultiFilter.bAnd) {
@@ -382,27 +368,36 @@ sap.ui.define(['jquery.sap.global', './Filter', 'sap/ui/model/Sorter', 'sap/ui/m
 	 *
 	 * @private
 	 */
-	ODataUtils._createFilterSegment = function(sPath, oMetadata, oEntityType, sOperator, oValue1, oValue2, sFilterParam) {
+	ODataUtils._createFilterSegment = function(sPath, oMetadata, oEntityType, sOperator, oValue1, oValue2, bCaseSensitive) {
 
 		var oPropertyMetadata, sType;
+
+		if (bCaseSensitive === undefined) {
+			bCaseSensitive = true;
+		}
+
 		if (oEntityType) {
 			oPropertyMetadata = oMetadata._getPropertyMetadata(oEntityType, sPath);
 			sType = oPropertyMetadata && oPropertyMetadata.type;
-			jQuery.sap.assert(oPropertyMetadata, "PropertyType for property " + sPath + " of EntityType " + oEntityType.name + " not found!");
+			assert(oPropertyMetadata, "PropertyType for property " + sPath + " of EntityType " + oEntityType.name + " not found!");
 		}
 
 		if (sType) {
-			oValue1 = this.formatValue(oValue1, sType);
-			oValue2 = (oValue2 != null) ? this.formatValue(oValue2, sType) : null;
+			oValue1 = this.formatValue(oValue1, sType, bCaseSensitive);
+			oValue2 = (oValue2 != null) ? this.formatValue(oValue2, sType, bCaseSensitive) : null;
 		} else {
-			jQuery.sap.assert(null, "Type for filter property could not be found in metadata!");
+			assert(null, "Type for filter property could not be found in metadata!");
 		}
 
 		if (oValue1) {
-			oValue1 = jQuery.sap.encodeURL(String(oValue1));
+			oValue1 = encodeURL(String(oValue1));
 		}
 		if (oValue2) {
-			oValue2 = jQuery.sap.encodeURL(String(oValue2));
+			oValue2 = encodeURL(String(oValue2));
+		}
+
+		if (!bCaseSensitive && sType === "Edm.String") {
+			sPath =  "toupper(" + sPath + ")";
 		}
 
 		// TODO embed 2nd value
@@ -413,24 +408,27 @@ sap.ui.define(['jquery.sap.global', './Filter', 'sap/ui/model/Sorter', 'sap/ui/m
 			case "GE":
 			case "LT":
 			case "LE":
-				sFilterParam += sPath + "%20" + sOperator.toLowerCase() + "%20" + oValue1;
-				break;
+				return sPath + "%20" + sOperator.toLowerCase() + "%20" + oValue1;
 			case "BT":
-				sFilterParam += "(" + sPath + "%20ge%20" + oValue1 + "%20and%20" + sPath + "%20le%20" + oValue2 + ")";
-				break;
+				return "(" + sPath + "%20ge%20" + oValue1 + "%20and%20" + sPath + "%20le%20" + oValue2 + ")";
+			case "NB":
+				return "not%20(" + sPath + "%20ge%20" + oValue1 + "%20and%20" + sPath + "%20le%20" + oValue2 + ")";
 			case "Contains":
-				sFilterParam += "substringof(" + oValue1 + "," + sPath + ")";
-				break;
+				return "substringof(" + oValue1 + "," + sPath + ")";
+			case "NotContains":
+				return "not%20substringof(" + oValue1 + "," + sPath + ")";
 			case "StartsWith":
-				sFilterParam += "startswith(" + sPath + "," + oValue1 + ")";
-				break;
+				return "startswith(" + sPath + "," + oValue1 + ")";
+			case "NotStartsWith":
+				return "not%20startswith(" + sPath + "," + oValue1 + ")";
 			case "EndsWith":
-				sFilterParam += "endswith(" + sPath + "," + oValue1 + ")";
-				break;
+				return "endswith(" + sPath + "," + oValue1 + ")";
+			case "NotEndsWith":
+				return "not%20endswith(" + sPath + "," + oValue1 + ")";
 			default:
-				sFilterParam += "true";
+				Log.error("ODataUtils :: Unknown filter operator " + sOperator);
+				return "true";
 		}
-		return sFilterParam;
 	};
 
 	/**
@@ -440,20 +438,33 @@ sap.ui.define(['jquery.sap.global', './Filter', 'sap/ui/model/Sorter', 'sap/ui/m
 	 *
 	 * @param {any} vValue the value to format
 	 * @param {string} sType the EDM type (e.g. Edm.Decimal)
+	 * @param {boolean} bCaseSensitive Wether strings gets compared case sensitive or not
 	 * @return {string} the formatted value
 	 * @public
 	 */
-	ODataUtils.formatValue = function(vValue, sType) {
+	ODataUtils.formatValue = function(vValue, sType, bCaseSensitive) {
+
+		if (bCaseSensitive === undefined) {
+			bCaseSensitive = true;
+		}
+
 		// Lazy creation of format objects
 		if (!this.oDateTimeFormat) {
 			this.oDateTimeFormat = DateFormat.getDateInstance({
-				pattern: "'datetime'''yyyy-MM-dd'T'HH:mm:ss''"
+				pattern: "'datetime'''yyyy-MM-dd'T'HH:mm:ss''",
+				calendarType: CalendarType.Gregorian
+			});
+			this.oDateTimeFormatMs = DateFormat.getDateInstance({
+				pattern: "'datetime'''yyyy-MM-dd'T'HH:mm:ss.SSS''",
+				calendarType: CalendarType.Gregorian
 			});
 			this.oDateTimeOffsetFormat = DateFormat.getDateInstance({
-				pattern: "'datetimeoffset'''yyyy-MM-dd'T'HH:mm:ss'Z'''"
+				pattern: "'datetimeoffset'''yyyy-MM-dd'T'HH:mm:ss'Z'''",
+				calendarType: CalendarType.Gregorian
 			});
 			this.oTimeFormat = DateFormat.getTimeInstance({
-				pattern: "'time''PT'HH'H'mm'M'ss'S'''"
+				pattern: "'time''PT'HH'H'mm'M'ss'S'''",
+				calendarType: CalendarType.Gregorian
 			});
 		}
 
@@ -467,6 +478,7 @@ sap.ui.define(['jquery.sap.global', './Filter', 'sap/ui/model/Sorter', 'sap/ui/m
 		switch (sType) {
 			case "Edm.String":
 				// quote
+				vValue = bCaseSensitive ? vValue : vValue.toUpperCase();
 				sValue = "'" + String(vValue).replace(/'/g, "''") + "'";
 				break;
 			case "Edm.Time":
@@ -477,10 +489,17 @@ sap.ui.define(['jquery.sap.global', './Filter', 'sap/ui/model/Sorter', 'sap/ui/m
 				}
 				break;
 			case "Edm.DateTime":
-				sValue = this.oDateTimeFormat.format(new Date(vValue), true);
+				var oDate = new Date(vValue);
+
+				if (oDate.getMilliseconds() > 0) {
+					sValue = this.oDateTimeFormatMs.format(oDate, true);
+				} else {
+					sValue = this.oDateTimeFormat.format(oDate, true);
+				}
 				break;
 			case "Edm.DateTimeOffset":
-				sValue = this.oDateTimeOffsetFormat.format(new Date(vValue), true);
+				var oDate = new Date(vValue);
+				sValue = this.oDateTimeOffsetFormat.format(oDate, true);
 				break;
 			case "Edm.Guid":
 				sValue = "guid'" + vValue + "'";
@@ -603,9 +622,9 @@ sap.ui.define(['jquery.sap.global', './Filter', 'sap/ui/model/Sorter', 'sap/ui/m
 	 */
 	function extractMilliseconds(vValue) {
 		if (typeof vValue === "string" && rTime.test(vValue)) {
-			vValue = parseInt(RegExp.$1, 10) * 3600000 +
-				parseInt(RegExp.$2, 10) * 60000 +
-				parseInt(RegExp.$3, 10) * 1000;
+			vValue = parseInt(RegExp.$1) * 3600000 +
+				parseInt(RegExp.$2) * 60000 +
+				parseInt(RegExp.$3) * 1000;
 		}
 		if (vValue instanceof Date) {
 			return vValue.getTime();

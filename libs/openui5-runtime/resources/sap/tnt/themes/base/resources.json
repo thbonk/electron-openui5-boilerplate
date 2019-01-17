@@ -6,6 +6,11 @@
 			"theme": "base"
 		},
 		{
+			"name": "InfoLabel.less",
+			"designtime": true,
+			"theme": "base"
+		},
+		{
 			"name": "NavigationList.less",
 			"designtime": true,
 			"theme": "base"
@@ -23,6 +28,22 @@
 		{
 			"name": "ToolPage.less",
 			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "fonts/SAP-icons-TNT.json",
+			"theme": "base"
+		},
+		{
+			"name": "fonts/SAP-icons-TNT.ttf",
+			"theme": "base"
+		},
+		{
+			"name": "fonts/SAP-icons-TNT.woff",
+			"theme": "base"
+		},
+		{
+			"name": "fonts/SAP-icons-TNT.woff2",
 			"theme": "base"
 		},
 		{

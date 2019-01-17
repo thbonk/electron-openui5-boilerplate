@@ -1,13 +1,22 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.ux3.FacetFilter.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
-	function(jQuery, Control, library) {
-	"use strict";
+sap.ui.define([
+    'sap/ui/core/Control',
+    './library',
+    './FacetFilterRenderer'
+],
+	function(Control, library, FacetFilterRenderer) {
+    "use strict";
+
+
+
+	// shortcut for sap.ui.ux3.VisibleItemCountMode
+	var VisibleItemCountMode = library.VisibleItemCountMode;
 
 
 
@@ -22,11 +31,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
-	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.FacetFilter</code> control.
+	 * @deprecated as of version 1.38, replaced by {@link sap.m.FacetFilter}
 	 * @alias sap.ui.ux3.FacetFilter
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -37,7 +46,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 			/**
 			 * If the value is "Auto" - the Facet Filter takes the whole available height. If "Fixed" , then the default number of Facet Filter Items (5) is visible.
 			 */
-			visibleItemCountMode : {type : "sap.ui.ux3.VisibleItemCountMode", group : "Appearance", defaultValue : sap.ui.ux3.VisibleItemCountMode.Fixed}
+			visibleItemCountMode : {type : "sap.ui.ux3.VisibleItemCountMode", group : "Appearance", defaultValue : VisibleItemCountMode.Fixed}
 		},
 		aggregations : {
 
@@ -55,4 +64,4 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 
 	return FacetFilter;
 
-}, /* bExport= */ true);
+});

@@ -1,14 +1,37 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides helper sap.ui.table.TableUtils.
 sap.ui.define([
-	"jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/ResizeHandler", "sap/ui/core/library", "sap/ui/Device", "sap/ui/model/ChangeReason",
-	"./TableGrouping", "./TableColumnUtils", "./TableMenuUtils", "./library"
-], function(jQuery, Control, ResizeHandler, coreLibrary, Device, ChangeReason, TableGrouping, TableColumnUtils, TableMenuUtils, library) {
+	"sap/ui/base/Object",
+	"sap/ui/core/Control",
+	"sap/ui/core/ResizeHandler",
+	"sap/ui/core/library",
+	"sap/ui/model/ChangeReason",
+	"./TableGrouping",
+	"./TableColumnUtils",
+	"./TableMenuUtils",
+	"./TableBindingUtils",
+	"./library",
+	"sap/base/Log",
+	"sap/ui/thirdparty/jquery"
+], function(
+	BaseObject,
+	Control,
+	ResizeHandler,
+	coreLibrary,
+	ChangeReason,
+	TableGrouping,
+	TableColumnUtils,
+	TableMenuUtils,
+	TableBindingUtils,
+	library,
+	Log,
+	jQuery
+) {
 	"use strict";
 
 	// Shortcuts
@@ -17,13 +40,10 @@ sap.ui.define([
 	var MessageType = coreLibrary.MessageType;
 
 	/**
-	 * The border width of a row in pixels.
-	 *
-	 * @type {int}
-	 * @static
-	 * @constant
+	 * The resource bundle of the sap.ui.table library.
+	 * @type {jQuery.sap.util.ResourceBundle}
 	 */
-	var ROW_BORDER_WIDTH = 1;
+	var oResourceBundle;
 
 	/**
 	 * Table cell type.
@@ -55,91 +75,126 @@ sap.ui.define([
 	CELLTYPE.ANY = CELLTYPE.ANYCONTENTCELL | CELLTYPE.ANYCOLUMNHEADER;
 
 	/**
+	 * The horizontal frame size of a row in pixels. This is the height of a row excluding the content height.
+	 *
+	 * @type {int}
+	 * @static
+	 * @constant
+	 */
+	var ROW_HORIZONTAL_FRAME_SIZE = 1; /* 1px border */
+
+	/**
+	 * The default row content heights in pixels for the different content densities.
+	 *
+	 * @type {sap.ui.table.TableUtils.DefaultRowContentHeight}
+	 * @static
+	 * @constant
+	 * @typedef {Object} sap.ui.table.TableUtils.DefaultRowContentHeight
+	 * @property {int} sapUiSizeCondensed - The default content height of a row in pixels in condensed content density.
+	 * @property {int} sapUiSizeCompact - The default content height of a row in pixels in compact content density.
+	 * @property {int} sapUiSizeCozy - The default content height of a row in pixels in cozy content density.
+	 * @property {int} undefined - The default content height of a row in pixels in case no content density information is available.
+	 */
+	var DEFAULT_ROW_CONTENT_HEIGHT = {
+		sapUiSizeCozy: 48,
+		sapUiSizeCompact: 32,
+		sapUiSizeCondensed: 24,
+		undefined: 32
+	};
+
+	/**
+	 * The default row heights in pixels for the different content densities.
+	 *
+	 * @type {sap.ui.table.TableUtils.DefaultRowHeight}
+	 * @static
+	 * @constant
+	 * @typedef {Object} sap.ui.table.TableUtils.DefaultRowHeight
+	 * @property {int} sapUiSizeCondensed - The default height of a row in pixels in condensed content density.
+	 * @property {int} sapUiSizeCompact - The default height of a row in pixels in compact content density.
+	 * @property {int} sapUiSizeCozy - The default height of a row in pixels in cozy content density.
+	 * @property {int} undefined - The default height of a row in pixels in case no content density information is available.
+	 */
+	var DEFAULT_ROW_HEIGHT = {
+		sapUiSizeCozy: DEFAULT_ROW_CONTENT_HEIGHT.sapUiSizeCozy + ROW_HORIZONTAL_FRAME_SIZE,
+		sapUiSizeCompact: DEFAULT_ROW_CONTENT_HEIGHT.sapUiSizeCompact + ROW_HORIZONTAL_FRAME_SIZE,
+		sapUiSizeCondensed: DEFAULT_ROW_CONTENT_HEIGHT.sapUiSizeCondensed + ROW_HORIZONTAL_FRAME_SIZE,
+		undefined: DEFAULT_ROW_CONTENT_HEIGHT.undefined + ROW_HORIZONTAL_FRAME_SIZE
+	};
+
+	/**
+	 * Reason for updates of the rows. Inherits from {@link sap.ui.model.ChangeReason}.
+	 *
+	 * @type {sap.ui.table.TableUtils.ROWS_UPDATE_REASON}
+	 * @static
+	 * @constant
+	 * @typedef {Object} sap.ui.table.TableUtils.ROWS_UPDATE_REASON
+	 * @property {string} Sort - {@link sap.ui.model.ChangeReason.Sort}
+	 * @property {string} Filter - {@link sap.ui.model.ChangeReason.Filter}
+	 * @property {string} Change - {@link sap.ui.model.ChangeReason.Change}
+	 * @property {string} Context - {@link sap.ui.model.ChangeReason.Context}
+	 * @property {string} Refresh - {@link sap.ui.model.ChangeReason.Refresh}
+	 * @property {string} Expand - {@link sap.ui.model.ChangeReason.Expand}
+	 * @property {string} Collapse - {@link sap.ui.model.ChangeReason.Collapse}
+	 * @property {string} Remove - {@link sap.ui.model.ChangeReason.Remove}
+	 * @property {string} Add - {@link sap.ui.model.ChangeReason.Add}
+	 * @property {string} Binding - {@link sap.ui.model.ChangeReason.Binding}
+	 * @property {string} Render - The table has been rendered.
+	 * @property {string} VerticalScroll - The table has been scrolled vertically.
+	 * @property {string} FirstVisibleRowChange - The first visible row has been changed by API call.
+	 * @property {string} Unbind - The row binding has been removed.
+	 * @property {string} Animation - An animation has been performed.
+	 * @property {string} Resize - The table has been resized.
+	 * @property {string} Zoom - The browsers zoom level has changed.
+	 * @property {string} Unknown - The reason for the update is unknown.
+	 */
+	var ROWS_UPDATE_REASON = {
+		Render: "Render",
+		VerticalScroll: "VerticalScroll",
+		FirstVisibleRowChange: "FirstVisibleRowChange",
+		Unbind: "Unbind",
+		Animation: "Animation",
+		Resize: "Resize",
+		Unknown: "Unknown"
+	};
+	for (var sProperty in ChangeReason) {
+		ROWS_UPDATE_REASON[sProperty] = ChangeReason[sProperty];
+	}
+
+	/**
+	 * The selectors which define whether an element is interactive. Due to the usage of pseudo selectors this can only be used in jQuery.
+	 *
+	 * @type {string}
+	 * @static
+	 * @constant
+	 */
+	var INTERACTIVE_ELEMENT_SELECTORS = ":sapTabbable, .sapUiTableTreeIcon:not(.sapUiTableTreeIconLeaf)";
+
+	/**
 	 * Static collection of utility functions related to the sap.ui.table.Table, ...
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @namespace
-	 * @name sap.ui.table.TableUtils
+	 * @alias sap.ui.table.TableUtils
 	 * @private
 	 */
 	var TableUtils = {
+		// Make other utils available.
+		Grouping: TableGrouping,
+		Column: TableColumnUtils,
+		Menu: TableMenuUtils,
+		Binding: TableBindingUtils,
 
-		Grouping: TableGrouping, //Make grouping utils available here
-		Column: TableColumnUtils, //Make column utils available here
-		Menu: TableMenuUtils, //Make menu utils available here
-
-		/**
-		 * @type {sap.ui.table.TableUtils.CellType}
-		 */
 		CELLTYPE: CELLTYPE,
-
-		/**
-		 * The default row heights in pixels for the different content densities.
-		 *
-		 * @type {DefaultRowHeight}
-		 * @static
-		 * @constant
-		 * @typedef {Object} DefaultRowHeight
-		 * @property {int} sapUiSizeCondensed - The default height of a row in pixels in condensed content density.
-		 * @property {int} sapUiSizeCompact - The default height of a row in pixels in compact content density.
-		 * @property {int} sapUiSizeCozy - The default height of a row in pixels in cozy content density.
-		 * @property {int} undefined - The default height of a row in pixels in case no content density information is available.
-		 */
-		DEFAULT_ROW_HEIGHT: {
-			sapUiSizeCondensed : 24 + ROW_BORDER_WIDTH,
-			sapUiSizeCompact : 32 + ROW_BORDER_WIDTH,
-			sapUiSizeCozy : 48 + ROW_BORDER_WIDTH,
-			undefined : 32 + ROW_BORDER_WIDTH
-		},
-
-		/**
-		 * Reason for updates of the rows. Inherits from {@link sap.ui.model.ChangeReason}.
-		 *
-		 * @type {RowsUpdateReason}
-		 * @static
-		 * @constant
-		 * @typedef {Object} RowsUpdateReason
-		 * @property {string} Sort - {@link sap.ui.model.ChangeReason.Sort}
-		 * @property {string} Filter - {@link sap.ui.model.ChangeReason.Filter}
-		 * @property {string} Change - {@link sap.ui.model.ChangeReason.Change}
-		 * @property {string} Context - {@link sap.ui.model.ChangeReason.Context}
-		 * @property {string} Refresh - {@link sap.ui.model.ChangeReason.Refresh}
-		 * @property {string} Expand - {@link sap.ui.model.ChangeReason.Expand}
-		 * @property {string} Collapse - {@link sap.ui.model.ChangeReason.Collapse}
-		 * @property {string} Remove - {@link sap.ui.model.ChangeReason.Remove}
-		 * @property {string} Add - {@link sap.ui.model.ChangeReason.Add}
-		 * @property {string} Binding - {@link sap.ui.model.ChangeReason.Binding}
-		 * @property {string} Render - The table has been rendered.
-		 * @property {string} VerticalScroll - The table has been scrolled vertically.
-		 * @property {string} FirstVisibleRowChange - The first visible row has been changed by API call.
-		 * @property {string} Unbind - The row binding has been removed.
-		 * @property {string} Animation - An animation has been performed.
-		 * @property {string} Resize - The table has been resized.
-		 * @property {string} Unknown - The reason for the update is unknown.
-		 */
-		RowsUpdateReason: (function() {
-			var mUpdateRowsReason = {};
-
-			for (var sProperty in ChangeReason) {
-				mUpdateRowsReason[sProperty] = ChangeReason[sProperty];
-			}
-
-			mUpdateRowsReason.Render = "Render";
-			mUpdateRowsReason.VerticalScroll = "VerticalScroll";
-			mUpdateRowsReason.FirstVisibleRowChange = "FirstVisibleRowChange";
-			mUpdateRowsReason.Unbind = "Unbind";
-			mUpdateRowsReason.Animation = "Animation";
-			mUpdateRowsReason.Resize = "Resize";
-			mUpdateRowsReason.Unknown = "Unknown";
-
-			return mUpdateRowsReason;
-		})(),
+		ROW_HORIZONTAL_FRAME_SIZE: ROW_HORIZONTAL_FRAME_SIZE,
+		DEFAULT_ROW_HEIGHT: DEFAULT_ROW_HEIGHT,
+		RowsUpdateReason: ROWS_UPDATE_REASON,
+		INTERACTIVE_ELEMENT_SELECTORS: INTERACTIVE_ELEMENT_SELECTORS,
 
 		/**
 		 * Returns whether the table has a row header or not
 		 * @param {sap.ui.table.Table} oTable Instance of the table
-		 * @return {boolean}
+		 * @returns {boolean}
 		 * @private
 		 */
 		hasRowHeader : function(oTable) {
@@ -152,11 +207,11 @@ sap.ui.define([
 		 * Returns whether the table has a SelectAll checkbox.
 		 *
 		 * @param {sap.ui.table.Table} oTable Instance of the table.
-		 * @return {boolean} Returns <code>true</code>, if the table has a SelectAll checkbox.
+		 * @returns {boolean} Returns <code>true</code>, if the table has a SelectAll checkbox.
 		 * @private
 		 */
 		hasSelectAll: function(oTable) {
-			var sSelectionMode = oTable != null ? oTable.getSelectionMode() : SelectionMode.None;
+			var sSelectionMode = oTable ? oTable.getSelectionMode() : SelectionMode.None;
 			return (sSelectionMode === SelectionMode.Multi || sSelectionMode === SelectionMode.MultiToggle)
 				   && oTable.getEnableSelectAll();
 		},
@@ -165,17 +220,17 @@ sap.ui.define([
 		 * Returns whether the table has row highlights.
 		 *
 		 * @param {sap.ui.table.Table} oTable Instance of the table
-		 * @return {boolean} Returns <code>true</code>, if the table has row highlights
+		 * @returns {boolean} Returns <code>true</code>, if the table has row highlights
 		 * @private
 		 */
 		hasRowHighlights: function(oTable) {
-			if (oTable == null) {
+			if (!oTable) {
 				return false;
 			}
 
 			var oRowSettingsTemplate = oTable.getRowSettingsTemplate();
 
-			if (oRowSettingsTemplate == null) {
+			if (!oRowSettingsTemplate) {
 				return false;
 			}
 
@@ -188,7 +243,7 @@ sap.ui.define([
 		/**
 		 * Returns the number of row actions in case the tahe has a row action column, <code>0</code> otherwise
 		 * @param {sap.ui.table.Table} oTable Instance of the table
-		 * @return {int}
+		 * @returns {int}
 		 * @private
 		 */
 		getRowActionCount : function(oTable) {
@@ -199,7 +254,7 @@ sap.ui.define([
 		/**
 		 * Returns whether the table has a row action column or not
 		 * @param {sap.ui.table.Table} oTable Instance of the table
-		 * @return {boolean}
+		 * @returns {boolean}
 		 * @private
 		 */
 		hasRowActions : function(oTable) {
@@ -213,7 +268,7 @@ sap.ui.define([
 		/**
 		 * Returns whether selection is allowed on the cells of a row (not row selector).
 		 * @param {sap.ui.table.Table} oTable Instance of the table
-		 * @return {boolean}
+		 * @returns {boolean}
 		 * @private
 		 */
 		isRowSelectionAllowed : function(oTable) {
@@ -224,7 +279,7 @@ sap.ui.define([
 		/**
 		 * Returns whether selection is allowed via the row selector.
 		 * @param {sap.ui.table.Table} oTable Instance of the table
-		 * @return {boolean}
+		 * @returns {boolean}
 		 * @private
 		 */
 		isRowSelectorSelectionAllowed : function(oTable) {
@@ -239,7 +294,7 @@ sap.ui.define([
 		 * @returns {boolean} Returns <code>true</code> if all rows in the table are selected.
 		 */
 		areAllRowsSelected: function(oTable) {
-			if (oTable == null) {
+			if (!oTable) {
 				return false;
 			}
 
@@ -251,7 +306,7 @@ sap.ui.define([
 		 * Returns whether the no data text is currently shown or not
 		 * If true, also CSS class sapUiTableEmpty is set on the table root element.
 		 * @param {sap.ui.table.Table} oTable Instance of the table
-		 * @return {boolean}
+		 * @returns {boolean}
 		 * @private
 		 */
 		isNoDataVisible : function(oTable) {
@@ -265,17 +320,17 @@ sap.ui.define([
 		/**
 		 * Returns whether the table currently has data.
 		 * @param {sap.ui.table.Table} oTable Instance of the table
-		 * @return {boolean}
+		 * @returns {boolean}
 		 * @private
 		 */
 		hasData : function(oTable) {
-			var oBinding = oTable.getBinding("rows"),
-			iBindingLength = oTable._getRowCount(),
-			bHasData = oBinding ? !!iBindingLength : false;
+			var oBinding = oTable.getBinding("rows");
+			var iTotalRowCount = oTable._getTotalRowCount();
+			var bHasData = iTotalRowCount > 0;
 
 			if (oBinding && oBinding.providesGrandTotal) { // Analytical Binding
 				var bHasTotal = oBinding.providesGrandTotal() && oBinding.hasTotaledMeasures();
-				bHasData = (bHasTotal && iBindingLength < 2) || (!bHasTotal && iBindingLength === 0) ? false : true;
+				bHasData = (bHasTotal && iTotalRowCount > 1) || (!bHasTotal && iTotalRowCount > 0);
 			}
 
 			return bHasData;
@@ -290,7 +345,7 @@ sap.ui.define([
 		 * @private
 		 */
 		isBusyIndicatorVisible: function(oTable) {
-			if (oTable == null || oTable.getDomRef() == null) {
+			if (!oTable || !oTable.getDomRef()) {
 				return false;
 			}
 
@@ -301,11 +356,11 @@ sap.ui.define([
 		 * Returns whether one or more requests are currently in process by the binding.
 		 *
 		 * @param {sap.ui.table.Table} oTable Instance of the table.
-		 * @return {boolean} Returns <code>true</code>, if the binding of the table is currently requesting data.
+		 * @returns {boolean} Returns <code>true</code>, if the binding of the table is currently requesting data.
 		 * @private
 		 */
 		hasPendingRequests: function(oTable) {
-			if (oTable == null) {
+			if (!oTable) {
 				return false;
 			}
 
@@ -336,11 +391,11 @@ sap.ui.define([
 		 * @returns {boolean} Returns <code>true</code>, if the table can use a counter for pending request detection.
 		 */
 		canUsePendingRequestsCounter: function(oTable) {
-			var oBinding = oTable != null ? oTable.getBinding("rows") : null;
+			var oBinding = oTable ? oTable.getBinding("rows") : null;
 
-			if (TableUtils.isInstanceOf(oBinding, "sap/ui/model/analytics/AnalyticalBinding")) {
+			if (TableUtils.isA(oBinding, "sap.ui.model.analytics.AnalyticalBinding")) {
 				return oBinding.bUseBatchRequests;
-			} else if (TableUtils.isInstanceOf(oBinding, "sap/ui/model/TreeBinding")) {
+			} else if (TableUtils.isA(oBinding, "sap.ui.model.TreeBinding")) {
 				return false;
 			}
 
@@ -348,37 +403,35 @@ sap.ui.define([
 		},
 
 		/**
-		 * Checks whether the given object is of the given type (given in AMD module syntax)
-		 * without the need of loading the types module.
-		 * @param {sap.ui.base.ManagedObject} oObject The object to check
-		 * @param {string} sType The type given in AMD module syntax
-		 * @return {boolean}
+		 * Checks whether an object is of the given type(s).
+		 * Wrapper for {@link sap.ui.base.Object.isA}
+		 *
+		 * @param {object} oObject Object which will be checked whether it is an instance of the given type
+		 * @param {string|string[]} vTypeName Type or types to check for
+		 * @see sap.ui.base.Object.isA
+		 * @returns {boolean} Whether this object is an instance of the given type or of any of the given types
 		 * @private
 		 */
-		isInstanceOf : function(oObject, sType) {
-			if (!oObject || !sType) {
-				return false;
-			}
-			var oType = sap.ui.require(sType);
-			return !!(oType && (oObject instanceof oType));
+		isA: function(oObject, vTypeName) {
+			return BaseObject.isA(oObject, vTypeName);
 		},
 
 		/**
 		 * Toggles the selection state of the row which contains the given cell DOM element.
 		 *
 		 * @param {sap.ui.table.Table} oTable Instance of the table
-		 * @param {jQuery|HTMLElement|int} oRowIndicator The data cell in the row, or the data row index of the row,
+		 * @param {jQuery|HTMLElement|int} vRowIndicator The data cell in the row, or the data row index of the row,
 		 * 												 where the selection state should be toggled.
 		 * @param {boolean} [bSelect] If defined, then instead of toggling the desired state is set.
 		 * @param {function} [fnDoSelect] If defined, then instead of the default selection code, this custom callback is used.
 		 * @returns {boolean} Returns <code>true</code> if the selection state of the row has been changed.
 		 * @private
 		 */
-		toggleRowSelection: function(oTable, oRowIndicator, bSelect, fnDoSelect) {
-			if (oTable == null ||
-				oTable.getBinding("rows") == null ||
+		toggleRowSelection: function(oTable, vRowIndicator, bSelect, fnDoSelect) {
+			if (!oTable ||
+				!oTable.getBinding("rows") ||
 				oTable.getSelectionMode() === SelectionMode.None ||
-				oRowIndicator == null) {
+				vRowIndicator == null) {
 
 				return false;
 			}
@@ -394,35 +447,32 @@ sap.ui.define([
 
 				if (fnDoSelect) {
 					bSelectionChanged = fnDoSelect(iAbsoluteRowIndex, bSelect);
-				} else {
-
-					if (oTable.isIndexSelected(iAbsoluteRowIndex)) {
-						if (bSelect != null && bSelect) {
-							return false;
-						}
-						oTable.removeSelectionInterval(iAbsoluteRowIndex, iAbsoluteRowIndex);
-					} else {
-						if (bSelect != null && !bSelect) {
-							return false;
-						}
-						oTable.addSelectionInterval(iAbsoluteRowIndex, iAbsoluteRowIndex);
+				} else if (oTable.isIndexSelected(iAbsoluteRowIndex)) {
+					if (bSelect === true) {
+						return false;
 					}
+					oTable.removeSelectionInterval(iAbsoluteRowIndex, iAbsoluteRowIndex);
+				} else {
+					if (bSelect === false) {
+						return false;
+					}
+					oTable.addSelectionInterval(iAbsoluteRowIndex, iAbsoluteRowIndex);
 				}
 
 				delete oTable._iSourceRowIndex;
 				return bSelectionChanged;
 			}
 
-			// Variable oRowIndicator is a row index value.
-			if (typeof oRowIndicator === "number") {
-				if (oRowIndicator < 0 || oRowIndicator >= oTable._getRowCount()) {
+			// Variable vRowIndicator is a row index value.
+			if (typeof vRowIndicator === "number") {
+				if (vRowIndicator < 0 || vRowIndicator >= oTable._getTotalRowCount()) {
 					return false;
 				}
-				return setSelectionState(oRowIndicator);
+				return setSelectionState(vRowIndicator);
 
-			// Variable oRowIndicator is a jQuery object or DOM element.
+			// Variable vRowIndicator is a jQuery object or DOM element.
 			} else {
-				var $Cell = jQuery(oRowIndicator);
+				var $Cell = jQuery(vRowIndicator);
 				var oCellInfo = TableUtils.getCellInfo($Cell[0]);
 				var bIsRowSelectionAllowed = TableUtils.isRowSelectionAllowed(oTable);
 
@@ -432,9 +482,9 @@ sap.ui.define([
 
 					var iAbsoluteRowIndex;
 					if (oCellInfo.isOfType(TableUtils.CELLTYPE.DATACELL)) {
-						iAbsoluteRowIndex = oTable.getRows()[parseInt($Cell.closest("tr", oTable.getDomRef()).attr("data-sap-ui-rowindex"), 10)].getIndex();
+						iAbsoluteRowIndex = oTable.getRows()[parseInt($Cell.closest("tr", oTable.getDomRef()).attr("data-sap-ui-rowindex"))].getIndex();
 					} else { // CELLTYPES.ROWHEADER, CELLTYPES.ROWACTION
-						iAbsoluteRowIndex = oTable.getRows()[parseInt($Cell.attr("data-sap-ui-rowindex"), 10)].getIndex();
+						iAbsoluteRowIndex = oTable.getRows()[parseInt($Cell.attr("data-sap-ui-rowindex"))].getIndex();
 					}
 
 					return setSelectionState(iAbsoluteRowIndex);
@@ -448,7 +498,7 @@ sap.ui.define([
 		 * Returns the text to be displayed as no data message.
 		 * If a custom noData control is set null is returned.
 		 * @param {sap.ui.table.Table} oTable Instance of the table
-		 * @return {String|string|null}
+		 * @returns {String|string|null}
 		 * @private
 		 */
 		getNoDataText : function(oTable) {
@@ -458,14 +508,14 @@ sap.ui.define([
 			} else if (typeof oNoData === "string" || oTable.getNoData() instanceof String) {
 				return oNoData;
 			} else {
-				return oTable._oResBundle.getText("TBL_NO_DATA");
+				return TableUtils.getResourceText("TBL_NO_DATA");
 			}
 		},
 
 		/**
 		 * Returns the number of currently visible columns
 		 * @param {sap.ui.table.Table} oTable Instance of the table
-		 * @return {int}
+		 * @returns {int}
 		 * @private
 		 */
 		getVisibleColumnCount : function(oTable) {
@@ -475,7 +525,7 @@ sap.ui.define([
 		/**
 		 * Returns the number of header rows
 		 * @param {sap.ui.table.Table} oTable Instance of the table
-		 * @return {int}
+		 * @returns {int}
 		 * @private
 		 */
 		getHeaderRowCount : function(oTable) {
@@ -504,7 +554,7 @@ sap.ui.define([
 		 * @param {Object} oTable current table object
 		 * @param {int} iRowIndex the index of the row which height is needed
 		 * @private
-		 * @return {int}
+		 * @returns {int}
 		 * /
 		getRowHeightByIndex : function(oTable, iRowIndex) {
 			var iRowHeight = 0;
@@ -533,7 +583,7 @@ sap.ui.define([
 		 * @private
 		 */
 		isVariableRowHeightEnabled : function(oTable) {
-			return oTable._bVariableRowHeightEnabled && oTable.getFixedRowCount() <= 0 && oTable.getFixedBottomRowCount() <= 0;
+			return oTable && oTable._bVariableRowHeightEnabled && oTable.getFixedRowCount() <= 0 && oTable.getFixedBottomRowCount() <= 0;
 		},
 
 		/**
@@ -542,11 +592,11 @@ sap.ui.define([
 		 * rows is smaller than the number of visible rows)
 		 * @param {sap.ui.table.Table} oTable Instance of the table
 		 * @param {boolean} bIncludeEmptyRows
-		 * @return {int}
+		 * @returns {int}
 		 * @private
 		 */
 		getTotalRowCount : function(oTable, bIncludeEmptyRows) {
-			var iRowCount = oTable._getRowCount();
+			var iRowCount = oTable._getTotalRowCount();
 			if (bIncludeEmptyRows) {
 				iRowCount = Math.max(iRowCount, oTable.getVisibleRowCount());
 			}
@@ -562,7 +612,7 @@ sap.ui.define([
 		 * @private
 		 */
 		getNonEmptyVisibleRowCount : function(oTable) {
-			return Math.min(oTable.getVisibleRowCount(), oTable._getRowCount());
+			return Math.min(oTable.getVisibleRowCount(), oTable._getTotalRowCount());
 		},
 
 		/**
@@ -597,7 +647,7 @@ sap.ui.define([
 		/**
 		 * Returns the index of the row (in the rows aggregation) of the current focused cell
 		 * @param {sap.ui.table.Table} oTable Instance of the table
-		 * @return {int}
+		 * @returns {int}
 		 * @private
 		 *
 		 */
@@ -611,21 +661,21 @@ sap.ui.define([
 		 * is a fixed column.
 		 * @param {sap.ui.table.Table} oTable Instance of the table
 		 * @param {int} iColIdx Index of column in the tables column aggregation
-		 * @return {boolean}
+		 * @returns {boolean}
 		 * @private
 		 */
 		isFixedColumn : function(oTable, iColIdx) {
-			return iColIdx < oTable.getFixedColumnCount();
+			return iColIdx < oTable.getComputedFixedColumnCount();
 		},
 
 		/**
 		 * Returns whether the table has fixed columns.
 		 * @param {sap.ui.table.Table} oTable Instance of the table
-		 * @return {boolean}
+		 * @returns {boolean}
 		 * @private
 		 */
 		hasFixedColumns : function(oTable) {
-			return oTable.getFixedColumnCount() > 0;
+			return oTable.getComputedFixedColumnCount() > 0;
 		},
 
 		/**
@@ -695,7 +745,7 @@ sap.ui.define([
 				oColumn = sap.ui.getCore().byId(sColumnId);
 
 				oCellInfo.type = TableUtils.CELLTYPE.DATACELL;
-				oCellInfo.rowIndex = parseInt($Cell.parent().data("sap-ui-rowindex"), 10);
+				oCellInfo.rowIndex = parseInt($Cell.parent().data("sap-ui-rowindex"));
 				oCellInfo.columnIndex = oColumn.getIndex();
 				oCellInfo.columnSpan = 1;
 
@@ -703,22 +753,22 @@ sap.ui.define([
 				rRowIndex = /_([\d]+)/;
 				sColumnId = $Cell.attr("id");
 				aRowIndexMatch = rRowIndex.exec(sColumnId);
-				iRowIndex =  aRowIndexMatch == null || aRowIndexMatch[1] == null ? 0 : parseInt(aRowIndexMatch[1], 10);
+				iRowIndex =  aRowIndexMatch && aRowIndexMatch[1] != null ? parseInt(aRowIndexMatch[1]) : 0;
 
 				oCellInfo.type = TableUtils.CELLTYPE.COLUMNHEADER;
 				oCellInfo.rowIndex = iRowIndex;
-				oCellInfo.columnIndex = parseInt($Cell.data("sap-ui-colindex"), 10);
-				oCellInfo.columnSpan = parseInt($Cell.attr("colspan") || 1, 10);
+				oCellInfo.columnIndex = parseInt($Cell.data("sap-ui-colindex"));
+				oCellInfo.columnSpan = parseInt($Cell.attr("colspan") || 1);
 
 			} else if ($Cell.hasClass("sapUiTableRowHdr")) { // Row Header Cell
 				oCellInfo.type = TableUtils.CELLTYPE.ROWHEADER;
-				oCellInfo.rowIndex = parseInt($Cell.data("sap-ui-rowindex"), 10);
+				oCellInfo.rowIndex = parseInt($Cell.data("sap-ui-rowindex"));
 				oCellInfo.columnIndex = -1;
 				oCellInfo.columnSpan = 1;
 
 			} else if ($Cell.hasClass("sapUiTableRowAction")) { // Row Action Cell
 				oCellInfo.type = TableUtils.CELLTYPE.ROWACTION;
-				oCellInfo.rowIndex = parseInt($Cell.data("sap-ui-rowindex"), 10);
+				oCellInfo.rowIndex = parseInt($Cell.data("sap-ui-rowindex"));
 				oCellInfo.columnIndex = -2;
 				oCellInfo.columnSpan = 1;
 
@@ -761,7 +811,7 @@ sap.ui.define([
 		 * @param {int} iColIdx Index of column in the list of visible columns
 		 * @param {boolean} bIdxInColumnAgg Whether the given column index is the index in the columns (<code>true</code>)
 		 * 									aggregation or in the list of visble columns (<code>false</code>).
-		 * @return {Object}
+		 * @returns {Object}
 		 * @type {Object}
 		 * @property {sap.ui.table.Row} row Row of the table
 		 * @property {sap.ui.table.Column} column Column of the table
@@ -813,7 +863,7 @@ sap.ui.define([
 		 * @private
 		 */
 		getCell: function(oTable, oElement) {
-			if (oTable == null || oElement == null) {
+			if (!oTable || !oElement) {
 				return null;
 			}
 
@@ -853,7 +903,7 @@ sap.ui.define([
 			var $Element = jQuery(oElement);
 			var $Cell = TableUtils.getCell(oTable, oElement);
 
-			if ($Cell === null || $Cell[0] === $Element[0]) {
+			if (!$Cell || $Cell[0] === $Element[0]) {
 				return null; // The element is not inside a table cell.
 			} else {
 				return $Cell;
@@ -870,7 +920,7 @@ sap.ui.define([
 		 * @param {Function} fnHandler Function to handle the resize event
 		 * @param {boolean}[bRegisterParent] Flag to register the ResizeHandler for the parent DOM element of the one identified by sIdSuffix
 		 *
-		 * @return {int|undefined} ResizeHandler ID or undefined if the DOM element could not be found
+		 * @returns {int|undefined} ResizeHandler ID or undefined if the DOM element could not be found
 		 * @private
 		 */
 		registerResizeHandler : function(oTable, sIdSuffix, fnHandler, bRegisterParent) {
@@ -878,12 +928,12 @@ sap.ui.define([
 			if (typeof sIdSuffix == "string") {
 				oDomRef = oTable.getDomRef(sIdSuffix);
 			} else {
-				jQuery.sap.log.error("sIdSuffix must be a string", oTable);
+				Log.error("sIdSuffix must be a string", oTable);
 				return;
 			}
 
 			if (typeof fnHandler !== "function") {
-				jQuery.sap.log.error("fnHandler must be a function", oTable);
+				Log.error("fnHandler must be a function", oTable);
 				return;
 			}
 
@@ -928,7 +978,7 @@ sap.ui.define([
 						aIdSuffix.push(sKey);
 					}
 				}
-			} else if (jQuery.isArray(vIdSuffix)) {
+			} else if (Array.isArray(vIdSuffix)) {
 				aIdSuffix = vIdSuffix;
 			}
 
@@ -950,7 +1000,7 @@ sap.ui.define([
 		isFirstScrollableRow : function(oTable, row) {
 			if (isNaN(row)) {
 				var $Ref = jQuery(row);
-				row = parseInt($Ref.add($Ref.parent()).filter("[data-sap-ui-rowindex]").data("sap-ui-rowindex"), 10);
+				row = parseInt($Ref.add($Ref.parent()).filter("[data-sap-ui-rowindex]").data("sap-ui-rowindex"));
 			}
 			var iFixed = oTable.getFixedRowCount() || 0;
 			return row == iFixed;
@@ -967,7 +1017,7 @@ sap.ui.define([
 		isLastScrollableRow : function(oTable, row) {
 			if (isNaN(row)) {
 				var $Ref = jQuery(row);
-				row = parseInt($Ref.add($Ref.parent()).filter("[data-sap-ui-rowindex]").data("sap-ui-rowindex"), 10);
+				row = parseInt($Ref.add($Ref.parent()).filter("[data-sap-ui-rowindex]").data("sap-ui-rowindex"));
 			}
 			var iFixed = oTable.getFixedBottomRowCount() || 0;
 			return row == oTable.getVisibleRowCount() - iFixed - 1;
@@ -988,9 +1038,9 @@ sap.ui.define([
 		 */
 		getContentDensity : function(oControl) {
 			var sContentDensity;
-			var aContentDensityStyleClasses = ["sapUiSizeCompact", "sapUiSizeCondensed", "sapUiSizeCozy"];
+			var aContentDensityStyleClasses = ["sapUiSizeCondensed", "sapUiSizeCompact", "sapUiSizeCozy"];
 
-			var fnGetContentDensity = function (sFnName, oObject) {
+			var fnGetContentDensity = function(sFnName, oObject) {
 				if (!oObject[sFnName]) {
 					return;
 				}
@@ -1069,7 +1119,7 @@ sap.ui.define([
 		sanitizeSelectionMode: function(oTable, sSelectionMode) {
 			if (sSelectionMode === SelectionMode.Multi) {
 				sSelectionMode = SelectionMode.MultiToggle;
-				jQuery.sap.log.warning("The selection mode 'Multi' is deprecated and must not be used anymore. Your setting was defaulted to selection mode 'MultiToggle'");
+				Log.warning("The selection mode 'Multi' is deprecated and must not be used anymore. Your setting was defaulted to selection mode 'MultiToggle'");
 			}
 			return sSelectionMode;
 		},
@@ -1099,25 +1149,329 @@ sap.ui.define([
 			if (oBinding && iFixedBottomRowCount > 0) {
 				var iVisibleRowCount = oTable.getVisibleRowCount();
 				var iFirstVisibleRow = oTable.getFirstVisibleRow();
+				var iTotalRowCount = oTable._getTotalRowCount();
 
-				if (oTable._iBindingLength >= iVisibleRowCount) {
+				if (iTotalRowCount >= iVisibleRowCount) {
 					iFirstFixedButtomIndex = iVisibleRowCount - iFixedBottomRowCount;
 				} else {
-					var iIdx = oTable._iBindingLength - iFixedBottomRowCount - iFirstVisibleRow;
-					if (iIdx >= 0 && (iFirstVisibleRow + iIdx) < oTable._iBindingLength) {
+					var iIdx = iTotalRowCount - iFixedBottomRowCount - iFirstVisibleRow;
+					if (iIdx >= 0 && (iFirstVisibleRow + iIdx) < iTotalRowCount) {
 						iFirstFixedButtomIndex = iIdx;
 					}
 				}
 			}
 
 			return iFirstFixedButtomIndex;
-		}
+		},
 
+		/**
+		 * Gets the resource bundle of the sap.ui.table library. The bundle will be loaded if it is not already loaded or if it should be reloaded.
+		 * After the bundle is loaded, {@link sap.ui.table.TableUtils.getResourceText} can be used to get texts.
+		 *
+		 * @param {object} [mOptions] Configuration options
+		 * @param {boolean} [mOptions.async=false] Whether to load the bundle asynchronously.
+		 * @param {boolean} [mOptions.reload=false] Whether to reload the bundle, if it already was loaded.
+		 * @returns {jQuery.sap.util.ResourceBundle | Promise} The resource bundle, or a Promise if the bundle is loaded asynchronously.
+		 */
+		getResourceBundle: function(mOptions) {
+			mOptions = jQuery.extend({async: false, reload: false}, mOptions);
+
+			if (oResourceBundle && mOptions.reload !== true) {
+				if (mOptions.async === true) {
+					return Promise.resolve(oResourceBundle);
+				} else {
+					return oResourceBundle;
+				}
+			}
+
+			var vResult = sap.ui.getCore().getLibraryResourceBundle("sap.ui.table", mOptions.async === true);
+
+			if (vResult instanceof Promise) {
+				vResult = vResult.then(function(oBundle) {
+					oResourceBundle = oBundle;
+					return oResourceBundle;
+				});
+			} else {
+				oResourceBundle = vResult;
+			}
+
+			return vResult;
+		},
+
+		/**
+		 * Gets a resource text, if the resource bundle was already loaded with {@link sap.ui.table.TableUtils.getResourceBundle}.
+		 *
+		 * @param {string} sKey The key of the resource text.
+		 * @param {string[]} [aValues] List of parameters values which should replace the placeholders.
+		 * @returns {string} The resource text, or an empty string if the resource bundle is not yet loaded.
+		 */
+		getResourceText: function(sKey, aValues) {
+			return oResourceBundle ? oResourceBundle.getText(sKey, aValues) : "";
+		},
+
+		/**
+		 * Facilitates dynamic calling.
+		 *
+		 * @param {function():T | T} vObject The object, or a function returning the object, on which methods will be called.
+		 * @param {function(this:U, T) | Object<string, Array.<*>>} vCall Called if <code>vObject</code> is, or returns an object.
+		 * @param {U} [oThis] Context in the function calls, or in the callback if <code>vCall</code>is a function. Default is <code>vObject</code>.
+		 * @returns {undefined | Array.<*>} If <code>vCall</code> is a map, the return values of the calls are returned. In case of multiple calls, an
+		 *                                  array of return values is returned.
+		 * @template T, U
+		 */
+		dynamicCall: function(vObject, vCall, oThis) {
+			var oObject = vObject instanceof Function ? vObject() : vObject;
+
+			if (!oObject || !vCall) {
+				return undefined;
+			}
+
+			oThis = oThis || oObject;
+
+			if (vCall instanceof Function) {
+				vCall.call(oThis, oObject);
+				return undefined;
+			} else {
+				var aParameters;
+				var aReturnValues = [];
+				for (var sFunctionName in vCall) {
+					if (oObject[sFunctionName] instanceof Function) {
+						aParameters = vCall[sFunctionName];
+						aReturnValues.push(oObject[sFunctionName].apply(oThis, aParameters));
+					} else {
+						aReturnValues.push(undefined);
+					}
+				}
+				if (aReturnValues.length === 1) {
+					return aReturnValues[0];
+				} else {
+					return aReturnValues;
+				}
+			}
+		},
+
+		/**
+		 * Invokes a method in a certain interval, regardless of how many times it was called.
+		 *
+		 * @param {Function} fn The method to throttle.
+		 * @param {Object} [mOptions] The options that influence when the throttled method will be invoked.
+		 * @param {int} [mOptions.wait=0] The amount of milliseconds to wait until actually invoking the method.
+		 * @param {boolean} [mOptions.leading=true] Whether the method should be invoked on the first call.
+		 * @param {boolean} [mOptions.asyncLeading=false] Whether the leading invocation should be asynchronous.
+		 * @returns {Function} Returns the throttled method.
+		 */
+		throttle: function(fn, mOptions) {
+			// Functionality taken from lodash open source library and adapted as needed
+
+			mOptions = Object.assign({
+				wait: 0,
+				leading: true
+			}, mOptions);
+			mOptions.maxWait = mOptions.wait;
+			mOptions.trailing = true;
+			mOptions.requestAnimationFrame = false;
+
+			return TableUtils.debounce(fn, mOptions);
+		},
+
+		/**
+		 * Invokes a method if a certain time has passed since the last call, regardless of how many times it was called.
+		 *
+		 * @param {Function} fn The method to debounce.
+		 * @param {Object} [mOptions] The options that influence when the debounced method will be invoked.
+		 * @param {int} [mOptions.wait=0] The amount of milliseconds since the last call to wait before actually invoking the method. Has no
+		 *                                effect, if <code>mOptions.requestAnimationFrame</code> is set to <code>true</code>.
+		 * @param {int|null} [mOptions.maxWait=null] The maximum amount of milliseconds to wait for an invocation. Has no effect, if
+		 *                                           <code>mOptions.requestAnimationFrame</code> is set to <code>true</code>.
+		 * @param {boolean} [mOptions.leading=false] Whether the method should be invoked on the first call.
+		 * @param {boolean} [mOptions.asyncLeading=false] Whether the leading invocation should be asynchronous.
+		 * @param {boolean} [mOptions.trailing=true] Whether the method should be invoked after a certain time has passed. If
+		 *                                           <code>mOptions.leading</code> is set to <code>true</code>, the method needs to be called more
+		 *                                           than once for an invocation at the end of the waiting time.
+		 * @param {boolean} [mOptions.requestAnimationFrame=false] Whether <code>requestAnimationFrame</code> should be used to debounce the
+		 *                                                         method. If set to <code>true</code>, <code>mOptions.wait</code> and
+		 *                                                         <code>mOptions.maxWait</code> have no effect.
+		 * @returns {Function} Returns the debounced method.
+		 */
+		debounce: function(fn, mOptions) {
+			// Functionality taken from lodash open source library and adapted as needed
+
+			mOptions = Object.assign({
+				wait: 0,
+				maxWait: null,
+				leading: false,
+				asyncLeading: false,
+				trailing: true,
+				requestAnimationFrame: false
+			}, mOptions);
+
+			var iLastInvocationTime = null;
+			var iTimerId = null;
+			var oCancelablePromise = null;
+			var bMaxWait = mOptions.maxWait != null;
+
+			mOptions.wait = Math.max(0, mOptions.wait);
+			mOptions.maxWait = bMaxWait ? Math.max(mOptions.maxWait, mOptions.wait) : mOptions.maxWait;
+
+			/**
+			 * Calls the method. Only calls the method if an arguments object is provided.
+			 *
+			 * @param {any} [vContext] The context of the call.
+			 * @param {Object} [vArguments] The arguments object.
+			 * @param {boolean} [bAsync=false] Whether the method should be called in a promise.
+			 */
+			function invoke(vContext, vArguments, bAsync) {
+				bAsync = bAsync === true;
+				iLastInvocationTime = Date.now();
+
+				if (vArguments == null) {
+					return;
+				}
+
+				if (bAsync) {
+					var oPromise = Promise.resolve().then(function() {
+						if (oPromise.canceled) {
+							return;
+						}
+						oCancelablePromise = null;
+						fn.apply(vContext, vArguments);
+					});
+					oPromise.cancel = function() {
+						oPromise.canceled = true;
+					};
+					oCancelablePromise = oPromise;
+				} else {
+					fn.apply(vContext, vArguments);
+				}
+			}
+
+			/**
+			 * Calls the method debounced. Multiple calls within a certain time will be reduced to one call.
+			 *
+			 * @param {any} [vContext] The context of the call.
+			 * @param {Object} [vArguments] The arguments object.
+			 */
+			function invokeDebounced(vContext, vArguments) {
+				cancelTimer();
+
+				function _invoke(bCancel) {
+					bCancel = bCancel !== false;
+					if (mOptions.trailing) {
+						invoke(vContext, vArguments);
+					}
+					if (bCancel) {
+						cancel();
+					}
+				}
+
+				if (mOptions.requestAnimationFrame) {
+					iTimerId = window.requestAnimationFrame(function() {
+						_invoke();
+					});
+				} else {
+					var iNow = Date.now();
+					var iTimeSinceLastInvocation = iLastInvocationTime == null ? 0 : iNow - iLastInvocationTime;
+					var iRemainingWaitTime = Math.max(0, bMaxWait ?
+														 Math.min(mOptions.maxWait - iTimeSinceLastInvocation, mOptions.wait) :
+														 mOptions.wait);
+					var bMaxWaitInvocation = iRemainingWaitTime < mOptions.wait;
+
+					iTimerId = setTimeout(function() {
+						if (bMaxWaitInvocation) {
+							var iTimerOvertime = Math.max(0, (Date.now() - iNow) - iRemainingWaitTime);
+							var iCancelWaitTime = mOptions.wait - iRemainingWaitTime;
+							if (iTimerOvertime > iCancelWaitTime) {
+								// The timer took longer, maybe because of a long-running synchronous execution. No need to wait more.
+								_invoke();
+							} else {
+								// Because there is some time left, the timer is restarted for cleanup. This is necessary for correct scheduling if
+								// the debounced method is called again during this time.
+								iTimerId = setTimeout(cancel, iCancelWaitTime - iTimerOvertime);
+								_invoke(false);
+							}
+						} else {
+							_invoke();
+						}
+					}, iRemainingWaitTime);
+				}
+			}
+
+			function cancelTimer() {
+				if (mOptions.requestAnimationFrame) {
+					window.cancelAnimationFrame(iTimerId);
+				} else {
+					clearTimeout(iTimerId);
+				}
+				iTimerId = null;
+			}
+
+			function cancelPromise() {
+				if (oCancelablePromise) {
+					oCancelablePromise.cancel();
+					oCancelablePromise = null;
+				}
+			}
+
+			function cancel() {
+				cancelTimer();
+				cancelPromise();
+				iLastInvocationTime = null;
+			}
+
+			function pending() {
+				return iTimerId != null;
+			}
+
+			var debounced = function() {
+				if (!pending() && !mOptions.leading) {
+					invoke(); // Fake a leading invocation. Required for maxWait invocations.
+				}
+				if (pending() || !mOptions.leading) {
+					invokeDebounced(this, arguments);
+				} else if (mOptions.asyncLeading) {
+					invoke(this, arguments, true);
+					invokeDebounced();
+				} else { // mOptions.leading
+					invokeDebounced(); // Schedule delayed invocation before leading invocation. Function execution might take some time.
+					invoke(this, arguments);
+				}
+			};
+			debounced.cancel = cancel;
+			debounced.pending = pending;
+
+			return debounced;
+		},
+
+		/**
+		 * Returns all interactive elements in a data cell.
+		 *
+		 * @param {jQuery|HTMLElement} oCell The data cell from which to get the interactive elements.
+		 * @returns {jQuery|null} Returns <code>null</code>, if the passed cell is not a cell or does not contain any interactive elements.
+		 */
+		getInteractiveElements: function(oCell) {
+			if (!oCell) {
+				return null;
+			}
+
+			var $Cell = jQuery(oCell);
+			var oCellInfo = TableUtils.getCellInfo($Cell);
+
+			if (oCellInfo.isOfType(CELLTYPE.DATACELL | CELLTYPE.ROWACTION)) {
+				var $InteractiveElements = $Cell.find(INTERACTIVE_ELEMENT_SELECTORS);
+				if ($InteractiveElements.length > 0) {
+					return $InteractiveElements;
+				}
+			}
+
+			return null;
+		}
 	};
 
-	TableGrouping.TableUtils = TableUtils; // Avoid cyclic dependency
-	TableColumnUtils.TableUtils = TableUtils; // Avoid cyclic dependency
-	TableMenuUtils.TableUtils = TableUtils; // Avoid cyclic dependency
+	// Avoid cyclic dependency.
+	TableGrouping.TableUtils = TableUtils;
+	TableColumnUtils.TableUtils = TableUtils;
+	TableMenuUtils.TableUtils = TableUtils;
+	TableBindingUtils.TableUtils = TableUtils;
 
 	return TableUtils;
 

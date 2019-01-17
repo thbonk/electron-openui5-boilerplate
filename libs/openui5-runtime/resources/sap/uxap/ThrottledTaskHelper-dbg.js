@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-	"jquery.sap.global",
+	"sap/ui/thirdparty/jquery",
 	'sap/ui/base/Object'
 ], function (jQuery, BaseObject) {
 	"use strict";
@@ -41,7 +41,7 @@ sap.ui.define([
 			var oReturnPromise = this._getPromise();
 
 			if (this._iTimer) {
-				jQuery.sap.clearDelayedCall(this._iTimer);
+				clearTimeout(this._iTimer);
 				this._iTimer = null;
 			}
 
@@ -54,12 +54,12 @@ sap.ui.define([
 			}
 
 			// throttle
-			this._iTimer = jQuery.sap.delayedCall(this._iDelay, this, function () {
+			this._iTimer = setTimeout(function () {
 				if (this._oPromise) {
 					var bSuccess = this._fnTask.call(this._oContext, this._oTaskOptions);
 					this._completePromise(bSuccess);
 				}
-			}.bind(this));
+			}.bind(this), this._iDelay);
 
 			return oReturnPromise;
 		},
@@ -107,4 +107,4 @@ sap.ui.define([
 
 	return ThrottledTask;
 
-}, /* bExport= */ false);
+});

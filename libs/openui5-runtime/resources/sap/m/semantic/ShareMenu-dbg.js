@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -14,15 +14,26 @@
 
 // Provides class sap.m.semantic.ShareMenu
 sap.ui.define([
-	'jquery.sap.global',
 	'sap/ui/base/Metadata',
 	'sap/ui/base/ManagedObjectObserver',
+	'sap/m/library',
 	'sap/m/Button',
 	'sap/m/OverflowToolbarLayoutData',
 	'sap/ui/core/IconPool',
-	'sap/m/OverflowToolbarButton'],
-	function(jQuery, Metadata, ManagedObjectObserver, Button, OverflowToolbarLayoutData, IconPool, OverflowToolbarButton) {
+	'sap/m/OverflowToolbarButton',
+	"sap/base/Log"],
+	function(Metadata,
+			 ManagedObjectObserver,
+			 library,
+			 Button,
+			 OverflowToolbarLayoutData,
+			 IconPool,
+			 OverflowToolbarButton,
+			 Log) {
 	"use strict";
+
+	// shortcut for sap.m.OverflowToolbarPriority
+	var OverflowToolbarPriority = library.OverflowToolbarPriority;
 
 	/**
 	 * Constructor for an sap.m.semantic.ShareMenu.
@@ -32,7 +43,7 @@ sap.ui.define([
 	 * ShareMenu is a special menu that is represented by (1) an actionSheet with the menu items and (2) a button that opens the actionSheet.
 	 * If the menu has only one item, then that item appears in place of the button that opens the actionSheet.
 	 *
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @private
 	 * @since 1.30.0
 	 * @alias sap.m.semantic.ShareMenu
@@ -42,7 +53,7 @@ sap.ui.define([
 
 		constructor : function(oActionSheet) {
 			if (!oActionSheet) {
-				jQuery.sap.log.error("missing argumment: constructor expects an actionsheet reference", this);
+				Log.error("missing argumment: constructor expects an actionsheet reference", this);
 				return;
 			}
 
@@ -333,7 +344,7 @@ sap.ui.define([
 	ShareMenu.prototype._setMode = function (sMode, bSuppressInvalidate, oBaseButton) {
 
 		if (!ShareMenu._Mode[sMode]) {
-			jQuery.sap.log.error("unknown shareMenu mode " + sMode, this);
+			Log.error("unknown shareMenu mode " + sMode, this);
 			return this;
 		}
 
@@ -385,12 +396,11 @@ sap.ui.define([
 
 			var that = this;
 
-			this._oShareMenuBtn = new sap.m.Button(this._oActionSheet.getParent().getId() + "-shareButton", {
+			this._oShareMenuBtn = new Button(this._oActionSheet.getParent().getId() + "-shareButton", {
 				icon: IconPool.getIconURI("action"),
 				tooltip: sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("SEMANTIC_CONTROL_ACTION_SHARE"),
 				layoutData: new OverflowToolbarLayoutData({
-					moveToOverflow: false,
-					stayInOverflow: false
+					priority: OverflowToolbarPriority.NeverOverflow
 				}),
 				press: function () {
 					that._oActionSheet.openBy(that._oShareMenuBtn);

@@ -1,17 +1,50 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.table.AnalyticalTable.
-sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTable', './library', 'sap/ui/model/analytics/ODataModelAdapter', 'sap/ui/model/SelectionModel', 'sap/ui/model/Sorter', 'sap/ui/base/ManagedObject', 'sap/ui/core/Popup', 'sap/ui/unified/Menu', 'sap/ui/unified/MenuItem', './TableUtils'],
-	function(jQuery, AnalyticalColumn, Table, TreeTable, library, ODataModelAdapter, SelectionModel, Sorter, ManagedObject, Popup, Menu, MenuItem, TableUtils) {
+sap.ui.define([
+	'./AnalyticalColumn',
+	'./Table',
+	'./TreeTable',
+	"./TableRenderer",
+	'./library',
+	'sap/ui/model/analytics/ODataModelAdapter',
+	'sap/ui/model/SelectionModel',
+	'sap/ui/model/Sorter',
+	'sap/ui/core/Popup',
+	'sap/ui/unified/Menu',
+	'sap/ui/unified/MenuItem',
+	'./TableUtils',
+	"./BindingSelectionAdapter",
+	"sap/base/Log",
+	"sap/base/assert",
+	"sap/ui/thirdparty/jquery"
+],
+	function(
+		AnalyticalColumn,
+		Table,
+		TreeTable,
+		TableRenderer,
+		library,
+		ODataModelAdapter,
+		SelectionModel,
+		Sorter,
+		Popup,
+		Menu,
+		MenuItem,
+		TableUtils,
+		BindingSelectionAdapter,
+		Log,
+		assert,
+		jQuery
+	) {
 	"use strict";
 
 	// shortcuts
 	var GroupEventType = library.GroupEventType,
-		SelectionBehavior = library.SelectionBehavior,
 		SelectionMode = library.SelectionMode,
 		SortOrder = library.SortOrder,
 		TreeAutoExpandMode = library.TreeAutoExpandMode;
@@ -28,11 +61,13 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	 * @see http://scn.sap.com/docs/DOC-44986
 	 *
 	 * @extends sap.ui.table.Table
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
 	 * @alias sap.ui.table.AnalyticalTable
+	 * @see {@link topic:08197fa68e4f479cbe30f639cc1cd22c sap.ui.table}
+	 * @see {@link fiori:/analytical-table-alv/ Analytical Table}
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var AnalyticalTable = Table.extend("sap.ui.table.AnalyticalTable", /** @lends sap.ui.table.AnalyticalTable.prototype */ { metadata : {
@@ -42,59 +77,62 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 
 			/**
 			 * Specifies if the total values should be displayed in the group headers or on bottom of the row. Does not affect the total sum.
-			 * @deprecated As of version 1.44.0, please use the corresponding binding parameter <code>sumOnTop</code> instead.
+			 *
+			 * The value of the property is only taken into account if no parameter is given in the binding information. Changes to this property after
+			 * the table is bound do not have any effect unless an explicit (re-)bind of the <code>rows</code> aggregation is done.
 			 *
 			 * Example:
 			 * <pre>
 			 *   oTable.bindRows({
-			 *      path: "...",
-			 *      parameters: {
-			 *         sumOnTop: true
-			 *      }
+			 *     path: "...",
+			 *     parameters: {
+			 *       sumOnTop: true
+			 *     }
 			 *   });
 			 * </pre>
 			 *
-			 * The value of the property is only taken into account if no parameter is given in the binding information. Changes to this property after
-			 * the table is bound do not have any effect unless an explicit (re-)bind of the <code>rows</code> aggregation is done.
+			 * @deprecated As of version 1.44.0, please use the corresponding binding parameter <code>sumOnTop</code> instead.
 			 */
 			sumOnTop : {type : "boolean", group : "Appearance", defaultValue : false, deprecated: true},
 
 			/**
 			 * Number of levels, which should be opened initially (on first load of data).
-			 * @deprecated As of version 1.44.0, please use the corresponding binding parameter <code>numberOfExpandedLevels</code> instead.
+			 *
+			 * The value of the property is only taken into account if no parameter is given in the binding information. Changes to this property after
+			 * the table is bound do not have any effect unless an explicit (re-)bind of the <code>rows</code> aggregation is done.
 			 *
 			 * Example:
 			 * <pre>
 			 *   oTable.bindRows({
-			 *      path: "...",
-			 *      parameters: {
-			 *         numberOfExpandedLevels: 1
-			 *      }
+			 *     path: "...",
+			 *     parameters: {
+			 *       numberOfExpandedLevels: 1
+			 *     }
 			 *   });
 			 * </pre>
 			 *
-			 * The value of the property is only taken into account if no parameter is given in the binding information. Changes to this property after
-			 * the table is bound do not have any effect unless an explicit (re-)bind of the <code>rows</code> aggregation is done.
+			 * @deprecated As of version 1.44.0, please use the corresponding binding parameter <code>numberOfExpandedLevels</code> instead.
 			 */
 			numberOfExpandedLevels : {type : "int", group : "Misc", defaultValue : 0, deprecated: true},
 
 			/**
 			 * The kind of auto expansion algorithm, e.g. optimized filter conditions, per level requests, ...
 			 * Must be a value of <code>sap.ui.table.TreeAutoExpandMode</code>.
-			 * @deprecated As of version 1.44.0, please use the corresponding binding parameter <code>autoExpandMode</code> instead.
+			 *
+			 * The value of the property is only taken into account if no parameter is given in the binding information. Changes to this property after
+			 * the table is bound do not have any effect unless an explicit (re-)bind of the <code>rows</code> aggregation is done.
 			 *
 			 * Example:
 			 * <pre>
 			 *   oTable.bindRows({
-			 *      path: "...",
-			 *      parameters: {
-			 *         autoExpandMode: "Bundled"
-			 *      }
+			 *     path: "...",
+			 *     parameters: {
+			 *       autoExpandMode: "Bundled"
+			 *     }
 			 *   });
 			 * </pre>
 			 *
-			 * The value of the property is only taken into account if no parameter is given in the binding information. Changes to this property after
-			 * the table is bound do not have any effect unless an explicit (re-)bind of the <code>rows</code> aggregation is done.
+			 * @deprecated As of version 1.44.0, please use the corresponding binding parameter <code>autoExpandMode</code> instead.
 			 */
 			autoExpandMode: {type: "string", group: "Misc", defaultValue: "Bundled", deprecated: true},
 
@@ -117,7 +155,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 			 */
 			dirty : {type : "boolean", group : "Appearance", defaultValue : null, deprecated: true}
 		},
-		designTime : true
+		designtime: "sap/ui/table/designtime/AnalyticalTable.designtime"
 	}, renderer: "sap.ui.table.TableRenderer"});
 
 	/**
@@ -125,7 +163,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	 * Overidden from Table.js
 	 * @overrides
 	 */
-	AnalyticalTable.prototype._getFixedBottomRowContexts = function () {
+	AnalyticalTable.prototype._getFixedBottomRowContexts = function() {
 		var oBinding = this.getBinding("rows");
 		if (oBinding) {
 			return [oBinding.getGrandTotalNode()];
@@ -155,30 +193,33 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		TableUtils.Grouping.setGroupMode(this);
 	};
 
+	AnalyticalTable.prototype._initSelectionAdapter = TreeTable.prototype._initSelectionAdapter;
+
 	AnalyticalTable.prototype.exit = function() {
 		this._cleanupGroupHeaderMenu();
 		Table.prototype.exit.apply(this, arguments);
 	};
 
 	AnalyticalTable.prototype._adaptLocalization = function(bRtlChanged, bLangChanged) {
-		Table.prototype._adaptLocalization.apply(this, arguments);
-		if (bLangChanged) {
-			this._cleanupGroupHeaderMenu();
-		}
+		return Table.prototype._adaptLocalization.apply(this, arguments).then(function() {
+			if (bLangChanged) {
+				this._cleanupGroupHeaderMenu();
+			}
+		}.bind(this));
 	};
 
 	AnalyticalTable.prototype.setFixedRowCount = function() {
-		jQuery.sap.log.error("The property fixedRowCount is not supported by control sap.ui.table.AnalyticalTable!");
+		Log.error("The property fixedRowCount is not supported by control sap.ui.table.AnalyticalTable!");
 		return this;
 	};
 
 	AnalyticalTable.prototype.setFixedBottomRowCount = function() {
-		jQuery.sap.log.error("The property fixedBottomRowCount is managed by control sap.ui.table.AnalyticalTable!");
+		Log.error("The property fixedBottomRowCount is managed by control sap.ui.table.AnalyticalTable!");
 		return this;
 	};
 
 	AnalyticalTable.prototype.setDirty = function(bDirty) {
-		jQuery.sap.log.error("The property dirty of control sap.ui.table.AnalyticalTable is deprecated. Please use showOverlay instead.");
+		Log.error("The property dirty of control sap.ui.table.AnalyticalTable is deprecated. Please use showOverlay instead.");
 		this.setProperty("dirty", bDirty, true);
 		this.setShowOverlay(this.getDirty());
 		return this;
@@ -197,11 +238,11 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	 * The property <code>enableGrouping</code> is not supported by the <code>AnalyticalTable</code> control.
 	 *
 	 * @deprecated Since version 1.28.
-	 * @returns {sap.ui.table.AnalyticalTable} Reference to this in order to allow method chaining
+	 * @returns {sap.ui.table.AnalyticalTable} Reference to <code>this</code> in order to allow method chaining
 	 * @public
 	 */
 	AnalyticalTable.prototype.setEnableGrouping = function() {
-		jQuery.sap.log.error("The property enableGrouping is not supported by the sap.ui.table.AnalyticalTable control");
+		Log.error("The property enableGrouping is not supported by the sap.ui.table.AnalyticalTable control");
 		return this;
 	};
 
@@ -218,11 +259,11 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	 * The <code>groupBy</code> association is not supported by the <code>AnalyticalTable</code> control.
 	 *
 	 * @deprecated Since version 1.28.
-	 * @returns {sap.ui.table.AnalyticalTable} Reference to this in order to allow method chaining
+	 * @returns {sap.ui.table.AnalyticalTable} Reference to <code>this</code> in order to allow method chaining
 	 * @public
 	 */
 	AnalyticalTable.prototype.setGroupBy = function() {
-		jQuery.sap.log.warning("The groupBy association is not supported by the sap.ui.table.AnalyticalTable control");
+		Log.warning("The groupBy association is not supported by the sap.ui.table.AnalyticalTable control");
 		return this;
 	};
 
@@ -251,17 +292,6 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		}
 	};
 
-	AnalyticalTable.prototype.bindRows = function(oBindingInfo) {
-		oBindingInfo = Table._getSanitizedBindingInfo(arguments);
-
-		if (oBindingInfo != null) {
-			this._applyAnalyticalBindingInfo(oBindingInfo);
-			this._updateTotalRow(true);
-		}
-
-		return Table.prototype.bindRows.call(this, oBindingInfo);
-	};
-
 	/**
 	 * This function will be called by either by {@link sap.ui.base.ManagedObject#bindAggregation} or {@link sap.ui.base.ManagedObject#setModel}.
 	 *
@@ -273,6 +303,8 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 			// TODO: think about a boundary check to reset the firstvisiblerow if out of bounds
 			this.setProperty("firstVisibleRow", 0, true);
 
+			this._applyAnalyticalBindingInfo(oBindingInfo);
+			this._updateTotalRow(true);
 			this._applyODataModelAnalyticalAdapter(oBindingInfo.model);
 
 			// The selectionChanged event is also a special AnalyticalTreeBindingAdapter event.
@@ -282,62 +314,15 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 
 		// Create the binding.
 		Table.prototype._bindAggregation.call(this, sName, oBindingInfo);
-	};
 
-	/**
-	 * Overwritten from Table.js - does nothing since the selection is stored in the
-	 */
-	AnalyticalTable.prototype._initSelectionModel = function (sSelectionMode) {
-		this._oSelection = new SelectionModel(sSelectionMode);
-		return this;
-	};
-
-	/**
-	 * Sets the selection mode, the current selection is lost.
-	 * Since the AnalyticalTable relies on the RowSelector for rendering the group headers the SelectionMode "None" is
-	 * not supported and must not be used.
-	 * @param {string} sSelectionMode the selection mode, see sap.ui.table.SelectionMode
-	 * @public
-	 * @return {sap.ui.table.Table} a reference on the table for chaining
-	 */
-	AnalyticalTable.prototype.setSelectionMode = function (sSelectionMode) {
-		// clear selection if the mode changes
-		if (sSelectionMode === SelectionMode.None) {
-			jQuery.sap.log.fatal("SelectionMode 'None' is not supported by the AnalyticalTable.");
-			return this;
-		}
-
-		var oBinding = this.getBinding("rows");
-		if (oBinding && oBinding.clearSelection) {
-			oBinding.clearSelection();
-		}
-
-		// Check for valid selection modes (e.g. change deprecated mode "Multi" to "MultiToggle")
-		sSelectionMode = TableUtils.sanitizeSelectionMode(this, sSelectionMode);
-
-		// set selection mode independent from clearing the selection
-		this.setProperty("selectionMode", sSelectionMode);
-		return this;
-	};
-
-	/**
-	 * Sets the selection behavior.
-	 * Since the AnalyticalTable relies on the RowSelector for rendering the group headers the SelectionBehavior "RowOnly" is
-	 * not supported and must not be used.
-	 * @param {string} sBehavior the selection behavior, see sap.ui.table.SelectionBehavior
-	 * @public
-	 * @returns {sap.ui.table.Table} this for chaining
-	 */
-	AnalyticalTable.prototype.setSelectionBehavior = function (sBehavior) {
-		if (sBehavior === SelectionBehavior.RowOnly) {
-			jQuery.sap.log.fatal("SelectionBehavior 'RowOnly' is not supported by the AnalyticalTable.");
-			return this;
-		} else {
-			return Table.prototype.setSelectionBehavior.apply(this, arguments);
+		if (sName === "rows") {
+			TableUtils.Binding.metadataLoaded(this).then(function() {
+				this._updateColumns(true);
+			}.bind(this));
 		}
 	};
 
-	AnalyticalTable.prototype._applyAnalyticalBindingInfo = function (oBindingInfo) {
+	AnalyticalTable.prototype._applyAnalyticalBindingInfo = function(oBindingInfo) {
 		// extract the sorters from the columns (TODO: reconsider this!)
 		var aColumns = this.getColumns();
 		for (var i = 0, l = aColumns.length; i < l; i++) {
@@ -375,8 +360,8 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		}
 	};
 
-	AnalyticalTable.prototype._applyODataModelAnalyticalAdapter = function (oModel) {
-		if (oModel != null) {
+	AnalyticalTable.prototype._applyODataModelAnalyticalAdapter = function(oModel) {
+		if (oModel) {
 			ODataModelAdapter.apply(oModel);
 		}
 	};
@@ -407,11 +392,11 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		for (var i = 0; i < aTableColumns.length; i++) {
 			var oColumn = aTableColumns[i];
 
-			if (jQuery.inArray(oColumn.getId(), this._aGroupedColumns) > -1) {
+			if (this._aGroupedColumns.indexOf(oColumn.getId()) > -1) {
 				continue;
 			}
 			if (!oColumn instanceof AnalyticalColumn) {
-				jQuery.sap.log.error("You have to use AnalyticalColumns for the Analytical table");
+				Log.error("You have to use AnalyticalColumns for the Analytical table");
 			}
 
 			aColumns.push({
@@ -449,8 +434,8 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		var oBindingInfo = this.getBindingInfo("rows");
 
 		for (var iRow = 0, l = Math.min(iCount, aRows.length); iRow < l; iRow++) {
-			var bIsFixedRow = iRow > (iCount - iFixedBottomRowCount - 1) && oBinding.getLength() > iCount,
-				iRowIndex = bIsFixedRow ? (oBinding.getLength() - 1 - (iCount - 1 - iRow)) : iFirstRow + iRow,
+			var bIsFixedRow = iRow > (iCount - iFixedBottomRowCount - 1) && this._getTotalRowCount() > iCount,
+				iRowIndex = bIsFixedRow ? (this._getTotalRowCount() - 1 - (iCount - 1 - iRow)) : iFirstRow + iRow,
 				oRow = aRows[iRow],
 				$row = oRow.$(),
 				$rowHdr = this.$().find("div[data-sap-ui-rowindex=" + $row.attr("data-sap-ui-rowindex") + "]");
@@ -469,7 +454,6 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 				if (oContextInfo && !oContextInfo.context) {
 					$row.addClass("sapUiAnalyticalTableDummy");
 					$rowHdr.addClass("sapUiAnalyticalTableDummy");
-					//TBD: $rowHdr.html('<div class="sapUiAnalyticalTableLoading">' + this._oResBundle.getText("TBL_CELL_LOADING") + '</div>');
 				}
 				continue;
 			}
@@ -544,7 +528,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		if (!this._oGroupHeaderMenu) {
 			this._oGroupHeaderMenu = new Menu();
 			this._oGroupHeaderMenuVisibilityItem = new MenuItem({
-				text: this._oResBundle.getText("TBL_SHOW_COLUMN"),
+				text: TableUtils.getResourceText("TBL_SHOW_COLUMN"),
 				select: function() {
 					var oGroupColumnInfo = getGroupColumnInfo();
 
@@ -559,11 +543,11 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 			});
 			this._oGroupHeaderMenu.addItem(this._oGroupHeaderMenuVisibilityItem);
 			this._oGroupHeaderMenu.addItem(new MenuItem({
-				text: this._oResBundle.getText("TBL_UNGROUP"),
+				text: TableUtils.getResourceText("TBL_UNGROUP"),
 				select: function() {
 					var oGroupColumnInfo = getGroupColumnInfo();
 
-					if (oGroupColumnInfo != null && oGroupColumnInfo.column != null) {
+					if (oGroupColumnInfo && oGroupColumnInfo.column) {
 						var oUngroupedColumn = oGroupColumnInfo.column;
 
 						oUngroupedColumn.setGrouped(false);
@@ -572,7 +556,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 				}
 			}));
 			this._oGroupHeaderMenu.addItem(new MenuItem({
-				text: this._oResBundle.getText("TBL_UNGROUP_ALL"),
+				text: TableUtils.getResourceText("TBL_UNGROUP_ALL"),
 				select: function() {
 					var aColumns = that.getColumns();
 
@@ -587,13 +571,13 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 				}
 			}));
 			this._oGroupHeaderMoveUpItem = new MenuItem({
-				text: this._oResBundle.getText("TBL_MOVE_UP"),
+				text: TableUtils.getResourceText("TBL_MOVE_UP"),
 				select: function() {
 					var oGroupColumnInfo = getGroupColumnInfo();
 
 					if (oGroupColumnInfo) {
 						var oColumn = oGroupColumnInfo.column;
-						var iIndex = jQuery.inArray(oColumn.getId(), that._aGroupedColumns);
+						var iIndex = that._aGroupedColumns.indexOf(oColumn.getId());
 						if (iIndex > 0) {
 							that._aGroupedColumns[iIndex] = that._aGroupedColumns.splice(iIndex - 1, 1, that._aGroupedColumns[iIndex])[0];
 							that.updateAnalyticalInfo();
@@ -605,13 +589,13 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 			});
 			this._oGroupHeaderMenu.addItem(this._oGroupHeaderMoveUpItem);
 			this._oGroupHeaderMoveDownItem = new MenuItem({
-				text: this._oResBundle.getText("TBL_MOVE_DOWN"),
+				text: TableUtils.getResourceText("TBL_MOVE_DOWN"),
 				select: function() {
 					var oGroupColumnInfo = getGroupColumnInfo();
 
 					if (oGroupColumnInfo) {
 						var oColumn = oGroupColumnInfo.column;
-						var iIndex = jQuery.inArray(oColumn.getId(), that._aGroupedColumns);
+						var iIndex = that._aGroupedColumns.indexOf(oColumn.getId());
 						if (iIndex < that._aGroupedColumns.length) {
 							that._aGroupedColumns[iIndex] = that._aGroupedColumns.splice(iIndex + 1, 1, that._aGroupedColumns[iIndex])[0];
 							that.updateAnalyticalInfo();
@@ -623,7 +607,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 			});
 			this._oGroupHeaderMenu.addItem(this._oGroupHeaderMoveDownItem);
 			this._oGroupHeaderMenu.addItem(new MenuItem({
-				text: this._oResBundle.getText("TBL_SORT_ASC"),
+				text: TableUtils.getResourceText("TBL_SORT_ASC"),
 				select: function() {
 					var oGroupColumnInfo = getGroupColumnInfo();
 
@@ -635,7 +619,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 				icon: "sap-icon://up"
 			}));
 			this._oGroupHeaderMenu.addItem(new MenuItem({
-				text: this._oResBundle.getText("TBL_SORT_DESC"),
+				text: TableUtils.getResourceText("TBL_SORT_DESC"),
 				select: function() {
 					var oGroupColumnInfo = getGroupColumnInfo();
 
@@ -647,7 +631,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 				icon: "sap-icon://down"
 			}));
 			this._oGroupHeaderMenu.addItem(new MenuItem({
-				text: this._oResBundle.getText("TBL_COLLAPSE_LEVEL"),
+				text: TableUtils.getResourceText("TBL_COLLAPSE_LEVEL"),
 				select: function() {
 					// Why -1? Because the "Collapse Level" Menu Entry should collapse TO the given level - 1
 					// So collapsing level 1 means actually all nodes up TO level 0 will be collapsed.
@@ -658,7 +642,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 				}
 			}));
 			this._oGroupHeaderMenu.addItem(new MenuItem({
-				text: this._oResBundle.getText("TBL_COLLAPSE_ALL"),
+				text: TableUtils.getResourceText("TBL_COLLAPSE_ALL"),
 				select: function() {
 					that.getBinding("rows").collapseToLevel(0);
 					that.setFirstVisibleRow(0); //scroll to top after collapsing (so no rows vanish)
@@ -671,9 +655,9 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		if (oGroupColumnInfo) {
 			var oColumn = oGroupColumnInfo.column;
 			if (oColumn.getShowIfGrouped()) {
-				this._oGroupHeaderMenuVisibilityItem.setText(this._oResBundle.getText("TBL_HIDE_COLUMN"));
+				this._oGroupHeaderMenuVisibilityItem.setText(TableUtils.getResourceText("TBL_HIDE_COLUMN"));
 			} else {
-				this._oGroupHeaderMenuVisibilityItem.setText(this._oResBundle.getText("TBL_SHOW_COLUMN"));
+				this._oGroupHeaderMenuVisibilityItem.setText(TableUtils.getResourceText("TBL_SHOW_COLUMN"));
 			}
 			this._oGroupHeaderMoveUpItem.setEnabled(oGroupColumnInfo.index > 0);
 			this._oGroupHeaderMoveDownItem.setEnabled(oGroupColumnInfo.index < this._aGroupedColumns.length - 1);
@@ -696,51 +680,12 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		}
 	};
 
-	AnalyticalTable.prototype.expand = function(iRowIndex) {
-		var oBinding = this.getBinding("rows");
-		if (oBinding) {
-			oBinding.expand(iRowIndex);
-		}
-	};
-
-	AnalyticalTable.prototype.collapse = function(iRowIndex) {
-		var oBinding = this.getBinding("rows");
-		if (oBinding) {
-			oBinding.collapse(iRowIndex);
-		}
-	};
-
-	/**
-	 * Collapses all nodes (and lower if collapseRecursive is activated)
-	 *
-	 * @return {sap.ui.table.AnalyticalTable} a reference on the <code>AnalyticalTable</code> control, can be used for chaining
-	 * @public
-	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
-	 */
-	AnalyticalTable.prototype.collapseAll = function () {
-		var oBinding = this.getBinding("rows");
-		if (oBinding) {
-			oBinding.collapseToLevel(0);
-			this.setFirstVisibleRow(0);
-		}
-
-		return this;
-	};
-
-	AnalyticalTable.prototype.isExpanded = function(iRowIndex) {
-		var oBinding = this.getBinding("rows");
-		if (oBinding) {
-			return oBinding.isExpanded(iRowIndex);
-		}
-		return false;
-	};
-
 	/**
 	 * Returns the context of a row by its index.
 	 *
 	 * @param {int} iIndex
 	 *         Index of the row to return the context from.
-	 * @return {object} The context of a row by its index
+	 * @returns {object} The context of a row by its index
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -846,6 +791,12 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		if (!this._bSuspendUpdateAnalyticalInfo) {
 			this._updateTableColumnDetails();
 			this.updateAnalyticalInfo(bSuppressRefresh, bForceChange);
+
+			if (this.bOutput) {
+				// If the table was already rendered if the column information has been updated, it needs to be invalidated. The necessity to render
+				// certain columns might have changed.
+				this.invalidate();
+			}
 		}
 	};
 
@@ -874,8 +825,8 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		}
 	};
 
-	AnalyticalTable.prototype.refreshRows = function () {
-		sap.ui.table.Table.prototype.refreshRows.apply(this, arguments);
+	AnalyticalTable.prototype.refreshRows = function() {
+		Table.prototype.refreshRows.apply(this, arguments);
 		// make sure we have a sum row displayed if necessary
 		// check is performed after the metadata was loaded
 		this._updateTotalRow();
@@ -939,18 +890,18 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 
 					// if one column of a dimension is grouped, the dimension is considered as grouped.
 					// all columns which are not explicitly grouped will be flagged as dependendGrouped in the next step
-					if (oColumn.getGrouped() && jQuery.inArray(sDimensionName, aGroupedDimensions) == -1) {
+					if (oColumn.getGrouped() && aGroupedDimensions.indexOf(sDimensionName) == -1) {
 						aGroupedDimensions.push(sDimensionName);
 					}
 
-					if (jQuery.inArray(sDimensionName, aDimensions) == -1) {
+					if (aDimensions.indexOf(sDimensionName) == -1) {
 						aDimensions.push(sDimensionName);
 					}
 				}
 			}
 
-			aUngroupedDimensions = jQuery.grep(aDimensions, function (s) {
-				return (jQuery.inArray(s, aGroupedDimensions) == -1);
+			aUngroupedDimensions = jQuery.grep(aDimensions, function(s) {
+				return aGroupedDimensions.indexOf(aGroupedDimensions, s) == -1;
 			});
 
 			// for all grouped dimensions
@@ -1005,7 +956,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	/**
 	 * Returns the total size of the data entries.
 	 *
-	 * @return {int} The total size of the data entries
+	 * @returns {int} The total size of the data entries
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -1043,11 +994,11 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		}
 	};
 
-	AnalyticalTable.prototype.getGroupedColumns = function () {
+	AnalyticalTable.prototype.getGroupedColumns = function() {
 		return this._aGroupedColumns;
 	};
 
-	/**
+	/*
 	 * Sets the node hierarchy to collapse recursive. When set to true, all child nodes will get collapsed as well.
 	 * This setting has only effect when the binding is already initialized.
 	 * @param {boolean} bCollapseRecursive
@@ -1055,7 +1006,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	AnalyticalTable.prototype.setCollapseRecursive = function(bCollapseRecursive) {
 		var oBinding = this.getBinding("rows");
 		if (oBinding) {
-			jQuery.sap.assert(oBinding.setCollapseRecursive, "Collapse Recursive is not supported by the used binding");
+			assert(oBinding.setCollapseRecursive, "Collapse Recursive is not supported by the used binding");
 			if (oBinding.setCollapseRecursive) {
 				oBinding.setCollapseRecursive(bCollapseRecursive);
 			}
@@ -1074,22 +1025,25 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	 */
 	AnalyticalTable.prototype._getSelectableRowCount = function() {
 		var oBinding = this.getBinding("rows");
-		if (oBinding) {
-			var oRootNode = oBinding.getGrandTotalContextInfo();
-			return oRootNode ? oRootNode.totalNumberOfLeafs : 0;
+
+		if (!oBinding) {
+			return 0;
 		}
+
+		var oRootNode = oBinding.getGrandTotalContextInfo();
+		return oRootNode ? oRootNode.totalNumberOfLeafs : 0;
 	};
 
 	/**
 	 * Checks if the row at the given index is selected.
 	 *
 	 * @param {int} iRowIndex The row index for which the selection state should be retrieved
-	 * @return {boolean} true if the index is selected, false otherwise
+	 * @returns {boolean} true if the index is selected, false otherwise
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 * @function
+	 * @name sap.ui.table.AnalyticalTable#isIndexSelected
 	 */
-	AnalyticalTable.prototype.isIndexSelected = TreeTable.prototype.isIndexSelected;
 
 	/**
 	 * In an <code>AnalyticalTable</code> control you can only select indices, which correspond to the currently visualized tree.
@@ -1097,12 +1051,12 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	 * correspond to an <code>AnalyticalTable</code> row.
 	 *
 	 * @param {int} iRowIndex The row index which will be selected (in case it exists)
-	 * @return {sap.ui.table.AnalyticalTable} a reference to the <code>AnalyticalTable</code> control, can be used for chaining
+	 * @returns {sap.ui.table.AnalyticalTable} a reference to the <code>AnalyticalTable</code> control, can be used for chaining
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 * @function
+	 * @name sap.ui.table.AnalyticalTable#setSelectedIndex
 	 */
-	AnalyticalTable.prototype.setSelectedIndex = TreeTable.prototype.setSelectedIndex;
 
 	/**
 	 * Returns an array containing the row indices of all selected tree nodes (in ascending order).
@@ -1112,27 +1066,27 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	 * of actually selected rows/tree nodes. Unknown rows/nodes (as in "not yet loaded" to the client), will not be
 	 * returned.
 	 *
-	 * @return {int[]} an array containing all selected indices
+	 * @returns {int[]} an array containing all selected indices
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 * @function
+	 * @name sap.ui.table.AnalyticalTable#getSelectedIndices
 	 */
-	AnalyticalTable.prototype.getSelectedIndices = TreeTable.prototype.getSelectedIndices;
 
 	/**
 	 * Sets the selection of the <code>AnalyticalTable</code> control to the given range (including boundaries).
 	 *
 	 * <b>Note:</b> The previous selection will be lost/overridden. If this is not the required behavior,
-	 * please use <code>addSelectionInterval</code> and <code>removeSelectionIntervall</code>.
+	 * please use <code>addSelectionInterval</code> and <code>removeSelectionInterval</code>.
 	 *
 	 * @param {int} iFromIndex the start index of the selection range
 	 * @param {int} iToIndex the end index of the selection range
-	 * @return {sap.ui.table.AnalyticalTable} a reference to the <code>AnalyticalTable</code> control, can be used for chaining
+	 * @returns {sap.ui.table.AnalyticalTable} a reference to the <code>AnalyticalTable</code> control, can be used for chaining
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 * @function
+	 * @name sap.ui.table.AnalyticalTable#setSelectionInterval
 	 */
-	AnalyticalTable.prototype.setSelectionInterval = TreeTable.prototype.setSelectionInterval;
 
 	/**
 	 * Marks a range of tree nodes as selected, starting with iFromIndex going to iToIndex.
@@ -1145,12 +1099,12 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	 *
 	 * @param {int} iFromIndex The starting index of the range which will be selected.
 	 * @param {int} iToIndex The starting index of the range which will be selected.
-	 * @return {sap.ui.table.AnalyticalTable} a reference to the <code>AnalyticalTable</code> control, can be used for chaining
+	 * @returns {sap.ui.table.AnalyticalTable} a reference to the <code>AnalyticalTable</code> control, can be used for chaining
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 * @function
+	 * @name sap.ui.table.AnalyticalTable#addSelectionInterval
 	 */
-	AnalyticalTable.prototype.addSelectionInterval = TreeTable.prototype.addSelectionInterval;
 
 	/**
 	 * All rows/tree nodes inside the range (including boundaries) will be deselected.
@@ -1160,12 +1114,12 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	 *
 	 * @param {int} iFromIndex The starting index of the range which will be deselected.
 	 * @param {int} iToIndex The starting index of the range which will be deselected.
-	 * @return {sap.ui.table.AnalyticalTable} a reference to the <code>AnalyticalTable</code> control, can be used for chaining
+	 * @returns {sap.ui.table.AnalyticalTable} a reference to the <code>AnalyticalTable</code> control, can be used for chaining
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 * @function
+	 * @name sap.ui.table.AnalyticalTable#removeSelectionInterval
 	 */
-	AnalyticalTable.prototype.removeSelectionInterval = TreeTable.prototype.removeSelectionInterval;
 
 	/**
 	 * Selects all available nodes/rows.
@@ -1175,43 +1129,66 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	 * In addition all subsequent rows/tree nodes, which will be paged into view are also immediately selected.
 	 * However, due to obvious performance/network traffic reasons, the SelectAll function will NOT retrieve any data from the backend.
 	 *
-	 * @return {sap.ui.table.AnalyticalTable} a reference to the <code>AnalyticalTable</code> control, can be used for chaining
+	 * @returns {sap.ui.table.AnalyticalTable} a reference to the <code>AnalyticalTable</code> control, can be used for chaining
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 * @function
+	 * @name sap.ui.table.AnalyticalTable#selectAll
 	 */
-	AnalyticalTable.prototype.selectAll = TreeTable.prototype.selectAll;
 
 	/**
 	 * Retrieves the lead selection index. The lead selection index is, among other things, used to determine the
 	 * start/end of a selection range, when using Shift-Click to select multiple entries at once.
 	 *
-	 * @return {int[]} an array containing all selected indices (ascending ordered integers)
+	 * @returns {int[]} an array containing all selected indices (ascending ordered integers)
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 * @function
+	 * @name sap.ui.table.AnalyticalTable#getSelectedIndex
 	 */
-	AnalyticalTable.prototype.getSelectedIndex = TreeTable.prototype.getSelectedIndex;
 
 	/**
-	 * Clears the complete selection (all analytical table rows/nodes will be deselected).
+	 * Expands one or more rows.
 	 *
-	 * @return {sap.ui.table.AnalyticalTable} a reference to the <code>AnalyticalTable</code> control, can be used for chaining
+	 * @param {int|int[]} vRowIndex A single index or an array of indices of the rows to be expanded
+	 * @returns {sap.ui.table.AnalyticalTable} <code>this</code> to allow method chaining
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 * @function
 	 */
-	AnalyticalTable.prototype.clearSelection = TreeTable.prototype.clearSelection;
+	AnalyticalTable.prototype.expand = TreeTable.prototype.expand;
 
-	AnalyticalTable.prototype._isRowSelectable = function(iRowIndex) {
-		var oBinding = this.getBinding("rows");
-		if (oBinding) {
-			return oBinding.isIndexSelectable(iRowIndex);
-		} else {
-			// if there is no binding the selection can't be handled, therefore the row is not selectable
-			return false;
-		}
-	};
+	/**
+	 * Collapses one or more rows.
+	 *
+	 * @param {int|int[]} vRowIndex A single index, or an array of indices of the rows to be collapsed
+	 * @returns {sap.ui.table.AnalyticalTable} <code>this</code> to allow method chaining
+	 * @public
+	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
+	 * @function
+	 */
+	AnalyticalTable.prototype.collapse = TreeTable.prototype.collapse;
+
+	/**
+	 * Collapses all nodes (and their child nodes if collapseRecursive is activated).
+	 *
+	 * @returns {sap.ui.table.AnalyticalTable} <code>this</code> to allow method chaining
+	 * @public
+	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
+	 * @function
+	 */
+	AnalyticalTable.prototype.collapseAll = TreeTable.prototype.collapseAll;
+
+	/**
+	 * Checks whether the row is expanded or collapsed.
+	 *
+	 * @param {int} iRowIndex The index of the row to be checked
+	 * @returns {boolean} <code>true</code> if the row is expanded, <code>false</code> if it is collapsed
+	 * @public
+	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
+	 * @function
+	 */
+	AnalyticalTable.prototype.isExpanded = TreeTable.prototype.isExpanded;
 
 	AnalyticalTable.prototype._getSelectedIndicesCount = TreeTable.prototype._getSelectedIndicesCount;
 
@@ -1232,7 +1209,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	 *
 	 * @param {sap.ui.table.Row} oRow The row for which the analytical information is returned
 	 *
-	 * @return {object} The analytical information of the given row
+	 * @returns {object} The analytical information of the given row
 	 * @private
 	 */
 	AnalyticalTable.prototype.getAnalyticalInfoOfRow = function(oRow) { //TBD: Make it public if needed

@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
-	function(jQuery, library, Control) {
+sap.ui.define(['./library', 'sap/ui/core/Control', './TileContentRenderer'],
+	function(library, Control, TileContentRenderer) {
 	"use strict";
 
 	/**
@@ -18,8 +18,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
-	 * @since 1.34
+	 * @version 1.61.2
+	 * @since 1.34.0
 	 *
 	 * @public
 	 * @alias sap.m.TileContent
@@ -52,7 +52,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 				 */
 				"disabled" : {type : "boolean", group : "Behavior", defaultValue : false},
 				/**
-				 * The frame type: 1x1 or 2x1.
+				 * Frame types: 1x1, 2x1, and auto.
 				 */
 				"frameType" : {type : "sap.m.FrameType", group : "Appearance", defaultValue : "Auto"}
 			},

@@ -1,13 +1,13 @@
 /*
  * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.P13nFilterItem.
 sap.ui.define([
-	'jquery.sap.global', './library', 'sap/ui/core/Item'
-], function(jQuery, library, Item) {
+	'./library', 'sap/ui/core/Item'
+], function(library, Item) {
 	"use strict";
 
 	/**
@@ -17,7 +17,7 @@ sap.ui.define([
 	 * @param {object} [mSettings] initial settings for the new control
 	 * @class Type for <code>filterItems</code> aggregation in P13nFilterPanel control.
 	 * @extends sap.ui.core.Item
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @constructor
 	 * @public
 	 * @since 1.26.0
@@ -88,18 +88,18 @@ sap.ui.define([
 		return this.setProperty("columnKey", sKey, true);
 	};
 
-	P13nFilterItem.prototype.setValue1 = function(sKey) {
-		return this.setProperty("value1", sKey, true);
+	P13nFilterItem.prototype.setValue1 = function(sValue) {
+		return this.setProperty("value1", sValue, true);
 	};
 
-	P13nFilterItem.prototype.setValue2 = function(sKey) {
-		return this.setProperty("value2", sKey, true);
+	P13nFilterItem.prototype.setValue2 = function(sValue) {
+		return this.setProperty("value2", sValue, true);
 	};
 
-	P13nFilterItem.prototype.setExclude = function(sKey) {
-		return this.setProperty("exclude", sKey, true);
+	P13nFilterItem.prototype.setExclude = function(bExclude) {
+		return this.setProperty("exclude", bExclude, true);
 	};
 
 	return P13nFilterItem;
 
-}, /* bExport= */true);
+});

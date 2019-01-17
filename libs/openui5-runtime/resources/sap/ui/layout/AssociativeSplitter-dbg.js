@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.layout.AssociativeSplitter.
-sap.ui.define(['./Splitter', './SplitterRenderer'],
-	function (Splitter, SplitterRenderer) {
+sap.ui.define(['./Splitter', './SplitterRenderer', "sap/base/Log", "sap/ui/thirdparty/jquery"],
+	function(Splitter, SplitterRenderer, Log, jQuery) {
 	"use strict";
 
 	/**
@@ -20,7 +20,7 @@ sap.ui.define(['./Splitter', './SplitterRenderer'],
 	 * @extends sap.ui.layout.Splitter
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @private
@@ -163,7 +163,7 @@ sap.ui.define(['./Splitter', './SplitterRenderer'],
 			return;
 		}
 
-		iBar = parseInt(this._oLastDOMclicked.id.substr((sId + "-splitbar-").length), 10);
+		iBar = parseInt(this._oLastDOMclicked.id.substr((sId + "-splitbar-").length));
 		oContentArea = this._getContentAreas()[iBar];
 		oContentArea._currentPosition = this.getCalculatedSizes()[iBar];
 		oContentArea._lastPosition = oContentArea._lastPosition || oContentArea._currentPosition;
@@ -213,8 +213,8 @@ sap.ui.define(['./Splitter', './SplitterRenderer'],
 		this.disableAutoResize(/* temporarily: */ true);
 
 		var iPos = oJEv[this._moveCord];
-		var iSplitBar = parseInt(oJEv.target.id.substr((sId + "-splitbar-").length), 10);
-		var iSplitBarCircle = parseInt(oJEv.target.parentElement.id.substr((sId + "-splitbar-").length), 10);
+		var iSplitBar = parseInt(oJEv.target.id.substr((sId + "-splitbar-").length));
+		var iSplitBarCircle = parseInt(oJEv.target.parentElement.id.substr((sId + "-splitbar-").length));
 		var iBar = (iSplitBar + 1) ? iSplitBar : iSplitBarCircle;
 		var $Bar = jQuery(oJEv.target);
 		// on tablet in landscape mode the target is the bar's icon
@@ -253,9 +253,9 @@ sap.ui.define(['./Splitter', './SplitterRenderer'],
 			bar : jQuery(oJEv.target),
 			// The content sizes for fast resize bound calculation
 			c1Size : mCalcSizes[iBar],
-			c1MinSize : oLd1 ? parseInt(oLd1.getMinSize(), 10) : 0,
+			c1MinSize : oLd1 ? parseInt(oLd1.getMinSize()) : 0,
 			c2Size : mCalcSizes[iBar + 1],
-			c2MinSize : oLd2 ? parseInt(oLd2.getMinSize(), 10) : 0
+			c2MinSize : oLd2 ? parseInt(oLd2.getMinSize()) : 0
 		};
 
 		// Event handlers use bound handler methods - see init()
@@ -296,7 +296,7 @@ sap.ui.define(['./Splitter', './SplitterRenderer'],
 			fMoveC2Size = parseFloat(sMoveContentSize2);
 
 		if (isNaN(iPixels)) {
-			jQuery.sap.log.warning("Splitter: Received invalid resizing values - resize aborted.");
+			Log.warning("Splitter: Received invalid resizing values - resize aborted.");
 			return;
 		}
 
@@ -312,8 +312,8 @@ sap.ui.define(['./Splitter', './SplitterRenderer'],
 
 		iNewSize1 = fMoveC1Size + iPixels;
 		iNewSize2 = fMoveC2Size - iPixels;
-		iMinSize1 = parseInt(oLd1.getMinSize(), 10);
-		iMinSize2 = parseInt(oLd2.getMinSize(), 10);
+		iMinSize1 = parseInt(oLd1.getMinSize());
+		iMinSize2 = parseInt(oLd2.getMinSize());
 
 		sOrientation = this.getOrientation();
 		iSplitterSize = sOrientation === "Horizontal" ? this.$().width() : this.$().height();
@@ -373,7 +373,7 @@ sap.ui.define(['./Splitter', './SplitterRenderer'],
 	 */
 	AssociativeSplitter.prototype._recalculateSizes = function () {
 		// TODO: (?) Use maxSize value from layoutData
-		var i, sSize, oLayoutData, iColSize, idx, iSize;
+		var i, sSize, oLayoutData, iColSize, idx, iSize, iMinSize;
 
 		// Read all content sizes from the layout data
 		var aSizes = [];
@@ -399,20 +399,20 @@ sap.ui.define(['./Splitter', './SplitterRenderer'],
 
 			if (sSize.indexOf("px") > -1) {
 				// Pixel based Value - deduct it from available size
-				iSize = parseInt(sSize, 10);
+				iSize = parseInt(sSize);
 				iAvailableSize -= iSize;
 				this._calculatedSizes[i] = iSize;
 			} else if (sSize.indexOf("%") > -1) {
 				aPercentsizeIdx.push(i);
 			} else if (sSize === "auto") {
 				oLayoutData = aContentAreas[i].getLayoutData();
-				if (oLayoutData && parseInt(oLayoutData.getMinSize(), 10) !== 0) {
+				if (oLayoutData && parseInt(oLayoutData.getMinSize()) !== 0) {
 					aAutoMinsizeIdx.push(i);
 				} else {
 					aAutosizeIdx.push(i);
 				}
 			} else {
-				jQuery.sap.log.error("Illegal size value: " + aSizes[i]);
+				Log.error("Illegal size value: " + aSizes[i]);
 			}
 		}
 
@@ -434,6 +434,11 @@ sap.ui.define(['./Splitter', './SplitterRenderer'],
 			} else {
 				// Percent based Value - deduct it from available size
 				iColSize = parseFloat(aSizes[idx]) / 100 * iAvailableSize;
+				iMinSize = parseInt(aContentAreas[idx].getLayoutData().getMinSize());
+
+				if (iColSize < iMinSize) {
+					iColSize = iMinSize;
+				}
 			}
 			this._calculatedSizes[idx] = iColSize;
 			iRest -= iColSize;
@@ -449,7 +454,7 @@ sap.ui.define(['./Splitter', './SplitterRenderer'],
 		var iAutoMinSizes = aAutoMinsizeIdx.length;
 		for (i = 0; i < iAutoMinSizes; ++i) {
 			idx = aAutoMinsizeIdx[i];
-			var iMinSize = parseInt(aContentAreas[idx].getLayoutData().getMinSize(), 10);
+			iMinSize = parseInt(aContentAreas[idx].getLayoutData().getMinSize());
 			if (iMinSize > iColSize) {
 				this._calculatedSizes[idx] = iMinSize;
 				iAvailableSize -= iMinSize;
@@ -476,7 +481,7 @@ sap.ui.define(['./Splitter', './SplitterRenderer'],
 			//       hand it might make analyzing of splitter bugs easier, since we can just ask
 			//       developers if there was a [Splitter] output on the console if the splitter looks
 			//       weird in their application.
-			jQuery.sap.log.info(
+			Log.info(
 				"[Splitter] The set sizes and minimal sizes of the splitter contents are bigger " +
 				"than the available space in the UI."
 			);
@@ -504,7 +509,7 @@ sap.ui.define(['./Splitter', './SplitterRenderer'],
 		// Make sure LayoutData is set on the content
 		// But this approach has the advantage that "compatible" LayoutData can be used.
 		if (oLd && (!oLd.getResizable || !oLd.getSize || !oLd.getMinSize)) {
-			jQuery.sap.log.warning(
+			Log.warning(
 				"Content \"" + oContent.getId() + "\" for the Splitter contained wrong LayoutData. " +
 				"The LayoutData has been replaced with default values."
 			);
@@ -544,4 +549,4 @@ sap.ui.define(['./Splitter', './SplitterRenderer'],
 
 	return AssociativeSplitter;
 
-}, /* bExport= */ false);
+});

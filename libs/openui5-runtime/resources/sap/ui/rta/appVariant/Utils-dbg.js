@@ -1,86 +1,141 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 sap.ui.define([
-	"jquery.sap.global"],
-	function(jQuery) {
+	"sap/ui/fl/LrepConnector",
+	"sap/ui/rta/appVariant/AppVariantUtils",
+	"sap/base/i18n/ResourceBundle"],
+	function(LrepConnector, AppVariantUtils, ResourceBundle) {
 		"use strict";
 
 		var Utils = {};
-		var _sAppIndexBasedOnIdUrl = "/sap/bc/ui2/app_index/?basedOnId=";
-		var _sAppIndexIdUrl = "/sap/bc/ui2/app_index/?sap.app/id=";
 
-		Utils.ajaxRequest = function(oRequestData) {
-			return new Promise(function(resolve, reject){
-		        jQuery.ajax(oRequestData).done(function(oResponseData) {
-	                return resolve(oResponseData);
-	            }).fail(function(oError) {
-	                return reject(oError);
-	            });
-		    });
+		var sModulePath = sap.ui.require.toUrl("sap/ui/rta/appVariant/manageApps/") + "webapp";
+		var oI18n = ResourceBundle.create({
+			url : sModulePath + "/i18n/i18n.properties"
+		});
+
+		Utils.sendRequest = function(sRoute, sOperation) {
+			var oLREPConnector = LrepConnector.createConnector();
+			return oLREPConnector.send(sRoute, sOperation);
 		};
 
-		Utils.getAppVariants = function(sComponentName, sType) {
-			var oRequestData = {
-	            url: _sAppIndexBasedOnIdUrl + sComponentName + '&fields=descriptorUrl',
-	            type: "GET"
-	        };
-
-	        return this.ajaxRequest(oRequestData).then(function(oResponseData) {
-				var aAppVariants = oResponseData.results;
-				return this.getAppVariantDescriptorInfo(aAppVariants, sType);
-	        }.bind(this));
-		};
-
-		Utils.getAppVariantDescriptorInfo = function(aAppVariants, sType) {
-			var aAllAppVariants = [];
-
-			var that = this;
-
-			aAppVariants.some(function(oAppVariant) {
-				aAllAppVariants.push(that.getAppVariantsProperties(oAppVariant, sType));
-			});
-
-			return Promise.all(aAllAppVariants).then(function(aResponses) {
-				return aResponses;
-			});
-		};
-
-		Utils.getAppVariantsProperties = function(oAppVariant, sType) {
-			var oAppVariantProperties = {}, oRequestData;
-
-			oRequestData = {
-				url: oAppVariant["descriptorUrl"],
-				type: "GET"
+		Utils.getAppVariantOverviewAttributes = function(oAppVariantInfo, bKeyUser) {
+			var oAppVariantAttributes;
+			var fnCheckAppType = function() {
+				if (oAppVariantInfo.isOriginal && oAppVariantInfo.isAppVariant) {
+					return oI18n.getText("MAA_ORIGINAL_TYPE");
+				} else if (oAppVariantInfo.isAppVariant) {
+					return oI18n.getText("MAA_APP_VARIANT_TYPE");
+				} else if (oAppVariantInfo.isOriginal) {
+					return oI18n.getText("MAA_ORIGINAL_TYPE");
+				}
 			};
 
-			return this.ajaxRequest(oRequestData).then(function(oResponseData) {
-				var oAppVariantDescriptor = oResponseData;
+			var fncheckNavigationSupported = function(oNavigationParams) {
+				var oNavigationService = sap.ushell.Container.getService( "CrossApplicationNavigation" );
+				return oNavigationService.getLinks(oNavigationParams);
+			};
 
-				oAppVariantProperties.id = oAppVariantDescriptor["sap.app"].id;
-				oAppVariantProperties.title = oAppVariantDescriptor["sap.app"].title;
-				oAppVariantProperties.subTitle = oAppVariantDescriptor["sap.app"].subTitle;
-				oAppVariantProperties.description = oAppVariantDescriptor["sap.app"].description;
-				oAppVariantProperties.icon = oAppVariantDescriptor["sap.ui"].icons.icon;
-				oAppVariantProperties.componentName = oAppVariantDescriptor["sap.ui5"].componentName;
-				oAppVariantProperties.type = sType;
+			var fnGetNavigationInfo = function(oAppVariantAttributes) {
+				if (oAppVariantInfo.hasStartableIntent) {
+					var sSemanticObject = oAppVariantInfo.startWith.semanticObject;
+					var sAction = oAppVariantInfo.startWith.action;
+					var oParams = oAppVariantInfo.startWith.parameters;
 
-				return Promise.resolve(oAppVariantProperties);
-	        });
+					var oNavigationParams = {
+						semanticObject : sSemanticObject,
+						action : sAction,
+						params: oParams
+					};
+
+					return fncheckNavigationSupported(oNavigationParams).then(function(aResult) {
+						if (aResult.length && bKeyUser) {
+							oAppVariantAttributes.adaptUIButtonVisibility = true;
+						} else {
+							oAppVariantAttributes.adaptUIButtonVisibility = false;
+						}
+						oAppVariantAttributes.semanticObject = sSemanticObject;
+						oAppVariantAttributes.action = sAction;
+
+						if (oParams) {
+							Object.keys(oParams).forEach(function(sParamValue) {
+								if (oParams[sParamValue].value) {
+									oParams[sParamValue] = oParams[sParamValue].value;
+								}
+							});
+
+							oAppVariantAttributes.params = oParams;
+						}
+						return Promise.resolve(oAppVariantAttributes);
+					});
+				} else {
+					oAppVariantAttributes.adaptUIButtonVisibility = false;
+					return Promise.resolve(oAppVariantAttributes);
+				}
+			};
+
+			// Adding the tooltip to every icon which is shown on the App Variant Overview Dialog
+			var sIconUrl = oAppVariantInfo.iconUrl;
+			if (sIconUrl && sap.ui.core.IconPool.isIconURI(sIconUrl)) {
+				oAppVariantInfo.iconText = sIconUrl.split('//')[1];
+			}
+
+			oAppVariantAttributes = {
+				appId : oAppVariantInfo.appId,
+				title : oAppVariantInfo.title || '',
+				subTitle : oAppVariantInfo.subTitle || '',
+				description : oAppVariantInfo.description || '',
+				icon : oAppVariantInfo.iconUrl || '',
+				iconText : oAppVariantInfo.iconText,
+				isOriginal : oAppVariantInfo.isOriginal,
+				typeOfApp : fnCheckAppType(),
+				descriptorUrl : oAppVariantInfo.descriptorUrl,
+				isKeyUser : bKeyUser
+			};
+
+			var sNewAppVariantId = AppVariantUtils.getNewAppVariantId();
+
+			if (sNewAppVariantId === oAppVariantInfo.appId) {
+				oAppVariantAttributes.currentStatus = oI18n.getText("MAA_NEW_APP_VARIANT");
+			}
+
+			return fnGetNavigationInfo(oAppVariantAttributes);
 		};
 
-		Utils.getOriginalAppProperties = function(sOriginalAppId, sType) {
-			var oRequestData = {
-	            url: _sAppIndexIdUrl + sOriginalAppId + '&fields=descriptorUrl',
-	            type: "GET"
-	        };
+		Utils.getAppVariantOverview = function(sReferenceAppId, bKeyUser) {
+			// Customer* means the layer can be either CUSTOMER or CUSTOMER_BASE. This layer calculation will be done backendside
+			var sLayer = bKeyUser ? 'CUSTOMER*' : 'VENDOR';
+			var sRoute = '/sap/bc/lrep/app_variant_overview/?sap.app/id=' + sReferenceAppId + '&layer=' + sLayer;
 
-	        return this.ajaxRequest(oRequestData).then(function(oResponseData) {
-				var aAppVariants = oResponseData.results;
-				return this.getAppVariantDescriptorInfo(aAppVariants, sType);
-	        }.bind(this));
+			return this.sendRequest(sRoute, 'GET').then(function(oResult) {
+				var aAppVariantOverviewInfo = [];
+				var aAppVariantInfo;
+				if (oResult.response && oResult.response.items) {
+					aAppVariantInfo = oResult.response.items;
+				} else {
+					return Promise.resolve([]);
+				}
+
+				aAppVariantInfo.forEach(function(oAppVariantInfo) {
+					if (!oAppVariantInfo.isDescriptorVariant) {
+						aAppVariantOverviewInfo.push(this.getAppVariantOverviewAttributes(oAppVariantInfo, bKeyUser));
+					}
+				}, this);
+
+				return Promise.all(aAppVariantOverviewInfo).then(function(aResponses) {
+					return aResponses;
+				});
+
+			}.bind(this));
+		};
+
+		Utils.getDescriptor = function(sDescriptorUrl) {
+			return this.sendRequest(sDescriptorUrl, 'GET').then(function(oResult) {
+				return oResult.response;
+			});
 		};
 
 	return Utils;

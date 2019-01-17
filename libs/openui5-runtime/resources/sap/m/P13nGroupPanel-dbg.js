@@ -1,14 +1,24 @@
 /*
  * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.P13nGroupPanel.
 sap.ui.define([
-	'jquery.sap.global', './P13nConditionPanel', './P13nPanel', './library', 'sap/ui/core/Control'
-], function(jQuery, P13nConditionPanel, P13nPanel, library, Control) {
+	'./library',
+	'./P13nConditionPanel',
+	'./P13nPanel',
+	'./P13nGroupItem',
+	"sap/ui/thirdparty/jquery"
+], function(library, P13nConditionPanel, P13nPanel, P13nGroupItem, jQuery) {
 	"use strict";
+
+	// shortcut for sap.m.P13nPanelType
+	var P13nPanelType = library.P13nPanelType;
+
+	// shortcut for sap.m.P13nConditionOperation TODO: use enum in library.js or official API
+	var P13nConditionOperation = library.P13nConditionOperation;
 
 	/**
 	 * Constructor for a new P13nGroupPanel.
@@ -17,7 +27,7 @@ sap.ui.define([
 	 * @param {object} [mSettings] initial settings for the new control
 	 * @class The P13nGroupPanel control is used to define group-specific settings for table personalization.
 	 * @extends sap.m.P13nPanel
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @constructor
 	 * @public
 	 * @since 1.26.0
@@ -212,20 +222,17 @@ sap.ui.define([
 	};
 
 	P13nGroupPanel.prototype.init = function() {
-		this.setType(sap.m.P13nPanelType.group);
+		this.setType(P13nPanelType.group);
 		this.setTitle(sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("GROUPPANEL_TITLE"));
 
 		sap.ui.getCore().loadLibrary("sap.ui.layout");
-		jQuery.sap.require("sap.ui.layout.Grid");
-
-		sap.ui.layout.Grid.prototype.init.apply(this);
 
 		this._aKeyFields = [];
 		this.addStyleClass("sapMGroupPanel");
 
 		if (!this._aOperations) {
 			this.setOperations([
-				sap.m.P13nConditionOperation.GroupAscending, sap.m.P13nConditionOperation.GroupDescending
+				P13nConditionOperation.GroupAscending, P13nConditionOperation.GroupDescending
 			]);
 		}
 
@@ -364,9 +371,10 @@ sap.ui.define([
 	P13nGroupPanel.prototype.updateGroupItems = function(sReason) {
 		this.updateAggregation("groupItems");
 
-		if (sReason == "change" && !this._bIgnoreBindCalls) {
-			this._bUpdateRequired = true;
-		}
+        if (sReason === "change" && !this._bIgnoreBindCalls) {
+            this._bUpdateRequired = true;
+            this.invalidate();
+        }
 	};
 
 	P13nGroupPanel.prototype.removeGroupItem = function(oGroupItem) {
@@ -424,7 +432,7 @@ sap.ui.define([
 				that._notifyChange();
 			}
 			if (sOperation === "add") {
-				oGroupItem = new sap.m.P13nGroupItem({
+				oGroupItem = new P13nGroupItem({
 					key: sKey,
 					columnKey: oNewData.keyField,
 					operation: oNewData.operation,
@@ -508,4 +516,4 @@ sap.ui.define([
 
 	return P13nGroupPanel;
 
-}, /* bExport= */true);
+});

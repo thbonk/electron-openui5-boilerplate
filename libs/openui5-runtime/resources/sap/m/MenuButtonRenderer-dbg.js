@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define([],
+	function() {
 		"use strict";
 
 		/**
@@ -33,31 +33,23 @@ sap.ui.define(['jquery.sap.global'],
 			oRm.write("<div");
 			oRm.writeControlData(oMenuButton);
 
-			//write aria attributes
-			this.writeAriaAttributes(oRm, oMenuButton);
-
 			//classes
 			oRm.addClass(MenuButtonRenderer.CSS_CLASS);
 			oRm.addClass(MenuButtonRenderer.CSS_CLASS + oMenuButton.getButtonMode());
 			oRm.writeClasses();
 
 			// set user defined width
-			if (sWidth != "" || sWidth.toLowerCase() === "auto") {
+			if (sWidth != "") {
 				oRm.addStyle("width", sWidth);
-			} else if (oMenuButton._isSplitButton() && oMenuButton._iInitialWidth) { //else if we have initial width apply it
-				oRm.addStyle("width", oMenuButton._iInitialWidth + "px");
 			}
 			oRm.writeStyles();
 
 			oRm.write(">");
 
+			oMenuButton._ensureBackwardsReference();
 			oRm.renderControl(oMenuButton._getButtonControl());
 
 			oRm.write("</div>");
-		};
-
-		MenuButtonRenderer.writeAriaAttributes = function(oRm, oMenuButton) {
-			oRm.writeAttribute("aria-haspopup", "true");
 		};
 
 		return MenuButtonRenderer;

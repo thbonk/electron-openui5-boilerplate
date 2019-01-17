@@ -6,6 +6,11 @@
 			"theme": "sap_belize_hcw"
 		},
 		{
+			"name": "InfoLabel.less",
+			"designtime": true,
+			"theme": "sap_belize_hcw"
+		},
+		{
 			"name": "NavigationList.less",
 			"designtime": true,
 			"theme": "sap_belize_hcw"

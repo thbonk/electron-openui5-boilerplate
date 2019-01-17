@@ -1,13 +1,13 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 /**
  * Provides methods for information retrieval from the core.
  */
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/ToolsAPI', 'sap/ui/thirdparty/URI'],
+sap.ui.define(["jquery.sap.global", "sap/ui/core/support/ToolsAPI", "sap/ui/thirdparty/URI"],
 	function (jQuery, ToolsAPI, URI) {
 	"use strict";
 
@@ -16,19 +16,69 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/ToolsAPI', 'sap/ui/thir
 	 */
 	var DataCollector = function(oCore) {
 		this._oCore = oCore;
+
+		// Set default
+		this._oSupportAssistantInfo = {
+			location: "",
+			version: {},
+			versionAsString: ""
+		};
+	};
+
+	/**
+	 * Setter for Support Assistant location
+	 *
+	 * @public
+	 * @param {string} sLocation the location the Support Assistant is loaded from
+	 */
+	DataCollector.prototype.setSupportAssistantLocation = function (sLocation) {
+		this._oSupportAssistantInfo.location = sLocation;
+	};
+
+	/**
+	 * Setter for Support Assistant version
+	 *
+	 * @public
+	 * @param {Object} oVersion version of the Support Assistant
+	 */
+	DataCollector.prototype.setSupportAssistantVersion = function (oVersion) {
+		this._oSupportAssistantInfo.version = oVersion;
+		this._oSupportAssistantInfo.versionAsString = "not available";
+
+		if (oVersion) {
+			this._oSupportAssistantInfo.versionAsString = jQuery.sap.escapeHTML(oVersion.version || "");
+			this._oSupportAssistantInfo.versionAsString += " (built at " + jQuery.sap.escapeHTML(oVersion.buildTimestamp || "");
+			this._oSupportAssistantInfo.versionAsString += ", last change " + jQuery.sap.escapeHTML(oVersion.scmRevision || "") + ")";
+		}
+	};
+
+	/**
+	 * Getter for Support Assistant information
+	 *
+	 * @public
+	 * @returns {Object} Information about the Support Assistant
+	 */
+	DataCollector.prototype.getSupportAssistantInfo = function() {
+		return this._oSupportAssistantInfo;
 	};
 
 	/**
 	 * @returns {Array} All loaded manifest.json files.
 	 */
 	DataCollector.prototype.getAppInfo = function() {
-		var appInfos = [];
-		for (var componentName in this._oCore.mObjects.component) {
-			var component = this._oCore.mObjects.component[componentName];
-			var sapApp = component.getMetadata().getManifestEntry('sap.app');
-			appInfos.push(sapApp);
+		var aAppInfos = [];
+		for (var sComponentName in this._oCore.mObjects.component) {
+			var oComponent = this._oCore.mObjects.component[sComponentName],
+				aSapApp = oComponent.getMetadata().getManifestEntry("sap.app"),
+				aSapFiori = oComponent.getMetadata().getManifestEntry("sap.fiori");
+
+			aAppInfos.push(aSapApp);
+
+			if (aSapFiori) {
+				aAppInfos.push(aSapFiori);
+			}
 		}
-		return appInfos;
+		return aAppInfos;
 	};
 
 	/**
@@ -58,7 +108,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/ToolsAPI', 'sap/ui/thir
 			resourcePaths: [],
 			themePaths : [],
 			locationsearch: document.location.search,
-			locationhash: document.location.hash
+			locationhash: document.location.hash,
+			supportAssistant: this._oSupportAssistantInfo
 		};
 
 		//add absolute paths for resources
@@ -77,6 +128,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/ToolsAPI', 'sap/ui/thir
 		var mLibraries = this._oCore.getLoadedLibraries();
 		aResults = [];
 		for (var n in mLibraries) {
+			if (n === "") {
+				// Ignoring "unnamed" libraries.
+				// This might happen when a control without namespace is defined
+				// (e.g. "MyControl" instead of "com.example.MyControl").
+				continue;
+			}
 			var sPath = this._oCore._getThemePath(n, this._oCore.oConfiguration.theme);
 			aResults.push({
 				theme : this._oCore.oConfiguration.theme,

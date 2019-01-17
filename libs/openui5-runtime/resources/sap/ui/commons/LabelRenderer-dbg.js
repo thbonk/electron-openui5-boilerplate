@@ -1,13 +1,19 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides default renderer for control sap.ui.commons.Label
-sap.ui.define([ 'sap/ui/core/Renderer'],
-	function(Renderer) {
+sap.ui.define(['sap/ui/core/Renderer', 'sap/ui/core/LabelEnablement', 'sap/ui/commons/library', 'sap/ui/core/library'],
+	function(Renderer, LabelEnablement, library, coreLibrary) {
 	"use strict";
+
+	// shortcut for sap.ui.core.TextDirection
+	var TextDirection = coreLibrary.TextDirection;
+
+	// shortcut for sap.ui.commons.LabelDesign
+	var LabelDesign = library.LabelDesign;
 
 	/**
 	 * Label renderer.
@@ -20,18 +26,14 @@ sap.ui.define([ 'sap/ui/core/Renderer'],
 	/**
 	 * Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
 	 *
-	 * @param {sap.ui.core.RenderManager} oRenderManager The RenderManager that can be used for writing to the render-output-buffer.
+	 * @param {sap.ui.core.RenderManager} rm The RenderManager that can be used for writing to the render-output-buffer.
 	 * @param {sap.ui.core.Control} oLabel An object representation of the control that should be rendered.
 	 */
-	LabelRenderer.render = function(oRenderManager, oLabel) {
-		// Some convenience variables.
-		var rm = oRenderManager;
-		var r = LabelRenderer;
-
+	LabelRenderer.render = function(rm, oLabel) {
 		rm.write("<label");
 		rm.writeControlData(oLabel);
 
-		sap.ui.core.LabelEnablement.writeLabelForAttribute(oRenderManager, oLabel);
+		LabelEnablement.writeLabelForAttribute(rm, oLabel);
 
 		var oFor = oLabel._getLabeledControl();
 		var sTooltip = oLabel.getTooltip_AsString();
@@ -57,7 +59,7 @@ sap.ui.define([ 'sap/ui/core/Renderer'],
 
 		// Styles
 		rm.addClass("sapUiLbl");
-		if (oLabel.getDesign() == sap.ui.commons.LabelDesign.Bold) {
+		if (oLabel.getDesign() == LabelDesign.Bold) {
 			rm.addClass("sapUiLblEmph");
 		}
 
@@ -68,7 +70,7 @@ sap.ui.define([ 'sap/ui/core/Renderer'],
 		}
 
 		// Style for text alignment
-		var sTextAlign = r.getTextAlign(oLabel.getTextAlign(), sTextDir);
+		var sTextAlign = LabelRenderer.getTextAlign(oLabel.getTextAlign(), sTextDir);
 		if (sTextAlign) {
 			rm.addStyle("text-align", sTextAlign);
 		}
@@ -79,7 +81,7 @@ sap.ui.define([ 'sap/ui/core/Renderer'],
 			rm.addStyle("width", sWidth);
 		}
 
-		if (!oLabel.getWrapping()) {
+		if (!oLabel.isWrapping()) {
 			rm.addClass("sapUiLblNowrap");
 		}
 
@@ -104,17 +106,16 @@ sap.ui.define([ 'sap/ui/core/Renderer'],
 	};
 
 
-	LabelRenderer.writeImgHtml = function(oRenderManager, oLabel) {
-		var rm = oRenderManager;
+	LabelRenderer.writeImgHtml = function(rm, oLabel) {
 		var sIconUrl = oLabel.getIcon();
-		var oConfig = oRenderManager.getConfiguration();
+		var oConfig = rm.getConfiguration();
 		var aClasses = [];
 		var mAttributes = {
 			"title": null
 		};
 
 		aClasses.push("sapUiLblIco");
-		if ((oLabel.getTextDirection() == sap.ui.core.TextDirection.RTL && !oConfig.getRTL()) || (oLabel.getTextDirection() == sap.ui.core.TextDirection.LTR && oConfig.getRTL())) {
+		if ((oLabel.getTextDirection() == TextDirection.RTL && !oConfig.getRTL()) || (oLabel.getTextDirection() == TextDirection.LTR && oConfig.getRTL())) {
 			// if text direction is different to global text direction, icon margin must be switched.
 			aClasses.push("sapUiLblIcoR");
 		} else {

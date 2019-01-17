@@ -1,12 +1,21 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-	"jquery.sap.global", "sap/ui/core/Component", "sap/ui/fl/ChangePersistence", "sap/ui/fl/Utils"
-], function(jQuery, Component, ChangePersistence, Utils) {
+	"sap/ui/thirdparty/jquery",
+	"sap/ui/core/Component",
+	"sap/ui/fl/ChangePersistence",
+	"sap/ui/fl/Utils"
+],
+function(
+	jQuery,
+	Component,
+	ChangePersistence,
+	Utils
+) {
 	"use strict";
 
 	/**
@@ -15,7 +24,7 @@ sap.ui.define([
 	 * @alias sap.ui.fl.ChangePersistenceFactory
 	 * @experimental Since 1.27.0
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 */
 	var ChangePersistenceFactory = {};
 
@@ -96,7 +105,9 @@ sap.ui.define([
 	 * @private
 	 */
 	ChangePersistenceFactory._doLoadComponent = function (oConfig, oManifest) {
-		var oChangePersistenceWrapper = {oChangePersistence: {}, oRequestOptions: {}};
+		var oChangePersistenceWrapper = {oChangePersistence: {}, oRequestOptions: {
+			appName: oConfig.name
+		}};
 		var sComponentName = Utils.getFlexReference(oManifest);
 		var sAppVersion = Utils.getAppVersionFromManifest(oManifest);
 		var sMaxLayer, oStartupParameters, oTechnicalParameters;
@@ -114,7 +125,6 @@ sap.ui.define([
 					var oFlAsyncHint = this._findFlAsyncHint(aAsyncHints.requests, sComponentName);
 					if (oFlAsyncHint) {
 						oChangePersistenceWrapper.oRequestOptions.cacheKey = oFlAsyncHint.cachebusterToken || "<NO CHANGES>";
-						oChangePersistenceWrapper.oRequestOptions.url = oFlAsyncHint.url;
 					}
 				}
 			}
@@ -153,6 +163,8 @@ sap.ui.define([
 		}
 
 		var oChangePersistenceWrapper = this._doLoadComponent(oConfig, oManifest);
+		oChangePersistenceWrapper.oRequestOptions.componentData = {};
+		Object.assign(oChangePersistenceWrapper.oRequestOptions.componentData, oConfig.componentData);
 
 		oChangePersistenceWrapper.oChangePersistence.getChangesForComponent(oChangePersistenceWrapper.oRequestOptions);
 	};

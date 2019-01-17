@@ -1,39 +1,89 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.uxap.ObjectPageHeader.
 sap.ui.define([
-	"sap/ui/core/Control",
-	"sap/ui/core/IconPool",
-	"sap/ui/core/CustomData",
-	"sap/ui/core/Icon",
-	"sap/ui/Device",
-	"sap/m/Breadcrumbs",
-	"./ObjectPageHeaderActionButton",
-	"sap/ui/core/ResizeHandler",
-	"sap/m/Text",
-	"sap/m/Button",
-	"sap/m/ActionSheet",
-	"sap/m/Image",
-	"./ObjectImageHelper",
-	"./library"
-], function (Control, IconPool, CustomData, Icon, Device, Breadcrumbs, ObjectPageHeaderActionButton,
-			 ResizeHandler, Text, Button, ActionSheet, Image, ObjectImageHelper, library) {
+    "sap/ui/thirdparty/jquery",
+    "sap/ui/core/Control",
+    "sap/ui/core/IconPool",
+    "sap/ui/core/CustomData",
+    "sap/ui/Device",
+    "sap/m/Breadcrumbs",
+    "./ObjectPageHeaderActionButton",
+    "sap/ui/core/ResizeHandler",
+    "sap/m/Button",
+    "sap/m/ActionSheet",
+    "./ObjectImageHelper",
+    "./ObjectPageHeaderContent",
+    "./library",
+    "sap/m/library",
+    "./ObjectPageHeaderRenderer"
+], function(
+    jQuery,
+	Control,
+	IconPool,
+	CustomData,
+	Device,
+	Breadcrumbs,
+	ObjectPageHeaderActionButton,
+	ResizeHandler,
+	Button,
+	ActionSheet,
+	ObjectImageHelper,
+	ObjectPageHeaderContent,
+	library,
+	mobileLibrary,
+	ObjectPageHeaderRenderer
+) {
 	"use strict";
 
+	// shortcut for sap.uxap.Importance
+	var Importance = library.Importance;
+
+	// shortcut for sap.m.ButtonType
+	var ButtonType = mobileLibrary.ButtonType;
+
+	// shortcut for sap.m.PlacementType
+	var PlacementType = mobileLibrary.PlacementType;
+
+	// shortcut for sap.uxap.ObjectPageHeaderDesign
+	var ObjectPageHeaderDesign = library.ObjectPageHeaderDesign;
+
+	// shortcut for sap.uxap.ObjectPageHeaderPictureShape
+	var ObjectPageHeaderPictureShape = library.ObjectPageHeaderPictureShape;
+
+	function isFunction(oObject) {
+		return typeof oObject === "function";
+	}
+
 	/**
-	 * Constructor for a new ObjectPageHeader.
+	 * Constructor for a new <code>ObjectPageHeader</code>.
 	 *
-	 * @param {string} [sId] id for the new control, generated automatically if no id is given
-	 * @param {object} [mSettings] initial settings for the new control
+	 * @param {string} [sId] ID for the new control, generated automatically if no ID is given
+	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
-	 * ObjectPageHeader represents the static part of an Object page header.
-	 * Typically used to display the basic information about a business object, such as title/description/picture, as well as a list of common actions.
+	 * Represents the static part (header title) of the classic header of the {@link sap.uxap.ObjectPageLayout}.
+	 *
+	 * <h3>Overview</h3>
+	 *
+	 * The <code>ObjectPageHeader</code> is used to display the basic information about a business object,
+	 * such as title/description/picture, as well as a list of common actions.
+	 *
+	 * <b>Note:</b> The <code>ObjectPageHeader</code> is meant to be used inside the <code>ObjectPageLayout</code>
+	 * control. Any other usage is not supported and can lead to unexpected behavior.
+	 *
+	 * @see {@link topic:0fecbce45e39406aa939bd25e89823f4 Object Page Classic Header}
+	 * @see {@link topic:d2ef0099542d44dc868719d908e576d0 Object Page Headers}
+	 * @see {@link topic:9c9d94fd28284539a9a5a57e9caf82a8 Object Page Headers Comparison}
+	 * @see {@link fiori:https://experience.sap.com/fiori-design-web/snapping-header/ Object Page Header}
+	 * @see {@link fiori:https://experience.sap.com/fiori-design-web/object-page/ UX Guidelines: Object Page}
+	 *
 	 * @extends sap.ui.core.Control
+	 * @implements sap.uxap.IHeaderTitle
 	 *
 	 * @author SAP SE
 	 *
@@ -46,6 +96,7 @@ sap.ui.define([
 	var ObjectPageHeader = Control.extend("sap.uxap.ObjectPageHeader", /** @lends sap.uxap.ObjectPageHeader.prototype */ {
 		metadata: {
 			library: "sap.uxap",
+			interfaces: ["sap.uxap.IHeaderTitle"],
 			properties: {
 
 				/**
@@ -79,7 +130,7 @@ sap.ui.define([
 				 */
 				objectImageShape: {
 					type: "sap.uxap.ObjectPageHeaderPictureShape",
-					defaultValue: sap.uxap.ObjectPageHeaderPictureShape.Square
+					defaultValue: ObjectPageHeaderPictureShape.Square
 				},
 
 				/**
@@ -110,7 +161,7 @@ sap.ui.define([
 				 */
 				headerDesign: {
 					type: "sap.uxap.ObjectPageHeaderDesign",
-					defaultValue: sap.uxap.ObjectPageHeaderDesign.Light
+					defaultValue: ObjectPageHeaderDesign.Light
 				},
 
 				/**
@@ -223,7 +274,20 @@ sap.ui.define([
 				 * A button that is used for opening the side content of the page or some additional content.
 				 * @since 1.38.0
 				 */
-				sideContentButton: {type: "sap.m.Button", multiple: false}
+				sideContentButton: {type: "sap.m.Button", multiple: false},
+
+				/**
+				 * A custom tooltip for the title selector button.
+				 *
+				 * The custom tooltip will be visible if the <code>showTitleSelector</code>
+				 * property is set to <code>true</code>.
+				 *
+				 * <b>Note:</b> If the aggregation is destroyed or set to invalid value, the
+				 * default tooltip will be set. The default tooltip text is "Related options".
+				 *
+				 * @since 1.56
+				 */
+				titleSelectorTooltip: {type: "sap.ui.core.TooltipBase", altTypes: ["string"], multiple: false}
 			},
 			events: {
 
@@ -267,7 +331,7 @@ sap.ui.define([
 					}
 				}
 			},
-			designTime: true
+			designtime: "sap/uxap/designtime/ObjectPageHeader.designtime"
 		}
 	});
 
@@ -280,7 +344,7 @@ sap.ui.define([
 			this.oLibraryResourceBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m"); // get resource translation bundle
 		}
 		if (!this.oLibraryResourceBundleOP) {
-			this.oLibraryResourceBundleOP = library.i18nModel.getResourceBundle(); // get resource translation bundle
+			this.oLibraryResourceBundleOP = sap.ui.getCore().getLibraryResourceBundle("sap.uxap"); // get resource translation bundle
 		}
 
 		// Overflow button
@@ -297,6 +361,16 @@ sap.ui.define([
 		this._oChangesIcon = this._lazyLoadInternalAggregation("_changesIcon", true).attachPress(this._handleChangesPress, this);
 		this._oChangesIconCont = this._lazyLoadInternalAggregation("_changesIconCont", true).attachPress(this._handleChangesPress, this);
 	};
+
+	ObjectPageHeader.getMetadata().forwardAggregation(
+		"breadCrumbsLinks",
+		{
+			getter: function() { // TODO: is invalidation needed for non-getters?
+				return this._lazyLoadInternalAggregation("_breadCrumbs");
+			},
+			aggregation: "links"
+		}
+	);
 
 	ObjectPageHeader.prototype._handleOverflowButtonPress = function (oEvent) {
 		this._oOverflowActionSheet.openBy(this._oOverflowButton);
@@ -324,10 +398,10 @@ sap.ui.define([
 		"_objectImage": ObjectImageHelper.createObjectImage,
 		"_placeholder": ObjectImageHelper.createPlaceholder,
 		"_overflowActionSheet": function () {
-			return new ActionSheet({placement: sap.m.PlacementType.Bottom});
+			return new ActionSheet({placement: PlacementType.Bottom});
 		},
 		"_lockIconCont": function (oParent) {
-			return this._getButton(oParent, "sap-icon://private", "lock-cont");
+			return this._getButton(oParent, "sap-icon://private", "lock-cont", oParent.oLibraryResourceBundleOP.getText("TOOLTIP_OP_LOCK_MARK_VALUE"));
 		},
 		"_breadCrumbs": function (oParent) {
 			return new Breadcrumbs({
@@ -338,10 +412,10 @@ sap.ui.define([
 			return this._getButton(oParent, "sap-icon://private", "lock", oParent.oLibraryResourceBundleOP.getText("TOOLTIP_OP_LOCK_MARK_VALUE"));
 		},
 		"_titleArrowIconCont": function (oParent) {
-			return this._getButton(oParent, "sap-icon://arrow-down", "titleArrow-cont", oParent.oLibraryResourceBundleOP.getText("OP_SELECT_ARROW_TOOLTIP"));
+			return this._getButton(oParent, "sap-icon://slim-arrow-down", "titleArrow-cont", oParent.oLibraryResourceBundleOP.getText("OP_SELECT_ARROW_TOOLTIP"));
 		},
 		"_titleArrowIcon": function (oParent) {
-			return this._getButton(oParent, "sap-icon://arrow-down", "titleArrow", oParent.oLibraryResourceBundleOP.getText("OP_SELECT_ARROW_TOOLTIP"));
+			return this._getButton(oParent, "sap-icon://slim-arrow-down", "titleArrow", oParent.oLibraryResourceBundleOP.getText("OP_SELECT_ARROW_TOOLTIP"));
 		},
 		"_favIcon": function (oParent) {
 			return this._getIcon(oParent, "favorite", oParent.oLibraryResourceBundleOP.getText("TOOLTIP_OP_FAVORITE_MARK_VALUE"));
@@ -350,7 +424,7 @@ sap.ui.define([
 			return this._getIcon(oParent, "flag", oParent.oLibraryResourceBundleOP.getText("TOOLTIP_OP_FLAG_MARK_VALUE"));
 		},
 		"_overflowButton": function (oParent) {
-			return this._getButton(oParent, "sap-icon://overflow", "overflow");
+			return this._getButton(oParent, "sap-icon://overflow", "overflow", oParent.oLibraryResourceBundleOP.getText("TOOLTIP_OP_OVERFLOW_BTN"));
 		},
 		"_expandButton": function (oParent) {
 			return this._getButton(oParent, "sap-icon://slim-arrow-down", "expand", oParent.oLibraryResourceBundleOP.getText("TOOLTIP_OP_EXPAND_HEADER_BTN"));
@@ -374,7 +448,7 @@ sap.ui.define([
 				id: this._getParentAugmentedId(oParent, sChildSignature),
 				tooltip: sTooltip,
 				icon: sIcon,
-				type: sap.m.ButtonType.Transparent
+				type: ButtonType.Transparent
 			});
 		},
 		_getParentAugmentedId: function (oParent, sChildSignature) {
@@ -421,11 +495,24 @@ sap.ui.define([
 		return this;
 	};
 
-	ObjectPageHeader.prototype._proxyMethodToBreadCrumbControl = function (sFuncName, aArguments) {
-		var oBreadCrumbs = this._lazyLoadInternalAggregation("_breadCrumbs"),
-			vResult = oBreadCrumbs[sFuncName].apply(oBreadCrumbs, aArguments);
-		this.invalidate();
-		return vResult;
+	ObjectPageHeader.prototype._setAggregationTooltip = function (sAggregationName, vTooltip) {
+		var oAggregation = this.getAggregation(sAggregationName);
+
+	   if (oAggregation) {
+		   oAggregation.setTooltip(vTooltip);
+	   }
+
+	   return this;
+	};
+
+	ObjectPageHeader.prototype._setTitleSelectorTooltip = function(vTooltip) {
+		if (vTooltip === null || vTooltip === undefined) {
+			vTooltip = this.oLibraryResourceBundleOP.getText("OP_SELECT_ARROW_TOOLTIP");
+		}
+		this._setAggregationTooltip("_titleArrowIcon", vTooltip);
+		this._setAggregationTooltip("_titleArrowIconCont", vTooltip);
+
+		return this;
 	};
 
 	ObjectPageHeader.prototype.setHeaderDesign = function (sHeaderDesign) {
@@ -436,33 +523,14 @@ sap.ui.define([
 		return this;
 	};
 
-	ObjectPageHeader.prototype._shiftHeaderTitle = function () {
-
-		var oParent = this.getParent(),
-			oShiftOffsetParams;
-
-		if (!oParent || (typeof oParent._calculateShiftOffset !== "function")) {
-			return;
-		}
-
-		oShiftOffsetParams = oParent._calculateShiftOffset();
-
-		if (typeof oParent._shiftHeader === "function") {
-			oParent._shiftHeader(oShiftOffsetParams.sStyleAttribute, oShiftOffsetParams.iMarginalsOffset + "px");
-		}
-	};
-
-	/**
-	 * get current title and if it is different from the new one re-render the HeaderContent
-	 * @param {string} sNewTitle title string
-	 * @return {*} this
-	 */
 	ObjectPageHeader.prototype.setObjectTitle = function (sNewTitle) {
 
-		var sOldTitle = this.getProperty("objectTitle"),
+		var oParent = this.getParent(),
+			sOldTitle = this.getProperty("objectTitle"),
 			bChanged = sOldTitle !== sNewTitle;
 
 		this._applyActionProperty("objectTitle", Array.prototype.slice.call(arguments));
+		oParent && isFunction(oParent._updateRootAriaLabel) && oParent._updateRootAriaLabel();
 
 		if (bChanged && this.mEventRegistry["_titleChange"]) {
 			this.fireEvent("_titleChange", {
@@ -486,6 +554,7 @@ sap.ui.define([
 		ObjectPageHeader.prototype[sConvertedSetterName] = function () {
 			var aArgumentsPassedToTheProperty = Array.prototype.slice.call(arguments);
 			this._applyActionProperty.call(this, sPropertyName, aArgumentsPassedToTheProperty);
+			return this;
 		};
 	};
 
@@ -495,6 +564,7 @@ sap.ui.define([
 		ObjectPageHeader.prototype[sConvertedSetterName] = function () {
 			var aArgumentsPassedToTheProperty = Array.prototype.slice.call(arguments);
 			this._applyObjectImageProperty.call(this, sPropertyName, aArgumentsPassedToTheProperty);
+			return this;
 		};
 	};
 
@@ -512,34 +582,6 @@ sap.ui.define([
 
 	aPropertiesToOverride.forEach(fnGenerateSetterForAction);
 	aObjectImageProperties.forEach(fnGenerateSetterForObjectImageProperties);
-
-	ObjectPageHeader.prototype.getBreadCrumbsLinks = function () {
-		return this._lazyLoadInternalAggregation("_breadCrumbs").getLinks();
-	};
-
-	ObjectPageHeader.prototype.addBreadCrumbLink = function () {
-		return this._proxyMethodToBreadCrumbControl("addLink", arguments);
-	};
-
-	ObjectPageHeader.prototype.indexOfBreadCrumbLink = function () {
-		return this._proxyMethodToBreadCrumbControl("indexOfLink", arguments);
-	};
-
-	ObjectPageHeader.prototype.insertBreadCrumbLink = function () {
-		return this._proxyMethodToBreadCrumbControl("insertLink", arguments);
-	};
-
-	ObjectPageHeader.prototype.removeBreadCrumbLink = function () {
-		return this._proxyMethodToBreadCrumbControl("removeLink", arguments);
-	};
-
-	ObjectPageHeader.prototype.removeAllBreadCrumbsLinks = function () {
-		return this._proxyMethodToBreadCrumbControl("removeAllLinks", arguments);
-	};
-
-	ObjectPageHeader.prototype.destroyBreadCrumbsLinks = function () {
-		return this._proxyMethodToBreadCrumbControl("destroyLinks", arguments);
-	};
 
 	ObjectPageHeader.prototype._destroyObjectImage = function () {
 		var sObjectImage = "_objectImage",
@@ -559,7 +601,9 @@ sap.ui.define([
 
 		var aActions = this.getActions() || [];
 		this._oOverflowActionSheet.removeAllButtons();
-		this._oActionSheetButtonMap = {};
+
+		// BCP: 1870085555 - Ensure all buttons from previous rendering are being destroyed
+		this._resetActionSheetMap();
 
 		//display overflow if there are more than 1 item or only 1 item and it is showing its text
 		if (aActions.length > 1 || this._hasOneButtonShowText(aActions)) {
@@ -585,8 +629,6 @@ sap.ui.define([
 					oAction.setVisible = function (bVisible) {
 						oAction._setInternalVisible(bVisible, true);
 						Button.prototype.setVisible.call(this, bVisible);
-
-						oAction.getParent()._adaptOverflow();
 					};
 
 					oAction.onAfterRendering = function () {
@@ -598,7 +640,7 @@ sap.ui.define([
 
 				// Force the design of the button to transparent
 				if (oAction instanceof Button && (oAction.getType() === "Default" || oAction.getType() === "Unstyled")) {
-					oAction.setProperty("type", sap.m.ButtonType.Transparent, false);
+					oAction.setProperty("type", ButtonType.Transparent, false);
 				}
 
 				if (oAction instanceof Button && oAction.getVisible()) {
@@ -616,7 +658,22 @@ sap.ui.define([
 		this._oFavIcon.setVisible(this.getMarkFavorite());
 		this._oFlagIcon.setVisible(this.getMarkFlagged());
 		this._attachDetachActionButtonsHandler(false);
+		if (this._iResizeId) {
+			ResizeHandler.deregister(this._iResizeId);
+			this._iResizeId = null;
+		}
 		this._bFirstRendering = false;
+	};
+
+	/**
+	 * Destroys all created action sheet buttons contained in _oActionSheetButtonMap and empty the object
+	 * @private
+	 */
+	ObjectPageHeader.prototype._resetActionSheetMap = function () {
+		Object.keys(this._oActionSheetButtonMap).forEach(function (sButton) {
+			this._oActionSheetButtonMap[sButton].destroy();
+		}.bind(this));
+		this._oActionSheetButtonMap = {};
 	};
 
 	/**
@@ -671,15 +728,14 @@ sap.ui.define([
 		if (!this._iResizeId) {
 			this._iResizeId = ResizeHandler.register(this, this._onHeaderResize.bind(this));
 		}
-		this._shiftHeaderTitle();
 
 		this._attachDetachActionButtonsHandler(true);
 	};
 
-	ObjectPageHeader.prototype._onHeaderResize = function () {
+	ObjectPageHeader.prototype._onHeaderResize = function (oEvent) {
 		this._adaptLayout();
-		if (this.getParent() && typeof this.getParent()._adjustHeaderHeights === "function") {
-			this.getParent()._adjustHeaderHeights();
+		if (this.getParent() && typeof this.getParent()._onUpdateHeaderTitleSize === "function") {
+			this.getParent()._onUpdateHeaderTitleSize(oEvent);
 		}
 	};
 
@@ -731,8 +787,8 @@ sap.ui.define([
 	 * @private
 	 */
 	ObjectPageHeader._sortActionsByImportance = function (oActionA, oActionB) {
-		var sImportanceA = (oActionA instanceof ObjectPageHeaderActionButton) ? oActionA.getImportance() : sap.uxap.Importance.High,
-			sImportanceB = (oActionB instanceof ObjectPageHeaderActionButton) ? oActionB.getImportance() : sap.uxap.Importance.High,
+		var sImportanceA = (oActionA instanceof ObjectPageHeaderActionButton) ? oActionA.getImportance() : Importance.High,
+			sImportanceB = (oActionB instanceof ObjectPageHeaderActionButton) ? oActionB.getImportance() : Importance.High,
 			iImportanceDifference = ObjectPageHeader._actionImportanceMap[sImportanceA] - ObjectPageHeader._actionImportanceMap[sImportanceB];
 
 		if (iImportanceDifference === 0) {
@@ -767,12 +823,39 @@ sap.ui.define([
 	 * @private
 	 */
 	ObjectPageHeader.prototype._adaptLayout = function (oEvent) {
-		var iIdentifierContWidth = this.$("identifierLine").width(),
+
+		this._adaptLayoutForDomElement(null, oEvent);
+	};
+
+	/**
+	 * Adapts the layout of the given headerTitle domElement
+	 *
+	 * @param {object} $headerDomRef The reference to the header dom element
+	 * @param {object} oEvent The event of child-element that brought the need to adapt the headerTitle layout
+	 *
+	 * @private
+	 */
+	ObjectPageHeader.prototype._adaptLayoutForDomElement = function ($headerDomRef, oEvent) {
+		var $domElement;
+
+		if ($headerDomRef) {
+			$domElement = $headerDomRef.length ? $headerDomRef[0] : $headerDomRef;
+		} else {
+			$domElement = this.getDomRef();
+		}
+
+		if (isDomElementHidden($domElement)) {
+			return;
+		}
+
+		var $identifierLine = this._findById($headerDomRef, "identifierLine"),
+			iIdentifierContWidth = $identifierLine.width(),
 			iActionsWidth = this._getActionsWidth(), // the width off all actions without hidden one
 			iActionsContProportion = iActionsWidth / iIdentifierContWidth, // the percentage(proportion) that action buttons take from the available space
 			iAvailableSpaceForActions = this._iAvailablePercentageForActions * iIdentifierContWidth,
 			$overflowButton = this._oOverflowButton.$(),
-			$actionButtons = this.$("actions").find(".sapMBtn").not(".sapUxAPObjectPageHeaderExpandButton");
+			$actions = this._findById($headerDomRef, "actions"),
+			$actionButtons = $actions.find(".sapMBtn").not(".sapUxAPObjectPageHeaderExpandButton");
 
 		if (iActionsContProportion > this._iAvailablePercentageForActions) {
 			this._adaptActions(iAvailableSpaceForActions);
@@ -780,8 +863,13 @@ sap.ui.define([
 			oEvent.getSource()._setInternalVisible(true);
 		}
 
-		if (sap.ui.Device.system.phone) {
-			$actionButtons.css("visibility", "visible");
+		if (Device.system.phone) {
+			// revert the visibility css style only for the actions whose style was modified by _getActionsWidth
+			this.getActions().forEach(function (oAction) {
+				if (oAction instanceof Button) {
+					oAction.$().css("visibility", "visible");
+				}
+			});
 		}
 
 		// verify overflow button visibility
@@ -789,32 +877,60 @@ sap.ui.define([
 			$overflowButton.hide();
 		}
 
-		this._adaptObjectPageHeaderIndentifierLine();
+		this._adaptObjectPageHeaderIndentifierLine($headerDomRef);
+	};
+
+	ObjectPageHeader.prototype._adaptLayoutDelayed = function () {
+		if (this._adaptLayoutTimeout) {
+			clearTimeout(this._adaptLayoutTimeout);
+		}
+		this._adaptLayoutTimeout = setTimeout(function() {
+			this._adaptLayoutTimeout = null;
+			this._adaptLayout();
+		}.bind(this), 0);
 	};
 
 	/**
 	 * Adapt title/subtitle container and action buttons
 	 * @private
 	 */
-	ObjectPageHeader.prototype._adaptObjectPageHeaderIndentifierLine = function () {
-		var iIdentifierContWidth = this.$("identifierLine").width(),
-			$subtitle = this.$("subtitle"),
-			$identifierLineContainer = this.$("identifierLineContainer"),
+	ObjectPageHeader.prototype._adaptObjectPageHeaderIndentifierLine = function ($domRef) {
+
+		var $identifierLine = this._findById($domRef, "identifierLine"),
+			iIdentifierContWidth = $identifierLine.width(),
+			$subtitle = this._findById($domRef, "subtitle"),
+			$innerTitle = this._findById($domRef, "innerTitle"),
+			$identifierLineContainer = this._findById($domRef, "identifierLineContainer"),
 			iSubtitleBottom,
 			iTitleBottom,
-			iActionsAndImageWidth = this.$("actions").width() + this.$().find(".sapUxAPObjectPageHeaderObjectImageContainer").width(),
+			sOriginalHeight = null,
+			$actions = this._findById($domRef, "actions"),
+			$imageContainer = $domRef ? $domRef.find(".sapUxAPObjectPageHeaderObjectImageContainer") : this.$().find(".sapUxAPObjectPageHeaderObjectImageContainer"),
+			iActionsAndImageWidth = $actions.width() + $imageContainer.width(),
 			iPixelTolerance = this.$().parents().hasClass('sapUiSizeCompact') ? 7 : 3;  // the tolerance of pixels from which we can tell that the title and subtitle are on the same row
 
 		if ($subtitle.length) {
 			if ($subtitle.hasClass("sapOPHSubtitleBlock")) {
+
+				// save the original height and
+				// set the height of the wrapping div to a constant value before temporarily changing its inner state
+				// to avoid flickering (as the temporary inner change will affect its height as well)
+				sOriginalHeight = $identifierLine.get(0).style.height;
+				$identifierLine.css("height", $identifierLine.height());
+
+				// temporarily toggle the default subtitle display
 				$subtitle.removeClass("sapOPHSubtitleBlock");
 			}
 
 			iSubtitleBottom = $subtitle.outerHeight() + $subtitle.position().top;
-			iTitleBottom = this.$("innerTitle").outerHeight() + this.$("innerTitle").position().top;
+			iTitleBottom = $innerTitle.outerHeight() + $innerTitle.position().top;
 			// check if subtitle is below the title and add it a display block class
 			if (Math.abs(iSubtitleBottom - iTitleBottom) > iPixelTolerance) {
 				$subtitle.addClass("sapOPHSubtitleBlock");
+			}
+
+			if (sOriginalHeight !== null) { // restore the original height
+				$identifierLine.get(0).style.height = sOriginalHeight;
 			}
 		}
 
@@ -827,7 +943,8 @@ sap.ui.define([
 	 */
 	ObjectPageHeader.prototype._adaptActions = function (iAvailableSpaceForActions) {
 		var bMobileScenario = library.Utilities.isPhoneScenario(this._getCurrentMediaContainerRange()) || Device.system.phone,
-			iVisibleActionsWidth = this._oOverflowButton.$().show().width(),
+			$_oOverflowButton = this._oOverflowButton.$(),
+			iVisibleActionsWidth = $_oOverflowButton.show().width(), // overflowButton is now visible
 			aActions = this.getActions(),
 			iActionsLength = aActions.length,
 			oActionSheetButton;
@@ -845,8 +962,10 @@ sap.ui.define([
 				iVisibleActionsWidth += oAction.$().width();
 				if (iAvailableSpaceForActions > iVisibleActionsWidth && !bMobileScenario) {
 					this._setActionButtonVisibility(oAction, true);
+					$_oOverflowButton.hide();
 				} else {
 					this._setActionButtonVisibility(oAction, false);
+					$_oOverflowButton.show();
 				}
 			}
 		}, this);
@@ -895,7 +1014,7 @@ sap.ui.define([
 			if (oAction instanceof Button) {
 				oAction.$().show();
 
-				if (sap.ui.Device.system.phone) {
+				if (Device.system.phone) {
 					oAction.$().css("visibility", "hidden");
 				}
 
@@ -904,6 +1023,30 @@ sap.ui.define([
 		});
 
 		return iWidthSum;
+	};
+
+	/**
+	 * Finds the sub-element with the given <code>sId</code> contained
+	 * within <code>$headerDomRef</code> (if <code>$headerDomRef</code> is supplied) or
+	 * globally, prepended with own id (if <code>$headerDomRef</code> is not supplied)
+	 *
+	 * @param {object} jQuery reference to the header dom element
+	 * @param {string} the id of the element to be found
+	 *
+	 * Returns the jQuery reference to the dom element with the given sId
+	 * @private
+	 */
+	ObjectPageHeader.prototype._findById = function ($headerDomRef, sId) {
+		if (!sId) {
+			return null;
+		}
+
+		if ($headerDomRef) {
+			sId = this.getId() + '-' + sId;
+			return jQuery(document.getElementById(sId));
+		}
+
+		return this.$(sId); //if no dom reference then search within its own id-space (prepended with own id)
 	};
 
 	/**
@@ -922,9 +1065,8 @@ sap.ui.define([
 	/*************************************************************************************/
 
 	/**
-	 * Notifies the parent control, when <code>ObjectPageHeader> changes.
-	 * @param {boolean}
-	 *            bIsObjectImageChange - flag if an image-related property was changed
+	 * Notifies the parent control, when <code>sap.uxap.ObjectPageHeader</code> changes.
+	 * @param {boolean} bIsObjectImageChange Whether the image-related property was changed
 	 * @private
 	 */
 	ObjectPageHeader.prototype._notifyParentOfChanges = function (bIsObjectImageChange) {
@@ -935,17 +1077,35 @@ sap.ui.define([
 		}
 	};
 
+	ObjectPageHeader.prototype.setTitleSelectorTooltip = function (vTooltip) {
+		this._setTitleSelectorTooltip(vTooltip);
+
+		this.setAggregation("titleSelectorTooltip", vTooltip, true);
+
+		return this;
+	};
+
+	ObjectPageHeader.prototype.destroyTitleSelectorTooltip = function () {
+		this._setTitleSelectorTooltip(null);
+
+		this.destroyAggregation("titleSelectorTooltip", true);
+
+		return this;
+	};
+
 	ObjectPageHeader.prototype.exit = function () {
 		this._clearImageNotFoundHandler();
 		if (this._iResizeId) {
 			ResizeHandler.deregister(this._iResizeId);
+			this._iResizeId = null;
 		}
+
+		// BCP: 1870085555 - Ensure all action sheet buttons are destroyed
+		this._resetActionSheetMap();
 	};
 
+	/* Fiori 2.0 adaptation */
 
-	/**
-	 * Fiori 2.0 adaptation
-	 */
 	ObjectPageHeader.prototype.setNavigationBar = function (oBar) {
 
 		this.setAggregation("navigationBar", oBar);
@@ -964,6 +1124,116 @@ sap.ui.define([
 		return this.getNavigationBar();
 	};
 
+	/**
+	 * Required by the {@link sap.uxap.IHeaderTitle} interface.
+	 * @returns {*}
+	 */
+	ObjectPageHeader.prototype.isDynamic = function () {
+		return false;
+	};
+
+	/**
+	 * Required by the {@link sap.uxap.IHeaderTitle} interface
+	 * @returns {sap.uxap.ObjectPageHeaderContent}
+	 */
+	ObjectPageHeader.prototype.getCompatibleHeaderContentClass = function () {
+		return ObjectPageHeaderContent;
+	};
+
+	/**
+	 * Required by the {@link sap.uxap.IHeaderTitle} interface
+	 * @returns {boolean}
+	 */
+	ObjectPageHeader.prototype.supportsToggleHeaderOnTitleClick = function () {
+		return false;
+	};
+
+	/**
+	 * Required by the {@link sap.uxap.IHeaderTitle} interface
+	 * @returns {boolean}
+	 */
+	ObjectPageHeader.prototype.supportsTitleInHeaderContent = function () {
+		return true;
+	};
+
+	/**
+	 * Required by the {@link sap.uxap.IHeaderTitle} interface
+	 * @returns {boolean}
+	 */
+	ObjectPageHeader.prototype.supportsAdaptLayoutForDomElement = function () {
+		return true;
+	};
+
+	/**
+	 * Required by the {@link sap.uxap.IHeaderTitle} interface
+	 * @returns {boolean}
+	 */
+	ObjectPageHeader.prototype.supportsBackgroundDesign = function () {
+		return false;
+	};
+
+
+	/**
+	 * Returns the text that represents the title of the page.
+	 * Required by the {@link sap.uxap.IHeaderTitle} interface
+	 */
+	ObjectPageHeader.prototype.getTitleText = function () {
+		return this.getObjectTitle();
+	};
+
+	/**
+	 * Required by the {@link sap.uxap.IHeaderTitle} interface
+	 */
+	ObjectPageHeader.prototype.snap = function () {
+		this._adaptLayout();
+	};
+
+	/**
+	 * Required by the {@link sap.uxap.IHeaderTitle} interface
+	 */
+	ObjectPageHeader.prototype.unSnap = function () {
+		this._adaptLayout();
+	};
+
+	/**
+	 * Required by the {@link sap.uxap.IHeaderTitle} interface
+	 * @param {boolean} bToggle
+	 * @private
+	 */
+	ObjectPageHeader.prototype._toggleExpandButton = function (bToggle) {
+
+	};
+
+	/**
+	 * Required by the {@link sap.uxap.IHeaderTitle} interface
+	 * @param {boolean} bValue
+	 * @private
+	 */
+	ObjectPageHeader.prototype._setShowExpandButton = function (bValue) {
+
+	};
+
+	/**
+	 * Required by the {@link sap.uxap.IHeaderTitle} interface
+	 * @private
+	 */
+	ObjectPageHeader.prototype._focusExpandButton = function () {
+
+	};
+
+	/**
+	 * Required by the {@link sap.uxap.IHeaderTitle} interface
+	 * @param {boolean} bFocusable
+	 * @private
+	 */
+	ObjectPageHeader.prototype._toggleFocusableState = function (bFocusable) {
+
+	};
+
+	// util
+	function isDomElementHidden($domElem) {
+		return $domElem && !$domElem.offsetWidth && !$domElem.offsetHeight;
+	}
 
 	return ObjectPageHeader;
 });

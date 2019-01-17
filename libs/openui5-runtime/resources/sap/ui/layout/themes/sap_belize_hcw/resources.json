@@ -6,6 +6,11 @@
 			"theme": "sap_belize_hcw"
 		},
 		{
+			"name": "BlockLayoutCell.less",
+			"designtime": true,
+			"theme": "sap_belize_hcw"
+		},
+		{
 			"name": "FormLayout.less",
 			"designtime": true,
 			"theme": "sap_belize_hcw"

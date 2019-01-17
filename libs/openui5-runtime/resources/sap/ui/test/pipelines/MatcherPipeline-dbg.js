@@ -1,22 +1,21 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-		"jquery.sap.global",
-		"sap/ui/base/Object",
-		"./PipelineFactory",
-		"sap/ui/test/_LogCollector"
-	],
-	function($, UI5Object, PipelineFactory, _LogCollector) {
+	"sap/ui/test/_OpaLogger",
+	"sap/ui/base/Object",
+	"sap/ui/test/pipelines/PipelineFactory",
+	"sap/ui/thirdparty/jquery"
+], function(_OpaLogger, UI5Object, PipelineFactory, jQueryDOM) {
 		"use strict";
 		var oPipelineFactory = new PipelineFactory({
 				name: "Matcher",
 				functionName: "isMatching"
 			}),
-			oLogger = $.sap.log.getLogger("sap.ui.test.pipelines.MatcherPipeline", _LogCollector.DEFAULT_LEVEL_FOR_OPA_LOGGERS);
+			oLogger = _OpaLogger.getLogger("sap.ui.test.pipelines.MatcherPipeline");
 
 		/*
 		 * Internals
@@ -86,10 +85,11 @@ sap.ui.define([
 
 				var iExpectedAmount;
 				if (!aMatchers || !aMatchers.length) {
+					oLogger.debug("No matchers defined. All controls are returned");
 					return vControl;
 				}
 
-				if (!$.isArray(vControl)) {
+				if (!jQueryDOM.isArray(vControl)) {
 					iExpectedAmount = 1;
 					aControls = [vControl];
 				} else {
@@ -104,13 +104,16 @@ sap.ui.define([
 							aMatchedValues.push(oControl);
 						} else {
 							// if matching result is a truthy value, then we pass this value as a result
+							oLogger.debug("Pipeline input control '" + "' was transformed to '" + vMatchResult + "'");
 							aMatchedValues.push(vMatchResult);
 						}
 					}
 				}, this);
 
+				oLogger.debug(!!aControls.length ? aMatchedValues.length + " out of " + aControls.length + " controls met the matchers pipeline requirements" :
+					"No controls found so matcher pipeline processing was skipped");
+
 				if (!aMatchedValues.length) {
-					oLogger.debug("all results were filtered out by the matchers - skipping the check");
 					return false;
 				}
 

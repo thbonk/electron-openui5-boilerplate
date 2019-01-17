@@ -1,11 +1,37 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventProvider', './HashChanger', './Route', './Views', './Targets', './History', 'sap/ui/thirdparty/crossroads'],
-	function(jQuery, library, EventProvider, HashChanger, Route, Views, Targets, History, crossroads) {
+sap.ui.define([
+	'sap/ui/core/library',
+	'sap/ui/base/EventProvider',
+	'./HashChanger',
+	'./Route',
+	'./Views',
+	'./Targets',
+	'./History',
+	'sap/ui/thirdparty/crossroads',
+	"sap/base/util/UriParameters",
+	"sap/base/util/deepEqual",
+	"sap/base/Log",
+	"sap/ui/thirdparty/jquery"
+],
+	function(
+		library,
+		EventProvider,
+		HashChanger,
+		Route,
+		Views,
+		Targets,
+		History,
+		crossroads,
+		UriParameters,
+		deepEqual,
+		Log,
+		jQuery
+	) {
 	"use strict";
 
 		var oRouters = {};
@@ -177,8 +203,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 
 				// temporarily: for checking the url param
 				function checkUrl() {
-					if (jQuery.sap.getUriParameters().get("sap-ui-xx-asyncRouting") === "true") {
-						jQuery.sap.log.warning("Activation of async view loading in routing via url parameter is only temporarily supported and may be removed soon", "Router");
+					if (new UriParameters(window.location.href).get("sap-ui-xx-asyncRouting") === "true") {
+						Log.warning("Activation of async view loading in routing via url parameter is only temporarily supported and may be removed soon", "Router");
 						return true;
 					}
 					return false;
@@ -235,11 +261,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 			 */
 			addRoute : function (oConfig, oParent) {
 				if (!oConfig.name) {
-					jQuery.sap.log.error("A name has to be specified for every route", this);
+					Log.error("A name has to be specified for every route", this);
 				}
 
 				if (this._oRoutes[oConfig.name]) {
-					jQuery.sap.log.error("Route with name " + oConfig.name + " already exists", this);
+					Log.error("Route with name " + oConfig.name + " already exists", this);
 				}
 				this._oRoutes[oConfig.name] = this._createRoute(this, oConfig, oParent);
 			},
@@ -254,7 +280,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 				if (this._oRouter) {
 					this._oRouter.parse(sNewHash);
 				} else {
-					jQuery.sap.log.warning("This router has been destroyed while the hash changed. No routing events where fired by the destroyed instance.", this);
+					Log.warning("This router has been destroyed while the hash changed. No routing events where fired by the destroyed instance.", this);
 				}
 			},
 
@@ -270,7 +296,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 					oHashChanger = this.oHashChanger = HashChanger.getInstance();
 
 				if (this._bIsInitialized) {
-					jQuery.sap.log.warning("Router is already initialized.", this);
+					Log.warning("Router is already initialized.", this);
 					return this;
 				}
 
@@ -285,7 +311,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 				};
 
 				if (!oHashChanger) {
-					jQuery.sap.log.error("navTo of the router is called before the router is initialized. If you want to replace the current hash before you initialize the router you may use getUrl and use replaceHash of the Hashchanger.", this);
+					Log.error("navTo of the router is called before the router is initialized. If you want to replace the current hash before you initialize the router you may use getUrl and use replaceHash of the Hashchanger.", this);
 					return;
 				}
 
@@ -344,7 +370,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 			 */
 			stop : function () {
 				if (!this._bIsInitialized) {
-					jQuery.sap.log.warning("Router is not initialized. But it got stopped", this);
+					Log.warning("Router is not initialized. But it got stopped", this);
 				}
 
 				if (this.fnHashChanged) {
@@ -371,8 +397,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 			destroy : function () {
 				EventProvider.prototype.destroy.apply(this);
 
+				// destroy the view cache
+				if (this._oViews) {
+					this._oViews.destroy();
+					this._oViews = null;
+				}
+
 				if (!this._bIsInitialized) {
-					jQuery.sap.log.info("Router is not initialized, but got destroyed.", this);
+					Log.info("Router is not initialized, but got destroyed.", this);
 				}
 
 				if (this.fnHashChanged) {
@@ -419,10 +451,24 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 
 				var oRoute = this.getRoute(sName);
 				if (!oRoute) {
-					jQuery.sap.log.warning("Route with name " + sName + " does not exist", this);
+					Log.warning("Route with name " + sName + " does not exist", this);
 					return;
 				}
 				return oRoute.getURL(oParameters);
+			},
+
+			/**
+			 * Returns whether the given hash can be matched by any one of the Route in the Router.
+			 *
+			 * @param {string} hash which will be tested by the Router
+			 * @return {boolean} whether the hash can be matched
+			 * @public
+			 * @since 1.58.0
+			 */
+			match : function (sHash) {
+				return Object.keys(this._oRoutes).some(function(sRouteName) {
+					return this._oRoutes[sRouteName].match(sHash);
+				}.bind(this));
 			},
 
 			/**
@@ -471,6 +517,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 			 * @public
 			 */
 			getView : function (sViewName, sViewType, sViewId) {
+				Log.warning("Deprecated API Router#getView called - use Router#getViews instead.", this);
+
 				var oView = this._oViews._getViewWithGlobalId({
 					viewName: sViewName,
 					type: sViewType,
@@ -487,7 +535,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 			},
 
 			/**
-			 * Adds or overwrites a view in the viewcache of the router, the viewname serves as a key
+			 * Adds or overwrites a view in the viewcache of the router which will be cached under the given sViewName
+			 * and the "undefined" key
 			 *
 			 * @deprecated Since 1.28 use {@link #getViews} instead.
 			 * @param {string} sViewName Name of the view
@@ -517,7 +566,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 				var sURL = this.getURL(sName, oParameters);
 
 				if (sURL === undefined) {
-					jQuery.sap.log.error("Can not navigate to route with name " + sName + " because the route does not exist");
+					Log.error("Can not navigate to route with name " + sName + " because the route does not exist");
 				}
 
 				if (bReplace) {
@@ -545,7 +594,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 			 *
 			 * @param {string|string[]} vName the name of a single target or the name of multiple targets
 			 * @return {sap.ui.core.routing.Target|undefined|sap.ui.core.routing.Target[]} The target with the corresponding name or undefined. If an array way passed as name this will return an array with all found targets. Non existing targets will not be returned but will log an error.
-			 */
+			 * @public
+			 * */
 			getTarget :  function(vName) {
 				return this._oTargets.getTarget(vName);
 			},
@@ -558,7 +608,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 			 *  c. the pattern of its nested route. When this occurs, the 'nestedRoute' parameter is set with the instance of nested route.
 			 * </pre>
 			 *
-			 * Please refer to event {@link sap.ui.core.routing.Router#event:routePatternMatched|routePatternMatched} for getting notified only when a route's own pattern is matched with the URL hash not its sub-routes.
+			 * Please refer to event {@link sap.ui.core.routing.Router#event:routePatternMatched routePatternMatched} for getting notified only when a route's own pattern is matched with the URL hash not its sub-routes.
 			 *
 			 * @name sap.ui.core.routing.Router#routeMatched
 			 * @event
@@ -618,6 +668,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 			 */
 			fireRouteMatched : function(mArguments) {
 				this.fireEvent("routeMatched", mArguments);
+
+				if (Router._trackRouteMatched) {
+					Router._trackRouteMatched(this._oConfig.controlId, this, mArguments);
+				}
 				return this;
 			},
 
@@ -873,9 +927,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 			 * @param {object} oEvent.getParameters
 			 * @param {string} oEvent.getParameters.title The current displayed title
 			 * @param {array} oEvent.getParameters.history An array which contains the history of previous titles
-			 * @param {string} oEvent.getParameters.history[].title The title
-			 * @param {string} oEvent.getParameters.history[].hash The hash
-			 * @param {boolean} oEvent.getParameters.history[].isHome The app home indicator
+			 * @param {string} oEvent.getParameters.history.title The title
+			 * @param {string} oEvent.getParameters.history.hash The hash
+			 * @param {boolean} oEvent.getParameters.history.isHome The app home indicator
 			 * @public
 			 */
 
@@ -928,7 +982,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 
 					// check whether there's a duplicate history entry with the last history entry and remove it if there is
 					this._aHistory.some(function(oEntry, i, aHistory) {
-						if (i < aHistory.length - 1 && jQuery.sap.equal(oEntry, oLastHistoryEntry)) {
+						if (i < aHistory.length - 1 && deepEqual(oEntry, oLastHistoryEntry)) {
 							return aHistory.splice(i, 1);
 						}
 					});
@@ -945,7 +999,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 
 					// Array.some is sufficient here, as we ensure there is only one occurence
 					this._aHistory.some(function(oEntry, i, aHistory) {
-						if (jQuery.sap.equal(oEntry, oNewHistoryEntry)) {
+						if (deepEqual(oEntry, oNewHistoryEntry)) {
 							return aHistory.splice(i, 1);
 						}
 					});
@@ -1042,7 +1096,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 					title: sAppTitle
 				};
 			} else {
-				jQuery.sap.log.error("Routes with dynamic parts cannot be resolved as home route.");
+				Log.error("Routes with dynamic parts cannot be resolved as home route.");
 			}
 		}
 
@@ -1054,6 +1108,22 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 			BYPASSED: "bypassed",
 			TITLE_CHANGED: "titleChanged"
 		};
+
+		/**
+		 * Tracks <code>routeMatched</code> event.
+		 * This method is meant for private usages. Apps are not supposed to used it.
+		 * It is created for an experimental purpose.
+		 * Implementation should be injected by outside(i.e. sap.ui.core.delegate.UsageAnalytics).
+		 *
+		 * @param {string} sControlId the name of the control
+		 * @param {sap.ui.core.routing.Router} oRouter The instance of the router
+		 * @param {object} [mArguments] the arguments passed along with the event.
+		 * @function
+		 * @private
+		 * @experimental Since 1.58
+		 * @ui5-restricted
+		 */
+		Router._trackRouteMatched = undefined;
 
 		/**
 		 * Get a registered router

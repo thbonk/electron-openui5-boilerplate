@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -48,6 +48,8 @@ function (jQuery, ManagedObject, CommunicationBus, channelNames, constants) {
 		style.left = "0";
 		style.bottom = "0";
 		style.border = "none";
+		// This fixed a visual glitch with the iframe on chrome see BCP 1870314303
+		style.borderRadius = "1px";
 		style.zIndex = "1001";
 		// style.transition = "width 300ms ease-in-out, height 300ms ease-in-out";
 		style.boxShadow = "1px -10px 42px -4px #888";

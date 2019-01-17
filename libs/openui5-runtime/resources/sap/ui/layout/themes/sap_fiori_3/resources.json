@@ -1,0 +1,81 @@
+{
+	"_version": "1.1.0",
+	"resources": [
+		{
+			"name": ".theming",
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "BlockLayout.less",
+			"designtime": true,
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "FormLayout.less",
+			"designtime": true,
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "GridLayout.less",
+			"designtime": true,
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "ResponsiveGridLayout.less",
+			"designtime": true,
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "ResponsiveLayout.less",
+			"designtime": true,
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "ResponsiveSplitter.less",
+			"designtime": true,
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "SimpleForm.less",
+			"designtime": true,
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "Splitter.less",
+			"designtime": true,
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "library-RTL-dbg.css",
+			"isDebug": true,
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "library-RTL.css",
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "library-dbg.css",
+			"isDebug": true,
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "library-parameters.json",
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "library.css",
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "library.less",
+			"designtime": true,
+			"theme": "sap_fiori_3"
+		},
+		{
+			"name": "library.source.less",
+			"designtime": true,
+			"theme": "sap_fiori_3"
+		}
+	]
+}

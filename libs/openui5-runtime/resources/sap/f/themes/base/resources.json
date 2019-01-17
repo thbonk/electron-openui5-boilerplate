@@ -11,6 +11,11 @@
 			"theme": "base"
 		},
 		{
+			"name": "Card.less",
+			"designtime": true,
+			"theme": "base"
+		},
+		{
 			"name": "DynamicPage.less",
 			"designtime": true,
 			"theme": "base"
@@ -27,6 +32,11 @@
 		},
 		{
 			"name": "FlexibleColumnLayout.less",
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "GridList.less",
 			"designtime": true,
 			"theme": "base"
 		},

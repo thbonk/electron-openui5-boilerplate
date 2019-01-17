@@ -1,13 +1,25 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.layout.AbsoluteLayout.
-sap.ui.define(['jquery.sap.global', './PositionContainer', 'sap/ui/commons/library', 'sap/ui/core/Control'],
-	function(jQuery, PositionContainer, library, Control) {
+sap.ui.define([
+    'sap/ui/thirdparty/jquery',
+    './PositionContainer',
+    'sap/ui/commons/library',
+    'sap/ui/core/Control',
+    './AbsoluteLayoutRenderer',
+    'sap/ui/core/library'
+],
+	function(jQuery, PositionContainer, library, Control, AbsoluteLayoutRenderer, coreLibrary) {
 	"use strict";
+
+
+
+	// shortcut for sap.ui.core.Scrolling
+	var Scrolling = coreLibrary.Scrolling;
 
 
 
@@ -23,7 +35,7 @@ sap.ui.define(['jquery.sap.global', './PositionContainer', 'sap/ui/commons/libra
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -48,12 +60,12 @@ sap.ui.define(['jquery.sap.global', './PositionContainer', 'sap/ui/commons/libra
 			/**
 			 * 'Auto', 'Scroll', 'Hidden', and 'None' are the available values for setting the vertical scrolling mode.
 			 */
-			verticalScrolling : {type : "sap.ui.core.Scrolling", group : "Behavior", defaultValue : sap.ui.core.Scrolling.Hidden},
+			verticalScrolling : {type : "sap.ui.core.Scrolling", group : "Behavior", defaultValue : Scrolling.Hidden},
 
 			/**
 			 * 'Auto', 'Scroll', 'Hidden', and 'None' are the available values for setting the vertical scrolling mode.
 			 */
-			horizontalScrolling : {type : "sap.ui.core.Scrolling", group : "Behavior", defaultValue : sap.ui.core.Scrolling.Hidden}
+			horizontalScrolling : {type : "sap.ui.core.Scrolling", group : "Behavior", defaultValue : Scrolling.Hidden}
 		},
 		defaultAggregation : "positions",
 		aggregations : {
@@ -66,30 +78,67 @@ sap.ui.define(['jquery.sap.global', './PositionContainer', 'sap/ui/commons/libra
 	}});
 
 
-	(function() {
-
 	//**** Overridden API Functions ****
 
+	/**
+	 * Sets the <code>width</code> property.
+	 *
+	 * @override
+	 * @public
+	 * @param {string} sWidth The passed width of the control.
+	 * @returns {sap.ui.commons.layout.AbsoluteLayout} <code>this</code> Control reference for chaining.
+	 */
 	AbsoluteLayout.prototype.setWidth = function(sWidth) {
 		return setProp(this, "width", sWidth, "LYT_SIZE");
 	};
 
 
+	/**
+	 * Sets the <code>height</code> property.
+	 *
+	 * @override
+	 * @public
+	 * @param {string} sHeight The passed height of the control.
+	 * @returns {sap.ui.commons.layout.AbsoluteLayout} <code>this</code> Control reference for chaining.
+	 */
 	AbsoluteLayout.prototype.setHeight = function(sHeight) {
 		return setProp(this, "height", sHeight, "LYT_SIZE");
 	};
 
 
+	/**
+	 * Sets the <code>verticalScrolling</code> property.
+	 *
+	 * @override
+	 * @public
+	 * @param {object} oVerticalScrolling Object that contains settings for Vertical scrolling.
+	 * @returns {sap.ui.commons.layout.AbsoluteLayout} <code>this</code> Control reference for chaining.
+	 */
 	AbsoluteLayout.prototype.setVerticalScrolling = function(oVerticalScrolling) {
 		return setProp(this, "verticalScrolling", oVerticalScrolling, "LYT_SCROLL");
 	};
 
-
+	/**
+	 * Sets the <code>horizontalScrolling</code> property.
+	 *
+	 * @override
+	 * @public
+	 * @param {object} oHorizontalScrolling Object that contains settings for Horizontal scrolling.
+	 * @returns {sap.ui.commons.layout.AbsoluteLayout} <code>this</code> Control reference for chaining.
+	 */
 	AbsoluteLayout.prototype.setHorizontalScrolling = function(oHorizontalScrolling) {
 		return setProp(this, "horizontalScrolling", oHorizontalScrolling, "LYT_SCROLL");
 	};
 
-
+	/**
+	 * Inserts element to the layout on a specific index.
+	 *
+	 * @override
+	 * @public
+	 * @param {object} oPosition Element which must be positioned in the layout.
+	 * @param {int} iIndex Index of the element which is to be positioned.
+	 * @returns {sap.ui.commons.layout.AbsoluteLayout} <code>this</code> Control reference for chaining.
+	 */
 	AbsoluteLayout.prototype.insertPosition = function(oPosition, iIndex) {
 		var bHasDomRef = !!this.getDomRef();
 		this.insertAggregation("positions", oPosition, iIndex, bHasDomRef);
@@ -99,7 +148,14 @@ sap.ui.define(['jquery.sap.global', './PositionContainer', 'sap/ui/commons/libra
 		return this;
 	};
 
-
+	/**
+	 * Adds element to the layout.
+	 *
+	 * @override
+	 * @public
+	 * @param {object} oPosition  Element which must be positioned in the layout.
+	 * @returns {sap.ui.commons.layout.AbsoluteLayout} <code>this</code> Control reference for chaining.
+	 */
 	AbsoluteLayout.prototype.addPosition = function(oPosition) {
 		var bHasDomRef = !!this.getDomRef();
 		this.addAggregation("positions", oPosition, bHasDomRef);
@@ -109,7 +165,14 @@ sap.ui.define(['jquery.sap.global', './PositionContainer', 'sap/ui/commons/libra
 		return this;
 	};
 
-
+	/**
+	 * Removes element from the layout.
+	 *
+	 * @override
+	 * @public
+	 * @param {any} vPosition  Element which must be removed from the positions element within the layout.
+	 * @returns {object} Removed element.
+	 */
 	AbsoluteLayout.prototype.removePosition = function(vPosition) {
 		var bHasDomRef = !!this.getDomRef();
 		var oRemovedPosition = this.removeAggregation("positions", vPosition, bHasDomRef);
@@ -120,7 +183,13 @@ sap.ui.define(['jquery.sap.global', './PositionContainer', 'sap/ui/commons/libra
 		return oRemovedPosition;
 	};
 
-
+	/**
+	 * Removes all elements from the layout.
+	 *
+	 * @override
+	 * @public
+	 * @returns {object} Removed elements.
+	 */
 	AbsoluteLayout.prototype.removeAllPositions = function() {
 		cleanup(this.getPositions());
 		var bHasDomRef = !!this.getDomRef();
@@ -131,7 +200,13 @@ sap.ui.define(['jquery.sap.global', './PositionContainer', 'sap/ui/commons/libra
 		return aRemovedPositions;
 	};
 
-
+	/**
+	 * Destroys all elements from the layout.
+	 *
+	 * @override
+	 * @public
+	 * @returns {sap.ui.commons.layout.AbsoluteLayout} <code>this</code> Control reference for chaining.
+	 */
 	AbsoluteLayout.prototype.destroyPositions = function() {
 		cleanup(this.getPositions());
 		var bHasDomRef = !!this.getDomRef();
@@ -396,21 +471,21 @@ sap.ui.define(['jquery.sap.global', './PositionContainer', 'sap/ui/commons/libra
 	AbsoluteLayout.prototype.contentChanged = function(oPosition, sChangeType) {
 		switch (sChangeType) {
 			case "CTRL_POS":
-				sap.ui.commons.layout.AbsoluteLayoutRenderer.updatePositionStyles(oPosition);
+				AbsoluteLayoutRenderer.updatePositionStyles(oPosition);
 				adaptChildControl(oPosition);
 				oPosition.reinitializeEventHandlers();
 				break;
 			case "CTRL_CHANGE":
 				adaptChildControl(oPosition, true);
-				sap.ui.commons.layout.AbsoluteLayoutRenderer.updatePositionedControl(oPosition);
+				AbsoluteLayoutRenderer.updatePositionedControl(oPosition);
 				oPosition.reinitializeEventHandlers();
 				break;
 			case "CTRL_REMOVE":
-				sap.ui.commons.layout.AbsoluteLayoutRenderer.removePosition(oPosition);
+				AbsoluteLayoutRenderer.removePosition(oPosition);
 				oPosition.reinitializeEventHandlers(true);
 				break;
 			case "CTRL_REMOVE_ALL":
-				sap.ui.commons.layout.AbsoluteLayoutRenderer.removeAllPositions(this);
+				AbsoluteLayoutRenderer.removeAllPositions(this);
 				var aPositions = oPosition;
 				if (aPositions) {
 					for (var index = 0; index < aPositions.length; index++) {
@@ -420,14 +495,14 @@ sap.ui.define(['jquery.sap.global', './PositionContainer', 'sap/ui/commons/libra
 				break;
 			case "CTRL_ADD":
 				adaptChildControl(oPosition, true);
-				sap.ui.commons.layout.AbsoluteLayoutRenderer.insertPosition(this, oPosition);
+				AbsoluteLayoutRenderer.insertPosition(this, oPosition);
 				oPosition.reinitializeEventHandlers();
 				break;
 			case "LYT_SCROLL":
-				sap.ui.commons.layout.AbsoluteLayoutRenderer.updateLayoutScolling(this);
+				AbsoluteLayoutRenderer.updateLayoutScolling(this);
 				break;
 			case "LYT_SIZE":
-				sap.ui.commons.layout.AbsoluteLayoutRenderer.updateLayoutSize(this);
+				AbsoluteLayoutRenderer.updateLayoutSize(this);
 				break;
 		}
 	};
@@ -501,7 +576,7 @@ sap.ui.define(['jquery.sap.global', './PositionContainer', 'sap/ui/commons/libra
 				bAdapted = true;
 			}
 			if (bAdapted) {
-				sap.ui.commons.layout.AbsoluteLayoutRenderer.updatePositionStyles(oControl.getParent());
+				AbsoluteLayoutRenderer.updatePositionStyles(oControl.getParent());
 			}
 		}
 		return bAdapted;
@@ -524,8 +599,9 @@ sap.ui.define(['jquery.sap.global', './PositionContainer', 'sap/ui/commons/libra
 	};
 
 
-	}());
+	// inject cleanUpControl into PositionContainer
+	PositionContainer.cleanUpControl = AbsoluteLayout.cleanUpControl;
 
 	return AbsoluteLayout;
 
-}, /* bExport= */ true);
+});

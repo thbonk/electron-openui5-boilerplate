@@ -1,15 +1,40 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-	"sap/ui/fl/Utils", "jquery.sap.global", "sap/ui/fl/registry/ChangeRegistryItem", "sap/ui/fl/registry/ChangeTypeMetadata",
-	"sap/ui/fl/registry/Settings", "sap/ui/fl/changeHandler/HideControl", "sap/ui/fl/changeHandler/MoveElements", "sap/ui/fl/changeHandler/MoveControls",
-	"sap/ui/fl/changeHandler/PropertyChange", "sap/ui/fl/changeHandler/PropertyBindingChange", "sap/ui/fl/changeHandler/UnhideControl",
-	"sap/ui/fl/changeHandler/StashControl", "sap/ui/fl/changeHandler/UnstashControl"
-], function(Utils, jQuery, ChangeRegistryItem, ChangeTypeMetadata, Settings, HideControl, MoveElements, MoveControls, PropertyChange, PropertyBindingChange, UnhideControl, StashControl, UnstashControl) {
+	"sap/ui/fl/Utils",
+	"sap/ui/thirdparty/jquery",
+	"sap/ui/fl/registry/ChangeRegistryItem",
+	"sap/ui/fl/registry/ChangeTypeMetadata",
+	"sap/ui/fl/registry/Settings",
+	"sap/ui/fl/changeHandler/HideControl",
+	"sap/ui/fl/changeHandler/MoveElements",
+	"sap/ui/fl/changeHandler/MoveControls",
+	"sap/ui/fl/changeHandler/PropertyChange",
+	"sap/ui/fl/changeHandler/PropertyBindingChange",
+	"sap/ui/fl/changeHandler/UnhideControl",
+	"sap/ui/fl/changeHandler/StashControl",
+	"sap/ui/fl/changeHandler/UnstashControl",
+	"sap/ui/fl/changeHandler/AddXML"
+], function(
+	Utils,
+	jQuery,
+	ChangeRegistryItem,
+	ChangeTypeMetadata,
+	Settings,
+	HideControl,
+	MoveElements,
+	MoveControls,
+	PropertyChange,
+	PropertyBindingChange,
+	UnhideControl,
+	StashControl,
+	UnstashControl,
+	AddXML
+) {
 	"use strict";
 
 	/**
@@ -18,7 +43,7 @@ sap.ui.define([
 	 * @alias sap.ui.fl.registry.ChangeRegistry
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @experimental Since 1.27.0
 	 *
 	 */
@@ -46,6 +71,9 @@ sap.ui.define([
 		},
 		"propertyBindingChange": {
 			changeHandler: PropertyBindingChange
+		},
+		"addXML": {
+			changeHandler: AddXML
 		}
 	};
 
@@ -113,7 +141,7 @@ sap.ui.define([
 		}
 
 		jQuery.each(oChangeHandlers, function (sChangeType, sChangeHandler) {
-			var oChangeHandler = that._getChangeHandler(sChangeType, sChangeHandler);
+			var oChangeHandler = that._getChangeHandlerEntry(sChangeType, sChangeHandler);
 			var oSimpleChange = {
 				"changeType": sChangeType,
 				"changeHandler": oChangeHandler.changeHandler,
@@ -121,6 +149,46 @@ sap.ui.define([
 			};
 			that.registerControlForSimpleChange(sControlType, oSimpleChange);
 		});
+	};
+
+	/**
+	 * Returns the Change Registry Item for a specific control instance (if available)
+	 * @param  {string} sChangeType Change type of a <code>sap.ui.fl.Change</code> change
+	 * @param  {sap.ui.core.Control} oControl  The control instance for which the registry item will be retrieved
+	 * @param  {sap.ui.core.util.reflection.BaseTreeModifier} oModifier Control tree modifier
+	 * @return {sap.ui.fl.registry.ChangeRegistryItem|undefined} Returns the registry item or undefined if not found
+	 * @private
+	 */
+	ChangeRegistry.prototype._getInstanceSpecificChangeRegistryItem = function (sChangeType, oControl, oModifier) {
+		var sChangeHandlerModulePath = oModifier.getChangeHandlerModulePath(oControl);
+		var oChangeHandlers = {}, vChangeHandler, oChangeHandler,
+			oSimpleChange, sControlType, oChangeRegistryItem;
+		if (typeof sChangeHandlerModulePath !== "string") {
+			return undefined; // continue without a registration
+		}
+
+		try {
+			oChangeHandlers = sap.ui.requireSync(sChangeHandlerModulePath);
+		} catch (error) {
+			Utils.log.error("Flexibility registration for control " + oModifier.getId(oControl) +
+				" failed to load module " + sChangeHandlerModulePath + "\n" + error.message);
+			return undefined; // continue without a registration
+		}
+
+		vChangeHandler = oChangeHandlers[sChangeType];
+		if (!vChangeHandler) {
+			return undefined;
+		}
+
+		oChangeHandler = this._getChangeHandlerEntry(sChangeType, vChangeHandler);
+		oSimpleChange = {
+			"changeType": sChangeType,
+			"changeHandler": oChangeHandler.changeHandler,
+			"layers":oChangeHandler.layers
+		};
+		sControlType = oModifier.getControlType(oControl);
+		oChangeRegistryItem = this._createChangeRegistryItemForSimpleChange(sControlType, oSimpleChange);
+		return oChangeRegistryItem;
 	};
 
 	/**
@@ -139,10 +207,10 @@ sap.ui.define([
 	 *
 	 * @private
 	 */
-	ChangeRegistry.prototype._getChangeHandler = function (sChangeType, vChangeHandler) {
+	ChangeRegistry.prototype._getChangeHandlerEntry = function (sChangeType, vChangeHandler) {
 		var oResult = {};
 		var aDeveloperModeChangeHandlers = Object.keys(this._mDeveloperModeChangeHandlers);
-		if (!vChangeHandler.changeHandler) {
+		if (!vChangeHandler || !vChangeHandler.changeHandler) {
 			oResult.changeHandler = vChangeHandler;
 		} else {
 			oResult = vChangeHandler;
@@ -153,6 +221,66 @@ sap.ui.define([
 			throw new Error("You can't use a custom change handler for the following Developer Mode change types: " + aDeveloperModeChangeHandlers.toString() + ". Please use 'default' instead.");
 		}
 		return oResult;
+	};
+
+	/**
+	 * Retrieves the <code>sap.ui.fl.registry.ChangeRegistryItem</code> for the given change and control
+	 *
+	 * @param {string} sChangeType The Change type of a <code>sap.ui.fl.Change</code> change
+	 * @param {string} sControlType The name of the ui5 control type i.e. sap.m.Button
+	 * @param {string} [sLayer] The Layer to be considered
+	 * @returns {sap.ui.fl.registry.ChangeRegistryItem} the registry item containing the change handler. Undefined if not found.
+	 * @private
+	 */
+	ChangeRegistry.prototype._getChangeRegistryItem = function (sChangeType, sControlType, sLayer) {
+		var mChangeRegistryItem;
+
+		if (!sChangeType || !sControlType) {
+			return undefined;
+		}
+
+		mChangeRegistryItem = this.getRegistryItems({
+			"changeTypeName": sChangeType,
+			"controlType": sControlType,
+			"layer": sLayer
+		});
+		if (mChangeRegistryItem && mChangeRegistryItem[sControlType] && mChangeRegistryItem[sControlType][sChangeType]) {
+			return mChangeRegistryItem[sControlType][sChangeType];
+		} else if (mChangeRegistryItem && mChangeRegistryItem[sControlType]) {
+			return mChangeRegistryItem[sControlType];
+		} else {
+			return mChangeRegistryItem;
+		}
+	};
+
+	/**
+	 * Retrieve the change handler for a certain change type and control
+	 * @param  {string} sChangeType The Change type of a <code>sap.ui.fl.Change</code> change
+	 * @param  {string} sControlType The name of the ui5 control type i.e. sap.m.Button
+	 * @param  {sap.ui.core.Control} oControl The Control instance for which the change handler will be retrieved
+	 * @param  {sap.ui.core.util.reflection.BaseTreeModifier} oModifier Control tree modifier
+	 * @param  {string} sLayer The layer to be considered when getting the change handlers
+	 * @return {object} Returns the change handler object
+	 */
+	ChangeRegistry.prototype.getChangeHandler = function (sChangeType, sControlType, oControl, oModifier, sLayer) {
+		var oSpecificChangeRegistryItem, oChangeRegistryItem;
+
+		oSpecificChangeRegistryItem = this._getInstanceSpecificChangeRegistryItem(sChangeType, oControl, oModifier);
+		if (oSpecificChangeRegistryItem && oSpecificChangeRegistryItem.getChangeTypeMetadata) {
+			var oSpecificChangeHandler = oSpecificChangeRegistryItem.getChangeTypeMetadata().getChangeHandler();
+			if (oSpecificChangeHandler) {
+				return oSpecificChangeHandler;
+			}
+		}
+
+		oChangeRegistryItem = this._getChangeRegistryItem(sChangeType, sControlType, sLayer);
+		if (oChangeRegistryItem && oChangeRegistryItem.getChangeTypeMetadata) {
+			var oOriginalChangeHandler = oChangeRegistryItem.getChangeTypeMetadata().getChangeHandler();
+			if (oOriginalChangeHandler) {
+				return oOriginalChangeHandler;
+			}
+		}
+		return undefined;
 	};
 
 	/**
@@ -189,7 +317,7 @@ sap.ui.define([
 	ChangeRegistry.prototype._createChangeRegistryItemForSimpleChange = function(sControlType, oSimpleChange) {
 		var mParam, oChangeTypeMetadata, oChangeRegistryItem, mLayerPermissions;
 
-		mLayerPermissions = jQuery.extend({}, this._oSettings.getDefaultLayerPermissions());
+		mLayerPermissions = Object.assign({}, this._oSettings.getDefaultLayerPermissions());
 		var oLayers = oSimpleChange.layers;
 
 		if (oLayers) {
@@ -361,9 +489,8 @@ sap.ui.define([
 				var oChangeHandlerMetadata = oChangeHandler.getChangeTypeMetadata();
 				var oChangeHandlerImplementation = oChangeHandlerMetadata.getChangeHandler();
 				if (typeof oChangeHandlerImplementation === "string") {
-					// load the module synchronous
-					jQuery.sap.require(oChangeHandlerImplementation);
-					oChangeHandlerImplementation = sap.ui.require(oChangeHandlerImplementation);
+					// load the module synchronously
+					oChangeHandlerImplementation = sap.ui.requireSync(oChangeHandlerImplementation.replace(/\./g,"/"));
 					oChangeHandlerMetadata._changeHandler = oChangeHandlerImplementation;
 				}
 

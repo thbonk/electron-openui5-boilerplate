@@ -1,12 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.core.LocalBusyIndicator.
-sap.ui.define(['jquery.sap.global', './Control', './library', './theming/Parameters'],
-	function(jQuery, Control, library, Parameters) {
+sap.ui.define([
+	'./Control',
+	'./library',
+	'./theming/Parameters',
+	"./LocalBusyIndicatorRenderer",
+	"sap/ui/thirdparty/jquery"
+],
+	function(Control, library, Parameters, LocalBusyIndicatorRenderer, jQuery) {
 	"use strict";
 
 
@@ -27,9 +33,8 @@ sap.ui.define(['jquery.sap.global', './Control', './library', './theming/Paramet
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
-	 * @constructor
 	 * @public
 	 * @since 1.11.0
 	 * @deprecated Since version 1.14.2.
@@ -80,7 +85,7 @@ sap.ui.define(['jquery.sap.global', './Control', './library', './theming/Paramet
 		};
 
 		LocalBusyIndicator.prototype.exit = function() {
-			jQuery.sap.clearDelayedCall(this._delayedCallId);
+			clearTimeout(this._delayedCallId);
 			delete this._delayedCallId;
 		};
 
@@ -91,8 +96,8 @@ sap.ui.define(['jquery.sap.global', './Control', './library', './theming/Paramet
 		};
 
 		LocalBusyIndicator.prototype.onAfterRendering = function() {
-			var w = parseInt(this.getWidth(), 10);
-			var h = parseInt(this.getHeight(), 10);
+			var w = parseInt(this.getWidth());
+			var h = parseInt(this.getHeight());
 
 			var $this = this.$();
 			$this.css("width", w + "px");
@@ -118,7 +123,7 @@ sap.ui.define(['jquery.sap.global', './Control', './library', './theming/Paramet
 				this._$right = this.$("rightBox");
 			}
 
-			this._delayedCallId = jQuery.sap.delayedCall(0, this, this._animateProxy);
+			this._delayedCallId = setTimeout(this._animateProxy.bind(this), 0);
 		};
 
 		var fnAnimate = function() {
@@ -175,7 +180,7 @@ sap.ui.define(['jquery.sap.global', './Control', './library', './theming/Paramet
 					}, 150);
 				}, 150);
 
-				this._delayedCallId = jQuery.sap.delayedCall(1200, this, this._animateProxy);
+				this._delayedCallId = setTimeout(this._animateProxy.bind(this), 1200);
 			}
 		};
 

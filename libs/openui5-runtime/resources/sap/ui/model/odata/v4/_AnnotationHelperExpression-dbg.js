@@ -1,15 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // This module provides internal functions for dynamic expressions in OData V4 annotations. It is a
 // helper module for sap.ui.model.odata.v4.AnnotationHelper.
 sap.ui.define([
-	'jquery.sap.global', '../_AnnotationHelperBasics', 'sap/ui/base/BindingParser',
-	'sap/ui/base/ManagedObject', 'sap/ui/core/format/DateFormat', 'sap/ui/model/odata/ODataUtils'
-], function(jQuery, Basics, BindingParser, ManagedObject, DateFormat, ODataUtils) {
+	"../_AnnotationHelperBasics",
+	"sap/base/Log",
+	"sap/ui/base/BindingParser",
+	"sap/ui/base/ManagedObject",
+	"sap/ui/performance/Measurement"
+], function (Basics, Log, BindingParser, ManagedObject, Measurement) {
 	'use strict';
 
 	// see http://docs.oasis-open.org/odata/odata/v4.0/errata02/os/complete/abnf/odata-abnf-construction-rules.txt
@@ -364,6 +367,42 @@ sap.ui.define([
 		},
 
 		/**
+		 * Handling of "14.5.3.1.2 Function odata.fillUriTemplate".
+		 *
+		 * @param {object} oPathValue
+		 *   path and value information pointing to the parameter array (see Expression object)
+		 * @returns {object}
+		 *   the result object
+		 */
+		fillUriTemplate : function (oPathValue) {
+			var i,
+				sName,
+				oParameter,
+				aParameters = oPathValue.value,
+				aParts = [],
+				sPrefix = "",
+				oResult,
+				oTemplate = Expression.parameter(oPathValue, 0, "Edm.String");
+
+			aParts.push('odata.fillUriTemplate(', Basics.resultToString(oTemplate, true), ',{');
+			for (i = 1; i < aParameters.length; i += 1) {
+				oParameter = Basics.descend(oPathValue, i, "object");
+				sName = Basics.property(oParameter, "$Name", "string");
+				oResult = Expression.expression(
+					Basics.descend(oParameter, "$LabeledElement", true/*"as expression"*/));
+				aParts.push(sPrefix, Basics.toJSON(sName), ":",
+					Basics.resultToString(oResult, true));
+				sPrefix = ",";
+			}
+			aParts.push("})");
+			return {
+				result : "expression",
+				type : "Edm.String",
+				value : aParts.join("")
+			};
+		},
+
+		/**
 		 * Formats the result to be an operand for a logical or comparison operator. Handles
 		 * constants accordingly.
 		 *
@@ -411,63 +450,26 @@ sap.ui.define([
 				return undefined;
 			}
 
-			jQuery.sap.measure.average(sPerformanceGetExpression, "", aPerformanceCategories);
+			Measurement.average(sPerformanceGetExpression, "", aPerformanceCategories);
 
 			if (!bSimpleParserWarningLogged
 					&& ManagedObject.bindingParser === BindingParser.simpleParser) {
-				jQuery.sap.log.warning("Complex binding syntax not active", null,
-					sAnnotationHelper);
+				Log.warning("Complex binding syntax not active", null, sAnnotationHelper);
 				bSimpleParserWarningLogged = true;
 			}
 
 			try {
 				oResult = Expression.expression(oPathValue);
-				jQuery.sap.measure.end(sPerformanceGetExpression);
+				Measurement.end(sPerformanceGetExpression);
 				return Basics.resultToString(oResult, false);
 			} catch (e) {
-				jQuery.sap.measure.end(sPerformanceGetExpression);
+				Measurement.end(sPerformanceGetExpression);
 				if (e instanceof SyntaxError) {
 					return "Unsupported: " + BindingParser.complexParser.escape(
 						Basics.toErrorString(oPathValue.value));
 				}
 				throw e;
 			}
-		},
-
-		/**
-		 * Handling of "14.5.3.1.2 Function odata.fillUriTemplate".
-		 *
-		 * @param {object} oPathValue
-		 *   path and value information pointing to the parameter array (see Expression object)
-		 * @returns {object}
-		 *   the result object
-		 */
-		fillUriTemplate : function (oPathValue) {
-			var i,
-				sName,
-				aParts = [],
-				sPrefix = "",
-				oParameter,
-				aParameters = oPathValue.value,
-				oResult,
-				oTemplate = Expression.parameter(oPathValue, 0, "Edm.String");
-
-			aParts.push('odata.fillUriTemplate(', Basics.resultToString(oTemplate, true), ',{');
-			for (i = 1; i < aParameters.length; i += 1) {
-				oParameter = Basics.descend(oPathValue, i, "object");
-				sName = Basics.property(oParameter, "$Name", "string");
-				oResult = Expression.expression(
-					Basics.descend(oParameter, "$LabeledElement", true/*"as expression"*/));
-				aParts.push(sPrefix, Basics.toJSON(sName), ":",
-					Basics.resultToString(oResult, true));
-				sPrefix = ",";
-			}
-			aParts.push("})");
-			return {
-				result : "expression",
-				type : "Edm.String",
-				value : aParts.join("")
-			};
 		},
 
 		/**

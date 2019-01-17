@@ -1,11 +1,19 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(["sap/ui/core/Control", "sap/m/Label"], function(Control, Label) {
+sap.ui.define([
+	"sap/ui/core/Control",
+	"sap/m/Label",
+	"sap/m/library",
+	"./DraftIndicatorRenderer"
+], function(Control, Label, library, DraftIndicatorRenderer) {
 	"use strict";
+
+	// shortcut for sap.m.DraftIndicatorState
+	var DraftIndicatorState = library.DraftIndicatorState;
 
 	/**
 	 * Constructor for a new DraftIndicator.
@@ -18,7 +26,7 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/Label"], function(Control, Label) {
 	 * @abstract
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -29,7 +37,8 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/Label"], function(Control, Label) {
 
 	var DraftIndicator = Control.extend("sap.m.DraftIndicator", /** @lends sap.m.DraftIndicator.prototype */ {
 		metadata : {
-
+			library: "sap.m",
+			designtime: "sap/m/designtime/DraftIndicator.designtime",
 			properties : {
 				/**
 				 * State of the indicator. Could be "Saving", "Saved" and "Clear".
@@ -37,7 +46,7 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/Label"], function(Control, Label) {
 				state : {
 					type: "sap.m.DraftIndicatorState",
 					group : "Behavior",
-					defaultValue : sap.m.DraftIndicatorState.Clear
+					defaultValue : DraftIndicatorState.Clear
 				},
 				/**
 				 * Minimum time in milliseconds for showing the draft indicator
@@ -60,24 +69,24 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/Label"], function(Control, Label) {
 
 	var oBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m");
 	DraftIndicator._oTEXTS = {};
-	DraftIndicator._oTEXTS[sap.m.DraftIndicatorState.Saving] = oBundle.getText("DRAFT_INDICATOR_SAVING_DRAFT");
-	DraftIndicator._oTEXTS[sap.m.DraftIndicatorState.Saved] = oBundle.getText("DRAFT_INDICATOR_DRAFT_SAVED");
-	DraftIndicator._oTEXTS[sap.m.DraftIndicatorState.Clear] = "";
+	DraftIndicator._oTEXTS[DraftIndicatorState.Saving] = oBundle.getText("DRAFT_INDICATOR_SAVING_DRAFT");
+	DraftIndicator._oTEXTS[DraftIndicatorState.Saved] = oBundle.getText("DRAFT_INDICATOR_DRAFT_SAVED");
+	DraftIndicator._oTEXTS[DraftIndicatorState.Clear] = "";
 
 	DraftIndicator.prototype.init = function() {
 		this.aQueue = [];
 		this.iDelayedCallId = null;
 	};
 
+	DraftIndicator.prototype.exit = function () {
+		this._resetDraftTimer();
+	};
 
-	/**
-	 * @Overwrites
-	 */
 	DraftIndicator.prototype.setState = function(sState) {
 		this.setProperty("state", sState);
 		this._addToQueue(sState);
-		if (sState === sap.m.DraftIndicatorState.Saving) {
-			this._addToQueue(sap.m.DraftIndicatorState.Clear);
+		if (sState === DraftIndicatorState.Saving) {
+			this._addToQueue(DraftIndicatorState.Clear);
 		}
 		return this;
 	};
@@ -85,7 +94,7 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/Label"], function(Control, Label) {
 	DraftIndicator.prototype._getLabel = function() {
 		var oControl = this.getAggregation('_label');
 		if (!oControl) {
-			var oControl = new sap.m.Label({id: this.getId() + "-label"});
+			var oControl = new Label({id: this.getId() + "-label"});
 			this.setAggregation('_label', oControl, true);
 			oControl = this.getAggregation('_label');
 		}
@@ -99,8 +108,8 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/Label"], function(Control, Label) {
 	 * @public
 	 */
 	DraftIndicator.prototype.showDraftSaving = function() {
-		this._addToQueue(sap.m.DraftIndicatorState.Saving);
-		this._addToQueue(sap.m.DraftIndicatorState.Clear);
+		this._addToQueue(DraftIndicatorState.Saving);
+		this._addToQueue(DraftIndicatorState.Clear);
 	};
 
 	/**
@@ -109,7 +118,7 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/Label"], function(Control, Label) {
 	 * @public
 	 */
 	DraftIndicator.prototype.showDraftSaved = function() {
-		this._addToQueue(sap.m.DraftIndicatorState.Saved);
+		this._addToQueue(DraftIndicatorState.Saved);
 	};
 
 	/**
@@ -118,7 +127,7 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/Label"], function(Control, Label) {
 	 * @public
 	 */
 	DraftIndicator.prototype.clearDraftState = function() {
-		this._addToQueue(sap.m.DraftIndicatorState.Clear);
+		this._addToQueue(DraftIndicatorState.Clear);
 	};
 
 
@@ -151,11 +160,11 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/Label"], function(Control, Label) {
 
 		this._applyState(sNextState);
 
-		if (sNextState === sap.m.DraftIndicatorState.Clear) {
+		if (sNextState === DraftIndicatorState.Clear) {
 			this._proceed();
 			return;
 		}
-		this.iDelayedCallId = jQuery.sap.delayedCall(iTimeOut, this, this._proceed);
+		this.iDelayedCallId = setTimeout(this._proceed.bind(this), iTimeOut);
 	};
 
 	/**
@@ -183,9 +192,9 @@ sap.ui.define(["sap/ui/core/Control", "sap/m/Label"], function(Control, Label) {
 	 * @private
 	 */
 	DraftIndicator.prototype._resetDraftTimer = function() {
-		jQuery.sap.clearDelayedCall(this.iDelayedCallId);
+		clearTimeout(this.iDelayedCallId);
 		this.iDelayedCallId = null;
 	};
 
 	return DraftIndicator;
-}, /* bExport= */ true);
+});

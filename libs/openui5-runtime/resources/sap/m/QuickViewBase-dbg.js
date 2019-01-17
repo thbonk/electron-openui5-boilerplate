@@ -1,13 +1,19 @@
 /*
  * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.QuickViewBase.
 sap.ui.define([
-	'jquery.sap.global', './library', 'sap/ui/core/Control', 'jquery.sap.dom'],
-	function(jQuery, library, Control) {
+	'./library',
+	'sap/ui/core/Control',
+	"sap/ui/events/KeyCodes",
+	"sap/ui/thirdparty/jquery",
+	// jQuery Plugin "firstFocusableDomRef"
+	"sap/ui/dom/jquery/Focusable"
+],
+	function(library, Control, KeyCodes, jQuery) {
 	"use strict";
 
 	/**
@@ -22,7 +28,7 @@ sap.ui.define([
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -309,7 +315,7 @@ sap.ui.define([
 		 * @private
 		 */
 		QuickViewBase.prototype._processKeyboard = function(oEvent) {
-			if (oEvent.shiftKey && oEvent.which === jQuery.sap.KeyCodes.ENTER) {
+			if (oEvent.shiftKey && oEvent.which === KeyCodes.ENTER) {
 
 				this.navigateBack();
 
@@ -333,8 +339,8 @@ sap.ui.define([
 			var sToPageId = oEvent.getParameter('toId');
 			var sFromPageId = oEvent.getParameter('fromId');
 
-			var iFromPageIndex = jQuery.sap.byId(sFromPageId).index();
-			var iToPageIndex = jQuery.sap.byId(sToPageId).index();
+			var iFromPageIndex = jQuery(document.getElementById(sFromPageId)).index();
+			var iToPageIndex = jQuery(document.getElementById(sToPageId)).index();
 
 			if (iToPageIndex == -1 || iToPageIndex > iFromPageIndex) {
 				oToPage.addStyleClass('sapMNavItemOffset');
@@ -365,8 +371,8 @@ sap.ui.define([
 			var sToPageId = oEvent.getParameter('toId');
 			var sFromPageId = oEvent.getParameter('fromId');
 
-			var iFromPageIndex = jQuery.sap.byId(sFromPageId).index();
-			var iToPageIndex = jQuery.sap.byId(sToPageId).index();
+			var iFromPageIndex = jQuery(document.getElementById(sFromPageId)).index();
+			var iToPageIndex = jQuery(document.getElementById(sToPageId)).index();
 
 			if (iToPageIndex > iFromPageIndex) {
 				oToPage.removeStyleClass('sapMNavItemOffset');
@@ -386,7 +392,7 @@ sap.ui.define([
 			this._setLinkWidth();
 
 			// Just wait for the next tick to apply the focus
-			jQuery.sap.delayedCall(0, this, this._restoreFocus);
+			setTimeout(this._restoreFocus.bind(this), 0);
 		};
 
 		/**
@@ -406,7 +412,7 @@ sap.ui.define([
 			}
 
 			if (oFocusDomRef) {
-				jQuery.sap.focus(oFocusDomRef);
+				oFocusDomRef.focus();
 			}
 		};
 
@@ -424,4 +430,4 @@ sap.ui.define([
 
 		return QuickViewBase;
 
-}, /* bExport= */true);
+});

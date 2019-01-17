@@ -1,12 +1,14 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-	"jquery.sap.global", "./_AnnotationHelperBasics"
-], function (jQuery, _AnnotationHelperBasics) {
+	"./_AnnotationHelperBasics",
+	"sap/base/Log",
+	"sap/ui/thirdparty/jquery"
+], function (_AnnotationHelperBasics, Log, jQuery) {
 	"use strict";
 
 	/*global Promise */
@@ -16,9 +18,13 @@ sap.ui.define([
 		// maps V2 sap:semantics value for a date part to corresponding V4 term relative to
 		// com.sap.vocabularies.Common.v1.
 		mDatePartSemantics2CommonTerm = {
+			"fiscalyear" : "IsFiscalYear",
+			"fiscalyearperiod" : "IsFiscalYearPeriod",
 			"year" : "IsCalendarYear",
 			"yearmonth" : "IsCalendarYearMonth",
-			"yearmonthday" : "IsCalendarDate"
+			"yearmonthday" : "IsCalendarDate",
+			"yearquarter" : "IsCalendarYearQuarter",
+			"yearweek" : "IsCalendarYearWeek"
 		},
 		// maps V2 filter-restriction value to corresponding V4 FilterExpressionType enum value
 		mFilterRestrictions = {
@@ -148,7 +154,7 @@ sap.ui.define([
 				"NonSortableProperties" ]
 		},
 		rValueList = /^com\.sap\.vocabularies\.Common\.v1\.ValueList(#.*)?$/,
-		iWARNING = jQuery.sap.log.Level.WARNING,
+		iWARNING = Log.Level.WARNING,
 		Utils;
 
 
@@ -195,15 +201,15 @@ sap.ui.define([
 		 * @param {object} oProperty
 		 *   the property of the entity
 		 * @param {object} oEntitySet
-		 *   the entity set to which the corresponding V4 annotations needs to be added
+		 *   the entity set to which the corresponding V4 annotations need to be added
 		 */
 		addFilterRestriction : function (oProperty, oEntitySet) {
 			var aFilterRestrictions,
 				sFilterRestrictionValue = mFilterRestrictions[oProperty["sap:filter-restriction"]];
 
 			if (!sFilterRestrictionValue) {
-				if (jQuery.sap.log.isLoggable(iWARNING, sLoggingModule)) {
-					jQuery.sap.log.warning("Unsupported sap:filter-restriction: "
+				if (Log.isLoggable(iWARNING, sLoggingModule)) {
+					Log.warning("Unsupported sap:filter-restriction: "
 							+ oProperty["sap:filter-restriction"],
 						oEntitySet.entityType + "." + oProperty.name, sLoggingModule);
 				}
@@ -222,6 +228,37 @@ sap.ui.define([
 			});
 			oEntitySet["com.sap.vocabularies.Common.v1.FilterExpressionRestrictions"] =
 				aFilterRestrictions;
+		},
+
+		/**
+		 * Adds a V4 navigation restriction annotation with a filter restriction to the given entity
+		 * set for the given navigation property with the V2 annotation
+		 * <code>sap:filterable="false"</code>.
+		 *
+		 * @param {object} oNavigationProperty
+		 *   the navigation property of the entity with the V2 annotation
+		 *   <code>sap:filterable="false"</code>
+		 * @param {object} oEntitySet
+		 *   the entity set to which the corresponding V4 annotation needs to be added
+		 */
+		addNavigationFilterRestriction : function (oNavigationProperty, oEntitySet) {
+			var oNavigationRestrictions =
+					oEntitySet["Org.OData.Capabilities.V1.NavigationRestrictions"] || {};
+
+			oNavigationRestrictions.RestrictedProperties =
+				oNavigationRestrictions.RestrictedProperties || [];
+
+			oNavigationRestrictions.RestrictedProperties.push({
+				"FilterRestrictions" : {
+					"Filterable": oBoolFalse
+				},
+				"NavigationProperty" : {
+					"NavigationPropertyPath" : oNavigationProperty.name
+				}
+			});
+
+			oEntitySet["Org.OData.Capabilities.V1.NavigationRestrictions"] =
+				oNavigationRestrictions;
 		},
 
 		/**
@@ -270,6 +307,12 @@ sap.ui.define([
 					if (!sV2Semantics) {
 						return;
 					}
+
+					if (sV2Semantics === "url") {
+						oProperty["Org.OData.Core.V1.IsURL"] = oBoolTrue;
+						return;
+					}
+
 					if (sV2Semantics in mDatePartSemantics2CommonTerm) {
 						sV4Annotation = "com.sap.vocabularies.Common.v1."
 							+ mDatePartSemantics2CommonTerm[sV2Semantics];
@@ -278,8 +321,8 @@ sap.ui.define([
 					}
 					aMatches = rSemanticsWithTypes.exec(sV2Semantics);
 					if (!aMatches) {
-						if (jQuery.sap.log.isLoggable(iWARNING, sLoggingModule)) {
-							jQuery.sap.log.warning("Unsupported sap:semantics: " + sV2Semantics,
+						if (Log.isLoggable(iWARNING, sLoggingModule)) {
+							Log.warning("Unsupported sap:semantics: " + sV2Semantics,
 								oType.name + "." + oProperty.name, sLoggingModule);
 						}
 						return;
@@ -373,8 +416,8 @@ sap.ui.define([
 									sAnnotationName = "Org.OData.Measures.V1.Unit";
 								} else if (sSemantics === "currency-code") {
 									sAnnotationName = "Org.OData.Measures.V1.ISOCurrency";
-								} else if (jQuery.sap.log.isLoggable(iWARNING, sLoggingModule)) {
-									jQuery.sap.log.warning("Unsupported sap:semantics='"
+								} else if (Log.isLoggable(iWARNING, sLoggingModule)) {
+									Log.warning("Unsupported sap:semantics='"
 											+ sSemantics + "' at sap:unit='" + sUnitPath + "'; "
 											+ "expected 'currency-code' or 'unit-of-measure'",
 										oType.namespace + "." + oType.name + "/" + oProperty.name,
@@ -384,8 +427,8 @@ sap.ui.define([
 								if (sAnnotationName && !(sAnnotationName in oProperty)) {
 									oProperty[sAnnotationName] = oUnitPath;
 								}
-							} else if (jQuery.sap.log.isLoggable(iWARNING, sLoggingModule)) {
-								jQuery.sap.log.warning("Path '" + sUnitPath
+							} else if (Log.isLoggable(iWARNING, sLoggingModule)) {
+								Log.warning("Path '" + sUnitPath
 										+ "' for sap:unit cannot be resolved",
 									oType.namespace + "." + oType.name + "/" + oProperty.name,
 									sLoggingModule);
@@ -515,6 +558,8 @@ sap.ui.define([
 			if (oEntityType.navigationProperty) {
 				oEntityType.navigationProperty.forEach(function (oNavigationProperty) {
 					if (oNavigationProperty["sap:filterable"] === "false") {
+						Utils.addNavigationFilterRestriction(oNavigationProperty, oEntitySet);
+						// keep deprecated conversion for compatibility reasons
 						Utils.addPropertyToAnnotation("sap:filterable", oEntitySet,
 							oNavigationProperty);
 					}
@@ -524,32 +569,30 @@ sap.ui.define([
 		},
 
 		/**
-		 * Returns the index of the object inside the given array, where the property with the
+		 * Returns the index of the first object inside the given array, where the property with the
 		 * given name has the given expected value.
 		 *
-		 * @param {object[]} aArray
+		 * @param {object[]} [aArray]
 		 *   some array
 		 * @param {any} vExpectedPropertyValue
 		 *   expected value of the property with given name
 		 * @param {string} [sPropertyName="name"]
 		 *   some property name
 		 * @returns {number}
-		 *   the index of the object found or <code>-1</code> if no such object is found
+		 *   the index of the first object found or <code>-1</code> if no such object is found
 		 */
 		findIndex : function (aArray, vExpectedPropertyValue, sPropertyName) {
-			var iIndex = -1;
+			var i, n;
 
 			sPropertyName = sPropertyName || "name";
 			if (aArray) {
-				aArray.forEach(function (oObject, i) {
-					if (oObject[sPropertyName] === vExpectedPropertyValue) {
-						iIndex = i;
-						return false; // break
+				for (i = 0, n = aArray.length; i < n; i++) {
+					if (aArray[i][sPropertyName] === vExpectedPropertyValue) {
+						return i;
 					}
-				});
+				}
 			}
-
-			return iIndex;
+			return -1;
 		},
 
 		/**
@@ -701,7 +744,7 @@ sap.ui.define([
 		 * "com.sap.vocabularies.Communication.v1.PhoneType/fax".
 		 *
 		 * @param {string} sSemantics
-		 *   the sap:semantivs value ("tel" or "email")
+		 *   the sap:semantics value ("tel" or "email")
 		 * @param {string} sTypesList
 		 *   the comma-separated list of types for sap:semantics
 		 * @param {object} oProperty
@@ -722,8 +765,8 @@ sap.ui.define([
 					var sTargetType = oV4TypeInfo.typeMapping[sType];
 					if (sTargetType) {
 						aResult.push(oV4TypeInfo.v4EnumType + "/" + sTargetType);
-					} else if (jQuery.sap.log.isLoggable(iWARNING, sLoggingModule)) {
-						jQuery.sap.log.warning("Unsupported type for sap:semantics: " + sType,
+					} else if (Log.isLoggable(iWARNING, sLoggingModule)) {
+						Log.warning("Unsupported type for sap:semantics: " + sType,
 							oType.name + "." + oProperty.name, sLoggingModule);
 					}
 				});
@@ -778,7 +821,7 @@ sap.ui.define([
 
 			if (sCreatable && sCreatablePath) {
 				// inconsistent service if both v2 annotations are set
-				jQuery.sap.log.warning("Inconsistent service",
+				Log.warning("Inconsistent service",
 					"Use either 'sap:creatable' or 'sap:creatable-path' at navigation property "
 						+ "'" + oEntitySet.entityType + "/" + oNavigationProperty.name + "'",
 					sLoggingModule);
@@ -835,7 +878,7 @@ sap.ui.define([
 				// only if a second extension (sap:xable-path or sap:xable) is processed,
 				// the warning is logged and the entity set is marked as non-deletable or
 				// non-updatable
-				jQuery.sap.log.warning("Inconsistent service",
+				Log.warning("Inconsistent service",
 					"Use either 'sap:" + sV2Annotation + "' or 'sap:" + sV2Annotation + "-path'"
 						+ " at entity set '" + o.name + "'", sLoggingModule);
 				oValue = oBoolFalse;
@@ -913,11 +956,19 @@ sap.ui.define([
 				return;
 			}
 			aSchemas.forEach(function (oSchema, i) {
+				var sSchemaVersion;
+
 				// remove datajs artefact for inline annotations in $metadata
 				delete oSchema.annotations;
 
 				Utils.liftSAPData(oSchema);
 				oSchema.$path = "/dataServices/schema/" + i;
+				sSchemaVersion = oSchema["sap:schema-version"];
+				if (sSchemaVersion) {
+					oSchema["Org.Odata.Core.V1.SchemaVersion"] = {
+						String : sSchemaVersion
+					};
+				}
 				jQuery.extend(oSchema, oAnnotations[oSchema.namespace]);
 
 				Utils.visitParents(oSchema, oAnnotations, "association",

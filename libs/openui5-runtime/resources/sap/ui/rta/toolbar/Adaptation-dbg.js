@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -9,6 +9,14 @@ sap.ui.define([
 	'sap/m/Button',
 	'sap/m/SegmentedButton',
 	'sap/m/SegmentedButtonItem',
+	'sap/m/MenuButton',
+	'sap/m/MenuItem',
+	'sap/m/Menu',
+	'sap/m/HBox',
+	'sap/m/OverflowToolbar',
+	'sap/m/OverflowToolbarLayoutData',
+	'sap/ui/Device',
+	'sap/m/FlexItemData',
 	'./Base'
 ],
 function(
@@ -16,6 +24,14 @@ function(
 	Button,
 	SegmentedButton,
 	SegmentedButtonItem,
+	MenuButton,
+	MenuItem,
+	Menu,
+	HBox,
+	OverflowToolbar,
+	OverflowToolbarLayoutData,
+	Device,
+	FlexItemData,
 	Base
 ) {
 	"use strict";
@@ -28,7 +44,7 @@ function(
 	 * @extends sap.ui.rta.toolbar.Base
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @private
@@ -37,7 +53,7 @@ function(
 	 * @experimental Since 1.48. This class is experimental. API might be changed in future.
 	 */
 	var Adaptation = Base.extend("sap.ui.rta.toolbar.Adaptation", {
-		renderer: 'sap.ui.rta.toolbar.BaseRenderer',
+		renderer: 'sap.ui.rta.toolbar.AdaptationRenderer',
 		animation: true,
 		metadata: {
 			events: {
@@ -50,7 +66,9 @@ function(
 				"restore": {},
 				"transport": {},
 				"modeChange": {},
-				"manageApps": {}
+				"manageApps": {},
+				"appVariantOverview": {},
+				"saveAs": {}
 			},
 			properties: {
 				/** Determines whether publish button is visible */
@@ -63,110 +81,280 @@ function(
 				"modeSwitcher": {
 					type: "string",
 					defaultValue: "adaptation"
-				},
-
-				/** Determines whether Message information icon button is visible */
-				"manageAppsVisible": {
-					"type": "boolean",
-					"defaultValue": false
 				}
 			}
 		}
 	});
 
-	Adaptation.prototype.onAfterRendering = function () {
-		var iSign = -1;
-		var bIgnore = false;
-		var iWidth = this.getAggregation('content').reduce(function (iResult, oControl) {
-			switch (oControl.data('name')) {
-				case 'spacerLeft':
-					iSign = 1;
-					bIgnore = true;
-					break;
-				case 'spacerRight':
-					bIgnore = false;
-					break;
-			}
-			return !(oControl instanceof ToolbarSpacer) && !bIgnore
-				? iResult + iSign * oControl.$().outerWidth(true)
-				: iResult;
-		}, 0);
+	Adaptation.modes = {
+		MOBILE: "sapUiRtaToolbarMobile",
+		TABLET: "sapUiRtaToolbarTablet",
+		DESKTOP: "sapUiRtaToolbarDesktop"
+	};
 
-		if (iWidth > 0) {
-			this.getControl('spacerBalancer').setWidth(iWidth + 'px');
+	var DEVICE_SET = "sapUiRtaToolbar";
+
+	Adaptation.prototype.onAfterRendering = function () {
+		if (!Device.media.hasRangeSet(DEVICE_SET)) {
+			Device.media.initRangeSet(DEVICE_SET, [600, 900], "px", [Adaptation.modes.MOBILE, Adaptation.modes.TABLET, Adaptation.modes.DESKTOP]);
 		}
+		Device.media.attachHandler(this._onSizeChanged, this, DEVICE_SET);
+		this._onSizeChanged(Device.media.getCurrentRange(DEVICE_SET));
 
 		Base.prototype.onAfterRendering.apply(this, arguments);
 	};
 
+	Adaptation.prototype.exit = function() {
+		Device.media.detachHandler(this._onSizeChanged, this, DEVICE_SET);
+		Base.prototype.exit.apply(this, arguments);
+	};
+
+	Adaptation.prototype._onSizeChanged = function(mParams) {
+		function setLayoutPriority(aControls, sFrom, sTo) {
+			var aControlsToChange = aControls.filter(function(oControl) {
+				return oControl.getLayoutData() && oControl.getLayoutData().getPriority() === sFrom;
+			});
+			aControlsToChange.forEach(function(oControl) {
+				oControl.getLayoutData().setPriority(sTo);
+			});
+		}
+
+		var sMode = mParams.name;
+		this.sMode = sMode;
+
+		var oSaveButton = this.getControl('exit');
+		var oOverflowToolbarContent = this.getControl("overflowToolbar").getContent();
+		switch (sMode) {
+			case Adaptation.modes.MOBILE:
+				oSaveButton.setIcon("sap-icon://decline");
+				oSaveButton.setText("");
+				setLayoutPriority(oOverflowToolbarContent, "Low", "AlwaysOverflow");
+				this._setWidthOfHBoxes(false);
+				break;
+			case Adaptation.modes.TABLET:
+				oSaveButton.setIcon("");
+				oSaveButton.setText(this.getTextResources().getText("BTN_EXIT"));
+				setLayoutPriority(oOverflowToolbarContent, "Low", "AlwaysOverflow");
+				this._setWidthOfHBoxes(false);
+				break;
+			case Adaptation.modes.DESKTOP:
+				oSaveButton.setIcon("");
+				oSaveButton.setText(this.getTextResources().getText("BTN_EXIT"));
+				setLayoutPriority(oOverflowToolbarContent, "AlwaysOverflow", "Low");
+				this._setWidthOfHBoxes(true);
+				break;
+			default:
+				// no default
+		}
+	};
+
+	function calculateAndSetWidthOfBothBoxes(bCalculateWidth) {
+		var oContent = this.getItems();
+
+		if (bCalculateWidth) {
+			var iWidth = this.getControl('modeSwitcher').$().outerWidth();
+			var iHalfWidthOfModeSwitcher = iWidth && Math.floor(iWidth / 2);
+
+			if (!iHalfWidthOfModeSwitcher) {
+				oContent[1].setWidth("50%");
+			} else {
+				oContent[1].setWidth("calc(50% + " + iHalfWidthOfModeSwitcher + "px)");
+			}
+		} else {
+			// for TABLET and MOBILE modes width is fixed
+			oContent[1].setWidth("100%");
+		}
+	}
+
+	Adaptation.prototype._setWidthOfHBoxes = function(bCalculateWidth) {
+		// in DESKTOP mode, as the mode switcher segmented buttons are of dynamic size (depending on text), we have to adjust the width of the two hboxes
+		// we add/subtract half the size of the mode switcher to the HBoxes
+		if (bCalculateWidth) {
+			var oModeSwitcherDomRef = this.getControl('modeSwitcher').getDomRef();
+
+			// if the domRef is not there it is (still) in the overflow of the toolbar, so we have to wait until it is rendered
+			if (!oModeSwitcherDomRef) {
+				this._oDelegate = {
+					"onAfterRendering": function() {
+						calculateAndSetWidthOfBothBoxes.call(this, bCalculateWidth);
+						this.getControl("modeSwitcher").removeEventDelegate(this._oDelegate, this);
+					}
+				};
+				this.getControl('modeSwitcher').addEventDelegate(this._oDelegate, this);
+				calculateAndSetWidthOfBothBoxes.call(this, bCalculateWidth);
+			} else {
+				calculateAndSetWidthOfBothBoxes.call(this, bCalculateWidth);
+			}
+		} else {
+			calculateAndSetWidthOfBothBoxes.call(this, bCalculateWidth);
+		}
+	};
+
+	/**
+	 * In Adaptation scenario we need to get the children of the container in the content aggregation
+	 *
+	 * @param {string} sName name of the control
+	 * @returns {sap.ui.core.Control} Returns the control;
+	 */
+	Adaptation.prototype.getControl = function(sName) {
+		return this._mControls[sName];
+	};
+
+	/**
+	 * format of the controls that get added here:
+	 * 	HBox (this)
+	 * 		HBox
+	 * 			place for Icon in Fiori Toolbar
+	 * 		HBox
+	 * 			OverflowToolbar
+	 * 				Segmented Button, Buttons for Undo, Redo, manageApps, appVariantOverview, restore, publish
+	 * 			Save & Exit Button
+	 *
+	 * @returns {sap.ui.core.Control[]} Returns the controls in a structure described above.
+	 */
 	Adaptation.prototype.buildControls = function () {
+		this._mControls = {};
 		return [
-			new ToolbarSpacer().data('name', 'spacerBalancer'),
-			new ToolbarSpacer().data('name', 'spacerLeft'),
-			new SegmentedButton({
-				width: "auto",
-				selectedKey: this.getModeSwitcher(),
+			new HBox({
+				alignItems: "Center",
+				layoutData: new FlexItemData({
+					baseSize: "0",
+					growFactor: 1,
+					minWidth: "0"
+				})
+			}),
+			new HBox({
+				alignItems: "Center",
 				items: [
-					new SegmentedButtonItem({
-						text: this.getTextResources().getText("BTN_ADAPTATION"),
-						tooltip: this.getTextResources().getText("BTN_ADAPTATION"),
-						width: "auto",
-						key: "adaptation"
+					this._mControls["overflowToolbar"] = new OverflowToolbar({
+						content: [
+							this._mControls["modeSwitcher"] = new SegmentedButton({
+								width: "auto",
+								selectedKey: this.getModeSwitcher(),
+								items: [
+									new SegmentedButtonItem({
+										text: this.getTextResources().getText("BTN_ADAPTATION"),
+										tooltip: this.getTextResources().getText("BTN_ADAPTATION"),
+										width: "auto",
+										key: "adaptation"
+									}),
+									new SegmentedButtonItem({
+										text: this.getTextResources().getText("BTN_NAVIGATION"),
+										tooltip: this.getTextResources().getText("BTN_NAVIGATION"),
+										width: "auto",
+										key: "navigation"
+									})
+								],
+								selectionChange: this.eventHandler.bind(this, 'ModeChange'),
+								layoutData: new OverflowToolbarLayoutData({
+									priority: "High"
+								})
+							}),
+							new ToolbarSpacer(),
+							this._mControls["undo"] = new Button({
+								type: "Transparent",
+								icon: "sap-icon://undo",
+								enabled: false,
+								tooltip: this.getTextResources().getText("BTN_UNDO"),
+								press: this.eventHandler.bind(this, 'Undo'),
+								layoutData: new OverflowToolbarLayoutData({
+									priority: "NeverOverflow"
+								})
+							}),
+							this._mControls["redo"] = new Button({
+								type:"Transparent",
+								icon: "sap-icon://redo",
+								iconFirst: false,
+								enabled: false,
+								tooltip: this.getTextResources().getText("BTN_REDO"),
+								press: this.eventHandler.bind(this, 'Redo'),
+								layoutData: new OverflowToolbarLayoutData({
+									priority: "NeverOverflow"
+								})
+							}),
+							this._mControls["manageApps"] = new Button({
+								type:"Transparent",
+								icon: "sap-icon://message-information",
+								enabled: false,
+								visible: false,
+								tooltip: this.getTextResources().getText("BTN_MANAGE_APPS"),
+								press: this.eventHandler.bind(this, 'ManageApps'),
+								layoutData: new OverflowToolbarLayoutData({
+									priority: "Low"
+								})
+							}),
+							this._mControls["appVariantOverview"] = new MenuButton({
+								type:"Transparent",
+								icon: "sap-icon://message-information",
+								enabled: false,
+								visible: false,
+								tooltip: this.getTextResources().getText("BTN_MANAGE_APPS"),
+								menu: new Menu({
+									itemSelected: this.eventHandler.bind(this, 'AppVariantOverview'),
+									items: [
+										new MenuItem('keyUser', {
+											text: this.getTextResources().getText("MENU_ITEM_KEY_USER")
+										}),
+										new MenuItem('developer', {
+											text: this.getTextResources().getText("MENU_ITEM_SAP_DEVELOPER")
+										})
+									]
+								}),
+								layoutData: new OverflowToolbarLayoutData({
+									priority: "Low"
+								})
+							}),
+							this._mControls["restore"] = new Button({
+								type: "Transparent",
+								text: this.getTextResources().getText("BTN_RESTORE"),
+								visible: true,
+								enabled: false,
+								tooltip: this.getTextResources().getText("BTN_RESTORE"),
+								press: this.eventHandler.bind(this, 'Restore'),
+								layoutData: new OverflowToolbarLayoutData({
+									priority: "Low"
+								})
+							}),
+							this._mControls["publish"] = new Button({
+								type: "Transparent",
+								enabled: false,
+								visible: this.getPublishVisible(),
+								text: this.getTextResources().getText("BTN_PUBLISH"),
+								tooltip: this.getTextResources().getText("BTN_PUBLISH"),
+								press: this.eventHandler.bind(this, 'Transport'), // Fixme: rename event
+								layoutData: new OverflowToolbarLayoutData({
+									priority: "Low"
+								})
+							}),
+							this._mControls["saveAs"] = new Button({
+								type: "Transparent",
+								text: this.getTextResources().getText("BTN_SAVE_AS"),
+								enabled: false,
+								visible: false,
+								tooltip: this.getTextResources().getText("TOOLTIP_SAVE_AS"),
+								press: this.eventHandler.bind(this, 'SaveAs'),
+								layoutData: new OverflowToolbarLayoutData({
+									priority: "Low"
+								})
+							})
+						],
+						layoutData: new FlexItemData({
+							growFactor: 1,
+							minWidth: "0"
+						})
 					}),
-					new SegmentedButtonItem({
-						text: this.getTextResources().getText("BTN_NAVIGATION"),
-						tooltip: this.getTextResources().getText("BTN_NAVIGATION"),
-						width: "auto",
-						key: "navigation"
+					this._mControls["exit"] = new Button({
+						type:"Transparent",
+						text: this.getTextResources().getText("BTN_EXIT"),
+						tooltip: this.getTextResources().getText("BTN_EXIT"),
+						press: this.eventHandler.bind(this, 'Exit'),
+						icon: "sap-icon://decline"
 					})
 				],
-				select: this.eventHandler.bind(this, 'ModeChange')
-			}).data('name', 'modeSwitcher'),
-			new ToolbarSpacer().data('name', 'spacerRight'),
-			new Button({
-				type: "Transparent",
-				icon: "sap-icon://undo",
-				enabled: false,
-				tooltip: this.getTextResources().getText("BTN_UNDO"),
-				press: this.eventHandler.bind(this, 'Undo')
-			}).data('name', 'undo'),
-			new Button({
-				type:"Transparent",
-				icon: "sap-icon://redo",
-				iconFirst: false,
-				enabled: false,
-				tooltip: this.getTextResources().getText("BTN_REDO"),
-				press: this.eventHandler.bind(this, 'Redo')
-			}).data('name', 'redo'),
-			new Button({
-				type:"Transparent",
-				icon: "sap-icon://message-information",
-				visible: this.getManageAppsVisible(),
-				tooltip: this.getTextResources().getText("BTN_MANAGE_APPS"),
-				press: this.eventHandler.bind(this, 'ManageApps')
-			}).data('name', 'manageApps'),
-			new Button({
-				type: "Transparent",
-				text: this.getTextResources().getText("BTN_RESTORE"),
-				visible: true,
-				enabled: false,
-				tooltip: this.getTextResources().getText("BTN_RESTORE"),
-				press: this.eventHandler.bind(this, 'Restore')
-			}).data('name', 'restore'),
-			new sap.m.Button({
-				type: "Transparent",
-				enabled: false,
-				visible: this.getPublishVisible(),
-				text: this.getTextResources().getText("BTN_PUBLISH"),
-				tooltip: this.getTextResources().getText("BTN_PUBLISH"),
-				press: this.eventHandler.bind(this, 'Transport') // Fixme: rename event
-			}).data('name', 'publish'),
-			new Button({
-				type:"Transparent",
-				text: this.getTextResources().getText("BTN_EXIT"),
-				tooltip: this.getTextResources().getText("BTN_EXIT"),
-				press: this.eventHandler.bind(this, 'Exit')
-			}).data('name', 'exit')
+				layoutData: new FlexItemData({
+					growFactor: 0
+				})
+			})
 		];
 	};
 
@@ -186,7 +374,6 @@ function(
 	/* Methods propagation */
 	Adaptation.prototype.show = function () { return Base.prototype.show.apply(this, arguments); };
 	Adaptation.prototype.hide = function () { return Base.prototype.hide.apply(this, arguments); };
-
 
 	return Adaptation;
 

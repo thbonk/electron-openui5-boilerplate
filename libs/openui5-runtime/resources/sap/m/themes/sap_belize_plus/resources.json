@@ -16,6 +16,11 @@
 			"theme": "sap_belize_plus"
 		},
 		{
+			"name": "ColorPalette.less",
+			"designtime": true,
+			"theme": "sap_belize_plus"
+		},
+		{
 			"name": "Dialog.less",
 			"designtime": true,
 			"theme": "sap_belize_plus"
@@ -32,11 +37,6 @@
 		},
 		{
 			"name": "IconTabBar.less",
-			"designtime": true,
-			"theme": "sap_belize_plus"
-		},
-		{
-			"name": "Label.less",
 			"designtime": true,
 			"theme": "sap_belize_plus"
 		},
@@ -61,11 +61,6 @@
 			"theme": "sap_belize_plus"
 		},
 		{
-			"name": "NotificationListGroup.less",
-			"designtime": true,
-			"theme": "sap_belize_plus"
-		},
-		{
 			"name": "ObjectAttribute.less",
 			"designtime": true,
 			"theme": "sap_belize_plus"
@@ -82,11 +77,6 @@
 		},
 		{
 			"name": "ObjectStatus.less",
-			"designtime": true,
-			"theme": "sap_belize_plus"
-		},
-		{
-			"name": "Popover.less",
 			"designtime": true,
 			"theme": "sap_belize_plus"
 		},
@@ -136,12 +126,22 @@
 			"theme": "sap_belize_plus"
 		},
 		{
+			"name": "TimePickerSliders.less",
+			"designtime": true,
+			"theme": "sap_belize_plus"
+		},
+		{
 			"name": "Token.less",
 			"designtime": true,
 			"theme": "sap_belize_plus"
 		},
 		{
 			"name": "Toolbar.less",
+			"designtime": true,
+			"theme": "sap_belize_plus"
+		},
+		{
+			"name": "ValueStateMessage.less",
 			"designtime": true,
 			"theme": "sap_belize_plus"
 		},

@@ -1,12 +1,22 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.Slider.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/EnabledPropagator', 'sap/ui/core/ResizeHandler'],
-	function(jQuery, library, Control, EnabledPropagator, ResizeHandler) {
+sap.ui.define([
+    'sap/ui/thirdparty/jquery',
+    'sap/base/Log',
+    'sap/ui/dom/containsOrEquals',
+    'sap/ui/events/ControlEvents',
+    './library',
+    'sap/ui/core/Control',
+    'sap/ui/core/EnabledPropagator',
+    'sap/ui/core/ResizeHandler',
+    './SliderRenderer'
+],
+	function(jQuery, Log, containsOrEquals, ControlEvents, library, Control, EnabledPropagator, ResizeHandler, SliderRenderer) {
 	"use strict";
 
 
@@ -24,11 +34,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @implements sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
-	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Slider</code> control.
+	 * @deprecated as of version 1.38, replaced by {@link sap.m.Slider}
 	 * @alias sap.ui.commons.Slider
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -172,7 +182,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		var fMin = this.getMin();
 		var fMax = this.getMax();
 		if ( fMin > fMax ) {
-			jQuery.sap.log.warning('Property wrong: Min:' + fMin + ' > Max:' + fMax + '; values switched', this);
+			Log.warning('Property wrong: Min:' + fMin + ' > Max:' + fMax + '; values switched', this);
 			this.setMin(fMax);
 			this.setMax(fMin);
 			fMax = fMin;
@@ -192,7 +202,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		this.oMovingGrip = this.oGrip;
 
 		if (this.bTextLabels && (this.getLabels().length - 1) != this.getTotalUnits()) {
-			jQuery.sap.log.warning('label count should be one more than total units', this);
+			Log.warning('label count should be one more than total units', this);
 		}
 
 		this.iDecimalFactor = this.calcDecimalFactor(this.getSmallStepWidth());
@@ -205,10 +215,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		var fMin = this.getMin();
 		var fMax = this.getMax();
 		if ( fValue > fMax ) {
-			jQuery.sap.log.warning('Property wrong: value:' + fValue + ' > Max:' + fMax + '; value set to Max', this);
+			Log.warning('Property wrong: value:' + fValue + ' > Max:' + fMax + '; value set to Max', this);
 			fValue = fMax;
 		} else if ( fValue < fMin ) {
-			jQuery.sap.log.warning('Property wrong: value:' + fValue + ' < Min:' + fMin + '; value set to Min', this);
+			Log.warning('Property wrong: value:' + fValue + ' < Min:' + fMin + '; value set to Min', this);
 			fValue = fMin;
 		}
 
@@ -314,7 +324,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 					// Check whether tick is clicked
 					iTickPos = sMyTargetId.search('-tick');
 					if ( iTickPos >= 0) {
-						var iTickNum = parseInt( sMyTargetId.slice( this.getId().length + 5), 10);
+						var iTickNum = parseInt( sMyTargetId.slice( this.getId().length + 5));
 						iNewPos = this.fTickDist * iTickNum;
 						var iTotalUnits;
 						if (this.bTextLabels) {
@@ -433,17 +443,21 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				if (!oEvent.targetTouches) {
 					jQuery(window.document).bind('mousemove', this.handleMoveCall);
 					jQuery(window.document).bind('selectstart', this.preventSelect);
-					jQuery.sap.bindAnyEvent(jQuery.proxy(this.onAnyEvent, this));
+					ControlEvents.bindAnyEvent(jQuery.proxy(this.onAnyEvent, this));
 				}
 			}
 			this.oStartTarget = null;
 		}
 	};
 
+	function isSimulatedTouchEvent(oEvent) {
+		return (oEvent.originalEvent && oEvent.originalEvent.type && oEvent.originalEvent.type.startsWith("mouse")) ||
+				(oEvent.handleObj && oEvent.handleObj.origType && oEvent.handleObj.origType.startsWith("mouse"));
+	}
+
 	Slider.prototype.ontouchstart = function(oEvent) {
 
-		if ( (oEvent.originalEvent && jQuery.sap.startsWith(oEvent.originalEvent.type, "mouse")) ||
-		     (oEvent.handleObj && jQuery.sap.startsWith(oEvent.handleObj.origType, "mouse"))) {
+		if ( isSimulatedTouchEvent(oEvent) ) {
 			// ignore simulated touch events (if mouse events are available use them)
 			return;
 		}
@@ -472,7 +486,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			if (this.handleMoveCall) {
 				jQuery(window.document).unbind('mousemove', this.handleMoveCall);
 				jQuery(window.document).unbind('selectstart', this.preventSelect);
-				jQuery.sap.unbindAnyEvent(this.onAnyEvent);
+				ControlEvents.unbindAnyEvent(this.onAnyEvent);
 
 				if ( this.iStartLeft != ( this.getOffsetLeft(this.oMovingGrip) + this.iShiftGrip )) {
 					// Only if position was changed
@@ -491,8 +505,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 	Slider.prototype.ontouchend = function(oEvent) {
 
-		if ( (oEvent.originalEvent && jQuery.sap.startsWith(oEvent.originalEvent.type, "mouse")) ||
-		     (oEvent.handleObj && jQuery.sap.startsWith(oEvent.handleObj.origType, "mouse"))) {
+		if ( isSimulatedTouchEvent(oEvent) ) {
 			// ignore simulated touch events (if mouse events are available use them)
 			return;
 		}
@@ -581,8 +594,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 	Slider.prototype.ontouchmove = function(oEvent) {
 
-		if ( (oEvent.originalEvent && jQuery.sap.startsWith(oEvent.originalEvent.type, "mouse")) ||
-		     (oEvent.handleObj && jQuery.sap.startsWith(oEvent.handleObj.origType, "mouse"))) {
+		if ( isSimulatedTouchEvent(oEvent) ) {
 			// ignore simulated touch events (if mouse events are available use them)
 			return;
 		}
@@ -618,7 +630,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 */
 	Slider.prototype.onAnyEvent = function (oEvent) {
 
-		jQuery.sap.log.info('onAnyEvent fired: "' + oEvent.type + '"');
+		Log.debug('onAnyEvent fired: "' + oEvent.type + '"');
 
 		// Skip if not editable or no drag operation in progress
 		if ((!this.getEditable()) || (!this.getEnabled()) || !this.bGripMousedown) {
@@ -627,7 +639,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 		// Check if outside of control
 		var oSource = oEvent.target;
-		if ((!jQuery.sap.containsOrEquals(this.oDomRef,oSource) || oSource.tagName == "BODY") && oEvent.type == 'mouseup') {
+		if ((!containsOrEquals(this.oDomRef,oSource) || oSource.tagName == "BODY") && oEvent.type == 'mouseup') {
 			this.onmouseup(oEvent);
 		}
 
@@ -1036,7 +1048,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			this.fTickDist = this.getBarWidth() / iTotalUnits;
 
 			for (var i = 0; i <= iTotalUnits; i++) {
-				oTick = jQuery.sap.domById(this.getId() + '-tick' + i);
+				oTick = this.getDomRef('tick' + i);
 				var iLeft = 0;
 				if (!this.bRtl || this.getVertical()) {
 					iLeft = Math.round( this.fTickDist * i ) - Math.ceil( this.getOffsetWidth(oTick) / 2 );
@@ -1049,7 +1061,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				this.setLeft(iLeft, oTick);
 
 				if ( this.getStepLabels() && i > 0 && i < iTotalUnits) {
-					oText = jQuery.sap.domById(this.getId() + '-text' + i);
+					oText = this.getDomRef('text' + i);
 					if (this.getSmallStepWidth() > 0 && this.iDecimalFactor > 0 && !this.bTextLabels) {
 						jQuery(oText).text(Math.round( parseFloat(jQuery(oText).text()) * this.iDecimalFactor ) / this.iDecimalFactor);
 					}
@@ -1099,7 +1111,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 			if ( this.getSmallStepWidth() > 0 ) {
 				// Move grip according to step-width
-				var iStepNum   = parseInt( ( fNewValue - this.getMin() ) / this.getSmallStepWidth() , 10);
+				var iStepNum   = parseInt( ( fNewValue - this.getMin() ) / this.getSmallStepWidth());
 				var fLeftStep  = ( iStepNum * this.getSmallStepWidth() ) + this.getMin();
 				var fRightStep = ( ( iStepNum + 1 ) * this.getSmallStepWidth() ) + this.getMin();
 
@@ -1134,7 +1146,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			}
 
 			//Output iShiftGrip to check if rendering issue occurs because of wrong value
-			jQuery.sap.log.info("iNewPos: " + iNewPos + " - iLeft: " + iLeft + " - iShiftGrip: " + this.iShiftGrip);
+			Log.debug("iNewPos: " + iNewPos + " - iLeft: " + iLeft + " - iShiftGrip: " + this.iShiftGrip);
 
 			this.updateValueProperty(fNewValue, oGrip);
 
@@ -1645,4 +1657,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 	return Slider;
 
-}, /* bExport= */ true);
+});

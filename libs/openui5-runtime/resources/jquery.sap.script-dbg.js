@@ -1,20 +1,23 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides miscellaneous utility functions that might be useful for any script
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define([
+	'jquery.sap.global',
+	'sap/base/util/uid',
+	'sap/base/strings/hash',
+	'sap/base/util/array/uniqueSort',
+	'sap/base/util/deepEqual',
+	'sap/base/util/each',
+	'sap/base/util/array/diff',
+	'sap/base/util/JSTokenizer',
+	'sap/base/util/merge',
+	'sap/base/util/UriParameters'
+], function(jQuery, uid, hash, uniqueSort, deepEqual, each, diff, JSTokenizer, merge, UriParameters) {
 	"use strict";
-
-	/**
-	 * Some private variable used for creation of (pseudo-)unique ids.
-	 * @type int
-	 * @private
-	 */
-	var iIdCounter = 0;
 
 	/**
 	 * Creates and returns a pseudo-unique id.
@@ -23,10 +26,10 @@ sap.ui.define(['jquery.sap.global'],
 	 *
 	 * @return {string} A pseudo-unique id.
 	 * @public
+	 * @function
+	 * @deprecated since 1.58 use {@link module:sap/base/util/uid} instead
 	 */
-	jQuery.sap.uid = function uid() {
-		return "id-" + new Date().valueOf() + "-" + iIdCounter++;
-	};
+	jQuery.sap.uid = uid;
 
 	/**
 	 * This function generates a hash-code from a string
@@ -34,180 +37,12 @@ sap.ui.define(['jquery.sap.global'],
 	 * @return {int} The generated hash-code
 	 * @since 1.39
 	 * @private
-	 */
-	jQuery.sap.hashCode = function(sString) {
-		var i = sString.length, iHash = 0;
-
-		while (i--) {
-			iHash = (iHash << 5) - iHash + sString.charCodeAt(i);
-			iHash = iHash & iHash; // convert to 32 bit
-		}
-
-		return iHash;
-	};
-
-	/**
-	 * Calls a method after a given delay and returns an id for this timer
-	 *
-	 * @param {int} iDelay Delay time in milliseconds
-	 * @param {object} oObject Object from which the method should be called
-	 * @param {string|object} method function pointer or name of the method
-	 * @param {array} [aParameters] Method parameters
-	 * @return {string} Id which can be used to cancel the timer with clearDelayedCall
-	 * @public
-	 */
-	jQuery.sap.delayedCall = function delayedCall(iDelay, oObject, method, aParameters) {
-		return setTimeout(function(){
-			if (jQuery.type(method) == "string") {
-				method = oObject[method];
-			}
-			method.apply(oObject, aParameters || []);
-		}, iDelay);
-	};
-
-	/**
-	 * Stops the delayed call.
-	 *
-	 * The function given when calling delayedCall is not called anymore.
-	 *
-	 * @param {string} sDelayedCallId The id returned, when calling delayedCall
-	 * @public
-	 */
-	jQuery.sap.clearDelayedCall = function clearDelayedCall(sDelayedCallId) {
-		clearTimeout(sDelayedCallId);
-		return this;
-	};
-
-	/**
-	 * Calls a method after a given interval and returns an id for this interval.
-	 *
-	 * @param {int} iInterval Interval time in milliseconds
-	 * @param {object} oObject Object from which the method should be called
-	 * @param {string|object} method function pointer or name of the method
-	 * @param {array} [aParameters] Method parameters
-	 * @return {string} Id which can be used to cancel the interval with clearIntervalCall
-	 * @public
-	 */
-	jQuery.sap.intervalCall = function intervalCall(iInterval, oObject, method, aParameters) {
-		return setInterval(function(){
-			if (jQuery.type(method) == "string") {
-				method = oObject[method];
-			}
-			method.apply(oObject, aParameters || []);
-		}, iInterval);
-	};
-
-	/**
-	 * Stops the interval call.
-	 *
-	 * The function given when calling intervalCall is not called anymore.
-	 *
-	 * @param {string} sIntervalCallId The id returned, when calling intervalCall
-	 * @public
-	 */
-	jQuery.sap.clearIntervalCall = function clearIntervalCall(sIntervalCallId) {
-		clearInterval(sIntervalCallId);
-		return this;
-	};
-
-	// Javadoc for private inner class "UriParams" - this list of comments is intentional!
-	/**
-	 * @interface	Encapsulates all URI parameters of the current windows location (URL).
-	 *
-	 * Use {@link jQuery.sap.getUriParameters} to create an instance of jQuery.sap.util.UriParameters.
-	 *
-	 * @author SAP SE
-	 * @version 1.50.6
-	 * @since 0.9.0
-	 * @name jQuery.sap.util.UriParameters
-	 * @public
-	 */
-	/**
-	 * Returns the value(s) of the URI parameter with the given name sName.
-	 *
-	 * If the boolean parameter bAll is <code>true</code>, an array of string values of all
-	 * occurrences of the URI parameter with the given name is returned. This array is empty
-	 * if the URI parameter is not contained in the windows URL.
-	 *
-	 * If the boolean parameter bAll is <code>false</code> or is not specified, the value of the first
-	 * occurrence of the URI parameter with the given name is returned. Might be <code>null</code>
-	 * if the URI parameter is not contained in the windows URL.
-	 *
-	 * @param {string} sName The name of the URI parameter.
-	 * @param {boolean} [bAll=false] Optional, specifies whether all or only the first parameter value should be returned.
-	 * @return {string|array} The value(s) of the URI parameter with the given name
-	 * @SecSource {return|XSS} Return value contains URL parameters
-	 *
+	 * @sap-restricted sap.ui.core
 	 * @function
-	 * @name jQuery.sap.util.UriParameters.prototype.get
+	 * @deprecated since 1.58 use {@link module:sap/base/strings/hash} instead
 	 */
+	jQuery.sap.hashCode = hash;
 
-	/*
-	 * Implements jQuery.sap.util.UriParameters
-	 */
-	var UriParams = function(sUri) {
-		this.mParams = {};
-		var sQueryString = sUri || window.location.href;
-		if ( sQueryString.indexOf('#') >= 0 ) {
-			sQueryString = sQueryString.slice(0, sQueryString.indexOf('#'));
-		}
-		if (sQueryString.indexOf("?") >= 0) {
-			sQueryString = sQueryString.slice(sQueryString.indexOf("?") + 1);
-			var aParameters = sQueryString.split("&"),
-				mParameters = {},
-				aParameter,
-				sName,
-				sValue;
-			for (var i = 0; i < aParameters.length; i++) {
-				aParameter = aParameters[i].split("=");
-				sName = decodeURIComponent(aParameter[0]);
-				sValue = aParameter.length > 1 ? decodeURIComponent(aParameter[1].replace(/\+/g,' ')) : "";
-				if (sName) {
-					if (!Object.prototype.hasOwnProperty.call(mParameters, sName)) {
-						mParameters[sName] = [];
-					}
-					mParameters[sName].push(sValue);
-				}
-			}
-			this.mParams = mParameters;
-		}
-	};
-
-	UriParams.prototype = {};
-
-	/*
-	 * Implements jQuery.sap.util.UriParameters.prototype.get
-	 */
-	UriParams.prototype.get = function(sName, bAll) {
-		var aValues = Object.prototype.hasOwnProperty.call(this.mParams, sName) ? this.mParams[sName] : [];
-		return bAll === true ? aValues : (aValues[0] || null);
-	};
-
-	/**
-	 * Creates and returns a new instance of {@link jQuery.sap.util.UriParameters}.
-	 *
-	 * Example for reading a single URI parameter (or the value of the first
-	 * occurrence of the URI parameter):
-	 * <pre>
-	 *	var sValue = jQuery.sap.getUriParameters().get("myUriParam");
-	 * </pre>
-	 *
-	 * Example for reading the values of the first of the URI parameter
-	 * (with multiple occurrences):
-	 * <pre>
-	 *	var aValues = jQuery.sap.getUriParameters().get("myUriParam", true);
-	 *	for(i in aValues){
-	 *	var sValue = aValues[i];
-	 *	}
-	 * </pre>
-	 *
-	 * @public
-	 * @param {string} sUri Uri to determine the parameters for
-	 * @return {jQuery.sap.util.UriParameters} A new URI parameters instance
-	 */
-	jQuery.sap.getUriParameters = function getUriParameters(sUri) {
-		return new UriParams(sUri);
-	};
 
 	/**
 	 * Sorts the given array in-place and removes any duplicates (identified by "===").
@@ -217,26 +52,10 @@ sap.ui.define(['jquery.sap.global'],
 	 * @param {Array} a An Array of any type
 	 * @return {Array} Same array as given (for chaining)
 	 * @public
+	 * @function
+	 * @deprecated since 1.58 use {@link module:sap/base/util/array/uniqueSort} instead
 	 */
-	jQuery.sap.unique = function(a) {
-		jQuery.sap.assert(a instanceof Array, "unique: a must be an array");
-		var l = a.length;
-		if ( l > 1 ) {
-			a.sort();
-			var j = 0;
-			for (var i = 1; i < l; i++) {
-				// invariant: i is the entry to check, j is the last unique entry known so far
-				if ( a[i] !== a[j] ) {
-					a[++j] = a[i];
-				}
-			}
-			// cut off the rest - if any
-			if ( ++j < l ) {
-				a.splice(j, l - j);
-			}
-		}
-		return a;
-	};
+	jQuery.sap.unique = uniqueSort;
 
 	/**
 	 * Compares the two given values for equality, especially takes care not to compare
@@ -250,64 +69,10 @@ sap.ui.define(['jquery.sap.global'],
 	 *
 	 * @return {boolean} Whether a and b are equal
 	 * @public
+	 * @function
+	 * @deprecated since 1.58 use {@link module:sap/base/util/deepEqual} instead
 	 */
-	jQuery.sap.equal = function(a, b, maxDepth, contains, depth) {
-		// Optional parameter normalization
-		if (typeof maxDepth == "boolean") {
-			contains = maxDepth;
-			maxDepth = undefined;
-		}
-		if (!depth) {
-			depth = 0;
-		}
-		if (!maxDepth) {
-			maxDepth = 10;
-		}
-		if (depth > maxDepth) {
-			return false;
-		}
-		if (a === b) {
-			return true;
-		}
-		if (Array.isArray(a) && Array.isArray(b)) {
-			if (!contains && a.length !== b.length) {
-				return false;
-			}
-			if (a.length > b.length) {
-				return false;
-			}
-			for (var i = 0; i < a.length; i++) {
-				if (!jQuery.sap.equal(a[i], b[i], maxDepth, contains, depth + 1)) {
-						return false;
-				}
-			}
-			return true;
-		}
-		if (typeof a == "object" && typeof b == "object") {
-			if (!a || !b) {
-				return false;
-			}
-			if (a.constructor !== b.constructor) {
-				return false;
-			}
-			if (!contains && Object.keys(a).length !== Object.keys(b).length) {
-				return false;
-			}
-			if (a.nodeName && b.nodeName && a.namespaceURI && b.namespaceURI) {
-				return jQuery.sap.isEqualNode(a,b);
-			}
-			if (a instanceof Date) {
-				return a.valueOf() === b.valueOf();
-			}
-			for (var i in a) {
-				if (!jQuery.sap.equal(a[i], b[i], maxDepth, contains, depth + 1)) {
-					return false;
-				}
-			}
-			return true;
-		}
-		return false;
-	};
+	jQuery.sap.equal = deepEqual;
 
 	/**
 	 * Iterates over elements of the given object or array.
@@ -323,53 +88,10 @@ sap.ui.define(['jquery.sap.global'],
 	 * @param {function} fnCallback function to call for each property name
 	 * @return {object|any[]} the given <code>oObject</code>
 	 * @since 1.11
-	 */
-	jQuery.sap.each = function(oObject, fnCallback) {
-		var isArray = Array.isArray(oObject),
-			length, i;
-
-		if ( isArray ) {
-			for (i = 0, length = oObject.length; i < length; i++) {
-				if ( fnCallback.call(oObject[i], i, oObject[i]) === false ) {
-					break;
-				}
-			}
-		} else {
-			for ( i in oObject ) {
-				if ( fnCallback.call(oObject[i], i, oObject[i] ) === false ) {
-					break;
-				}
-			}
-		}
-
-		return oObject;
-	};
-
-	/**
-	 * Substitute for <code>for(n in o)</code> loops which used to fix the 'Don'tEnum' bug of IE8.
-	 * As IE8 is not supported anymore this function is just a wrapper around the native for-in loop.
-	 *
-	 * Iterates over all enumerable properties of the given object and calls the
-	 * given callback function for each of them. The assumed signature of the
-	 * callback function is
-	 *
-	 *	 fnCallback(name, value)
-	 *
-	 * where name is the name of the property and value is its value.
-	 *
-	 * @param {object} oObject object to enumerate the properties of
-	 * @param {function} fnCallback function to call for each property name
 	 * @function
-	 * @deprecated Since version 1.48.0. IE8 is not supported anymore, thus no special handling is required. Use native for-in loop instead.
-	 * @since 1.7.1
+	 * @deprecated since 1.58 use {@link module:sap/base/util/each} instead
 	 */
-	jQuery.sap.forIn = function(oObject, fnCallback) {
-		for (var n in oObject) {
-			if ( fnCallback(n, oObject[n]) === false ) {
-				return;
-			}
-		}
-	};
+	jQuery.sap.each = each;
 
 	/**
 	 * Calculate delta of old list and new list.
@@ -434,147 +156,265 @@ sap.ui.define(['jquery.sap.global'],
 	 * @param {function} [fnSymbol] Function to calculate substitute symbols for array items
 	 * @return {Array.<{type:string,index:int}>} List of update operations
 	 * @public
+	 * @function
+	 * @deprecated since 1.58 use {@link module:sap/base/util/array/diff} instead
 	 */
-	jQuery.sap.arraySymbolDiff = function(aOld, aNew, fnSymbol){
-		var mSymbols = {},
-			aOldRefs = [],
-			aNewRefs = [],
-			iOldLine,
-			vSymbol, oSymbol,
-			iOld = 0,
-			iNew = 0,
-			iOldRefLine,
-			iNewRefLine,
-			iOldDistance,
-			iNewDistance,
-			aDiff = [];
+	jQuery.sap.arraySymbolDiff = diff;
 
-		// If arrays are equal, don't try to diff them
-		if (aOld === aNew || jQuery.sap.equal(aOld, aNew)) {
-			return aDiff;
-		}
 
-		// If no symbol function is provided, we stringify, if it is not type string, and create a hash from it
-		fnSymbol = fnSymbol || function(vValue) {
-			if (typeof vValue !== "string") {
-				vValue = JSON.stringify(vValue) || "";
-			}
-			return jQuery.sap.hashCode(vValue);
-		};
-
-		// Pass 1
-		for (var i = 0; i < aNew.length; i++) {
-			vSymbol = fnSymbol(aNew[i]);
-			oSymbol = mSymbols[vSymbol];
-			if (!oSymbol) {
-				oSymbol = mSymbols[vSymbol] = {
-					iNewCount: 0,
-					iOldCount: 0
-				};
-			}
-			oSymbol.iNewCount++;
-			aNewRefs[i] = {
-				symbol: oSymbol
-			};
-		}
-
-		// Pass 2
-		for (var i = 0; i < aOld.length; i++) {
-			vSymbol = fnSymbol(aOld[i]);
-			oSymbol = mSymbols[vSymbol];
-			if (!oSymbol) {
-				oSymbol = mSymbols[vSymbol] = {
-					iNewCount: 0,
-					iOldCount: 0
-				};
-			}
-			oSymbol.iOldCount++;
-			oSymbol.iOldLine = i;
-			aOldRefs[i] = {
-				symbol: oSymbol
-			};
-		}
-
-		// Pass 3
-		for (var i = 0; i < aNewRefs.length; i++) {
-			oSymbol = aNewRefs[i].symbol;
-			if (oSymbol.iNewCount === 1 && oSymbol.iOldCount === 1) {
-				aNewRefs[i].line = oSymbol.iOldLine;
-				aOldRefs[oSymbol.iOldLine].line = i;
-			}
-		}
-
-		// Pass 4
-		for (var i = 0; i < aNewRefs.length - 1; i++) {
-			iOldLine = aNewRefs[i].line;
-			if (iOldLine !== undefined && iOldLine < aOldRefs.length - 1) {
-				if (aOldRefs[iOldLine + 1].symbol === aNewRefs[i + 1].symbol) {
-					aOldRefs[iOldLine + 1].line = i + 1;
-					aNewRefs[i + 1].line = iOldLine + 1;
-				}
-			}
-		}
-
-		// Pass 5
-		for (var i = aNewRefs.length - 1; i > 0; i--) {
-			iOldLine = aNewRefs[i].line;
-			if (iOldLine !== undefined && iOldLine > 0) {
-				if (aOldRefs[iOldLine - 1].symbol === aNewRefs[i - 1].symbol) {
-					aOldRefs[iOldLine - 1].line = i - 1;
-					aNewRefs[i - 1].line = iOldLine - 1;
-				}
-			}
-		}
-
-		// Create diff
-		while (iOld < aOld.length || iNew < aNew.length) {
-			iNewRefLine = aOldRefs[iOld] && aOldRefs[iOld].line;
-			iOldRefLine = aNewRefs[iNew] && aNewRefs[iNew].line;
-			if (iOld < aOld.length && (iNewRefLine === undefined || iNewRefLine < iNew)) {
-				aDiff.push({
-					index: iNew,
-					type: "delete"
-				});
-				iOld++;
-			} else if (iNew < aNew.length && (iOldRefLine === undefined || iOldRefLine < iOld)) {
-				aDiff.push({
-					index: iNew,
-					type: "insert"
-				});
-				iNew++;
-			} else if (iNew === iNewRefLine) {
-				iNew++;
-				iOld++;
-			} else {
-				iNewDistance = iNewRefLine - iNew;
-				iOldDistance = iOldRefLine - iOld;
-				if (iNewDistance <= iOldDistance) {
-					aDiff.push({
-						index: iNew,
-						type: "insert"
-					});
-					iNew++;
-				} else {
-					aDiff.push({
-						index: iNew,
-						type: "delete"
-					});
-					iOld++;
-				}
-			}
-		}
-
-		return aDiff;
+	/**
+	 * A factory returning a tokenizer object for JS values.
+	 * Contains functions to consume tokens on an input string.
+	 * @function
+	 * @private
+	 * @returns {object} - the tokenizer
+	 * @deprecated since 1.58 use {@link module:sap/base/util/JSTokenizer} instead
+	 */
+	jQuery.sap._createJSTokenizer = function() {
+		return new JSTokenizer();
 	};
+
+	/**
+	 * Parse simple JS objects.
+	 *
+	 * A parser for JS object literals. This is different from a JSON parser, as it does not have
+	 * the JSON specification as a format description, but a subset of the JavaScript language.
+	 * The main difference is, that keys in objects do not need to be quoted and strings can also
+	 * be defined using apostrophes instead of quotation marks.
+	 *
+	 * The parser does not support functions, but only boolean, number, string, object and array.
+	 *
+	 * @function
+	 * @param {string} The string containing the JS objects
+	 * @throws an error, if the string does not contain a valid JS object
+	 * @returns {object} the JS object
+	 *
+	 * @private
+	 * @since 1.11
+	 * @deprecated since 1.58 use {@link module:sap/base/util/JSTokenizer.parseJS} instead
+	 */
+	jQuery.sap.parseJS = JSTokenizer.parseJS;
+
+	/**
+	 * Merge the contents of two or more objects together into the first object.
+	 * Usage is the same as jQuery.extend, but Arguments that are null or undefined are NOT ignored.
+	 *
+	 * @deprecated since 1.58. For shallow extend use <code>Object.assign</code> (polyfilled), for deep extend use <code>sap/base/util/merge</code>.
+	 * @function
+	 * @since 1.26
+	 * @private
+	 */
+	jQuery.sap.extend = function () {
+		var args = arguments,
+			deep = false;
+
+		// Check whether the first argument is the deep-flag
+		if (typeof arguments[0] === "boolean") {
+			deep = arguments[0];
+
+			// skip the first argument while creating a shallow copy of arguments
+			args = Array.prototype.slice.call(arguments, 1);
+		}
+
+		if (deep) {
+			return merge.apply(this, args);
+		} else {
+			/*
+			 * The code in this function is taken from jQuery 2.2.3 "jQuery.extend" and got modified.
+			 *
+			 * jQuery JavaScript Library v2.2.3
+			 * http://jquery.com/
+			 *
+			 * Copyright jQuery Foundation and other contributors
+			 * Released under the MIT license
+			 * http://jquery.org/license
+			 */
+			var copy, name, options,
+				target = arguments[0] || {},
+				i = 1,
+				length = arguments.length;
+
+			// Handle case when target is a string or something (possible in deep copy)
+			if (typeof target !== "object" && typeof target !== "function") {
+				target = {};
+			}
+
+			for (; i < length; i++) {
+
+				options = arguments[i];
+
+				// Extend the base object
+				for (name in options) {
+					copy = options[name];
+
+					// Prevent never-ending loop
+					if (target === copy) {
+						continue;
+					}
+
+					target[name] = copy;
+				}
+			}
+
+			// Return the modified object
+			return target;
+		}
+	};
+
+	// Javadoc for private inner class "UriParams" - this list of comments is intentional!
+	/**
+	 * @interface Encapsulates all URI parameters of the current windows location (URL).
+	 *
+	 * Use {@link jQuery.sap.getUriParameters} to create an instance of jQuery.sap.util.UriParameters.
+	 *
+	 * @author SAP SE
+	 * @version 1.61.2
+	 * @since 0.9.0
+	 * @name jQuery.sap.util.UriParameters
+	 * @public
+	 */
+
+	/**
+	 * Returns the value(s) of the URI parameter with the given name sName.
+	 *
+	 * If the boolean parameter bAll is <code>true</code>, an array of string values of all
+	 * occurrences of the URI parameter with the given name is returned. This array is empty
+	 * if the URI parameter is not contained in the windows URL.
+	 *
+	 * If the boolean parameter bAll is <code>false</code> or is not specified, the value of the first
+	 * occurrence of the URI parameter with the given name is returned. Might be <code>null</code>
+	 * if the URI parameter is not contained in the windows URL.
+	 *
+	 * @public
+	 * @param {string} sUri The name of the URI parameter.
+	 * @return {string|array} The value(s) of the URI parameter with the given name
+	 * @SecSource {return|XSS} Return value contains URL parameters
+	 * @function
+	 * @name jQuery.sap.util.UriParameters.prototype.get
+	 */
+
+	/**
+	 * Creates and returns a new instance of {@link jQuery.sap.util.UriParameters}.
+	 *
+	 * Example for reading a single URI parameter (or the value of the first
+	 * occurrence of the URI parameter):
+	 * <pre>
+	 *	var sValue = jQuery.sap.getUriParameters().get("myUriParam");
+	 * </pre>
+	 *
+	 * Example for reading the values of the first of the URI parameter
+	 * (with multiple occurrences):
+	 * <pre>
+	 *	var aValues = jQuery.sap.getUriParameters().get("myUriParam", true);
+	 *	for(i in aValues){
+	 *	var sValue = aValues[i];
+	 *	}
+	 * </pre>
+	 *
+	 * @public
+	 * @param {string} sUri Uri to determine the parameters for
+	 * @return {jQuery.sap.util.UriParameters} A new URI parameters instance
+	 */
+	jQuery.sap.getUriParameters = function getUriParameters(sUri) {
+		sUri = sUri ? sUri : window.location.href;
+		return new UriParameters(sUri);
+	};
+
+	/**
+	 * Calls a method after a given delay and returns an id for this timer
+	 *
+	 * @param {int} iDelay Delay time in milliseconds
+	 * @param {object} oObject Object from which the method should be called
+	 * @param {string|object} method function pointer or name of the method
+	 * @param {array} [aParameters] Method parameters
+	 * @return {string} Id which can be used to cancel the timer with clearDelayedCall
+	 * @public
+	 * @deprecated since 1.58 use native <code>setTimeout</code> instead
+	 */
+	jQuery.sap.delayedCall = function delayedCall(iDelay, oObject, method, aParameters) {
+		return setTimeout(function(){
+			if (jQuery.type(method) == "string") {
+				method = oObject[method];
+			}
+			method.apply(oObject, aParameters || []);
+		}, iDelay);
+	};
+
+	/**
+	 * Stops the delayed call.
+	 *
+	 * The function given when calling delayedCall is not called anymore.
+	 *
+	 * @param {string} sDelayedCallId The id returned, when calling delayedCall
+	 * @public
+	 * @deprecated since 1.58 use native <code>clearTimeout</code> instead
+	 */
+	jQuery.sap.clearDelayedCall = function clearDelayedCall(sDelayedCallId) {
+		clearTimeout(sDelayedCallId);
+		return this;
+	};
+
+	/**
+	 * Calls a method after a given interval and returns an id for this interval.
+	 *
+	 * @param {int} iInterval Interval time in milliseconds
+	 * @param {object} oObject Object from which the method should be called
+	 * @param {string|object} method function pointer or name of the method
+	 * @param {array} [aParameters] Method parameters
+	 * @return {string} Id which can be used to cancel the interval with clearIntervalCall
+	 * @public
+	 * @deprecated since 1.58 use native <code>setInterval</code> instead
+	 */
+	jQuery.sap.intervalCall = function intervalCall(iInterval, oObject, method, aParameters) {
+		return setInterval(function(){
+			if (jQuery.type(method) == "string") {
+				method = oObject[method];
+			}
+			method.apply(oObject, aParameters || []);
+		}, iInterval);
+	};
+
+	/**
+	 * Stops the interval call.
+	 *
+	 * The function given when calling intervalCall is not called anymore.
+	 *
+	 * @param {string} sIntervalCallId The id returned, when calling intervalCall
+	 * @public
+	 * @deprecated since 1.58 use native <code>clearInterval</code> instead
+	 */
+	jQuery.sap.clearIntervalCall = function clearIntervalCall(sIntervalCallId) {
+		clearInterval(sIntervalCallId);
+		return this;
+	};
+
+	/**
+	 * Substitute for <code>for(n in o)</code> loops which used to fix the 'Don'tEnum' bug of IE8.
+	 * As IE8 is not supported anymore this function is just a wrapper around the native for-in loop.
+	 *
+	 * Iterates over all enumerable properties of the given object and calls the
+	 * given callback function for each of them. The assumed signature of the
+	 * callback function is
+	 *
+	 *	 fnCallback(name, value)
+	 *
+	 * where name is the name of the property and value is its value.
+	 *
+	 * @param {object} oObject object to enumerate the properties of
+	 * @param {function} fnCallback function to call for each property name
+	 * @deprecated since 1.48.0 IE8 is not supported anymore, thus no special handling is required. Use native for-in loop instead.
+	 * @since 1.7.1
+	 */
+	jQuery.sap.forIn = each;
 
 	/**
 	 * Calculate delta of old list and new list.
 	 *
 	 * This partly implements the algorithm described in "A Technique for Isolating Differences Between Files"
 	 * but instead of working with hashes, it does compare each entry of the old list with each entry of the new
-	 * list, which causes terrible performane on large datasets.
+	 * list, which causes terrible performance on large datasets.
 	 *
-	 * @deprecated As of 1.38, use {@link jQuery.sap.arraySymbolDiff} instead if applicable
+	 * @deprecated As of 1.38, use {@link module:sap/base/util/array/diff} instead if applicable
 	 * @public
 	 * @param {Array} aOld Old Array
 	 * @param {Array} aNew New Array
@@ -584,7 +424,7 @@ sap.ui.define(['jquery.sap.global'],
 	 */
 	jQuery.sap.arrayDiff = function(aOld, aNew, fnCompare, bUniqueEntries){
 		fnCompare = fnCompare || function(vValue1, vValue2) {
-			return jQuery.sap.equal(vValue1, vValue2);
+			return deepEqual(vValue1, vValue2);
 		};
 
 		var aOldRefs = [];
@@ -721,432 +561,5 @@ sap.ui.define(['jquery.sap.global'],
 		return aDiff;
 	};
 
-	/**
-	 * A factory returning a tokenizer object for JS values.
-	 * Contains functions to consume tokens on an input string.
-	 * @private
-	 * @returns {object} - the tokenizer
-	 */
-	jQuery.sap._createJSTokenizer = function() {
-		var at, // The index of the current character
-			ch, // The current character
-			escapee = {
-				'"': '"',
-				'\'': '\'',
-				'\\': '\\',
-				'/': '/',
-				b: '\b',
-				f: '\f',
-				n: '\n',
-				r: '\r',
-				t: '\t'
-			},
-			text,
-
-			error = function(m) {
-
-				// Call error when something is wrong.
-				throw {
-					name: 'SyntaxError',
-					message: m,
-					at: at,
-					text: text
-				};
-			},
-
-			next = function(c) {
-
-				// If a c parameter is provided, verify that it matches the current character.
-				if (c && c !== ch) {
-					error("Expected '" + c + "' instead of '" + ch + "'");
-				}
-
-				// Get the next character. When there are no more characters,
-				// return the empty string.
-				ch = text.charAt(at);
-				at += 1;
-				return ch;
-			},
-
-			number = function() {
-
-				// Parse a number value.
-				var number, string = '';
-
-				if (ch === '-') {
-					string = '-';
-					next('-');
-				}
-				while (ch >= '0' && ch <= '9') {
-					string += ch;
-					next();
-				}
-				if (ch === '.') {
-					string += '.';
-					while (next() && ch >= '0' && ch <= '9') {
-						string += ch;
-					}
-				}
-				if (ch === 'e' || ch === 'E') {
-					string += ch;
-					next();
-					if (ch === '-' || ch === '+') {
-						string += ch;
-						next();
-					}
-					while (ch >= '0' && ch <= '9') {
-						string += ch;
-						next();
-					}
-				}
-				number = +string;
-				if (!isFinite(number)) {
-					error("Bad number");
-				} else {
-					return number;
-				}
-			},
-
-			string = function() {
-
-				// Parse a string value.
-				var hex, i, string = '', quote,
-					uffff;
-
-				// When parsing for string values, we must look for " and \ characters.
-				if (ch === '"' || ch === '\'') {
-					quote = ch;
-					while (next()) {
-						if (ch === quote) {
-							next();
-							return string;
-						}
-						if (ch === '\\') {
-							next();
-							if (ch === 'u') {
-								uffff = 0;
-								for (i = 0; i < 4; i += 1) {
-									hex = parseInt(next(), 16);
-									if (!isFinite(hex)) {
-										break;
-									}
-									uffff = uffff * 16 + hex;
-								}
-								string += String.fromCharCode(uffff);
-							} else if (typeof escapee[ch] === 'string') {
-								string += escapee[ch];
-							} else {
-								break;
-							}
-						} else {
-							string += ch;
-						}
-					}
-				}
-				error("Bad string");
-			},
-
-			name = function() {
-
-				// Parse a name value.
-				var name = '',
-					allowed = function(ch) {
-						return ch === "_" || ch === "$" ||
-							(ch >= "0" && ch <= "9") ||
-							(ch >= "a" && ch <= "z") ||
-							(ch >= "A" && ch <= "Z");
-					};
-
-				if (allowed(ch)) {
-					name += ch;
-				} else {
-					error("Bad name");
-				}
-
-				while (next()) {
-					if (ch === ' ') {
-						next();
-						return name;
-					}
-					if (ch === ':') {
-						return name;
-					}
-					if (allowed(ch)) {
-						name += ch;
-					} else {
-						error("Bad name");
-					}
-				}
-				error("Bad name");
-			},
-
-			white = function() {
-
-				// Skip whitespace.
-				while (ch && ch <= ' ') {
-					next();
-				}
-			},
-
-			word = function() {
-
-				// true, false, or null.
-				switch (ch) {
-				case 't':
-					next('t');
-					next('r');
-					next('u');
-					next('e');
-					return true;
-				case 'f':
-					next('f');
-					next('a');
-					next('l');
-					next('s');
-					next('e');
-					return false;
-				case 'n':
-					next('n');
-					next('u');
-					next('l');
-					next('l');
-					return null;
-				}
-				error("Unexpected '" + ch + "'");
-			},
-
-			value, // Place holder for the value function.
-			array = function() {
-
-				// Parse an array value.
-				var array = [];
-
-				if (ch === '[') {
-					next('[');
-					white();
-					if (ch === ']') {
-						next(']');
-						return array; // empty array
-					}
-					while (ch) {
-						array.push(value());
-						white();
-						if (ch === ']') {
-							next(']');
-							return array;
-						}
-						next(',');
-						white();
-					}
-				}
-				error("Bad array");
-			},
-
-			object = function() {
-
-				// Parse an object value.
-				var key, object = {};
-
-				if (ch === '{') {
-					next('{');
-					white();
-					if (ch === '}') {
-						next('}');
-						return object; // empty object
-					}
-					while (ch) {
-						if (ch >= "0" && ch <= "9") {
-							key = number();
-						} else if (ch === '"' || ch === '\'') {
-							key = string();
-						} else {
-							key = name();
-						}
-						white();
-						next(':');
-						if (Object.hasOwnProperty.call(object, key)) {
-							error('Duplicate key "' + key + '"');
-						}
-						object[key] = value();
-						white();
-						if (ch === '}') {
-							next('}');
-							return object;
-						}
-						next(',');
-						white();
-					}
-				}
-				error("Bad object");
-			};
-
-		value = function() {
-
-			// Parse a JS value. It could be an object, an array, a string, a number,
-			// or a word.
-			white();
-			switch (ch) {
-			case '{':
-				return object();
-			case '[':
-				return array();
-			case '"':
-			case '\'':
-				return string();
-			case '-':
-				return number();
-			default:
-				return ch >= '0' && ch <= '9' ? number() : word();
-			}
-		};
-
-		// Return the parse function. It will have access to all of the above
-		// functions and variables.
-		function parseJS(source, start) {
-			var result;
-
-			text = source;
-			at = start || 0;
-			ch = ' ';
-			result = value();
-
-			if ( isNaN(start) ) {
-				white();
-				if (ch) {
-					error("Syntax error");
-				}
-				return result;
-			} else {
-				return { result : result, at : at - 1 };
-			}
-
-		}
-
-		return {
-			array: array,
-			error: error,
-			/**
-			 * Returns the index of the current character.
-			 * @returns {number} The current character's index.
-			 */
-			getIndex: function() {
-				return at - 1;
-			},
-			getCh: function() {
-				return ch;
-			},
-			init: function(source, iIndex) {
-				text = source;
-				at = iIndex || 0;
-				ch = ' ';
-			},
-			name: name,
-			next: next,
-			number: number,
-			parseJS: parseJS,
-			/**
-			 * Advances the index in the text to <code>iIndex</code>. Fails if the new index
-			 * is smaller than the previous index.
-			 *
-			 * @param {number} iIndex - the new index
-			 */
-			setIndex: function(iIndex) {
-				if (iIndex < at - 1) {
-					throw new Error("Must not set index " + iIndex
-						+ " before previous index " + (at - 1));
-				}
-				at = iIndex;
-				next();
-			},
-			string: string,
-			value: value,
-			white: white,
-			word: word
-		};
-	};
-
-	/**
-	 * Parse simple JS objects.
-	 *
-	 * A parser for JS object literals. This is different from a JSON parser, as it does not have
-	 * the JSON specification as a format description, but a subset of the JavaScript language.
-	 * The main difference is, that keys in objects do not need to be quoted and strings can also
-	 * be defined using apostrophes instead of quotation marks.
-	 *
-	 * The parser does not support functions, but only boolean, number, string, object and array.
-	 *
-	 * @param {string} The string containing the JS objects
-	 * @throws an error, if the string does not contain a valid JS object
-	 * @returns {object} the JS object
-	 *
-	 * @since 1.11
-	 */
-	jQuery.sap.parseJS = jQuery.sap._createJSTokenizer().parseJS;
-
-	/**
-	 * Merge the contents of two or more objects together into the first object.
-	 * Usage is the same as jQuery.extend, but Arguments that are null or undefined are NOT ignored.
-	 *
-	 * @since 1.26
-	 */
-	jQuery.sap.extend = function() {
-		var src, copyIsArray, copy, name, options, clone,
-			target = arguments[0] || {},
-			i = 1,
-			length = arguments.length,
-			deep = false;
-
-		// Handle a deep copy situation
-		if ( typeof target === "boolean" ) {
-			deep = target;
-
-			// skip the boolean and the target
-			target = arguments[ i ] || {};
-			i++;
-		}
-
-		// Handle case when target is a string or something (possible in deep copy)
-		if ( typeof target !== "object" && !jQuery.isFunction(target) ) {
-			target = {};
-		}
-
-		for ( ; i < length; i++ ) {
-
-			options = arguments[ i ];
-
-			// Extend the base object
-			for ( name in options ) {
-				src = target[ name ];
-				copy = options[ name ];
-
-				// Prevent never-ending loop
-				if ( target === copy ) {
-					continue;
-				}
-
-				// Recurse if we're merging plain objects or arrays
-				if ( deep && copy && ( jQuery.isPlainObject(copy) || (copyIsArray = Array.isArray(copy)) ) ) {
-					if ( copyIsArray ) {
-						copyIsArray = false;
-						clone = Array.isArray(src) ? src : [];
-
-					} else {
-						clone = src && jQuery.isPlainObject(src) ? src : {};
-					}
-
-					// Never move original objects, clone them
-					target[ name ] = jQuery.sap.extend( deep, clone, copy );
-
-				} else {
-					target[ name ] = copy;
-				}
-			}
-		}
-
-		// Return the modified object
-		return target;
-	};
-
 	return jQuery;
-
 });

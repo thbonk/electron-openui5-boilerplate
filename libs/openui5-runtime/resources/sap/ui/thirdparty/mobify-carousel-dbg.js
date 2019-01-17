@@ -497,42 +497,24 @@ Mobify.UI.Carousel = (function($, Utils) {
 
         $element.on('afterSlide', function(e, previousSlide, nextSlide) {
 
-	        // SAP MODIFICATION BEGIN
-	        // The event might bubble up from another carousel inside of this one.
-	        // In this case we ignore the event.
-	        if (e.target != this) {
-		        return;
-	        }
-	        // SAP MODIFICATION END
-
-            // SAP MODIFICATION BEGIN
-            // due to JIRA BGSOFUIRODOPI-828
-            // self.$items.eq(previousSlide - 1).removeClass(self._getClass('active'));
-            var bActive = self._getClass('active'),
-                sId = self.$element[0].id,
-                sPageIndicatorId = sId.replace(/(:|\.)/g,'\\$1') + '-pageIndicator',
-                oItems = self.$items, iStart, iStop;
-            if (previousSlide === 1 && nextSlide === oItems.length ||
-                previousSlide === oItems.length && nextSlide === 1) {
-                // the border use cases
-                iStart = Math.min(previousSlide, nextSlide);
-                iStop = Math.max(previousSlide, nextSlide);
-                for(var i = iStart; i < iStop - 1; i++) {
-                    jQuery(oItems[i]).removeClass(bActive);
-                }
+            // The event might bubble up from another carousel inside of this one.
+            // In this case we ignore the event.
+            if (e.target != this) {
+                return;
             }
-            // SAP MODIFICATION ENDS
 
+            var sId = self.$element[0].id,
+                sPageIndicatorId = sId.replace(/(:|\.)/g,'\\$1') + '-pageIndicator';
+
+            // self.$items.eq(previousSlide - 1).removeClass(self._getClass('active'));
             self.$items.eq(nextSlide - 1).addClass(self._getClass('active'));
 
             self.$element.find('#' + sPageIndicatorId + ' > [data-slide=\'' + previousSlide + '\']').removeClass(self._getClass('active'));
             self.$element.find('#' + sPageIndicatorId + ' > [data-slide=\'' + nextSlide + '\']').addClass(self._getClass('active'));
 
-            // SAP MODIFICATION BEGIN
             if (self.$items[nextSlide - 1]) {
                 this.setAttribute('aria-activedescendant', self.$items[nextSlide - 1].id);
             }
-            // SAP MODIFICATION ENDS
         });
 
 
@@ -550,7 +532,20 @@ Mobify.UI.Carousel = (function($, Utils) {
     // SAP MODIFICATION BEGIN
     Carousel.prototype.onTransitionComplete = function() {
         this.$inner.unbind(this._sTransitionEvents, this.onTransitionComplete);
+
+		var sActiveClass = this._getClass('active'),
+			i;
+
+        for (i = 0; i < this.$items.length; i++) {
+			if (i != this._index - 1) {
+				this.$items.eq(i).removeClass(sActiveClass);
+			}
+		}
+
         this.hasActiveTransition = false;
+
+		// Trigger afterSlide event
+		this.$element.trigger('afterSlide', [this._prevIndex, this._index]);
     };
     // SAP MODIFICATION ENDS
 
@@ -627,6 +622,7 @@ Mobify.UI.Carousel = (function($, Utils) {
 
         this._offset = transitionOffset;
         this._offsetDrag = 0;
+        this._prevIndex = this._index;
         this._index = newIndex;
         this.update();
 
@@ -634,12 +630,7 @@ Mobify.UI.Carousel = (function($, Utils) {
         if(bTriggerEvents) {
             // This indicate that transition has started
             this.hasActiveTransition = true;
-            $inner.bind(this._sTransitionEvents, this.onTransitionComplete.bind(this));
-        }
-
-        // Trigger afterSlide event
-        if(bTriggerEvents) {
-            $element.trigger('afterSlide', [index, newIndex]);
+            $inner.bind(this._sTransitionEvents, jQuery.proxy(this.onTransitionComplete, this));
         }
     };
 

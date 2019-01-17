@@ -2,7 +2,7 @@
 
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -75,6 +75,14 @@
 @_sap_ui_unified_CalendarLegend_sapUiCalLegDayType18: lighten(desaturate(@sapUiAccent8,30),25);
 @_sap_ui_unified_CalendarLegend_sapUiCalLegDayType19: lighten(desaturate(@sapUiAccent6,50), 20);
 @_sap_ui_unified_CalendarLegend_sapUiCalLegDayType20: lighten(saturate(@sapUiAccent5, 30),20);
+
+.sapUiUnifiedLegendWorkingDay > .sapUiUnifiedLegendSquare > .sapUiUnifiedLegendSquareColor {
+	background: lighten(@sapUiContentForegroundColor, 1);
+}
+
+.sapUiUnifiedLegendNonWorkingDay > .sapUiUnifiedLegendSquare > .sapUiUnifiedLegendSquareColor {
+	background: darken(@sapUiContentForegroundColor, 5);
+}
 /* END "CalendarLegend.less" */
 
 /* START "CalendarRow.less" */

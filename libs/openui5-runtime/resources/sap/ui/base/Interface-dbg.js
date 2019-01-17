@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -18,13 +18,12 @@ sap.ui.define([], function() {
 	 *        only the defined functions will be visible, no internals of the class can be accessed.
 	 *
 	 * @author Malte Wedel, Daniel Brinkmann
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @param {sap.ui.base.Object}
 	 *            oObject the instance that needs an interface created
 	 * @param {string[]}
 	 *            aMethods the names of the methods, that should be available on this interface
 	 *
-	 * @constructor
 	 * @public
 	 * @alias sap.ui.base.Interface
 	 */
@@ -64,7 +63,10 @@ sap.ui.define([], function() {
 		// PERFOPT: 'cache' length of aMethods to reduce # of resolutions
 		for (var i = 0, ml = aMethods.length; i < ml; i++) {
 			sMethodName = aMethods[i];
-			this[sMethodName] = fCreateDelegator(oObject, sMethodName);
+			//!oObject[sMethodName] for 'lazy' loading interface methods ;-)
+			if (!oObject[sMethodName] || typeof oObject[sMethodName] === "function") {
+				this[sMethodName] = fCreateDelegator(oObject, sMethodName);
+			}
 		}
 
 	};

@@ -1,17 +1,71 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.IconTabHeader.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/EnabledPropagator',
-		'sap/ui/core/delegate/ItemNavigation', 'sap/ui/core/IconPool', 'sap/ui/core/delegate/ScrollEnablement',
-		'./IconTabBarSelectList', './Button', './ResponsivePopover', './IconTabFilter'],
-	function(jQuery, library, Control, EnabledPropagator,
-				ItemNavigation, IconPool, ScrollEnablement,
-				IconTabBarSelectList, Button, ResponsivePopover, IconTabFilter) {
+
+sap.ui.define([
+	'./library',
+	'sap/ui/core/Control',
+	'sap/ui/core/EnabledPropagator',
+	'sap/ui/core/delegate/ItemNavigation',
+	'sap/ui/core/IconPool',
+	'sap/ui/core/delegate/ScrollEnablement',
+	'./IconTabBarSelectList',
+	'./Button',
+	'./ResponsivePopover',
+	'./IconTabFilter',
+	'sap/ui/Device',
+	'sap/ui/core/ResizeHandler',
+	'sap/ui/core/Icon',
+	'./IconTabBarDragAndDropUtil',
+	'./IconTabHeaderRenderer',
+	"sap/ui/thirdparty/jquery",
+	"sap/base/Log"
+],
+function(
+	library,
+	Control,
+	EnabledPropagator,
+	ItemNavigation,
+	IconPool,
+	ScrollEnablement,
+	IconTabBarSelectList,
+	Button,
+	ResponsivePopover,
+	IconTabFilter,
+	Device,
+	ResizeHandler,
+	Icon,
+	IconTabBarDragAndDropUtil,
+	IconTabHeaderRenderer,
+	jQuery,
+	Log
+) {
 	"use strict";
+
+	// shortcut for sap.m.touch
+	var touch = library.touch;
+
+	// shortcut for sap.m.ImageHelper
+	var ImageHelper = library.ImageHelper;
+
+	// shortcut for sap.m.PlacementType
+	var PlacementType = library.PlacementType;
+
+	// shortcut for sap.m.ButtonType
+	var ButtonType = library.ButtonType;
+
+	// shortcut for sap.m.BackgroundDesign
+	var BackgroundDesign = library.BackgroundDesign;
+
+	// shortcut for sap.m.IconTabHeaderMode
+	var IconTabHeaderMode = library.IconTabHeaderMode;
+
+	// shortcut for sap.m.IconTabDensityMode
+	var IconTabDensityMode = library.IconTabDensityMode;
 
 	/**
 	 * Constructor for a new IconTabHeader.
@@ -25,7 +79,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -65,7 +119,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			 *
 			 * @since 1.40
 			 */
-			mode : {type : "sap.m.IconTabHeaderMode", group : "Appearance", defaultValue : sap.m.IconTabHeaderMode.Standard},
+			mode : {type : "sap.m.IconTabHeaderMode", group : "Appearance", defaultValue : IconTabHeaderMode.Standard},
 
 			/**
 			 * Specifies if the overflow select list is displayed.
@@ -84,20 +138,38 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			 * Default is "Solid".
 			 * @since 1.44
 			 */
-			backgroundDesign : {type : "sap.m.BackgroundDesign", group : "Appearance", defaultValue : sap.m.BackgroundDesign.Solid},
+			backgroundDesign : {type : "sap.m.BackgroundDesign", group : "Appearance", defaultValue : BackgroundDesign.Solid},
 
 			/**
 			 * Specifies whether tab reordering is enabled. Relevant only for desktop devices.
+			 * The {@link sap.m.IconTabSeparator sap.m.IconTabSeparator} cannot be dragged  and dropped
+			 * Items can be moved around {@link sap.m.IconTabSeparator sap.m.IconTabSeparator}
 			 * @since 1.46
 			 */
-			enableTabReordering : {type : "boolean", group : "Behavior", defaultValue : false}
+			enableTabReordering : {type : "boolean", group : "Behavior", defaultValue : false},
+
+			/**
+			 * Specifies the visual density mode of the tabs.
+			 *
+			 * The values that can be applied are <code>Cozy</code>, <code>Compact</code> and <code>Inherit</code>.
+			 * <code>Cozy</code> and <code>Compact</code> render the control in one of these modes independent of the global density settings.
+			 * The <code>Inherit</code> value follows the global density settings which are applied.
+			 * For compatibility reasons, the default value is <code>Cozy</code>.
+			 * @since 1.56
+			 */
+			tabDensityMode :{type : "sap.m.IconTabDensityMode", group : "Appearance", defaultValue : IconTabDensityMode.Cozy}
 		},
 		aggregations : {
 
 			/**
 			 * The items displayed in the IconTabHeader.
 			 */
-			items : {type : "sap.m.IconTab", multiple : true, singularName : "item"}
+			items : {type : "sap.m.IconTab", multiple : true, singularName : "item", dnd : {draggable: true, droppable: true, layout: "Horizontal"} },
+
+			/**
+			 * Internal aggregation for managing the overflow button.
+			 */
+			_overflowButton : {type : "sap.m.Button", multiple : false, visibility : "hidden"}
 		},
 		events : {
 
@@ -124,15 +196,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	}});
 
 	EnabledPropagator.apply(IconTabHeader.prototype, [true]);
-
-	IconTabHeader.ANIMATION_DURATION = sap.ui.getCore().getConfiguration().getAnimation() ? 200 : 0;
 	IconTabHeader.SCROLL_STEP = 264; // how many pixels to scroll with every overflow arrow click
 
 	IconTabHeader.prototype.init = function() {
 		this._bPreviousScrollForward = false; // remember the item overflow state
 		this._bPreviousScrollBack = false;
 		this._iCurrentScrollLeft = 0;
-		this._bRtl = sap.ui.getCore().getConfiguration().getRTL();
 
 		this.startScrollX = 0;
 		this.startTouchX = 0;
@@ -148,6 +217,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			sapnext : ["alt", "meta"],
 			sapprevious : ["alt", "meta"]
 		});
+
 		this.addDelegate(this._oItemNavigation);
 
 		this._oScroller = new ScrollEnablement(this, this.getId() + "-head", {
@@ -193,38 +263,57 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @private
 	 */
 	IconTabHeader.prototype._getOverflowButton = function () {
-		if (!this._oOverflowButton) {
-			this._oOverflowButton = new Button({
+		var oOverflowButton = this.getAggregation("_overflowButton");
+
+		if (!oOverflowButton) {
+			oOverflowButton = new Button({
 				id: this.getId() + '-overflow',
-				icon: "sap-icon://overflow",
-				type: sap.m.ButtonType.Transparent,
+				icon: "sap-icon://slim-arrow-down",
+				type: ButtonType.Transparent,
 				press: this._overflowButtonPress.bind(this)
 			});
+			oOverflowButton.addEventDelegate(this._onOverflowButtonEventDelegate);
+			this.setAggregation("_overflowButton", oOverflowButton);
 		}
 
-		return this._oOverflowButton;
+		return oOverflowButton;
 	};
 
 	/**
-	 * Handles overrflow button "press" event
+	 * Handles overflow button "press" event
 	 * @private
 	 */
 	IconTabHeader.prototype._overflowButtonPress = function (event) {
-
 		if (!this._oPopover) {
 			this._oPopover = new ResponsivePopover({
 					showArrow: false,
 					showHeader: false,
-					placement: sap.m.PlacementType.Vertical,
+					placement: PlacementType.Vertical,
 					offsetX: 0,
 					offsetY: 0
 				}
 			).addStyleClass('sapMITBPopover');
 
-			if (sap.ui.Device.system.phone) {
+			if (Device.system.phone) {
 				this._oPopover._oControl.addButton(this._createPopoverCloseButton());
 			}
 			this.addDependent(this._oPopover);
+
+			//This overrides the popover _adaptPositionParams function for placing the popover
+			//over the right bottom corner of the button. This change is required by the visual spec.
+			this._oPopover._oControl._adaptPositionParams =  function () {
+				var bIsCompact = jQuery("body").hasClass("sapUiSizeCompact");
+
+				this._arrowOffset = 0;
+
+				if (bIsCompact) {
+					this._offsets = ["0 0", "0 0", "0 2", "0 0"];
+				} else {
+					this._offsets = ["0 0", "0 0", "0 3", "0 0"];
+				}
+				this._myPositions = ["end bottom", "begin top", "end top", "end top"];
+				this._atPositions = ["end top", "end top", "end bottom", "begin top"];
+			};
 		}
 
 		var oSelectList = this._getSelectList();
@@ -259,7 +348,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 */
 	IconTabHeader.prototype._closeOverflow = function () {
 
-		if (!sap.ui.Device.system.desktop) {
+		if (!Device.system.desktop) {
 			this._oPopover.close();
 		}
 
@@ -285,7 +374,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			oSelectList = this._getSelectList(),
 			aTabFilters = this.getTabFilters();
 
-		oSelectList.removeAllItems();
+		oSelectList.destroyItems();
 
 		for (var i = 0; i < aTabFilters.length; i++) {
 			oTabFilter = aTabFilters[i];
@@ -334,7 +423,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		for (var i = 0; i < aItems.length; i++) {
 			oItem = aItems[i];
 
-			if (oItem instanceof sap.m.IconTabFilter == false) {
+			if (oItem instanceof IconTabFilter == false) {
 				continue;
 			}
 
@@ -381,7 +470,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		var aTabFilters = [];
 
 		aItems.forEach(function(oItem) {
-			if (oItem instanceof sap.m.IconTabFilter) {
+			if (oItem instanceof IconTabFilter) {
 				aTabFilters.push(oItem);
 			}
 		});
@@ -409,7 +498,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		}
 
 		if (this._sResizeListenerId) {
-			sap.ui.core.ResizeHandler.deregister(this._sResizeListenerId);
+			ResizeHandler.deregister(this._sResizeListenerId);
 			this._sResizeListenerId = null;
 		}
 		if (this._aTabKeys) {
@@ -420,10 +509,55 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			this._oPopover.destroy();
 			this._oPopover = null;
 		}
+	};
 
-		if (this._oOverflowButton) {
-			this._oOverflowButton.destroy();
-			this._oOverflowButton = null;
+	/**
+	 * Handles onLongDragOver of overflow button.
+	 * @private
+	 */
+	IconTabHeader.prototype._handleOnLongDragOver = function() {
+		if (!this._oPopover || !this._oPopover.isOpen()) {
+			this._overflowButtonPress();
+		}
+	};
+
+	/**
+	 * Handles onDragOver of the overflow button.
+	 * @private
+	 * @param {jQuery.Event} oEvent The jQuery drag over event
+	 */
+	IconTabHeader.prototype._handleOnDragOver = function(oEvent) {
+		this._getOverflowButton().addStyleClass("sapMBtnDragOver");
+		oEvent.preventDefault(); // allow drop, so that the cursor is correct
+	};
+
+	/**
+	 * Handles onDrop of the overflow button.
+	 * @private
+	 */
+	IconTabHeader.prototype._handleOnDrop = function() {
+		this._getOverflowButton().removeStyleClass("sapMBtnDragOver");
+	};
+
+	/**
+	 * Handles onDragLeave of the overflow button.
+	 * @private
+	 */
+	IconTabHeader.prototype._handleOnDragLeave = function() {
+		this._getOverflowButton().removeStyleClass("sapMBtnDragOver");
+	};
+
+	/**
+	 * Sets or remove Drag and Drop configurations.
+	 * @private
+	 */
+	IconTabHeader.prototype._setsDragAndDropConfigurations = function() {
+		if (!this.getEnableTabReordering() && this.getDragDropConfig().length) {
+			//Destroying Drag&Drop aggregation
+			this.destroyDragDropConfig();
+		} else if (this.getEnableTabReordering() && !this.getDragDropConfig().length) {
+			//Adding Drag&Drop configuration to the dragDropConfig aggregation if needed
+			IconTabBarDragAndDropUtil.setDragDropAggregations(this, "Horizontal");
 		}
 	};
 
@@ -434,9 +568,16 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			oParent = this.getParent(),
 			bIsParentIconTabBar = oParent instanceof sap.m.IconTabBar,
 			bIsParentToolHeader = oParent && oParent.getMetadata().getName() == 'sap.tnt.ToolHeader';
+			this._bRtl = sap.ui.getCore().getConfiguration().getRTL();
+			this._onOverflowButtonEventDelegate = {
+				onlongdragover: this._handleOnLongDragOver.bind(this),
+				ondragover: this._handleOnDragOver.bind(this),
+				ondragleave: this._handleOnDragLeave.bind(this),
+				ondrop: this._handleOnDrop.bind(this)
+			};
 
 		if (this._sResizeListenerId) {
-			sap.ui.core.ResizeHandler.deregister(this._sResizeListenerId);
+			ResizeHandler.deregister(this._sResizeListenerId);
 			this._sResizeListenerId = null;
 		}
 
@@ -479,13 +620,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		}
 
 		this._isTouchScrollingDisabled = this.isTouchScrollingDisabled();
-		this._oScroller.setHorizontal(!this._isTouchScrollingDisabled);
+		this._oScroller.setHorizontal(!this._isTouchScrollingDisabled && (!this.getEnableTabReordering() || !Device.system.desktop));
 
-		// Deregister resize event before re-rendering
-		if (this._sResizeListenerNoFlexboxSupportId) {
-			sap.ui.core.ResizeHandler.deregister(this._sResizeListenerNoFlexboxSupportId);
-			this._sResizeListenerNoFlexboxSupportId = null;
-		}
+		this._setsDragAndDropConfigurations();
 	};
 
 	/**
@@ -535,13 +672,17 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 */
 	IconTabHeader.prototype.setSelectedItem = function(oItem, bAPIchange) {
 
-		if (!oItem || !oItem.getEnabled()) {
+		if (!oItem) {
 
 			if (this.oSelectedItem) {
 				this.oSelectedItem.$().removeClass("sapMITBSelected");
 				this.oSelectedItem = null;
 			}
 
+			return this;
+		}
+
+		if (!oItem.getEnabled()) {
 			return this;
 		}
 
@@ -704,7 +845,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 		// find a collection of all tabs
 		aItems.forEach(function(oItem) {
-			if (oItem instanceof sap.m.IconTabFilter) {
+			if (oItem instanceof IconTabFilter) {
 				var oItemDomRef = that.getFocusDomRef(oItem);
 				jQuery(oItemDomRef).attr("tabindex", "-1");
 				aTabDomRefs.push(oItemDomRef);
@@ -725,10 +866,32 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		//Reinitialize the ItemNavigation after rendering
 		this._oItemNavigation.setRootDomRef(oHeadDomRef);
 		this._oItemNavigation.setItemDomRefs(aTabDomRefs);
+		this._oItemNavigation.setPageSize(aTabDomRefs.length); // set the page size equal to the tab number so when we press pageUp/pageDown to focus first/last tab
 		this._oItemNavigation.setSelectedIndex(iSelectedDomIndex);
 	};
 
+	IconTabHeader.prototype.onThemeChanged = function() {
+		this._applyTabDensityMode();
+	};
+
+	IconTabHeader.prototype._applyTabDensityMode = function() {
+		var sTabDensityMode = this.getTabDensityMode();
+		this.$().removeClass("sapUiSizeCompact");
+
+		switch (sTabDensityMode) {
+			case IconTabDensityMode.Compact:
+				this.$().addClass("sapUiSizeCompact");
+				break;
+			case  IconTabDensityMode.Inherit:
+				if (this.$().closest(".sapUiSizeCompact").length) {
+					this.$().addClass("sapUiSizeCompact");
+				}
+				break;
+		}
+	};
+
 	IconTabHeader.prototype.onAfterRendering = function() {
+		this._applyTabDensityMode();
 		// initialize scrolling
 		if (this._oScroller) {
 			this._oScroller.setIconTabBar(this, jQuery.proxy(this._afterIscroll, this), jQuery.proxy(this._scrollPreparation, this));
@@ -744,7 +907,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 					.attr({ 'aria-selected': true });
 		}
 
-		jQuery.sap.delayedCall(350, this, "_checkOverflow");
+		setTimeout(this["_checkOverflow"].bind(this), 350);
 
 		// scroll to selected item if it is out of screen and we render the control the first time
 		if (this.oSelectedItem) {
@@ -759,15 +922,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		}
 
 		//listen to resize
-		this._sResizeListenerId = sap.ui.core.ResizeHandler.register(this.getDomRef(),  jQuery.proxy(this._fnResize, this));
-
-		// Change ITB content height on resize when ITB stretchContentHeight is set to true (IE9 fix)
-		if (!jQuery.support.newFlexBoxLayout &&
-			bIsParentIconTabBar &&
-			oParent.getStretchContentHeight()) {
-			this._sResizeListenerNoFlexboxSupportId = sap.ui.core.ResizeHandler.register(oParent.getDomRef(), jQuery.proxy(this._fnResizeNoFlexboxSupport, this));
-			this._fnResizeNoFlexboxSupport();
-		}
+		this._sResizeListenerId = ResizeHandler.register(this.getDomRef(),  jQuery.proxy(this._fnResize, this));
 
 		this._bCheckIfIntoView = true;
 	};
@@ -786,7 +941,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			var sKey = oItem.getKey();
 			// check if key is a duplicate
 			if (this._aTabKeys.indexOf(sKey) !== -1) {
-				jQuery.sap.log.warning("sap.m.IconTabHeader: duplicate key '" + sKey + "' inside the IconTabFilter. Please use unique keys.");
+				Log.warning("sap.m.IconTabHeader: duplicate key '" + sKey + "' inside the IconTabFilter. Please use unique keys.");
 			}
 			this._aTabKeys.push(sKey);
 		}
@@ -798,7 +953,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			var sKey = oItem.getKey();
 			//check if key is a duplicate
 			if (this._aTabKeys.indexOf(sKey) !== -1) {
-				jQuery.sap.log.warning("sap.m.IconTabHeader: duplicate key '" + sKey + "' inside the IconTabFilter. Please use unique keys.");
+				Log.warning("sap.m.IconTabHeader: duplicate key '" + sKey + "' inside the IconTabFilter. Please use unique keys.");
 			}
 			this._aTabKeys.push(sKey);
 		}
@@ -807,7 +962,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 	IconTabHeader.prototype.removeAllItems = function() {
 		this._aTabKeys = [];
-		this.removeAllAggregation("items");
+		return this.removeAllAggregation("items");
 	};
 
 	IconTabHeader.prototype.removeItem = function(oItem) {
@@ -835,14 +990,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 		var oItem = Control.prototype.removeAggregation.apply(this, arguments);
 
-		// don't change selected item while drag-drop
-		if (this._oDragContext) {
+		if (bSuppressInvalidate) {
 			return oItem;
 		}
 
 		if (oItem && oItem == this.oSelectedItem && sAggregationName == 'items') {
 
-			var iIndexOf = jQuery.inArray(oItem, aItems);
+			var iIndexOf = (aItems ? Array.prototype.indexOf.call(aItems, oItem) : -1);
 			aItems = this.getTabFilters();
 
 			iIndexOf = Math.max(0, Math.min(iIndexOf, aItems.length - 1));
@@ -900,7 +1054,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @private
 	 */
 	IconTabHeader.prototype.isInlineMode = function () {
-		return this._bTextOnly && this.getMode() == sap.m.IconTabHeaderMode.Inline;
+		return this._bTextOnly && this.getMode() == IconTabHeaderMode.Inline;
 	};
 
 
@@ -1026,13 +1180,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 		if (sName === "left") {
 			if (!this._oArrowLeft) {
-				this._oArrowLeft = sap.m.ImageHelper.getImageControl(this.getId() + "-arrowScrollLeft", this._oArrowLeft, this, mProperties, aCssClassesToAddLeft);
+				this._oArrowLeft = ImageHelper.getImageControl(this.getId() + "-arrowScrollLeft", this._oArrowLeft, this, mProperties, aCssClassesToAddLeft);
 			}
 			return this._oArrowLeft;
 		}
 		if (sName === "right") {
 			if (!this._oArrowRight) {
-				this._oArrowRight = sap.m.ImageHelper.getImageControl(this.getId() + "-arrowScrollRight", this._oArrowRight, this, mProperties, aCssClassesToAddRight);
+				this._oArrowRight = ImageHelper.getImageControl(this.getId() + "-arrowScrollRight", this._oArrowRight, this, mProperties, aCssClassesToAddRight);
 			}
 			return this._oArrowRight;
 		}
@@ -1083,20 +1237,17 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	IconTabHeader.prototype._handleActivation = function(oEvent) {
 		var sTargetId = oEvent.target.id,
 			oControl = oEvent.srcControl,
-			sControlId;
-
-		if (this._oDragContext && this._oDragContext.movedTabIndexes.length) {
-			return;
-		}
+			sControlId,
+			$target = jQuery(oEvent.target);
 
 		if (oControl instanceof  Button) {
 			return;
 		}
 
-		var $sTargetId = jQuery.sap.byId(sTargetId);
+		var $sTargetId = jQuery(document.getElementById(sTargetId));
 		/*eslint-disable no-empty */
 		// TODO check better implementation
-		if (jQuery.inArray(this.$("content")[0], $sTargetId.parents()) > -1) {
+		if ($sTargetId.parents() && Array.prototype.indexOf.call($sTargetId.parents(), this.$("content")[0]) > -1) {
 		/*eslint-enable no-empty */
 			//do nothing because element is inside content
 		} else {
@@ -1104,21 +1255,21 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				var sId = this.getId();
 
 				// For items: do not navigate away! Stay on the page and handle the click in-place. Right-click + "Open in new Tab" still works.
-				// For scroll buttons: Prevent IE from firing beforeunload event -> see CSN 4378288 2012
+				// For scroll buttons: Prevent IE from firing beforeunload event -> see CSN 4378288 2012// TODO remove after 1.62 version
 				oEvent.preventDefault();
 
 				//on mobile devices click on arrows has no effect
-				if (sTargetId == sId + "-arrowScrollLeft" && sap.ui.Device.system.desktop) {
+				if (sTargetId == sId + "-arrowScrollLeft" && Device.system.desktop) {
 					var iScrollLeft = this._oScroller.getScrollLeft() - IconTabHeader.SCROLL_STEP;
 					if (iScrollLeft < 0) {
 						iScrollLeft = 0;
 					}
 					// execute manual scrolling with iScroll's scrollTo method (delayedCall 0 is needed for positioning glitch)
 					this._scrollPreparation();
-					jQuery.sap.delayedCall(0, this._oScroller, "scrollTo", [iScrollLeft, 0, 500]);
-					jQuery.sap.delayedCall(500, this, "_afterIscroll");
+					setTimeout(this._oScroller["scrollTo"].bind(this._oScroller, iScrollLeft, 0, 500), 0);
+					setTimeout(this["_afterIscroll"].bind(this), 500);
 
-				} else if (sTargetId == sId + "-arrowScrollRight" && sap.ui.Device.system.desktop) {
+				} else if (sTargetId == sId + "-arrowScrollRight" && Device.system.desktop) {
 					var iScrollLeft = this._oScroller.getScrollLeft() + IconTabHeader.SCROLL_STEP;
 					var iContainerWidth = this.$("scrollContainer").width();
 					var iHeadWidth = this.$("head").width();
@@ -1127,12 +1278,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 					}
 					// execute manual scrolling with iScroll's scrollTo method (delayedCall 0 is needed for positioning glitch)
 					this._scrollPreparation();
-					jQuery.sap.delayedCall(0, this._oScroller, "scrollTo", [iScrollLeft, 0, 500]);
-					jQuery.sap.delayedCall(500, this, "_afterIscroll");
+					setTimeout(this._oScroller["scrollTo"].bind(this._oScroller, iScrollLeft, 0, 500), 0);
+					setTimeout(this["_afterIscroll"].bind(this), 500);
 				} else {
 
 					// should be one of the items - select it
-					if (oControl instanceof sap.ui.core.Icon || oControl instanceof sap.m.Image) {
+					if ($target.hasClass('sapMITBFilterIcon') || $target.hasClass('sapMITBCount') || $target.hasClass('sapMITBText') || $target.hasClass('sapMITBTab') || $target.hasClass('sapMITBContentArrow') || $target.hasClass('sapMITBSep') || $target.hasClass('sapMITBSepIcon')) {
 						// click on icon: fetch filter instead
 						sControlId = oEvent.srcControl.getId().replace(/-icon$/, "");
 						oControl = sap.ui.getCore().byId(sControlId);
@@ -1186,14 +1337,15 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 					iNewScrollLeft += iItemPosLeft;
 				} else { // right side: make this the last item
 					iNewScrollLeft += Math.min(iItemPosLeft, iItemPosLeft + iItemWidth - iContainerWidth);
+					iNewScrollLeft = Math.round(iNewScrollLeft);
 				}
 
 				// execute manual scrolling with scrollTo method (delayedCall 0 is needed for positioning glitch)
 				this._scrollPreparation();
 				// store current scroll state to set it after rerendering
 				this._iCurrentScrollLeft = iNewScrollLeft;
-				jQuery.sap.delayedCall(0, this._oScroller, "scrollTo", [iNewScrollLeft, 0, iDuration]);
-				jQuery.sap.delayedCall(iDuration, this, "_afterIscroll");
+				setTimeout(this._oScroller["scrollTo"].bind(this._oScroller, iNewScrollLeft, 0, iDuration), 0);
+				setTimeout(this["_afterIscroll"].bind(this), iDuration);
 			}
 		}
 
@@ -1212,8 +1364,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 		var oDomRef = this.getDomRef("head");
 		var iScrollLeft = oDomRef.scrollLeft;
-		var bIsIE = sap.ui.Device.browser.internet_explorer || sap.ui.Device.browser.edge;
-		if (!bIsIE && this._bRtl) {
+		var bIsIE = Device.browser.msie || Device.browser.edge;// TODO remove after 1.62 version
+		if (!bIsIE && this._bRtl) {// TODO remove after 1.62 version
 			iDelta = -iDelta;
 		} // RTL lives in the negative space
 		var iScrollTarget = iScrollLeft + iDelta;
@@ -1229,7 +1381,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		this._$bar && this._$bar.toggleClass("sapMITBScrolling", false);
 		this._$bar = null;
 		//update the arrows on desktop
-		if (sap.ui.Device.system.desktop) {
+		if (Device.system.desktop) {
 			this._checkOverflow();
 		}
 	};
@@ -1271,19 +1423,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		}
 
 		this._setTabsVisibility();
-	};
-
-	/**
-	 * Resize handler for ITB content inside FixFlex layout (IE9 fix)
-	 * Calculate height on the content
-	 * @private
-	 */
-	IconTabHeader.prototype._fnResizeNoFlexboxSupport = function() {
-		var $content = this.getParent().$("containerContent"),
-			iDiffOuterInnerHeight = $content.outerHeight(true) - $content.height();
-
-		// calculate and set content div height
-		$content.height(this.getParent().$().height() - $content.position().top - iDiffOuterInnerHeight);
 	};
 
 	/**
@@ -1343,8 +1482,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			iContainerWidth = this.$("scrollContainer").width(),
 			$head = this.$('head'),
 			iHeadPaddingWidth = $head.innerWidth() - $head.width(),
-			leftMargin = $tab.css('margin-left'),
-			iItemWidth = $tab.outerWidth() + parseFloat(leftMargin),
+			leftMargin = $tab.css('padding-left'),
+			iItemWidth = $tab.width() + parseFloat(leftMargin),
 			iItemPosLeft = Math.ceil($tab.position().left - iHeadPaddingWidth / 2);
 
 		if (iItemPosLeft - iScrollLeft < 0 ||
@@ -1388,14 +1527,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		return true;
 	};
 
-	IconTabHeader.prototype.onExit = function() {
-		// Deregister resize event before re-rendering
-		if (this._sResizeListenerNoFlexboxSupportId) {
-			sap.ui.core.ResizeHandler.deregister(this._sResizeListenerNoFlexboxSupportId);
-			this._sResizeListenerNoFlexboxSupportId = null;
-		}
-	};
-
 	/**
 	 * @overwrite
 	 */
@@ -1432,20 +1563,15 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		// store & init touch state
 		this._iActiveTouch = oTargetTouch.identifier;
 		this._iTouchStartPageX = oTargetTouch.pageX;
+		this._iTouchStartPageY = oTargetTouch.pageY;
 		this._iTouchDragX = 0;
+		this._iTouchDragY = 0;
 
 		var $target = jQuery(oEvent.target);
 
 		// prevent text selecting when click on the scrolling arrows
 		if ($target.hasClass('sapMITBArrowScroll')) {
 			oEvent.preventDefault();
-		}
-
-		//if the browser is IE prevent click events on dom elements in the tab, because the IE will focus them, not the tab itself.
-		if (sap.ui.Device.browser.internet_explorer) {
-			if ($target.hasClass('sapMITBFilterIcon') || $target.hasClass('sapMITBCount') || $target.hasClass('sapMITBText') || $target.hasClass('sapMITBTab') || $target.hasClass('sapMITBContentArrow') || $target.hasClass('sapMITBSep') || $target.hasClass('sapMITBSepIcon')) {
-				oEvent.preventDefault();
-			}
 		}
 	};
 
@@ -1461,7 +1587,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			return;
 		}
 
-		var oTouch = sap.m.touch.find(oEvent.changedTouches, this._iActiveTouch);
+		var oTouch = touch.find(oEvent.changedTouches, this._iActiveTouch);
 
 		// check for valid changes
 		if (!oTouch || oTouch.pageX === this._iTouchStartPageX) {
@@ -1470,7 +1596,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 		// sum up movement to determine in touchend event if selection should be executed
 		this._iTouchDragX += Math.abs(this._iTouchStartPageX - oTouch.pageX);
+		this._iTouchDragY += Math.abs(this._iTouchStartPageY - oTouch.pageY);
 		this._iTouchStartPageX = oTouch.pageX;
+		this._iTouchStartPageY = oTouch.pageY;
 	};
 
 	/**
@@ -1486,7 +1614,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		}
 
 		// suppress selection if there ware a drag (moved more than 5px on desktop or 20px on others)
-		if (this._scrollable && this._iTouchDragX > (sap.ui.Device.system.desktop ? 5 : 15)) {
+		var iMaxMove = Device.system.desktop ? 5 : 15;
+
+
+		if ((this._scrollable && this._iTouchDragX > iMaxMove) ||
+			this._iTouchDragY > iMaxMove) {
 			return;
 		}
 
@@ -1529,206 +1661,116 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	/* =========================================================== */
 
 	/**
-	 * Listens to the mousedown events for starting tab drag & drop.
+	 * Handles drop event for drag &  drop functionality in sap.m.IconTabHeader
+	 * @param {jQuery.Event} oEvent
 	 * @private
 	 */
-	IconTabHeader.prototype.onmousedown = function(oEvent) {
+	IconTabHeader.prototype._handleDragAndDrop = function (oEvent) {
+		var sDropPosition = oEvent.getParameter("dropPosition"),
+			oDraggedControl = oEvent.getParameter("draggedControl"),
+			oDroppedControl = oEvent.getParameter("droppedControl"),
+			isParentSelectList = oDraggedControl.getParent().getMetadata().getName() === "sap.m.IconTabBarSelectList";
+
+		//drag and drop is between overflow list and header
+		if (isParentSelectList) {
+			this._handleDragAndDropBetweenHeaderAndList(sDropPosition, oDroppedControl, oDraggedControl);
+		} else {
+			IconTabBarDragAndDropUtil.handleDrop(this, sDropPosition, oDraggedControl, oDroppedControl, false);
+		}
+
+		this._initItemNavigation();
+		oDraggedControl.$().focus();
+	};
+
+	/**
+	 * Handles drop event for drag &  drop between sap.m.IconTabHeader and sap.m.IconTabBarSelectList.
+	 * @param {string} sDropPosition position where the control will be dropped (e.g. Before/After)
+	 * @param {object} oDraggedControl item that is dragged
+	 * @param {object} oDroppedControl item that the dragged control will be dropped on
+	 * @private
+	 */
+	IconTabHeader.prototype._handleDragAndDropBetweenHeaderAndList = function (sDropPosition, oDroppedControl, oDraggedControl) {
+		var oSelectList = this._getSelectList(),
+			oDraggedAndDroppedItemFromSelectList = IconTabBarDragAndDropUtil.getDraggedDroppedItemsFromList(oSelectList.getAggregation("items"), oDraggedControl, oDroppedControl);
+			if (!oDraggedAndDroppedItemFromSelectList) {
+
+				return;
+			}
+			IconTabBarDragAndDropUtil.handleDrop(this, sDropPosition, oDraggedControl._tabFilter, oDroppedControl, false);
+			IconTabBarDragAndDropUtil.handleDrop(oSelectList, sDropPosition, oDraggedControl, oDraggedAndDroppedItemFromSelectList.oDroppedControlFromList, false);
+			oSelectList._initItemNavigation();
+	};
+	/* =========================================================== */
+	/*           end: tab drag-drop		                           */
+	/* =========================================================== */
+
+	/* =========================================================== */
+	/*           start: tab keyboard handling - drag-drop          */
+	/* =========================================================== */
+
+	/**
+	 * Moves a tab by a specific key code
+	 *
+	 * @param {object} oTab The event object
+	 * @param {number} iKeyCode Key code
+	 * @private
+	 */
+	IconTabHeader.prototype._moveTab = function (oTab, iKeyCode) {
+		var bResult = IconTabBarDragAndDropUtil.moveItem.call(this, oTab, iKeyCode);
+		this._initItemNavigation();
+
+		if (bResult) {
+			this._scrollIntoView(oTab, 0);
+		}
+	};
+
+	/**
+	 * Handle keyboard drag&drop
+	 * @param {jQuery.Event} oEvent
+	 * @private
+	 */
+	IconTabHeader.prototype.ondragrearranging = function (oEvent) {
 		if (!this.getEnableTabReordering()) {
 			return;
 		}
 
-		var bIsTouchMode = !!oEvent.originalEvent["touches"];
-		if (bIsTouchMode) {
-			return;
-		}
-
-		var $target = jQuery(oEvent.target);
-
-		// start drag and drop
-		var $tab = $target.closest(".sapMITBFilter, .sapMITBAll");
-		if ($tab.length === 1) {
-			this._onTabMoveStart($tab, oEvent);
-		}
-	};
-
-	IconTabHeader.prototype._onTabMoveStart = function($tab, oEvent) {
-		var iIndex = this._getItemIndex($tab),
-			$children = this.$().find('.sapMITBHead').children(),
-			iWidth = $tab.outerWidth(true),
-			$document = jQuery(document);
-
-		oEvent.preventDefault();
-		$tab.zIndex(this.$().zIndex() + 10);
-
-		this._oDragContext = {
-			index: jQuery.inArray($tab[0], $children),
-			tabIndex : iIndex,
-			startX: oEvent.pageX,
-			$tab: $tab,
-			tab: this.getItems()[iIndex],
-			tabWidth: iWidth,
-			tabCenter: $tab.position().left + iWidth / 2,
-			movedTabIndexes: []
-		};
-
-		this._oScroller.setHorizontal(false);
-
-		$document.mousemove(jQuery.proxy(this._onTabMove, this));
-		$document.mouseup(jQuery.proxy(this._onTabMoved, this));
-	};
-
-	IconTabHeader.prototype._onTabMove = function(oEvent) {
-		var oDragContext = this._oDragContext;
-		if (!oDragContext) {
-			return;
-		}
-
-		var iPageX = oEvent.pageX,
-			iDx = iPageX - oDragContext.startX,
-			$child,
-			iX,
-			iOffset,
-			bReorder,
-			$children = this.$().find('.sapMITBHead').children(),
-			aMovedTabIndexes = oDragContext.movedTabIndexes,
-			bRTL = sap.ui.getCore().getConfiguration().getRTL();
-
-		oDragContext.$tab.css({left: iDx});
-
-		for (var i = 0; i < $children.length; i++) {
-
-			if (i == oDragContext.index) {
-				continue;
-			}
-
-			$child = jQuery($children[i]);
-			iX = $child.position().left;
-			iOffset = parseFloat($child.css('left'));
-
-			if (!isNaN(iOffset)) {
-				iX -= iOffset;
-			}
-
-			if (i < oDragContext.index != bRTL) {
-				bReorder = iX + $child.outerWidth(true) > oDragContext.tabCenter + iDx;
-				this._onAnimateTab($child, oDragContext.tabWidth, bReorder, aMovedTabIndexes, i);
-			} else {
-				bReorder = iX < oDragContext.tabCenter + iDx;
-				this._onAnimateTab($child, -oDragContext.tabWidth, bReorder, aMovedTabIndexes, i);
-			}
-		}
-	};
-
-	IconTabHeader.prototype._onAnimateTab = function($child, iDragOffset, bReorder, aMovedTabIndexes, iIndex) {
-		var iIndexInArray = jQuery.inArray(iIndex, aMovedTabIndexes),
-			bInArray = iIndexInArray != -1;
-
-		if (bReorder && !bInArray) {
-			$child.stop(true, true);
-			$child.animate({left : iDragOffset}, IconTabHeader.ANIMATION_DURATION);
-			aMovedTabIndexes.push(iIndex);
-		} else if (!bReorder && bInArray) {
-			$child.stop(true, true);
-			$child.animate({left : 0}, IconTabHeader.ANIMATION_DURATION);
-			aMovedTabIndexes.splice(iIndexInArray, 1);
-		}
-	};
-
-	IconTabHeader.prototype._onTabMoved = function(oEvent) {
-		var oDragContext = this._oDragContext;
-		if (!oDragContext) {
-			return;
-		}
-
-		var aMovedTabIndexes = oDragContext.movedTabIndexes;
-		if (aMovedTabIndexes.length > 0) {
-			var $tab = oDragContext.$tab,
-				$children = this.$().find('.sapMITBHead').children(),
-				iNewIndex = aMovedTabIndexes[aMovedTabIndexes.length - 1],
-				iNewTabIndex = this._getItemIndex(jQuery($children[iNewIndex]));
-
-			this.removeAggregation('items', oDragContext.tab, true);
-			this.insertAggregation('items', oDragContext.tab, iNewTabIndex, true);
-
-			if (iNewIndex > oDragContext.index) {
-				$tab.insertAfter(jQuery($children[iNewIndex]));
-			} else {
-				$tab.insertBefore(jQuery($children[iNewIndex]));
-			}
-
-			this._initItemNavigation();
-			jQuery.sap.delayedCall(100, this, function () {
-				$tab.focus();
-			});
-		}
-
-		this._stopMoving();
-	};
-
-	IconTabHeader.prototype._stopMoving = function() {
-		var oDragContext = this._oDragContext,
-			$tab = oDragContext.$tab,
-			$children = this.$().find('.sapMITBHead').children();
-
-		$tab.css('z-index', '');
-		$children.stop(true, true);
-		$children.css('left', '');
-
-		this._oDragContext = null;
-
-		var $document = jQuery(document);
-
-		$document.off("mousemove", this._onTabMove);
-		$document.off("mouseup", this._onTabMoved);
-
-		this._oScroller.setHorizontal(true);
-		this._enableTextSelection();
-	};
-
-	IconTabHeader.prototype._getItemIndex = function($tab) {
-
-		var sId = $tab.attr('id'),
-			aTabs = this.getItems();
-
-		for (var i = 0; i < aTabs.length; i++) {
-			if (aTabs[i].getId() == sId) {
-				return i;
-			}
-		}
-
-		return -1;
+		var oTab = oEvent.srcControl;
+		this._moveTab(oTab, oEvent.keyCode);
+		oTab.$().focus();
 	};
 
 	/**
-	 * Disables text selection on the document (disabled for Dnd).
-	 * @private
+	 * Moves tab on first position
+	 * Ctrl + Home
+	 * @param {jQuery.Event} oEvent
 	 */
-	IconTabHeader.prototype._disableTextSelection = function (oElement) {
-		// prevent text selection
-		jQuery(oElement || document.body).
-			attr("unselectable", "on").
-			addClass('sapMITBNoSelection').
-			bind("selectstart", function(oEvent) {
-				oEvent.preventDefault();
-				return false;
-			});
-	};
+	IconTabHeader.prototype.onsaphomemodifiers = IconTabHeader.prototype.ondragrearranging;
 
 	/**
-	 * Enables text selection on the document (disabled for Dnd).
-	 * @private
+	 * Move focused tab of IconTabHeader to last position
+	 * Ctrl + End
+	 * @param {jQuery.Event} oEvent
 	 */
-	IconTabHeader.prototype._enableTextSelection = function (oElement) {
-		jQuery(oElement || document.body).
-			attr("unselectable", "off").
-			removeClass('sapMITBNoSelection').
-			unbind("selectstart");
-	};
+	IconTabHeader.prototype.onsapendmodifiers = IconTabHeader.prototype.ondragrearranging;
+
+	/**
+	 * Moves tab for Drag&Drop keyboard handling
+	 * Ctrl + Left Right || Ctrl + Arrow Up
+	 * @param {jQuery.Event} oEvent
+	 */
+	IconTabHeader.prototype.onsapincreasemodifiers = IconTabHeader.prototype.ondragrearranging;
+
+	/**
+	 * Moves tab for Drag&Drop keyboard handling
+	 * Ctrl + Left Arrow || Ctrl + Arrow Down
+	 * @param {jQuery.Event} oEvent
+	 */
+	IconTabHeader.prototype.onsapdecreasemodifiers = IconTabHeader.prototype.ondragrearranging;
 
 	/* =========================================================== */
-	/*           end: tab drag-drop  ..                            */
+	/*           end: tab keyboard handling - drag-drop            */
 	/* =========================================================== */
 
 	return IconTabHeader;
 
-}, /* bExport= */ true);
+});

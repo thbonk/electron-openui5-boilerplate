@@ -1,13 +1,13 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 /*global Promise */// declare unusual global vars for JSLint/SAPUI5 validation
 
 // Provides class sap.ui.core.util.Export
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './ExportColumn', './ExportRow', './ExportType', './File'],
-	function(jQuery, Control, ExportColumn, ExportRow, ExportType, File) {
+sap.ui.define(['sap/ui/core/Control', './ExportColumn', './ExportRow', './ExportType', './File', "sap/base/Log"],
+	function(Control, ExportColumn, ExportRow, ExportType, File, Log) {
 	'use strict';
 
 	// Utility functions to add jQuery Promise methods to a standard ES6 Promise object for compatibility reasons
@@ -23,7 +23,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './ExportColumn', './
 	}
 
 	function printJqPromiseDeprecationWarning(sMethodName) {
-		jQuery.sap.log.warning("Usage of deprecated jQuery Promise method: '" + sMethodName + "'. " +
+		Log.warning("Usage of deprecated jQuery Promise method: '" + sMethodName + "'. " +
 			"Please use the standard Promise methods 'then' / 'catch' instead!", "", "sap.ui.core.util.Export");
 	}
 
@@ -134,10 +134,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './ExportColumn', './
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @since 1.22.0
 	 *
-	 * @constructor
 	 * @public
 	 * @alias sap.ui.core.util.Export
 	 */

@@ -1,122 +1,181 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 sap.ui.define([
-	"jquery.sap.global",
 	"sap/ui/core/mvc/Controller",
 	"sap/ui/rta/appVariant/manageApps/webapp/model/models",
 	"sap/ui/rta/appVariant/Utils",
-	"sap/m/MessageBox"
-], function(jQuery, Controller, Model, ManageAppsUtils, MessageBox) {
+	"sap/m/MessageBox",
+	"sap/ui/rta/Utils",
+	"sap/ui/rta/appVariant/Feature",
+	"sap/ui/rta/RuntimeAuthoring",
+	"sap/ui/core/BusyIndicator",
+	"sap/ui/rta/appVariant/AppVariantUtils",
+	"sap/base/i18n/ResourceBundle"
+], function(
+	Controller,
+	Model,
+	AppVariantOverviewUtils,
+	MessageBox,
+	RtaUtils,
+	RtaAppVariantFeature,
+	RuntimeAuthoring,
+	BusyIndicator,
+	AppVariantUtils,
+	ResourceBundle
+) {
 	"use strict";
 
-	var _oAdaptedAppProperties, sModulePath, oI18n;
+	var _sIdRunningApp, _bKeyUser, sModulePath, oI18n;
 	return Controller.extend("sap.ui.rta.appVariant.manageApps.webapp.controller.ManageApps", {
 		onInit: function() {
-			_oAdaptedAppProperties = this.getOwnerComponent().getAdaptedAppProperties();
-			var sOriginalAppId = _oAdaptedAppProperties.componentName;
+			_sIdRunningApp = this.getOwnerComponent().getIdRunningApp();
+			_bKeyUser = this.getOwnerComponent().getIsOverviewForKeyUser();
 
-			sModulePath = jQuery.sap.getModulePath( "sap.ui.rta.appVariant.manageApps.webapp" );
-			oI18n = jQuery.sap.resources({
+			sModulePath = sap.ui.require.toUrl("sap/ui/rta/appVariant/manageApps/") + "webapp";
+			oI18n = ResourceBundle.create({
 				url : sModulePath + "/i18n/i18n.properties"
 			});
 
-			var sAppVariantType = oI18n.getText("MAA_APP_VARIANT_TYPE");
-
-			return ManageAppsUtils.getAppVariants(sOriginalAppId, sAppVariantType).then(function(aAppVariantsProperties) {
-				return this._addAppVariantsProperties(aAppVariantsProperties).then(function() {
-					return this._paintCurrentlyAdaptedApp();
-				}.bind(this));
+			BusyIndicator.show();
+			return AppVariantOverviewUtils.getAppVariantOverview(_sIdRunningApp, _bKeyUser).then(function(aAppVariantOverviewAttributes) {
+				BusyIndicator.hide();
+				if (aAppVariantOverviewAttributes.length) {
+					return this._arrangeOverviewDataAndBindToModel(aAppVariantOverviewAttributes).then(function(aAppVariantOverviewAttributes) {
+						return this._highlightNewCreatedAppVariant(aAppVariantOverviewAttributes);
+					}.bind(this));
+				} else {
+					AppVariantUtils.publishEventBus();
+					return this._showMessageWhenNoAppVariantsExist();
+				}
 			}.bind(this))["catch"](function(oError) {
-				return this._showMessage(MessageBox.Icon.ERROR, "HEADER_MANAGE_APPS_FAILED", "MSG_MANAGE_APPS_FAILED", oError).then(function() {
-					return this._closeManageAppsDialog();
-				}.bind(this));
-			}.bind(this));
+				AppVariantUtils.publishEventBus();
+				var oErrorInfo = AppVariantUtils.buildErrorInfo("MSG_MANAGE_APPS_FAILED", oError);
+				oErrorInfo.overviewDialog = true;
+				BusyIndicator.hide();
+				return AppVariantUtils.showRelevantDialog(oErrorInfo, false);
+			});
 		},
-		_showMessage: function(oMessageType, sTitleKey, sMessageKey, oError) {
-			var _oTextResources = sap.ui.getCore().getLibraryResourceBundle("sap.ui.rta");
-			var sMessage = _oTextResources.getText(sMessageKey, oError ? [oError.message || oError] : undefined);
-			var sTitle = _oTextResources.getText(sTitleKey);
-
+		_showMessageWhenNoAppVariantsExist: function() {
+			var sMessage = oI18n.getText("MSG_APP_VARIANT_OVERVIEW_SAP_DEVELOPER");
+			var sTitle = oI18n.getText("TITLE_APP_VARIANT_OVERVIEW_SAP_DEVELOPER");
 			return new Promise(function(resolve) {
 				MessageBox.show(sMessage, {
-					icon: oMessageType,
-					title: sTitle,
-					onClose: resolve
+					icon: MessageBox.Icon.INFORMATION,
+					title : sTitle,
+					onClose : resolve,
+					styleClass: RtaUtils.getRtaStyleClassName()
 				});
 			});
 		},
-		_addAppVariantsProperties: function(aAppVariantsProperties) {
-			var oAdaptedAppProperties = {
-				title: _oAdaptedAppProperties.title,
-				subTitle: _oAdaptedAppProperties.subTitle,
-				description: _oAdaptedAppProperties.description,
-				icon: _oAdaptedAppProperties.icon,
-				id: _oAdaptedAppProperties.idAppAdapted,
-				componentName: _oAdaptedAppProperties.componentName,
-				currentStatus: oI18n.getText("MAA_CURRENTLY_ADAPTING")
-			};
+		_highlightNewCreatedAppVariant: function(aAppVariantOverviewAttributes) {
+			var oTable = this.byId("Table1");
 
-			if (_oAdaptedAppProperties.idAppAdapted === _oAdaptedAppProperties.componentName) {
-				oAdaptedAppProperties.type = oI18n.getText("MAA_ORIGINAL_TYPE");
-				aAppVariantsProperties.unshift(oAdaptedAppProperties);
-				return this._bindModelData(aAppVariantsProperties);
-			} else {
-				var aFilteredAppVariantsProperties = aAppVariantsProperties.filter(function(oAppVariantProperty) {
-					return oAppVariantProperty.id !== oAdaptedAppProperties.id;
-				});
+			aAppVariantOverviewAttributes.forEach(function(oAppVariantDescriptor, index) {
+				if (oAppVariantDescriptor.currentStatus) {
+					if (oTable.getItems().length >= index) {
+						oTable.getItems()[index].focus();
+					}
+				}
+			});
 
-				oAdaptedAppProperties.type = oI18n.getText("MAA_APP_VARIANT_TYPE");
-				aFilteredAppVariantsProperties.unshift(oAdaptedAppProperties);
-				return ManageAppsUtils.getOriginalAppProperties(_oAdaptedAppProperties.componentName, oI18n.getText("MAA_ORIGINAL_TYPE")).then(function(aOriginalAppProperties) {
-					// Original app properties must be on the top of the overview list
-					aFilteredAppVariantsProperties.unshift(aOriginalAppProperties[0]);
-					return this._bindModelData(aFilteredAppVariantsProperties);
-				}.bind(this));
-			}
+			return Promise.resolve();
 		},
-		_bindModelData: function(aAppVariantsProperties) {
+		_arrangeOverviewDataAndBindToModel: function(aAppVariantOverviewAttributes) {
+			var aAdaptingAppAttributes = aAppVariantOverviewAttributes.filter(function(oAppVariantProperty){
+				return oAppVariantProperty.appId === _sIdRunningApp;
+			});
+
+			var oAdaptingAppAttributes = aAdaptingAppAttributes[0];
+			if (oAdaptingAppAttributes) {
+				oAdaptingAppAttributes.currentStatus = oI18n.getText("MAA_CURRENTLY_ADAPTING");
+			}
+
+			aAppVariantOverviewAttributes = aAppVariantOverviewAttributes.filter(function(oAppVariantProperty) {
+				return oAppVariantProperty.appId !== _sIdRunningApp;
+			});
+
+			aAppVariantOverviewAttributes.unshift(oAdaptingAppAttributes);
+
+			var aReferenceAppAttributes = aAppVariantOverviewAttributes.filter(function(oAppVariantProperty){
+				return oAppVariantProperty.isOriginal;
+			});
+
+			var oReferenceAppAttributes = aReferenceAppAttributes[0];
+
+			aAppVariantOverviewAttributes = aAppVariantOverviewAttributes.filter(function(oAppVariantProperty) {
+				return !oAppVariantProperty.isOriginal;
+			});
+
+			aAppVariantOverviewAttributes.unshift(oReferenceAppAttributes);
+
+			// Bind the app variant overview to JSON model
+
 			var oModelData = {
-				appVariants: aAppVariantsProperties
+				appVariants: aAppVariantOverviewAttributes
 			};
+
 			var oModel = Model.createModel(oModelData);
 			this.getView().setModel(oModel);
-			return Promise.resolve(true);
 
+			return Promise.resolve(aAppVariantOverviewAttributes);
 		},
-		_closeManageAppsDialog: function() {
-			var oManageAppsDialog = sap.ui.getCore().byId("manageAppsDialog");
-
-			oManageAppsDialog.oPopup.attachClosed(function (){
-				oManageAppsDialog.destroy();
-				return Promise.resolve(true);
-			});
-			oManageAppsDialog.close();
-		},
-		_paintCurrentlyAdaptedApp: function() {
-			var oTable = this.getView().byId("Table1");
-			jQuery('.maaCurrentStatus,.maaSubTitle').css("font-size", '12px');
-
-			function colorRows() {
-				var rowCount = oTable.getVisibleRowCount();
-	            var rowStart = oTable.getFirstVisibleRow();
-	            var currentRowContext;
-
-	            for (var i = 0; i < rowCount; i++) {
-					currentRowContext = oTable.getContextByIndex(rowStart + i);
-					if (currentRowContext && currentRowContext.getProperty("currentStatus") === oI18n.getText("MAA_CURRENTLY_ADAPTING")) {
-						var sColor = sap.ui.core.theming.Parameters.get("sapUiHighlight");
-						oTable.getRows()[i].$().find("span").css({color: sColor});
-						break;
-					}
-	            }
-
-	            return Promise.resolve(true);
+		formatRowHighlight: function(sValue) {
+			// Your logic for rowHighlight goes here
+			if (sValue === oI18n.getText("MAA_CURRENTLY_ADAPTING")) {
+				return "Success";
+			} else if (sValue === oI18n.getText("MAA_NEW_APP_VARIANT")) {
+				return "Information";
 			}
 
-			return colorRows();
+			return "None";
+		},
+		getModelProperty : function(sModelPropName, sBindingContext) {
+			return this.getView().getModel().getProperty(sModelPropName, sBindingContext);
+		},
+		handleUiAdaptation: function(oEvent) {
+			var oNavigationService = sap.ushell.Container.getService( "CrossApplicationNavigation" );
+
+			var sSemanticObject = this.getModelProperty("semanticObject", oEvent.getSource().getBindingContext());
+			var sAction = this.getModelProperty("action", oEvent.getSource().getBindingContext());
+			var oParams = this.getModelProperty("params", oEvent.getSource().getBindingContext());
+
+			var oNavigationParams;
+			if (sSemanticObject && sAction && oParams) {
+				oNavigationParams = {
+					target: {
+						semanticObject : sSemanticObject,
+						action : sAction
+					},
+					params: oParams
+				};
+
+				RuntimeAuthoring.enableRestart( "CUSTOMER" );
+
+				oNavigationService.toExternal(oNavigationParams);
+
+				AppVariantUtils.publishEventBus();
+				return true;
+			} else {
+				return false;
+			}
+		},
+		saveAsAppVariant: function(oEvent) {
+			AppVariantUtils.publishEventBus();
+
+			var sDescriptorUrl = this.getModelProperty("descriptorUrl", oEvent.getSource().getBindingContext());
+
+			BusyIndicator.show();
+			return AppVariantOverviewUtils.getDescriptor(sDescriptorUrl).then(function(oAppVariantDescriptor) {
+				BusyIndicator.hide();
+				return RtaAppVariantFeature.onSaveAsFromOverviewDialog(oAppVariantDescriptor, false);
+			});
+		},
+		copyId: function(oEvent) {
+			var sCopiedId = this.getModelProperty("appId", oEvent.getSource().getBindingContext());
+			AppVariantUtils.copyId(sCopiedId);
 		}
 	});
 });

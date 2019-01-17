@@ -1,13 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.layout.PaneContainer.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', './Splitter', './AssociativeSplitter'],
-	function(jQuery, library, Element, Splitter, AssociativeSplitter) {
+sap.ui.define(['./library', 'sap/ui/core/Element', './AssociativeSplitter', 'sap/ui/core/library'],
+	function(library, Element, AssociativeSplitter, coreLibrary) {
 	"use strict";
+
+	// shortcut for sap.ui.core.Orientation
+	var Orientation = coreLibrary.Orientation;
 
 	/**
 	 * Constructor for a new PaneContainer.
@@ -22,7 +25,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', './Split
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -35,7 +38,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', './Split
 			/**
 			 The orientation of the Splitter
 			 */
-			orientation : { type : "sap.ui.core.Orientation", group : "Behavior", defaultValue : sap.ui.core.Orientation.Horizontal }
+			orientation : { type : "sap.ui.core.Orientation", group : "Behavior", defaultValue : Orientation.Horizontal }
 		},
 		defaultAggregation : "panes",
 		aggregations : {
@@ -141,4 +144,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', './Split
 
 	return PaneContainer;
 
-}, /* bExport= */ true);
+});

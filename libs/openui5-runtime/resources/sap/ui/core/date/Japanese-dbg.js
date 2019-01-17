@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.core.date.Japanese
-sap.ui.define(['jquery.sap.global', './UniversalDate'],
-	function(jQuery, UniversalDate, LocaleData) {
+sap.ui.define(['./UniversalDate', '../CalendarType'],
+	function(UniversalDate, CalendarType) {
 	"use strict";
 
 
@@ -33,7 +33,7 @@ sap.ui.define(['jquery.sap.global', './UniversalDate'],
 				aArgs = toGregorianArguments(aArgs);
 			}
 			this.oDate = this.createDate(Date, aArgs);
-			this.sCalendarType = sap.ui.core.CalendarType.Japanese;
+			this.sCalendarType = CalendarType.Japanese;
 		}
 	});
 
@@ -53,8 +53,8 @@ sap.ui.define(['jquery.sap.global', './UniversalDate'],
 	 * @return {object}
 	 */
 	function toJapanese(oGregorian) {
-		var iEra = UniversalDate.getEraByDate(sap.ui.core.CalendarType.Japanese, oGregorian.year, oGregorian.month, oGregorian.day),
-			iEraStartYear = UniversalDate.getEraStartDate(sap.ui.core.CalendarType.Japanese, iEra).year;
+		var iEra = UniversalDate.getEraByDate(CalendarType.Japanese, oGregorian.year, oGregorian.month, oGregorian.day),
+			iEraStartYear = UniversalDate.getEraStartDate(CalendarType.Japanese, iEra).year;
 		return {
 			era: iEra,
 			year: oGregorian.year - iEraStartYear + 1,
@@ -70,7 +70,7 @@ sap.ui.define(['jquery.sap.global', './UniversalDate'],
 	 * @return {int}
 	 */
 	function toGregorian(oJapanese) {
-		var iEraStartYear = UniversalDate.getEraStartDate(sap.ui.core.CalendarType.Japanese, oJapanese.era).year;
+		var iEraStartYear = UniversalDate.getEraStartDate(CalendarType.Japanese, oJapanese.era).year;
 		return {
 			year: iEraStartYear + oJapanese.year - 1,
 			month: oJapanese.month,
@@ -94,7 +94,7 @@ sap.ui.define(['jquery.sap.global', './UniversalDate'],
 				return aArgs;
 			} else {
 				// Year less than 100 is emperor year in the current era
-				iEra = UniversalDate.getCurrentEra(sap.ui.core.CalendarType.Japanese);
+				iEra = UniversalDate.getCurrentEra(CalendarType.Japanese);
 				vYear = [iEra, vYear];
 			}
 		} else if (!Array.isArray(vYear)) {
@@ -192,7 +192,7 @@ sap.ui.define(['jquery.sap.global', './UniversalDate'],
 		return this._setJapanese(oJapanese);
 	};
 	Japanese.prototype.setEra = function(iEra, iYear, iMonth, iDay) {
-		var oEraStartDate = UniversalDate.getEraStartDate(sap.ui.core.CalendarType.Japanese, iEra),
+		var oEraStartDate = UniversalDate.getEraStartDate(CalendarType.Japanese, iEra),
 			oJapanese = toJapanese(oEraStartDate);
 		if (iYear !== undefined) {
 			oJapanese.year = iYear;
@@ -217,7 +217,7 @@ sap.ui.define(['jquery.sap.global', './UniversalDate'],
 		return this._setUTCJapanese(oJapanese);
 	};
 	Japanese.prototype.setUTCEra = function(iEra, iYear, iMonth, iDay) {
-		var oEraStartDate = UniversalDate.getEraStartDate(sap.ui.core.CalendarType.Japanese, iEra),
+		var oEraStartDate = UniversalDate.getEraStartDate(CalendarType.Japanese, iEra),
 			oJapanese = toJapanese(oEraStartDate);
 		if (iYear !== undefined) {
 			oJapanese.year = iYear;

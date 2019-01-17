@@ -1,12 +1,29 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 //Provides control sap.ui.unified.Calendar.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleData', 'sap/ui/core/delegate/ItemNavigation', 'sap/ui/unified/library'],
-		function(jQuery, Control, LocaleData, ItemNavigation, library) {
+sap.ui.define([
+	'sap/ui/core/Control',
+	'sap/ui/Device',
+	'sap/ui/core/LocaleData',
+	'sap/ui/core/delegate/ItemNavigation',
+	'sap/ui/unified/library',
+	'sap/ui/core/Locale',
+	"./MonthPickerRenderer",
+	"sap/ui/thirdparty/jquery"
+], function(
+	Control,
+	Device,
+	LocaleData,
+	ItemNavigation,
+	library,
+	Locale,
+	MonthPickerRenderer,
+	jQuery
+) {
 	"use strict";
 
 	/**
@@ -19,7 +36,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 	 * renders a MonthPicker with ItemNavigation
 	 * This is used inside the calendar. Not for stand alone usage
 	 * @extends sap.ui.core.Control
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -156,7 +173,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 			return oParent._getLocaleData();
 		} else if (!this._oLocaleData) {
 			var sLocale = this._getLocale();
-			var oLocale = new sap.ui.core.Locale(sLocale);
+			var oLocale = new Locale(sLocale);
 			this._oLocaleData = LocaleData.getInstance(oLocale);
 		}
 
@@ -181,12 +198,27 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 
 	};
 
+	MonthPicker.prototype.onmousedown = function (oEvent) {
+		this._oMousedownPosition = {
+			clientX: oEvent.clientX,
+			clientY: oEvent.clientY
+		};
+	};
+
 	MonthPicker.prototype.onmouseup = function(oEvent){
 
 		// fire select event on mouseup to prevent closing MonthPicker during click
 
 		if (this._bMousedownChange) {
 			this._bMousedownChange = false;
+			this.fireSelect();
+		} else if (Device.support.touch
+			&& this._isValueInThreshold(this._oMousedownPosition.clientX, oEvent.clientX, 10)
+			&& this._isValueInThreshold(this._oMousedownPosition.clientY, oEvent.clientY, 10)
+		) {
+			var iIndex = this._oItemNavigation.getFocusedIndex();
+			var iMonth = iIndex + this.getStartMonth();
+			_selectMonth.call(this, iMonth);
 			this.fireSelect();
 		}
 
@@ -281,12 +313,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 			return this;
 		}
 
-		iMin = parseInt(iMin, 10);
+		iMin = parseInt(iMin);
 		if (isNaN(iMin) || iMin < 0 || iMin > 11) {
 			iMin = 0;
 		}
 
-		iMax = parseInt(iMax, 10);
+		iMax = parseInt(iMax);
 		if (isNaN(iMax) || iMax < 0 || iMax > 11) {
 			iMax = 11;
 		}
@@ -305,7 +337,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 
 			for (var i = 0; i < aMonths.length; i++) {
 				var $DomRef = jQuery(aMonths[i]);
-				var iMonth = parseInt( $DomRef.attr("id").slice( iIDLength), 10);
+				var iMonth = parseInt( $DomRef.attr("id").slice( iIDLength));
 				if (iMonth < this._iMinMonth || iMonth > this._iMaxMonth) {
 					$DomRef.addClass("sapUiCalItemDsbl");
 					$DomRef.attr("aria-disabled", true);
@@ -324,11 +356,23 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 
 		if (this.getMonths() < 12) {
 			var oFirstMonth = this._oItemNavigation.getItemDomRefs()[0];
-			return parseInt( oFirstMonth.id.slice( this.getId().length + 2), 10);
+			return parseInt( oFirstMonth.id.slice( this.getId().length + 2));
 		} else {
 			return 0;
 		}
 
+	};
+
+	/**
+	 * Returns if value is in predefined threshold.
+	 *
+	 * @private
+	 */
+	MonthPicker.prototype._isValueInThreshold = function (iReference, iValue, iThreshold) {
+		var iLowerThreshold = iReference - iThreshold,
+			iUpperThreshold = iReference + iThreshold;
+
+		return iValue >= iLowerThreshold && iValue <= iUpperThreshold;
 	};
 
 	function _initItemNavigation(){
@@ -401,8 +445,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 
 	function _handleMousedown(oEvent, iIndex){
 
-		if (oEvent.button) {
-			// only use left mouse button
+		if (oEvent.button || Device.support.touch) {
+			// only use left mouse button or not touch
 			return;
 		}
 
@@ -609,4 +653,4 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 
 	return MonthPicker;
 
-}, /* bExport= */ true);
+});

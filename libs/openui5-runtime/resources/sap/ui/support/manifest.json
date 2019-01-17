@@ -1,12 +1,11 @@
 {
-  "_version": "1.2.0",
+  "_version": "1.9.0",
   "sap.app": {
-    "_version": "1.2.0",
     "id": "sap.ui.support",
     "type": "library",
     "embeds": [],
     "applicationVersion": {
-      "version": "1.50.6"
+      "version": "1.61.2"
     },
     "title": "UI5 library: sap.ui.support",
     "description": "UI5 library: sap.ui.support",
@@ -14,34 +13,28 @@
     "offline": true
   },
   "sap.ui": {
-    "_version": "1.1.0",
     "technology": "UI5",
-    "supportedThemes": [
-      "base",
-      "sap_belize",
-      "sap_belize_plus"
-    ]
+    "supportedThemes": []
   },
   "sap.ui5": {
-    "_version": "1.1.0",
     "dependencies": {
-      "minUI5Version": "1.50",
+      "minUI5Version": "1.61",
       "libs": {
         "sap.ui.core": {
-          "minVersion": "1.50.6"
-        },
-        "sap.ui.fl": {
-          "minVersion": "1.50.6"
-        },
-        "sap.ui.layout": {
-          "minVersion": "1.50.6"
-        },
-        "sap.ui.codeeditor": {
-          "minVersion": "1.50.6"
-        },
-        "sap.m": {
-          "minVersion": "1.50.6"
+          "minVersion": "1.61.2"
         }
+      }
+    },
+    "library": {
+      "i18n": false,
+      "css": false,
+      "content": {
+        "controls": [],
+        "elements": [],
+        "types": [
+          "sap.ui.support.Severity"
+        ],
+        "interfaces": []
       }
     }
   }

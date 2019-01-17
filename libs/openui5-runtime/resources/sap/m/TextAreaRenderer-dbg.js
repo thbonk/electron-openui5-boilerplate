@@ -1,12 +1,22 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './InputBaseRenderer'],
-	function(jQuery, Renderer, InputBaseRenderer) {
+sap.ui.define([
+	'sap/ui/core/Renderer',
+	'./InputBaseRenderer',
+	'sap/ui/Device',
+	'sap/ui/core/library',
+	"sap/base/security/encodeXML"
+],
+	function(Renderer, InputBaseRenderer, Device, coreLibrary, encodeXML) {
 	"use strict";
+
+
+	// shortcut for sap.ui.core.Wrapping
+	var Wrapping = coreLibrary.Wrapping;
 
 
 	/**
@@ -65,13 +75,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './InputBaseRenderer
 	// Write the value of the TextArea
 	TextAreaRenderer.writeInnerContent = function(oRm, oControl) {
 		var sValue = oControl.getValue();
-		sValue = jQuery.sap.encodeHTML(sValue);
+		sValue = encodeXML(sValue);
 
-		// Convert the new line HTML entity rather than displaying it as a text.
-		//Normalize the /n and /r to /r/n - Carriage Return and Line Feed
-		if (sap.ui.Device.browser.msie && sap.ui.Device.browser.version < 11) {
-			sValue = sValue.replace(/&#xd;&#xa;|&#xd;|&#xa;/g, "&#13;");
-		}
 		oRm.write(sValue);
 	};
 
@@ -90,7 +95,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './InputBaseRenderer
 
 	// Add extra attributes to TextArea
 	TextAreaRenderer.writeInnerAttributes = function(oRm, oControl) {
-		if (oControl.getWrapping() != sap.ui.core.Wrapping.None) {
+		if (oControl.getWrapping() != Wrapping.None) {
 			oRm.writeAttribute("wrap", oControl.getWrapping());
 		}
 

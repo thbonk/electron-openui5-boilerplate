@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -17,10 +17,10 @@ sap.ui.define(['./Binding'],
 	 * The ContextBinding is a specific binding for a setting context for the model
 	 *
 	 * @param {sap.ui.model.Model} oModel
-	 * @param {String} sPath
-	 * @param {Object} oContext
-	 * @param {Object} [mParameters]
-	 * @param {Object} [oEvents] object defining event handlers
+	 * @param {string} sPath
+	 * @param {sap.ui.model.Context} oContext
+	 * @param {object} [mParameters]
+	 * @param {object} [oEvents] object defining event handlers
 	 * @abstract
 	 * @public
 	 * @alias sap.ui.model.ContextBinding
@@ -62,12 +62,51 @@ sap.ui.define(['./Binding'],
 	 */
 
 	/**
-	 * Return the bound context
+	 * Return the bound context.
+	 *
+	 * @returns {sap.ui.model.Context} Context object used by this context binding or <code>null</code>
+	 * @public
 	 */
-	ContextBinding.prototype.getBoundContext = function(oContext) {
+	ContextBinding.prototype.getBoundContext = function() {
 		return this.oElementContext;
 	};
 
+	/**
+	 * Checks whether an update of the data state of this binding is required.
+	 *
+	 * @param {map} mPaths A Map of paths to check if update needed
+	 * @private
+	 * @since 1.58
+	 */
+	ContextBinding.prototype.checkDataState = function(mPaths) {
+		var oDataState = this.getDataState(),
+			sResolvedPath = this.oModel ? this.oModel.resolve(this.sPath, this.oContext) : null,
+			that = this;
+
+		function fireChange() {
+			that.fireEvent("AggregatedDataStateChange", { dataState: oDataState });
+			oDataState.changed(false);
+			that._sDataStateTimout = null;
+		}
+
+		if (!mPaths || sResolvedPath && sResolvedPath in mPaths) {
+			if (sResolvedPath) {
+				oDataState.setModelMessages(this.oModel.getMessagesByPath(sResolvedPath));
+			}
+			if (oDataState && oDataState.changed()) {
+				if (this.mEventRegistry["DataStateChange"]) {
+					this.fireEvent("DataStateChange", { dataState: oDataState });
+				}
+				if (this.bIsBeingDestroyed) {
+					fireChange();
+				} else if (this.mEventRegistry["AggregatedDataStateChange"]) {
+					if (!this._sDataStateTimout) {
+						this._sDataStateTimout = setTimeout(fireChange, 0);
+					}
+				}
+			}
+		}
+	};
 
 	return ContextBinding;
 

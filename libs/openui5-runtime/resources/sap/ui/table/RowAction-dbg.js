@@ -1,12 +1,32 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.table.RowAction
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TableUtils', './library', 'sap/ui/core/Icon', 'sap/ui/unified/Menu', 'sap/ui/core/Popup', './RowActionItem'],
-function(jQuery, Control, TableUtils, library, Icon, Menu, Popup, RowActionItem) {
+sap.ui.define([
+	'sap/ui/core/Control',
+	"sap/ui/table/TableUtils",
+	'./library',
+	'sap/ui/core/Icon',
+	'sap/ui/unified/Menu',
+	'sap/ui/core/Popup',
+	"./RowActionRenderer",
+	"sap/ui/events/KeyCodes",
+	"sap/ui/thirdparty/jquery"
+],
+function(
+	Control,
+	TableUtils,
+	library,
+	Icon,
+	Menu,
+	Popup,
+	RowActionRenderer,
+	KeyCodes,
+	jQuery
+) {
 	"use strict";
 
 	/**
@@ -20,7 +40,7 @@ function(jQuery, Control, TableUtils, library, Icon, Menu, Popup, RowActionItem)
 	 * If more action items are available as the available space allows to display an overflow mechanism is provided.
 	 * This control must only be used in the context of the <code>sap.ui.table.Table</code> control to define row actions.
 	 * @extends sap.ui.core.Control
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -67,7 +87,7 @@ function(jQuery, Control, TableUtils, library, Icon, Menu, Popup, RowActionItem)
 		};
 
 		var fnOnKeyUp = function(oEvent) {
-			this._bKeyboard = oEvent.which === jQuery.sap.KeyCodes.SPACE || oEvent.which === jQuery.sap.KeyCodes.ENTER;
+			this._bKeyboard = oEvent.which === KeyCodes.SPACE || oEvent.which === KeyCodes.ENTER;
 			Icon.prototype.onkeyup.apply(this, arguments);
 		};
 
@@ -82,8 +102,6 @@ function(jQuery, Control, TableUtils, library, Icon, Menu, Popup, RowActionItem)
 		oIcon.setTooltip = fnSetTooltip;
 		oIcon.onkeyup = fnOnKeyUp;
 		this.addAggregation("_icons", oIcon);
-
-		this._oResBundle = sap.ui.getCore().getLibraryResourceBundle("sap.ui.table");
 
 		this._iLen = 0;
 		this._iCount = 2;
@@ -173,9 +191,9 @@ function(jQuery, Control, TableUtils, library, Icon, Menu, Popup, RowActionItem)
 
 		var sText;
 		if (bActive) {
-			sText = this._oResBundle.getText(this._iLen == 1 ? "TBL_ROW_ACTION_SINGLE_ACTION" : "TBL_ROW_ACTION_MULTIPLE_ACTION", [this._iLen]);
+			sText = TableUtils.getResourceText(this._iLen == 1 ? "TBL_ROW_ACTION_SINGLE_ACTION" : "TBL_ROW_ACTION_MULTIPLE_ACTION", [this._iLen]);
 		} else {
-			sText = this._oResBundle.getText("TBL_ROW_ACTION_NO_ACTION");
+			sText = TableUtils.getResourceText("TBL_ROW_ACTION_NO_ACTION");
 		}
 
 		return {
@@ -241,8 +259,8 @@ function(jQuery, Control, TableUtils, library, Icon, Menu, Popup, RowActionItem)
 	/**
 	 * Enables or disables the fixed column layout.
 	 * If enabled, the control tries to keep the position of the icons stable.
-	 * @see #_updateIcons
 	 * @param {boolean} bFixed Whether fixed column layout should be applied.
+	 * @see #_updateIcons
 	 * @private
 	 */
 	RowAction.prototype._setFixedLayout = function(bFixed) {
@@ -354,13 +372,13 @@ function(jQuery, Control, TableUtils, library, Icon, Menu, Popup, RowActionItem)
 		} else if (this._iLen > 2 && this._iCount == 2) {
 			aItems[0]._syncIcon(aIcons[0]);
 			aIcons[1].setSrc("sap-icon://overflow");
-			aIcons[1].setTooltip(this._oResBundle.getText("TBL_ROW_ACTION_MORE"));
+			aIcons[1].setTooltip(TableUtils.getResourceText("TBL_ROW_ACTION_MORE"));
 			$Icons.toggleClass("sapUiTableActionHidden", false);
 			setMenuAriaOfIcon(1);
 			this._aActions = ["action", "menu"];
 		} else { // this._iLen > 2 && this._iCount == 1
 			aIcons[0].setSrc("sap-icon://overflow");
-			aIcons[0].setTooltip(this._oResBundle.getText("TBL_ROW_ACTION_MORE"));
+			aIcons[0].setTooltip(TableUtils.getResourceText("TBL_ROW_ACTION_MORE"));
 			jQuery($Icons.get(0)).toggleClass("sapUiTableActionHidden", false);
 			jQuery($Icons.get(1)).toggleClass("sapUiTableActionHidden", true);
 			setMenuAriaOfIcon(0);

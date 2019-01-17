@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.model.odata.TreeBindingAdapter
-sap.ui.define(['jquery.sap.global', 'sap/ui/model/TreeBinding', 'sap/ui/model/ClientTreeBinding', 'sap/ui/model/ChangeReason', 'sap/ui/model/TreeBindingUtils'],
-	function(jQuery, TreeBinding, ClientTreeBinding, ChangeReason, TreeBindingUtils) {
+sap.ui.define(["sap/ui/thirdparty/jquery"],
+	function(jQuery) {
 		"use strict";
 
 		/**
@@ -92,7 +92,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/TreeBinding', 'sap/ui/model/Cl
 				},
 				_loadChildContexts: function(oContext) {
 					var oContextInfo = this._getContextInfo(oContext);
-					var iIndex = jQuery.inArray(oContext, this.aContexts);
+					var iIndex = (this.aContexts ? this.aContexts.indexOf(oContext) : -1);
 					var aNodeContexts = this.getNodeContexts(oContext, 0, Number.MAX_VALUE);
 					for (var i = 0, l = aNodeContexts.length; i < l; i++) {
 						this.aContexts.splice(iIndex + i + 1, 0, aNodeContexts[i]);
@@ -230,7 +230,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/TreeBinding', 'sap/ui/model/Cl
 					that.clearSelection();
 					var _aSelectedContexts = this._aSelectedContexts;
 					jQuery.each(this.aContexts, function(iIndex, oContext) {
-						if (jQuery.inArray(oContext, _aSelectedContexts) >= 0) {
+						if (((_aSelectedContexts ? this.aContexts.indexOf(oContext) : -1)) >= 0) {
 							that.addSelectionInterval(iIndex, iIndex);
 						}
 					});

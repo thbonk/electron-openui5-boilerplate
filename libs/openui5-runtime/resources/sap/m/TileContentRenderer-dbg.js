@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer'],
-	function(jQuery, Renderer) {
+sap.ui.define(["sap/base/security/encodeCSS"],
+	function(encodeCSS) {
 	"use strict";
 
 	/**
@@ -25,9 +25,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer'],
 		var sTooltip = oControl.getTooltip_AsString();
 		var sContentTypeClass = oControl._getContentType();
 		if (sContentTypeClass) {
-			sContentTypeClass = jQuery.sap.encodeCSS(sContentTypeClass);
+			sContentTypeClass = encodeCSS(sContentTypeClass);
 		}
-		var sFrameTypeClass = jQuery.sap.encodeCSS("sapMFrameType" + oControl.getFrameType());
+		var sFrameTypeClass = encodeCSS("sapMFrameType" + oControl.getFrameType());
 
 		oRm.write("<div");
 		oRm.writeControlData(oControl);
@@ -91,7 +91,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer'],
 		// footer text div
 		oRm.write("<div");
 		oRm.addClass("sapMTileCntFtrTxt");
-		oRm.addClass(jQuery.sap.encodeCSS(sColorClass));
+		oRm.addClass(encodeCSS(sColorClass));
 		oRm.writeClasses();
 		oRm.writeAttribute("id", oControl.getId() + "-footer-text");
 		if (sTooltip.trim()) { // check for white space(s) needed since the IE11 renders it

@@ -1,10 +1,13 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global','sap/ui/base/ManagedObject'],
-function (jQuery, ManagedObject) {
+sap.ui.define([
+	'sap/ui/base/ManagedObject',
+	"sap/base/security/encodeXML"
+],
+function(ManagedObject, encodeXML) {
 	'use strict';
 	var TreeViewer = ManagedObject.extend("sap.ui.core.support.controls.TreeViewer", {
 		constructor: function() {
@@ -28,10 +31,10 @@ function (jQuery, ManagedObject) {
 	var iLevel = 1;
 	var iIdx = -1;
 	function nextWithIndent(oNode) {
-		var iLevel = parseInt(oNode.getAttribute("level"), 10);
+		var iLevel = parseInt(oNode.getAttribute("level"));
 		oNode = oNode.nextSibling;
 		while (oNode) {
-			if (parseInt(oNode.getAttribute("level"), 10) == iLevel) {
+			if (parseInt(oNode.getAttribute("level")) == iLevel) {
 				return oNode;
 			}
 			oNode = oNode.nextSibling;
@@ -96,18 +99,18 @@ function (jQuery, ManagedObject) {
 				if (!oRenderContext.bIgnoreIds) {
 					oRenderContext.addWithParam(mRenderTemplates.idattribute, {
 						attributeName: oAttribute.name,
-						attributeValue1: jQuery.sap.encodeHTML(String(oAttribute.value || "")),
+						attributeValue1: encodeXML(String(oAttribute.value || "")),
 						attributeValue2: oNode.getAttribute("__id"),
 						modified: bModified,
-						oldValue: jQuery.sap.encodeHTML(sOldValue)
+						oldValue: encodeXML(sOldValue)
 					});
 				}
 			} else {
 				oRenderContext.addWithParam(mRenderTemplates.attribute, {
 					attributeName: oAttribute.name,
-					attributeValue: jQuery.sap.encodeHTML(String(oAttribute.value || "")),
+					attributeValue: encodeXML(String(oAttribute.value || "")),
 					modified: bModified,
-					oldValue: jQuery.sap.encodeHTML(sOldValue)
+					oldValue: encodeXML(sOldValue)
 				});
 			}
 		}
@@ -145,7 +148,7 @@ function (jQuery, ManagedObject) {
 			pxlevel: (iLevel * 16) + "px",
 			collapsed: iLevel >= (oRenderContext.initialExpandedLevel - 1),
 			localName: oNode.localName,
-			namespaceURI:  oNode.namespaceURI ? jQuery.sap.encodeHTML(String(oNode.namespaceURI)) + ":" : ""
+			namespaceURI:  oNode.namespaceURI ? encodeXML(String(oNode.namespaceURI)) + ":" : ""
 		});
 
 		var aInfos = oRenderContext.fnNodeInfos(oNode);
@@ -156,8 +159,8 @@ function (jQuery, ManagedObject) {
 					idx: iIdx + "",
 					infoidx: i + "",
 					selected: oInfo.selected || false,
-					color: jQuery.sap.encodeHTML(oInfo.color) || "orange",
-					tooltip: jQuery.sap.encodeHTML(oInfo.tooltip) || ""
+					color: encodeXML(oInfo.color) || "orange",
+					tooltip: encodeXML(oInfo.tooltip) || ""
 				});
 			}
 		}
@@ -174,7 +177,7 @@ function (jQuery, ManagedObject) {
 				pxlevel: (iLevel * 16) + "px",
 				collapsed: iLevel >= (oRenderContext.initialExpandedLevel - 1),
 				localName: oNode.localName,
-				namespaceURI:  oNode.namespaceURI ? jQuery.sap.encodeHTML(String(oNode.namespaceURI)) + ":" : ""
+				namespaceURI:  oNode.namespaceURI ? encodeXML(String(oNode.namespaceURI)) + ":" : ""
 			});
 
 		} else {
@@ -186,7 +189,7 @@ function (jQuery, ManagedObject) {
 				pxlevel: (iLevel * 16) + "px",
 				collapsed: iLevel >= (oRenderContext.initialExpandedLevel - 1),
 				localName: oNode.localName,
-				namespaceURI: oNode.namespaceURI ? jQuery.sap.encodeHTML(String(oNode.namespaceURI)) + ":" : ""
+				namespaceURI: oNode.namespaceURI ? encodeXML(String(oNode.namespaceURI)) + ":" : ""
 			});
 		}
 	}
@@ -300,7 +303,7 @@ function (jQuery, ManagedObject) {
 
 	TreeViewer.prototype._iSelectedIndex = -1;
 	TreeViewer.prototype._selectNode = function(iIndex, aReasons) {
-		iIndex = parseInt(iIndex, 10);
+		iIndex = parseInt(iIndex);
 		var oNode = this._getStartNodeByIndex(iIndex);
 		if (this._oSelectedNode === oNode) {
 			return;
@@ -316,9 +319,9 @@ function (jQuery, ManagedObject) {
 	};
 
 	TreeViewer.prototype._onInfoClick = function(iIndex, iInfoIndex) {
-		iIndex = parseInt(iIndex, 10);
+		iIndex = parseInt(iIndex);
 		this._selectNode(iIndex, ["template"]);
-		this.fnInfoPress(this._getDataObjectByIndex(iIndex), parseInt(iInfoIndex, 10));
+		this.fnInfoPress(this._getDataObjectByIndex(iIndex), parseInt(iInfoIndex));
 		return true;
 	};
 
@@ -332,12 +335,12 @@ function (jQuery, ManagedObject) {
 		if (!oDomRef || oDomRef.getAttribute("visible") === "true") {
 			return;
 		}
-		var iLevel = parseInt(oDomRef.getAttribute("level"), 10);
+		var iLevel = parseInt(oDomRef.getAttribute("level"));
 		oDomRef = oDomRef.previousSibling;
 		while (oDomRef) {
-			var iCurrentLevel = parseInt(oDomRef.getAttribute("level"), 10);
+			var iCurrentLevel = parseInt(oDomRef.getAttribute("level"));
 			if (iCurrentLevel < iLevel && oDomRef.getAttribute("collapsed") === "true") {
-				this._toggleNode(parseInt(oDomRef.getAttribute("idx"), 10));
+				this._toggleNode(parseInt(oDomRef.getAttribute("idx")));
 			}
 			oDomRef = oDomRef.previousSibling;
 		}
@@ -369,13 +372,13 @@ function (jQuery, ManagedObject) {
 	};
 
 	TreeViewer.prototype._toggleNode = function(iIndex) {
-		iIndex = parseInt(iIndex, 10);
+		iIndex = parseInt(iIndex);
 		var oNode = this._getStartNodeByIndex(iIndex);
 		if (oNode) {
-			var iLevel = parseInt(oNode.getAttribute("level"), 10);
+			var iLevel = parseInt(oNode.getAttribute("level"));
 			var oNextNode = oNode.nextSibling;
 			while (oNextNode) {
-				if (parseInt(oNextNode.getAttribute("level"), 10) > iLevel) {
+				if (parseInt(oNextNode.getAttribute("level")) > iLevel) {
 					if (oNode.getAttribute("collapsed") === "true") {
 						if (oNextNode.getAttribute("collapsed") === "true") {
 							oNextNode.setAttribute("visible", "true");
@@ -390,7 +393,7 @@ function (jQuery, ManagedObject) {
 						oNextNode.setAttribute("visible", "false");
 					}
 				}
-				if (parseInt(oNextNode.getAttribute("level"), 10) === iLevel) {
+				if (parseInt(oNextNode.getAttribute("level")) === iLevel) {
 					if (oNode.getAttribute("collapsed") === "true") {
 						oNextNode.setAttribute("visible", "true");
 					} else {

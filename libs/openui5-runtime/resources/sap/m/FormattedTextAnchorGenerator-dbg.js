@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -9,12 +9,19 @@
  * This class handles the <code>AnchorGeneration</code> for the <code>FormattedText</code> control.
  */
 
-sap.ui.define(["jquery.sap.global", "sap/ui/base/Metadata"], function (jQuery, Metadata) {
+sap.ui.define([
+	"sap/ui/base/Metadata",
+	"sap/m/library",
+	"sap/base/security/URLWhitelist"
+], function(Metadata, library, URLWhitelist) {
 	"use strict";
+
+	// shortcut for sap.m.LinkConversion
+	var LinkConversion = library.LinkConversion;
 
 	var AnchorGenerator = Metadata.createClass("sap.m.FormattedTextAnchorGenerator", {});
 
-	var LINK_SEARCH_PATTERN = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+	var LINK_SEARCH_PATTERN = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;()$]*[-A-Z0-9+&@#\/%=~_|])/gim;
 	var WWW_DETECTION_PATTERN = /(www\.[^\s><]+(\b|$))/gim;
 	var WWW_DETECTED_LINKS_PREFIX = "//";
 	var DETECT_HTML_TAGS = /<(?:"[^"]*"['"]*|'[^']*'['"]*|[^'">])+(?!\/\s\*)>/gim;
@@ -23,19 +30,19 @@ sap.ui.define(["jquery.sap.global", "sap/ui/base/Metadata"], function (jQuery, M
 
 	/**
 	 * Generates anchors based on the provided configuration.
-	 * @param {string} sText
-	 * @param {sap.m.LinkConversion} sLinkConversionStrategy
-	 * @param {string} sTarget
+	 * @param {string} sText The text to be processed
+	 * @param {sap.m.LinkConversion} sLinkConversionStrategy The link conversion strategy
+	 * @param {string} sTarget The target attribute of the newly created anchors
 	 * @static
 	 * @public
-	 * @returns {string}
+	 * @returns {string} The resulting text after the anchor generation
 	 */
 	AnchorGenerator.generateAnchors = function (sText, sLinkConversionStrategy, sTarget) {
-		if (sLinkConversionStrategy === sap.m.LinkConversion.ProtocolOnly) {
+		if (sLinkConversionStrategy === LinkConversion.ProtocolOnly) {
 			sText = AnchorGenerator._createAnchors(sText, LINK_SEARCH_PATTERN, sTarget);
 		}
 
-		if (sLinkConversionStrategy === sap.m.LinkConversion.All) {
+		if (sLinkConversionStrategy === LinkConversion.All) {
 			sText = AnchorGenerator._createAnchors(sText, LINK_SEARCH_PATTERN, sTarget);
 			sText = AnchorGenerator._createAnchors(sText, WWW_DETECTION_PATTERN, sTarget, WWW_DETECTED_LINKS_PREFIX);
 		}
@@ -87,7 +94,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/base/Metadata"], function (jQuery, M
 	 * @private
 	 */
 	AnchorGenerator._shouldBeProcessed = function (sUrlCandidate, oCandidatePosition, aBlackListedPositions) {
-		return jQuery.sap.validateUrl(sUrlCandidate) && !AnchorGenerator._isAllowed(aBlackListedPositions, oCandidatePosition);
+		return URLWhitelist.validate(sUrlCandidate) && !AnchorGenerator._isAllowed(aBlackListedPositions, oCandidatePosition);
 	};
 
 	/**
@@ -154,5 +161,4 @@ sap.ui.define(["jquery.sap.global", "sap/ui/base/Metadata"], function (jQuery, M
 	};
 
 	return AnchorGenerator;
-
 }, /* bExport= */ false);

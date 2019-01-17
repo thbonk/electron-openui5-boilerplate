@@ -1,19 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define([
-	"jquery.sap.global",
-	"./Base",
-	"sap/ui/fl/Utils"
-],
-function(
-	jQuery,
-	Base,
-	FlexUtils
-) {
+sap.ui.define(["./Base", "sap/ui/fl/Utils"],
+function(Base, FlexUtils) {
 	"use strict";
 
 	/**
@@ -21,12 +13,10 @@ function(
 	 *
 	 * @alias sap.ui.fl.changeHandler.MoveControls
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @experimental Since 1.46
 	 */
 	var MoveControls = { };
-
-	MoveControls.CHANGE_TYPE = "moveControls";
 
 	// Defines object which contains constants used in the handler
 	MoveControls.SOURCE_ALIAS = "source";
@@ -72,8 +62,12 @@ function(
 			throw new Error("Missing targetIndex for element with id '" + mMovedElement.selector.id
 					+ "' in movedElements supplied");
 		}
+		var oControl = oModifier.bySelector(mMovedElement.selector || mMovedElement.id, oAppComponent, oView);
 
-		return oModifier.bySelector(mMovedElement.selector || mMovedElement.id, oAppComponent, oView);
+		if (!oControl) {
+			throw new Error("Control to move was not found. Id: '" + mMovedElement.selector.id + "'");
+		}
+		return oControl;
 	};
 
 	MoveControls._checkCompleteChangeContentConditions = function(mSpecificChangeInfo) {
@@ -145,9 +139,11 @@ function(
 	 * @param {sap.ui.core.Control} oRelevantContainer control that matches the change selector for applying the change, which is the source of the move
 	 * @param {object} mPropertyBag - map of properties
 	 * @param {object} mPropertyBag.view - xml node representing a ui5 view
-	 * @param {sap.ui.fl.changeHandler.BaseTreeModifier} mPropertyBag.modifier - modifier for the controls
+	 * @param {string} [mPropertyBag.sourceAggregation] - name of the source aggregation. Overwrites the aggregation from the change. Can be provided by a custom ChangeHandler, that uses this ChangeHandler
+	 * @param {string} [mPropertyBag.targetAggregation] - name of the target aggregation. Overwrites the aggregation from the change. Can be provided by a custom ChangeHandler, that uses this ChangeHandler
+	 * @param {sap.ui.core.util.reflection.BaseTreeModifier} mPropertyBag.modifier - modifier for the controls
 	 * @param {sap.ui.core.UIComponent} mPropertyBag.appComponent - appComopnent
-	 * @return {boolean} true - if change could be applied
+	 * @return {boolean} Returns true if change could be applied, otherwise undefined
 	 * @public
 	 * @function
 	 * @name sap.ui.fl.changeHandler.MoveControls#applyChange
@@ -160,46 +156,33 @@ function(
 		this._checkConditions(oChange, oModifier, oView, oAppComponent);
 
 		var oChangeContent = oChange.getContent();
-		var sSourceAggregation = oChangeContent.source.selector.aggregation;
+		var sSourceAggregation = mPropertyBag.sourceAggregation || oChangeContent.source.selector.aggregation;
 		var oTargetParent = oModifier.bySelector(oChangeContent.target.selector, oAppComponent, oView);
-		var sTargetAggregation = oChangeContent.target.selector.aggregation;
+		var sTargetAggregation = mPropertyBag.targetAggregation || oChangeContent.target.selector.aggregation;
 
 		var aRevertData = [];
 		oChangeContent.movedElements.forEach(function(mMovedElement, iElementIndex) {
 			var oMovedElement = this._getElementControlOrThrowError(mMovedElement, oModifier, oAppComponent, oView);
-			if (!oMovedElement) {
-				FlexUtils.log.warning("Element to move not found");
-				return;
-			}
-			var oSourceParent = oModifier.getParent(oMovedElement);
 
+			var oSourceParent = oModifier.getParent(oMovedElement);
 			var iInsertIndex = mMovedElement.targetIndex;
 
 			// save the current index, sourceParent and sourceAggregation for revert
-			var iIndex;
-			var mAllAggregations = oModifier.getAllAggregations(oSourceParent);
-			Object.keys(mAllAggregations).some(function(sKey) {
-				var aAggregation = oModifier.getAggregation(oSourceParent, sKey);
-				if (Array.isArray(aAggregation)) {
-					iIndex = aAggregation.indexOf(oMovedElement);
-					if (iIndex > -1) {
-						sSourceAggregation = sKey;
-						aRevertData.unshift({
-							index: iIndex,
-							aggregation: sKey,
-							sourceParent: oSourceParent
-						});
-						return true;
-					}
-				}
-			});
+			var iIndex = oModifier.findIndexInParentAggregation(oMovedElement);
+			if (iIndex > -1) {
+				// mPropertyBag.sourceAggregation should always be used when available
+				sSourceAggregation = mPropertyBag.sourceAggregation || oModifier.getParentAggregationName(oMovedElement, oSourceParent);
 
-			// on XML, getAllAggregations doesn't work yet, so we have to take the (in specific circumstances wrong) data from the change.
-			if (!jQuery.isNumeric(iIndex)) {
+				// if iIndex === iInsertIndex the operation was already performed
+				// in this case we need the sourceIndex that is saved in the change in order to revert it to the correct index
+				if (iIndex === iInsertIndex) {
+					iIndex = mMovedElement.sourceIndex;
+				}
+
 				aRevertData.unshift({
-					index: mMovedElement.sourceIndex,
-					aggregation: oChangeContent.source.selector.aggregation,
-					sourceParent: oSourceParent
+					index: iIndex,
+					aggregation: sSourceAggregation,
+					sourceParentId: oModifier.getId(oSourceParent)
 				});
 			}
 
@@ -219,7 +202,7 @@ function(
 	 * @param {sap.ui.core.Control} oRelevantContainer control that matches the change selector for applying the change, which is the source of the move
 	 * @param {object} mPropertyBag - map of properties
 	 * @param {object} mPropertyBag.view - xml node representing a ui5 view
-	 * @param {sap.ui.fl.changeHandler.BaseTreeModifier} mPropertyBag.modifier - modifier for the controls
+	 * @param {sap.ui.core.util.reflection.BaseTreeModifier} mPropertyBag.modifier - modifier for the controls
 	 * @param {sap.ui.core.UIComponent} mPropertyBag.appComponent - appComopnent
 	 * @return {boolean} true - if change could be applied
 	 * @public
@@ -252,9 +235,11 @@ function(
 
 			var iInsertIndex = mMovedElement.sourceIndex;
 			if (aRevertData) {
-				oSourceParent = aRevertData[iElementIndex].sourceParent;
-				sSourceAggregation = aRevertData[iElementIndex].aggregation;
-				iInsertIndex = aRevertData[iElementIndex].index;
+				var mRevertData = aRevertData[iElementIndex];
+				sSourceAggregation = mRevertData.aggregation;
+				iInsertIndex = mRevertData.index;
+				//TODO: If revert needs to be done on XML, this has to be adjusted
+				oSourceParent = oModifier.byId(mRevertData.sourceParentId, oView);
 			}
 
 			oModifier.removeAggregation(oTargetParent, sTargetAggregation, oMovedElement);
@@ -286,7 +271,6 @@ function(
 
 		mSpecificChangeInfo = this._getSpecificChangeInfo(oModifier, mSpecificChangeInfo, oAppComponent);
 
-		mChangeData.changeType = MoveControls.CHANGE_TYPE;
 		mChangeData.content = {
 			movedElements : [],
 			source : {

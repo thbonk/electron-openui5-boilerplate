@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
  /*global Promise*/
-sap.ui.define(['jquery.sap.global', 'sap/m/InstanceManager', 'sap/m/NavContainer', 'sap/m/SplitContainer', 'sap/ui/base/Object', 'sap/ui/core/routing/History', 'sap/ui/core/routing/Router'],
-	function($, InstanceManager, NavContainer, SplitContainer, BaseObject, History, Router) {
+sap.ui.define(['sap/m/InstanceManager', 'sap/m/NavContainer', 'sap/m/SplitContainer', 'sap/ui/base/Object', 'sap/ui/core/routing/History', 'sap/ui/Device', "sap/base/Log"],
+	function(InstanceManager, NavContainer, SplitContainer, BaseObject, History, Device, Log) {
 		"use strict";
 
 
@@ -174,7 +174,7 @@ sap.ui.define(['jquery.sap.global', 'sap/m/InstanceManager', 'sap/m/NavContainer
 					}
 
 					//Always override the navigation when its a navContainer, and if its a splitContainer - in the mobile case it behaves like a nav container
-					if (bIsNavContainer || sap.ui.Device.system.phone) {
+					if (bIsNavContainer || Device.system.phone) {
 						aResults.splice(i, 1);
 						aResults.push(oCurrentNavigation);
 						bFoundTheCurrentNavigation = true;
@@ -196,7 +196,7 @@ sap.ui.define(['jquery.sap.global', 'sap/m/InstanceManager', 'sap/m/NavContainer
 					}
 				}
 
-				if (oCurrentContainer instanceof SplitContainer && !sap.ui.Device.system.phone) {
+				if (oCurrentContainer instanceof SplitContainer && !Device.system.phone) {
 					//We have a desktop SplitContainer and need to add to transitions if necessary
 					oCurrentNavigation.bIsMasterPage = !!oCurrentContainer.getMasterPage(oView.getId());
 				}
@@ -246,11 +246,11 @@ sap.ui.define(['jquery.sap.global', 'sap/m/InstanceManager', 'sap/m/NavContainer
 			// TODO: when target view is loaded asyncly, it could happen that the target control is rendered with empty content and
 			// the target view is added later. oTargetControl.getDomRef has to be adapted with some new method in target control.
 			if (oTargetControl.getDomRef() && oTargetControl.getCurrentPage(bNextPageIsMaster).getId() === sViewId) {
-				$.sap.log.info("navigation to view with id: " + sViewId + " is skipped since it already is displayed by its targetControl", "sap.m.routing.TargetHandler");
+				Log.info("navigation to view with id: " + sViewId + " is skipped since it already is displayed by its targetControl", "sap.m.routing.TargetHandler");
 				return false;
 			}
 
-			$.sap.log.info("navigation to view with id: " + sViewId + " the targetControl is " + oTargetControl.getId() + " backwards is " + bBack);
+			Log.info("navigation to view with id: " + sViewId + " the targetControl is " + oTargetControl.getId() + " backwards is " + bBack);
 
 			if (bBack) {
 				// insert previous page if not in nav container yet
@@ -300,4 +300,4 @@ sap.ui.define(['jquery.sap.global', 'sap/m/InstanceManager', 'sap/m/NavContainer
 
 		return TargetHandler;
 
-	}, /* bExport= */ true);
+	});

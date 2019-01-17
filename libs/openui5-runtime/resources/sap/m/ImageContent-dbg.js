@@ -1,11 +1,26 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/Image', 'sap/ui/core/IconPool'],
-	function(jQuery, library, Control, Image, IconPool) {
+sap.ui.define([
+	'./library',
+	'sap/ui/core/Control',
+	'sap/m/Image',
+	'sap/ui/core/IconPool',
+	'sap/ui/Device',
+	'./ImageContentRenderer',
+	"sap/ui/events/KeyCodes"
+], function(
+	library,
+	Control,
+	Image,
+	IconPool,
+	Device,
+	ImageContentRenderer,
+	KeyCodes
+) {
 	"use strict";
 
 	/**
@@ -14,11 +29,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/I
 	 * @param {string} [sId] ID for the new control, generated automatically if no ID is given
 	 * @param {object} [mSettings] Initial settings for the new control
 	 *
-	 * @class This control can be displayed as image content in a tile.
+	 * @class This control can be used to display image content in a GenericTile.
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @since 1.38
 	 *
 	 * @public
@@ -26,38 +41,38 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/I
 	 * @ui5-metamodel This control will also be described in the UI5 (legacy) designtime metamodel
 	 */
 	var ImageContent = Control.extend("sap.m.ImageContent", /** @lends sap.m.ImageContent.prototype */ {
-		metadata : {
+		metadata: {
 
-			library : "sap.m",
-			properties : {
+			library: "sap.m",
+			properties: {
 				/**
 				 * The image to be displayed as a graphical element within the imageContent. This can be an image or an icon from the icon font.
 				 */
-				"src" : {type : "sap.ui.core.URI", group : "Appearance", defaultValue : null},
+				src: {type: "sap.ui.core.URI", group: "Appearance", defaultValue: null},
 				/**
 				 * Description of image. This text is used to provide ScreenReader information.
 				 */
-				"description" : {type : "string", group : "Accessibility", defaultValue : null}
+				description: {type: "string", group: "Accessibility", defaultValue: null}
 			},
-			defaultAggregation : "_content",
-			aggregations : {
+			defaultAggregation: "_content",
+			aggregations: {
 				/**
 				 * The hidden aggregation for the image content.
 				 */
-				"_content" : {type : "sap.ui.core.Control", multiple : false, visibility : "hidden"}
+				_content: {type: "sap.ui.core.Control", multiple: false, visibility: "hidden"}
 			},
-			events : {
+			events: {
 				/**
 				 * The event is triggered when the image content is pressed.
 				 */
-				"press" : {}
+				press: {}
 			}
 		}
 	});
 
 	/* --- Lifecycle Handling --- */
 
-	ImageContent.prototype.onBeforeRendering = function() {
+	ImageContent.prototype.onBeforeRendering = function () {
 		var oImage, sUri, sDescription;
 		oImage = this.getAggregation("_content");
 		sUri = this.getSrc();
@@ -70,10 +85,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/I
 			}
 
 			oImage = IconPool.createControlByURI({
-				id : this.getId() + "-icon-image",
-				src : sUri,
-				alt : sDescription,
-				decorative : false
+				id: this.getId() + "-icon-image",
+				src: sUri,
+				alt: sDescription,
+				decorative: true
 			}, Image);
 			this.setAggregation("_content", oImage, true);
 			this._setPointerOnImage();
@@ -88,7 +103,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/I
 	 * Sets CSS class 'sapMPointer' for the internal Icon if needed.
 	 * @private
 	 */
-	ImageContent.prototype._setPointerOnImage = function() {
+	ImageContent.prototype._setPointerOnImage = function () {
 		var oImage = this.getAggregation("_content");
 		if (oImage && this.hasListeners("press")) {
 			oImage.addStyleClass("sapMPointer");
@@ -103,8 +118,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/I
 	 *
 	 * @param {sap.ui.base.Event} oEvent which was triggered
 	 */
-	ImageContent.prototype.ontap = function(oEvent) {
-		if (sap.ui.Device.browser.msie) {
+	ImageContent.prototype.ontap = function (oEvent) {
+		if (Device.browser.msie) {
 			this.$().focus();
 		}
 		this.firePress();
@@ -115,15 +130,15 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/I
 	 *
 	 * @param {sap.ui.base.Event} oEvent which was triggered
 	 */
-	ImageContent.prototype.onkeydown = function(oEvent) {
-		if (oEvent.which === jQuery.sap.KeyCodes.ENTER || oEvent.which === jQuery.sap.KeyCodes.SPACE) {
+	ImageContent.prototype.onkeydown = function (oEvent) {
+		if (oEvent.which === KeyCodes.ENTER || oEvent.which === KeyCodes.SPACE) {
 			this.firePress();
 			oEvent.preventDefault();
 		}
 	};
 
-	ImageContent.prototype.attachEvent = function(eventId, data, functionToCall, listener) {
-		sap.ui.core.Control.prototype.attachEvent.call(this, eventId, data, functionToCall, listener);
+	ImageContent.prototype.attachEvent = function (eventId, data, functionToCall, listener) {
+		Control.prototype.attachEvent.call(this, eventId, data, functionToCall, listener);
 		if (this.hasListeners("press")) {
 			this.$().attr("tabindex", 0).addClass("sapMPointer");
 			this._setPointerOnImage();
@@ -131,8 +146,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/I
 		return this;
 	};
 
-	ImageContent.prototype.detachEvent = function(eventId, functionToCall, listener) {
-		sap.ui.core.Control.prototype.detachEvent.call(this, eventId, functionToCall, listener);
+	ImageContent.prototype.detachEvent = function (eventId, functionToCall, listener) {
+		Control.prototype.detachEvent.call(this, eventId, functionToCall, listener);
 		if (!this.hasListeners("press")) {
 			this.$().removeAttr("tabindex").removeClass("sapMPointer");
 			this._setPointerOnImage();
@@ -149,8 +164,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/I
 		var oContent = this.getAggregation("_content");
 		if (oContent && oContent.getAlt() !== "") {
 			return oContent.getAlt();
-		} else if (oContent) {
+		} else if (oContent && oContent.getAccessibilityInfo()) {
 			return oContent.getAccessibilityInfo().description;
+		} else {
+			return "";
 		}
 	};
 

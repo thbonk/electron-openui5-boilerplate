@@ -1,12 +1,19 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool', 'sap/ui/core/theming/Parameters'],
-	function(jQuery, IconPool, Parameters) {
+sap.ui.define(["./library", "sap/ui/Device", "sap/ui/core/InvisibleText"],
+	function(library, Device, InvisibleText) {
 	"use strict";
+
+
+	// shortcut for sap.m.ListType
+	var ListItemType = library.ListType;
+
+	// shortcut for sap.m.ListMode
+	var ListMode = library.ListMode;
 
 
 	/**
@@ -15,9 +22,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool', 'sap/ui/core/theming
 	 * @namespace
 	 */
 	var ListItemBaseRenderer = {};
-
-	// create ARIA announcements
-	var mAriaAnnouncements = {};
 
 	ListItemBaseRenderer.renderInvisible = function(rm, oLI) {
 		this.openItemTag(rm, oLI);
@@ -47,8 +51,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool', 'sap/ui/core/theming
 	};
 
 	ListItemBaseRenderer.isModeMatched = function(sMode, iOrder) {
-		var mOrderConfig = (sap.m.ListBaseRenderer || {}).ModeOrder || {};
-		return (mOrderConfig[sMode] == iOrder);
+		var mOrderConfig = (sap.ui.require("sap/m/ListBaseRenderer") || {}).ModeOrder || {};
+		return mOrderConfig[sMode] == iOrder;
 	};
 
 	/**
@@ -78,7 +82,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool', 'sap/ui/core/theming
 
 	ListItemBaseRenderer.decorateMode = function(oModeControl, oLI) {
 
-		/* Remove animation classes to avoid unexpected re-rendering bahavior */
+		// remove animation classes to avoid unexpected re-rendering behavior
 		oModeControl.removeStyleClass("sapMLIBSelectAnimation sapMLIBUnselectAnimation");
 
 		// determine whether animation is necessary or not
@@ -95,7 +99,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool', 'sap/ui/core/theming
 			return;
 		}
 
-		if (sMode == sap.m.ListMode.None) {
+		if (sMode == ListMode.None) {
 			oModeControl.addStyleClass("sapMLIBUnselectAnimation");
 		} else {
 			oModeControl.addStyleClass("sapMLIBSelectAnimation");
@@ -136,7 +140,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool', 'sap/ui/core/theming
 	 * @protected
 	 */
 	ListItemBaseRenderer.renderType = function(rm, oLI) {
-		var oTypeControl = oLI.getTypeControl();
+		var oTypeControl = oLI.getTypeControl(true);
 		if (oTypeControl) {
 			rm.renderControl(oTypeControl);
 		}
@@ -183,7 +187,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool', 'sap/ui/core/theming
 	 * @protected
 	 */
 	ListItemBaseRenderer.addFocusableClasses = function(rm, oLI) {
-		if (sap.ui.Device.system.desktop) {
+		if (Device.system.desktop) {
 			rm.addClass("sapMLIBFocusable");
 			this.addLegacyOutlineClass(rm, oLI);
 		}
@@ -197,7 +201,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool', 'sap/ui/core/theming
 	 * @protected
 	 */
 	ListItemBaseRenderer.addLegacyOutlineClass = function(rm, oLI) {
-		if (sap.ui.Device.browser.msie || sap.ui.Device.browser.edge) {
+		if (Device.browser.msie || Device.browser.edge) {
 			rm.addClass("sapMLIBLegacyOutline");
 		}
 	};
@@ -214,16 +218,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool', 'sap/ui/core/theming
 	 * @protected
 	 */
 	ListItemBaseRenderer.getAriaAnnouncement = function(sKey, sBundleText) {
-		if (mAriaAnnouncements[sKey]) {
-			return mAriaAnnouncements[sKey];
-		}
-
-		sBundleText = sBundleText || "LIST_ITEM_" + sKey.toUpperCase();
-		mAriaAnnouncements[sKey] = new sap.ui.core.InvisibleText({
-			text : sap.ui.getCore().getLibraryResourceBundle("sap.m").getText(sBundleText)
-		}).toStatic().getId();
-
-		return mAriaAnnouncements[sKey];
+		return InvisibleText.getStaticId("sap.m", sBundleText || "LIST_ITEM_" + sKey.toUpperCase());
 	};
 
 
@@ -264,24 +259,23 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool', 'sap/ui/core/theming
 		}
 
 		var aDescribedBy = [],
-			sType = oLI.getType(),
-			mType = sap.m.ListType;
+			sType = oLI.getType();
 
 		if (oLI.getListProperty("showUnread") && oLI.getUnread()) {
 			aDescribedBy.push(this.getAriaAnnouncement("unread"));
 		}
 
-		if (oLI.getMode() == sap.m.ListMode.Delete) {
-			aDescribedBy.push(this.getAriaAnnouncement("deletable"));
+		if (oLI.getMode() == ListMode.Delete) {
+			aDescribedBy.push(this.getAriaAnnouncement("delete"));
 		}
 
-		if (sType == mType.Navigation) {
+		if (sType == ListItemType.Navigation) {
 			aDescribedBy.push(this.getAriaAnnouncement("navigation"));
 		} else {
-			if (sType == mType.Detail || sType == mType.DetailAndActive) {
+			if (sType == ListItemType.Detail || sType == ListItemType.DetailAndActive) {
 				aDescribedBy.push(this.getAriaAnnouncement("detail"));
 			}
-			if (sType == mType.Active || sType == mType.DetailAndActive) {
+			if (sType == ListItemType.Active || sType == ListItemType.DetailAndActive) {
 				aDescribedBy.push(this.getAriaAnnouncement("active"));
 			}
 		}
@@ -404,7 +398,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool', 'sap/ui/core/theming
 		rm.addClass("sapMLIBShowSeparator");
 		rm.addClass("sapMLIBType" + oLI.getType());
 
-		if (sap.ui.Device.system.desktop && oLI.isActionable()) {
+		if (Device.system.desktop && oLI.isActionable()) {
 			rm.addClass("sapMLIBActionable");
 			rm.addClass("sapMLIBHoverable");
 		}

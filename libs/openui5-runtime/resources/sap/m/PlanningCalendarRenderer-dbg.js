@@ -1,10 +1,10 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define([],
+	function() {
 	"use strict";
 
 	/**
@@ -37,6 +37,14 @@ sap.ui.define(['jquery.sap.global'],
 
 		if (!oPC.getShowRowHeaders()) {
 			oRm.addClass("sapMPlanCalNoHead");
+		}
+
+		if (oPC.getShowWeekNumbers() && oPC._viewAllowsWeekNumbers(oPC.getViewKey())) {
+			oRm.addClass("sapMPlanCalWithWeekNumbers");
+		}
+
+		if (oPC.getShowDayNamesLine() && oPC._viewAllowsDayNamesLine(oPC.getViewKey())) {
+			oRm.addClass("sapMPlanCalWithDayNamesLine");
 		}
 
 		if (sTooltip) {

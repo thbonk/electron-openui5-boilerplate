@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool'],
-	function(jQuery, IconPool) {
+sap.ui.define([],
+	function() {
 	"use strict";
 
 /**
@@ -44,9 +44,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool'],
 			oRm.addClass("sapMITBNoContentPadding");
 		}
 		oRm.addClass("sapMITBBackgroundDesign" + oControl.getBackgroundDesign());
+
 		oRm.writeClasses();
 		oRm.write(">");
-
 		// render icon tab header (if not configured to hide by ObjectHeader)
 		if (!oControl._bHideHeader) {
 			oRm.renderControl(oHeader);
@@ -66,6 +66,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool'],
 		if (!oControl.getExpanded()) { // hide content when closed
 			oRm.write("style='display: none'");
 		}
+
+		if (oHeader.oSelectedItem) {
+			oRm.writeAttribute('aria-labelledby', oHeader.oSelectedItem.getId());
+		}
+
 		oRm.write(">");
 		if (oControl.getExpanded()) {
 			// content from selected item

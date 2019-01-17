@@ -1,12 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides default renderer for control sap.ui.commons.layout.BorderLayout
-sap.ui.define(['jquery.sap.global', 'jquery.sap.encoder'],
-	function(jQuery/* , jQuerySap */) {
+sap.ui.define([
+    "sap/ui/thirdparty/jquery",
+    "sap/base/assert",
+    "sap/base/security/encodeXML"
+],
+	function(jQuery, assert, encodeXML) {
 	"use strict";
 
 
@@ -17,7 +21,7 @@ sap.ui.define(['jquery.sap.global', 'jquery.sap.encoder'],
 	 */
 	var BorderLayoutRenderer = {};
 
-	(function() {
+
 		/**
 		 * Renders the HTML for the given control, using the provided.
 		 * {@link sap.ui.core.RenderManager}.
@@ -183,13 +187,13 @@ sap.ui.define(['jquery.sap.global', 'jquery.sap.encoder'],
 				oRm.addStyle("height", mAreaSizes.bottom);
 				break;
 			default:
-				jQuery.sap.assert("default branch must not be reached");
+				assert("default branch must not be reached");
 				break;
 			}
 
 			// add overflow definition to the style-attribute value
-			oRm.addStyle("overflow-x", jQuery.sap.encodeHTML(oArea.getOverflowX() || ""));
-			oRm.addStyle("overflow-y", jQuery.sap.encodeHTML(oArea.getOverflowY() || ""));
+			oRm.addStyle("overflow-x", encodeXML(oArea.getOverflowX() || ""));
+			oRm.addStyle("overflow-y", encodeXML(oArea.getOverflowY() || ""));
 
 			// write alignment
 			var sAlign = oArea.getContentAlign();
@@ -200,7 +204,7 @@ sap.ui.define(['jquery.sap.global', 'jquery.sap.encoder'],
 					sAlign = "right";
 				}
 			}
-			oRm.addStyle("text-align", jQuery.sap.encodeHTML(sAlign || ""));
+			oRm.addStyle("text-align", encodeXML(sAlign || ""));
 
 			oRm.writeClasses(oArea);
 			oRm.writeStyles();
@@ -219,7 +223,7 @@ sap.ui.define(['jquery.sap.global', 'jquery.sap.encoder'],
 			var oOtherArea = oArea.getParent().getArea(sAreaId);
 			return oOtherArea ? oOtherArea.$() : jQuery();
 		}
-	}());
+
 
 	return BorderLayoutRenderer;
 

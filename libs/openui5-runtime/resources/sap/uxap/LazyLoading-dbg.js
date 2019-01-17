@@ -1,11 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(["jquery.sap.global",	"sap/ui/Device", "sap/ui/base/Metadata", "./ObjectPageSubSection", "./library"],
-	function (jQuery, Device, Metadata, ObjectPageSubSection, library) {
+sap.ui.define([
+	"sap/ui/thirdparty/jquery",
+	"sap/ui/Device",
+	"sap/ui/base/Metadata",
+	"./ObjectPageSubSection",
+	"./library",
+	"sap/base/Log"
+],
+	function(jQuery, Device, Metadata, ObjectPageSubSection, library, Log) {
 		"use strict";
 
 		var LazyLoading = Metadata.createClass("sap.uxap._helpers.LazyLoading", {
@@ -72,13 +79,24 @@ sap.ui.define(["jquery.sap.global",	"sap/ui/Device", "sap/ui/base/Metadata", "./
 		 */
 		LazyLoading.prototype._triggerVisibleSubSectionsEvents = function () {
 			this._oPrevSubSectionsInView = {};
+			// BCP: 1870326083 - force OP to recalculate immediately so Lazy Loading wont work with outdated size data
+			this._oObjectPageLayout._requestAdjustLayout(true);
 			this.doLazyLoading();
 		};
 
-		LazyLoading.prototype.lazyLoadDuringScroll = function (iScrollTop, timeStamp, iPageHeight) {
+		LazyLoading.prototype.lazyLoadDuringScroll = function (bImmediateLazyLoading, iScrollTop, timeStamp, iPageHeight) {
 			var iProgressPercentage,
 				iDelay,
 				bFastScrolling = false;
+
+			if (bImmediateLazyLoading) {
+				if (this._sLazyLoadingTimer) {
+					clearTimeout(this._sLazyLoadingTimer);
+				}
+				this._sLazyLoadingTimer = null;
+				this.doLazyLoading();
+				return;
+			}
 
 			this._iScrollProgress = iScrollTop - this._iPreviousScrollTop;
 			iProgressPercentage = Math.round(Math.abs(this._iScrollProgress) / iPageHeight * 100);
@@ -93,19 +111,21 @@ sap.ui.define(["jquery.sap.global",	"sap/ui/Device", "sap/ui/base/Metadata", "./
 			//as we don't want to load intermediate subsections which are visible only
 			//during a brief moment during scroll.
 			if (bFastScrolling && this._sLazyLoadingTimer) {
-				jQuery.sap.log.debug("ObjectPageLayout :: lazyLoading", "delayed by " + iDelay + " ms because of fast scroll");
-				jQuery.sap.clearDelayedCall(this._sLazyLoadingTimer);
+				Log.debug("ObjectPageLayout :: lazyLoading", "delayed by " + iDelay + " ms because of fast scroll");
+				clearTimeout(this._sLazyLoadingTimer);
 				this._sLazyLoadingTimer = null;
 			}
 
 			//If there's no delayed lazy loading call, create a new one.
 			if (!this._sLazyLoadingTimer) {
-				this._sLazyLoadingTimer = jQuery.sap.delayedCall(iDelay, this, this.doLazyLoading);
+				this._sLazyLoadingTimer = setTimeout(this.doLazyLoading.bind(this), iDelay);
 			}
 		};
 
 		LazyLoading.prototype.doLazyLoading = function () {
 			var oHeightParams = this._oObjectPageLayout._getHeightRelatedParameters(),
+				bIconTabBar = this._oObjectPageLayout.getUseIconTabBar(),
+				oSelectedSection = sap.ui.getCore().byId(this._oObjectPageLayout.getSelectedSection()),
 				oSectionInfo = this._oObjectPageLayout._oSectionInfo,
 				iScrollTop,
 				iScrollPageBottom,
@@ -145,7 +165,7 @@ sap.ui.define(["jquery.sap.global",	"sap/ui/Device", "sap/ui/base/Metadata", "./
 					iShift = -1 * Math.round(Math.min(Math.abs(this._iScrollProgress) * 20, iPageHeight / 2));
 				}
 				iScrollTop += iShift;
-				jQuery.sap.log.debug("ObjectPageLayout :: lazyLoading", "Visible page shifted from : " + iShift);
+				Log.debug("ObjectPageLayout :: lazyLoading", "Visible page shifted from : " + iShift);
 			}
 			iScrollPageBottom = iScrollTop + iPageHeight;       //the bottom limit
 
@@ -158,6 +178,10 @@ sap.ui.define(["jquery.sap.global",	"sap/ui/Device", "sap/ui/base/Metadata", "./
 			jQuery.each(oSectionInfo, jQuery.proxy(function (sId, oInfo) {
 				// on desktop/tablet, find a section, not a subsection
 				if (!oInfo.isSection && oInfo.sectionReference.getParent() && oInfo.sectionReference.getParent().getVisible()) {
+
+					if (bIconTabBar && oSelectedSection && oSelectedSection.indexOfSubSection(oInfo.sectionReference) < 0) {
+						return; // ignore hidden tabs content
+					}
 					// 1D segment intersection between visible page and current sub section
 					// C <= B and A <= D -> intersection
 					//    A-----B
@@ -188,13 +212,13 @@ sap.ui.define(["jquery.sap.global",	"sap/ui/Device", "sap/ui/base/Metadata", "./
 			//      - we have no visible subsections to load
 			if (iExtraSubSectionTop != -1 &&
 				jQuery.isEmptyObject(oSubSectionsToLoad)) {
-				jQuery.sap.log.debug("ObjectPageLayout :: lazyLoading", "extra section added : " + sExtraSubSectionId);
+				Log.debug("ObjectPageLayout :: lazyLoading", "extra section added : " + sExtraSubSectionId);
 				oSubSectionsToLoad[sExtraSubSectionId] = sExtraSubSectionId;
 			}
 
 			//Load the subsections
 			jQuery.each(oSubSectionsToLoad, jQuery.proxy(function (idx, sSectionId) {
-				jQuery.sap.log.debug("ObjectPageLayout :: lazyLoading", "connecting " + sSectionId);
+				Log.debug("ObjectPageLayout :: lazyLoading", "connecting " + sSectionId);
 				sap.ui.getCore().byId(sSectionId).connectToModels();
 				oSectionInfo[sSectionId].loaded = true;
 			}, this));
@@ -203,7 +227,7 @@ sap.ui.define(["jquery.sap.global",	"sap/ui/Device", "sap/ui/base/Metadata", "./
 			jQuery.each(oSubSectionsInView, jQuery.proxy(function (idx, sSectionId) {
 				if (!this._oPrevSubSectionsInView[idx]) {
 					// newly scrolled in view
-					jQuery.sap.log.debug("ObjectPageLayout :: lazyLoading", "subSectionEnteredViewPort " + sSectionId);
+					Log.debug("ObjectPageLayout :: lazyLoading", "subSectionEnteredViewPort " + sSectionId);
 					this._oObjectPageLayout.fireEvent("subSectionEnteredViewPort", {
 						subSection: sap.ui.getCore().byId(sSectionId)
 					});
@@ -215,13 +239,13 @@ sap.ui.define(["jquery.sap.global",	"sap/ui/Device", "sap/ui/base/Metadata", "./
 				//bOnGoingScroll is just a prediction, we can't be 100% sure as there's no end-of-scroll event
 				//so we relaunch a new delayed lazy loading to ensure all visible
 				//sections will actually be loaded (no shift) if scroll stops suddenly.
-				this._sLazyLoadingTimer = jQuery.sap.delayedCall(this.LAZY_LOADING_DELAY, this, this.doLazyLoading);
+				this._sLazyLoadingTimer = setTimeout(this.doLazyLoading.bind(this), this.LAZY_LOADING_DELAY);
 			} else {
 				if (iExtraSubSectionTop) {
 					//An extra subsection has been found
 					//relaunch a delayed lazy loading call to check if there's another extra subsection to load
 					//We use a long delay (5* LAZY_LOADING_DELAY) to wait for current loading completion.
-					this._sLazyLoadingTimer = jQuery.sap.delayedCall(5 * this.LAZY_LOADING_DELAY, this, this.doLazyLoading);
+					this._sLazyLoadingTimer = setTimeout(this.doLazyLoading.bind(this), 5 * this.LAZY_LOADING_DELAY);
 				} else {
 					//reset the lazy loading timer
 					this._sLazyLoadingTimer = null;

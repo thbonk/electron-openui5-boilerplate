@@ -16,6 +16,11 @@
 			"theme": "base"
 		},
 		{
+			"name": "DragAndDrop.less",
+			"designtime": true,
+			"theme": "base"
+		},
+		{
 			"name": "Icon.less",
 			"designtime": true,
 			"theme": "base"

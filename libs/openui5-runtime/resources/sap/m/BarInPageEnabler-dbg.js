@@ -1,13 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides helper sap.m.BarInPageEnabler
-sap.ui.define(['sap/ui/base/Object', './PageAccessibleLandmarkInfo', 'sap/ui/core/InvisibleText'],
-	function(Object, PageAccessibleLandmarkInfo, InvisibleText) {
+sap.ui.define(['sap/ui/base/Object', 'sap/m/library', "sap/base/Log"],
+	function(Object, library, Log) {
 	"use strict";
+
+	// shortcut for sap.m.IBarHTMLTag
+	var IBarHTMLTag = library.IBarHTMLTag;
 
 	var mContexts = {
 		footer : {
@@ -28,26 +31,6 @@ sap.ui.define(['sap/ui/base/Object', './PageAccessibleLandmarkInfo', 'sap/ui/cor
 	};
 
 	var IBAR_CSS_CLASS = "sapMIBar";
-
-	var _mInvisibleTexts = {},
-		oBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m");
-
-	/**
-	 * Creates (if not already created) and returns an invisible text element for screen reader support.
-	 * @param {string} sType - the type of the control we want to get a label for
-	 * @param {string} sText - the text to be used
-	 * @private
-	 */
-	var _ensureInvisibleText = function(sType, sText) {
-
-		if (typeof _mInvisibleTexts[sType] === "undefined") {
-			_mInvisibleTexts[sType] = new InvisibleText({
-				text: sText
-			}).toStatic().getId();
-		}
-
-		return _mInvisibleTexts[sType];
-	};
 
 	/**
 	 * @class Helper Class for implementing the IBar interface. Should be created once per IBar instance.
@@ -91,7 +74,7 @@ sap.ui.define(['sap/ui/base/Object', './PageAccessibleLandmarkInfo', 'sap/ui/cor
 		getHTMLTag : function () {
 			if (!this.hasOwnProperty("sTag")) {
 				//Div is the default
-				this.sTag = sap.m.IBarHTMLTag.Div;
+				this.sTag = IBarHTMLTag.Div;
 			}
 
 			return this.sTag;
@@ -162,17 +145,13 @@ sap.ui.define(['sap/ui/base/Object', './PageAccessibleLandmarkInfo', 'sap/ui/cor
 			}
 
 			if (!this.isContextSensitive) {
-				jQuery.sap.log.error("The bar control you are using does not implement all the members of the IBar interface", this);
+				Log.error("The bar control you are using does not implement all the members of the IBar interface", this);
 				return this;
 			}
 
 			//If this class does not gets added by the renderer, add it here
 			if (!this.getRenderer().shouldAddIBarContext()) {
 				this.addStyleClass(IBAR_CSS_CLASS + "-CTX");
-			}
-
-			if (oOptions.internalAriaLabel) {
-				this._sInternalAriaLabelId = _ensureInvisibleText(oOptions.tag, oBundle.getText(oOptions.internalAriaLabel));
 			}
 
 			if (this.isContextSensitive()) {
@@ -199,7 +178,7 @@ sap.ui.define(['sap/ui/base/Object', './PageAccessibleLandmarkInfo', 'sap/ui/cor
 			}
 
 			if (!this.setHTMLTag) {
-				jQuery.sap.log.error("The bar control you are using does not implement all the members of the IBar interface", this);
+				Log.error("The bar control you are using does not implement all the members of the IBar interface", this);
 				return this;
 			}
 
@@ -228,7 +207,7 @@ sap.ui.define(['sap/ui/base/Object', './PageAccessibleLandmarkInfo', 'sap/ui/cor
 			var oOptions = oContext[sContext];
 
 			if (!oOptions) {
-				jQuery.sap.log.error("The context " + sContext + " is not known", this);
+				Log.error("The context " + sContext + " is not known", this);
 
 				return null;
 			}
@@ -248,12 +227,6 @@ sap.ui.define(['sap/ui/base/Object', './PageAccessibleLandmarkInfo', 'sap/ui/cor
 
 			oRM.write("<" + sTag);
 			oRM.addClass(IBAR_CSS_CLASS);
-
-			if (oControl._sInternalAriaLabelId) {
-				oRM.writeAccessibilityState(oControl, {
-					"labelledby": {value: oControl._sInternalAriaLabelId, append: true}
-				});
-			}
 
 			if (this.shouldAddIBarContext(oControl)) {
 				oRM.addClass(IBAR_CSS_CLASS + "-CTX");
@@ -300,17 +273,6 @@ sap.ui.define(['sap/ui/base/Object', './PageAccessibleLandmarkInfo', 'sap/ui/cor
 		oControl.addStyleClass("sapMBarChild");
 	};
 
-	/**
-	 * Termination of the BarInPageEnabler control
-	 * @private
-	 */
-	BarInPageEnabler.prototype.exit = function () {
-		if (this._sInternalAriaLabelId) {
-			this._sInternalAriaLabelId.destroy();
-			this._sInternalAriaLabelId = null;
-		}
-	};
-
 	return BarInPageEnabler;
 
-}, /* bExport= */ true);
+});

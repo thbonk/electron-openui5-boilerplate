@@ -1,12 +1,21 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Item"],
-	function(jQuery, library, Item) {
+sap.ui.define([
+	"./library",
+	"sap/ui/core/Item",
+	"sap/ui/core/library",
+	"sap/base/Log",
+	"sap/base/security/sanitizeHTML"
+],
+	function(library, Item, coreLibrary, Log, sanitizeHTML) {
 		"use strict";
+
+		// shortcut for sap.ui.core.MessageType
+		var MessageType = coreLibrary.MessageType;
 
 		/**
 		 * Constructor for a new MessageItem.
@@ -28,7 +37,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Item"],
 		 *
 		 * @extends sap.ui.core.Item
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.61.2
 		 *
 		 * @constructor
 		 * @public
@@ -44,7 +53,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Item"],
 					/**
 					 * Specifies the type of the message
 					 */
-					type: { type: "sap.ui.core.MessageType", group: "Appearance", defaultValue: sap.ui.core.MessageType.Error },
+					type: { type: "sap.ui.core.MessageType", group: "Appearance", defaultValue: MessageType.Error },
 
 					/**
 					 * Specifies the title of the message
@@ -80,7 +89,13 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Item"],
 					/**
 					 * Name of a message group the current item belongs to.
 					 */
-					groupName: { type: "string", group: "Misc", defaultValue: "" }
+					groupName: { type: "string", group: "Misc", defaultValue: "" },
+
+					/**
+					 * Defines whether the title of the item will be interactive.
+					 * @since 1.58
+					 */
+					activeTitle: { type: "boolean", group: "Misc", defaultValue: false }
 				},
 				defaultAggregation: "link",
 				aggregations: {
@@ -138,7 +153,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Item"],
 			}
 
 			if (this.getMarkupDescription()) {
-				sDescription = jQuery.sap._sanitizeHTML(sDescription);
+				sDescription = sanitizeHTML(sDescription);
 			}
 
 			this.setProperty("description", sDescription, true);
@@ -155,14 +170,13 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Item"],
 		 * @public
 		 */
 		MessageItem.prototype.setType = function (sType) {
-			if (sType === sap.ui.core.MessageType.None) {
-				sType = sap.ui.core.MessageType.Information;
-				jQuery.sap.log.warning("The provided None type is handled and rendered as Information type");
+			if (sType === MessageType.None) {
+				sType = MessageType.Information;
+				Log.warning("The provided None type is handled and rendered as Information type");
 			}
 
 			return this.setProperty("type", sType, true);
 		};
 
 		return MessageItem;
-
-	}, /* bExport= */true);
+	});

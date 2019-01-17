@@ -1,17 +1,39 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.DateTimeField.
 sap.ui.define([
-	'jquery.sap.global',
 	'sap/ui/model/type/Date',
 	'sap/ui/model/odata/type/ODataType',
-	'./InputBase'
-], function (jQuery, SimpleDateType, ODataType, InputBase) {
+	'./InputBase',
+	'sap/ui/core/LocaleData',
+	'sap/ui/core/library',
+	'sap/ui/core/format/DateFormat',
+	'./DateTimeFieldRenderer',
+	"sap/base/util/deepEqual",
+	"sap/base/Log",
+	"sap/ui/thirdparty/jquery",
+	// jQuery Plugin "cursorPos"
+	"sap/ui/dom/jquery/cursorPos"
+], function(
+	SimpleDateType,
+	ODataType,
+	InputBase,
+	LocaleData,
+	coreLibrary,
+	DateFormat,
+	DateTimeFieldRenderer,
+	deepEqual,
+	Log,
+	jQuery
+) {
 	"use strict";
+
+	// shortcut for sap.ui.core.CalendarType
+	var CalendarType = coreLibrary.CalendarType;
 
 	/**
 	 * Constructor for a new <code>sap.m.DateTimeField</code>.
@@ -21,13 +43,14 @@ sap.ui.define([
 	 *
 	 * @class
 	 * The <code>sap.m.DateTimeField</code> control provides a basic functionality for date/time input controls.
-	 * @abstract
+	 *
 	 * To be extended by date and time picker controls. For internal use only.
+	 * @abstract
 	 *
 	 * @extends sap.m.InputBase
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -56,8 +79,26 @@ sap.ui.define([
 				 * and <code>valueFormat</code> pair properties are supplied instead,
 				 * the <code>dateValue</code> will be instantiated according to the parsed
 				 * <code>value</code>.
+				 * Use <code>dateValue</code> as a helper property to easily obtain the day, month, year, hours, minutes
+				 * and seconds of the chosen date and time. Although possible to bind it, the recommendation is not to do it.
+				 * When binding is needed, use <code>value</code> property instead.
 				 */
-				dateValue: {type: "object", group: "Data", defaultValue: null}
+				dateValue: {type: "object", group: "Data", defaultValue: null},
+
+				/**
+				 * Holds a reference to a JavaScript Date Object to define the initially focused
+				 * date/time when the picker popup is opened.
+				 *
+				 * <b>Notes:</b>
+				 * <ul>
+				 * <li>Setting this property does not change the <code>value</code> property.</li>
+				 * <li>Depending on the context this property is used in ({@link sap.m.TimePicker},
+				 * {@link sap.m.DatePicker} or {@link sap.m.DateTimePicker}), it takes into account only the time part, only
+				 * the date part or both parts of the JavaScript Date Object.</li>
+				 * </ul>
+				 * @since 1.54
+				 */
+				initialFocusedDateValue: {type: "object", group: "Data", defaultValue: null}
 			}
 		}
 	});
@@ -74,7 +115,7 @@ sap.ui.define([
 		}
 
 		// set the property in any case but check validity on output
-		this.setProperty("value", sValue, true); // no rerendering
+		this.setProperty("value", sValue);
 		this._bValid = true;
 
 		// convert to date object
@@ -83,14 +124,11 @@ sap.ui.define([
 			oDate = this._parseValue(sValue);
 			if (!oDate || oDate.getTime() < this._oMinDate.getTime() || oDate.getTime() > this._oMaxDate.getTime()) {
 				this._bValid = false;
-				jQuery.sap.log.warning("Value can not be converted to a valid date", this);
-				this._oWantedDate = oDate;
+				Log.warning("Value can not be converted to a valid date", this);
 			}
 		}
-		if (this._bValid) {
-			this.setProperty("dateValue", oDate, true); // no rerendering
-			this._oWantedDate = undefined;
-		}
+
+		this.setProperty("dateValue", oDate);
 
 		// do not call InputBase.setValue because the displayed value and the output value might have different pattern
 		if (this.getDomRef()) {
@@ -113,11 +151,11 @@ sap.ui.define([
 
 	DateTimeField.prototype.setDateValue = function (oDate) {
 
-		if (oDate && !(oDate instanceof Date)) {
+		if (this._isValidDate(oDate)) {
 			throw new Error("Date must be a JavaScript date object; " + this);
 		}
 
-		if (jQuery.sap.equal(this.getDateValue(), oDate)) {
+		if (deepEqual(this.getDateValue(), oDate)) {
 			return this;
 		}
 
@@ -130,7 +168,7 @@ sap.ui.define([
 			this._lastValue = sValue;
 		}
 		// set the property in any case but check validity on output
-		this.setProperty("value", sValue, true); // no rerendering
+		this.setProperty("value", sValue);
 
 		if (this.getDomRef()) {
 			// convert to output
@@ -138,7 +176,6 @@ sap.ui.define([
 
 			if (this._$input.val() !== sOutputValue) {
 				this._$input.val(sOutputValue);
-				this._setLabelVisibility();
 				this._curpos = this._$input.cursorPos();
 			}
 		}
@@ -165,6 +202,8 @@ sap.ui.define([
 
 		this.updateDomValue(this._formatValue(this.getDateValue()));
 
+		this._updateDomPlaceholder(this._getPlaceholder());
+
 		return this;
 	};
 
@@ -174,14 +213,14 @@ sap.ui.define([
 
 	DateTimeField.prototype._dateValidation = function (oDate) {
 		this._bValid = true;
-		this.setProperty("dateValue", oDate, true); // no rerendering
+		this.setProperty("dateValue", oDate);
 
 		return oDate;
 	};
 
 	DateTimeField.prototype._handleDateValidation = function (oDate) {
 		this._bValid = true;
-		this.setProperty("dateValue", oDate, true); // no rerendering
+		this.setProperty("dateValue", oDate);
 	};
 
 	DateTimeField.prototype._getPlaceholder = function() {
@@ -196,9 +235,7 @@ sap.ui.define([
 			}
 
 			if (this._checkStyle(sPlaceholder)) {
-				var oLocale = sap.ui.getCore().getConfiguration().getFormatSettings().getFormatLocale();
-				var oLocaleData = sap.ui.core.LocaleData.getInstance(oLocale);
-				sPlaceholder = this._getPlaceholderPattern(oLocaleData, sPlaceholder);
+				sPlaceholder = this._getLocaleBasedPattern(sPlaceholder);
 			}
 		}
 
@@ -206,10 +243,11 @@ sap.ui.define([
 
 	};
 
-	DateTimeField.prototype._getPlaceholderPattern = function (oLocaleData, sPlaceholder) {
-		return oLocaleData.getDatePattern(sPlaceholder);
+	DateTimeField.prototype._getLocaleBasedPattern = function (sPlaceholder) {
+		return LocaleData.getInstance(
+			sap.ui.getCore().getConfiguration().getFormatSettings().getFormatLocale()
+		).getDatePattern(sPlaceholder);
 	};
-
 
 	DateTimeField.prototype._parseValue = function (sValue, bDisplayFormat) {
 		return this._getFormatter(bDisplayFormat).parse(sValue);
@@ -251,7 +289,7 @@ sap.ui.define([
 				sCalendarType = this.getDisplayFormatType();
 			} else {
 				sPattern = ( this.getValueFormat() || this._getDefaultValueStyle() );
-				sCalendarType = sap.ui.core.CalendarType.Gregorian;
+				sCalendarType = CalendarType.Gregorian;
 			}
 		}
 
@@ -298,7 +336,7 @@ sap.ui.define([
 	};
 
 	DateTimeField.prototype._getFormatInstance = function (oArguments, bDisplayFormat) {
-		return sap.ui.core.format.DateFormat.getInstance(oArguments);
+		return DateFormat.getInstance(oArguments);
 	};
 
 	DateTimeField.prototype._checkStyle = function (sPattern) {
@@ -306,7 +344,19 @@ sap.ui.define([
 	};
 
 	DateTimeField.prototype._getDisplayFormatPattern = function () {
-		return this._getBoundValueTypePattern() || this.getDisplayFormat();
+		var sPattern = this._getBoundValueTypePattern();
+
+		if (sPattern) {
+			return sPattern;
+		}
+
+		sPattern = this.getDisplayFormat();
+
+		if (this._checkStyle(sPattern)) {
+			sPattern = this._getLocaleBasedPattern(sPattern);
+		}
+
+		return sPattern;
 	};
 
 	DateTimeField.prototype._getBoundValueTypePattern = function () {
@@ -324,7 +374,29 @@ sap.ui.define([
 		return undefined;
 	};
 
+	// Cross frame check for a date should be performed here otherwise setDateValue would fail in OPA tests
+	// because Date object in the test is different than the Date object in the application (due to the iframe).
+	// We can use jQuery.type or this method:
+	// function isValidDate (date) {
+	//	return date && Object.prototype.toString.call(date) === "[object Date]" && !isNaN(date);
+	//}
+	DateTimeField.prototype._isValidDate = function (oDate) {
+		return oDate && jQuery.type(oDate) !== "date";
+	};
+
+
+	/**
+	 * Updates the placeholder of the input element with a given valye
+	 * @param {string} sValue the new value
+	 * @private
+	 * @returns void
+	 */
+	DateTimeField.prototype._updateDomPlaceholder = function (sValue) {
+		if (this.getDomRef()) {
+			this._$input.attr("placeholder", sValue);
+		}
+	};
 
 	return DateTimeField;
 
-}, /* bExport= */ true);
+});

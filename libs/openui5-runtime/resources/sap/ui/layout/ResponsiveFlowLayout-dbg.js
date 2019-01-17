@@ -1,12 +1,29 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.layout.ResponsiveFlowLayout.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/IntervalTrigger', 'sap/ui/core/theming/Parameters', './ResponsiveFlowLayoutData', './library'],
-	function(jQuery, Control, IntervalTrigger, Parameters, ResponsiveFlowLayoutData, library) {
+sap.ui.define([
+	'sap/ui/core/Control',
+	'./ResponsiveFlowLayoutData',
+	'./library',
+	'sap/ui/core/ResizeHandler',
+	'sap/ui/Device',
+	'./ResponsiveFlowLayoutRenderer',
+	"sap/ui/thirdparty/jquery",
+	'sap/ui/dom/jquery/rect' // jQuery Plugin "rect"
+],
+	function(
+		Control,
+		ResponsiveFlowLayoutData,
+		library,
+		ResizeHandler,
+		Device,
+		ResponsiveFlowLayoutRenderer,
+		jQuery
+	) {
 	"use strict";
 
 
@@ -22,7 +39,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -72,12 +89,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 			delete this._rows;
 
 			if (this._IntervalCall) {
-				jQuery.sap.clearDelayedCall(this._IntervalCall);
+				clearTimeout(this._IntervalCall);
 				this._IntervalCall = undefined;
 			}
 
 			if (this._resizeHandlerComputeWidthsID) {
-				sap.ui.core.ResizeHandler.deregister(this._resizeHandlerComputeWidthsID);
+				ResizeHandler.deregister(this._resizeHandlerComputeWidthsID);
 			}
 			delete this._resizeHandlerComputeWidthsID;
 			delete this._proxyComputeWidths;
@@ -178,7 +195,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 			var currentRow = -1;
 
 			var fnCurrentWrapping = function(j) {
-				var $cont = jQuery.sap.byId(oRow.cont[j].id);
+				var $cont = jQuery(document.getElementById(oRow.cont[j].id));
 				if ($cont.length > 0) {
 					var offset = $cont[0].offsetLeft;
 					if (lastOffsetLeft >= offset) {
@@ -522,7 +539,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 						if (this._bLayoutDataChanged || bRender) {
 
 							//in IE when setting the innerHTML property to "" the changes do not take effect correctly and all the children are gone
-							if (sap.ui.Device.browser.internet_explorer){
+							if (Device.browser.internet_explorer){
 								jQuery(this._oDomRef).empty();
 							} else {
 								this._oDomRef.innerHTML = "";
@@ -538,14 +555,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 						this._getRenderManager().flush(this._oDomRef);
 
 						for (var i = 0; i < this._rows.length; i++) {
-							var oTmpRect = this._getElementRect(jQuery.sap.byId(sId + "-row" + i));
+							var oTmpRect = this._getElementRect(jQuery(document.getElementById(sId + "-row" + i)));
 							this._rows[i].oRect = oTmpRect;
 						}
 					}
 
 					if (this._rows.length === 0) {
 						if (this._resizeHandlerComputeWidthsID) {
-							sap.ui.core.ResizeHandler.deregister(this._resizeHandlerComputeWidthsID);
+							ResizeHandler.deregister(this._resizeHandlerComputeWidthsID);
 							delete this._resizeHandlerComputeWidthsID;
 						}
 					}
@@ -563,7 +580,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 			updateRows(this);
 
 			if (this._resizeHandlerFullLengthID) {
-				sap.ui.core.ResizeHandler.deregister(this._resizeHandlerFullLengthID);
+				ResizeHandler.deregister(this._resizeHandlerFullLengthID);
 				delete this._resizeHandlerFullLengthID;
 			}
 		};
@@ -582,11 +599,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 
 			if (this.getResponsive()) {
 				if (!this._resizeHandlerComputeWidthsID) {
-					this._resizeHandlerComputeWidthsID = sap.ui.core.ResizeHandler.register(this, this._proxyComputeWidths);
+					this._resizeHandlerComputeWidthsID = ResizeHandler.register(this, this._proxyComputeWidths);
 				}
 			} else {
 				if (this._resizeHandlerComputeWidthsID) {
-					sap.ui.core.ResizeHandler.deregister(this._resizeHandlerComputeWidthsID);
+					ResizeHandler.deregister(this._resizeHandlerComputeWidthsID);
 					delete this._resizeHandlerComputeWidthsID;
 				}
 			}
@@ -597,7 +614,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 				this._bLayoutDataChanged = true;
 			}
 			if (!this._resizeHandlerComputeWidthsID) {
-				this._resizeHandlerComputeWidthsID = sap.ui.core.ResizeHandler.register(this, this._proxyComputeWidths);
+				this._resizeHandlerComputeWidthsID = ResizeHandler.register(this, this._proxyComputeWidths);
 			}
 
 			updateRows(this);
@@ -639,7 +656,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 		 */
 		ResponsiveFlowLayout.prototype.addContent = function(oContent) {
 			if (oContent && this._IntervalCall) {
-				jQuery.sap.clearDelayedCall(this._IntervalCall);
+				clearTimeout(this._IntervalCall);
 				this._IntervalCall = undefined;
 			}
 			this.addAggregation("content", oContent);
@@ -658,7 +675,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 		 */
 		ResponsiveFlowLayout.prototype.insertContent = function(oContent, iIndex) {
 			if (oContent && this._IntervalCall) {
-				jQuery.sap.clearDelayedCall(this._IntervalCall);
+				clearTimeout(this._IntervalCall);
 				this._IntervalCall = undefined;
 			}
 			this.insertAggregation("content", oContent, iIndex);
@@ -674,7 +691,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 		 */
 		ResponsiveFlowLayout.prototype.removeContent = function(oContent) {
 			if (oContent && this._IntervalCall) {
-				jQuery.sap.clearDelayedCall(this._IntervalCall);
+				clearTimeout(this._IntervalCall);
 				this._IntervalCall = undefined;
 			}
 			this.removeAggregation("content", oContent);
@@ -763,4 +780,4 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 
 	return ResponsiveFlowLayout;
 
-}, /* bExport= */ true);
+});

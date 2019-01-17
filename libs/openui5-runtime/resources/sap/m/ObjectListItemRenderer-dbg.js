@@ -1,12 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', 'sap/ui/core/Renderer'],
-	function(jQuery, ListItemBaseRenderer, Renderer) {
+sap.ui.define(['./ListItemBaseRenderer', 'sap/ui/core/Renderer', 'sap/ui/core/library', 'sap/ui/Device'],
+	function(ListItemBaseRenderer, Renderer, coreLibrary, Device) {
 		"use strict";
+
+
+		// shortcut for sap.ui.core.TextDirection
+		var TextDirection = coreLibrary.TextDirection;
 
 
 		/**
@@ -22,70 +26,43 @@ sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', 'sap/ui/core/Rende
 		 *            rm The RenderManager that can be used for writing to the render output buffer
 		 * @param {sap.m.ObjectListItem}
 		 *            oLI An object to be rendered
-		 * @param {sap.m.ObjectAttribute}
-		 *            oAttribute An attribute to be rendered
-		 * @param {sap.m.ObjectStatus}
-		 *            oStatus A status to be rendered
+		 * @param {sap.m.ObjectAttribute[]}
+		 *            aAttributes Attributes to be rendered
+		 * @param {sap.m.ObjectStatus[]}
+		 *            aStatuses Statuses to be rendered
 		 */
-		ObjectListItemRenderer.renderAttributeStatus = function(rm, oLI, oAttribute, oStatus) {
-
-			if (!oAttribute && !oStatus || (oAttribute && oAttribute._isEmpty() && oStatus && oStatus._isEmpty())) {
-				return; // nothing to render
-			}
-
+		ObjectListItemRenderer.renderAttributesStatuses = function(rm, oLI, aAttributes, aStatuses) {
+			var i;
 			rm.write("<div"); // Start attribute row container
 			rm.addClass("sapMObjLAttrRow");
 			rm.writeClasses();
 			rm.write(">");
 
-			if (oAttribute && !oAttribute._isEmpty()) {
-				rm.write("<div");
-				rm.addClass("sapMObjLAttrDiv");
-
-				// Add padding to push attribute text down since it will be raised up due
-				// to markers height
-				if (oStatus && (!oStatus._isEmpty())) {
-					if (oStatus instanceof Array) {
-						rm.addClass("sapMObjAttrWithMarker");
-					}
-				}
-
-				rm.writeClasses();
-
-				if (!oStatus || oStatus._isEmpty()) {
-					rm.addStyle("width", "100%");
-					rm.writeStyles();
-				}
-				rm.write(">");
-				rm.renderControl(oAttribute);
-				rm.write("</div>");
+			rm.write("<div"); // Start render attribute
+			rm.addClass("sapMObjLAttrDiv");
+			rm.writeClasses();
+			rm.write(">");
+			for (i = 0; i < aAttributes.length; i++) {
+				rm.renderControl(aAttributes[i]);
 			}
+			rm.write("</div>"); // End render attribute
 
-			if (oStatus && !oStatus._isEmpty()) {
-				rm.write("<div");
-				rm.addClass("sapMObjLStatusDiv");
-
-				// Object marker icons (flag, favorite) are passed as an array
-				if (oStatus instanceof Array && oStatus.length > 0) {
-					rm.addClass("sapMObjStatusMarker");
-				}
-				rm.writeClasses();
-				if (!oAttribute || oAttribute._isEmpty()) {
-					rm.addStyle("width", "100%");
-					rm.writeStyles();
-				}
-				rm.write(">");
-				if (oStatus instanceof Array) {
-					while (oStatus.length > 0) {
-						rm.renderControl(oStatus.shift());
+			rm.write("<div"); // Start render status
+			rm.addClass("sapMObjLStatusDiv");
+			rm.writeClasses();
+			rm.write(">");
+			for (i = 0; i < aStatuses.length; i++) {
+				if (aStatuses[i] instanceof Array) {
+					while (aStatuses[i].length > 0) {
+						rm.renderControl(aStatuses[i].shift());
 					}
 				} else {
-					rm.renderControl(oStatus);
+					rm.renderControl(aStatuses[i]);
 				}
-				rm.write("</div>");
 			}
+			rm.write("</div>"); // End render status
 
-			rm.write("</div>"); // Start attribute row container
+			rm.write("</div>"); // End attribute row container
 		};
 
 		/**
@@ -117,7 +94,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', 'sap/ui/core/Rende
 				rm.write("<span");
 				//sets the dir attribute to "rtl" or "ltr" if a direction
 				//for the intro text is provided explicitly
-				if (sIntroDir !== sap.ui.core.TextDirection.Inherit) {
+				if (sIntroDir !== TextDirection.Inherit) {
 					rm.writeAttribute("dir", sIntroDir.toLowerCase());
 				}
 				rm.write(">");
@@ -176,9 +153,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', 'sap/ui/core/Rende
 
 			rm.write("</div>"); // End Top row container
 
-			if (!(sap.ui.Device.browser.internet_explorer && sap.ui.Device.browser.version < 10)) {
-				rm.write("<div style=\"clear: both;\"></div>");
-			}
+			rm.write("<div style=\"clear: both;\"></div>");
 
 			// Bottom row container.
 			if (oLI._hasBottomContent()) {
@@ -187,9 +162,9 @@ sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', 'sap/ui/core/Rende
 				rm.writeClasses();
 				rm.write(">");
 
-				var aAttribs = oLI._getVisibleAttributes();
+				var aAttribs = oLI.getAttributes();
 				var statuses = [];
-				var markers = oLI._getVisibleMarkers();
+				var markers = oLI.getMarkers();
 
 				markers._isEmpty = function() {
 					return !(markers.length);
@@ -199,16 +174,10 @@ sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', 'sap/ui/core/Rende
 					statuses.push(markers);
 				}
 
-				statuses.push(oLI.getFirstStatus());
-				statuses.push(oLI.getSecondStatus());
+				oLI.getFirstStatus() && statuses.push(oLI.getFirstStatus());
+				oLI.getSecondStatus() && statuses.push(oLI.getSecondStatus());
 
-				while (aAttribs.length > 0) {
-					this.renderAttributeStatus(rm, oLI, aAttribs.shift(), statuses.shift());
-				}
-
-				while (statuses.length > 0) {
-					this.renderAttributeStatus(rm, oLI, null, statuses.shift());
-				}
+				this.renderAttributesStatuses(rm, oLI, aAttribs, statuses);
 
 				rm.write("</div>"); // End Bottom row container
 			}
@@ -264,5 +233,4 @@ sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', 'sap/ui/core/Rende
 		};
 
 		return ObjectListItemRenderer;
-
 	}, /* bExport= */ true);

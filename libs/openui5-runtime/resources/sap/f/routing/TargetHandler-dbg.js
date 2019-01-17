@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
  /*global Promise*/
-sap.ui.define(['jquery.sap.global', 'sap/m/InstanceManager', 'sap/ui/base/Object', 'sap/ui/core/routing/History'],
-	function($, InstanceManager, BaseObject, History) {
+sap.ui.define(['sap/m/InstanceManager', 'sap/f/FlexibleColumnLayout', 'sap/ui/base/Object', 'sap/ui/core/routing/History', "sap/base/Log"],
+	function(InstanceManager, FlexibleColumnLayout, BaseObject, History, Log) {
 		"use strict";
 
 
@@ -142,6 +142,10 @@ sap.ui.define(['jquery.sap.global', 'sap/m/InstanceManager', 'sap/ui/base/Object
 					oParams : oCurrentParams
 				};
 
+				if (!isNavigationContainer(oCurrentContainer)) {
+					continue;
+				}
+
 				for (i = 0; i < aResults.length; i++) {
 					oResult = aResults[i];
 
@@ -164,7 +168,7 @@ sap.ui.define(['jquery.sap.global', 'sap/m/InstanceManager', 'sap/ui/base/Object
 		 * @param {object} oParams the navigation parameters
 		 * @param {boolean} bBack forces the nav container to show a backwards transition
 		 * @private
-		 * @returns {boolean} if a navigation occured - if the page is already displayed false is returned
+		 * @returns {boolean} if a navigation occurred - if the page is already displayed false is returned
 		 */
 		TargetHandler.prototype._applyNavigationResult = function(oParams, bBack) {
 			var oTargetControl = oParams.targetControl,
@@ -173,9 +177,31 @@ sap.ui.define(['jquery.sap.global', 'sap/m/InstanceManager', 'sap/ui/base/Object
 			//Nav container does not work well if you pass undefined as transition
 				sTransition = oParams.transition || "",
 				oTransitionParameters = oParams.transitionParameters,
-				sViewId = oParams.view.getId();
+				sViewId = oParams.view.getId(),
+				aColumnsCurrentPages,
+				bIsFCL = oTargetControl instanceof FlexibleColumnLayout,
+				bSkipNavigation = false;
 
-			$.sap.log.info("navigation to view with id: " + sViewId + " the targetControl is " + oTargetControl.getId() + " backwards is " + bBack);
+			if (bIsFCL) {
+				aColumnsCurrentPages = [
+					oTargetControl.getCurrentBeginColumnPage(),
+					oTargetControl.getCurrentMidColumnPage(),
+					oTargetControl.getCurrentEndColumnPage()
+				];
+
+				bSkipNavigation = aColumnsCurrentPages.some(function(oCurrentPage) {
+					return oCurrentPage && oCurrentPage.getId() === sViewId;
+				});
+			}
+
+			// If the page we are going to navigate is already displayed,
+			// we are skipping the navigation.
+			if (bSkipNavigation) {
+				Log.info("navigation to view with id: " + sViewId + " is skipped since it already is displayed by its targetControl", "sap.f.routing.TargetHandler");
+				return false;
+			}
+
+			Log.info("navigation to view with id: " + sViewId + " the targetControl is " + oTargetControl.getId() + " backwards is " + bBack);
 
 			if (bBack) {
 				oTargetControl._safeBackToPage(sViewId, sTransition, oArguments, oTransitionParameters);
@@ -213,6 +239,10 @@ sap.ui.define(['jquery.sap.global', 'sap/m/InstanceManager', 'sap/ui/base/Object
 			}
 		};
 
+		function isNavigationContainer(oContainer) {
+			return oContainer && oContainer.isA(["sap.m.NavContainer", "sap.m.SplitContainer", "sap.f.FlexibleColumnLayout"]);
+		}
+
 		return TargetHandler;
 
-	}, /* bExport= */ true);
+	});

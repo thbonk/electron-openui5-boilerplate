@@ -46,6 +46,11 @@
 			"theme": "sap_belize"
 		},
 		{
+			"name": "ColorPalette.less",
+			"designtime": true,
+			"theme": "sap_belize"
+		},
+		{
 			"name": "ComboBoxBase.less",
 			"designtime": true,
 			"theme": "sap_belize"
@@ -106,11 +111,6 @@
 			"theme": "sap_belize"
 		},
 		{
-			"name": "Label.less",
-			"designtime": true,
-			"theme": "sap_belize"
-		},
-		{
 			"name": "LightBox.less",
 			"designtime": true,
 			"theme": "sap_belize"
@@ -162,11 +162,6 @@
 		},
 		{
 			"name": "NotificationListBase.less",
-			"designtime": true,
-			"theme": "sap_belize"
-		},
-		{
-			"name": "NotificationListGroup.less",
 			"designtime": true,
 			"theme": "sap_belize"
 		},
@@ -286,12 +281,22 @@
 			"theme": "sap_belize"
 		},
 		{
+			"name": "SinglePlanningCalendarGrid.less",
+			"designtime": true,
+			"theme": "sap_belize"
+		},
+		{
 			"name": "SlideTile.less",
 			"designtime": true,
 			"theme": "sap_belize"
 		},
 		{
 			"name": "Slider.less",
+			"designtime": true,
+			"theme": "sap_belize"
+		},
+		{
+			"name": "SliderTooltip.less",
 			"designtime": true,
 			"theme": "sap_belize"
 		},
@@ -337,6 +342,11 @@
 		},
 		{
 			"name": "TimePicker.less",
+			"designtime": true,
+			"theme": "sap_belize"
+		},
+		{
+			"name": "TimePickerSliders.less",
 			"designtime": true,
 			"theme": "sap_belize"
 		},

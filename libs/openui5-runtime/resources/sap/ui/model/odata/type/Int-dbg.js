@@ -1,13 +1,19 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/format/NumberFormat',
-		'sap/ui/model/FormatException', 'sap/ui/model/odata/type/ODataType',
-		'sap/ui/model/ParseException', 'sap/ui/model/ValidateException'],
-	function(jQuery, NumberFormat, FormatException, ODataType, ParseException, ValidateException) {
+sap.ui.define([
+	"sap/base/Log",
+	"sap/ui/core/format/NumberFormat",
+	"sap/ui/model/FormatException",
+	"sap/ui/model/ParseException",
+	"sap/ui/model/ValidateException",
+	"sap/ui/model/odata/type/ODataType",
+	"sap/ui/thirdparty/jquery"
+], function (Log, NumberFormat, FormatException, ParseException, ValidateException, ODataType,
+		jQuery) {
 	"use strict";
 
 	/**
@@ -50,20 +56,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/format/NumberFormat',
 	 *   constraints, see {@link #constructor}
 	 */
 	function setConstraints(oType, oConstraints) {
-		var vNullable = oConstraints && oConstraints.nullable;
+		var vNullable;
 
 		oType.oConstraints = undefined;
-		switch (vNullable) {
-		case false:
-		case "false":
-			oType.oConstraints = {nullable : false};
-			break;
-		case true:
-		case "true":
-		case undefined:
-			break;
-		default:
-			jQuery.sap.log.warning("Illegal nullable: " + vNullable, null, oType.getName());
+		if (oConstraints) {
+			vNullable = oConstraints.nullable;
+			if (vNullable === false || vNullable === "false") {
+				oType.oConstraints = {nullable : false};
+			} else if (vNullable !== undefined && vNullable !== true && vNullable !== "true") {
+				Log.warning("Illegal nullable: " + vNullable, null, oType.getName());
+			}
 		}
 		oType._handleLocalizationChange();
 	}
@@ -78,9 +80,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/format/NumberFormat',
 	 * @extends sap.ui.model.odata.type.ODataType
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
-	 * @constructor
+	 * @abstract
 	 * @alias sap.ui.model.odata.type.Int
 	 * @param {object} [oFormatOptions]
 	 *   type-specific format options; see subtypes
@@ -126,12 +128,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/format/NumberFormat',
 	 *   the formatted output value in the target type; <code>undefined</code> or <code>null</code>
 	 *   are formatted to <code>null</code>
 	 * @throws {sap.ui.model.FormatException}
-	 *   if <code>sTargetType</code> is unsupported
+	 *   If <code>sTargetType</code> is not supported or <code>iValue</code> is not a model value
+	 *   for this type.
 	 * @public
 	 */
-	Int.prototype.formatValue = function(iValue, sTargetType) {
+	Int.prototype.formatValue = function (iValue, sTargetType) {
 		if (iValue === undefined || iValue === null) {
 			return null;
+		}
+		if (typeof iValue !== "number" && sTargetType !== "any") {
+			throw new FormatException("Illegal " + this.getName() + " value: " + iValue);
 		}
 		switch (this.getPrimitiveType(sTargetType)) {
 			case "string":
@@ -165,7 +171,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/format/NumberFormat',
 	 *   the parsed value
 	 * @public
 	 */
-	Int.prototype.parseValue = function(vValue, sSourceType) {
+	Int.prototype.parseValue = function (vValue, sSourceType) {
 		var iResult;
 
 		if (vValue === null || vValue === "") {
@@ -198,7 +204,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/format/NumberFormat',
 	 *   if the value is not in the allowed range of Int or if it is of invalid type.
 	 * @public
 	 */
-	Int.prototype.validateValue = function(iValue) {
+	Int.prototype.validateValue = function (iValue) {
 		var oRange = this.getRange();
 
 		if (iValue === null) {

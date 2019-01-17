@@ -1,13 +1,36 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.Dialog.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/Popup', 'sap/ui/core/RenderManager'],
-	function (jQuery, library, Control, Popup, RenderManager) {
+sap.ui.define([
+    'sap/ui/thirdparty/jquery',
+    'sap/base/Log',
+    'sap/ui/dom/containsOrEquals',
+    './library',
+    'sap/ui/core/Control',
+    'sap/ui/core/Popup',
+    'sap/ui/core/RenderManager',
+    './DialogRenderer',
+    'sap/ui/core/library',
+    'sap/ui/core/ResizeHandler',
+    'sap/ui/dom/jquery/control', // jQuery.fn.control
+    'sap/ui/dom/jquery/Selectors' // sapTabbable
+],
+	function(jQuery, Log, containsOrEquals, library, Control, Popup, RenderManager, DialogRenderer, coreLibrary, ResizeHandler) {
 		"use strict";
+
+
+		// shortcut for sap.ui.core.OpenState
+		var OpenState = coreLibrary.OpenState;
+
+		// shortcut for sap.ui.core.AccessibleRole
+		var AccessibleRole = coreLibrary.AccessibleRole;
+
+		// shortcut for sap.ui.commons.enums.BorderDesign
+		var BorderDesign = library.enums.BorderDesign;
 
 
 		/**
@@ -23,7 +46,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		 *
 		 * @namespace
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.61.2
 		 *
 		 * @constructor
 		 * @public
@@ -154,7 +177,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 					contentBorderDesign: {
 						type: "sap.ui.commons.enums.BorderDesign",
 						group: "Appearance",
-						defaultValue: sap.ui.commons.enums.BorderDesign.None
+						defaultValue: BorderDesign.None
 					},
 
 					/**
@@ -172,7 +195,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 					accessibleRole: {
 						type: "sap.ui.core.AccessibleRole",
 						group: "Accessibility",
-						defaultValue: sap.ui.core.AccessibleRole.Dialog
+						defaultValue: AccessibleRole.Dialog
 					},
 
 					/**
@@ -318,9 +341,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		Dialog.prototype.onAfterRendering = function () {
 
 			var $content = this.$("cont");
-			var bIsIE9Or10 = !!sap.ui.Device.browser.internet_explorer &&
-				(sap.ui.Device.browser.version == 9 || sap.ui.Device.browser.version == 10);
-			var bIsRTLOn = sap.ui.getCore().getConfiguration().getRTL();
 
 			var _minSize = this.getMinSize();
 			this._minWidth = _minSize.width;
@@ -353,27 +373,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 					this.$().removeClass("sapUiDlgFlexHeight");
 				} // else normal case: Dialog content pushes its height to or beyond its minimum height - this works fine with "sapUiDlgFlexHeight"
 			}
-
-			// IE9+10 fix where subpixel font rendering may lead to rounding errors in RTL mode when the content has a width of "xyz.5px"
-			if (bIsIE9Or10 && $content.length > 0 && bIsRTLOn && !this._isSizeSet(this.getWidth())) {
-				var element = $content[0];
-				var hasGetComputedStyle = element.ownerDocument &&
-					element.ownerDocument.defaultView &&
-					element.ownerDocument.defaultView.getComputedStyle;
-
-				if (!hasGetComputedStyle) {
-					return;
-				}
-
-				var width = element.ownerDocument.defaultView.getComputedStyle(element).getPropertyValue("width");
-				if (width) {
-					var fWidth = parseFloat(width, 10);
-					if (fWidth % 1 == 0.5) {
-						// if all these conditions are fulfilled, the Dialog must be a LITTLE bit wider to avoid rounding errors
-						element.style.width = (fWidth + 0.01) + "px";
-					}
-				}
-			}
 		};
 
 		/**
@@ -386,7 +385,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			var sCloseBtnId = this.getId() + "-close";
 			if (oEvent.target.id === sCloseBtnId) {
 				this.close();
-				oEvent.preventDefault(); // avoid onbeforeunload event which happens at least in IE9 because of the "#" link target
+				oEvent.preventDefault(); // avoid onbeforeunload event which happens at least in IE9 because of the "#" link target// TODO remove after 1.62 version
 			}
 			return false;
 		};
@@ -399,7 +398,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		 */
 		Dialog.prototype.open = function () {
 			if (!this.oPopup) {
-				jQuery.sap.log.fatal("This dialog instance has been destroyed already");
+				Log.fatal("This dialog instance has been destroyed already");
 			} else if (!this._bOpen) {
 				// Save current focused element to restore the focus after closing the dialog
 				this._oPreviousFocus = Popup.getCurrentFocusInfo();
@@ -455,8 +454,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			} else {
 				// if there is something in the content but isn't tabbable then
 				// use the first fake element to focus
-				var oFakeDomRef = jQuery.sap.domById(this._mParameters.firstFocusable);
-				jQuery.sap.focus(oFakeDomRef);
+				var oFakeDomRef = document.getElementById(this._mParameters.firstFocusable);
+				if ( oFakeDomRef ) {
+					oFakeDomRef.focus();
+				}
 			}
 		};
 
@@ -491,10 +492,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			}
 
 			// do this delayed or it possibly won't work because of popup closing animations
-			jQuery.sap.delayedCall(400, this, "restorePreviousFocus");
+			setTimeout(function() {
+				this.restorePreviousFocus();
+			}.bind(this), 400);
 
 			jQuery.each(oRect, function (key, val) {
-				oRect[key] = parseInt(val, 10);
+				oRect[key] = parseInt(val);
 			});
 
 			this._oRect = oRect;
@@ -567,7 +570,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			}
 
 			this.oPopup = null;
-			jQuery.sap.clearDelayedCall(this._sDelayedCall);
+			clearTimeout(this._sDelayedCall);
 			this._sDelayedCall = null;
 			delete this._mParameters;
 			this._fnOnResizeRecenter = null;
@@ -632,7 +635,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			this.sLastRelevantNavigation = null;
 
 			if (!this._bInitialFocusSet) {
-				// since IE9 calls first "onfocusin" it has to be checked if the initial focus was set already
+				// since IE9 calls first "onfocusin" it has to be checked if the initial focus was set already// TODO remove after 1.62 version
 				return;
 			}
 
@@ -664,7 +667,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		 * @private
 		 */
 		Dialog.prototype.onselectstart = function (oEvent) {
-			if (!jQuery.sap.containsOrEquals(this.getDomRef("cont"), oEvent.target)) {
+			if (!containsOrEquals(this.getDomRef("cont"), oEvent.target)) {
 				oEvent.preventDefault();
 				oEvent.stopPropagation();
 			}
@@ -679,9 +682,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		Dialog.prototype.getMinSize = function () {
 
 			var ADDITIONAL_HEIGHT_IF_NO_FOOTER = 36;
-			var $oDialog = jQuery.sap.byId(this.sId);
-			var	$oTitle = jQuery.sap.byId(this.sId + "-hdr");
-			var $oFooter = jQuery.sap.byId(this.sId + "-footer");
+			var $oDialog = this.$();
+			var	$oTitle = this.$("hdr");
+			var $oFooter = this.$("footer");
 			var oFooterBtns = $oFooter.children("DIV").get(0);
 			var widthFooter = oFooterBtns ? oFooterBtns.offsetWidth : 0;
 			var bFooterIsVisible = $oFooter.css('display') !== 'none';
@@ -783,7 +786,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			// TODO the check for state OPENING is a compromise. Without that, the content of the dialog will render
 			// in disabled state but will be enabled. As an alternative, the dialog could render again after OPEN is reached
 			// and after switching to CLOSING (to properly reflect the changed enabled state in the descendants)
-			return eState === sap.ui.core.OpenState.OPENING || eState === sap.ui.core.OpenState.OPEN;
+			return eState === OpenState.OPENING || eState === OpenState.OPEN;
 		};
 
 		// **************************************************
@@ -817,7 +820,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 			this._bRtlMode = sap.ui.getCore().getConfiguration().getRTL(); // remember the RTL mode for the starting resize operation
 			var oDomRef = this.getDomRef();
-			if (jQuery.sap.containsOrEquals(this.getDomRef("hdr"), oSource)) {
+			if (containsOrEquals(this.getDomRef("hdr"), oSource)) {
 				if (oSource.id != (sId + "-close")) {
 					this.sDragMode = "move";
 					this._RootWidth = oDomRef.offsetWidth;
@@ -844,7 +847,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			// save current focused control for restoring later in restore focus
 			var oActElement = document.activeElement;
 			if (oActElement && oActElement.id) {
-				var oCtrl = jQuery.sap.byId(oActElement.id).control(0);
+				var oCtrl = jQuery(oActElement).control(0);
 				if (oCtrl) {
 					this.oRestoreFocusInfo = {
 						sFocusId: oCtrl.getId(),
@@ -1023,7 +1026,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		*/
 		Dialog.prototype._deregisterContentResizeHandler = function () {
 			if (this._sContentResizeListenerId) {
-				sap.ui.core.ResizeHandler.deregister(this._sContentResizeListenerId);
+				ResizeHandler.deregister(this._sContentResizeListenerId);
 				this._sContentResizeListenerId = null;
 			}
 		};
@@ -1034,7 +1037,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		 */
 		Dialog.prototype._registerContentResizeHandler = function() {
 			if (!this._sContentResizeListenerId) {
-				this._sContentResizeListenerId = sap.ui.core.ResizeHandler.register(this.getDomRef("cont"), this._fnOnResizeRecenter);
+				this._sContentResizeListenerId = ResizeHandler.register(this.getDomRef("cont"), this._fnOnResizeRecenter);
 			}
 		};
 
@@ -1047,4 +1050,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 		return Dialog;
 
-	}, /* bExport= */ true);
+	});

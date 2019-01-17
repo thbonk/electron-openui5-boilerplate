@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.GrowingList.
-sap.ui.define(['jquery.sap.global', './List', './library'],
-	function(jQuery, List, library) {
+sap.ui.define(['./List', './library', './GrowingListRenderer'],
+	function(List, library, GrowingListRenderer) {
 	"use strict";
 
 
@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', './List', './library'],
 	 * @extends sap.m.List
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -67,7 +67,7 @@ sap.ui.define(['jquery.sap.global', './List', './library'],
 
 	//sets growing property to true on init
 	GrowingList.prototype.init = function() {
-		sap.m.ListBase.prototype.init.call(this);
+		List.prototype.init.call(this);
 		if (!this._isIncompatible()) {
 			this.setGrowing();
 		}
@@ -75,17 +75,17 @@ sap.ui.define(['jquery.sap.global', './List', './library'],
 
 	// sets growing feature always to true
 	GrowingList.prototype.setGrowing = function() {
-		return sap.m.ListBase.prototype.setGrowing.call(this, true);
+		return List.prototype.setGrowing.call(this, true);
 	};
 
 	// not to break add getters and setters for old properties
-	!(function(oGL, oLB) {
+	!(function(oGL, oL) {
 		["Threshold", "TriggerText", "ScrollToLoad"].forEach(function(property) {
-			oGL["set" + property] = oLB["setGrowing" + property];
-			oGL["get" + property] = oLB["getGrowing" + property];
+			oGL["set" + property] = oL["setGrowing" + property];
+			oGL["get" + property] = oL["getGrowing" + property];
 		});
-	}(GrowingList.prototype, sap.m.ListBase.prototype));
+	}(GrowingList.prototype, List.prototype));
 
 	return GrowingList;
 
-}, /* bExport= */ true);
+});

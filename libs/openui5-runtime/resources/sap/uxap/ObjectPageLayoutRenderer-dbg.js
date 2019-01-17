@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(["sap/ui/core/Renderer", "./ObjectPageHeaderRenderer"],
-	function (Renderer, ObjectPageHeaderRenderer) {
+sap.ui.define(["sap/ui/Device"],
+	function(Device) {
 		"use strict";
 
 		/**
@@ -20,7 +20,18 @@ sap.ui.define(["sap/ui/core/Renderer", "./ObjectPageHeaderRenderer"],
 				oAnchorBar = null,
 				bIsHeaderContentVisible = oControl.getHeaderContent() && oControl.getHeaderContent().length > 0 && oControl.getShowHeaderContent(),
 				bIsTitleInHeaderContent = oControl.getShowTitleInHeaderContent() && oControl.getShowHeaderContent(),
-				bRenderHeaderContent = bIsHeaderContentVisible || bIsTitleInHeaderContent;
+				bRenderHeaderContent = bIsHeaderContentVisible || bIsTitleInHeaderContent,
+				bUseIconTabBar = oControl.getUseIconTabBar(),
+				bTitleClickable = oControl.getToggleHeaderOnTitleClick() && oControl.getHeaderTitle() && oControl.getHeaderTitle().supportsToggleHeaderOnTitleClick(),
+				sRootAriaLabelText = oControl._getRootAriaLabelText(),
+				sBackgroundDesign = oControl.getBackgroundDesignAnchorBar(),
+				oLandmarkInfo = oControl.getLandmarkInfo(),
+				sHeaderTag = oControl._getHeaderTag(oLandmarkInfo),
+				sFooterTag = oControl._getFooterTag(oLandmarkInfo),
+				bHeaderRoleSet = oLandmarkInfo && oLandmarkInfo.getHeaderRole(),
+				bRootRoleSet = oLandmarkInfo && oLandmarkInfo.getRootRole(),
+				bRootLabelSet = oLandmarkInfo && oLandmarkInfo.getRootLabel(),
+				bNavigationRoleSet = oLandmarkInfo && oLandmarkInfo.getNavigationRole();
 
 			if (oControl.getShowAnchorBar() && oControl._getInternalAnchorBarVisible()) {
 				oAnchorBar = oControl.getAggregation("_anchorBar");
@@ -28,54 +39,80 @@ sap.ui.define(["sap/ui/core/Renderer", "./ObjectPageHeaderRenderer"],
 
 			oRm.write("<div");
 			oRm.writeControlData(oControl);
-			if (oHeader) {
-				oRm.writeAttributeEscaped("aria-label", oHeader.getObjectTitle());
+			if (!bRootRoleSet) {
+				oRm.writeAttribute("role", "region");
+			}
+			if (!bRootLabelSet) {
+				oRm.writeAttributeEscaped("aria-label", sRootAriaLabelText);
 			}
 			oRm.addClass("sapUxAPObjectPageLayout");
+			if (bTitleClickable) {
+				oRm.addClass("sapUxAPObjectPageLayoutTitleClickEnabled");
+			}
+			if (oAnchorBar) {
+				oRm.addClass("sapUxAPObjectPageLayoutWithNavigation");
+			}
+
 			oRm.writeClasses();
 			oRm.addStyle("height", oControl.getHeight());
 			oRm.writeStyles();
+			oRm.writeAccessibilityState(oControl, oControl._formatLandmarkInfo(oLandmarkInfo, "Root"));
 			oRm.write(">");
 
-            // custom scrollbar
-			if (sap.ui.Device.system.desktop) {
+			// custom scrollbar
+			if (Device.system.desktop) {
 				oRm.renderControl(oControl._getCustomScrollBar().addStyleClass("sapUxAPObjectPageCustomScroller"));
 			}
 
 			// Header
-			oRm.write("<header ");
-			oRm.writeAttribute("role", "banner");
+			oRm.write("<" + sHeaderTag + " ");
+			if (!bHeaderRoleSet) {
+				oRm.writeAttribute("role", "banner");
+			}
 			oRm.writeAttributeEscaped("id", oControl.getId() + "-headerTitle");
+			oRm.writeAttribute("data-sap-ui-customfastnavgroup", true);
 			oRm.addClass("sapUxAPObjectPageHeaderTitle");
 			oRm.addClass("sapContrastPlus");
 			oRm.writeClasses();
+			oRm.writeAccessibilityState(oControl, oControl._formatLandmarkInfo(oLandmarkInfo, "Header"));
 			oRm.write(">");
 			if (oHeader) {
 				oRm.renderControl(oHeader);
 			}
 
 			// Sticky Header Content
-			this._renderHeaderContentDOM(oRm, oControl, bRenderHeaderContent && oControl._bHContentAlwaysExpanded, "-stickyHeaderContent");
+			this._renderHeaderContentDOM(oRm, oControl, bRenderHeaderContent && oControl._bHeaderInTitleArea, "-stickyHeaderContent");
 
 			// Sticky anchorBar placeholder
 			oRm.write("<div ");
 			oRm.writeAttributeEscaped("id", oControl.getId() + "-stickyAnchorBar");
+			// write ARIA role
+			if (!bNavigationRoleSet) {
+				oRm.writeAttribute("role", "navigation");
+			}
 			oRm.addClass("sapUxAPObjectPageStickyAnchorBar");
 			oRm.addClass("sapUxAPObjectPageNavigation");
+
+			if (sBackgroundDesign) {
+				oRm.addClass("sapUxAPObjectPageNavigation" + sBackgroundDesign);
+			}
+
 			oRm.writeClasses();
+			oRm.writeAccessibilityState(oControl, oControl._formatLandmarkInfo(oLandmarkInfo, "Navigation"));
 			oRm.write(">");
 
 			// if the content is expanded render bars outside the scrolling div
-			this._renderAnchorBar(oRm, oControl, oAnchorBar, oControl._bHContentAlwaysExpanded);
+			this._renderAnchorBar(oRm, oControl, oAnchorBar, oControl._bHeaderInTitleArea);
 
 			oRm.write("</div>");
-			oRm.write("</header>");
+			oRm.write("</" + sHeaderTag + ">");
 
 			oRm.write("<div ");
 			oRm.writeAttributeEscaped("id", oControl.getId() + "-opwrapper");
 			oRm.addClass("sapUxAPObjectPageWrapper");
 			// set transform only if we don't have title arrow inside the header content, otherwise the z-index is not working
-			if (!(oControl.getShowTitleInHeaderContent() && oHeader.getShowTitleSelector())) {
+			// always set transform if showTitleInHeaderConent is not supported
+			if (oHeader && !oHeader.supportsTitleInHeaderContent() || !(oControl.getShowTitleInHeaderContent() && oHeader.getShowTitleSelector())) {
 				oRm.addClass("sapUxAPObjectPageWrapperTransform");
 			}
 			oRm.writeClasses();
@@ -88,19 +125,27 @@ sap.ui.define(["sap/ui/core/Renderer", "./ObjectPageHeaderRenderer"],
 			oRm.write(">");
 
 			// Header Content
-			this._renderHeaderContentDOM(oRm, oControl, bRenderHeaderContent && !oControl._bHContentAlwaysExpanded, "-headerContent",  true);
+			this._renderHeaderContentDOM(oRm, oControl, bRenderHeaderContent && !oControl._bHeaderInTitleArea, "-headerContent",  true);
 
 			// Anchor Bar
 			oRm.write("<section ");
 			oRm.writeAttributeEscaped("id", oControl.getId() + "-anchorBar");
 			// write ARIA role
-			oRm.writeAttribute("role", "navigation");
+			if (!bNavigationRoleSet) {
+				oRm.writeAttribute("role", "navigation");
+			}
 			oRm.addClass("sapUxAPObjectPageNavigation");
 			oRm.addClass("sapContrastPlus");
+
+			if (sBackgroundDesign) {
+				oRm.addClass("sapUxAPObjectPageNavigation" + sBackgroundDesign);
+			}
+
 			oRm.writeClasses();
+			oRm.writeAccessibilityState(oControl, oControl._formatLandmarkInfo(oLandmarkInfo, "Navigation"));
 			oRm.write(">");
 
-			this._renderAnchorBar(oRm, oControl, oAnchorBar, !oControl._bHContentAlwaysExpanded);
+			this._renderAnchorBar(oRm, oControl, oAnchorBar, !oControl._bHeaderInTitleArea);
 
 			oRm.write("</section>");
 
@@ -113,11 +158,15 @@ sap.ui.define(["sap/ui/core/Renderer", "./ObjectPageHeaderRenderer"],
 				oRm.addClass("sapUxAPObjectPageContainerNoBar");
 			}
 			oRm.writeClasses();
+			oRm.writeAccessibilityState(oControl, oControl._formatLandmarkInfo(oLandmarkInfo, "Content"));
 			oRm.write(">");
 			aSections = oControl._getSectionsToRender();
-			if (jQuery.isArray(aSections)) {
-				jQuery.each(aSections, function (iIndex, oSection) {
+			if (Array.isArray(aSections)) {
+				aSections.forEach(function (oSection) {
 					oRm.renderControl(oSection);
+					if (bUseIconTabBar) {
+						oControl._oCurrentTabSection = oSection;
+					}
 				});
 			}
 			oRm.write("</section>");
@@ -132,7 +181,7 @@ sap.ui.define(["sap/ui/core/Renderer", "./ObjectPageHeaderRenderer"],
 			oRm.write("</div>");  // END scroll
 
 			oRm.write("</div>"); // END wrapper
-			this._renderFooterContentInternal(oRm, oControl);
+			this._renderFooterContentInternal(oRm, oControl, sFooterTag, oLandmarkInfo);
 
 			oRm.write("</div>"); // END page
 		};
@@ -144,12 +193,14 @@ sap.ui.define(["sap/ui/core/Renderer", "./ObjectPageHeaderRenderer"],
 		 * @param {sap.ui.core.Control} oControl an object representation of the control that should be rendered
 		 */
 		ObjectPageLayoutRenderer._renderAnchorBar = function (oRm, oControl, oAnchorBar, bRender) {
-			var aSections = oControl.getAggregation("sections");
+			var aSections = oControl.getAggregation("sections"),
+				oHeaderContent;
 			if (bRender) {
-				if (oControl.getIsChildPage()) {
+				oHeaderContent = oControl._getHeaderContent();
+				if (oControl.getIsChildPage() && oHeaderContent && oHeaderContent.supportsChildPageDesign()) {
 					oRm.write("<div ");
 					oRm.writeAttributeEscaped("id", oControl.getId() + "-childPageBar");
-					if (jQuery.isArray(aSections) && aSections.length > 1) {
+					if (Array.isArray(aSections) && aSections.length > 1) {
 						oRm.addClass('sapUxAPObjectChildPage');
 					}
 					oRm.writeClasses();
@@ -216,14 +267,14 @@ sap.ui.define(["sap/ui/core/Renderer", "./ObjectPageHeaderRenderer"],
 		 * @param {sap.ui.core.RenderManager} oRm the RenderManager that can be used for writing to the render output buffer
 		 * @param {sap.ui.core.Control} oObjectPageLayout an object representation of the control that should be rendered
 		 */
-		ObjectPageLayoutRenderer._renderFooterContentInternal = function (oRm, oObjectPageLayout) {
+		ObjectPageLayoutRenderer._renderFooterContentInternal = function (oRm, oObjectPageLayout, sFooterTag, oLandmarkInfo) {
 			var oFooter = oObjectPageLayout.getFooter();
 
 			if (!oFooter) {
 				return;
 			}
 
-			oRm.write("<footer");
+			oRm.write("<" + sFooterTag);
 			oRm.writeAttributeEscaped("id", oObjectPageLayout.getId() + "-footerWrapper");
 			oRm.addClass("sapUxAPObjectPageFooter sapMFooter-CTX sapContrast sapContrastPlus");
 
@@ -232,10 +283,11 @@ sap.ui.define(["sap/ui/core/Renderer", "./ObjectPageHeaderRenderer"],
 			}
 
 			oRm.writeClasses();
+			oRm.writeAccessibilityState(oObjectPageLayout, oObjectPageLayout._formatLandmarkInfo(oLandmarkInfo, "Footer"));
 			oRm.write(">");
 			oFooter.addStyleClass("sapUxAPObjectPageFloatingFooter");
 			oRm.renderControl(oFooter);
-			oRm.write("</footer>");
+			oRm.write("</" + sFooterTag + ">");
 		};
 
 		/**
@@ -245,7 +297,7 @@ sap.ui.define(["sap/ui/core/Renderer", "./ObjectPageHeaderRenderer"],
 		 * @param {sap.ui.core.Control} oControl an object representation of the control that should be rendered
 		 */
 		ObjectPageLayoutRenderer._rerenderHeaderContentArea = function (oRm, oControl) {
-			var sHeaderContentDOMId = oControl._bHContentAlwaysExpanded ? "stickyHeaderContent" : "headerContent",
+			var sHeaderContentDOMId = oControl._bHeaderInTitleArea ? "stickyHeaderContent" : "headerContent",
 			$headerContent;
 
 			this.renderHeaderContent(oRm, oControl);

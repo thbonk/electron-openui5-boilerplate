@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -13,7 +13,7 @@ sap.ui.define(function () {
 	WizardStepRenderer.render = function (oRm, oStep) {
 		this.startWizardStep(oRm, oStep);
 		this.renderWizardStepTitle(oRm, oStep);
-		this.renderContent(oRm, oStep.getContent());
+		this.renderContent(oRm, oStep);
 		this.endWizardStep(oRm);
 	};
 
@@ -39,8 +39,9 @@ sap.ui.define(function () {
 		return oStep.getId() + "-Title";
 	};
 
-	WizardStepRenderer.renderContent = function (oRm, aChildren) {
-		aChildren.forEach(oRm.renderControl);
+	WizardStepRenderer.renderContent = function (oRm, oStep) {
+		oStep.getContent().forEach(oRm.renderControl, oRm);
+		oRm.renderControl(oStep.getAggregation("_nextButton"));
 	};
 
 	WizardStepRenderer.endWizardStep = function (oRm) {

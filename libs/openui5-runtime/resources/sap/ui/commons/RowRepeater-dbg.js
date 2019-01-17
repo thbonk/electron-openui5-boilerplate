@@ -1,13 +1,33 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.RowRepeater.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
-	function(jQuery, library, Control) {
+sap.ui.define([
+    'sap/ui/thirdparty/jquery',
+    './library',
+    'sap/ui/core/Control',
+    './RowRepeaterRenderer',
+    './Toolbar',
+    './Paginator',
+    './Button',
+    'sap/ui/model/FilterType'
+],
+	function(jQuery, library, Control, RowRepeaterRenderer, Toolbar, Paginator, Button, FilterType) {
 	"use strict";
+
+
+
+	// shortcut for sap.ui.commons.PaginatorEvent
+	var PaginatorEvent = library.PaginatorEvent;
+
+	// shortcut for sap.ui.commons.ToolbarDesign
+	var ToolbarDesign = library.ToolbarDesign;
+
+	// shortcut for sap.ui.commons.RowRepeaterDesign
+	var RowRepeaterDesign = library.RowRepeaterDesign;
 
 
 
@@ -22,7 +42,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -57,7 +77,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 			/**
 			 * The visual design of the control.
 			 */
-			design : {type : "sap.ui.commons.RowRepeaterDesign", group : "Appearance", defaultValue : sap.ui.commons.RowRepeaterDesign.Standard},
+			design : {type : "sap.ui.commons.RowRepeaterDesign", group : "Appearance", defaultValue : RowRepeaterDesign.Standard},
 
 			/**
 			 * Threshold to fetch the next chunk of data. The minimal threshold can be the numberOfRows of the RR.
@@ -229,26 +249,26 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 		this.iPreviousNumberOfRows = this.getNumberOfRows();
 
 		// create filter and sorter toolbar control and add as aggregation
-		this.setAggregation("filterToolbar", new sap.ui.commons.Toolbar(sId + "-ftb", {
+		this.setAggregation("filterToolbar", new Toolbar(sId + "-ftb", {
 			standalone: false,
-			design: sap.ui.commons.ToolbarDesign.Transparent
+			design: ToolbarDesign.Transparent
 		}));
-		this.setAggregation("sorterToolbar", new sap.ui.commons.Toolbar(sId + "-stb", {
+		this.setAggregation("sorterToolbar", new Toolbar(sId + "-stb", {
 			standalone: false
 		}));
 
 		// create pager controls and their event handlers, add them as aggregations
-		var oPager = new sap.ui.commons.Paginator(sId + "-fp",{page:[this.paging,this]});
+		var oPager = new Paginator(sId + "-fp",{page:[this.paging,this]});
 		this.setAggregation("footerPager",oPager);
 
 		// create show more buttons and add them as aggregation
 		var sShowMoreText = this.oResourceBundle.getText("SHOW_MORE");
-		this.setAggregation("headerShowMoreButton", new sap.ui.commons.Button(sId + "-hsm", {
+		this.setAggregation("headerShowMoreButton", new Button(sId + "-hsm", {
 			text: sShowMoreText,
 			tooltip: sShowMoreText,
 			press: [this.triggerShowMore, this]
 		}));
-		this.setAggregation("footerShowMoreButton", new sap.ui.commons.Button(sId + "-fsm", {
+		this.setAggregation("footerShowMoreButton", new Button(sId + "-fsm", {
 			text: sShowMoreText,
 			tooltip: sShowMoreText,
 			press: [this.triggerShowMore, this]
@@ -417,7 +437,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 		if (oFilter) {
 
 			// apply the filter assigned to filter item
-			oListBinding.filter(oFilter.getFilters(), sap.ui.model.FilterType.Control);
+			oListBinding.filter(oFilter.getFilters(), FilterType.Control);
 
 			// fire the filter
 			this.fireFilter({filterId:id});
@@ -928,7 +948,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 		// insert a button into the filter toolbar's aggregation
 		var oToolbar = this.getAggregation("filterToolbar");
 		var sFilterId = oFilter.getId();
-		var oButton = new sap.ui.commons.Button({text:oFilter.getText(),icon:oFilter.getIcon(),tooltip:oFilter.getTooltip(),press:[function(){this.applyFilter(sFilterId);},this]});
+		var oButton = new Button({text:oFilter.getText(),icon:oFilter.getIcon(),tooltip:oFilter.getTooltip(),press:[function(){this.applyFilter(sFilterId);},this]});
 		oToolbar.insertItem(oButton,iIndex);
 
 		this.insertAggregation("filters", oFilter, iIndex);
@@ -943,7 +963,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 		// add a button to the filter toolbar's aggregation
 		var oToolbar = this.getAggregation("filterToolbar");
 		var sFilterId = oFilter.getId();
-		var oButton = new sap.ui.commons.Button({text:oFilter.getText(),icon:oFilter.getIcon(),tooltip:oFilter.getTooltip(),press:[function(){this.applyFilter(sFilterId);},this]});
+		var oButton = new Button({text:oFilter.getText(),icon:oFilter.getIcon(),tooltip:oFilter.getTooltip(),press:[function(){this.applyFilter(sFilterId);},this]});
 		oToolbar.addItem(oButton);
 
 		this.addAggregation("filters", oFilter);
@@ -991,7 +1011,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 		// add a button to the sorter toolbar's aggregation
 		var oToolbar = this.getAggregation("sorterToolbar");
 		var sSorterId = oSorter.getId();
-		var oButton = new sap.ui.commons.Button({text:oSorter.getText(),icon:oSorter.getIcon(),tooltip:oSorter.getTooltip(),press:[function(){this.triggerSort(sSorterId);},this]});
+		var oButton = new Button({text:oSorter.getText(),icon:oSorter.getIcon(),tooltip:oSorter.getTooltip(),press:[function(){this.triggerSort(sSorterId);},this]});
 		oToolbar.insertItem(oButton,iIndex);
 
 		this.insertAggregation("sorters", oSorter, iIndex);
@@ -1005,7 +1025,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 		// add a button to the sorter toolbar's aggregation
 		var oToolbar = this.getAggregation("sorterToolbar");
 		var sSorterId = oSorter.getId();
-		var oButton = new sap.ui.commons.Button({text:oSorter.getText(),icon:oSorter.getIcon(),tooltip:oSorter.getTooltip(),press:[function(){this.triggerSort(sSorterId);},this]});
+		var oButton = new Button({text:oSorter.getText(),icon:oSorter.getIcon(),tooltip:oSorter.getTooltip(),press:[function(){this.triggerSort(sSorterId);},this]});
 		oToolbar.addItem(oButton);
 
 		this.addAggregation("sorters", oSorter);
@@ -1312,19 +1332,19 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 RowRepeater.prototype.paging = function(oEvent) {
 
 		 switch (oEvent.getParameter("type")) {
-			 case sap.ui.commons.PaginatorEvent.First:
+			 case PaginatorEvent.First:
 				 this.firstPage();
 				 break;
-			 case sap.ui.commons.PaginatorEvent.Last:
+			 case PaginatorEvent.Last:
 				 this.lastPage();
 				 break;
-			 case sap.ui.commons.PaginatorEvent.Previous:
+			 case PaginatorEvent.Previous:
 				 this.previousPage();
 				 break;
-			 case sap.ui.commons.PaginatorEvent.Next:
+			 case PaginatorEvent.Next:
 				 this.nextPage();
 				 break;
-			 case sap.ui.commons.PaginatorEvent.Goto:
+			 case PaginatorEvent.Goto:
 				 this.gotoPage(oEvent.getParameter("targetPage"));
 				 break;
 		 }
@@ -1387,7 +1407,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * Verify if the rows aggregation of this control is bound.
 	 */
 	RowRepeater.prototype.isBound = function(sName) {
-		return sap.ui.core.Element.prototype.isBound.call(this, sName || "rows");
+		return Control.prototype.isBound.call(this, sName || "rows");
 	};
 
 	/**
@@ -1409,7 +1429,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * @private
 	 */
 	RowRepeater.prototype.unbindAggregation = function(sName) {
-		sap.ui.core.Element.prototype.unbindAggregation.apply(this, arguments);
+		Control.prototype.unbindAggregation.apply(this, arguments);
 		if (sName === "rows") {
 			this.destroyRows();
 		}
@@ -1422,7 +1442,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	*/
 	RowRepeater.prototype.refreshRows = function() {
 
-		// collect the relevant informations
+		// collect the relevant information
 		var oBindingInfo = this.getBindingInfo("rows"),
 			oBinding = oBindingInfo.binding,
 			iRowCount = this._getRowCount(),
@@ -1444,7 +1464,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 */
 	RowRepeater.prototype.updateRows = function(bViaAPI) {
 
-		// collect the relevant informations
+		// collect the relevant information
 		var oBindingInfo = this.getBindingInfo("rows"),
 		    fnFactory = oBindingInfo.factory,
 		    oBinding = oBindingInfo.binding,
@@ -1542,4 +1562,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 
 	return RowRepeater;
 
-}, /* bExport= */ true);
+});

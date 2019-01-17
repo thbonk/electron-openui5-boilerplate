@@ -1,40 +1,19 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/ui/model/FormatException',
-		'sap/ui/model/odata/type/ODataType', 'sap/ui/model/ParseException',
-		'sap/ui/model/ValidateException', 'sap/ui/model/type/String'],
-	function(jQuery, FormatException, ODataType, ParseException, ValidateException, StringType) {
+sap.ui.define([
+	"sap/base/Log",
+	"sap/ui/model/ValidateException",
+	"sap/ui/model/odata/type/ODataType",
+	"sap/ui/model/type/String"
+], function (Log, ValidateException, ODataType, StringType) {
 	"use strict";
 
 	var rDigitsOnly = /^\d+$/,
-		rLeadingZeros = /^0*(?=\d)/,
-		sZeros = "00000000000000000000000000000000000000000000000000000000000000000000000000000000";
-
-	/**
-	 * Adds leading zeros to the given value.
-	 *
-	 * @param {string} sValue
-	 *   the string which needs to be filled up with leading zeros
-	 * @param {number} iLength
-	 *   the expected length of the resulting string; resulting string might be longer if given
-	 *   value is already longer
-	 * @returns {string}
-	 *   given value with leading zeros
-	 */
-	function fillLeadingZeros(sValue, iLength) {
-		if (sValue.length >= iLength) {
-			return sValue;
-		}
-		// ensure that constant for zeros is long enough
-		while (sZeros.length < iLength) {
-			sZeros = sZeros + sZeros;
-		}
-		return sZeros.slice(0, iLength - sValue.length) + sValue;
-	}
+		rLeadingZeros = /^0*(?=\d)/;
 
 	/**
 	 * Checks whether isDigitSequence constraint is set to true and the given value is a digit
@@ -66,13 +45,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FormatException',
 		if (oConstraints) {
 			vMaxLength = oConstraints.maxLength;
 			if (typeof vMaxLength === "string") {
-				vMaxLength = parseInt(vMaxLength, 10);
+				vMaxLength = parseInt(vMaxLength);
 			}
 			if (typeof vMaxLength === "number" && !isNaN(vMaxLength) && vMaxLength > 0) {
 				oType.oConstraints = {maxLength : vMaxLength };
 			} else if (vMaxLength !== undefined) {
-				jQuery.sap.log.warning("Illegal maxLength: " + oConstraints.maxLength,
-					null, oType.getName());
+				Log.warning("Illegal maxLength: " + oConstraints.maxLength, null, oType.getName());
 			}
 			vIsDigitSequence = oConstraints.isDigitSequence;
 			if (vIsDigitSequence === true || vIsDigitSequence === "true") {
@@ -80,8 +58,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FormatException',
 				oType.oConstraints.isDigitSequence = true;
 			} else if (vIsDigitSequence !== undefined && vIsDigitSequence !== false
 					&& vIsDigitSequence !== "false") {
-				jQuery.sap.log.warning("Illegal isDigitSequence: " + vIsDigitSequence, null,
-					oType.getName());
+				Log.warning("Illegal isDigitSequence: " + vIsDigitSequence, null, oType.getName());
 			}
 
 			vNullable = oConstraints.nullable;
@@ -89,7 +66,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FormatException',
 				oType.oConstraints = oType.oConstraints || {};
 				oType.oConstraints.nullable = false;
 			} else if (vNullable !== undefined && vNullable !== true && vNullable !== "true") {
-				jQuery.sap.log.warning("Illegal nullable: " + vNullable, null, oType.getName());
+				Log.warning("Illegal nullable: " + vNullable, null, oType.getName());
 			}
 		}
 	}
@@ -107,7 +84,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FormatException',
 	 * @extends sap.ui.model.odata.type.ODataType
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @alias sap.ui.model.odata.type.String
 	 * @param {object} [oFormatOptions]
@@ -201,7 +178,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FormatException',
 		if (isDigitSequence(sResult, this.oConstraints)) {
 			sResult = sResult.replace(rLeadingZeros, "");
 			if (this.oConstraints.maxLength) {
-				sResult = fillLeadingZeros(sResult, this.oConstraints.maxLength);
+				sResult = sResult.padStart(this.oConstraints.maxLength, "0");
 			}
 		}
 		return sResult;

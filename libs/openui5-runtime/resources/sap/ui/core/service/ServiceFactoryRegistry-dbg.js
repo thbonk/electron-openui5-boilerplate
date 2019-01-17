@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.core.service.ServiceFactoryRegistry
-sap.ui.define(['jquery.sap.global', './ServiceFactory'],
-	function(jQuery, ServiceFactory) {
+sap.ui.define(['./ServiceFactory', "sap/base/assert"],
+	function(ServiceFactory, assert) {
 	"use strict";
 
 
@@ -18,7 +18,7 @@ sap.ui.define(['jquery.sap.global', './ServiceFactory'],
 	 * The service factory registry.
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @alias sap.ui.core.service.ServiceFactoryRegistry
 	 * @private
 	 * @sap-restricted sap.ushell
@@ -39,8 +39,8 @@ sap.ui.define(['jquery.sap.global', './ServiceFactory'],
 	 */
 	ServiceFactoryRegistry.register = function(sServiceFactoryName, oServiceFactory) {
 
-		jQuery.sap.assert(sServiceFactoryName, "sServiceFactoryName must not be empty, null or undefined");
-		jQuery.sap.assert(oServiceFactory instanceof ServiceFactory, "oServiceFactory must be an instance of sap.ui.core.service.ServiceFactory");
+		assert(sServiceFactoryName, "sServiceFactoryName must not be empty, null or undefined");
+		assert(oServiceFactory instanceof ServiceFactory, "oServiceFactory must be an instance of sap.ui.core.service.ServiceFactory");
 
 		mServiceFactories[sServiceFactoryName] = oServiceFactory;
 
@@ -60,7 +60,7 @@ sap.ui.define(['jquery.sap.global', './ServiceFactory'],
 	 */
 	ServiceFactoryRegistry.unregister = function(sServiceFactoryName) {
 
-		jQuery.sap.assert(sServiceFactoryName, "sServiceFactoryName must not be empty, null or undefined");
+		assert(sServiceFactoryName, "sServiceFactoryName must not be empty, null or undefined");
 
 		delete mServiceFactories[sServiceFactoryName];
 

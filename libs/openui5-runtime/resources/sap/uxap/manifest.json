@@ -1,14 +1,13 @@
 {
-  "_version": "1.2.0",
+  "_version": "1.9.0",
   "sap.app": {
-    "_version": "1.2.0",
     "id": "sap.uxap",
     "type": "library",
     "embeds": [
       "component"
     ],
     "applicationVersion": {
-      "version": "1.50.6"
+      "version": "1.61.2"
     },
     "title": "SAP UxAP",
     "description": "SAP UxAP",
@@ -17,7 +16,6 @@
     "offline": true
   },
   "sap.ui": {
-    "_version": "1.1.0",
     "technology": "UI5",
     "supportedThemes": [
       "base",
@@ -25,19 +23,54 @@
     ]
   },
   "sap.ui5": {
-    "_version": "1.1.0",
     "dependencies": {
-      "minUI5Version": "1.50",
+      "minUI5Version": "1.61",
       "libs": {
         "sap.ui.core": {
-          "minVersion": "1.50.6"
+          "minVersion": "1.61.2"
         },
         "sap.m": {
-          "minVersion": "1.50.6"
+          "minVersion": "1.61.2"
         },
         "sap.ui.layout": {
-          "minVersion": "1.50.6"
+          "minVersion": "1.61.2"
         }
+      }
+    },
+    "library": {
+      "i18n": "messagebundle.properties",
+      "content": {
+        "controls": [
+          "sap.uxap.AnchorBar",
+          "sap.uxap.BlockBase",
+          "sap.uxap.BreadCrumbs",
+          "sap.uxap.HierarchicalSelect",
+          "sap.uxap.ObjectPageHeader",
+          "sap.uxap.ObjectPageDynamicHeaderTitle",
+          "sap.uxap.ObjectPageDynamicHeaderContent",
+          "sap.uxap.ObjectPageHeaderActionButton",
+          "sap.uxap.ObjectPageHeaderContent",
+          "sap.uxap.ObjectPageLayout",
+          "sap.uxap.ObjectPageSection",
+          "sap.uxap.ObjectPageSectionBase",
+          "sap.uxap.ObjectPageSubSection"
+        ],
+        "elements": [
+          "sap.uxap.ModelMapping",
+          "sap.uxap.ObjectPageHeaderLayoutData"
+        ],
+        "types": [
+          "sap.uxap.BlockBaseColumnLayout",
+          "sap.uxap.ObjectPageConfigurationMode",
+          "sap.uxap.ObjectPageHeaderDesign",
+          "sap.uxap.ObjectPageHeaderPictureShape",
+          "sap.uxap.ObjectPageSubSectionLayout",
+          "sap.uxap.ObjectPageSubSectionMode"
+        ],
+        "interfaces": [
+          "sap.uxap.IHeaderTitle",
+          "sap.uxap.IHeaderContent"
+        ]
       }
     }
   }

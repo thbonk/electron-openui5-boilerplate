@@ -1,12 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.t.ToolPage.
-sap.ui.define(['./library', 'sap/ui/core/Control', 'sap/ui/Device', 'sap/ui/core/ResizeHandler'],
-	function (library, Control, Device, ResizeHandler) {
+sap.ui.define([
+    './library',
+    'sap/ui/core/Control',
+    'sap/ui/Device',
+    'sap/ui/core/ResizeHandler',
+    "./ToolPageRenderer"
+],
+	function(library, Control, Device, ResizeHandler, ToolPageRenderer) {
 		'use strict';
 
 		/**
@@ -18,14 +24,14 @@ sap.ui.define(['./library', 'sap/ui/core/Control', 'sap/ui/Device', 'sap/ui/core
 		 * @class
 		 * The ToolPage is a layout control, used to create a basic tools app that has a header, side navigation and contents area.
 		 * <h4>Overview</h4>
-		 * The control has three main areas - a header on top, navigation to the side and a content are that can hold any control. The header and side navigation use custom controls
+		 * The control has three main areas - a header on top, navigation to the side and a content area that can hold any control. The header and side navigation use custom controls
 		 * - {@link sap.tnt.ToolHeader} and {@link sap.tnt.SideNavigation}.
 		 * <h4>Usage</h4>
-		 * The main usage for the asp.tnt controls is for scenarios in the tooling or administration space.
+		 * The main usage of the sap.tnt controls is for scenarios in the tooling or administration space.
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.61.2
 		 *
 		 * @constructor
 		 * @public
@@ -84,6 +90,8 @@ sap.ui.define(['./library', 'sap/ui/core/Control', 'sap/ui/Device', 'sap/ui/core
 			if (sideContentAggregation) {
 				var newState = Device.system.phone ? true :  isSideExpanded;
 				sideContentAggregation.setExpanded(newState);
+			} else {
+				return this;
 			}
 
 			if (!domRef) {

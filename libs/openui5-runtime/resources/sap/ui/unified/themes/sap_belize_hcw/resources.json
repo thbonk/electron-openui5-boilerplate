@@ -21,6 +21,11 @@
 			"theme": "sap_belize_hcw"
 		},
 		{
+			"name": "ColorPicker.less",
+			"designtime": true,
+			"theme": "sap_belize_hcw"
+		},
+		{
 			"name": "Currency.less",
 			"designtime": true,
 			"theme": "sap_belize_hcw"
@@ -43,6 +48,14 @@
 		{
 			"name": "ShellOverlay.less",
 			"designtime": true,
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "img-RTL/PickingCursor-HCW.png",
+			"theme": "sap_belize_hcw"
+		},
+		{
+			"name": "img/PickingCursor-HCW.png",
 			"theme": "sap_belize_hcw"
 		},
 		{

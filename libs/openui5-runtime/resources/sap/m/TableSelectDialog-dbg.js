@@ -1,13 +1,50 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.TableSelectDialog.
-sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './Table', './library', 'sap/ui/core/Control'],
-	function(jQuery, Button, Dialog, SearchField, Table, library, Control) {
+sap.ui.define([
+	'./Button',
+	'./Dialog',
+	'./SearchField',
+	'./Table',
+	'./library',
+	'sap/ui/core/Control',
+	'sap/ui/Device',
+	'sap/ui/base/ManagedObject',
+	'sap/m/Toolbar',
+	'sap/m/Label',
+	'sap/m/BusyIndicator',
+	'sap/m/Bar',
+	'sap/ui/core/theming/Parameters',
+	'sap/m/Title',
+	'./TableSelectDialogRenderer'
+],
+	function(
+		Button,
+		Dialog,
+		SearchField,
+		Table,
+		library,
+		Control,
+		Device,
+		ManagedObject,
+		Toolbar,
+		Label,
+		BusyIndicator,
+		Bar,
+		Parameters,
+		Title,
+		TableSelectDialogRenderer
+	) {
 	"use strict";
+
+
+
+	// shortcut for sap.m.ListMode
+	var ListMode = library.ListMode;
 
 
 
@@ -25,7 +62,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 	 * The table select dialog consists of the following elements:
 	 * <ul>
 	 * <li> Search field - used to search enter search terms for a specific item.</li>
-	 * <li> Infobar (optional) - shows additional information for the current selection (i.e. total number of selected items).</li>
+	 * <li> Info toolbar (only in multi-select mode) - displays the number of currently selected items.</li>
 	 * <li> Content - the table with the items.</li>
 	 * <li> Footer (optional) - a toolbar for actions.</li>
 	 * </ul>
@@ -40,9 +77,18 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 	 * </ul>
 	 * <h4>When not to use:</h4>
 	 * <ul>
-	 * <li>You need to select one item from a predefined set of options that contains only one value. Use a {@link sap.m.Select switch} control instead.</li>
-	 * <li>You need to select items within a query-based range. Use a {@link sap.ui.comp.valuehelpdialog.ValueHelpDialog value help} control instead.</li>
-	 * <li>You need to only filter a set of items. Use a {@link sap.ui.comp.filterbar.FilterBar filter bar} control instead.</li>
+	 * <li>You need to select only one item from a predefined list of single-value options. Use the {@link sap.m.Select Select} control instead.</li>
+	 * <li>You need to display complex content without having the user navigate away from the current page or you want to prompt the user for an action. Use the {@link sap.m.Dialog Dialog} control instead.</li>
+	 * <li>You need to select items within a query-based range. Use the {@link https://experience.sap.com/fiori-design-web/value-help-dialog/ Value Help Dialog} control instead.</li>
+	 * <li>You need to filter a set of items without any selection. Use the {@link https://experience.sap.com/fiori-design-web/filter-bar/ Filter Bar} control instead.</li>
+	 * </ul>
+	 * <h4>Notes:</h4>
+	 * <ul>
+	 * <li>The property <code>growing</code> must not be used together with two-way binding.
+	 * <li>When the property <code>growing</code> is set to <code>true</code> (default value), the features <code>selected count</code> in info bar, <code>search</code> and <code>select/deselect all</code>, if present, work only for the currently loaded items.
+	 * To make sure that all items in the table are loaded at once and the above features work properly, set the property to <code>false</code>.
+	 * <li>Since version 1.58, the columns headers and the info toolbar are sticky (remain fixed on top when scrolling). This feature is not supported in all browsers.
+	 * For more information on browser support limitations, you can refer to the {@link sap.m.ListBase sap.m.ListBase} <code>sticky</code> property.
 	 * </ul>
 	 * <h3>Responsive Behavior</h3>
 	 * <ul>
@@ -50,12 +96,13 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 	 * </ul>
 	 * @extends sap.ui.core.Control
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.16
 	 * @alias sap.m.TableSelectDialog
+	 * @see {@link fiori:https://experience.sap.com/fiori-design-web/table-select-dialog/ Table Select Dialog}
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var TableSelectDialog = Control.extend("sap.m.TableSelectDialog", /** @lends sap.m.TableSelectDialog.prototype */ { metadata : {
@@ -79,7 +126,17 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 			multiSelect : {type : "boolean", group : "Dimension", defaultValue : false},
 
 			/**
-			 * Determines the number of items initially displayed in the table.
+			 * Determines the progressive loading. When set to <code>true</code>, enables the growing feature of the control to load more items by requesting from the bound model.
+			 * <b>Note:</b> This feature only works when an <code>items</code> aggregation is bound. Growing must not be used together with two-way binding.
+			 * <b>Note:</b> If the property is set to true, the features <code>selected count</code> in info bar, <code>search</code> and <code>select/deselect all</code>, if present, work only for the currently loaded items.
+			 * To make sure that all items in the table are loaded at once and the above features work properly, we recommend setting the <code>growing</code> property to false.
+			 * @since 1.56
+			 */
+			growing : {type : "boolean", group : "Behavior", defaultValue : true},
+
+			/**
+			 * Determines the number of items initially displayed in the table and defines the number of items to be requested from the model for each grow.
+			 * This property can only be used if the property <code>growing</code> is set to <code>true</code>.
 			 */
 			growingThreshold : {type : "int", group : "Misc", defaultValue : null},
 
@@ -99,7 +156,24 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 			/**
 			 * Specifies the content height of the inner dialog. For more information, see the Dialog documentation.
 			 */
-			contentHeight : {type : "sap.ui.core.CSSSize", group : "Dimension", defaultValue : null}
+			contentHeight : {type : "sap.ui.core.CSSSize", group : "Dimension", defaultValue : null},
+
+			/**
+			 * This flag controls whether the Clear button is shown. When set to <code>true</code>, it provides a way to clear a selection made in Table Select Dialog.
+			 *
+			 * We recommend enabling of the Clear button in the following cases, where a mechanism to clear the value is needed:
+			 * In case the Table Select Dialog is in single-selection mode (default mode) and <code>rememberSelections</code> is set to <code>true</code>. The Clear button needs to be enabled in order to allow users to clear the selection.
+			 * In case of using <code>sap.m.Input</code> with <code>valueHelpOnly</code> set to <code>true</code>, the Clear button can be used for clearing the selection.
+			 * In case the application stores a value and uses only Table Select Dialog to edit/maintain it.
+			 *
+			 * Optional:
+			 * In case <code>multiSelect</code> is set to <code>true</code>, the selection can be easily cleared with one click.
+			 *
+			 * <b>Note:</b> When used with oData, only the loaded selections will be cleared.
+			 * @since 1.58
+			 */
+			showClearButton : {type : "boolean", group : "Behavior", defaultValue : false}
+
 		},
 		defaultAggregation : "items",
 		aggregations : {
@@ -144,6 +218,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 					selectedContexts : {type : "string"}
 				}
 			},
+
 
 			/**
 			 * Fires when the search button has been clicked on dialog.
@@ -218,15 +293,16 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 
 		// store a reference to the table for binding management
 		this._oTable = new Table(this.getId() + "-table", {
-			growing: true,
-			growingScrollToLoad: true,
-			mode: sap.m.ListMode.SingleSelectMaster,
+			growing: that.getGrowing(),
+			growingScrollToLoad: that.getGrowing(),
+			mode: ListMode.SingleSelectMaster,
 			modeAnimationOn: false,
-			infoToolbar: new sap.m.Toolbar({
+			sticky: [library.Sticky.InfoToolbar, library.Sticky.ColumnHeaders],
+			infoToolbar: new Toolbar({
 				visible: false,
 				active: false,
 				content: [
-					new sap.m.Label({
+					new Label({
 						text: this._oRb.getText("TABLESELECTDIALOG_SELECTEDITEMS", [0])
 					})
 				]
@@ -255,7 +331,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 		this._table = this._oTable; // for downward compatibility
 
 		// store a reference to the busyIndicator to display when data is currently loaded by a service
-		this._oBusyIndicator = new sap.m.BusyIndicator(this.getId() + "-busyIndicator").addStyleClass("sapMTableSelectDialogBusyIndicator", true);
+		this._oBusyIndicator = new BusyIndicator(this.getId() + "-busyIndicator").addStyleClass("sapMTableSelectDialogBusyIndicator", true);
 
 		// store a reference to the searchField for filtering
 		this._oSearchField = new SearchField(this.getId() + "-searchField", {
@@ -281,20 +357,29 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 		this._searchField = this._oSearchField; // for downward compatibility
 
 		// store a reference to the subheader for hiding it when data loads
-		this._oSubHeader = new sap.m.Bar(this.getId() + "-subHeader", {
+		this._oSubHeader = new Bar(this.getId() + "-subHeader", {
 			contentMiddle: [
 				this._searchField
 			]
 		});
 
+		var oCustomHeader = new Bar(this.getId() + "-dialog-header", {
+			contentMiddle: [
+				new Title(this.getId()  + "-dialog-title", {
+					level: "H2"
+				})
+			]
+		});
+
 		// store a reference to the internal dialog
 		this._oDialog = new Dialog(this.getId() + "-dialog", {
-			stretch: sap.ui.Device.system.phone,
+			customHeader: oCustomHeader,
+			stretch: Device.system.phone,
 			contentHeight: "2000px",
 			subHeader: this._oSubHeader,
 			content: [this._oBusyIndicator, this._oTable],
 			leftButton: this._getCancelButton(),
-			initialFocus: ((sap.ui.Device.system.desktop && this._oSearchField) ? this._oSearchField : null)
+			initialFocus: ((Device.system.desktop && this._oSearchField) ? this._oSearchField : null)
 		});
 		this._dialog = this._oDialog; // for downward compatibility
 		this.setAggregation("_dialog", this._oDialog);
@@ -312,7 +397,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 
 		// internally set top and bottom margin of the dialog to 8rem respectively
 		// CSN# 333642/2014: in base theme the parameter sapUiFontSize is "medium", implement a fallback
-		this._oDialog._iVMargin = 8 * (parseInt(sap.ui.core.theming.Parameters.get("sapUiFontSize"), 10) || 16); //128
+		this._oDialog._iVMargin = 8 * (parseInt(Parameters.get("sapUiFontSize")) || 16); //128
 
 		// helper variables for search update behaviour
 		this._sSearchFieldValue = "";
@@ -320,7 +405,15 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 		// flags to control the busy indicator behaviour because the growing table will always show the no data text when updating
 		this._bFirstRequest = true; // to only show the busy indicator for the first request when the dialog has been openend
 		this._iTableUpdateRequested = 0; // to only show the busy indicator when we initiated the change
-	};
+
+		this._oDialog.getProperty = function (sName) {
+				if (sName !== "title") {
+					return Control.prototype.getProperty.call(this, sName);
+				}
+
+				return this.getCustomHeader().getAggregation("contentMiddle")[0].getText();
+			}.bind(this._oDialog);
+		};
 
 	/**
 	 * Destroys the control
@@ -331,6 +424,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 		this._oTable = null;
 		this._oSearchField = null;
 		this._oSubHeader = null;
+		this._oClearButton = null;
 		this._oBusyIndicator = null;
 		this._sSearchFieldValue = null;
 		this._iTableUpdateRequested = null;
@@ -445,6 +539,20 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 	};
 
 	/**
+	* Sets the growing  to the internal table
+	* @public
+	* @param {boolean} bValue Value for the table's growing.
+	* @returns {sap.m.TableSelectDialog} this pointer for chaining
+	*/
+	TableSelectDialog.prototype.setGrowing = function (bValue) {
+		this._oTable.setGrowing(bValue);
+		this._oTable.setGrowingScrollToLoad(bValue);
+		this.setProperty("growing", bValue, true);
+
+		return this;
+	};
+
+	/**
 	* Sets the growing threshold to the internal table
 	* @public
 	* @param {int} iValue Value for the table's growing threshold.
@@ -456,6 +564,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 
 		return this;
 	};
+
 	/**
 	 * Enables/Disables busy state.
 	 * @overwrite
@@ -508,12 +617,12 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 	TableSelectDialog.prototype.setMultiSelect = function (bMulti) {
 		this.setProperty("multiSelect", bMulti, true);
 		if (bMulti) {
-			this._oTable.setMode(sap.m.ListMode.MultiSelect);
+			this._oTable.setMode(ListMode.MultiSelect);
 			this._oTable.setIncludeItemInSelection(true);
 			this._oDialog.setRightButton(this._getCancelButton());
 			this._oDialog.setLeftButton(this._getOkButton());
 		} else {
-			this._oTable.setMode(sap.m.ListMode.SingleSelectMaster);
+			this._oTable.setMode(ListMode.SingleSelectMaster);
 			this._oDialog.setLeftButton(this._getCancelButton());
 		}
 
@@ -529,8 +638,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 	 */
 	TableSelectDialog.prototype.setTitle = function (sTitle) {
 		this.setProperty("title", sTitle, true);
-		this._oDialog.setTitle(sTitle);
-
+		this._oDialog.getCustomHeader().getAggregation("contentMiddle")[0].setText(sTitle);
 		return this;
 	};
 
@@ -659,6 +767,26 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 		}
 	};
 
+	/**
+	 * Sets the Clear button visible state
+	 * @public
+	 * @param {boolean} bVisible Value for the Clear button visible state.
+	 * @returns {sap.m.TableSelectDialog} this pointer for chaining
+	 */
+	TableSelectDialog.prototype.setShowClearButton = function (bVisible) {
+		this.setProperty("showClearButton", bVisible, true);
+
+		if (bVisible) {
+			var oCustomHeader = this._oDialog.getCustomHeader();
+			oCustomHeader.addContentRight(this._getClearButton());
+			this._oClearButton.setVisible(bVisible);
+		} else if (this._oClearButton) {
+				this._oClearButton.setVisible(bVisible);
+		}
+
+		return this;
+	};
+
 	/* =========================================================== */
 	/*           begin: forward aggregation  methods to table      */
 	/* =========================================================== */
@@ -690,126 +818,33 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 		this._oTable.setModel(oModel, sModelName);
 		TableSelectDialog.prototype._setModel.apply(this, aArgs);
 
-		// reset the selection label when setting the model
+		// clear the selection label when setting the model
 		this._updateSelectionIndicator();
 
 		return this;
 	};
 
-	/**
-	 * Forwards a function call to a managed object based on the aggregation name.
-	 * If the name is items, it will be forwarded to the table, otherwise called locally
-	 * @private
-	 * @param {string} sFunctionName The name of the function to be called
-	 * @param {string} sAggregationName The name of the aggregation associated
-	 * @returns {any} The return type of the called function
-	 */
-	TableSelectDialog.prototype._callMethodInManagedObject = function (sFunctionName, sAggregationName) {
-		var aArgs = Array.prototype.slice.call(arguments);
-
-		if (sAggregationName === "items") {
-			// apply to the internal table
-			return this._oTable[sFunctionName].apply(this._oTable, aArgs.slice(1));
-		} else if (sAggregationName === "columns") {
-			// apply to the internal table
-			return this._oTable[sFunctionName].apply(this._oTable, aArgs.slice(1));
-		} else {
-			// apply to this control
-			return sap.ui.base.ManagedObject.prototype[sFunctionName].apply(this, aArgs.slice(1));
+	TableSelectDialog.getMetadata().forwardAggregation(
+		"items",
+		{
+			getter: function() {
+				return this._oTable;
+			},
+			aggregation: "items",
+			forwardBinding: true
 		}
-	};
+	);
 
-	/**
-	 * Forwards aggregations with the name of items or columns to the internal table.
-	 * @overwrite
-	 * @protected
-	 * @param {string} sAggregationName The name for the binding
-	 * @param {object} oBindingInfo The configuration parameters for the binding
-	 * @returns {sap.m.TableSelectDialog} this pointer for chaining
-	 */
-	TableSelectDialog.prototype.bindAggregation = function () {
-		var args = Array.prototype.slice.call(arguments);
-
-		// propagate the bind aggregation function to list
-		this._callMethodInManagedObject.apply(this, ["bindAggregation"].concat(args));
-		return this;
-	};
-
-	TableSelectDialog.prototype.validateAggregation = function (sAggregationName, oObject, bMultiple) {
-		return this._callMethodInManagedObject("validateAggregation", sAggregationName, oObject, bMultiple);
-	};
-
-	TableSelectDialog.prototype.setAggregation = function (sAggregationName, oObject, bSuppressInvalidate) {
-		this._callMethodInManagedObject("setAggregation", sAggregationName, oObject, bSuppressInvalidate);
-		return this;
-	};
-
-	TableSelectDialog.prototype.getAggregation = function (sAggregationName, oDefaultForCreation) {
-		return this._callMethodInManagedObject("getAggregation", sAggregationName, oDefaultForCreation);
-	};
-
-	TableSelectDialog.prototype.indexOfAggregation = function (sAggregationName, oObject) {
-		return this._callMethodInManagedObject("indexOfAggregation", sAggregationName, oObject);
-	};
-
-	TableSelectDialog.prototype.insertAggregation = function (sAggregationName, oObject, iIndex, bSuppressInvalidate) {
-		this._callMethodInManagedObject("insertAggregation", sAggregationName, oObject, iIndex, bSuppressInvalidate);
-		return this;
-	};
-
-	TableSelectDialog.prototype.addAggregation = function (sAggregationName, oObject, bSuppressInvalidate) {
-		this._callMethodInManagedObject("addAggregation", sAggregationName, oObject, bSuppressInvalidate);
-		return this;
-	};
-
-	TableSelectDialog.prototype.removeAggregation = function (sAggregationName, oObject, bSuppressInvalidate) {
-		this._callMethodInManagedObject("removeAggregation", sAggregationName, oObject, bSuppressInvalidate);
-		return this;
-	};
-
-	TableSelectDialog.prototype.removeAllAggregation = function (sAggregationName, bSuppressInvalidate) {
-		return this._callMethodInManagedObject("removeAllAggregation", sAggregationName, bSuppressInvalidate);
-	};
-
-	TableSelectDialog.prototype.destroyAggregation = function (sAggregationName, bSuppressInvalidate) {
-		this._callMethodInManagedObject("destroyAggregation", sAggregationName, bSuppressInvalidate);
-		return this;
-	};
-
-	TableSelectDialog.prototype.getBinding = function (sAggregationName) {
-		return this._callMethodInManagedObject("getBinding", sAggregationName);
-	};
-
-	TableSelectDialog.prototype.getBindingInfo = function (sAggregationName) {
-		return this._callMethodInManagedObject("getBindingInfo", sAggregationName);
-	};
-
-	TableSelectDialog.prototype.getBindingPath = function (sAggregationName) {
-		return this._callMethodInManagedObject("getBindingPath", sAggregationName);
-	};
-
-	TableSelectDialog.prototype.getBindingContext = function (sModelName) {
-		return this._oTable && this._oTable.getBindingContext(sModelName);
-	};
-
-	/**
-	 * Sets the binding context for the internal table AND the current control so that both controls can be used with the context.
-	 * @overwrite
-	 * @public
-	 * @param {sap.ui.model.Context} oContext the new context
-	 * @param {string} sModelName The optional model name
-	 * @returns {sap.m.TableSelectDialog} this pointer for chaining
-	 */
-	TableSelectDialog.prototype._setBindingContext = TableSelectDialog.prototype.setBindingContext;
-	TableSelectDialog.prototype.setBindingContext = function (oContext, sModelName) {
-		var args = Array.prototype.slice.call(arguments);
-
-		// pass the model to the list and also to the local control to allow binding of own properties
-		this._oTable.setBindingContext(oContext, sModelName);
-		TableSelectDialog.prototype._setBindingContext.apply(this, args);
-
-		return this;
-	};
+	TableSelectDialog.getMetadata().forwardAggregation(
+		"columns",
+		{
+			getter: function() {
+				return this._oTable;
+			},
+			aggregation: "columns",
+			forwardBinding: true
+		}
+	);
 
 	/* =========================================================== */
 	/*           end: forward aggregation  methods to table       */
@@ -838,13 +873,13 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 		if (this._oDialog.isOpen() && ((bSearchValueDifferent && sEventType === "liveChange") || sEventType === "search")) {
 			// set the internal value to the passed value to check if the same value has already been filtered (happens when clear is called, it fires liveChange and change events)
 			this._sSearchFieldValue = sValue;
-
 			// only set when the binding has already been executed
 			// only set when the binding has already been executed
 			if (oBinding) {
 				// we made another request in this control, so we update the counter
 				this._iTableUpdateRequested += 1;
 				if (sEventType === "search") {
+
 					// fire the search so the data can be updated externally
 					this.fireSearch({value: sValue, itemsBinding: oBinding});
 				} else if (sEventType === "liveChange") {
@@ -916,7 +951,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 			this._bInitBusy = false;
 		}
 
-		if (sap.ui.Device.system.desktop) {
+		if (Device.system.desktop) {
 
 			if (this._oTable.getItems()[0]) {
 				this._oDialog.setInitialFocus(this._oTable.getItems()[0]);
@@ -993,6 +1028,28 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 	};
 
 	/**
+	* Lazy load the Clear button
+	* @private
+	* @return {sap.m.Button} The button
+	*/
+	TableSelectDialog.prototype._getClearButton = function () {
+
+		if (!this._oClearButton) {
+			this._oClearButton = new Button(this.getId() + "-clear", {
+				text: this._oRb.getText("TABLESELECTDIALOG_CLEARBUTTON"),
+				press: function() {
+					this._removeSelection();
+					this._updateSelectionIndicator();
+					//when clear is executed focus should stay in sap.mTableSelectDialog
+					this._oDialog.focus();
+				}.bind(this)
+			});
+		}
+
+		return this._oClearButton;
+	};
+
+	/**
 	 * Internal event handler for the Cancel button and ESC key
 	 * @private
 	 */
@@ -1012,7 +1069,6 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 			// fire cancel event
 			that.fireCancel();
 		};
-
 		// reset selection
 		// before was part of the fnAfterClose callback but apparently actions were executed on
 		// a table that does not exist so moving here as fix
@@ -1031,6 +1087,9 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 		var iSelectedContexts = this._oTable.getSelectedContextPaths(true).length,
 			oInfoBar = this._oTable.getInfoToolbar();
 
+		if (this.getShowClearButton() && this._oClearButton) {
+			this._oClearButton.setEnabled(iSelectedContexts > 0);
+		}
 		// update the selection label
 		oInfoBar.setVisible(!!iSelectedContexts);
 		oInfoBar.getContent()[0].setText(this._oRb.getText("TABLESELECTDIALOG_SELECTEDITEMS", [iSelectedContexts]));
@@ -1064,10 +1123,18 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 		// cleanup old selection on Close to allow reuse of dialog
 		// due to the delayed call (dialog onAfterClose) the control could be already destroyed
 		if (!this.getRememberSelections() && !this.bIsDestroyed) {
+			this._removeSelection();
+		}
+	};
+
+	/**
+	 * Removes selection from <code> sap.m.TableSelectDialog</code>
+	 * @private
+	 */
+	TableSelectDialog.prototype._removeSelection = function () {
 			this._oTable.removeSelections(true);
 			delete this._oSelectedItem;
 			delete this._aSelectedItems;
-		}
 	};
 
 	/**
@@ -1079,7 +1146,10 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 
 		// due to the delayed call (dialog onAfterClose) the control could be already destroyed
 		if (!this.bIsDestroyed) {
-			this._executeSearch("", "search");
+			var oBindings = this._oTable.getBinding("items");
+			if (oBindings) {
+				oBindings.filter([]);
+			}
 			this._oTable.removeSelections();
 			for (; i < this._aInitiallySelectedItems.length; i++) {
 				this._oTable.setSelectedItem(this._aInitiallySelectedItems[i]);
@@ -1094,4 +1164,4 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './SearchField', './
 
 	return TableSelectDialog;
 
-}, /* bExport= */ true);
+});

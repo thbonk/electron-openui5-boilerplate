@@ -1,18 +1,20 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
 	'sap/m/Image',
 	'./Adaptation',
-	'../Utils'
+	'../Utils',
+	"sap/base/Log"
 ],
 function(
 	Image,
 	Adaptation,
-	Utils
+	Utils,
+	Log
 ) {
 	"use strict";
 
@@ -30,7 +32,7 @@ function(
 	 * @extends sap.ui.rta.toolbar.Adaptation
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @private
@@ -39,7 +41,7 @@ function(
 	 * @experimental Since 1.48. This class is experimental. API might be changed in future.
 	 */
 	var Fiori = Adaptation.extend("sap.ui.rta.toolbar.Fiori", {
-		renderer: 'sap.ui.rta.toolbar.BaseRenderer',
+		renderer: 'sap.ui.rta.toolbar.AdaptationRenderer',
 		type: 'fiori'
 	});
 
@@ -66,38 +68,51 @@ function(
 			var iWidth, iHeight;
 
 			if ($logo.length) {
-				var iNaturalWidth = $logo.get(0).naturalWidth;
-				var iNaturalHeight = $logo.get(0).naturalHeight;
 				iWidth = $logo.width();
 				iHeight = $logo.height();
-
-				if (iWidth !== iNaturalWidth || iHeight !== iNaturalHeight) {
-					jQuery.sap.log.error([
-						"sap.ui.rta: please check Fiori Launchpad logo, expected size is",
-						iWidth + "x" + iHeight + ",",
-						"but actual is " + iNaturalWidth + "x" + iNaturalHeight
-					].join(' '));
-				}
+				this._checkLogoSize($logo, iWidth, iHeight);
 			}
 
-			aControls.unshift(
-				new Image({
+			// first control is the left HBox
+			aControls[0].addItem(
+				this._mControls["logo"] = new Image({
 					src: sLogoPath,
 					width: iWidth ? iWidth + 'px' : iWidth,
 					height: iHeight ? iHeight + 'px' : iHeight
-				}).data('name', 'logo')
+				})
 			);
 		}
-
 		return aControls;
 	};
 
 	Fiori.prototype.hide = function () {
-		return Adaptation.prototype
-			.hide.apply(this, arguments)
-			.then(function () {
-				this._oFioriHeader.removeStyleClass(FIORI_HIDDEN_CLASS);
-			}.bind(this));
+		return Adaptation.prototype.hide.apply(this, arguments)
+		.then(function () {
+			this._oFioriHeader.removeStyleClass(FIORI_HIDDEN_CLASS);
+		}.bind(this));
+	};
+
+	Fiori.prototype._checkLogoSize = function($logo, iWidth, iHeight) {
+		var iNaturalWidth = $logo.get(0).naturalWidth;
+		var iNaturalHeight = $logo.get(0).naturalHeight;
+
+		if (iWidth !== iNaturalWidth || iHeight !== iNaturalHeight) {
+			Log.error([
+				"sap.ui.rta: please check Fiori Launchpad logo, expected size is",
+				iWidth + "x" + iHeight + ",",
+				"but actual is " + iNaturalWidth + "x" + iNaturalHeight
+			].join(' '));
+		}
+	};
+
+	Fiori.prototype.destroy = function () {
+		// In case of destroy() without normal hide() call.
+		this._oFioriHeader.removeStyleClass(FIORI_HIDDEN_CLASS);
+
+		delete this._oRenderer;
+		delete this._oFioriHeader;
+
+		Adaptation.prototype.destroy.apply(this, arguments);
 	};
 
 	return Fiori;

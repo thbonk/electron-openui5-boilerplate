@@ -2,7 +2,7 @@
 
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -240,12 +240,6 @@ html.sap-desktop .sapUiLoSplitterV > .sapUiLoSplitterOverlay > .sapUiLoSplitterO
 	display: none;
 }
 
-/*********************************** IE Focus outline workaround **********************************/
-
-html[data-sap-ui-browser^=ie] .sapUiLoSplitterH > .sapUiLoSplitterBar:focus::after {
-	top: 0;
-}
-
 /* END "Splitter.less" */
 
 /* START "BlockLayout.less" */
@@ -324,7 +318,9 @@ html[data-sap-ui-browser^=ie] .sapUiLoSplitterH > .sapUiLoSplitterBar:focus::aft
 		.sapUiBlockCellContent {
 			color: contrast(@@color-param, @sapUiBaseText, @sapUiContentContrastTextColor, @sapUiContentContrastTextThreshold);
 
-			.sapMText, .sapMLabel, .sapUiBlockCellTitle {
+			.sapMText,
+			.sapMLabel,
+			.sapUiBlockCellTitle{
 				color: inherit;
 			}
 		}
@@ -373,6 +369,12 @@ html[data-sap-ui-browser^=ie] .sapUiLoSplitterH > .sapUiLoSplitterBar:focus::aft
 		}
 	}
 }
+
+//Link as title
+.sapUiBlockCellTitle .sapMLnk {color: darken(@sapUiLink, 4);}
+.sapUiBlockCellTitle .sapMLnk:visited {color: darken(@sapUiLinkVisited, 4);}
+.sapUiBlockCellTitle .sapMLnk:hover:not(.sapMLnkDsbl) {color: darken(@sapUiLinkHover, 4);}
+// disabled and emphasized links: we do not support this at all here.
 
 /* ============ Background type: Light ============== */
 .sapUiBlockLayoutBackgroundLight {

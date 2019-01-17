@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.ViewSettingsFilterItem.
-sap.ui.define(['jquery.sap.global', './ViewSettingsItem', './library'],
-	function(jQuery, ViewSettingsItem, library) {
+sap.ui.define(['./ViewSettingsItem', './library', 'sap/ui/base/ManagedObject'],
+	function(ViewSettingsItem, library, ManagedObject) {
 	"use strict";
 
 
@@ -24,7 +24,7 @@ sap.ui.define(['jquery.sap.global', './ViewSettingsItem', './library'],
 	 * @extends sap.m.ViewSettingsItem
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -45,7 +45,8 @@ sap.ui.define(['jquery.sap.global', './ViewSettingsItem', './library'],
 		aggregations : {
 
 			/**
-			 * Items that are logically grouped under this filter item. They are used to display filter details in the ViewSettingsDialog.
+			 * Items with key and value that are logically grouped under this filter item.
+			 * They are used to display filter details in the ViewSettingsDialog.
 			 */
 			items : {type : "sap.m.ViewSettingsItem", multiple : true, singularName : "item", bindable: "bindable"}
 		},
@@ -87,7 +88,7 @@ sap.ui.define(['jquery.sap.global', './ViewSettingsItem', './library'],
 		 * @returns {sap.m.ViewSettingsFilterItem} This instance for chaining
 		 */
 	ViewSettingsFilterItem.prototype.addAggregation = function (sAggregationName, oObject, bSuppressInvalidate) {
-		sap.ui.base.ManagedObject.prototype.addAggregation.apply(this, arguments);
+		ManagedObject.prototype.addAggregation.apply(this, arguments);
 		this._handleNewAggregationEvents(oObject);
 		return this;
 	};
@@ -104,7 +105,7 @@ sap.ui.define(['jquery.sap.global', './ViewSettingsItem', './library'],
 	 * @override
 	 */
 	ViewSettingsFilterItem.prototype.insertAggregation = function(sAggregationName, oObject, iIndex, bSuppressInvalidate) {
-		sap.ui.base.ManagedObject.prototype.insertAggregation.apply(this, arguments);
+		ManagedObject.prototype.insertAggregation.apply(this, arguments);
 		this._handleNewAggregationEvents(oObject);
 		return this;
 	};
@@ -119,7 +120,7 @@ sap.ui.define(['jquery.sap.global', './ViewSettingsItem', './library'],
 	 * @override
 	 */
 	ViewSettingsFilterItem.prototype.removeAggregation = function(sAggregationName, oObject, bSuppressInvalidate) {
-		sap.ui.base.ManagedObject.prototype.removeAggregation.apply(this, arguments);
+		ManagedObject.prototype.removeAggregation.apply(this, arguments);
 		this.fireFilterDetailItemsAggregationChange();
 		return this;
 	};
@@ -133,7 +134,7 @@ sap.ui.define(['jquery.sap.global', './ViewSettingsItem', './library'],
 	 * @override
 	 */
 	ViewSettingsFilterItem.prototype.removeAllAggregation = function(sAggregationName, bSuppressInvalidate) {
-		sap.ui.base.ManagedObject.prototype.removeAllAggregation.apply(this, arguments);
+		ManagedObject.prototype.removeAllAggregation.apply(this, arguments);
 		this.fireFilterDetailItemsAggregationChange();
 		return this;
 	};
@@ -147,7 +148,7 @@ sap.ui.define(['jquery.sap.global', './ViewSettingsItem', './library'],
 	 * @override
 	 */
 	ViewSettingsFilterItem.prototype.destroyAggregation = function(sAggregationName, bSuppressInvalidate) {
-		sap.ui.base.ManagedObject.prototype.destroyAggregation.apply(this, arguments);
+		ManagedObject.prototype.destroyAggregation.apply(this, arguments);
 		this.fireFilterDetailItemsAggregationChange();
 		return this;
 	};
@@ -156,4 +157,4 @@ sap.ui.define(['jquery.sap.global', './ViewSettingsItem', './library'],
 
 	return ViewSettingsFilterItem;
 
-}, /* bExport= */ true);
+});

@@ -1,11 +1,11 @@
 /*
  * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 sap.ui.define([
-	'jquery.sap.global', '../json/JSONModel', 'sap/ui/base/ManagedObject', './XMLNodeUtils'
-], function(jQuery, JSONModel, ManagedObject, Utils) {
+	'../json/JSONModel', 'sap/ui/base/ManagedObject', './XMLNodeUtils', 'sap/ui/core/util/reflection/XmlTreeModifier'
+], function(JSONModel, ManagedObject, Utils, XmlTreeModifier) {
 	"use strict";
 
 	/**
@@ -118,6 +118,7 @@ sap.ui.define([
 	 * @public
 	 */
 	XMLNodeAttributesModel.prototype.getProperty = function(sPath, oContext) {
+		sPath = sPath || "/";
 		var oResult, bContext = sPath.length == 0;
 		var evalMode = this.evalMode.simple;
 
@@ -227,6 +228,10 @@ sap.ui.define([
 	XMLNodeAttributesModel.prototype._getTopProperty = function(sPath, evalMode) {
 		var oResult = null;
 		var oProperty;
+		if (sPath.length == 0) {
+			// get the object itself
+			return this.oNode;
+		}
 
 		if (this.mProperties.hasOwnProperty(sPath)) {
 			// get a property
@@ -240,7 +245,13 @@ sap.ui.define([
 			} else {
 				oResult = this.oNode.getAttribute(sPath);
 			}
-		} else if (!this.mAggregations.hasOwnProperty(sPath) && !this.mSpecialSettings.hasOwnProperty(sPath) && !this.mEvents.hasOwnProperty(sPath)) {
+		} else if (this.mAggregations.hasOwnProperty(sPath)) {
+			if (this.oNode.hasAttribute(sPath)) {
+				oResult = this.oNode.getAttribute(sPath);
+			} else {
+				oResult =  XmlTreeModifier.getAggregation(this.oNode, sPath);
+			}
+		} else if (!this.mSpecialSettings.hasOwnProperty(sPath) && !this.mEvents.hasOwnProperty(sPath)) {
 			oResult = null;
 		} else {
 			if (this.oNode.hasAttribute(sPath)) {

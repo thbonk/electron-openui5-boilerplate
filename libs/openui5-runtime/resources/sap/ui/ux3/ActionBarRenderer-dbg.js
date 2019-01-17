@@ -1,12 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define(["./library"],
+	function(library) {
 	"use strict";
+
+
+	// shortcut for sap.ui.ux3.ActionBarSocialActions
+	var ActionBarSocialActions = library.ActionBarSocialActions;
 
 
 	/**
@@ -23,12 +27,10 @@ sap.ui.define(['jquery.sap.global'],
 	/**
 	 * Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
 	 *
-	 * @param {sap.ui.core.RenderManager} oRenderManager the RenderManager that can be used for writing to the Render-Output-Buffer
+	 * @param {sap.ui.core.RenderManager} rm the RenderManager that can be used for writing to the Render-Output-Buffer
 	 * @param {sap.ui.core.Control} oControl an object representation of the control that should be rendered
 	 */
-	ActionBarRenderer.render = function(oRenderManager, oControl){
-		// convenience variable
-		var rm = oRenderManager;
+	ActionBarRenderer.render = function(rm, oControl){
 
 		// render ActionBar
 		// result: <div id="<id>" data-sap-ui="<id>" class="sapUiUx3ActionBar" role="toolbar">
@@ -167,7 +169,7 @@ sap.ui.define(['jquery.sap.global'],
 		//developer to aggregation 'socialActions' manually and which are not contained
 		//in the predefined list of social actions Update, Follow, Flag, Favorite, Open
 		for (var sKey in  mMap) {
-			if (!(sKey in sap.ui.ux3.ActionBarSocialActions)) {
+			if (!(sKey in ActionBarSocialActions)) {
 				this._renderSocialActionListItem(rm, oControl, mMap[sKey]);
 			}
 		}
@@ -247,4 +249,4 @@ sap.ui.define(['jquery.sap.global'],
 
 	return ActionBarRenderer;
 
-}, /* bExport= */ true);
+});

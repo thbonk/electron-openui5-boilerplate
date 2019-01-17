@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', 'sap/ui/core/Renderer'],
-	function(jQuery, ListItemBaseRenderer, Renderer) {
+sap.ui.define(['./ListItemBaseRenderer', 'sap/ui/core/Renderer'],
+	function(ListItemBaseRenderer, Renderer) {
 	"use strict";
 
 	/**
@@ -19,6 +19,9 @@ sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', 'sap/ui/core/Rende
 
 		if (!oLI.isTopLevel()) {
 			rm.addClass("sapMTreeItemBaseChildren");
+		}
+		if (oLI.isLeaf()) {
+			rm.addClass("sapMTreeItemBaseLeaf");
 		}
 
 		var iIndentation = oLI._getPadding();

@@ -1,10 +1,10 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define(["sap/ui/Device"],
+	function(Device) {
 	"use strict";
 
 
@@ -83,7 +83,7 @@ sap.ui.define(['jquery.sap.global'],
 			}
 		}
 
-		if (sap.ui.Device.system.phone && oControl.getShowCancelButton()) {
+		if (Device.system.phone && oControl.getShowCancelButton()) {
 			oRm.renderControl(oControl._getCancelButton());
 		}
 

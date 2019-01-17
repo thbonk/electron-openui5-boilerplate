@@ -1,12 +1,32 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides base class sap.ui.core.Control for all controls
-sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', './UIArea', './RenderManager', './ResizeHandler', './BusyIndicatorUtils'],
-	function(jQuery, CustomStyleClassSupport, Element, UIArea, RenderManager, ResizeHandler, BusyIndicatorUtils) {
+sap.ui.define([
+	'./CustomStyleClassSupport',
+	'./Element',
+	'./UIArea',
+	'./RenderManager',
+	'./ResizeHandler',
+	'./BusyIndicatorUtils',
+	'./BlockLayerUtils',
+	"sap/base/Log",
+	"sap/ui/thirdparty/jquery"
+],
+	function(
+		CustomStyleClassSupport,
+		Element,
+		UIArea,
+		RenderManager,
+		ResizeHandler,
+		BusyIndicatorUtils,
+		BlockLayerUtils,
+		Log,
+		jQuery
+	) {
 	"use strict";
 
 	/**
@@ -47,13 +67,13 @@ sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', '.
 	 *     rendering or when the control is destroyed).</li>
 	 * </ul>
 	 *
-	 * See section "Developing OpenUI5/SAPUI5 Controls" in the documentation for an introduction
-	 * to control development.
+	 * See section "{@link topic:91f1703b6f4d1014b6dd926db0e91070 Developing OpenUI5/SAPUI5 Controls}"
+	 * in the documentation for an introduction to control development.
 	 *
 	 * @extends sap.ui.core.Element
 	 * @abstract
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @alias sap.ui.core.Control
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -65,16 +85,29 @@ sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', '.
 			publicMethods: ["placeAt", "attachBrowserEvent", "detachBrowserEvent", "getControlsByFieldGroup", "triggerValidateFieldGroup", "checkFieldGroupIds"],
 			library: "sap.ui.core",
 			properties : {
-
+				/**
+				 * Whether the control is currently in blocked state.
+				 */
+				"blocked" : {type: "boolean", defaultValue: false, hidden: true},
 				/**
 				 * Whether the control is currently in busy state.
 				 */
 				"busy" : {type: "boolean", defaultValue: false},
-
 				/**
 				 * The delay in milliseconds, after which the busy indicator will show up for this control.
 				 */
 				"busyIndicatorDelay" : {type: "int", defaultValue: 1000},
+
+				/**
+				 * The size of the BusyIndicator. For controls with a width smaller 3rem a
+				 * <code>sap.ui.core.BusyIndicatorSize.Small</code> should be used.
+				 * If the size could vary in width and the width could get smaller than 3rem, the
+				 * <code>sap.ui.core.BusyIndicatorSize.Auto</code> option could be used.
+				 * The default is set to <code>sap.ui.core.BusyIndicatorSize.Medium</code>
+				 * For a full screen BusyIndicator use <code>sap.ui.core.BusyIndicatorSize.Large</code>.
+				 * @since 1.54
+				 */
+				"busyIndicatorSize" : {type: "sap.ui.core.BusyIndicatorSize", defaultValue: 'Medium'},
 
 				/**
 				 * Whether the control should be visible on the screen.
@@ -144,9 +177,9 @@ sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', '.
 	 *
 	 * The additionally cloned information contains:
 	 * <ul>
-	 * <li>browser event handlers attached with {@link #attachBrowserEvent}
-	 * <li>text selection behavior
-	 * <li>style classes added with {@link #addStyleClass}
+	 * <li>browser event handlers attached with {@link #attachBrowserEvent}</li>
+	 * <li>text selection behavior</li>
+	 * <li>style classes added with {@link #addStyleClass}</li>
 	 * </ul>
 	 *
 	 * @param {string} [sIdSuffix] a suffix to be appended to the cloned element id
@@ -178,7 +211,7 @@ sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', '.
 	 * @private
 	 */
 	Control.prototype.isActive = function() {
-		return jQuery.sap.domById(this.sId) != null;
+		return ((this.sId ? window.document.getElementById(this.sId) : null)) != null;
 	};
 
 	/**
@@ -520,7 +553,7 @@ sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', '.
 					bContainerSupportsPlaceAt = false;
 				}
 				if (!bContainerSupportsPlaceAt) {
-					jQuery.sap.log.warning("placeAt cannot be processed because container " + oContainer + " does not have an aggregation 'content'.");
+					Log.warning("placeAt cannot be processed because container " + oContainer + " does not have an aggregation 'content'.");
 					return this;
 				}
 			}
@@ -541,7 +574,7 @@ sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', '.
 						oContainer.addContent(this);
 						break;
 					default:
-						jQuery.sap.log.warning("Position " + vPosition + " is not supported for function placeAt.");
+						Log.warning("Position " + vPosition + " is not supported for function placeAt.");
 				}
 			}
 		} else {
@@ -581,11 +614,12 @@ sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', '.
 	 *
 	 * Subclasses of Control should override this hook to implement any necessary actions before the rendering.
 	 *
-	 * @function
-	 * @name sap.ui.core.Control.prototype.onBeforeRendering
 	 * @protected
 	 */
-	//sap.ui.core.Control.prototype.onBeforeRendering = function() {};
+	Control.prototype.onBeforeRendering = function() {
+		// Before adding any implementation, please remember that this method was first implemented in release 1.54.
+		// Therefore, many subclasses will not call this method at all.
+	};
 
 	/**
 	 * Function is called when the rendering of the control is completed.
@@ -594,11 +628,12 @@ sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', '.
 	 *
 	 * Subclasses of Control should override this hook to implement any necessary actions after the rendering.
 	 *
-	 * @function
-	 * @name sap.ui.core.Control.prototype.onAfterRendering
 	 * @protected
 	 */
-	//sap.ui.core.Control.prototype.onAfterRendering = function() {};
+	Control.prototype.onAfterRendering = function() {
+		// Before adding any implementation, please remember that this method was first implemented in release 1.54.
+		// Therefore, many subclasses will not call this method at all.
+	};
 
 	/**
 	 * Returns the DOMNode Id to be used for the "labelFor" attribute of the label.
@@ -613,8 +648,14 @@ sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', '.
 	};
 
 	Control.prototype.destroy = function(bSuppressInvalidate) {
+		// ignore repeated calls
+		if (this.bIsDestroyed) {
+			return;
+		}
+
 		// avoid rerendering
 		this._bIsBeingDestroyed = true;
+
 		//Cleanup Busy Indicator
 		this._cleanupBusyIndicator();
 
@@ -634,29 +675,40 @@ sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', '.
 
 
 	// ---- local busy indicator handling ---------------------------------------------------------------------------------------
+	var oRenderingDelegate = {
+		onBeforeRendering: function() {
+			// remove all block-layers to prevent leftover DOM elements and eventhandlers
+			fnRemoveAllBlockLayers.call(this);
+		},
+		onAfterRendering: function () {
+			if (this.getBlocked() && this.getDomRef() && !this.getDomRef("blockedLayer")) {
+				this._oBlockState = BlockLayerUtils.block(this, this.getId() + "-blockedLayer", this._sBlockSection);
+				jQuery(this._oBlockState.$blockLayer.get(0)).addClass("sapUiBlockLayerOnly");
+			}
+			if (this.getBusy() && this.getDomRef() && !this._busyIndicatorDelayedCallId && !this.getDomRef("busyIndicator")) {
+				// Also use the BusyIndicatorDelay when a control is initialized
+				// with "busy = true". If the delayed call was already initialized
+				// skip any further call if the control was re-rendered while
+				// the delay is running.
+				var iDelay = this.getBusyIndicatorDelay();
 
-	var sPreventedEvents = "focusin focusout keydown keypress keyup mousedown touchstart touchmove mouseup touchend click",
-		rForbiddenTags = /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i,
-		oBusyIndicatorDelegate = {
-			onAfterRendering: function() {
-				if (this.getBusy() && this.getDomRef() && !this._busyIndicatorDelayedCallId && !this.getDomRef("busyIndicator")) {
-					// Also use the BusyIndicatorDelay when a control is initialized
-					// with "busy = true". If the delayed call was already initialized
-					// skip any further call if the control was re-rendered while
-					// the delay is running.
-					var iDelay = this.getBusyIndicatorDelay();
-
-					// Only do it via timeout if there is a delay. Otherwise append the
-					// BusyIndicator immediately
-					if (iDelay) {
-						this._busyIndicatorDelayedCallId = jQuery.sap.delayedCall(iDelay, this, fnAppendBusyIndicator);
-					} else {
-						fnAppendBusyIndicator.call(this);
-					}
+				// Only do it via timeout if there is a delay. Otherwise append the
+				// BusyIndicator immediately
+				if (iDelay) {
+					this._busyIndicatorDelayedCallId = setTimeout(fnAppendBusyIndicator.bind(this), iDelay);
+				} else {
+					fnAppendBusyIndicator.call(this);
 				}
 			}
-		};
+		}
+	};
 
+
+	/**
+	 * Add busy indicator to DOM
+	 *
+	 * @private
+	 */
 	function fnAppendBusyIndicator() {
 
 		// Only append if busy state is still set
@@ -668,102 +720,179 @@ sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', '.
 
 		//If there is a pending delayed call to append the busy indicator, we can clear it now
 		if (this._busyIndicatorDelayedCallId) {
-			jQuery.sap.clearDelayedCall(this._busyIndicatorDelayedCallId);
+			clearTimeout(this._busyIndicatorDelayedCallId);
 			delete this._busyIndicatorDelayedCallId;
 		}
 
 		// if no busy section/control jquery instance could be retrieved -> the control is not part of the dom anymore
 		// this might happen in certain scenarios when e.g. a dialog is closed faster than the busyIndicatorDelay
 		if (!$this || $this.length === 0) {
-			jQuery.sap.log.warning("BusyIndicator could not be rendered. The outer control instance is not valid anymore.");
+			Log.warning("BusyIndicator could not be rendered. The outer control instance is not valid anymore.");
 			return;
 		}
 
-		//Check if DOM Element where the busy indicator is supposed to be placed can handle content
-		var sTag = $this.get(0) && $this.get(0).tagName;
-		if ( rForbiddenTags.test(sTag) ) {
-			jQuery.sap.log.warning("BusyIndicator cannot be placed in elements with tag '" + sTag + "'.");
-			return;
+		if (this._sBlockSection === this._sBusySection) {
+			if (this._oBlockState) {
+				BusyIndicatorUtils.addHTML(this._oBlockState, this.getBusyIndicatorSize());
+
+				BlockLayerUtils.toggleAnimationStyle(this._oBlockState, true);
+
+				this._oBusyBlockState = this._oBlockState;
+
+			} else {
+				// BusyIndicator is the first blocking element created (and )
+				fnAddStandaloneBusyIndicator.call(this);
+			}
+		} else {
+			// Standalone busy indicator
+			fnAddStandaloneBusyIndicator.call(this);
 		}
-
-		//check if the control has static position, if this is the case we need to change it,
-		//because we relay on relative/absolute/fixed positioning
-		if ($this.css('position') == 'static') {
-			this._busyStoredPosition = 'static';
-			$this.css('position', 'relative');
-		}
-
-		//Append busy indicator to control DOM
-		this._$BusyIndicator = BusyIndicatorUtils.addHTML($this, this.getId() + "-busyIndicator");
-
-		fnHandleInteraction.call(this, true);
 	}
 
-	function fnHandleInteraction(bBusy) {
+	/**
+	 * Adds a standalone block-layer. Might be shared with a BusyIndicator later on.
+	 */
+	function fnAddStandaloneBlockLayer () {
+		this._oBlockState = BlockLayerUtils.block(this, this.getId() + "-blockedLayer", this._sBlockSection);
+		jQuery(this._oBlockState.$blockLayer.get(0)).addClass("sapUiBlockLayerOnly");
+	}
+
+	/**
+	 * Adds a standalone BusyIndicator.
+	 * The block-layer code is able to recognize that a new block-layer is not needed.
+	 */
+	function fnAddStandaloneBusyIndicator () {
+		this._oBusyBlockState = BlockLayerUtils.block(this, this.getId() + "-busyIndicator", this._sBusySection);
+		BusyIndicatorUtils.addHTML(this._oBusyBlockState, this.getBusyIndicatorSize());
+	}
+
+	/**
+	 * Cleanup all block-layers.
+	 * Doesn't matter if it's a busy- or regular block-layer.
+	 * Used to remove all unnecessary DOM elements and event-handlers during destroy and before rerendering.
+	 */
+	function fnRemoveAllBlockLayers() {
+		BlockLayerUtils.unblock(this._oBlockState);
+		BlockLayerUtils.unblock(this._oBusyBlockState);
+
+		delete this._oBlockState;
+		delete this._oBusyBlockState;
+	}
+
+	/**
+	 * Remove busy indicator from DOM
+	 * @param {boolean} bForceRemoval Forces the removal of all Block layers
+	 * @private
+	 */
+	function fnRemoveBusyIndicator(bForceRemoval) {
+		// removing all block layers is done upon rerendering and destroy of the control
+		if (bForceRemoval) {
+			fnRemoveAllBlockLayers.call(this);
+			return;
+		}
+
 		var $this = this.$(this._sBusySection);
 
-		if (bBusy) {
-			// all focusable elements must be processed for the "tabindex=-1"
-			// attribute. The dropdownBox for example has got two focusable elements
-			// (arrow and input field) and both shouldn't be focusable. Otherwise
-			// the input field will still be focused on keypress (tab) because the
-			// browser focuses the element
-			var $TabRefs = $this.find(":sapTabbable"),
-				that = this;
+		$this.removeClass('sapUiLocalBusy');
+		//Unset the actual DOM Element´s 'aria-busy'
+		$this.removeAttr('aria-busy');
 
-			this._busyTabIndices = [
-				// if only the control itself without any nested tabrefs was found,
-				// block the events as well
-				{
-					ref : $this,
-					tabindex : $this.attr('tabindex')
-				}
-			];
+		if (this._sBlockSection === this._sBusySection) {
+			if (!this.getBlocked() && !this.getBusy()) {
+				// Remove shared block state & busy block state reference
+				fnRemoveAllBlockLayers.call(this);
 
-			$this.attr('tabindex', -1);
-			$this.bind(sPreventedEvents, preventDefaultAndStopPropagation);
+			} else if (this.getBlocked()) {
+				// Hide animation in shared block layer
+				BlockLayerUtils.toggleAnimationStyle(this._oBlockState || this._oBusyBlockState, false);
 
-			$TabRefs.each(function(iIndex, oObject) {
-				var $Ref = jQuery(oObject),
-					iTabIndex = $Ref.attr('tabindex');
+				this._oBlockState = this._oBusyBlockState;
 
-				if (iTabIndex < 0) {
-					return true;
-				}
+			} else if (this._oBusyBlockState) {
+				BlockLayerUtils.unblock(this._oBusyBlockState);
 
-				that._busyTabIndices.push({
-					ref: $Ref,
-					tabindex: iTabIndex
-				});
-
-				$Ref.attr('tabindex', -1);
-				$Ref.bind(sPreventedEvents, preventDefaultAndStopPropagation);
-			});
-		} else {
-			if (this._busyTabIndices) {
-				this._busyTabIndices.forEach(function(oObject) {
-					if (oObject.tabindex) {
-						// if there was no tabindex before it was added by the BusyIndicator
-						// the previous value is "undefined". And this value can't be set
-						// so the attribute remains at the DOM-ref. So if there was no tabindex
-						// attribute before the whole attribute should be removed again.
-						oObject.ref.attr('tabindex', oObject.tabindex);
-					} else {
-						oObject.ref.removeAttr('tabindex');
-					}
-
-					oObject.ref.unbind(sPreventedEvents, preventDefaultAndStopPropagation);
-				});
+				delete this._oBusyBlockState;
 			}
-			this._busyTabIndices = null;
+		} else if (this._oBusyBlockState) {
+			// standalone busy block state
+			BlockLayerUtils.unblock(this._oBusyBlockState);
+
+			delete this._oBusyBlockState;
 		}
 	}
 
-	function preventDefaultAndStopPropagation(oEvent) {
-		jQuery.sap.log.debug("Local Busy Indicator Event Suppressed: " + oEvent.type);
-		oEvent.preventDefault();
-		oEvent.stopImmediatePropagation();
-	}
+	/**
+	 * Get the controls block state.
+	 *
+	 * @return {boolean} <code>true</code> when blocked
+	 * @private
+	 * @ui5-restricted sap.ui.core, sap.m, sap.viz
+	 * @name sap.ui.core.Control#getBlocked
+	 */
+
+	/**
+	 * Set the controls block state.
+	 *
+	 * @param {boolean} bBlocked The new blocked state to be set
+	 * @return {sap.ui.core.Control} <code>this</code> to allow method chaining
+	 * @private
+	 * @ui5-restricted sap.ui.core, sap.m, sap.viz
+	 */
+	Control.prototype.setBlocked = function(bBlocked, sBlockedSection /* this is an internal parameter to apply partial blocking for a specific section of the control */) {
+		//If the new state is already set, we don't need to do anything
+		if (!!bBlocked == this.getProperty("blocked")) {
+			return this;
+		}
+		this._sBlockSection = sBlockedSection || this._sBlockSection;
+
+		//No rerendering - should be modeled as a non-invalidating property once we have that
+		this.setProperty("blocked", bBlocked, /*bSuppressInvalidate*/ true);
+
+		if (bBlocked) {
+			this.addDelegate(oRenderingDelegate, false, this);
+		} else {
+			this.removeDelegate(oRenderingDelegate);
+		}
+
+		//If no domref exists stop here.
+		if (!this.getDomRef()) {
+			return this;
+		}
+
+		if (bBlocked) {
+			// blocking
+			if (this._sBlockSection === this._sBusySection) {
+				// only create a new block state if neither busy nor blocking blockState is present
+				if (!this._oBusyBlockState && !this._oBlockState) {
+					fnAddStandaloneBlockLayer.call(this);
+				} else {
+					Log.info("The control is already busy. Hence, no new block-layer was created for the shared section.");
+				}
+			} else {
+				fnAddStandaloneBlockLayer.call(this);
+			}
+		} else {
+			// unblocking
+			if (this._sBlockSection === this._sBusySection) {
+				if (!this.getBlocked() && !this.getBusy()) {
+					// Remove shared block state & busy block state reference
+					fnRemoveAllBlockLayers.call(this);
+
+				} else if (this.getBusy()) {
+					// Control or section is still busy, hence no removal required
+					Log.info("The control is already busy. Hence, no new block-layer was created for the shared section.");
+
+				}
+			} else if (this._oBlockState) {
+				// standalone block state
+				BlockLayerUtils.unblock(this._oBlockState);
+
+				delete this._oBlockState;
+			}
+		}
+
+		return this;
+	};
 
 	/**
 	 * Set the controls busy state.
@@ -773,24 +902,23 @@ sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', '.
 	 * @public
 	 */
 	Control.prototype.setBusy = function (bBusy, sBusySection /* this is an internal parameter to apply partial local busy indicator for a specific section of the control */) {
-		this._sBusySection = sBusySection;
-		var $this = this.$(this._sBusySection);
-
 		//If the new state is already set, we don't need to do anything
-		if (bBusy == this.getProperty("busy")) {
+		if (!!bBusy == this.getProperty("busy")) {
 			return this;
 		}
+
+		this._sBusySection = sBusySection || this._sBusySection;
 
 		//No rerendering - should be modeled as a non-invalidating property once we have that
 		this.setProperty("busy", bBusy, /*bSuppressInvalidate*/ true);
 
 		if (bBusy) {
-			this.addDelegate(oBusyIndicatorDelegate, false, this);
+			this.addDelegate(oRenderingDelegate, false, this);
 		} else {
-			this.removeDelegate(oBusyIndicatorDelegate);
+			this.removeDelegate(oRenderingDelegate);
 			//If there is a pending delayed call we clear it
 			if (this._busyIndicatorDelayedCallId) {
-				jQuery.sap.clearDelayedCall(this._busyIndicatorDelayedCallId);
+				clearTimeout(this._busyIndicatorDelayedCallId);
 				delete this._busyIndicatorDelayedCallId;
 			}
 		}
@@ -804,22 +932,10 @@ sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', '.
 			if (this.getBusyIndicatorDelay() <= 0) {
 				fnAppendBusyIndicator.call(this);
 			} else {
-				this._busyIndicatorDelayedCallId = jQuery.sap.delayedCall(this.getBusyIndicatorDelay(), this, fnAppendBusyIndicator);
+				this._busyIndicatorDelayedCallId = setTimeout(fnAppendBusyIndicator.bind(this), this.getBusyIndicatorDelay());
 			}
 		} else {
-			//Remove the busy indicator from the DOM
-			this.$("busyIndicator").remove();
-			$this.removeClass('sapUiLocalBusy');
-			//Unset the actual DOM Element´s 'aria-busy'
-			$this.removeAttr('aria-busy');
-
-			//Reset the position style to its original state
-			if (this._busyStoredPosition) {
-				$this.css('position', this._busyStoredPosition);
-				delete this._busyStoredPosition;
-			}
-			fnHandleInteraction.call(this, false);
-
+			fnRemoveBusyIndicator.call(this);
 		}
 		return this;
 	};
@@ -853,10 +969,12 @@ sap.ui.define(['jquery.sap.global', './CustomStyleClassSupport', './Element', '.
 	 * @private
 	 */
 	Control.prototype._cleanupBusyIndicator = function() {
+		//If there is a pending delayed call we clear it
 		if (this._busyIndicatorDelayedCallId) {
-			jQuery.sap.clearDelayedCall(this._busyIndicatorDelayedCallId);
+			clearTimeout(this._busyIndicatorDelayedCallId);
 			delete this._busyIndicatorDelayedCallId;
 		}
+		fnRemoveBusyIndicator.call(this, true);
 	};
 
 

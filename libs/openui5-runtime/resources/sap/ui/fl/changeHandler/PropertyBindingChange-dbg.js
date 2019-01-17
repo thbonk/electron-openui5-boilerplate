@@ -1,16 +1,14 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-	"jquery.sap.global",
-	"sap/ui/fl/changeHandler/Base",
+	"sap/base/Log",
 	"sap/ui/fl/Utils"
 ], function(
-	jQuery,
-	Base,
+	Log,
 	FlexUtils
 ) {
 	"use strict";
@@ -20,12 +18,18 @@ sap.ui.define([
 	 *
 	 * @alias sap.ui.fl.changeHandler.PropertyBindingChange
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @since 1.38
 	 * @private
 	 * @experimental Since 1.38. This class is experimental and provides only limited functionality. Also the API might be changed in future.
 	 */
 	var PropertyBindingChange = {};
+
+	// var sNoBindingError = "Please use 'PropertyChange' to set properties without binding";
+
+	// function isBinding(vPropertyValue) {
+	// 	return FlexUtils.isBinding(vPropertyValue) || jQuery.isPlainObject(vPropertyValue);
+	// }
 
 	/**
 	 * @param {object} oChange - change object with instructions to be applied on the control
@@ -41,8 +45,14 @@ sap.ui.define([
 		var vPropertyValue = oDef.content.newBinding;
 		var oModifier = mPropertyBag.modifier;
 
+		// TODO: enable again when apps have adapted
+		// if (!isBinding(vPropertyValue)) {
+		// 	throw new Error(sNoBindingError);
+		// }
+
+		var vOriginalValue = oModifier.getPropertyBinding(oControl, sPropertyName) || oModifier.getProperty(oControl, sPropertyName);
 		oChange.setRevertData({
-			originalValue: oModifier.getPropertyBinding(oControl, sPropertyName)
+			originalValue: vOriginalValue
 		});
 
 		oModifier.setPropertyBinding(oControl, sPropertyName, vPropertyValue);
@@ -68,7 +78,7 @@ sap.ui.define([
 			oModifier.setPropertyBinding(oControl, sPropertyName, vPropertyValue);
 			oChange.resetRevertData();
 		} else {
-			jQuery.sap.log.error("Attempt to revert an unapplied change.");
+			Log.error("Attempt to revert an unapplied change.");
 			return false;
 		}
 
@@ -86,11 +96,16 @@ sap.ui.define([
 	 */
 	PropertyBindingChange.completeChangeContent = function(oChange, oSpecificChangeInfo) {
 		var oChangeJson = oChange.getDefinition();
-		if (oSpecificChangeInfo.content) {
-			oChangeJson.content = oSpecificChangeInfo.content;
-		} else {
+
+		if (!oSpecificChangeInfo.content) {
 			throw new Error("oSpecificChangeInfo attribute required");
 		}
+		// TODO: enable again when apps have adapted
+		// if (!isBinding(oSpecificChangeInfo.content.newBinding)) {
+		// 	throw new Error(sNoBindingError);
+		// }
+
+		oChangeJson.content = oSpecificChangeInfo.content;
 	};
 
 	return PropertyBindingChange;

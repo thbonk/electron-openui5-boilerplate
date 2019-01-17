@@ -1,25 +1,35 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.uxap.ObjectPageSectionBase.
-sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/library", "./library"], function (jQuery, Control, coreLibrary, library) {
+sap.ui.define([
+	"sap/ui/thirdparty/jquery",
+	"sap/ui/core/Control",
+	"sap/ui/core/library",
+	"./library",
+	"sap/base/Log",
+	"sap/ui/events/KeyCodes",
+	// jQuery Plugin "firstFocusableDomRef"
+	"sap/ui/dom/jquery/Focusable"
+], function(jQuery, Control, coreLibrary, library, Log, KeyCodes) {
 	"use strict";
 
 	// shortcut for sap.ui.core.TitleLevel
 	var TitleLevel = coreLibrary.TitleLevel;
 
 	/**
-	 * Constructor for a new ObjectPageSectionBase.
+	 * Constructor for a new <code>ObjectPageSectionBase</code>.
 	 *
-	 * @param {string} [sId] id for the new control, generated automatically if no id is given
-	 * @param {object} [mSettings] initial settings for the new control
+	 * @param {string} [sId] ID for the new control, generated automatically if no ID is given
+	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
-	 * An abstract container for object page sections and subSections
+	 * An abstract container for sections and subsections in the {@link sap.uxap.ObjectPageLayout}.
 	 * @extends sap.ui.core.Control
+	 * @abstract
 	 *
 	 * @constructor
 	 * @public
@@ -43,13 +53,13 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/library"
 				 * Determines the ARIA level of the <code>ObjectPageSectionBase</code> title.
 				 * The ARIA level is used by assisting technologies, such as screen readers, to create a hierarchical site map for faster navigation.
 				 *
-				 * <br><b>Note:</b> Defining a <code>titleLevel</code> will add <code>aria-level</code> attribute from 1 to 6,
+				 * <b>Note:</b> Defining a <code>titleLevel</code> will add <code>aria-level</code> attribute from 1 to 6,
 				 * instead of changing the <code>ObjectPageSectionBase</code> title HTML tag from H1 to H6.
 				 * <br>For example: if <code>titleLevel</code> is <code>TitleLevel.H1</code>,
 				 * it will result as aria-level of 1 added to the <code>ObjectPageSectionBase</code> title.
 				 * @since 1.44.0
 				 */
-				titleLevel : {type : "sap.ui.core.TitleLevel", group : "Appearance", defaultValue : sap.ui.core.TitleLevel.Auto},
+				titleLevel : {type : "sap.ui.core.TitleLevel", group : "Appearance", defaultValue : TitleLevel.Auto},
 
 				/**
 				 * Invisible ObjectPageSectionBase are not rendered
@@ -105,7 +115,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/library"
 	ObjectPageSectionBase.prototype.onAfterRendering = function () {
 		if (this._getObjectPageLayout()) {
 			this._getObjectPageLayout()._requestAdjustLayout().catch(function () {
-				jQuery.sap.log.debug("ObjectPageSectionBase :: cannot adjustLayout", this);
+				Log.debug("ObjectPageSectionBase :: cannot adjustLayout", this);
 			});
 			this._getObjectPageLayout()._setSectionsFocusValues();
 		}
@@ -173,6 +183,16 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/library"
 				this.invalidate();
 			}
 		}
+	};
+
+	/**
+	 * Returns the <code>ObjectPageSectionBase</code> internal title if present,
+	 * otherwise - the public title.
+	 * @private
+	 * @returns {String} the title
+	 */
+	ObjectPageSectionBase.prototype._getTitle = function () {
+		return this._getInternalTitle() || this.getTitle();
 	};
 
 	ObjectPageSectionBase.prototype._getInternalTitle = function () {
@@ -243,7 +263,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/library"
 	 */
 	ObjectPageSectionBase.prototype._notifyObjectPageLayout = function () {
 		if (this._getObjectPageLayout() && this._getObjectPageLayout().$().length){
-			this._getObjectPageLayout()._adjustLayoutAndUxRules();
+			this._getObjectPageLayout()._requestAdjustLayoutAndUxRules();
 		}
 	};
 
@@ -273,7 +293,8 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/library"
 
 		this.setProperty("visible", bValue, true);
 		/* handle invalidation ourselves in adjustLayoutAndUxRules */
-		this._getObjectPageLayout()._adjustLayoutAndUxRules();
+		this._notifyObjectPageLayout();
+
 		this.invalidate();
 		return this;
 	};
@@ -348,7 +369,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/library"
 
 	ObjectPageSectionBase.prototype.onkeydown = function (oEvent) {
 		// Filter F7 key down
-		if (oEvent.keyCode === jQuery.sap.KeyCodes.F7) {
+		if (oEvent.keyCode === KeyCodes.F7) {
 			var aSubSections = this.getSubSections(),
 				oFirstSubSection = aSubSections[0],
 				oLastFocusedEl;
@@ -370,7 +391,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/library"
 
 	/**
 	 * Handler for arrow down
-	 * @param oEvent - The event object
+	 * @param {jQuery.Event} oEvent The AROW-DOWN keyboard key event object
 	 */
 	ObjectPageSectionBase.prototype.onsapdown = function (oEvent) {
 		this._handleFocusing(oEvent, oEvent.currentTarget.nextSibling);
@@ -390,6 +411,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/library"
 
 	/**
 	 * Handler for arrow right
+	 * @param {jQuery.Event} oEvent The AROW-RIGHT keyboard key event object
 	 */
 	ObjectPageSectionBase.prototype.onsapright = function (oEvent) {
 		var sMethodName = this._bRtl ? "onsapup" : "onsapdown";
@@ -398,7 +420,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/library"
 
 	/**
 	 * Handler for arrow up
-	 * @param oEvent - The event object
+	 * @param {jQuery.Event} oEvent The AROW-UP keyboard key event object
 	 */
 	ObjectPageSectionBase.prototype.onsapup = function (oEvent) {
 		this._handleFocusing(oEvent, oEvent.currentTarget.previousSibling);
@@ -406,6 +428,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/library"
 
 	/**
 	 * Handler for arrow left
+	 * @param {jQuery.Event} oEvent The ARROW-LEFT keyboard key event object
 	 */
 	ObjectPageSectionBase.prototype.onsapleft = function (oEvent) {
 		var sMethodName = this._bRtl ? "onsapdown" : "onsapup";
@@ -414,7 +437,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/library"
 
 	/**
 	 * Handler for HOME key
-	 * @param oEvent - The event object
+	 * @param {jQuery.Event} oEvent The HOME keyboard key event object
 	 */
 	ObjectPageSectionBase.prototype.onsaphome = function (oEvent) {
 		this._handleFocusing(oEvent, oEvent.currentTarget.parentElement.firstChild);
@@ -422,7 +445,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/library"
 
 	/**
 	 * Handler for END key
-	 * @param oEvent - The event object
+	 * @param {jQuery.Event} oEvent The END keyboard key event object
 	 */
 	ObjectPageSectionBase.prototype.onsapend = function (oEvent) {
 		this._handleFocusing(oEvent, oEvent.currentTarget.parentElement.lastChild);
@@ -430,8 +453,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/library"
 
 	/**
 	 * Handler for PAGE UP event.
-	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The PAGE-UP keyboard key event object
 	 * @private
 	 */
 	ObjectPageSectionBase.prototype.onsappageup = function (oEvent) {
@@ -466,7 +488,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/library"
 	/**
 	 * Handler for PAGE DOWN event.
 	 *
-	 * @param {jQuery.Event} oEvent
+	 * @param {jQuery.Event} oEvent The PAGE-DOWN keyboard key event object
 	 * @private
 	 */
 	ObjectPageSectionBase.prototype.onsappagedown = function (oEvent) {

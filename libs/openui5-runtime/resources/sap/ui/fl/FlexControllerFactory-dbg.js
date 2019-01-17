@@ -1,12 +1,15 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-	"jquery.sap.global", "sap/ui/fl/FlexController", "sap/ui/fl/Utils", "sap/ui/fl/ChangePersistenceFactory", "sap/ui/fl/variants/VariantModel"
-], function(jQuery, FlexController, Utils, ChangePersistenceFactory, VariantModel) {
+	"sap/ui/fl/FlexController",
+	"sap/ui/fl/Utils",
+	"sap/ui/fl/ChangePersistenceFactory",
+	"sap/ui/fl/variants/VariantModel"
+], function(FlexController, Utils, ChangePersistenceFactory, VariantModel) {
 	"use strict";
 
 	/**
@@ -15,7 +18,7 @@ sap.ui.define([
 	 * @alias sap.ui.fl.FlexControllerFactory
 	 * @experimental Since 1.27.0
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 */
 	var FlexControllerFactory = {};
 
@@ -49,6 +52,7 @@ sap.ui.define([
 	/**
 	 * Creates or returns an instance of the FlexController for the specified control.
 	 * The control needs to be embedded into a View and the view needs to be embedded into a component.
+	 * If the component is an embedded component, then the responsible app component is used.
 	 * If one of this prerequisites is not fulfilled, no instance of FlexController will be returned.
 	 *
 	 * @public
@@ -57,10 +61,14 @@ sap.ui.define([
 	 * @returns {sap.ui.fl.FlexController} instance
 	 */
 	FlexControllerFactory.createForControl = function(oControl, oManifest) {
-		var sComponentName = Utils.getComponentClassName(oControl);
-		var oLocalManifest = oManifest || Utils.getAppComponentForControl(oControl).getManifest();
-		var sAppVersion = Utils.getAppVersionFromManifest(oLocalManifest);
-		return FlexControllerFactory.create(sComponentName, sAppVersion);
+		try {
+			var oAppComponent = Utils.getAppComponentForControl(oControl);
+			var sComponentName = Utils.getComponentClassName(oAppComponent ? oAppComponent : oControl);
+			var sAppVersion = Utils.getAppVersionFromManifest(oAppComponent ? oAppComponent.getManifest() : oManifest);
+			return FlexControllerFactory.create(sComponentName, sAppVersion);
+		} catch (oError){
+			Utils.log.error(oError.message, undefined, "sap.ui.fl.FlexControllerFactory");
+		}
 	};
 
 	/**
@@ -71,15 +79,30 @@ sap.ui.define([
 	 * @public
 	 */
 	FlexControllerFactory.getChangesAndPropagate = function (oComponent, vConfig) {
+		// only manifest with type = "application" will fetch changes
 		var oManifest = oComponent.getManifestObject();
+		var sVariantModelName = "$FlexVariants";
+		var oFlexController;
+
+		// if component's manifest is of type 'application' then only a flex controller and change persistence instances are created.
+		// if component's manifest is of type 'component' then no flex controller and change persistence instances are created. The variant model is fetched from the outer app component and applied on this component type.
 		if (Utils.isApplication(oManifest)) {
-			var oFlexController = FlexControllerFactory.createForControl(oComponent, oManifest);
+			oFlexController = FlexControllerFactory.createForControl(oComponent, oManifest);
 			ChangePersistenceFactory._getChangesForComponentAfterInstantiation(vConfig, oManifest, oComponent)
 			.then(function (fnGetChangesMap) {
 				oComponent.addPropagationListener(oFlexController.getBoundApplyChangesOnControl(fnGetChangesMap, oComponent));
 				var oData = oFlexController.getVariantModelData() || {};
-				oComponent.setModel(new VariantModel(oData, oFlexController, oComponent), "$FlexVariants");
+				oComponent.setModel(new VariantModel(oData, oFlexController, oComponent), sVariantModelName);
 			});
+		} else if (Utils.isEmbeddedComponent(oComponent)) {
+			var oAppComponent = Utils.getAppComponentForControl(oComponent);
+			// Some embedded components might not have an app component, e.g. sap.ushell.plugins.rta, sap.ushell.plugins.rta-personalize
+			if (oAppComponent) {
+				var oVariantModel = oAppComponent.getModel(sVariantModelName);
+				if (oVariantModel) {
+					oComponent.setModel(oVariantModel, sVariantModelName);
+				}
+			}
 		}
 	};
 

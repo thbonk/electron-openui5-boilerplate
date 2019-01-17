@@ -1,14 +1,26 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.IconTabBarSelectList.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control',
-	'sap/ui/core/delegate/ItemNavigation'],
-	function(jQuery, library, Control,
-			ItemNavigation) {
+sap.ui.define([
+	'./library',
+	'sap/ui/core/Control',
+	'sap/ui/core/delegate/ItemNavigation',
+	'./IconTabBarDragAndDropUtil',
+	'./IconTabBarSelectListRenderer',
+	"sap/ui/thirdparty/jquery"
+],
+	function(
+		library,
+		Control,
+		ItemNavigation,
+		IconTabBarDragAndDropUtil,
+		IconTabBarSelectListRenderer,
+		jQuery
+	) {
 		"use strict";
 
 		/**
@@ -22,7 +34,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control',
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.61.2
 		 *
 		 * @constructor
 		 * @private
@@ -37,7 +49,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control',
 					/**
 					 * The items displayed in the list.
 					 */
-					items : {type : "sap.m.IconTabFilter", multiple : true, singularName : "item"}
+					items : {type : "sap.m.IconTabFilter", multiple : true, singularName : "item", dnd : true}
 				},
 				events: {
 					/**
@@ -88,6 +100,40 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control',
 		 * @private
 		 */
 		IconTabBarSelectList.prototype.onAfterRendering = function () {
+			this._initItemNavigation();
+		};
+
+		/**
+		 * Sets or remove Drag and Drop configuration.
+		 * @private
+		 */
+		IconTabBarSelectList.prototype._setsDragAndConfiguration = function() {
+			if (!this._iconTabHeader.getEnableTabReordering() && this.getDragDropConfig().length) {
+				//Destroying Drag&Drop aggregation
+				this.destroyDragDropConfig();
+			} else if (this._iconTabHeader.getEnableTabReordering() && !this.getDragDropConfig().length) {
+				IconTabBarDragAndDropUtil.setDragDropAggregations(this, "Vertical");
+			}
+		};
+
+		/**
+		 * Called before the control is rendered.
+		 *
+		 * @private
+		 */
+		IconTabBarSelectList.prototype.onBeforeRendering = function () {
+			if (!this._iconTabHeader) {
+				return;
+			}
+
+			this._setsDragAndConfiguration();
+		};
+
+		/**
+		 * Initialize item navigation
+		 * @private
+		 */
+		IconTabBarSelectList.prototype._initItemNavigation = function() {
 			var item,
 				items = this.getItems(),
 				domRefs = [];
@@ -96,7 +142,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control',
 				item = items[i];
 				domRefs.push(item.getDomRef());
 			}
-
 
 			this._itemNavigation.setRootDomRef(this.getDomRef());
 			this._itemNavigation.setItemDomRefs(domRefs);
@@ -216,6 +261,104 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control',
 			return true;
 		};
 
-		return IconTabBarSelectList;
+		/* =========================================================== */
+		/*           start: tab drag-drop		                       */
+		/* =========================================================== */
 
-	}, /* bExport= */ true);
+		/**
+		 * Handles drop event for drag &  drop functionality
+		 * @param {jQuery.Event} oEvent
+		 * @private
+		 */
+		IconTabBarSelectList.prototype._handleDragAndDrop = function (oEvent) {
+			var oDropPosition = oEvent.getParameter("dropPosition"),
+				oDraggedControl = oEvent.getParameter("draggedControl"),
+				oDroppedControl = oEvent.getParameter("droppedControl"),
+				bDraggedHeaderItem = oDraggedControl.getParent().getMetadata().getName() === "sap.m.IconTabHeader",
+				oDragDropItemsFromList;
+
+				if (bDraggedHeaderItem) {
+					oDragDropItemsFromList = IconTabBarDragAndDropUtil.getDraggedDroppedItemsFromList(this.getAggregation("items"), oDraggedControl, oDroppedControl);
+					this._handleDropOfListAndHeaderItems(oDropPosition, oDragDropItemsFromList.oDraggedControlFromList, oDragDropItemsFromList.oDroppedControlFromList, oDraggedControl, oDroppedControl._tabFilter);
+				} else {
+					this._handleDropOfListAndHeaderItems(oDropPosition,oDraggedControl, oDroppedControl, oDraggedControl._tabFilter, oDroppedControl._tabFilter);
+				}
+
+			this._initItemNavigation();
+			oDraggedControl.$().focus();
+		};
+
+		/**
+		 * Handle drag and drop in overflow list and header
+		 * @private
+		 */
+		IconTabBarSelectList.prototype._handleDropOfListAndHeaderItems = function (oDropPosition, oDraggedControl, oDroppedControl, oDragControlHeader, oDropControlHeader, bIgnoreRTL) {
+			//Handle Drop event for sap.m.IconTabBarSelectList
+			IconTabBarDragAndDropUtil.handleDrop(this, oDropPosition, oDraggedControl, oDroppedControl, true);
+
+			//Handle Drop event for sap.m.IconTabHeader
+			IconTabBarDragAndDropUtil.handleDrop(this._iconTabHeader, oDropPosition, oDragControlHeader, oDropControlHeader, true);
+			this._iconTabHeader._initItemNavigation();
+		};
+
+		/* =========================================================== */
+		/*           start: tab keyboard handling - drag-drop          */
+		/* =========================================================== */
+
+		/**
+		 * Handle keyboard drag&drop
+		 * Ctrl + Home
+		 * @param {jQuery.Event} oEvent
+		 * @private
+		 */
+		IconTabBarSelectList.prototype.ondragrearranging = function (oEvent) {
+			if (!this._iconTabHeader.getEnableTabReordering()) {
+				return;
+			}
+			var oTabToBeMoved = oEvent.srcControl,
+				iKeyCode = oEvent.keyCode;
+
+			IconTabBarDragAndDropUtil.moveItem.call(this, oTabToBeMoved, iKeyCode);
+			this._initItemNavigation();
+			oTabToBeMoved.$().focus();
+
+			this._iconTabHeader._moveTab(oTabToBeMoved._tabFilter, iKeyCode);
+		};
+
+		/**
+		 * Moves tab on first position
+		 * Ctrl + Home
+		 * @param {jQuery.Event} oEvent
+		 */
+		IconTabBarSelectList.prototype.onsaphomemodifiers = IconTabBarSelectList.prototype.ondragrearranging;
+
+		/**
+		 * Move focused tab of IconTabHeader to last position
+		 * Ctrl + End
+		 * @param {jQuery.Event} oEvent
+		 */
+		IconTabBarSelectList.prototype.onsapendmodifiers = IconTabBarSelectList.prototype.ondragrearranging;
+
+		/**
+		 * Moves tab for Drag&Drop keyboard handling
+		 * Ctrl + Left Right || Ctrl + Arrow Up
+		 * @param {jQuery.Event} oEvent
+		 */
+		IconTabBarSelectList.prototype.onsapincreasemodifiers = IconTabBarSelectList.prototype.ondragrearranging;
+
+		/**
+		 * Moves tab for Drag&Drop keyboard handling
+		 * Ctrl + Left Arrow || Ctrl + Arrow Down
+		 * @param {jQuery.Event} oEvent
+		 */
+		IconTabBarSelectList.prototype.onsapdecreasemodifiers = IconTabBarSelectList.prototype.ondragrearranging;
+
+		/* =========================================================== */
+		/*           end: tab keyboard handling - drag-drop            */
+		/* =========================================================== */
+		/* =========================================================== */
+		/*           end: tab drag-drop		                           */
+		/* =========================================================== */
+
+		return IconTabBarSelectList;
+	});

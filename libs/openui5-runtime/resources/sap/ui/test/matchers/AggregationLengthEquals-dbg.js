@@ -1,16 +1,20 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './Matcher'], function ($, Matcher) {
+sap.ui.define([
+	"sap/ui/test/matchers/Matcher",
+	"sap/base/strings/capitalize",
+	"sap/ui/thirdparty/jquery"
+], function(Matcher, capitalize, jQueryDOM) {
 	"use strict";
 
 	/**
-	 * AggregationLengthEquals - checks if an aggregation contains at least one entry.
+	 * AggregationLengthEquals - checks if an aggregation contains a specified number of entries.
 	 *
-	 * @class AggregationLengthEquals - checks if an aggregation contains at least one entry
+	 * @class AggregationLengthEquals - checks if an aggregation contains a specified number of entries.
 	 * @param {object} [mSettings] optional map/JSON-object with initial settings for the new AggregationLengthEqualsMatcher
 	 * @extends sap.ui.test.matchers.Matcher
 	 * @public
@@ -47,13 +51,15 @@ sap.ui.define(['jquery.sap.global', './Matcher'], function ($, Matcher) {
 		 */
 		isMatching : function (oControl) {
 			var sAggregationName = this.getName(),
-				fnAggregation = oControl["get" + $.sap.charToUpperCase(sAggregationName, 0)];
+				fnAggregation = oControl["get" + capitalize(sAggregationName, 0)];
 
 			if (!fnAggregation) {
 				this._oLogger.error("Control '" + oControl + "' does not have an aggregation called '" + sAggregationName + "'");
 				return false;
 			}
-			var iAggregationLength = fnAggregation.call(oControl).length;
+			var vAggregation = fnAggregation.call(oControl);
+			var aAggregation = jQueryDOM.isArray(vAggregation) ? vAggregation : [vAggregation];
+			var iAggregationLength = aAggregation.length;
 			var iExpectedLength = this.getLength();
 			var bIsMatch = iAggregationLength === iExpectedLength;
 			if (!bIsMatch) {

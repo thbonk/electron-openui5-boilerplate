@@ -1,18 +1,30 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-/**
- * @namespace
- * @name sap.m.delegate.ValueState
- * @private
- */
-
-sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/Object', 'sap/ui/core/ValueStateSupport', 'sap/ui/core/Popup'],
-	function(jQuery, Device, BaseObject, ValueStateSupport, Popup) {
+sap.ui.define([
+	'sap/ui/Device',
+	'sap/ui/base/Object',
+	'sap/ui/core/ValueStateSupport',
+	'sap/ui/core/Popup',
+	'sap/ui/core/library',
+	"sap/ui/thirdparty/jquery",
+	"sap/ui/dom/jquery/Aria" // jQuery Plugin "addAriaDescribedBy", "removeAriaDescribedBy"
+],
+	function(
+		Device,
+		BaseObject,
+		ValueStateSupport,
+		Popup,
+		coreLibrary,
+		jQuery
+	) {
 		"use strict";
+
+		// shortcut for sap.ui.core.ValueState
+		var ValueState = coreLibrary.ValueState;
 
 		/**
 		 * Creates a <code>sap.m.delegate.ValueState</code> delegate that can be attached to controls that require
@@ -167,7 +179,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/Object', 'sap/
 
 			this._oPopup = new Popup(document.createElement("span"), false, false, false);
 			this._oPopup.attachClosed(function() {
-				jQuery.sap.byId(sID).remove();
+				jQuery(document.getElementById(sID)).remove();
 			});
 
 			return this._oPopup;
@@ -201,11 +213,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/Object', 'sap/
 			}
 
 			var sState = oControl.getValueState(),
-				sText = oControl.getValueStateText() || sap.ui.core.ValueStateSupport.getAdditionalText(oControl),
+				sText = oControl.getValueStateText() || ValueStateSupport.getAdditionalText(oControl),
 				sClass = "sapMValueStateMessage sapMValueStateMessage" + sState,
 				oRB = sap.ui.getCore().getLibraryResourceBundle("sap.m");
 
-			if (sState === sap.ui.core.ValueState.Success) {
+			if (sState === ValueState.Success || sState === ValueState.None) {
 				sClass = "sapUiInvisibleText";
 				sText = "";
 			}
@@ -221,11 +233,18 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/Object', 'sap/
 			oAccDomRef.id = sID + "hidden";
 			oAccDomRef.className = "sapUiHidden";
 			oAccDomRef.setAttribute("aria-hidden", "true");
-			oAccDomRef.appendChild(document.createTextNode(oRB.getText("INPUTBASE_VALUE_STATE_" + sState.toUpperCase())));
+
+			if (sState !== ValueState.None) {
+				oAccDomRef.appendChild(document.createTextNode(oRB.getText("INPUTBASE_VALUE_STATE_" + sState.toUpperCase())));
+			}
 
 			var oTextDomRef = document.createElement("span");
 			oTextDomRef.id = sID + "-text";
-			oTextDomRef.setAttribute("aria-hidden", "true");
+
+			if (!oControl.isA('sap.m.Select')) {
+				oTextDomRef.setAttribute("aria-hidden", "true");
+			}
+
 			oTextDomRef.appendChild(document.createTextNode(sText));
 
 			oMessageDomRef.appendChild(oAccDomRef);

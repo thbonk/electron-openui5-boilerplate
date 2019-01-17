@@ -1,12 +1,10 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define([
-	"jquery.sap.global", "sap/ui/fl/Change"
-], function($, Change) {
+sap.ui.define(["sap/ui/fl/Change"], function(Change) {
 	"use strict";
 
 	/**
@@ -16,7 +14,7 @@ sap.ui.define([
 	 * @alias sap.ui.fl.DefaultVariant
 	 * @author SAP SE
 	 *
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @experimental Since 1.25.0
 	 */
@@ -133,9 +131,12 @@ sap.ui.define([
 	 * Creates the JSON content of a new change file, specifying the new default variant
 	 *
 	 * @param {object} mParameters map of parameters, see below
-	 * @param {String} mParameters.defaultVariantName - id of the new default variant
-	 * @param {String} mParameters.component - name of the UI5 component
+	 * @param {String} mParameters.defaultVariantId - id of the new default variant
+	 * @param {String} mParameters.reference - name of the UI5 component
 	 * @param {object} mParameters.selector - stable propertyName:propertyValue
+	 * @param {Object} mParameters.validAppVersions - Application versions (format: major.minor.patch) where the context is active
+	 * @param {String} mParameters.validAppVersions.creation - Original application version
+	 * @param {String} mParameters.validAppVersions.from - Minimum application version
 	 *
 	 * @returns {Object} default variant change
 	 *
@@ -144,8 +145,6 @@ sap.ui.define([
 	DefaultVariant.prototype._createChangeFile = function(mParameters) {
 		var oFileData;
 
-		mParameters.namespace = mParameters.component + '/changes/default';
-		mParameters.componentName = mParameters.component;
 		mParameters.changeType = 'defaultVariant';
 
 		oFileData = Change.createInitialFileContent(mParameters);
@@ -160,9 +159,12 @@ sap.ui.define([
 	 * Creates an instance of {sap.ui.fl.Change}, specifying the new default variant
 	 *
 	 * @param {object} mParameters - map of parameters, see below
-	 * @param {String} mParameters.defaultVariantName - id of the new default variant
-	 * @param {String} mParameters.component - name of the UI5 component
+	 * @param {String} mParameters.defaultVariantId - id of the new default variant
+	 * @param {String} mParameters.reference - name of the UI5 component
 	 * @param {object} mParameters.selector - stable propertyName:propertyValue
+	 * @param {Object} mParameters.validAppVersions - Application versions (format: major.minor.patch) where the context is active
+	 * @param {String} mParameters.validAppVersions.creation - Original application version
+	 * @param {String} mParameters.validAppVersions.from - Minimum application version
 	 * @returns {sap.ui.fl.Change} Change
 	 *
 	 * @public

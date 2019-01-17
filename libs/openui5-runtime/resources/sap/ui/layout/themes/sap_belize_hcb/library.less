@@ -2,7 +2,7 @@
 
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -22,6 +22,17 @@
 	box-sizing: border-box;
 }
 /* END "FormLayout.less" */
+
+/* START "BlockLayoutCell.less" */
+/* ============================================== */
+/* CSS for control sap.ui.layout/BlockLayoutCell  */
+/* Belize High Contrast Black theme               */
+/* ============================================== */
+
+.sapUiBlockCellContent {
+	border: 1px solid @sapUiTileBorderColor;
+}
+/* END "BlockLayoutCell.less" */
 
 /* START "GridLayout.less" */
 /* ========================================= */
@@ -102,6 +113,16 @@
 .sapUiLoSplitter > .sapUiLoSplitterBar:hover,
 .sapUiLoSplitter > .sapUiLoSplitterOverlay > .sapUiLoSplitterOverlayBar {
 	background-color: @sapUiHcStandardForeground;
+}
+
+/*********************************** Focus outline**********************************/
+
+.sapUiLoSplitter > .sapUiLoSplitterBar:focus::before {
+	border-width: 2px;
+	top: -1px;
+	bottom: -1px;
+	left: -1px;
+	right: -1px;
 }
 /* END "Splitter.less" */
 

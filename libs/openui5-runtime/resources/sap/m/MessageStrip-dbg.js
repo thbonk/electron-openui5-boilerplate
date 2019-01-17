@@ -1,13 +1,35 @@
 /*!
 * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
 */
 
 // Provides control sap.m.MessageStrip.
-sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "./MessageStripUtilities",
-	"./Text", "./Link", "./FormattedText"], function (jQuery, library, Control, MSUtils, Text, Link, FormattedText) {
+sap.ui.define([
+	"./library",
+	"sap/ui/core/Control",
+	"./MessageStripUtilities",
+	"./Text",
+	"./Link",
+	"./FormattedText",
+	"sap/ui/core/library",
+	"./MessageStripRenderer",
+	"sap/base/Log"
+], function(
+	library,
+	Control,
+	MSUtils,
+	Text,
+	Link,
+	FormattedText,
+	coreLibrary,
+	MessageStripRenderer,
+	Log
+) {
 	"use strict";
+
+	// shortcut for sap.ui.core.MessageType
+	var MessageType = coreLibrary.MessageType;
 
 	/**
 	 * Constructor for a new MessageStrip.
@@ -41,17 +63,19 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "./Messa
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.30
 	 * @alias sap.m.MessageStrip
+	 * @see {@link fiori:https://experience.sap.com/fiori-design-web/message-strip/ Message Strip}
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var MessageStrip = Control.extend("sap.m.MessageStrip", /** @lends sap.m.MessageStrip.prototype */ {
 		metadata: {
 			library: "sap.m",
+			designtime: "sap/m/designtime/MessageStrip.designtime",
 			properties: {
 
 				/**
@@ -64,7 +88,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "./Messa
 				 * Possible values are: Information (default), Success, Warning, Error.
 				 * If None is passed, the value is set to Information and a warning is displayed in the console.
 				 */
-				type: { type: "sap.ui.core.MessageType", group: "Appearance", defaultValue: sap.ui.core.MessageType.Information },
+				type: { type: "sap.ui.core.MessageType", group: "Appearance", defaultValue: MessageType.Information },
 
 				/**
 				 * Determines a custom icon which is displayed.
@@ -160,9 +184,9 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "./Messa
 	 * @returns {sap.m.MessageStrip} this to allow method chaining
 	 */
 	MessageStrip.prototype.setType = function (sType) {
-		if (sType === sap.ui.core.MessageType.None) {
-			jQuery.sap.log.warning(MSUtils.MESSAGES.TYPE_NOT_SUPPORTED);
-			sType = sap.ui.core.MessageType.Information;
+		if (sType === MessageType.None) {
+			Log.warning(MSUtils.MESSAGES.TYPE_NOT_SUPPORTED);
+			sType = MessageType.Information;
 		}
 
 		return this.setProperty("type", sType);
@@ -195,28 +219,28 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "./Messa
 
 	/**
 	 * Handles tap/click
-	 * @type void
+	 * @returns void
 	 * @private
 	 */
 	MessageStrip.prototype.ontap = MSUtils.handleMSCloseButtonInteraction;
 
 	/**
 	 * Handles enter key
-	 * @type void
+	 * @returns void
 	 * @private
 	 */
 	MessageStrip.prototype.onsapenter = MSUtils.handleMSCloseButtonInteraction;
 
 	/**
 	 * Handles space key
-	 * @type void
+	 * @returns void
 	 * @private
 	 */
 	MessageStrip.prototype.onsapspace = MSUtils.handleMSCloseButtonInteraction;
 
 	/**
 	 * Handles mobile touch events
-	 * @type void
+	 * @param {jQuery.Event} oEvent The event object
 	 * @private
 	 */
 	MessageStrip.prototype.ontouchmove = function (oEvent) {
@@ -228,7 +252,6 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "./Messa
 	 * Closes the MessageStrip.
 	 * This method sets the visible property of the MessageStrip to false.
 	 * The MessageStrip can be shown again by setting the visible property to true.
-	 * @type void
 	 * @public
 	 */
 	MessageStrip.prototype.close = function () {
@@ -242,13 +265,9 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "./Messa
 			return;
 		}
 
-		if (sap.ui.Device.browser.internet_explorer && sap.ui.Device.browser.version < 10) {
-			MSUtils.closeTransitionWithJavascript.call(this, fnClosed);
-		} else {
-			MSUtils.closeTransitionWithCSS.call(this, fnClosed);
-		}
+		MSUtils.closeTransitionWithCSS.call(this, fnClosed);
 	};
 
 	return MessageStrip;
 
-}, /* bExport= */ true);
+});

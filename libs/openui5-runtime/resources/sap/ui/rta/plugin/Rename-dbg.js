@@ -1,28 +1,17 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-// Provides class sap.ui.rta.plugin.Rename.
 sap.ui.define([
-	'jquery.sap.global',
 	'sap/ui/rta/plugin/Plugin',
-	'sap/ui/dt/Overlay',
-	'sap/ui/dt/ElementUtil',
-	'sap/ui/dt/OverlayUtil',
-	'sap/ui/dt/OverlayRegistry',
-	'sap/ui/rta/Utils',
-	'sap/ui/dt/DOMUtil'
+	'sap/ui/rta/plugin/RenameHandler',
+	"sap/base/Log"
 ], function(
-	jQuery,
 	Plugin,
-	Overlay,
-	ElementUtil,
-	OverlayUtil,
-	OverlayRegistry,
-	Utils,
-	DOMUtil
+	RenameHandler,
+	Log
 ) {
 	"use strict";
 
@@ -39,7 +28,7 @@ sap.ui.define([
 	 * @extends sap.ui.rta.plugin.Plugin
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @private
@@ -75,41 +64,34 @@ sap.ui.define([
 	Rename.prototype.exit = function() {
 		Plugin.prototype.exit.apply(this, arguments);
 
-		if (this._$oEditableControlDomRef) {
-			this._stopEdit();
-		}
-
-		clearTimeout(this._iStopTimeout);
+		this._bPreventMenu = false;
+		RenameHandler._exit.call(this);
 	};
 
 	/**
 	 * @override
 	 */
 	Rename.prototype.setDesignTime = function(oDesignTime) {
-		this._aSelection = [];
-		var oOldDesignTime = this.getDesignTime();
-
-		if (oOldDesignTime) {
-			oOldDesignTime.detachSelectionChange(this._onDesignTimeSelectionChange, this);
-		}
-		Plugin.prototype.setDesignTime.apply(this, arguments);
-
-		if (oDesignTime) {
-			oDesignTime.attachSelectionChange(this._onDesignTimeSelectionChange, this);
-			this._aSelection = oDesignTime.getSelection();
-		}
+		RenameHandler._setDesignTime.call(this, oDesignTime);
 	};
 
-	/**
-	 * @param {sap.ui.dt.ElementOverlay} oOverlay overlay object
-	 * @returns {string} action value
-	 * @private
-	 */
-	Rename.prototype._getRenameAction = function(oOverlay) {
-		var oDesignTimeMetadata = oOverlay.getDesignTimeMetadata();
-		if (oDesignTimeMetadata && oDesignTimeMetadata.getAction) {
-			return oDesignTimeMetadata.getAction("rename", oOverlay.getElementInstance());
-		}
+	Rename.prototype.startEdit = function (oOverlay) {
+		var oElement = oOverlay.getElement(),
+			oDesignTimeMetadata = oOverlay.getDesignTimeMetadata(),
+			vDomRef = oDesignTimeMetadata.getAction("rename", oElement).domRef;
+		RenameHandler.startEdit.call(this, {
+			overlay: oOverlay,
+			domRef: vDomRef,
+			pluginMethodName: "plugin.Rename.startEdit"
+		});
+	};
+
+	Rename.prototype.stopEdit = function (bRestoreFocus) {
+		RenameHandler._stopEdit.call(this, bRestoreFocus, "plugin.Rename.stopEdit");
+	};
+
+	Rename.prototype.handler = function (aElementOverlays) {
+		this.startEdit(aElementOverlays[0]);
 	};
 
 	/**
@@ -123,23 +105,31 @@ sap.ui.define([
 		return this._isEditableByPlugin(oOverlay);
 	};
 
+	Rename.prototype.isRenameEnabled = function (aOverlays) {
+		return this.isEnabled(aOverlays);
+	};
+
 	/**
 	 * Checks if rename is enabled for oOverlay
-	 *
-	 * @param {sap.ui.dt.Overlay} oOverlay overlay object
+	 * @param {sap.ui.dt.ElementOverlay[]} aElementOverlays - Target overlays
 	 * @returns {boolean} true if it's enabled
 	 * @public
 	 */
-	Rename.prototype.isRenameEnabled = function(oOverlay) {
+	Rename.prototype.isEnabled = function (aElementOverlays) {
+		if (aElementOverlays.length > 1) {
+			return false;
+		}
+
+		var oOverlay = aElementOverlays[0];
 		var bIsEnabled = true;
-		var oAction = this._getRenameAction(oOverlay);
+		var oAction = this.getAction(oOverlay);
 		if (!oAction) {
 			bIsEnabled = false;
 		}
 
 		if (bIsEnabled && typeof oAction.isEnabled !== "undefined") {
 			if (typeof oAction.isEnabled === "function") {
-				bIsEnabled = oAction.isEnabled(oOverlay.getElementInstance());
+				bIsEnabled = oAction.isEnabled(oOverlay.getElement());
 			} else {
 				bIsEnabled = oAction.isEnabled;
 			}
@@ -147,7 +137,7 @@ sap.ui.define([
 
 		if (bIsEnabled) {
 			var oDesignTimeMetadata = oOverlay.getDesignTimeMetadata();
-			if (!oDesignTimeMetadata.getAssociatedDomRef(oOverlay.getElementInstance(), oAction.domRef)) {
+			if (!oDesignTimeMetadata.getAssociatedDomRef(oOverlay.getElement(), oAction.domRef)) {
 				bIsEnabled = false;
 			}
 		}
@@ -159,8 +149,7 @@ sap.ui.define([
 	 * @override
 	 */
 	Rename.prototype.registerElementOverlay = function(oOverlay) {
-		oOverlay.attachEvent("editableChange", this._manageClickEvent, this);
-
+		oOverlay.attachEvent("editableChange", RenameHandler._manageClickEvent, this);
 
 		Plugin.prototype.registerElementOverlay.apply(this, arguments);
 	};
@@ -172,18 +161,15 @@ sap.ui.define([
 	 */
 	Rename.prototype._isEditable = function(oOverlay) {
 		var bEditable = false;
-		var oElement = oOverlay.getElementInstance();
+		var oElement = oOverlay.getElement();
 
-		if (!Utils.getRelevantContainerDesigntimeMetadata(oOverlay)) {
-			return false;
-		}
-
-		var oRenameAction = this._getRenameAction(oOverlay);
+		var oRenameAction = this.getAction(oOverlay);
 		if (oRenameAction && oRenameAction.changeType) {
 			if (oRenameAction.changeOnRelevantContainer) {
 				oElement = oOverlay.getRelevantContainer();
 			}
-			bEditable = this.hasChangeHandler(oRenameAction.changeType, oElement);
+			bEditable = this.hasChangeHandler(oRenameAction.changeType, oElement) &&
+						this._checkRelevantContainerStableID(oRenameAction, oOverlay);
 		}
 
 		if (bEditable) {
@@ -197,260 +183,71 @@ sap.ui.define([
 	 * @override
 	 */
 	Rename.prototype.deregisterElementOverlay = function(oOverlay) {
-		oOverlay.detachEvent("editableChange", this._manageClickEvent, this);
-		oOverlay.detachBrowserEvent("click", this._onClick, this);
+		oOverlay.detachEvent("editableChange", RenameHandler._manageClickEvent, this);
+		oOverlay.detachBrowserEvent("click", RenameHandler._onClick, this);
 
 		this.removeFromPluginsList(oOverlay);
 	};
 
 	/**
-	 * @param {sap.ui.base.Event} oEvent - event object
-	 * @private
-	 */
-	Rename.prototype._onClick = function(oEvent) {
-		var oOverlay = sap.ui.getCore().byId(oEvent.currentTarget.id);
-		if (this.isRenameEnabled(oOverlay) && !oEvent.metaKey && !oEvent.ctrlKey) {
-			this.startEdit(oOverlay);
-			oEvent.preventDefault();
-		}
-	};
-
-	/**
-	 * @override
-	 */
-	Rename.prototype._onDesignTimeSelectionChange = function(oEvent) {
-		var aSelection = oEvent.getParameter("selection");
-
-		// detach events from previous selection
-		this._aSelection.forEach(this._manageClickEvent, this);
-		// attach events to the new selection
-		aSelection.forEach(this._manageClickEvent, this);
-
-		this._aSelection = aSelection;
-	};
-
-
-	/**
-	 * @override
-	 */
-	Rename.prototype._manageClickEvent = function(vEventOrElement) {
-		var oOverlay = vEventOrElement.getSource ? vEventOrElement.getSource() : vEventOrElement;
-		if (oOverlay.isSelected() && this.isRenameAvailable(oOverlay)) {
-			oOverlay.attachBrowserEvent("click", this._onClick, this);
-		} else {
-			oOverlay.detachBrowserEvent("click", this._onClick, this);
-		}
-	};
-
-	/**
-	 * @param {sap.ui.dt.Overlay} oOverlay - target overlay
-	 * @public
-	 */
-	Rename.prototype.startEdit = function(oOverlay) {
-
-		this._oEditedOverlay = oOverlay;
-
-		var oElement = oOverlay.getElementInstance();
-		var oDesignTimeMetadata = this._oEditedOverlay.getDesignTimeMetadata();
-		var vDomRef = oDesignTimeMetadata.getAction("rename", oElement).domRef;
-
-		var oEditableControlDomRef = oDesignTimeMetadata.getAssociatedDomRef(oElement, vDomRef);
-
-		// if the Control is currently not visible on the screen, we have to scroll it into view
-		if (!Utils.isElementInViewport(oEditableControlDomRef)) {
-			oEditableControlDomRef.get(0).scrollIntoView();
-		}
-
-		this._$oEditableControlDomRef = jQuery(oEditableControlDomRef);
-
-		var oEditableControlOverlay = sap.ui.dt.OverlayRegistry.getOverlay(oEditableControlDomRef.id) || oOverlay;
-
-		var oWrapper = jQuery("<div class='sapUiRtaEditableField'></div>").appendTo(oEditableControlOverlay.$());
-		this._$editableField = jQuery("<div contentEditable='true'></div>").appendTo(oWrapper);
-
-		// if label is empty, set a preliminary dummy text at the control to get an overlay
-		if (this._$oEditableControlDomRef.text() === "") {
-			this._$oEditableControlDomRef.text("_?_");
-			this._$editableField.text("");
-		} else {
-			this._$editableField.text(this._$oEditableControlDomRef.text());
-		}
-
-		DOMUtil.copyComputedStyle(this._$oEditableControlDomRef, this._$editableField);
-		this._$editableField.children().remove();
-		this._$editableField.css('visibility', 'hidden');
-
-		// TODO : for all browsers
-		this._$editableField.css({
-			"-moz-user-modify" : "read-write",
-			"-webkit-user-modify" : "read-write",
-			"-ms-user-modify" : "read-write",
-			"user-modify" : "read-write",
-			"text-overflow" : "clip"
-		});
-
-		Overlay.getMutationObserver().ignoreOnce({
-			target: this._$oEditableControlDomRef.get(0)
-		});
-
-		this._$editableField.one("focus", this._onEditableFieldFocus.bind(this));
-
-		this._$editableField.on("blur", this._onEditableFieldBlur.bind(this));
-		this._$editableField.on("keydown", this._onEditableFieldKeydown.bind(this));
-		this._$editableField.on("dragstart", this._stopPropagation.bind(this));
-		this._$editableField.on("drag", this._stopPropagation.bind(this));
-		this._$editableField.on("dragend", this._stopPropagation.bind(this));
-
-		this._$editableField.on("click", this._stopPropagation.bind(this));
-		this._$editableField.on("mousedown", this._stopPropagation.bind(this));
-
-		this.setOldValue(this._getCurrentEditableFieldText());
-
-		// BCP: 1780352883
-		setTimeout(function () {
-			this._$oEditableControlDomRef.css("visibility", "hidden");
-			this._$editableField.offset({ left: this._$oEditableControlDomRef.offset().left });
-			this._$editableField.offset({ top: this._$oEditableControlDomRef.offset().top });
-			this._$editableField.css('visibility', '');
-			this._$editableField.focus();
-
-			// keep Overlay selected while renaming
-			oOverlay.setSelected(true);
-			sap.ui.getCore().getEventBus().publish('sap.ui.rta', 'plugin.Rename.startEdit', {
-				overlay: oOverlay,
-				editableField: this._$editableField
-			});
-		}.bind(this), 0);
-	};
-
-	/**
-	 * @param {sap.ui.base.Event} oEvent - event object
-	 * @private
-	 */
-	Rename.prototype._stopPropagation = function(oEvent) {
-		oEvent.stopPropagation();
-	};
-
-	/**
-	 * @param {sap.ui.base.Event} oEvent - event object
-	 * @private
-	 */
-	Rename.prototype._onEditableFieldFocus = function(oEvent) {
-		this._oEditedOverlay.setSelected(false);
-		var el = oEvent.target;
-		var range = document.createRange();
-		range.selectNodeContents(el);
-		var sel = window.getSelection();
-		sel.removeAllRanges();
-		sel.addRange(range);
-	};
-
-	/**
-	 * @param {boolean} bRestoreFocus - true if the focus should be restored on overlay after rename
-	 * @private
-	 */
-	Rename.prototype._stopEdit = function(bRestoreFocus) {
-		// exchange the dummy text at the label with the genuine empty text (see start_edit function)
-		if (this._$oEditableControlDomRef.text() === "_?_") {
-			this._$oEditableControlDomRef.text("");
-		}
-
-		this._oEditedOverlay.$().find(".sapUiRtaEditableField").remove();
-		Overlay.getMutationObserver().ignoreOnce({
-			target: this._$oEditableControlDomRef.get(0)
-		});
-		this._$oEditableControlDomRef.css("visibility", "visible");
-
-		if (bRestoreFocus) {
-			var oOverlay = this._oEditedOverlay;
-
-			// timeout is needed because of invalidation (test on bounded fields)
-			// TODO: get rid of timeout! prevent UI5 from taking focus out of overlays
-			this._iStopTimeout = setTimeout(function() {
-				oOverlay.setSelected(true);
-				oOverlay.focus();
-				sap.ui.getCore().getEventBus().publish('sap.ui.rta', 'plugin.Rename.stopEdit', {
-					overlay: oOverlay
-				});
-			}, 500);
-		}
-
-		this._oEditedOverlay.setSelected(false);
-
-		delete this._$editableField;
-		delete this._$oEditableControlDomRef;
-		delete this._oEditedOverlay;
-	};
-
-	/**
-	 * @param {sap.ui.base.Event} oEvent - event object
-	 * @private
-	 */
-	Rename.prototype._onEditableFieldBlur = function(oEvent) {
-		this._emitLabelChangeEvent();
-		this._stopEdit();
-	};
-
-	/**
-	 * @param {sap.ui.base.Event} oEvent - event object
-	 * @private
-	 */
-	Rename.prototype._onEditableFieldKeydown = function(oEvent) {
-		switch (oEvent.keyCode) {
-			case jQuery.sap.KeyCodes.ENTER:
-				this._emitLabelChangeEvent();
-				this._stopEdit(true);
-				oEvent.preventDefault();
-				break;
-			case jQuery.sap.KeyCodes.ESCAPE:
-				this._stopEdit(true);
-				oEvent.preventDefault();
-				break;
-			case jQuery.sap.KeyCodes.DELETE:
-				//Incident ID: #1680315103
-				oEvent.stopPropagation();
-				break;
-			default:
-		}
-	};
-
-	/**
+	 * @returns {Promise} Empty promise
 	 * @private
 	 */
 	Rename.prototype._emitLabelChangeEvent = function() {
-		var sText = this._getCurrentEditableFieldText();
+		var sText = RenameHandler._getCurrentEditableFieldText.call(this);
 		if (this.getOldValue() !== sText) { //check for real change before creating a command
 			this._$oEditableControlDomRef.text(sText);
-			try {
-				var oRenameCommand;
-				var oRenamedElement = this._oEditedOverlay.getElementInstance();
-				var oDesignTimeMetadata = this._oEditedOverlay.getDesignTimeMetadata();
 
-				oRenameCommand = this.getCommandFactory().getCommandFor(oRenamedElement, "rename", {
+			return Promise.resolve(this._oEditedOverlay)
+
+			.then(function(oEditedOverlay) {
+				var oRenamedElement = oEditedOverlay.getElement();
+				var oDesignTimeMetadata = oEditedOverlay.getDesignTimeMetadata();
+				var oRenameAction = this.getAction(oEditedOverlay);
+				var sVariantManagementReference = this.getVariantManagementReference(oEditedOverlay, oRenameAction);
+
+				return this.getCommandFactory().getCommandFor(oRenamedElement, "rename", {
 					renamedElement : oRenamedElement,
 					newValue : sText
-				}, oDesignTimeMetadata/*, this._oEditedOverlay.getVariantMangement()*/);
+				}, oDesignTimeMetadata, sVariantManagementReference);
+			}.bind(this))
+
+			.then(function(oRenameCommand) {
 				this.fireElementModified({
 					"command" : oRenameCommand
 				});
-			} catch (oError) {
-				jQuery.sap.log.error("Error during rename : ", oError);
-			}
+			}.bind(this))
+
+			.catch(function(oError) {
+				Log.error("Error during rename : ", oError);
+			});
 		}
+		return Promise.resolve();
 	};
 
 	/**
-	 * @returns {string} current editable field text
-	 * @private
+	 * Retrieve the context menu item for the action.
+	 * @param {sap.ui.dt.ElementOverlay|sap.ui.dt.ElementOverlay[]} vElementOverlays - Target overlay(s)
+	 * @return {object[]} - array of the items with required data
 	 */
-	Rename.prototype._getCurrentEditableFieldText = function() {
-		var sText = this._$editableField.text();
-		// Rename to empty string should not be possible
-		// to prevent issues with disappearing elements
-		if (sText === ""){
-			sText = '\xa0'; // = non-breaking space (&nbsp)
-		}
-		return sText;
+	Rename.prototype.getMenuItems = function (vElementOverlays) {
+		return this._getMenuItems(vElementOverlays, { pluginId : "CTX_RENAME", rank : 10, icon: "sap-icon://edit" });
+	};
+
+	/**
+	 * Get the name of the action related to this plugin.
+	 * @return {string} Returns the action name
+	 */
+	Rename.prototype.getActionName = function(){
+		return "rename";
+	};
+
+	/**
+	 * Indicates whether the Plugin is busy
+	 * @return {boolean} true if Plugin is busy
+	 */
+	Rename.prototype.isBusy = function(){
+		return this._bPreventMenu;
 	};
 
 	return Rename;

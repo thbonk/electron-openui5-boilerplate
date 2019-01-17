@@ -1,25 +1,24 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(["sap/ui/fl/changeHandler/JsControlTreeModifier"], function (JsControlTreeModifier) {
+sap.ui.define([
+	"sap/ui/core/util/reflection/JsControlTreeModifier",
+	"sap/base/util/merge"
+], function(JsControlTreeModifier, merge) {
 
 	"use strict";
 
 	/**
 	 * Implementation of the RTA-specific functionality for the control tree modifier
 	 *
-	 * @class
-	 * @extends sap.ui.fl.changehandler.jsControlTreeModifier
-	 *
-	 * @author SAP SE
-	 * @version 1.50.6
+	 * @namespace sap.ui.rta.ControlTreeModifier
+	 * @extends sap.ui.core.util.reflection.JsControlTreeModifier
 	 *
 	 * @private
 	 * @since 1.44
-	 * @alias sap.ui.rta.ControlTreeModifier
 	 * @experimental Since 1.44. This class is experimental and provides only limited functionality. Also the API might be
 	 *               changed in future.
 	 */
@@ -29,7 +28,7 @@ sap.ui.define(["sap/ui/fl/changeHandler/JsControlTreeModifier"], function (JsCon
 	 */
 	var _aUndoStack;
 
-	var RtaControlTreeModifier = {
+	var RtaControlTreeModifier = /** @lends sap.ui.rta.ControlTreeModifier */{
 
 		/**
 		 * Start recording operations
@@ -208,17 +207,40 @@ sap.ui.define(["sap/ui/fl/changeHandler/JsControlTreeModifier"], function (JsCon
 		 * Record destroy as undo operation
 		 * @override
 		 */
-		createControl: function (sClassName, oAppComponent, oView, oSelector) {
+		createControl: function (sClassName, oAppComponent, oView, oSelector, mSettings, bAsync) {
 			var oExistingControl = this.bySelector(oSelector, oAppComponent);
+			var fnCreateUndoOperation = function() {
+				if (!oExistingControl) {
+					var oCreatedControl = this.bySelector(oSelector, oAppComponent);
+					RtaControlTreeModifier._saveUndoOperation("destroy", [oCreatedControl]);
+				}
+			}.bind(this);
 
 			var vReturnValue = JsControlTreeModifier.createControl.apply(this, arguments);
 
-			if (!oExistingControl) {
-				var oCreatedControl = this.bySelector(oSelector, oAppComponent);
-				this._saveUndoOperation("destroy", [oCreatedControl]);
+			if (bAsync) {
+				return vReturnValue.then(function(oReturnedControl) {
+					fnCreateUndoOperation();
+					return oReturnedControl;
+				});
 			}
 
+			fnCreateUndoOperation();
 			return vReturnValue;
+		},
+
+		/**
+		 * When a fragment is instantiated in JS, a control is created.
+		 * This control has to be destroyed on undo
+		 * @override
+		 */
+		instantiateFragment: function(sFragment, sChangeId, oView, oController) {
+			var aControls = JsControlTreeModifier.instantiateFragment.apply(this, arguments);
+
+			aControls.forEach(function(oControl) {
+				this._saveUndoOperation("destroy", [oControl]);
+			}.bind(this));
+			return aControls;
 		},
 
 		/**
@@ -317,8 +339,7 @@ sap.ui.define(["sap/ui/fl/changeHandler/JsControlTreeModifier"], function (JsCon
 		}
 	};
 
-	return jQuery.sap.extend(
-		true /* deep extend */,
+	return merge(
 		{} /* target object, to avoid changing of original modifier */,
 		JsControlTreeModifier,
 		RtaControlTreeModifier

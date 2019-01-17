@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -15,12 +15,15 @@ sap.ui.define(["sap/ui/core/library"],
 	 * UI5 library: sap.ui.support.
 	 * A library for the Support Assistant tool.
 	 * <h3>Overview</h3>
-The library provides the Support Assistant tool. It enables application developers to check whether their applications are built according to the best practices for building SAPUI5 apps. The tool uses a set of pre-defined rules to check all aspects of an application.
+	 * The library provides the Support Assistant tool. It enables application
+	 * developers to check whether their applications are built according to the
+	 * best practices for building SAPUI5 apps. The tool uses a set of pre-defined
+	 * rules to check all aspects of an application.
 	 *
 	 * @namespace
 	 * @name sap.ui.support
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @public
 	 */
@@ -30,22 +33,27 @@ The library provides the Support Assistant tool. It enables application develope
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.support",
-		// Loading sap.ui.codeeditor is moved to overlay.html to make sure it is loaded from the correct origin.
-		dependencies : ["sap.ui.core", "sap.ui.fl", "sap.m", "sap.ui.layout"],
+		dependencies : ["sap.ui.core"],
 		types: [
 			"sap.ui.support.Severity"
 		],
 		interfaces: [],
 		controls: [],
 		elements: [],
-		noLibraryCSS: false,
-		version: "1.50.6"
+		noLibraryCSS: true,
+		version: "1.61.2",
+		extensions: {
+			//Configuration used for rule loading of Support Assistant
+			"sap.ui.support": {
+				internalRules:true
+			}
+		}
 	});
 
 	/**
 	 * Defines severity types.
 	 * @enum {string}
-	 * @since 1.50.6
+	 * @since 1.61.2
 	 * @public
 	 */
 	sap.ui.support.Severity = {
@@ -69,7 +77,7 @@ The library provides the Support Assistant tool. It enables application develope
 	/**
 	 * Defines the Audiences.
 	 * @enum {string}
-	 * @since 1.50.6
+	 * @since 1.61.2
 	 * @public
 	 */
 	sap.ui.support.Audiences = {
@@ -93,7 +101,7 @@ The library provides the Support Assistant tool. It enables application develope
 	/**
 	 * Issue Categories.
 	 * @enum {string}
-	 * @since 1.50.6
+	 * @since 1.61.2
 	 * @public
 	 */
 	sap.ui.support.Categories = {
@@ -123,30 +131,99 @@ The library provides the Support Assistant tool. It enables application develope
 		 */
 		Consistency: "Consistency",
 		/**
+		 * Fiori Guidelines issue category.
+		 * @public
+		 */
+		FioriGuidelines : "FioriGuidelines",
+		/**
 		 * Functionality issue category.
 		 * @public
 		 */
-		Functionality : "Functionality",
+		Functionality: "Functionality",
 		/**
 		 * Usability issue category.
 		 * @public
 		 */
-		Usability : "Usability",
+		Usability: "Usability",
 		/**
 		 * DataModel issue category.
 		 * @public
 		 */
 		DataModel: "DataModel",
 		/**
+		 * Modularization issue category.
+		 * @public
+		 */
+		Modularization: "Modularization",
+		/**
 		 * Usage issue category.
 		 * @public
 		 */
 		Usage: "Usage",
 		/**
-		 * Accessibility issue category.
+		 * Other issue category.
 		 * @public
 		 */
 		Other: "Other"
+	};
+
+	/**
+	 * Analysis history formats.
+	 * @enum {string}
+	 * @since 1.61.2
+	 * @public
+	 */
+	sap.ui.support.HistoryFormats = {
+		/**
+		 * ABAP history format.
+		 * @public
+		 */
+		Abap: "Abap",
+		/**
+		 * String history format.
+		 * @public
+		 */
+		String: "String"
+	};
+
+	/**
+	 * Contains the available system presets.
+	 * @enum {object}
+	 * @since 1.61.2
+	 * @public
+	 */
+	sap.ui.support.SystemPresets = {
+		/**
+		 * The accessibility preset.
+		 *
+		 * @public
+		 */
+		Accessibility : {
+			id: "Accessibility",
+			title: "Accessibility",
+			description: "Accessibility related rules",
+			selections: [
+				// Grouped by library
+				// Public
+				{ruleId: "dialogAriaLabelledBy", libName: "sap.m"},
+				{ruleId: "onlyIconButtonNeedsTooltip", libName: "sap.m"},
+				{ruleId: "inputNeedsLabel", libName: "sap.m"},
+				{ruleId: "titleLevelProperty", libName: "sap.m"},
+				{ruleId: "formTitleOrAriaLabel", libName: "sap.ui.layout"},
+				{ruleId: "formTitleInToolbarAria", libName: "sap.ui.layout"},
+				{ruleId: "formMissingLabel", libName: "sap.ui.layout"},
+				{ruleId: "gridTableAccessibleLabel", libName: "sap.ui.table"},
+				{ruleId: "gridTableColumnTemplateIcon", libName: "sap.ui.table"},
+				{ruleId: "smartFormLabelOrAriaLabel", libName: "sap.ui.comp"},
+				// Internal
+				{ruleId: "icontabbarlabels", libName: "sap.m"},
+				{ruleId: "labeltooltip", libName: "sap.m"},
+				{ruleId: "labelfor", libName: "sap.m"},
+				{ruleId: "labelInDisplayMode", libName: "sap.m"},
+				{ruleId: "texttooltip", libName: "sap.m"},
+				{ruleId: "rbText", libName: "sap.m"}
+			]
+		}
 	};
 
 	return sap.ui.support;

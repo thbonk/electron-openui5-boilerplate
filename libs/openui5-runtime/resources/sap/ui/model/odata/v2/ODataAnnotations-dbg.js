@@ -1,38 +1,20 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.model.odata.v2.ODataAnnotations
-sap.ui.define(['jquery.sap.global', 'sap/ui/model/odata/AnnotationParser', 'sap/ui/Device', 'sap/ui/base/EventProvider'],
-	function(jQuery, AnnotationParser, Device, EventProvider) {
+sap.ui.define([
+	'sap/ui/model/odata/AnnotationParser',
+	'sap/ui/Device',
+	'sap/ui/base/EventProvider',
+	'sap/ui/core/cache/CacheManager',
+	"sap/base/assert",
+	"sap/ui/thirdparty/jquery"
+],
+	function(AnnotationParser, Device, EventProvider, CacheManager, assert, jQuery) {
 	"use strict";
-
-	///////////////////////////////////////////////// Hidden Functions /////////////////////////////////////////////////
-
-	/**
-	 * Creates a promise that always resolves from the given promise
-	 *
-	 * @param {Promise} pPromise The original promise, which may reject
-	 * @returns {Promise} A new Promise that always resolves even if the original promise fails.
-	 */
-	function alwaysResolve(pPromise) {
-		return pPromise.catch(function(oError) {
-			return oError;
-		});
-	}
-
-	/**
-	 * Helper function to chain a Promise as a then-callback via bind.
-	 * To chain promiseB after promiseA use promiseA.then(chain.bind(promiseB))
-	 *
-	 * @returns {object} The context of the method upon invocation
-	 */
-	function chain() {
-		return this;
-	}
-
 
 	///////////////////////////////////////////////// Class Definition /////////////////////////////////////////////////
 
@@ -44,13 +26,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/odata/AnnotationParser', 'sap/
 	 * @param {string|map|string[]|map[]} mOptions.source One or several annotation sources. See {@link sap.ui.model.odata.v2.ODataAnnotations#addSource} for more details
 	 * @param {map} mOptions.headers A map of headers to be sent with every request. See {@link sap.ui.model.odata.v2.ODataAnnotations#setHeaders} for more details
 	 * @param {boolean} mOptions.skipMetadata If set to <code>true</code>, the metadata document will not be parsed for annotations;
+	 * @param {string} [mOptions.cacheKey] (optional) A valid cache key
 	 * @public
 	 *
 	 * @class Annotation loader for OData V2 services
 	 *
 	 * @author SAP SE
 	 * @version
-	 * 1.50.6
+	 * 1.61.2
 	 *
 	 * @public
 	 * @since 1.37.0
@@ -60,16 +43,23 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/odata/AnnotationParser', 'sap/
 	var ODataAnnotations = EventProvider.extend("sap.ui.model.odata.v2.ODataAnnotations", /** @lends sap.ui.model.odata.v2.ODataAnnotations.prototype */ {
 
 		constructor : function(oMetadata, mOptions) {
+			var that = this;
 			// Allow event substription in constructor options
 			EventProvider.apply(this, [ mOptions ]);
-
 			this._oMetadata = oMetadata;
 			// The promise to have (loaded,) parsed and merged the previously added source. This promise should never
 			// reject to assign another promise "pPromise" use alwaysResolve(pPromise)
-			this._pReadyToParseNext = oMetadata.loaded();
-			this._pLoaded =  oMetadata.loaded();
+			this._pLoaded = oMetadata.loaded();
 			this._mCustomHeaders = {};
 			this._mAnnotations = {};
+			this._hasErrors = false;
+
+			function writeCache(aResults) {
+				// write annotations to cache if no errors occured
+				if (!that._hasErrors) {
+					CacheManager.set(that.sCacheKey, JSON.stringify(aResults));
+				}
+			}
 
 			if (!mOptions || !mOptions.skipMetadata) {
 				if (!mOptions) {
@@ -89,17 +79,48 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/odata/AnnotationParser', 'sap/
 					data: oMetadata.loaded().then(function(mParams) {
 						return {
 							xml: mParams["metadataString"],
-							lastModified: mParams["lastModified"]
+							lastModified: mParams["lastModified"],
+							eTag: mParams["eTag"]
 						};
 					})
 				});
 			}
-
 			if (mOptions) {
+				this.sCacheKey = mOptions.cacheKey;
 				this.setHeaders(mOptions.headers);
-				this.addSource(mOptions.source);
+				if (this.sCacheKey) {
+					//check cache
+					this._pLoaded = CacheManager.get(that.sCacheKey)
+						.then(function(sAnnotations){
+							var aResults;
+							if (sAnnotations) {
+								aResults = JSON.parse(sAnnotations);
+							}
+							//old cache entries are an object; invalidate the cache in this case
+							if (Array.isArray(aResults)) {
+								// restore return array structure
+								aResults.annotations = {};
+								aResults.forEach(function(oAnnotation) {
+									AnnotationParser.restoreAnnotationsAtArrays(oAnnotation.annotations);
+									AnnotationParser.merge(aResults.annotations, oAnnotation.annotations);
+								});
+								that._mAnnotations = aResults.annotations;
+								// only valid loading was cached - fire loaded event in this case
+								that._fireSomeLoaded(aResults);
+								that._fireLoaded(aResults);
+								return aResults;
+							} else {
+								return that.addSource(mOptions.source)
+									.then(function(aResults) {
+										writeCache(aResults);
+										return aResults;
+									});
+							}
+						});
+				} else {
+					this._pLoaded = this.addSource(mOptions.source);
+				}
 			}
-
 		},
 		metadata : {
 			publicMethods : [
@@ -124,26 +145,23 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/odata/AnnotationParser', 'sap/
 	};
 
 	/**
-	 * V1 API Compatibility method. @see sap.ui.model.odata.v2.ODataAnnotations#getData
-	 * Returns the parsed and merged annotation data object
+	 * Returns the parsed and merged annotation data object.
 	 *
 	 * @public
 	 * @returns {object} returns annotations data
-	 * @deprecated
+	 * @deprecated As of version 1.37.0, only kept for compatibility with V1 API, use {@link #getData} instead.
 	 */
 	ODataAnnotations.prototype.getAnnotationsData = function() {
 		return this._mAnnotations;
 	};
 
 	/**
-	 * Returns a map of the headers that are sent with every request to an annotation URL
-	 *
-	 * @returns {map} A map of all headers that are sent with requests to annotation source URLs
+	 * Returns a map of custom headers that are sent with every request to an annotation URL.
+	 * @public
+	 * @returns {map} A map of all custom headers.
 	 */
 	ODataAnnotations.prototype.getHeaders = function() {
-		return jQuery.extend({}, this._mCustomHeaders, {
-			"Accept-Language": sap.ui.getCore().getConfiguration().getLanguageTag() // Always overwrite
-		});
+		return jQuery.extend({}, this._mCustomHeaders);
 	};
 
 	/**
@@ -201,61 +219,65 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/odata/AnnotationParser', 'sap/
 	 */
 	ODataAnnotations.prototype.addSource = function(vSource) {
 		if (!vSource || Array.isArray(vSource) && vSource.length === 0) {
-			return this._pReadyToParseNext.then(function() { return []; });
+			//For compatibility
+			return this._oMetadata.loaded();
 		}
 
 		if (!Array.isArray(vSource)) {
 			vSource = [ vSource ];
 		}
 
-		// Make sure aSources contains source objects not simple URL strings
-		var aSources = vSource.map(function(vAnnotationSource) {
-			return (typeof vAnnotationSource === "string")
+		var that = this;
+
+		// Make sure aSources contains source objects not simple URL strings and create merge Promise array
+		var aMergePromises = vSource.map(function(vAnnotationSource) {
+			vAnnotationSource = (typeof vAnnotationSource === "string")
 				? { type: "url", data: vAnnotationSource }
 				: vAnnotationSource;
+
+			return that._loadSource(vAnnotationSource)
+				.then(that._parseSourceXML)
+				.then(that._parseSource.bind(that))
+				.catch(function(oError) {
+					return oError;
+				});
 		});
 
-		// Load all sources asynchronously
-		var aSourcesLoadedPromises = aSources.map(this._loadSource.bind(this));
-
-		// Chain promises to parse in the correct order
-		var aMergePromises = [];
-		var pContinue = this._pReadyToParseNext;
-		for (var i = 0; i < aSourcesLoadedPromises.length; ++i) {
-			var pSourceLoaded = aSourcesLoadedPromises[i];
-
-			// Load, parse and merge
-			pContinue =
-				pContinue
-				.then(chain.bind(pSourceLoaded))
-				.then(this._parseSourceXML.bind(this))
-				.then(this._parseSource.bind(this))
-				.then(this._mergeSource.bind(this));
-
-			// Fire success event after every successful merge
-			pContinue.then(this._fireSuccess.bind(this));
-			// Fire event in case of loading/parsing/merging error
-			pContinue.catch(this._fireError.bind(this));
-
-			aMergePromises.push(pContinue);
-
-			// Parse next annotation source after this one was either successfully merged or failed
-			pContinue = alwaysResolve(pContinue);
-		}
-
-		var pAllLoaded = this._promiseFinally(aMergePromises);
-		var pSomeLoaded = this._promiseFinally(aMergePromises, true);
-
-		// Fire "loaded"-event if all sources were (loaded,) parsed and merged successfully and "failed"-event if not
-		pAllLoaded.then(this._fireLoaded.bind(this), this._fireFailed.bind(this));
-
-		// Fire "someLoaded"- or "allFailed"- event after every group of sources that has been added
-		pSomeLoaded.then(this._fireSomeLoaded.bind(this), this._fireAllFailed.bind(this));
-
-		this._pLoaded = pSomeLoaded;
-		this._pReadyToParseNext = alwaysResolve(pAllLoaded);
-
-		return pAllLoaded;
+		//merge parsed annotations in correct order
+		return Promise.all(aMergePromises)
+			.then(function(aAnnotations) {
+				return aAnnotations.map(function(oAnnotation) {
+					try {
+						oAnnotation = that._mergeSource(oAnnotation);
+						that._fireSuccess(oAnnotation);
+					} catch (oError) {
+						that._fireError(oAnnotation);
+					}
+					return oAnnotation;
+				});
+			})
+			.then(function(aResults) {
+				// Add for Promise compatibility with v1 version:
+				aResults.annotations = that.getData();
+				var aErrors = aResults.filter(function(oResult) {
+					return oResult instanceof Error;
+				});
+				if (aErrors.length > 0) {
+					that._hasErrors = true;
+					if (aErrors.length !== aResults.length) {
+						that._fireSomeLoaded(aResults);
+						that._fireFailed(aResults);
+					} else {
+						that._fireFailed(aResults);
+						that._fireAllFailed(aResults);
+						return Promise.reject(aResults);
+					}
+				} else {
+					that._fireSomeLoaded(aResults);
+					that._fireLoaded(aResults);
+				}
+				return aResults;
+			});
 	};
 
 
@@ -583,6 +605,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/odata/AnnotationParser', 'sap/
 				mSource.type = "xml";
 				mSource.xml = oData.xml;
 				mSource.lastModified = oData.lastModified;
+				mSource.eTag = oData.eTag;
 				return this._loadSource(mSource);
 			}.bind(this));
 		} else if (mSource.type === "xml") {
@@ -594,10 +617,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/odata/AnnotationParser', 'sap/
 		} else if (mSource.type === "url") {
 			return this._loadUrl(mSource);
 		} else {
-			return Promise.reject({
-				error: new Error("Unknown source type: \"" + mSource.type + "\""),
-				source: mSource
-			});
+			var oError = new Error("Unknown source type: \"" + mSource.type + "\"");
+			oError.source = mSource;
+			return Promise.reject(oError);
 		}
 	};
 
@@ -610,13 +632,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/odata/AnnotationParser', 'sap/
 	 * @private
 	 */
 	ODataAnnotations.prototype._loadUrl = function(mSource) {
-		jQuery.sap.assert(mSource.type === "url", "Source type must be \"url\" in order to be loaded");
+		assert(mSource.type === "url", "Source type must be \"url\" in order to be loaded");
 
 		return new Promise(function(fnResolve, fnReject) {
 			var mAjaxOptions = {
 				url: mSource.data,
 				async: true,
-				headers: this.getHeaders(),
+				headers: this._getHeaders(),
 				beforeSend: function(oXHR) {
 					// Force text/plain so the XML parser does not run twice
 					oXHR.overrideMimeType("text/plain");
@@ -628,6 +650,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/odata/AnnotationParser', 'sap/
 
 				if (oXHR.getResponseHeader("Last-Modified")) {
 					mSource.lastModified = new Date(oXHR.getResponseHeader("Last-Modified"));
+				}
+
+				if (oXHR.getResponseHeader("eTag")) {
+					mSource.eTag = oXHR.getResponseHeader("eTag");
 				}
 
 				fnResolve(mSource);
@@ -652,7 +678,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/odata/AnnotationParser', 'sap/
 	 * @private
 	 */
 	ODataAnnotations.prototype._parseSourceXML = function(mSource) {
-		jQuery.sap.assert(typeof mSource.xml === "string", "Source must contain XML string in order to be parsed");
+		assert(typeof mSource.xml === "string", "Source must contain XML string in order to be parsed");
 
 		return new Promise(function(fnResolve, fnReject) {
 			var oXMLDocument;
@@ -714,11 +740,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/odata/AnnotationParser', 'sap/
 	 */
 	ODataAnnotations.prototype._parseSource = function(mSource) {
 		// On IE we have a special format for the XML documents on every other browser it must be a "Document" object.
-		jQuery.sap.assert(mSource.document instanceof window.Document || Device.browser.msie, "Source must contain a parsed XML document converted to an annotation object");
+		assert(mSource.document instanceof window.Document || Device.browser.msie, "Source must contain a parsed XML document converted to an annotation object");
 
-		mSource.annotations = AnnotationParser.parse(this._oMetadata, mSource.document);
-
-		return Promise.resolve(mSource);
+		return this._oMetadata.loaded()
+			.then(function() {
+				mSource.annotations
+					= AnnotationParser.parse(this._oMetadata, mSource.document, mSource.data);
+				//delete document as it is not needed anymore after parsing
+				delete mSource.document;
+				return mSource;
+			}.bind(this));
 	};
 
 	/**
@@ -730,55 +761,23 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/odata/AnnotationParser', 'sap/
 	 * @private
 	 */
 	ODataAnnotations.prototype._mergeSource = function(mSource) {
-		jQuery.sap.assert(typeof mSource.annotations === "object", "Source must contain an annotation object to be merged");
+		assert(typeof mSource.annotations === "object", "Source must contain an annotation object to be merged");
 
 		AnnotationParser.merge(this._mAnnotations, mSource.annotations);
 
-		return Promise.resolve(mSource);
+		return mSource;
 	};
 
 	/**
-	 * Returns a new <code>Promise</code> that resolves or rejects after all given promises have either resolved or rejected. This is
-	 * like Promise.all() but waits until all promises have finished and the reject gets all results
-	 * (mixed results and errors). In case the second argument is set to true, this does not behave like <code>Promise.all()</code>
-	 * but resolves if at least one of the given promises resolves.
-	 *
-	 * @param {Promise[]} aPromises The promises to be collected and made to resolve/rejected.
-	 * @param {boolean} bFailOnlyIfAllFail If set to true the resulting promise only rejects if all given promises
-	 *        rejects.
-	 * @returns {Promise} The collected Promise
+	 * Returns a map of the public and private headers headers that are sent with every request to an annotation URL.
+	 * @private
+	 * @returns {map} A map of all public and private headers.
 	 */
-	ODataAnnotations.prototype._promiseFinally = function(aPromises, bFailOnlyIfAllFail) {
-		return new Promise(function(fnResolve, fnReject) {
-			var bAllSucceeded = true;
-			var bAllFailed    = true;
-			var iPromises = aPromises.length;
-			var aResults = [];
-
-			var fnCheckDone = function() {
-				if (aResults.length === iPromises) {
-					// Add for Promise compatibility with v1 version:
-					aResults.annotations = this.getData();
-					if (bAllSucceeded || (bFailOnlyIfAllFail && !bAllFailed)) {
-						fnResolve(aResults);
-					} else {
-						fnReject(aResults);
-					}
-				}
-			}.bind(this);
-
-			function onRejectOrResolve(bCatch, oResult) {
-				bAllSucceeded = bCatch  ? false : bAllSucceeded;
-				bAllFailed    = !bCatch ? false : bAllFailed;
-				aResults.push(oResult);
-				fnCheckDone();
-			}
-
-			for (var i = 0; i < iPromises; ++i) {
-				aPromises[i].then(onRejectOrResolve.bind(this, false));
-				aPromises[i].catch(onRejectOrResolve.bind(this, true));
-			}
-		}.bind(this));
+	ODataAnnotations.prototype._getHeaders = function() {
+		//The 'sap-cancel-on-close' header marks the OData annotation request as cancelable. This helps to save resources at the back-end.
+		return jQuery.extend({"sap-cancel-on-close": true}, this.getHeaders(), {
+			"Accept-Language": sap.ui.getCore().getConfiguration().getLanguageTag() // Always overwrite
+		});
 	};
 
 	///////////////////////////////////////////////////// End Class ////////////////////////////////////////////////////

@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides default renderer for the sap.ui.ux3.ExactArea
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define(["sap/ui/commons/ToolbarRenderer", "sap/base/security/encodeXML"],
+	function(ToolbarRenderer, encodeXML) {
 	"use strict";
 
 
@@ -21,12 +21,10 @@ sap.ui.define(['jquery.sap.global'],
 	/**
 	 * Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
 	 *
-	 * @param {sap.ui.core.RenderManager} oRenderManager the RenderManager that can be used for writing to the Render-Output-Buffer
+	 * @param {sap.ui.core.RenderManager} rm the RenderManager that can be used for writing to the Render-Output-Buffer
 	 * @param {sap.ui.core.Control} oControl an object representation of the control that should be rendered
 	 */
-	ExactAreaRenderer.render = function(oRenderManager, oControl){
-		var rm = oRenderManager;
-
+	ExactAreaRenderer.render = function(rm, oControl){
 		rm.write("<div");
 		rm.writeControlData(oControl);
 		rm.addClass("sapUiUx3ExactArea");
@@ -39,9 +37,9 @@ sap.ui.define(['jquery.sap.global'],
 			for (var idx = 0; idx < aToolbarItems.length; idx++) {
 				var oToolbarItem = aToolbarItems[idx];
 				if (oToolbarItem instanceof sap.ui.commons.ToolbarSeparator) {
-					sap.ui.commons.ToolbarRenderer.renderSeparator(rm, oToolbarItem);
+					ToolbarRenderer.renderSeparator(rm, oToolbarItem);
 				} else if (oToolbarItem instanceof sap.ui.ux3.ExactAreaToolbarTitle) {
-					rm.write("<div class=\"sapUiUx3ExactAreaTbTitle\">" + jQuery.sap.encodeHTML(oToolbarItem.getText()) + "</div>");
+					rm.write("<div class=\"sapUiUx3ExactAreaTbTitle\">" + encodeXML(oToolbarItem.getText()) + "</div>");
 				} else {
 					rm.renderControl(oToolbarItem);
 				}

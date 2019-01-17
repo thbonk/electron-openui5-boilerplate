@@ -1,11 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global'],
-	function (jQuery) {
+sap.ui.define([
+	'sap/ui/thirdparty/jquery',
+	'sap/ui/Device',
+	"sap/base/security/encodeXML",
+	"sap/base/util/isPlainObject"
+],
+	function(jQuery, Device, encodeXML, isPlainObject) {
 		"use strict";
 
 		/**
@@ -24,14 +29,14 @@ sap.ui.define(['jquery.sap.global'],
 		 *
 		 * NOTE: This class is internal and all its functions must not be used by an application
 		 *
-		 * As <code>sap.m.Support</code> is a static class, a <code>jQuery.sap.require("sap.m.Support");</code>
+		 * As <code>sap.m.Support</code> is a static class, a <code>sap.ui.requireSync("sap/m/Support");</code>
 		 * statement must be implicitly executed before the class is used.
 		 *
 		 *
 		 * Enable Support:
 		 * --------------------------------------------------
 		 * //import library
-		 * jQuery.sap.require("sap.m.Support");
+		 * sap.ui.requireSync("sap/m/Support");
 		 *
 		 * //By default after require, support is enabled but implicitly we can call
 		 * sap.m.Support.on();
@@ -74,12 +79,12 @@ sap.ui.define(['jquery.sap.global'],
 
 			// copied from core
 			function line(buffer, right, border, label, content) {
-				buffer.push("<tr class='sapUiSelectable'><td class='sapUiSupportTechInfoBorder sapUiSelectable'><label class='sapUiSupportLabel sapUiSelectable'>", jQuery.sap.encodeHTML(label), "</label><br>");
+				buffer.push("<tr class='sapUiSelectable'><td class='sapUiSupportTechInfoBorder sapUiSelectable'><label class='sapUiSupportLabel sapUiSelectable'>", encodeXML(label), "</label><br>");
 				var ctnt = content;
-				if ($.isFunction(content)) {
+				if (jQuery.isFunction(content)) {
 					ctnt = content(buffer) || "";
 				}
-				buffer.push($.sap.encodeHTML(ctnt));
+				buffer.push(encodeXML(ctnt));
 				buffer.push("</td></tr>");
 			}
 
@@ -87,12 +92,12 @@ sap.ui.define(['jquery.sap.global'],
 			function multiline(buffer, right, border, label, content) {
 				line(buffer, right, border, label, function (buffer) {
 					buffer.push("<table class='sapMSupportTable' border='0' cellspacing='5' cellpadding='5' width='100%'><tbody>");
-					$.each(content, function (i, v) {
+					jQuery.each(content, function (i, v) {
 						var val = "";
 						if (v !== undefined && v !== null) {
-							if (typeof (v) == "string" || typeof (v) == "boolean" || ($.isArray(v) && v.length == 1)) {
+							if (typeof (v) == "string" || typeof (v) == "boolean" || (Array.isArray(v) && v.length == 1)) {
 								val = v;
-							} else if (($.isArray(v) || $.isPlainObject(v)) && window.JSON) {
+							} else if ((Array.isArray(v) || isPlainObject(v)) && window.JSON) {
 								val = window.JSON.stringify(v);
 							}
 						}
@@ -151,7 +156,7 @@ sap.ui.define(['jquery.sap.global'],
 
 				line(html, true, true, "Loaded Libraries", function (buffer) {
 					buffer.push("<ul class='sapUiSelectable'>");
-					$.each(oData.loadedlibs, function (i, v) {
+					jQuery.each(oData.loadedlibs, function (i, v) {
 						if (v && (typeof (v) === "string" || typeof (v) === "boolean")) {
 							buffer.push("<li class='sapUiSelectable'>", i + " " + v, "</li>");
 						}
@@ -180,7 +185,7 @@ sap.ui.define(['jquery.sap.global'],
 				var libsCount = 0, arDivContent = [];
 
 				libsCount = arContent.length;
-				$.each(arContent.sort(), function (i, module) {
+				jQuery.each(arContent.sort(), function (i, module) {
 					arDivContent.push(new sap.m.Label({text: " - " + module}).addStyleClass("sapUiSupportPnlLbl"));
 				});
 
@@ -240,19 +245,19 @@ sap.ui.define(['jquery.sap.global'],
 					return dialog;
 				}
 
-				$.sap.require("sap.m.Dialog");
-				$.sap.require("sap.m.Button");
-				$.sap.require("sap.ui.core.HTML");
-				$.sap.require("sap.m.MessageToast");
-				$.sap.require("sap.ui.core.support.trace.E2eTraceLib");
+				var Dialog = sap.ui.requireSync("sap/m/Dialog");
+				var Button = sap.ui.requireSync("sap/m/Button");
+				sap.ui.requireSync("sap/ui/core/HTML");
+				sap.ui.requireSync("sap/m/MessageToast");
+				sap.ui.requireSync("sap/ui/core/support/trace/E2eTraceLib");
 
-				dialog = new sap.m.Dialog({
+				dialog = new Dialog({
 					title: "Technical Information",
 					horizontalScrolling: true,
 					verticalScrolling: true,
-					stretch: jQuery.device.is.phone,
+					stretch: Device.system.phone,
 					buttons: [
-						new sap.m.Button({
+						new Button({
 							text: "Close",
 							press: function () {
 								dialog.close();
@@ -275,9 +280,9 @@ sap.ui.define(['jquery.sap.global'],
 				if (oEvent.touches) {
 					var currentTouches = oEvent.touches.length;
 
-					if (sap.ui.Device.browser.mobile &&
-						(sap.ui.Device.browser.name === sap.ui.Device.browser.BROWSER.INTERNET_EXPLORER ||
-						sap.ui.Device.browser.name === sap.ui.Device.browser.BROWSER.EDGE)) {
+					if (Device.browser.mobile &&
+						(Device.browser.name === Device.browser.BROWSER.INTERNET_EXPLORER ||// TODO remove after 1.62 version
+						Device.browser.name === Device.browser.BROWSER.EDGE)) {
 						windowsPhoneTouches = currentTouches;
 					}
 
@@ -306,9 +311,9 @@ sap.ui.define(['jquery.sap.global'],
 
 			//function is triggered when a touch is removed e.g. the user’s finger is removed from the touchscreen.
 			function onTouchEnd(oEvent) {
-				var windowsPhoneTouchCondition = sap.ui.Device.browser.mobile &&
-					(sap.ui.Device.browser.name === sap.ui.Device.browser.BROWSER.INTERNET_EXPLORER ||
-					sap.ui.Device.browser.name === sap.ui.Device.browser.BROWSER.EDGE) &&
+				var windowsPhoneTouchCondition = Device.browser.mobile &&
+					(Device.browser.name === Device.browser.BROWSER.INTERNET_EXPLORER ||// TODO remove after 1.62 version
+					Device.browser.name === Device.browser.BROWSER.EDGE) &&
 					windowsPhoneTouches == maxFingersAllowed;
 
 				document.removeEventListener('touchend', onTouchEnd);
@@ -390,5 +395,4 @@ sap.ui.define(['jquery.sap.global'],
 
 
 		return Support;
-
 	}, /* bExport= */ true);

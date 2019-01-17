@@ -1,13 +1,13 @@
 /*
  * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.P13nPanel.
 sap.ui.define([
-	'jquery.sap.global', './library', 'sap/ui/core/Control'
-], function(jQuery, library, Control) {
+	'./library', 'sap/ui/core/Control'
+], function(library, Control) {
 	"use strict";
 
 	/**
@@ -15,11 +15,12 @@ sap.ui.define([
 	 *
 	 * @param {string} [sId] ID for the new control, generated automatically if no ID is given
 	 * @param {object} [mSettings] initial settings for the new control
-	 * @class Base type for <code>panels</code> aggregation in <code>P13nDialog</code> control.
+	 * @class An abstract base type for <code>panels</code> aggregation in <code>P13nDialog</code> control.
 	 * @extends sap.ui.core.Control
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @constructor
 	 * @public
+	 * @abstract
 	 * @since 1.26.0
 	 * @alias sap.m.P13nPanel
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
@@ -27,6 +28,7 @@ sap.ui.define([
 	var P13nPanel = Control.extend("sap.m.P13nPanel", /** @lends sap.m.P13nPanel.prototype */
 	{
 		metadata: {
+			"abstract": true,
 			library: "sap.m",
 			properties: {
 				/**
@@ -130,7 +132,7 @@ sap.ui.define([
 	 *
 	 * @returns {object} Object which describes the state after Ok has been pressed
 	 * @deprecated As of version 1.50, replaced by the event of the respective inherited
-	 * control, for example {@link sap.m.P13nColumnsPanel.html#changeColumnsItems} of
+	 * control, for example {@link sap.m.P13nColumnsPanel#event:changeColumnsItems} of
 	 * <code>P13nColumnsPanel</code> control.
 	 * @public
 	 * @since 1.26.7
@@ -182,4 +184,4 @@ sap.ui.define([
 
 	return P13nPanel;
 
-}, /* bExport= */true);
+});

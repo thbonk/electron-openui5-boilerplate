@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-	"jquery.sap.global", "sap/ui/thirdparty/URI", "sap/ui/fl/Utils", "sap/ui/fl/LrepConnector", "sap/ui/fl/Cache", "sap/ui/fl/ChangePersistenceFactory"
+	"sap/ui/thirdparty/jquery", "sap/ui/thirdparty/URI", "sap/ui/fl/Utils", "sap/ui/fl/LrepConnector", "sap/ui/fl/Cache", "sap/ui/fl/ChangePersistenceFactory"
 ], function(jQuery, uri, FlexUtils, LrepConnector, Cache, ChangePersistenceFactory) {
 	"use strict";
 	var oLrepConnector = Object.create(LrepConnector.prototype);
@@ -22,10 +22,11 @@ sap.ui.define([
 	 * @alias sap.ui.fl.FakeLrepConnector
 	 * @experimental Since 1.27.0
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 */
 	function FakeLrepConnector(sInitialComponentJsonPath){
 		this.sInitialComponentJsonPath = sInitialComponentJsonPath;
+		this.mSettings = {};
 	}
 
 	for (var prop in oLrepConnector){
@@ -39,6 +40,42 @@ sap.ui.define([
 			/*eslint-enable noinspection, no-loop-func */
 		}
 	}
+
+	/**
+	 * Replaces the original {@link sap.ui.fl.LrepConnector.prototype.loadSettings} method.
+	 * This method returns a Promise with a settings map which can be set by {@link sap.ui.fl.FakeLrepConnector.prototype.setSettings} method
+	 * and also sets the flex service availability status to true.
+	 *
+	 * @returns {Promise} Returns a Promise with a settings map
+	 * @public
+	 */
+	FakeLrepConnector.prototype.loadSettings  = function(){
+		this.setFlexServiceAvailability(true);
+		return Promise.resolve(this.mSettings);
+	};
+
+	/**
+	 * Sets the settings map which can be retrieved by {@link sap.ui.fl.FakeLrepConnector.prototype.loadSettings} method.
+	 *
+	 * @param {map} mSettings Contains flexibility settings values
+	 * @param {boolean} [mSettings.isKeyUser] Indicates that current user is a Key User
+	 * @param {boolean} [mSettings.isAtoAvailable] Indicates that ATO is available or not
+	 * @param {boolean} [mSettings.isProductiveSystem] Indicates whether the running system is productive or not
+	 * @param {boolean} [mSettings.isVariantSharingEnabled] Indicates whether smart variant sharing is enable or not
+	 */
+	FakeLrepConnector.prototype.setSettings  = function(mSettings){
+		this.mSettings = mSettings;
+	};
+
+	/**
+	 * Sets the availability status of flexibility service.
+	 * This method allows testing application behavior when flexibility service is not available.
+	 *
+	 * @param {boolean} [bAvailability] - Availability status
+	 */
+	FakeLrepConnector.prototype.setFlexServiceAvailability  = function(bAvailability){
+		LrepConnector._bServiceAvailability = bAvailability;
+	};
 
 	FakeLrepConnector.prototype.loadChanges = function(sComponentClassName){
 		var initialComponentJsonPath = this.sInitialComponentJsonPath;
@@ -101,8 +138,33 @@ sap.ui.define([
 		return new Promise(function(resolve, reject){
 			handleGetTransports(sUri, sMethod, oData, mOptions, resolve, reject);
 			handleMakeChangesTransportable(sUri, sMethod, oData, mOptions, resolve, reject);
+			handleManifirstSupport(sUri, sMethod, oData, mOptions, resolve, reject);
+			handleResetChanges(sUri, sMethod, oData, mOptions, resolve, reject);
 		});
 	};
+
+	function handleResetChanges(sUri, sMethod, oData, mOptions, resolve) {
+		if (sUri.match(/^\/sap\/bc\/lrep\/changes\//) && sMethod === 'DELETE') {
+			var aUriParameters = [];
+			var regExp = /\?reference=([\w.]+)\&.+\&layer=(\w+)\&generator=([\w.]+)/;
+			aUriParameters = sUri.match(regExp);
+			resolve({
+				response: {
+					"parameters": aUriParameters
+				},
+				status: "success"
+			});
+		}
+	}
+
+	function handleManifirstSupport(sUri, sMethod, oData, mOptions, resolve) {
+		if (sUri.match(/^\/sap\/bc\/ui2\/app_index\/ui5_app_mani_first_supported\//) && sMethod === 'GET') {
+			resolve({
+				response: false,
+				status: "success"
+			});
+		}
+	}
 
 	function handleMakeChangesTransportable(sUri, sMethod, oData, mOptions, resolve){
 		if (sUri.match(/^\/sap\/bc\/lrep\/actions\/make_changes_transportable\//) && sMethod === 'POST'){

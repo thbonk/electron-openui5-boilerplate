@@ -1,12 +1,19 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides the XML model implementation of a list binding
-sap.ui.define(['jquery.sap.global', 'sap/ui/model/ChangeReason', 'sap/ui/model/ClientListBinding'],
-	function(jQuery, ChangeReason, ClientListBinding) {
+sap.ui.define([
+	'sap/ui/model/ChangeReason',
+	'sap/ui/model/ClientListBinding',
+	"sap/ui/util/XMLHelper",
+	"sap/base/util/array/diff",
+	"sap/base/util/deepEqual",
+	"sap/ui/thirdparty/jquery"
+],
+	function(ChangeReason, ClientListBinding, XMLHelper, diff, deepEqual, jQuery) {
 	"use strict";
 
 
@@ -57,7 +64,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ChangeReason', 'sap/ui/model/C
 
 			//Check diff
 			if (this.aLastContexts && iStartIndex < this.iLastEndIndex) {
-				aContexts.diff = jQuery.sap.arraySymbolDiff(this.aLastContextData, aContextData);
+				aContexts.diff = diff(this.aLastContextData, aContextData);
 			}
 
 			this.iLastEndIndex = iStartIndex + iLength;
@@ -83,7 +90,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ChangeReason', 'sap/ui/model/C
 	 * @private
 	 */
 	XMLListBinding.prototype.getEntryData = function(oContext) {
-		return jQuery.sap.serializeXML(oContext.getObject());
+		return XMLHelper.serialize(oContext.getObject());
 	};
 
 	/**
@@ -127,8 +134,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ChangeReason', 'sap/ui/model/C
 		}
 
 		if (!this.bUseExtendedChangeDetection) {
-			var oList = this.oModel._getObject(this.sPath, this.oContext);
-			if (!this.oList || !oList || oList.length != this.oList.length || bForceupdate) {
+			var oList = this.oModel._getObject(this.sPath, this.oContext) || [];
+			if (oList.length != this.oList.length || bForceupdate) {
 				// TODO does not work currently, so so old behavior
 				//if (!jQuery.sap.equal(this.oList, oList)) {
 				this.update();
@@ -139,11 +146,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ChangeReason', 'sap/ui/model/C
 			var that = this;
 
 			//If the list has changed we need to update the indices first
-			var oList = this.oModel._getObject(this.sPath, this.oContext);
-			if (oList && this.oList.length != oList.length) {
+			var oList = this.oModel._getObject(this.sPath, this.oContext) || [];
+			if (this.oList.length != oList.length) {
 				bChangeDetected = true;
 			}
-			if (!jQuery.sap.equal(this.oList, oList)) {
+			if (!deepEqual(this.oList, oList)) {
 				this.update();
 			}
 

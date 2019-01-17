@@ -1,12 +1,32 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.core.Icon.
-sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './InvisibleText', './library'],
-	function(jQuery, Device, Control, IconPool, InvisibleText, library) {
+sap.ui.define([
+	'sap/base/assert',
+	'../Device',
+	'./Control',
+	'./IconPool',
+	'./InvisibleText',
+	'./library',
+	"./IconRenderer",
+	"sap/ui/events/KeyCodes",
+	"sap/ui/thirdparty/jquery"
+],
+	function(
+		assert,
+		Device,
+		Control,
+		IconPool,
+		InvisibleText,
+		library,
+		IconRenderer,
+		KeyCodes,
+		jQuery
+	) {
 	"use strict";
 
 	// shortcut
@@ -26,9 +46,8 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './I
 	 * @implements sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
-	 * @constructor
 	 * @public
 	 * @since 1.11.1
 	 * @alias sap.ui.core.Icon
@@ -38,6 +57,7 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './I
 
 		interfaces : ["sap.ui.core.IFormContent"],
 		library : "sap.ui.core",
+		designtime: "sap/ui/core/designtime/Icon.designtime",
 		properties : {
 
 			/**
@@ -52,16 +72,22 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './I
 
 			/**
 			 * The color of the Icon. If color is not defined here, the Icon inherits the color from its DOM parent.
+			 *
+			 * The property can be set with {@link sap.ui.core.CSSColor CSS Color} or {@link sap.ui.core.IconColor Semantic Icon Color}.
 			 */
 			color : {type : "string", group : "Appearance", defaultValue : null},
 
 			/**
 			 * This color is shown when icon is hovered. This property has no visual effect when run on mobile device.
+			 *
+			 * The property can be set with {@link sap.ui.core.CSSColor CSS Color} or {@link sap.ui.core.IconColor Semantic Icon Color}.
 			 */
 			hoverColor : {type : "string", group : "Appearance", defaultValue : null},
 
 			/**
 			 * This color is shown when icon is pressed/activated by the user.
+			 *
+			 * The property can be set with {@link sap.ui.core.CSSColor CSS Color} or {@link sap.ui.core.IconColor Semantic Icon Color}.
 			 */
 			activeColor : {type : "string", group : "Appearance", defaultValue : null},
 
@@ -77,16 +103,22 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './I
 
 			/**
 			 * Background color of the Icon in normal state.
+			 *
+			 * The property can be set with {@link sap.ui.core.CSSColor CSS Color} or {@link sap.ui.core.IconColor Semantic Icon Color}.
 			 */
 			backgroundColor : {type : "string", group : "Appearance", defaultValue : null},
 
 			/**
 			 * Background color for Icon in hover state. This property has no visual effect when run on mobile device.
+			 *
+			 * The property can be set with {@link sap.ui.core.CSSColor CSS Color} or {@link sap.ui.core.IconColor Semantic Icon Color}.
 			 */
 			hoverBackgroundColor : {type : "string", group : "Appearance", defaultValue : null},
 
 			/**
 			 * Background color for Icon in active state.
+			 *
+			 * The property can be set with {@link sap.ui.core.CSSColor CSS Color} or {@link sap.ui.core.IconColor Semantic Icon Color}.
 			 */
 			activeBackgroundColor : {type : "string", group : "Appearance", defaultValue : null},
 
@@ -189,7 +221,7 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './I
 		if (!oEvent.targetTouches || (oEvent.targetTouches && oEvent.targetTouches.length === 0)) {
 
 			this.$().removeClass("sapUiIconActive");
-			this._restoreColors();
+			this._restoreColors(Device.system.desktop ? "hover" : undefined);
 		}
 	};
 
@@ -247,7 +279,7 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './I
 	 */
 	Icon.prototype.onkeydown = function(oEvent) {
 
-		if (oEvent.which === jQuery.sap.KeyCodes.SPACE || oEvent.which === jQuery.sap.KeyCodes.ENTER) {
+		if (oEvent.which === KeyCodes.SPACE || oEvent.which === KeyCodes.ENTER) {
 
 			// note: prevent document scrolling
 			oEvent.preventDefault();
@@ -276,7 +308,7 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './I
 	 */
 	Icon.prototype.onkeyup = function(oEvent) {
 
-		if (oEvent.which === jQuery.sap.KeyCodes.SPACE || oEvent.which === jQuery.sap.KeyCodes.ENTER) {
+		if (oEvent.which === KeyCodes.SPACE || oEvent.which === KeyCodes.ENTER) {
 
 			this.$().removeClass("sapUiIconActive");
 			this._restoreColors();
@@ -288,9 +320,20 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './I
 	/* Private methods                                             */
 	/* =========================================================== */
 
-	Icon.prototype._restoreColors = function() {
-		this._addColorClass(this.getColor() || "", "color");
-		this._addColorClass(this.getBackgroundColor() || "", "background-color");
+	Icon.prototype._restoreColors = function(sMode) {
+		var sColor, sBackgroundColor;
+
+		if (sMode === "hover") {
+			sColor = this.getHoverColor();
+			sBackgroundColor = this.getHoverBackgroundColor();
+		}
+
+		// always fallback to the normal color if no hover color exists
+		sColor = sColor || this.getColor();
+		sBackgroundColor = sBackgroundColor || this.getBackgroundColor();
+
+		this._addColorClass(sColor || "", "color");
+		this._addColorClass(sBackgroundColor || "", "background-color");
 	};
 
 	/* =========================================================== */
@@ -298,25 +341,31 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './I
 	/* =========================================================== */
 
 	Icon.prototype.setSrc = function(sSrc) {
-		var oIconInfo = IconPool.getIconInfo(sSrc),
+		assert(sSrc == null || IconPool.isIconURI(sSrc), this + ": Property 'src' (value: '" + sSrc + "') should be a valid Icon URI (sap-icon://...)");
+
+		var vIconInfo = IconPool.getIconInfo(sSrc, undefined, "mixed"),
 			$Icon = this.$(),
 			sIconLabel, sTooltip, bUseIconTooltip, aLabelledBy, oInvisibleText;
 
-		// when the given sSrc can't be found in IconPool, rerender the icon is needed.
-		this.setProperty("src", sSrc, !!oIconInfo);
+		// when the given sSrc can't be found in IconPool
+		// rerender the icon is needed.
+		this.setProperty("src", sSrc, !!vIconInfo);
 
-		if (oIconInfo && $Icon.length) {
-			$Icon.css("font-family", oIconInfo.fontFamily);
-			$Icon.attr("data-sap-ui-icon-content", oIconInfo.content);
-			$Icon.toggleClass("sapUiIconMirrorInRTL", !oIconInfo.suppressMirroring);
+		if (vIconInfo instanceof Promise) {
+			// trigger a rerendering once the icon info is available
+			vIconInfo.then(this.invalidate.bind(this));
+		} else if (vIconInfo && $Icon.length) {
+			$Icon.css("font-family", vIconInfo.fontFamily);
+			$Icon.attr("data-sap-ui-icon-content", vIconInfo.content);
+			$Icon.toggleClass("sapUiIconMirrorInRTL", !vIconInfo.suppressMirroring);
 
 			sTooltip = this.getTooltip_AsString();
 			aLabelledBy = this.getAriaLabelledBy();
 			bUseIconTooltip = this.getUseIconTooltip();
-			sIconLabel = this._getIconLabel();
+			sIconLabel = this._getIconLabel(vIconInfo);
 
-			if (sTooltip || (bUseIconTooltip && oIconInfo.text)) {
-				$Icon.attr("title", sTooltip || oIconInfo.text);
+			if (sTooltip || (bUseIconTooltip && vIconInfo.text)) {
+				$Icon.attr("title", sTooltip || vIconInfo.text);
 			} else {
 				$Icon.attr("title", null);
 			}
@@ -333,6 +382,7 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './I
 					oInvisibleText.setText(sIconLabel);
 				}
 			}
+
 		}
 
 		return this;
@@ -454,13 +504,12 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './I
 
 	/**
 	 * Returns the string which is set to the 'title' attribute of the DOM output
-	 *
+	 * @param {object} oIconInfo icon metadata
 	 * @return {string|undefined} the string which is output as title attribute
 	 * @private
 	 */
-	Icon.prototype._getOutputTitle = function() {
-		var oIconInfo = IconPool.getIconInfo(this.getSrc()),
-			sTooltip = this.getTooltip_AsString(),
+	Icon.prototype._getOutputTitle = function(oIconInfo) {
+		var sTooltip = this.getTooltip_AsString(),
 			bUseIconTooltip = this.getUseIconTooltip();
 
 		if (sTooltip || (bUseIconTooltip && oIconInfo && oIconInfo.text)) {
@@ -478,16 +527,16 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './I
 	 * which is set to the 'title' attribute of the DOM, this method returns undefined in
 	 * order not to set the aria-label or aria-labelledby attribute.
 	 *
+	 * @param {object} oIconInfo icon metadata
 	 * @return {string} the label when it's necessary to be output
 	 * @private
 	 */
-	Icon.prototype._getIconLabel = function() {
-		var oIconInfo = IconPool.getIconInfo(this.getSrc()),
-			sAlt = this.getAlt(),
+	Icon.prototype._getIconLabel = function(oIconInfo) {
+		var sAlt = this.getAlt(),
 			sTooltip = this.getTooltip_AsString(),
 			bUseIconTooltip = this.getUseIconTooltip(),
 			sLabel = sAlt || sTooltip || (bUseIconTooltip && oIconInfo && (oIconInfo.text || oIconInfo.name)),
-			sOutputTitle = this._getOutputTitle();
+			sOutputTitle = this._getOutputTitle(oIconInfo);
 
 		if (sLabel && sLabel !== sOutputTitle) {
 			return sLabel;
@@ -498,10 +547,10 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './I
 		var oInvisibleText = this.getAggregation("_invisibleText");
 
 		if (!oInvisibleText) {
+			// create control without rerendering
 			oInvisibleText = new InvisibleText(this.getId() + "-label", {
 				text: sText
 			});
-
 			this.setAggregation("_invisibleText", oInvisibleText, true);
 		} else {
 			// avoid triggering invalidation during rendering
@@ -511,10 +560,10 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './I
 		return oInvisibleText;
 	};
 
-	Icon.prototype._getAccessibilityAttributes = function() {
+	Icon.prototype._getAccessibilityAttributes = function(oIconInfo) {
 		var aLabelledBy = this.getAriaLabelledBy(),
 			mAccAttributes = {},
-			sIconLabel = this._getIconLabel(),
+			sIconLabel = this._getIconLabel(oIconInfo),
 			oInvisibleText;
 
 		if (this.getDecorative()) {
@@ -551,7 +600,7 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './I
 		}
 
 		var bHasPressListeners = this.hasListeners("press");
-		var oIconInfo = IconPool.getIconInfo(this.getSrc());
+		var oIconInfo = IconPool.getIconInfo(this.getSrc(), undefined, "sync");
 
 		return {
 			role: bHasPressListeners ? "button" : "img",

@@ -1,29 +1,28 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides (optional) base class for all renderers
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/library'],
-	function(jQuery, sapUiCore) {
+sap.ui.define(["sap/ui/thirdparty/jquery", 'sap/base/util/ObjectPath', "sap/base/assert"],
+	function(jQuery, ObjectPath, assert) {
 	"use strict";
-
-	// create shortcuts for enums from sap.ui.core
-	var TextAlign = sapUiCore.TextAlign,
-		TextDirection = sapUiCore.TextDirection;
 
 	/**
 	 * @classdesc Base Class for a Renderer.
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @namespace
 	 * @public
 	 * @alias sap.ui.core.Renderer
 	 */
 	var Renderer = {
 	};
+
+	// shortcut for lazy required Core library
+	var sapUiCore;
 
 	/**
 	 * Helper to create an extend function for the given renderer class.
@@ -34,8 +33,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library'],
 	function createExtendFunction(oBaseRenderer) {
 
 		return function(sName, oRendererInfo) {
-			jQuery.sap.assert(typeof sName === 'string' && sName, 'Renderer.extend must be called with a non-empty name for the new renderer');
-			jQuery.sap.assert(oRendererInfo == null || typeof oRendererInfo === 'object', 'oRendererInfo must be an object or can be omitted');
+			assert(typeof sName === 'string' && sName, 'Renderer.extend must be called with a non-empty name for the new renderer');
+			assert(oRendererInfo == null || typeof oRendererInfo === 'object', 'oRendererInfo must be an object or can be omitted');
 
 			var oChildRenderer = Object.create(oBaseRenderer);
 			oChildRenderer.extend = createExtendFunction(oChildRenderer);
@@ -44,7 +43,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library'],
 			}
 
 			// expose the renderer globally
-			jQuery.sap.setObject(sName, oChildRenderer);
+			ObjectPath.set(sName, oChildRenderer);
 
 			return oChildRenderer;
 		};
@@ -179,6 +178,15 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library'],
 	 * @protected
 	 */
 	Renderer.getTextAlign = function(oTextAlign, oTextDirection) {
+		// lazy require sap.ui.core library
+		if (!sapUiCore) {
+			sapUiCore = sap.ui.requireSync("sap/ui/core/library");
+		}
+
+		// create shortcuts for enums from sap.ui.core library
+		var TextAlign = sapUiCore.TextAlign;
+		var TextDirection = sapUiCore.TextDirection;
+
 		var sTextAlign = "",
 			bRTL = sap.ui.getCore().getConfiguration().getRTL();
 

@@ -1,16 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 /**
  * Initialization Code and shared classes of library sap.ui.ux3.
  */
-sap.ui.define(['jquery.sap.global',
+sap.ui.define([
 	'sap/ui/core/library', // library dependency
 	'sap/ui/commons/library'], // library dependency
-	function(jQuery) {
+	function() {
 
 	"use strict";
 
@@ -20,14 +20,15 @@ sap.ui.define(['jquery.sap.global',
 	 * @namespace
 	 * @name sap.ui.ux3
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @public
+	 * @deprecated Since 1.38
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.ux3",
-		version: "1.50.6",
+		version: "1.61.2",
 		dependencies : ["sap.ui.core","sap.ui.commons"],
 		types: [
 			"sap.ui.ux3.ActionBarSocialActions",
@@ -88,6 +89,7 @@ sap.ui.define(['jquery.sap.global',
 	 * @experimental Since version 1.2.
 	 * API is not yet finished and might change completely
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated Since 1.38
 	 */
 	sap.ui.ux3.ActionBarSocialActions = {
 
@@ -132,6 +134,7 @@ sap.ui.define(['jquery.sap.global',
 	 * @interface
 	 * @public
 	 * @ui5-metamodel This interface also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated Since 1.38
 	 */
 
 
@@ -143,6 +146,7 @@ sap.ui.define(['jquery.sap.global',
 	 * @public
 	 * @since 1.7.1
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated Since 1.38
 	 */
 	sap.ui.ux3.ExactOrder = {
 
@@ -169,6 +173,7 @@ sap.ui.define(['jquery.sap.global',
 	 * @experimental Since version 1.2.
 	 * The whole Feed/Feeder API is still under discussion, significant changes are likely. Especially text presentation (e.g. @-references and formatted text) is not final. Also the Feed model topic is still open.
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated Since 1.38
 	 */
 	sap.ui.ux3.FeederType = {
 
@@ -199,6 +204,7 @@ sap.ui.define(['jquery.sap.global',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated Since 1.38
 	 */
 	sap.ui.ux3.FollowActionState = {
 
@@ -230,6 +236,7 @@ sap.ui.define(['jquery.sap.global',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated Since 1.38
 	 */
 	sap.ui.ux3.NotificationBarStatus = {
 
@@ -268,6 +275,7 @@ sap.ui.define(['jquery.sap.global',
 	 * @public
 	 * @since 1.12.0
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated Since 1.38
 	 */
 	sap.ui.ux3.ShellDesignType = {
 
@@ -306,6 +314,7 @@ sap.ui.define(['jquery.sap.global',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated Since 1.38
 	 */
 	sap.ui.ux3.ShellHeaderType = {
 
@@ -344,6 +353,7 @@ sap.ui.define(['jquery.sap.global',
 	 * @public
 	 * @since 1.16.3
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated Since 1.38
 	 */
 	sap.ui.ux3.ThingViewerHeaderType = {
 
@@ -368,6 +378,7 @@ sap.ui.define(['jquery.sap.global',
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @deprecated Since 1.38
 	 */
 	sap.ui.ux3.VisibleItemCountMode = {
 

@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -16,7 +16,7 @@ sap.ui.define(function() {
 	 * should be thrown in cases, where the exception can, and should, be handled
 	 * within the framework, instead of causing the application to exit.
 	 *
-	 * The try/catch statement in JavaScript can not catch specific exceptions, so
+	 * The try/catch statement in JavaScript cannot catch specific exceptions, so
 	 * when catching internal exceptions you should make sure to rethrow other errors:
 	 *
 	 * try {
@@ -31,6 +31,7 @@ sap.ui.define(function() {
 	 *     }
 	 * }
 	 *
+	 * @param {string} message Message explaining what went wrong
 	 * @alias sap.ui.base.Exception
 	 */
 	var Exception = function(message) {

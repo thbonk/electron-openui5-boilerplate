@@ -1,12 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides helper sap.ui.table.TableUtils.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter', 'sap/ui/Device', './library'],
-	function(jQuery, Element, Sorter, Device, library) {
+sap.ui.define([
+	'sap/ui/core/Element',
+	'sap/ui/model/Sorter',
+	'sap/ui/Device',
+	'./library',
+	"sap/ui/thirdparty/jquery"
+],
+	function(Element, Sorter, Device, library, jQuery) {
 	"use strict";
 
 	/**
@@ -15,9 +21,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter'
 	 * Note: Do not access the function of this helper directly but via <code>sap.ui.table.TableUtils.Grouping...</code>
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @namespace
-	 * @name sap.ui.table.TableGrouping
+	 * @alias sap.ui.table.TableGrouping
 	 * @private
 	 */
 	var TableGrouping = {
@@ -80,10 +86,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter'
 		 * @private
 		 */
 		getModeCssClass : function(oTable) {
-			if (oTable._mode) {
-				return "sapUiTable" + oTable._mode + "Mode";
+			switch (oTable._mode) {
+				case "Group":
+					return "sapUiTableGroupMode";
+				case "Tree":
+					return "sapUiTableTreeMode";
+				default:
+					return null;
 			}
-			return null;
 		},
 
 		/*
@@ -100,7 +110,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter'
 				return oTable._bShowGroupMenuButton;
 			}
 
-			if (!Device.system.desktop && TableGrouping.TableUtils.isInstanceOf(oTable, "sap/ui/table/AnalyticalTable")) {
+			if (!Device.system.desktop && oTable.isA("sap.ui.table.AnalyticalTable")) {
 				oTable._bShowGroupMenuButton = true;
 			} else {
 				oTable._bShowGroupMenuButton = false;
@@ -114,45 +124,85 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter'
 		 */
 
 		/**
-		 * Toggles the expand / collapse state of the group for the given index.
-		 * @param {sap.ui.table.Table} oTable Instance of the table
-		 * @param {number} iRowIndex the row index which should be toggled.
-		 * @param {boolean} [bExpand] If defined instead of toggling the desired state is set.
-		 * @return {boolean|null} the new expand state in case an action was performed, <code>null</code> otherwise.
+		 * Toggles or sets the expanded state of a single or multiple rows. Toggling only works for a single row.
+		 *
+		 * @param {sap.ui.table.Table} oTable Instance of the table.
+		 * @param {int|int[]} vRowIndex A single index, or an array of indices of the rows to expand or collapse.
+		 * @param {boolean} [bExpand] If defined, instead of toggling the desired state is set.
+		 * @returns {boolean|null} The new expanded state in case an action was performed, otherwise <code>null</code>.
 		 * @private
 		 */
-		toggleGroupHeader : function(oTable, iRowIndex, bExpand) {
-			var oBinding = oTable.getBinding("rows");
+		toggleGroupHeader : function(oTable, vRowIndex, bExpand) {
+			var aIndices = [];
+			var oBinding = oTable ? oTable.getBinding("rows") : null;
 
-			if (oBinding) {
-				var bIsExpanded = oBinding.isExpanded(iRowIndex);
-				var bIsLeaf = true; // If the node state can not be determined, we assume it is a leaf.
+			if (!oTable || !oBinding || !oBinding.expand || vRowIndex == null) {
+				return null;
+			}
 
-				if (oBinding.nodeHasChildren != null) {
-					if (oBinding.getNodeByIndex != null) {
-						bIsLeaf = !oBinding.nodeHasChildren(oBinding.getNodeByIndex(iRowIndex));
+			if (typeof vRowIndex === "number") {
+				aIndices = [vRowIndex];
+			} else if (Array.isArray(vRowIndex)) {
+				if (bExpand == null && vRowIndex.length > 1) {
+					// Toggling the expanded state of multiple rows seems to be an absurd task. Therefore we assume this is unintentional and
+					// prevent the execution.
+					return null;
+				}
+				aIndices = vRowIndex;
+			}
+
+			// The cached binding length cannot be used here. In the synchronous execution after re-binding the rows, the cached binding length is
+			// invalid. The table will validate it in its next update cycle, which happens asynchronously.
+			// As of now, this is the required behavior for some features, but leads to failure here. Therefore, the length is requested from the
+			// binding directly.
+			var iTotalRowCount = oTable._getTotalRowCount(true);
+
+			var aValidSortedIndices = aIndices.filter(function(iIndex) {
+				// Only indices of existing, expandable/collapsible nodes must be considered. Otherwise there might be no change event on the final
+				// expand/collapse.
+				var bIsExpanded = oBinding.isExpanded(iIndex);
+				var bIsLeaf = true; // If the node state cannot be determined, we assume it is a leaf.
+
+				if (oBinding.nodeHasChildren) {
+					if (oBinding.getNodeByIndex) {
+						bIsLeaf = !oBinding.nodeHasChildren(oBinding.getNodeByIndex(iIndex));
 					} else {
 						// The sap.ui.model.TreeBindingCompatibilityAdapter has no #getNodeByIndex function and #nodeHasChildren always returns true.
 						bIsLeaf = false;
 					}
 				}
 
-				if (bIsLeaf) {
-					return null; // a leaf can't be expanded or collapsed
-				} else if (bExpand === true && !bIsExpanded) { // Force expand
-					oBinding.expand(iRowIndex);
-				} else if (bExpand === false && bIsExpanded) { // Force collapse
-					oBinding.collapse(iRowIndex);
-				} else if (bExpand !== true && bExpand !== false) { // Toggle state
-					oBinding.toggleIndex(iRowIndex);
-				} else {
-					return null;
-				}
+				return iIndex >= 0 && iIndex < iTotalRowCount
+					   && !bIsLeaf
+					   && bExpand !== bIsExpanded;
+			}).sort();
 
-				return !bIsExpanded;
+			if (aValidSortedIndices.length === 0) {
+				return null;
 			}
 
-			return null;
+			// Operations need to be performed from the highest index to the lowest. This ensures correct results with OData bindings. The indices
+			// are sorted ascending, so the array is iterated backwards.
+
+			// Expand/Collapse all nodes except the first, and suppress the change event.
+			for (var i = aValidSortedIndices.length - 1; i > 0; i--) {
+				if (bExpand) {
+					oBinding.expand(aValidSortedIndices[i], true);
+				} else {
+					oBinding.collapse(aValidSortedIndices[i], true);
+				}
+			}
+
+			// Expand/Collapse the first node without suppressing the change event.
+			if (bExpand === true) {
+				oBinding.expand(aValidSortedIndices[0], false);
+			} else if (bExpand === false) {
+				oBinding.collapse(aValidSortedIndices[0], false);
+			} else {
+				oBinding.toggleIndex(aValidSortedIndices[0]);
+			}
+
+			return oBinding.isExpanded(aValidSortedIndices[0]);
 		},
 
 		/**
@@ -160,7 +210,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter'
 		 * @param {sap.ui.table.Table} oTable Instance of the table
 		 * @param {Object} oRef DOM reference of an element within the table group header
 		 * @param {boolean} [bExpand] If defined instead of toggling the desired state is set.
-		 * @return {boolean} <code>true</code> when the operation was performed, <code>false</code> otherwise.
+		 * @returns {boolean} <code>true</code> when the operation was performed, <code>false</code> otherwise.
 		 * @private
 		 */
 		toggleGroupHeaderByRef : function(oTable, oRef, bExpand) {
@@ -178,7 +228,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter'
 				var iGroupHeaderRowIndex = $GroupRef.data("sap-ui-rowindex");
 				var oRow = oTable.getRows()[iGroupHeaderRowIndex];
 
-				if (oRow != null) {
+				if (oRow) {
 					var iAbsoluteRowIndex = oRow.getIndex();
 					var bIsExpanded = TableGrouping.toggleGroupHeader(oTable, iAbsoluteRowIndex, bExpand);
 					var bChanged = bIsExpanded === true || bIsExpanded === false;
@@ -197,7 +247,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter'
 		/**
 		 * Returns whether the given cell is located in a group header.
 		 * @param {Object} oCellRef DOM reference of table cell
-		 * @return {boolean}
+		 * @returns {boolean}
 		 * @private
 		 */
 		isInGroupingRow : function(oCellRef) {
@@ -228,7 +278,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter'
 		/**
 		 * Returns whether the given cell is located in an analytical summary row.
 		 * @param {Object} oCellRef DOM reference of table cell
-		 * @return {boolean}
+		 * @returns {boolean}
 		 * @private
 		 */
 		isInSumRow : function(oCellRef) {
@@ -252,19 +302,20 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter'
 		 * @param {sap.ui.table.Table} oTable Instance of the table
 		 * @param {number} iLevel the hierarchy level
 		 * @param {boolean} bChildren whether the row is a group (has children) or not
+		 * @param {boolean} bSum whether the row is a summary row
 		 * @private
 		 */
-		_calcGroupIndent : function(oTable, iLevel, bChildren) {
-			if (TableGrouping.TableUtils.isInstanceOf(oTable, "sap/ui/table/TreeTable")) {
+		_calcGroupIndent : function(oTable, iLevel, bChildren, bSum) {
+			if (oTable.isA("sap.ui.table.TreeTable")) {
 				var iIndent = 0;
 				for (var i = 0; i < iLevel; i++) {
 					iIndent = iIndent + (i < 2 ? 12 : 8);
 				}
 				return iIndent;
-			} else if (TableGrouping.TableUtils.isInstanceOf(oTable, "sap/ui/table/AnalyticalTable")) {
+			} else if (oTable.isA("sap.ui.table.AnalyticalTable")) {
 				var iIndent = 0;
 				iLevel = iLevel - 1;
-				iLevel = !bChildren ? iLevel - 1 : iLevel;
+				iLevel = !bChildren && !bSum ? iLevel - 1 : iLevel;
 				iLevel = Math.max(iLevel, 0);
 				for (var i = 0; i < iLevel; i++) {
 					if (iIndent == 0) {
@@ -317,7 +368,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter'
 		 * @param {boolean} bChildren whether the row is a group (has children) or not
 		 * @param {boolean} bExpanded whether the row should be expanded
 		 * @param {boolean} bExpanded whether the row content should be hidden
-		 * @param {boolean} bChildren whether the row should be a summary row
+		 * @param {boolean} bSum whether the row should be a summary row
 		 * @param {number} iLevel the hierarchy level
 		 * @param {string} sGroupHeaderText the title of the group header
 		 * @private
@@ -342,13 +393,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter'
 					.toggleClass("sapUiTableGroupHeader", bChildren)
 					.toggleClass("sapUiTableRowHidden", bChildren && bHidden || oRow._bHidden);
 
-				jQuery.sap.byId(oRow.getId() + "-groupHeader")
+				jQuery(document.getElementById(oRow.getId() + "-groupHeader"))
 					.toggleClass("sapUiTableGroupIconOpen", bChildren && bExpanded)
 					.toggleClass("sapUiTableGroupIconClosed", bChildren && !bExpanded)
 					.attr("title", oTable._getShowStandardTooltips() && sGroupHeaderText ? sGroupHeaderText : null)
 					.text(sGroupHeaderText || "");
 
-				TableGrouping._setIndent(oTable, $Row, $RowHdr, TableGrouping._calcGroupIndent(oTable, iLevel, bChildren));
+				TableGrouping._setIndent(oTable, $Row, $RowHdr, TableGrouping._calcGroupIndent(oTable, iLevel, bChildren, bSum));
 			}
 
 			var $TreeIcon = null;
@@ -362,17 +413,17 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter'
 
 			if (TableGrouping.showGroupMenuButton(oTable)) {
 				// Update the GroupMenuButton
-				var iScrollBarOffset = 0;
+				var iScrollbarOffset = 0;
 				var $Table = oTable.$();
 				if ($Table.hasClass("sapUiTableVScr")) {
-					iScrollBarOffset += $Table.find('.sapUiTableVSb').width();
+					iScrollbarOffset += $Table.find('.sapUiTableVSb').width();
 				}
 				var $GroupHeaderMenuButton = $RowHdr.find(".sapUiTableGroupMenuButton");
 
 				if (oTable._bRtlMode) {
-					$GroupHeaderMenuButton.css("right", ($Table.width() - $GroupHeaderMenuButton.width() + $RowHdr.position().left - iScrollBarOffset - 5) + "px");
+					$GroupHeaderMenuButton.css("right", ($Table.width() - $GroupHeaderMenuButton.width() + $RowHdr.position().left - iScrollbarOffset - 5) + "px");
 				} else {
-					$GroupHeaderMenuButton.css("left", ($Table.width() - $GroupHeaderMenuButton.width() - $RowHdr.position().left - iScrollBarOffset - 5) + "px");
+					$GroupHeaderMenuButton.css("left", ($Table.width() - $GroupHeaderMenuButton.width() - $RowHdr.position().left - iScrollbarOffset - 5) + "px");
 				}
 			}
 
@@ -445,7 +496,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter'
 		 * @param {sap.ui.table.Row} oRow Instance of the row
 		 * @param {object} oRowBinding the binding object of the rows aggregation
 		 * @param {object} oRowBindingInfo the binding info object of the rows aggregation
-		 * @return {object} the group information for the given row
+		 * @returns {object} the group information for the given row
 		 * @private
 		 */
 		_getRowGroupInfo: function(oTable, oRow, oRowBinding, oRowBindingInfo) {
@@ -516,8 +567,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter'
 
 			// check for grouping being supported or not (only for client ListBindings!!)
 			var oGroupBy = sap.ui.getCore().byId(oTable.getGroupBy());
-			var bIsSupported = oGroupBy && oGroupBy.getGrouped() &&
-				oBinding && TableGrouping.TableUtils.isInstanceOf(oBinding, "sap/ui/model/ClientListBinding");
+			var bIsSupported = oGroupBy && oGroupBy.getGrouped() && TableGrouping.TableUtils.isA(oBinding, "sap.ui.model.ClientListBinding");
 
 			// only enhance the binding if it has not been done yet and supported!
 			if (!bIsSupported || oBinding._modified) {
@@ -536,7 +586,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter'
 			oBinding.sort(new Sorter(sPropertyName));
 
 			// fetch the contexts from the original binding
-			var iLength = oBinding.getLength(),
+			var iLength = oTable._getTotalRowCount(),
 				aContexts = oBinding.getContexts(0, iLength);
 
 			// add the context information for the group headers which are later on
@@ -623,7 +673,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Sorter'
 
 				// For compatibility with TreeBinding adapters.
 				nodeHasChildren: function(oContext) {
-					if (oContext == null || oContext.__groupInfo == null) {
+					if (!oContext || !oContext.__groupInfo) {
 						return false;
 					} else {
 						return oContext.__groupInfo.groupHeader === true;

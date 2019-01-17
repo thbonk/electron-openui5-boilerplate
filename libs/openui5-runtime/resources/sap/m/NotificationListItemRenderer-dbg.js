@@ -1,11 +1,14 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define([], function () {
+sap.ui.define(["sap/ui/core/library"], function(coreLibrary) {
     'use strict';
+
+    // shortcut for sap.ui.core.Priority
+    var Priority = coreLibrary.Priority;
 
     /**
      * NotificationListItem renderer.
@@ -88,13 +91,13 @@ sap.ui.define([], function () {
         var classPriority = '';
 
         switch (oControl.getPriority()) {
-            case (sap.ui.core.Priority.Low):
+            case (Priority.Low):
                 classPriority = 'sapMNLB-Low';
                 break;
-            case (sap.ui.core.Priority.Medium):
+            case (Priority.Medium):
                 classPriority = 'sapMNLB-Medium';
                 break;
-            case (sap.ui.core.Priority.High):
+            case (Priority.High):
                 classPriority = 'sapMNLB-High';
                 break;
             default:
@@ -110,15 +113,15 @@ sap.ui.define([], function () {
         oRm.write('</div>');
     };
 
-	/**
-	 * Renders the MessageStrip of the notification if such exists.
-	 *
-	 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer
-	 * @param {sap.ui.core.Control} oControl An object representation of the control that should be rendered
-	 */
-	NotificationListItemRenderer.renderMessageStrip = function (oRm, oControl) {
-		oRm.renderControl(oControl.getProcessingMessage());
-	};
+    /**
+     * Renders the MessageStrip of the notification if such exists.
+     *
+     * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer
+     * @param {sap.ui.core.Control} oControl An object representation of the control that should be rendered
+     */
+    NotificationListItemRenderer.renderMessageStrip = function (oRm, oControl) {
+        oRm.renderControl(oControl.getProcessingMessage());
+    };
 
     /**
      * Renders the picture of the author of the Notification.
@@ -359,5 +362,4 @@ sap.ui.define([], function () {
     }
 
     return NotificationListItemRenderer;
-
 }, /* bExport= */ true);

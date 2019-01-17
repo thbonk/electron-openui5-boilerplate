@@ -1,12 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides the base implementation for all model implementations
-sap.ui.define(['jquery.sap.global', 'sap/ui/model/SimpleType', 'sap/ui/model/FormatException', 'sap/ui/model/ParseException', 'sap/ui/model/ValidateException'],
-	function(jQuery, SimpleType, FormatException, ParseException, ValidateException) {
+sap.ui.define([
+	'sap/ui/model/SimpleType',
+	'sap/ui/model/FormatException',
+	'sap/ui/model/ParseException',
+	'sap/ui/model/ValidateException',
+	"sap/ui/thirdparty/jquery"
+],
+	function(SimpleType, FormatException, ParseException, ValidateException, jQuery) {
 	"use strict";
 
 
@@ -19,9 +25,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/SimpleType', 'sap/ui/model/For
 	 * @extends sap.ui.model.SimpleType
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
-	 * @constructor
 	 * @public
 	 * @param {object} [oFormatOptions] formatting options. String doesn't support any formatting options
 	 * @param {object} [oConstraints] value constraints. All given constraints must be fulfilled by a value to be valid
@@ -57,7 +62,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/SimpleType', 'sap/ui/model/For
 			case "any":
 				return sValue;
 			case "int":
-				var iResult = parseInt(sValue, 10);
+				var iResult = parseInt(sValue);
 				if (isNaN(iResult)) {
 					throw new FormatException(sValue + " is not a valid int value");
 				}
@@ -114,25 +119,25 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/SimpleType', 'sap/ui/model/For
 						}
 						break;
 					case "startsWith":  // expects string
-						if (!jQuery.sap.startsWith(sValue,oContent)) {
+						if (!(typeof oContent == "string" && oContent.length > 0 && sValue.startsWith(oContent))) {
 							aViolatedConstraints.push("startsWith");
 							aMessages.push(oBundle.getText("String.StartsWith", [oContent]));
 						}
 						break;
 					case "startsWithIgnoreCase":  // expects string
-						if (!jQuery.sap.startsWithIgnoreCase(sValue,oContent)) {
+						if (!((typeof oContent == "string" && oContent != "" ? sValue.toLowerCase().startsWith(oContent.toLowerCase()) : false))) {
 							aViolatedConstraints.push("startsWithIgnoreCase");
 							aMessages.push(oBundle.getText("String.StartsWith", [oContent]));
 						}
 						break;
 					case "endsWith":  // expects string
-						if (!jQuery.sap.endsWith(sValue,oContent)) {
+						if (!(typeof oContent == "string" && oContent.length > 0 && sValue.endsWith(oContent))) {
 							aViolatedConstraints.push("endsWith");
 							aMessages.push(oBundle.getText("String.EndsWith", [oContent]));
 						}
 						break;
 					case "endsWithIgnoreCase": // expects string
-						if (!jQuery.sap.endsWithIgnoreCase(sValue,oContent)) {
+						if (!((typeof oContent == "string" && oContent != "" ? sValue.toLowerCase().endsWith(oContent.toLowerCase()) : false))) {
 							aViolatedConstraints.push("endsWithIgnoreCase");
 							aMessages.push(oBundle.getText("String.EndsWith", [oContent]));
 						}
@@ -158,7 +163,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/SimpleType', 'sap/ui/model/For
 				}
 			});
 			if (aViolatedConstraints.length > 0) {
-				throw new ValidateException(aMessages.join(" "), aViolatedConstraints);
+				throw new ValidateException(this.combineMessages(aMessages), aViolatedConstraints);
 			}
 		}
 	};

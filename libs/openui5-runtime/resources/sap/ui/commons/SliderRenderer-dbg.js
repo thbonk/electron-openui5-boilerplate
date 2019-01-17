@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides default renderer for control sap.ui.commons.Slider
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define([],
+	function() {
 	"use strict";
 
 
@@ -18,15 +18,12 @@ sap.ui.define(['jquery.sap.global'],
 	};
 
 	/**
-	 * Renders the HTML for the given control, using the provided {@link sap.ui.fw.RenderManager}.
+	 * Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
 	 *
-	 * @param {sap.ui.fw.RenderManager} oRenderManager The RenderManager that can be used for writing to the render output buffer.
+	 * @param {sap.ui.core.RenderManager} rm The RenderManager that can be used for writing to the render output buffer.
 	 * @param {sap.ui.commons.Slider} oSlider An object representation of the control that should be rendered.
 	 */
-	SliderRenderer.render = function(oRenderManager, oSlider){
-		// Convenience variable
-		var rm = oRenderManager;
-
+	SliderRenderer.render = function(rm, oSlider){
 		// Write the HTML into the render manager
 		rm.write('<DIV');
 		rm.writeControlData(oSlider);
@@ -135,9 +132,9 @@ sap.ui.define(['jquery.sap.global'],
 	};
 
 	/**
-	 * Renders the Grip for the slider control, using the provided {@link sap.ui.fw.RenderManager}.
+	 * Renders the Grip for the slider control, using the provided {@link sap.ui.core.RenderManager}.
 	 *
-	 * @param {sap.ui.fw.RenderManager} rm The RenderManager that can be used for writing to the render output buffer.
+	 * @param {sap.ui.core.RenderManager} rm The RenderManager that can be used for writing to the render output buffer.
 	 * @param {sap.ui.commons.Slider} oSlider An object representation of the control that should be rendered.
 	 */
 	SliderRenderer.renderGrip = function(rm, oSlider){
@@ -177,9 +174,9 @@ sap.ui.define(['jquery.sap.global'],
 	};
 
 	/**
-	 * Adds extra code to the control (i.e. in subclasses), using the provided {@link sap.ui.fw.RenderManager}.
+	 * Adds extra code to the control (i.e. in subclasses), using the provided {@link sap.ui.core.RenderManager}.
 	 *
-	 * @param {sap.ui.fw.RenderManager} rm The RenderManager that can be used for writing to the render output buffer.
+	 * @param {sap.ui.core.RenderManager} rm The RenderManager that can be used for writing to the render output buffer.
 	 * @param {sap.ui.commons.Slider} oSlider An object representation of the control that should be rendered.
 	 */
 	SliderRenderer.controlAdditionalCode = function(rm, oSlider){

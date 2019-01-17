@@ -1,12 +1,26 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides client-based DataBinding implementation
-sap.ui.define(['jquery.sap.global', './ClientContextBinding', './ClientListBinding', './ClientPropertyBinding', './ClientTreeBinding', './Model'],
-	function(jQuery, ClientContextBinding, ClientListBinding, ClientPropertyBinding, ClientTreeBinding, Model) {
+sap.ui.define([
+	'./ClientContextBinding',
+	'./ClientListBinding',
+	'./ClientPropertyBinding',
+	'./ClientTreeBinding',
+	'./Model',
+	"sap/ui/thirdparty/jquery"
+],
+	function(
+		ClientContextBinding,
+		ClientListBinding,
+		ClientPropertyBinding,
+		ClientTreeBinding,
+		Model,
+		jQuery
+	) {
 	"use strict";
 
 
@@ -18,10 +32,9 @@ sap.ui.define(['jquery.sap.global', './ClientContextBinding', './ClientListBindi
 	 * @extends sap.ui.model.Model
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
-	 * @param {object} oData URL where to load the data from
-	 * @constructor
+	 * @param {string} [oData] URL where to load the data from
 	 * @public
 	 * @alias sap.ui.model.ClientModel
 	 */
@@ -97,9 +110,11 @@ sap.ui.define(['jquery.sap.global', './ClientContextBinding', './ClientListBindi
 		function wrapHandler(fn) {
 			return function() {
 				// request finished, remove request handle from pending request array
-				var iIndex = jQuery.inArray(oRequestHandle, that.aPendingRequestHandles);
-				if (iIndex > -1) {
-					that.aPendingRequestHandles.splice(iIndex, 1);
+				if (that.aPendingRequestHandles){
+					var iIndex = that.aPendingRequestHandles.indexOf(oRequestHandle);
+					if (iIndex > -1) {
+						that.aPendingRequestHandles.splice(iIndex, 1);
+					}
 				}
 
 				// call original handler method

@@ -1,13 +1,39 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.ux3.Feeder.
-sap.ui.define(['jquery.sap.global', 'sap/ui/commons/Button', 'sap/ui/core/Control', 'sap/ui/core/theming/Parameters', './library'],
-	function(jQuery, Button, Control, Parameters, library) {
+sap.ui.define([
+    'sap/ui/thirdparty/jquery',
+    'sap/ui/commons/Button',
+    'sap/ui/core/Control',
+    'sap/ui/core/theming/Parameters',
+    './library',
+    './FeederRenderer',
+    'sap/ui/commons/library',
+    'sap/ui/Device'
+],
+	function(
+	    jQuery,
+		Button,
+		Control,
+		Parameters,
+		library,
+		FeederRenderer,
+		commonsLibrary,
+		Device
+	) {
 	"use strict";
+
+
+
+	// shortcut for sap.ui.commons.ButtonStyle
+	var ButtonStyle = commonsLibrary.ButtonStyle;
+
+	// shortcut for sap.ui.ux3.FeederType
+	var FeederType = library.FeederType;
 
 
 
@@ -23,7 +49,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/Button', 'sap/ui/core/Contro
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -52,7 +78,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/Button', 'sap/ui/core/Contro
 			/**
 			 * Type and size of the Feeder
 			 */
-			type : {type : "sap.ui.ux3.FeederType", group : "Appearance", defaultValue : sap.ui.ux3.FeederType.Large},
+			type : {type : "sap.ui.ux3.FeederType", group : "Appearance", defaultValue : FeederType.Large},
 
 			/**
 			 * This property could be used for costum placeholder. If it is not set, the default text is used.
@@ -84,7 +110,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/Button', 'sap/ui/core/Contro
 	Feeder.prototype.init = function(){
 		this.rb = sap.ui.getCore().getLibraryResourceBundle("sap.ui.ux3");
 		this.oSendButton = new Button( this.getId() + "-send", {
-				style: sap.ui.commons.ButtonStyle.Emph,
+				style: ButtonStyle.Emph,
 				icon: "sap-icon://feeder-arrow"
 			}).setParent(this);
 		this.oSendButton.attachEvent('press', this.handleSendButtonPress, this); // attach event this way to have the right this-reference in handler
@@ -168,7 +194,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/Button', 'sap/ui/core/Contro
 		var sText = this.oInput.text();
 		if (sText == "") {
 			this.oInput.empty(); // to remove invisible line breaks and so on
-			this.oInput.append(sap.ui.ux3.FeederRenderer.getEmptyTextInfo(this));
+			this.oInput.append(FeederRenderer.getEmptyTextInfo(this));
 		}
 
 		this.setProperty("text", sText, true); // no rerendering!
@@ -231,7 +257,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/Button', 'sap/ui/core/Contro
 				if (node.nodeType === 3 || node.nodeType === 4) {
 
 					// ignore non-breakable space in IE
-					if (!((!!sap.ui.Device.browser.internet_explorer || !!sap.ui.Device.browser.edge) && node.nodeValue === '\xA0')) {
+					if (!((Device.browser.msie || Device.browser.edge) && node.nodeValue === '\xA0')) {
 						sText += node.nodeValue.replace(/\n/g, ''); // filter out line breaks in text-nodes
 					}
 				}
@@ -239,24 +265,24 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/Button', 'sap/ui/core/Contro
 				// check for "linebreaking"-nodes
 				if (node.nodeName === 'DIV' ||
 						node.nodeName ===  'P' ||
-						(node.nodeName === 'BR' && !sap.ui.Device.browser.webkit)) { // ignore BR in webkit
+						(node.nodeName === 'BR' && !Device.browser.webkit)) { // ignore BR in webkit
 
 					// ignore last <br> with type="_moz" in mozilla
 					if (node.nodeName === 'BR' &&
-						!!sap.ui.Device.browser.firefox &&
+						Device.browser.firefox &&
 						i === nodes.length - 1 &&
 						jQuery(node).attr("type") === "_moz") {
 						continue;
 					}
 
 					// do not add a newline if no text was found until now (IE)
-					if (!((!!sap.ui.Device.browser.internet_explorer || !!sap.ui.Device.browser.edge) && sText === '') &&
+					if (!((Device.browser.msie || Device.browser.edge) && sText === '') &&
 
 						// same as above but only for <P> and webkit/mozilla
-						!((!!sap.ui.Device.browser.firefox || !!sap.ui.Device.browser.webkit) && sText === '' && node.nodeName ===  'P') &&
+						!((Device.browser.firefox || Device.browser.webkit) && sText === '' && node.nodeName ===  'P') &&
 
 						// ignore <P>'s containing linebreaks only (\n)
-						!(!!sap.ui.Device.browser.webkit && node.nodeName ===  'P' && node.textContent.match(/^(\n)*$/))) {
+						!(Device.browser.webkit && node.nodeName ===  'P' && node.textContent.match(/^(\n)*$/))) {
 
 						sText += '\n';
 					}
@@ -297,8 +323,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/Button', 'sap/ui/core/Contro
 	Feeder.prototype.onpaste = function(oEvent){
 
 		// call after paste function delayed to have content already pasted (in the moment only needed in FireFox)
-		if (!!sap.ui.Device.browser.firefox) {
-			jQuery.sap.delayedCall(10, this, "onAfterPaste");
+		if (Device.browser.firefox) {
+			setTimeout(this.onAfterPaste.bind(this), 10);
 		}
 
 	};
@@ -320,4 +346,4 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/Button', 'sap/ui/core/Contro
 
 	return Feeder;
 
-}, /* bExport= */ true);
+});

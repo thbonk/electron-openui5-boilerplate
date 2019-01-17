@@ -1,13 +1,36 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.layout.Splitter.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
-	function(jQuery, Control, library) {
+sap.ui.define([
+	'sap/ui/core/Control',
+	'./library',
+	'sap/ui/core/library',
+	'sap/ui/core/ResizeHandler',
+	'sap/ui/core/RenderManager',
+	'./SplitterRenderer',
+	"sap/base/Log",
+	"sap/ui/thirdparty/jquery"
+],
+	function(
+		Control,
+		library,
+		coreLibrary,
+		ResizeHandler,
+		RenderManager,
+		SplitterRenderer,
+		Log,
+		jQuery
+	) {
 	"use strict";
+
+	// shortcut for sap.ui.core.Orientation
+	var Orientation = coreLibrary.Orientation;
+
+	var iRemAsPixels = 16;
 
 	/**
 	 * Constructor for a new Splitter.
@@ -29,7 +52,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -45,7 +68,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 			/**
 			 * Whether to split the contents horizontally (default) or vertically.
 			 */
-			orientation : {type : "sap.ui.core.Orientation", group : "Behavior", defaultValue : sap.ui.core.Orientation.Horizontal},
+			orientation : {type : "sap.ui.core.Orientation", group : "Behavior", defaultValue : Orientation.Horizontal},
 
 			/**
 			 * The width of the control
@@ -89,7 +112,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 					newSizes : {type : "int[]"}
 				}
 			}
-		}
+		},
+		designtime: "sap/ui/layout/designtime/Splitter.designtime"
 	}});
 
 	// "Hidden" resource bundle instance
@@ -139,16 +163,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 		};
 		this._enableKeyboardListeners();
 
-		// Flag tracking the preserved state of this control. In case the control is preserved, no resizing attempts should be made.
-		this._isPreserved = false;
-		sap.ui.getCore().getEventBus().subscribe("sap.ui","__preserveContent", this._preserveHandler, this);
-
 		// Use Icon for separators
 		this._bUseIconForSeparator = true;
 	};
 
 	Splitter.prototype.exit = function() {
-		sap.ui.getCore().getEventBus().unsubscribe("sap.ui","__preserveContent", this._preserveHandler, this);
 		this.disableAutoResize();
 		delete this._resizeCallback;
 
@@ -184,7 +203,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	 *
 	 * @returns {Number[]} Array of px values that correspond to the content area sizes
 	 * @protected
-	 * @deprecated This method is declared as protected in order to assess the need for this feature. It is declared as deprecated because the API might change in case the need for this is high enough to make it part of the official Splitter interface
+	 * @deprecated As of version 1.21. This method is declared as protected in order to assess the need for this feature. It is declared as deprecated because the API might change in case the need for this is high enough to make it part of the official Splitter interface
 	 */
 	Splitter.prototype.getCalculatedSizes = function() {
 		return this._calculatedSizes;
@@ -198,7 +217,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	 *
 	 * @param {boolean} [bTemporarily=false] Only enables autoResize if it was previously disabled temporarily (used for live resize)
 	 * @protected
-	 * @deprecated This method is declared as protected in order to assess the need for this feature. It is declared as deprecated because the API might change in case the need for this is high enough to make it part of the official Splitter interface
+	 * @deprecated As of version 1.21. This method is declared as protected in order to assess the need for this feature. It is declared as deprecated because the API might change in case the need for this is high enough to make it part of the official Splitter interface
 	 */
 	Splitter.prototype.enableAutoResize = function(bTemporarily) {
 		// Do not enable autoResize if it was deactivated temporarily and wasn't enabled before
@@ -210,7 +229,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 
 		var that = this;
 		sap.ui.getCore().attachInit(function() {
-			that._resizeHandlerId = sap.ui.core.ResizeHandler.register(that, that._resizeCallback);
+			that._resizeHandlerId = ResizeHandler.register(that, that._resizeCallback);
 		});
 
 		this._delayedResize();
@@ -224,10 +243,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	 *
 	 * @param {boolean} [bTemporarily=false] Only disable autoResize temporarily (used for live resize), so that the previous status can be restored afterwards
 	 * @protected
-	 * @deprecated This method is declared as protected in order to assess the need for this feature. It is declared as deprecated because the API might change in case the need for this is high enough to make it part of the official Splitter interface
+	 * @deprecated As of version 1.21. This method is declared as protected in order to assess the need for this feature. It is declared as deprecated because the API might change in case the need for this is high enough to make it part of the official Splitter interface
 	 */
 	Splitter.prototype.disableAutoResize = function(bTemporarily) {
-		sap.ui.core.ResizeHandler.deregister(this._resizeHandlerId);
+		ResizeHandler.deregister(this._resizeHandlerId);
 
 		if (!bTemporarily) {
 			this._autoResize = false;
@@ -239,7 +258,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	 * This means that the contents are resized several times per second when moving the splitter bar.
 	 *
 	 * @protected
-	 * @deprecated This method is declared as protected in order to assess the need for this feature. It is declared as deprecated because the API might change in case the need for this is high enough to make it part of the official Splitter interface
+	 * @deprecated As of version 1.21. This method is declared as protected in order to assess the need for this feature. It is declared as deprecated because the API might change in case the need for this is high enough to make it part of the official Splitter interface
 	 */
 	Splitter.prototype.enableLiveResize = function() {
 		this._liveResize = true;
@@ -251,7 +270,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	 * This means that the contents are resized only once after moving the splitter bar.
 	 *
 	 * @protected
-	 * @deprecated This method is declared as protected in order to assess the need for this feature. It is declared as deprecated because the API might change in case the need for this is high enough to make it part of the official Splitter interface
+	 * @deprecated As of version 1.21. This method is declared as protected in order to assess the need for this feature. It is declared as deprecated because the API might change in case the need for this is high enough to make it part of the official Splitter interface
 	 */
 	Splitter.prototype.disableLiveResize = function() {
 		this._liveResize = false;
@@ -301,9 +320,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 		this._$SplitterOverlay = this.$("overlay");
 		this._$SplitterOverlayBar = this.$("overlayBar");
 		this._$SplitterOverlay.detach();
-
-		// Upon new rendering, the DOM cannot be preserved any more
-		this._isPreserved = false;
 
 		// Calculate and apply correct sizes to the Splitter contents
 		this._resize();
@@ -381,7 +397,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 		this.disableAutoResize(/* temporarily: */ true);
 
 		var iPos = oJEv[this._moveCord];
-		var iBar = parseInt(oJEv.target.id.substr((sId + "-splitbar-").length), 10);
+		var iBar = parseInt(oJEv.target.id.substr((sId + "-splitbar-").length));
 		var $Bar = jQuery(oJEv.target);
 		var mCalcSizes = this.getCalculatedSizes();
 		var iBarSize = this._bHorizontal ?  $Bar.innerWidth() : $Bar.innerHeight();
@@ -414,9 +430,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 			bar : jQuery(oJEv.target),
 			// The content sizes for fast resize bound calculation
 			c1Size : mCalcSizes[iBar],
-			c1MinSize : oLd1 ? parseInt(oLd1.getMinSize(), 10) : 0,
+			c1MinSize : oLd1 ? parseInt(oLd1.getMinSize()) : 0,
 			c2Size : mCalcSizes[iBar + 1],
-			c2MinSize : oLd2 ? parseInt(oLd2.getMinSize(), 10) : 0
+			c2MinSize : oLd2 ? parseInt(oLd2.getMinSize()) : 0
 		};
 
 		// Event handlers use bound handler methods - see init()
@@ -450,7 +466,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 		var iDelta = (iPos - this._move.start);
 		//We should only switch direction of change in case it is left or right.
 		//Otherwise the vertical splitter is moved opposite to the mouse movement
-		if (this.getOrientation() == sap.ui.core.Orientation.Horizontal && this._bRtl) {
+		if (this.getOrientation() == Orientation.Horizontal && this._bRtl) {
 			iDelta = -iDelta;
 		}
 
@@ -459,7 +475,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 
 
 		var bInBounds = (
-			    c1NewSize >= 0
+				c1NewSize >= 0
 			 && c2NewSize >= 0
 			 && c1NewSize >= this._move.c1MinSize
 			 && c2NewSize >= this._move.c2MinSize
@@ -474,7 +490,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 
 				//We should only switch direction of change in case it is left or right.
 				//Otherwise the vertical splitter is moved opposite to the mouse movement
-				if (this.getOrientation() == sap.ui.core.Orientation.Horizontal && this._bRtl) {
+				if (this.getOrientation() == Orientation.Horizontal && this._bRtl) {
 					fMove = -fMove;
 				}
 
@@ -511,7 +527,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 
 		//We should only switch direction of change in case it is left or right.
 		//Otherwise the vertical splitter is moved opposite to the mouse movement
-		if (this.getOrientation() == sap.ui.core.Orientation.Horizontal && this._bRtl) {
+		if (this.getOrientation() == Orientation.Horizontal && this._bRtl) {
 			fMove = -fMove;
 		}
 
@@ -535,8 +551,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 
 		// Enable auto resize after bar move if it was enabled before
 		this.enableAutoResize(/* temporarily: */ true);
-
-		jQuery.sap.focus(this._move.bar);
+		if (this._move.bar){
+			this._move.bar.focus();
+		}
 	};
 
 	/**
@@ -549,7 +566,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	 */
 	Splitter.prototype._resizeContents = function(iLeftContent, iPixels, bFinal) {
 		if (isNaN(iPixels)) {
-			jQuery.sap.log.warning("Splitter: Received invalid resizing values - resize aborted.");
+			Log.warning("Splitter: Received invalid resizing values - resize aborted.");
 			return;
 		}
 
@@ -565,8 +582,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 
 		var iNewSize1 = this._move.c1Size + iPixels;
 		var iNewSize2 = this._move.c2Size - iPixels;
-		var iMinSize1 = parseInt(oLd1.getMinSize(), 10);
-		var iMinSize2 = parseInt(oLd2.getMinSize(), 10);
+		var iMinSize1 = parseInt(oLd1.getMinSize());
+		var iMinSize2 = parseInt(oLd2.getMinSize());
 
 		// Adhere to size constraints
 		var iDiff;
@@ -604,15 +621,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 
 	////////////////////////////////////////// Private Methods /////////////////////////////////////////
 
-	Splitter.prototype._preserveHandler = function(sChannelId, sEventId, oData) {
-		var oDom = this.getDomRef();
-		if (oDom && jQuery.contains(oData.domNode, oDom)) {
-			// Our HTML has been preserved...
-			this._isPreserved = true;
-		}
-	};
-
-
 	/**
 	 * Resizes as soon as the current stack is done. Can be used in cases where several resize-relevant
 	 * actions are done in a loop to make sure only one resize calculation is done at the end.
@@ -627,8 +635,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 
 		// If we are not rendered, we do not need to resize since resizing is done after rendering
 		if (this.getDomRef()) {
-			jQuery.sap.clearDelayedCall(this._resizeTimeout);
-			jQuery.sap.delayedCall(iDelay, this, "_resize", []);
+			clearTimeout(this._resizeTimeout);
+			setTimeout(this["_resize"].bind(this), iDelay);
 		}
 	};
 
@@ -666,7 +674,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	 * @private
 	 */
 	Splitter.prototype._resize = function() {
-		if (this._isPreserved) {
+		var oDomRef = this.getDomRef();
+		if (!oDomRef || RenderManager.getPreserveAreaRef().contains(oDomRef)) {
 			// Do not attempt to resize the content areas in case we are in the preserved area
 			return;
 		}
@@ -768,7 +777,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 				: this.$("splitbar-" + i).innerHeight();
 		}
 
-		return iFullSize - iSplitBarsWidth;
+		return Math.max(0, iFullSize - iSplitBarsWidth);
 	};
 
 	/**
@@ -807,22 +816,26 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 			sSize = aSizes[i];
 			var iSize;
 
-			if (sSize.indexOf("px") > -1) {
+			if (sSize.indexOf("rem") > -1) {
+				iSize = parseFloat(sSize) * iRemAsPixels;
+				iRest -= iSize;
+				this._calculatedSizes[i] = iSize;
+			} else if (sSize.indexOf("px") > -1) {
 				// Pixel based Value - deduct it from available size
-				iSize = parseInt(sSize, 10);
+				iSize = parseInt(sSize);
 				iRest -= iSize;
 				this._calculatedSizes[i] = iSize;
 			} else if (sSize.indexOf("%") > -1) {
 				aPercentsizeIdx.push(i);
 			} else if (aSizes[i] == "auto") {
 				oLayoutData = aContentAreas[i].getLayoutData();
-				if (oLayoutData && parseInt(oLayoutData.getMinSize(), 10) != 0) {
+				if (oLayoutData && parseInt(oLayoutData.getMinSize()) != 0) {
 					aAutoMinsizeIdx.push(i);
 				} else {
 					aAutosizeIdx.push(i);
 				}
 			} else {
-				jQuery.sap.log.error("Illegal size value: " + aSizes[i]);
+				Log.error("Illegal size value: " + aSizes[i]);
 			}
 		}
 
@@ -852,7 +865,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 		var iAutoMinSizes = aAutoMinsizeIdx.length;
 		for (i = 0; i < iAutoMinSizes; ++i) {
 			idx = aAutoMinsizeIdx[i];
-			var iMinSize = parseInt(aContentAreas[idx].getLayoutData().getMinSize(), 10);
+			var iMinSize = parseInt(aContentAreas[idx].getLayoutData().getMinSize());
 			if (iMinSize > iColSize) {
 				this._calculatedSizes[idx] = iMinSize;
 				iAvailableSize -= iMinSize;
@@ -872,10 +885,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 			idx = aAutosizeIdx[i];
 			this._calculatedSizes[idx] = iColSize;
 			iRest -= iColSize;
-//			if (i == iAutoSizes - 1 && iRest != 0) {
-//				// In case of rounding errors, change the last auto-size column
-//				this._calculatedSizes[idx] += iRest;
-//			}
+	//			if (i == iAutoSizes - 1 && iRest != 0) {
+	//				// In case of rounding errors, change the last auto-size column
+	//				this._calculatedSizes[idx] += iRest;
+	//			}
 		}
 
 		if (bWarnSize) {
@@ -883,7 +896,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 			//       hand it might make analyzing of splitter bugs easier, since we can just ask
 			//       developers if there was a [Splitter] output on the console if the splitter looks
 			//       weird in their application.
-			jQuery.sap.log.info(
+			Log.info(
 				"[Splitter] The set sizes and minimal sizes of the splitter contents are bigger " +
 				"than the available space in the UI."
 			);
@@ -897,7 +910,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	 * @private
 	 */
 	Splitter.prototype._switchOrientation = function() {
-		this._bHorizontal = this.getOrientation() === sap.ui.core.Orientation.Horizontal;
+		this._bHorizontal = this.getOrientation() === Orientation.Horizontal;
 		if (this._bHorizontal) {
 			this._sizeDirNot  = "top";
 			this._sizeTypeNot = "height";
@@ -938,7 +951,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 
 		var iBigStep  = 999999;
 
-		var iBar = parseInt(oEvent.target.id.substr(sBarId.length), 10);
+		var iBar = parseInt(oEvent.target.id.substr(sBarId.length));
 		var mCalcSizes = this.getCalculatedSizes();
 		// TODO: These two lines are incomprehensible magic - find better solution
 		this._move.c1Size = mCalcSizes[iBar];
@@ -971,7 +984,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 				break;
 
 			default:
-				jQuery.sap.log.warn("[Splitter] Invalid keyboard resize type");
+				Log.warn("[Splitter] Invalid keyboard resize type");
 				break;
 		}
 
@@ -1093,7 +1106,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 		// Make sure LayoutData is set on the content
 		// But this approach has the advantage that "compatible" LayoutData can be used.
 		if (oLd && (!oLd.getResizable || !oLd.getSize || !oLd.getMinSize)) {
-			jQuery.sap.log.warning(
+			Log.warning(
 				"Content \"" + oContent.getId() + "\" for the Splitter contained wrong LayoutData. " +
 				"The LayoutData has been replaced with default values."
 			);
@@ -1128,7 +1141,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 		}
 	};
 
-	    //////////////////////////////////// Property "orientation" ///////////////////////////////////
+	//////////////////////////////////// Property "orientation" ///////////////////////////////////
 
 	Splitter.prototype.setOrientation = function(sOrientation) {
 		var vReturn = this.setProperty("orientation", sOrientation, true);
@@ -1142,7 +1155,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	};
 
 
-	    ///////////////////////////////////// Property "width" ///////////////////////////////
+	///////////////////////////////////// Property "width" ///////////////////////////////
 
 	Splitter.prototype.setWidth = function(sWidth) {
 		// Do not invalidate for size change
@@ -1152,7 +1165,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 		return this;
 	};
 
-	    ///////////////////////////////////// Property "height" ///////////////////////////////
+	///////////////////////////////////// Property "height" ///////////////////////////////
 
 	Splitter.prototype.setHeight = function(sHeight) {
 		// Do not invalidate for size change
@@ -1162,9 +1175,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 		return this;
 	};
 
-	    //////////////////////////////////////// Event "xxx" ///////////////////////////////////////
+	//////////////////////////////////////// Event "xxx" ///////////////////////////////////////
 
-	    ///////////////////////////////////// Aggregation "contents" ///////////////////////////////
+	///////////////////////////////////// Aggregation "contents" ///////////////////////////////
 
 	Splitter.prototype.addContentArea = function(oContent) {
 		this._needsInvalidation = true;
@@ -1197,8 +1210,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 		return this.getContentAreas();
 	};
 
-	    ///////////////////////////////////// Association "xxx" ////////////////////////////////////
+	///////////////////////////////////// Association "xxx" ////////////////////////////////////
 
 	return Splitter;
 
-}, /* bExport= */ true);
+});

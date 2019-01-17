@@ -1,6 +1,6 @@
 /*!
 * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
 */
 
@@ -68,13 +68,6 @@ sap.ui.define(function () {
 	MessageStripUtilities.isMSCloseButtonPressed = function (oTarget) {
 		return oTarget.className.indexOf(MessageStripUtilities.CLASSES.CLOSE_BUTTON) !== -1 ||
 			oTarget.parentNode.className.indexOf(MessageStripUtilities.CLASSES.CLOSE_BUTTON) !== -1;
-	};
-
-	MessageStripUtilities.closeTransitionWithJavascript = function (fnCallback) {
-		this.$().animate({opacity: 0}, {
-			duration: 200,
-			complete: fnCallback
-		});
 	};
 
 	MessageStripUtilities.closeTransitionWithCSS = function (fnCallback) {

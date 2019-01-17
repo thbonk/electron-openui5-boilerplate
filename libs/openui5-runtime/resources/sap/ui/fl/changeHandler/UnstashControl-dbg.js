@@ -1,13 +1,13 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-	"jquery.sap.global"
+	"sap/base/Log"
 ], function(
-	jQuery
+	Log
 ) {
 	"use strict";
 
@@ -15,7 +15,7 @@ sap.ui.define([
 	 * Change handler for unstashing of a control.
 	 * @alias sap.ui.fl.changeHandler.UnstashControl
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @experimental Since 1.27.0
 	 */
 	var UnstashControl = { };
@@ -32,21 +32,23 @@ sap.ui.define([
 	UnstashControl.applyChange = function(oChange, oControl, mPropertyBag) {
 		var mContent = oChange.getContent();
 		var oModifier = mPropertyBag.modifier;
+		var bStashed = false;
 
 		oChange.setRevertData({
 			originalValue: mPropertyBag.modifier.getStashed(oControl)
 		});
 
-		oModifier.setStashed(oControl, false);
+		var oUnstashedControl = oModifier.setStashed(oControl, bStashed, mPropertyBag.appComponent) || oControl;
 
+		//old way including move, new way will have separate move change
+		//only applicable for XML modifier
 		if (mContent.parentAggregationName){
-			//old way including move, new way will have separate move change
 			var sTargetAggregation = mContent.parentAggregationName;
-			var oTargetParent = oModifier.getParent(oControl);
-			oModifier.removeAggregation(oTargetParent, sTargetAggregation, oControl);
-			oModifier.insertAggregation(oTargetParent, sTargetAggregation, oControl, mContent.index, mPropertyBag.view);
+			var oTargetParent = oModifier.getParent(oUnstashedControl);
+			oModifier.removeAggregation(oTargetParent, sTargetAggregation, oUnstashedControl);
+			oModifier.insertAggregation(oTargetParent, sTargetAggregation, oUnstashedControl, mContent.index, mPropertyBag.view);
 		}
-		return true;
+		return oUnstashedControl;
 	};
 
 	/**
@@ -66,7 +68,7 @@ sap.ui.define([
 			mPropertyBag.modifier.setStashed(oControl, mRevertData.originalValue);
 			oChange.resetRevertData();
 		} else {
-			jQuery.sap.log.error("Attempt to revert an unapplied change.");
+			Log.error("Attempt to revert an unapplied change.");
 			return false;
 		}
 

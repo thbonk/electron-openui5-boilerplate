@@ -1,13 +1,55 @@
 /*
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides TablePersoDialog
-sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', './List', './Toolbar', 'sap/ui/base/ManagedObject'],
-	function(jQuery, Button, Dialog, InputListItem, List, Toolbar, ManagedObject) {
+sap.ui.define([
+	'./Button',
+	'./Dialog',
+	'./InputListItem',
+	'./List',
+	'./Toolbar',
+	'sap/ui/base/ManagedObject',
+	'sap/m/library',
+	'sap/ui/Device',
+	'sap/ui/model/Sorter',
+	'sap/ui/model/Filter',
+	'sap/ui/model/FilterOperator',
+	'sap/ui/model/json/JSONModel',
+	'sap/m/CheckBox',
+	'sap/m/SearchField',
+	'sap/m/ScrollContainer',
+	"sap/ui/thirdparty/jquery"
+],
+	function(
+		Button,
+		Dialog,
+		InputListItem,
+		List,
+		Toolbar,
+		ManagedObject,
+		library,
+		Device,
+		Sorter,
+		Filter,
+		FilterOperator,
+		JSONModel,
+		CheckBox,
+		SearchField,
+		ScrollContainer,
+		jQuery
+	) {
 	"use strict";
+
+
+
+	// shortcut for sap.m.ToolbarDesign
+	var ToolbarDesign = library.ToolbarDesign;
+
+	// shortcut for sap.m.ListMode
+	var ListMode = library.ListMode;
 
 
 
@@ -30,7 +72,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 	 * @class Table Personalization Dialog
 	 * @extends sap.ui.base.ManagedObject
 	 * @author SAP
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @alias sap.m.TablePersoDialog
 	 */
 	var TablePersoDialog = ManagedObject.extend("sap.m.TablePersoDialog", /** @lends sap.m.TablePersoDialog */
@@ -97,7 +139,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 		this._oRb = sap.ui.getCore().getLibraryResourceBundle("sap.m");
 
 		// To store the column settings
-		this._oP13nModel = new sap.ui.model.json.JSONModel();
+		this._oP13nModel = new JSONModel();
 		// Make sure that model can contain more than the 100 entries
 		// it may contain by default.
 		// SUGGESTED IMPROVEMENT: use number of table columns instead
@@ -137,16 +179,16 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 		// for this case.
 
 		// Template for list inside the dialog - 1 item per column
-		this._oColumnItemTemplate = new InputListItem({
+		this._oColumnItemTemplate = new InputListItem(this.getId() + "-li", {
 			label: "{Personalization>text}",
-			content: new sap.m.CheckBox({
+			content: new CheckBox(this.getId() + "-cb", {
 				selected: "{Personalization>visible}",
 				select: this._fnUpdateCheckBoxes
 			})
 		}).addStyleClass("sapMPersoDialogLI");
 
 		// Button definition for sorting of the table content(up/down)
-		this._oButtonUp = new Button({
+		this._oButtonUp = new Button(this.getId() + "-buttonUp", {
 						icon: "sap-icon://arrow-top",
 						enabled: false,
 						tooltip: that._oRb.getText('PERSODIALOG_UP'),
@@ -155,7 +197,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 						}
 		});
 
-		this._oButtonDown = new Button({
+		this._oButtonDown = new Button(this.getId() + "-buttonDown",{
 						icon: "sap-icon://arrow-bottom",
 						enabled: false,
 						tooltip: that._oRb.getText('PERSODIALOG_DOWN'),
@@ -196,15 +238,15 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 				if (that._oList.getItems()[0].getSelected()) {
 					// First item selected: disable button "arrow top" and focus button "arrow bottom"
 					bButtonUpEnabled = false;
-					if (bUpdateFocus) {
-						jQuery.sap.focus(that._oButtonDown.getDomRef());
+					if (bUpdateFocus && that._oButtonDown.getDomRef()) {
+						that._oButtonDown.getDomRef().focus();
 					}
 				}
 				if (that._oList.getItems()[iItemCount - 1].getSelected()) {
 					// Last item selected: disable button "arrow bottom" and focus button "arrow top"
 					bButtonDownEnabled = false;
-					if (bUpdateFocus) {
-						jQuery.sap.focus(that._oButtonUp.getDomRef());
+					if (bUpdateFocus && that._oButtonUp.getDomRef()) {
+						that._oButtonUp.getDomRef().focus();
 					}
 				}
 			}
@@ -269,17 +311,17 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 			that._oScrollContainer.$().attr('tabindex', '-1');
 		};
 
-		this._oList =  new List({
+		this._oList =  new List(this.getId() + "-colList",{
 			includeItemInSelection: true,
 			noDataText: this._oRb.getText('PERSODIALOG_NO_DATA'),
-			mode: sap.m.ListMode.SingleSelectMaster,
+			mode: ListMode.SingleSelectMaster,
 			selectionChange: function(){ this._fnUpdateArrowButtons.call(this); }.bind(this),
 			updateFinished: this._fnListUpdateFinished
 		});
 
 		this._oList.addDelegate({onAfterRendering : this._fnListUpdateFinished});
 
-		this._oSearchField = new sap.m.SearchField(this.getId() + "-searchField", {
+		this._oSearchField = new SearchField(this.getId() + "-searchField", {
 			width: "100%",
 			liveChange: function (oEvent) {
 				var sValue = oEvent.getSource().getValue(),
@@ -301,7 +343,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 			}
 		});
 
-		this._oScrollContainer = new sap.m.ScrollContainer({
+		this._oScrollContainer = new ScrollContainer({
 			horizontal: false,
 			vertical: true,
 			content:[this._oList],
@@ -310,7 +352,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 
 		this._oScrollContainer.addDelegate({onAfterRendering : this._fnAfterScrollContainerRendering});
 
-		this._resetAllButton = new Button({
+		this._resetAllButton = new Button(this.getId() + "-buttonUndo", {
 			icon: "sap-icon://undo",
 			tooltip: this._oRb.getText('PERSODIALOG_UNDO'),
 			press : function () {
@@ -318,7 +360,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 			}.bind(this)
 		}).addStyleClass("sapMPersoDialogResetBtn");
 
-		this._oSelectAllCheckbox = new sap.m.CheckBox(this._getSelectAllCheckboxId(), {
+		this._oSelectAllCheckbox = new CheckBox(this._getSelectAllCheckboxId(), {
 			selected: "{Personalization>/oHeader/visible}",
 			select: this._fnUpdateCheckBoxes,
 			text: "{Personalization>/oHeader/text}"
@@ -326,42 +368,42 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 
 
 		// SUGGESTED IMPROVEMENT: adjust alignment of selectAll checkbox in compact mode
-		this._oSelectAllToolbar = new Toolbar({
+		this._oSelectAllToolbar = new Toolbar(this.getId() + "-toolbarSelAll", {
 			// makes sure that toolbar itself is not clickable and removed from tab chain
 			active: false,
-			design : sap.m.ToolbarDesign.Transparent,
+			design : ToolbarDesign.Transparent,
 			content: [this._oSelectAllCheckbox, this._resetAllButton]
 		}).addStyleClass("sapMPersoDialogFixedBar");
 
-		this._oDialog = new Dialog({
+		this._oDialog = new Dialog(this.getId() + "-Dialog", {
 			title : this._oRb.getText("PERSODIALOG_COLUMNS_TITLE"),
-			stretch: sap.ui.Device.system.phone,
+			stretch: Device.system.phone,
 			horizontalScrolling: false,
 			verticalScrolling: false,
-			initialFocus: (sap.ui.Device.system.desktop ? this._oList : null),
+			initialFocus: (Device.system.desktop ? this._oList : null),
 			content : [ this._oSelectAllToolbar, this._oScrollContainer],
-			subHeader : new Toolbar({
+			subHeader : new Toolbar(this.getId() + "-toolbar", {
 				//makes sure that toolbar itself is not clickable and removed from tab chain
 				active : false,
 				content: [ this._oButtonUp, this._oButtonDown, this._oSearchField ]
 			}),
-			leftButton : new Button({
+			leftButton : new Button(this.getId() + "-buttonOk", {
 				text : this._oRb.getText("PERSODIALOG_OK"),
 				press : function () {
 					that._oDialog.close();
 					that._oSearchField.setValue("");
 					that._oSelectAllToolbar.setVisible(true);
-					sap.ui.Device.resize.detachHandler(that._fnHandleResize);
+					Device.resize.detachHandler(that._fnHandleResize);
 					that.fireConfirm();
 				}
 			}),
-			rightButton : new Button({
+			rightButton : new Button(this.getId() + "-buttonCancel", {
 				text: this._oRb.getText("PERSODIALOG_CANCEL"),
 				press: function () {
 					that._oDialog.close();
 					that._oSearchField.setValue("");
 					that._oSelectAllToolbar.setVisible(true);
-					sap.ui.Device.resize.detachHandler(that._fnHandleResize);
+					Device.resize.detachHandler(that._fnHandleResize);
 					that.fireCancel();
 				}
 			}),
@@ -392,7 +434,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 	TablePersoDialog.prototype.open = function () {
 		var aSorter = null;
 		if (this.getHasGrouping()) {
-			aSorter = [new sap.ui.model.Sorter('group', false, true)];
+			aSorter = [new Sorter('group', false, true)];
 		}
 		// Get the associated Table's column info and set it into the Personalization model
 		this._readCurrentSettingsFromTable();
@@ -434,7 +476,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 		// _fnHandleResize is called to make sure that 'selectallToolBar' does not show
 		// scrollbar
 		this._fnHandleResize.call(this);
-		sap.ui.Device.resize.attachHandler(this._fnHandleResize);
+		Device.resize.attachHandler(this._fnHandleResize);
 	};
 
 
@@ -513,7 +555,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 			// and can only be used once to restore the initial state
 
 			var aInitialStateCopy = jQuery.extend(true, [], this.getInitialColumnState()),
-			    that = this;
+				that = this;
 			// CSN 0120031469 0000184938 2014
 			// Remember last selected row, so it can be selected again after
 			// reset all is done
@@ -525,7 +567,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 			// CSN 0120061532 0001380609 2014
 			// Make sure that captions are not replaced by column id's. This my be the case if
 			// initalStateCopy has been created too early
-			if (!!this._mColumnCaptions) {
+			if (this._mColumnCaptions) {
 				aInitialStateCopy.forEach(
 					function(oColumn) {
 						oColumn.text = that._mColumnCaptions[oColumn.id];
@@ -601,10 +643,10 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 		sap.ui.getCore().applyChanges();
 		// swapItem need to be rendered, otherwise we can not
 		// perfrom the necessary calculations
-		if (!!oSwapItem.getDomRef()) {
+		if (oSwapItem.getDomRef()) {
 			var iElementOffset =  oSwapItem.$().position().top,
 				// This is the minimal height that should be visible from the selected element
-			    // 18 means 18px which corresponds to 3em
+				// 18 means 18px which corresponds to 3em
 				iMinHeight = 18,
 				iViewPortHeight = this._oScrollContainer.$().height(),
 				iViewPortStart = this._oScrollContainer.$().offset().top - this._oList.$().offset().top,
@@ -672,7 +714,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 	 */
 	TablePersoDialog.prototype._executeSearch = function () {
 		var sValue = this._oSearchField.getValue(),
-			oFilter = new sap.ui.model.Filter("text", sap.ui.model.FilterOperator.Contains, sValue),
+			oFilter = new Filter("text", FilterOperator.Contains, sValue),
 			oBinding = this._oList.getBinding("items");
 
 		this._oSelectAllToolbar.setVisible(!sValue && this.getShowSelectAll());
@@ -732,4 +774,4 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 
 	return TablePersoDialog;
 
-}, /* bExport= */ true);
+});

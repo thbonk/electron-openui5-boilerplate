@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.unified.Shell.
-sap.ui.define(['jquery.sap.global', './ShellHeader', './ShellLayout', './library'],
-	function(jQuery, ShellHeader, ShellLayout, library) {
+sap.ui.define(['./ShellHeader', './ShellLayout', './library', './ShellRenderer'],
+	function(ShellHeader, ShellLayout, library, ShellRenderer) {
 	"use strict";
 
 
@@ -25,7 +25,7 @@ sap.ui.define(['jquery.sap.global', './ShellHeader', './ShellLayout', './library
 	 * @extends sap.ui.unified.ShellLayout
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -79,23 +79,23 @@ sap.ui.define(['jquery.sap.global', './ShellHeader', './ShellLayout', './library
 			/**
 			 * The buttons shown in the begin (left in left-to-right case) of the Shell header. Currently max. 3 visible buttons are supported. If a custom header is set this aggregation has no effect.
 			 */
-			headItems : {type : "sap.ui.unified.ShellHeadItem", multiple : true, singularName : "headItem"},
+			headItems : {type : "sap.ui.unified.ShellHeadItem", multiple : true, singularName : "headItem", forwarding: {idSuffix: "-header", aggregation: "headItems"}},
 
 			/**
 			 * The buttons shown in the end (right in left-to-right case) of the Shell header. Currently max. 3 visible buttons are supported (when user is set only 1). If a custom header is set this aggregation has no effect.
 			 */
-			headEndItems : {type : "sap.ui.unified.ShellHeadItem", multiple : true, singularName : "headEndItem"},
+			headEndItems : {type : "sap.ui.unified.ShellHeadItem", multiple : true, singularName : "headEndItem", forwarding: {idSuffix: "-header", aggregation: "headEndItems"}},
 
 			/**
 			 * Experimental (This aggregation might change in future!): The search control which should be displayed in the shell header. If a custom header is set this aggregation has no effect.
 			 */
-			search : {type : "sap.ui.core.Control", multiple : false},
+			search : {type : "sap.ui.core.Control", multiple : false, forwarding: {idSuffix: "-header", aggregation: "search"}},
 
 			/**
 			 * The user item which is rendered in the shell header beside the items. If a custom header is set this aggregation has no effect.
 			 * @since 1.22.0
 			 */
-			user : {type : "sap.ui.unified.ShellHeadUserItem", multiple : false}
+			user : {type : "sap.ui.unified.ShellHeadUserItem", multiple : false, forwarding: {idSuffix: "-header", aggregation: "user"}}
 		}
 	}});
 
@@ -146,76 +146,6 @@ sap.ui.define(['jquery.sap.global', './ShellHeader', './ShellLayout', './library
 		return this._header.getSearchVisible();
 	};
 
-	Shell.prototype.setSearch = function(oSearch){
-		this._header.setSearch(oSearch);
-		return this;
-	};
-
-	Shell.prototype.getSearch = function(){
-		return this._header.getSearch();
-	};
-
-	Shell.prototype.setUser = function(oUser){
-		this._header.setUser(oUser);
-		return this;
-	};
-
-	Shell.prototype.getUser = function(){
-		return this._header.getUser();
-	};
-
-	Shell.prototype.getHeadItems = function() {
-		return this._header.getHeadItems();
-	};
-	Shell.prototype.insertHeadItem = function(oHeadItem, iIndex) {
-		this._header.insertHeadItem(oHeadItem, iIndex);
-		return this;
-	};
-	Shell.prototype.addHeadItem = function(oHeadItem) {
-		this._header.addHeadItem(oHeadItem);
-		return this;
-	};
-	Shell.prototype.removeHeadItem = function(vIndex) {
-		return this._header.removeHeadItem(vIndex);
-	};
-	Shell.prototype.removeAllHeadItems = function() {
-		return this._header.removeAllHeadItems();
-	};
-	Shell.prototype.destroyHeadItems = function() {
-		this._header.destroyHeadItems();
-		return this;
-	};
-	Shell.prototype.indexOfHeadtem = function(oHeadItem) {
-		return this._header.indexOfHeadItem(oHeadItem);
-	};
-
-
-	Shell.prototype.getHeadEndItems = function() {
-		return this._header.getHeadEndItems();
-	};
-	Shell.prototype.insertHeadEndItem = function(oHeadItem, iIndex) {
-		this._header.insertHeadEndItem(oHeadItem, iIndex);
-		return this;
-	};
-	Shell.prototype.addHeadEndItem = function(oHeadItem) {
-		this._header.addHeadEndItem(oHeadItem);
-		return this;
-	};
-	Shell.prototype.removeHeadEndItem = function(vIndex) {
-		return this._header.removeHeadEndItem(vIndex);
-	};
-	Shell.prototype.removeAllHeadEndItems = function() {
-		return this._header.removeAllHeadEndItems();
-	};
-	Shell.prototype.destroyHeadEndItems = function() {
-		this._header.destroyHeadEndItems();
-		return this;
-	};
-	Shell.prototype.indexOfHeadEndItem = function(oHeadItem) {
-		return this._header.indexOfHeadEndItem(oHeadItem);
-	};
-
-
 	/**
 	 * Setter for the aggregated <code>header</code>.
 	 *
@@ -243,4 +173,4 @@ sap.ui.define(['jquery.sap.global', './ShellHeader', './ShellLayout', './library
 
 	return Shell;
 
-}, /* bExport= */ true);
+});

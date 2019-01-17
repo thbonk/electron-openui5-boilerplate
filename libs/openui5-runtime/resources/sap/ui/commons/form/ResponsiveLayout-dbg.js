@@ -1,12 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.form.ResponsiveLayout.
-sap.ui.define(['jquery.sap.global', 'sap/ui/commons/library', 'sap/ui/layout/form/ResponsiveLayout'],
-	function(jQuery, library, ResponsiveLayout1) {
+sap.ui.define([
+ 'sap/ui/commons/library',
+ 'sap/ui/layout/form/ResponsiveLayout',
+ './ResponsiveLayoutRenderer'
+],
+	function(library, LayoutResponsiveLayout, ResponsiveLayoutRenderer) {
 	"use strict";
 
 
@@ -22,7 +26,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/library', 'sap/ui/layout/for
 	 * @extends sap.ui.layout.form.ResponsiveLayout
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -32,16 +36,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/library', 'sap/ui/layout/for
 	 * @alias sap.ui.commons.form.ResponsiveLayout
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	var ResponsiveLayout = ResponsiveLayout1.extend("sap.ui.commons.form.ResponsiveLayout", /** @lends sap.ui.commons.form.ResponsiveLayout.prototype */ { metadata : {
+	var ResponsiveLayout = LayoutResponsiveLayout.extend("sap.ui.commons.form.ResponsiveLayout", /** @lends sap.ui.commons.form.ResponsiveLayout.prototype */ { metadata : {
 
 		deprecated : true,
 		library : "sap.ui.commons"
 	}});
 
-	/**
-	 * This file defines behavior for the control,
-	 */
-
 	return ResponsiveLayout;
 
-}, /* bExport= */ true);
+});

@@ -6,6 +6,11 @@
 			"theme": "sap_belize_plus"
 		},
 		{
+			"name": "global.less",
+			"designtime": true,
+			"theme": "sap_belize_plus"
+		},
+		{
 			"name": "library-RTL-dbg.css",
 			"isDebug": true,
 			"theme": "sap_belize_plus"

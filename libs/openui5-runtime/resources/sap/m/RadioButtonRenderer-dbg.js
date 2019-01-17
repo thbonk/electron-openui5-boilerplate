@@ -1,12 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport'],
-	function(jQuery, ValueStateSupport) {
+sap.ui.define(['sap/ui/core/ValueStateSupport', 'sap/ui/core/library', 'sap/ui/Device'],
+	function(ValueStateSupport, coreLibrary, Device) {
 	"use strict";
+
+
+	// shortcut for sap.ui.core.ValueState
+	var ValueState = coreLibrary.ValueState;
 
 
 	/**
@@ -25,10 +29,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport'],
 		// get control properties
 		var sId = oRadioButton.getId();
 		var bEnabled = oRadioButton.getEnabled();
-		var bEditable = oRadioButton.getEditable();
-		var bReadOnly = !bEnabled || !bEditable;
-		var bInErrorState = sap.ui.core.ValueState.Error == oRadioButton.getValueState();
-		var bInWarningState = sap.ui.core.ValueState.Warning == oRadioButton.getValueState();
+		var bNonEditableParent = !oRadioButton.getProperty("editableParent");
+		var bNonEditable = !oRadioButton.getEditable() || bNonEditableParent;
+		var bReadOnly = !bEnabled || bNonEditable;
+		var bInErrorState = ValueState.Error === oRadioButton.getValueState();
+		var bInWarningState = ValueState.Warning === oRadioButton.getValueState();
+		var bInInformationState = ValueState.Information === oRadioButton.getValueState();
 		var bUseEntireWidth = oRadioButton.getUseEntireWidth();
 
 		// Radio Button style class
@@ -51,9 +57,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport'],
 		// ARIA
 		oRm.writeAccessibilityState(oRadioButton, {
 			role: "radio",
+			posinset: oRadioButton.getProperty("posinset"),
+			setsize: oRadioButton.getProperty("setsize"),
+			readonly: bNonEditableParent || undefined,
 			selected: null, // Avoid output aria-selected
 			checked: oRadioButton.getSelected() === true ? true : undefined, // aria-checked=false is default value and must not be set explicitly
-			disabled: !oRadioButton.getEditable() ? true : undefined, // Avoid output aria-disabled=false when the button is editable
+			disabled: bNonEditable ? true : undefined, // Avoid output aria-disabled=false when the button is editable
 			labelledby: { value: sId + "-label", append: true },
 			describedby: { value: (sTooltipWithStateMessage ? sId + "-Descr" : undefined), append: true }
 		});
@@ -67,7 +76,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport'],
 			oRm.addClass("sapMRbDis");
 		}
 
-		if (!bEditable) {
+		if (bNonEditable) {
 			oRm.addClass("sapMRbRo");
 		}
 
@@ -77,6 +86,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport'],
 
 		if (bInWarningState) {
 			oRm.addClass("sapMRbWarn");
+		}
+
+		if (bInInformationState) {
+			oRm.addClass("sapMRbInfo");
 		}
 
 		oRm.writeClasses();
@@ -97,7 +110,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport'],
 		//set an id on this this to be able to focus it, on ApplyFocusInfo (rerenderAllUiAreas)
 		oRm.writeAttribute("id", sId + "-Button");
 
-		if (!bReadOnly && sap.ui.Device.system.desktop) {
+		if (!bReadOnly && Device.system.desktop) {
 			oRm.addClass("sapMRbHoverable");
 		}
 

@@ -1,11 +1,19 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(["jquery.sap.global", "sap/ui/model/odata/ODataUtils", "sap/ui/Device", "sap/ui/core/library", "sap/ui/thirdparty/URI", "sap/ui/core/message/MessageParser", "sap/ui/core/message/Message"],
-	function(jQuery, ODataUtils, Device, coreLibrary, URI, MessageParser, Message) {
+sap.ui.define([
+	"sap/ui/model/odata/ODataUtils",
+	"sap/ui/core/library",
+	"sap/ui/thirdparty/URI",
+	"sap/ui/core/message/MessageParser",
+	"sap/ui/core/message/Message",
+	"sap/base/Log",
+	"sap/ui/thirdparty/jquery"
+],
+	function(ODataUtils, coreLibrary, URI, MessageParser, Message, Log, jQuery) {
 	"use strict";
 
 // shortcuts for enums
@@ -70,7 +78,7 @@ var mSeverityMap = {
  * @extends sap.ui.core.message.MessageParser
  *
  * @author SAP SE
- * @version 1.50.6
+ * @version 1.61.2
  * @public
  * @abstract
  * @alias sap.ui.model.odata.ODataMessageParser
@@ -146,7 +154,7 @@ ODataMessageParser.prototype.parse = function(oResponse, oRequest, mGetEntities,
 	} else {
 		// Status neither ok nor error - I don't know what to do
 		// TODO: Maybe this is ok and should be silently ignored...?
-		jQuery.sap.log.warning(
+		Log.warning(
 			"No rule to parse OData response with status " + oResponse.statusCode + " for messages"
 		);
 	}
@@ -396,37 +404,38 @@ ODataMessageParser.prototype._getFunctionTarget = function(mFunctionInfo, mReque
 		} else if (mFunctionInfo.returnType) {
 			mEntityType = this._metadata._getEntityTypeByName(mFunctionInfo.returnType);
 		}
+		if (mEntityType){
+			var mEntitySet = this._metadata._getEntitySetByType(mEntityType);
 
-		var mEntitySet = this._metadata._getEntitySetByType(mEntityType);
+			if (mEntitySet && mEntityType && mEntityType.key && mEntityType.key.propertyRef) {
 
-		if (mEntitySet && mEntityType && mEntityType.key && mEntityType.key.propertyRef) {
+				var sId = "";
+				var sParam;
 
-			var sId = "";
-			var sParam;
-
-			if (mEntityType.key.propertyRef.length === 1) {
-				// Just the ID in brackets
-				sParam = mEntityType.key.propertyRef[0].name;
-				if (mUrlData.parameters[sParam]) {
-					sId = mUrlData.parameters[sParam];
-				}
-			} else {
-				// Build ID string from keys
-				var aKeys = [];
-				for (i = 0; i < mEntityType.key.propertyRef.length; ++i) {
-					sParam = mEntityType.key.propertyRef[i].name;
+				if (mEntityType.key.propertyRef.length === 1) {
+					// Just the ID in brackets
+					sParam = mEntityType.key.propertyRef[0].name;
 					if (mUrlData.parameters[sParam]) {
-						aKeys.push(sParam + "=" + mUrlData.parameters[sParam]);
+						sId = mUrlData.parameters[sParam];
 					}
+				} else {
+					// Build ID string from keys
+					var aKeys = [];
+					for (i = 0; i < mEntityType.key.propertyRef.length; ++i) {
+						sParam = mEntityType.key.propertyRef[i].name;
+						if (mUrlData.parameters[sParam]) {
+							aKeys.push(sParam + "=" + mUrlData.parameters[sParam]);
+						}
+					}
+					sId = aKeys.join(",");
 				}
-				sId = aKeys.join(",");
-			}
 
-			sTarget = "/" + mEntitySet.name + "(" + sId + ")";
-		} else if (!mEntitySet) {
-			jQuery.sap.log.error("Could not determine path of EntitySet for function call: " + mUrlData.url);
-		} else {
-			jQuery.sap.log.error("Could not determine keys of EntityType for function call: " + mUrlData.url);
+				sTarget = "/" + mEntitySet.name + "(" + sId + ")";
+			} else if (!mEntitySet) {
+				Log.error("Could not determine path of EntitySet for function call: " + mUrlData.url);
+			} else {
+				Log.error("Could not determine keys of EntityType for function call: " + mUrlData.url);
+			}
 		}
 	}
 
@@ -455,14 +464,14 @@ ODataMessageParser.prototype._createTarget = function(oMessageObject, mRequestIn
 		var sMethod = (mRequestInfo.request && mRequestInfo.request.method) ? mRequestInfo.request.method : "GET";
 		var bRequestCreatePost = (sMethod === "POST"
 			&& mRequestInfo.response
-			&& (mRequestInfo.response.statusCode === "201" || mRequestInfo.response.statusCode === 201)
+			&& mRequestInfo.response.statusCode == 201
 			&& mRequestInfo.response.headers
 			&& mRequestInfo.response.headers["location"]);
 
 		var sUrlForTargetCalculation;
 		if (bRequestCreatePost) {
 			sUrlForTargetCalculation = mRequestInfo.response.headers["location"];
-		} else if (mRequestInfo.request && mRequestInfo.request.created && mRequestInfo.response && mRequestInfo.response.statusCode >= 400) {
+		} else if (mRequestInfo.request && mRequestInfo.request.key && mRequestInfo.request.created && mRequestInfo.response && mRequestInfo.response.statusCode >= 400) {
 			// If a create request returns an error the target should be set to the internal entity key
 			sUrlForTargetCalculation = mRequestInfo.request.key;
 		} else {
@@ -505,7 +514,7 @@ ODataMessageParser.prototype._createTarget = function(oMessageObject, mRequestIn
 		var sRequestTargetName = iSlashPos > -1 ? sRequestTarget.substr(iSlashPos) : sRequestTarget;
 		if (sRequestTargetName.indexOf("(") > -1) {
 			// It is an entity
-			sTarget = sRequestTarget + "/" + sTarget;
+			sTarget = sTarget ? sRequestTarget + "/" + sTarget : sRequestTarget;
 		} else {
 			// It's a collection
 			sTarget = sRequestTarget + sTarget;
@@ -560,7 +569,7 @@ ODataMessageParser.prototype._parseHeader = function(/* ref: */ aMessages, oResp
 		}
 
 	} catch (ex) {
-		jQuery.sap.log.error("The message string returned by the back-end could not be parsed");
+		Log.error("The message string returned by the back-end could not be parsed");
 		return;
 	}
 };
@@ -643,7 +652,7 @@ ODataMessageParser.prototype._parseBodyXML = function(/* ref: */ aMessages, oRes
 			aMessages.push(this._createMessage(oError, mRequestInfo, true));
 		}
 	} catch (ex) {
-		jQuery.sap.log.error("Error message returned by server could not be parsed");
+		Log.error("Error message returned by server could not be parsed");
 	}
 };
 
@@ -669,7 +678,7 @@ ODataMessageParser.prototype._parseBodyJSON = function(/* ref: */ aMessages, oRe
 		}
 
 		if (!oError) {
-			jQuery.sap.log.error("Error message returned by server did not contain error-field");
+			Log.error("Error message returned by server did not contain error-field");
 			return;
 		}
 
@@ -695,7 +704,7 @@ ODataMessageParser.prototype._parseBodyJSON = function(/* ref: */ aMessages, oRe
 			aMessages.push(this._createMessage(aFurtherErrors[i], mRequestInfo, true));
 		}
 	} catch (ex) {
-		jQuery.sap.log.error("Error message returned by server could not be parsed");
+		Log.error("Error message returned by server could not be parsed");
 	}
 };
 
@@ -746,21 +755,21 @@ ODataMessageParser.prototype._outputMesages = function(aMessages) {
 		var sOutput = "[OData Message] " + oMessage.getMessage() + " - " + oMessage.getDescription() + " (" + oMessage.getTarget() + ")";
 		switch (aMessages[i].getType()) {
 			case MessageType.Error:
-				jQuery.sap.log.error(sOutput);
+				Log.error(sOutput);
 				break;
 
 			case MessageType.Warning:
-				jQuery.sap.log.warning(sOutput);
+				Log.warning(sOutput);
 				break;
 
 			case MessageType.Success:
-				jQuery.sap.log.debug(sOutput);
+				Log.debug(sOutput);
 				break;
 
 			case MessageType.Information:
 			case MessageType.None:
 			default:
-				jQuery.sap.log.info(sOutput);
+				Log.info(sOutput);
 				break;
 		}
 	}

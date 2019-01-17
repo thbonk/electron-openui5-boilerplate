@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.AccButton.
-sap.ui.define(['jquery.sap.global', './Button' ],
-	function(jQuery, Button) {
+sap.ui.define(['./Button','./AccButtonRenderer'],
+	function(Button, AccButtonRenderer) {
 		"use strict";
 
 	/**
@@ -18,10 +18,10 @@ sap.ui.define(['jquery.sap.global', './Button' ],
 	 * @class
 	 * The AccButton control represents button with additional capabilities for accessability settings. It is meant for private usage.
 	 *
-	 * @extends sap.ui.core.Control
+	 * @extends sap.m.Button
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @private
@@ -33,10 +33,11 @@ sap.ui.define(['jquery.sap.global', './Button' ],
 			library : "sap.m",
 			properties : {
 				"tabIndex": {type : "string", defaultValue : null, bindable : "bindable"},
-				"ariaHidden": {type : "string", defaultValue : null, bindable : "bindable"}
+				"ariaHidden": {type : "string", defaultValue : null, bindable : "bindable"},
+				"ariaHaspopup": {type : "string", defaultValue : null, bindable : "bindable"}
 			}
 		}
 	});
 
 	return AccButton;
-}, /* bExport= */ false);
+});

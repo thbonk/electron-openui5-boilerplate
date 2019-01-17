@@ -1,12 +1,34 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.table.TreeTable.
-sap.ui.define(['jquery.sap.global', './Table', 'sap/ui/model/odata/ODataTreeBindingAdapter', 'sap/ui/model/ClientTreeBindingAdapter', 'sap/ui/model/TreeBindingCompatibilityAdapter', './library', 'sap/ui/core/Element', './TableUtils'],
-	function(jQuery, Table, ODataTreeBindingAdapter, ClientTreeBindingAdapter, TreeBindingCompatibilityAdapter, library, Element, TableUtils) {
+sap.ui.define([
+	'./Table',
+	"./TableRenderer",
+	'sap/ui/model/ClientTreeBindingAdapter',
+	'sap/ui/model/TreeBindingCompatibilityAdapter',
+	'./library',
+	'sap/ui/core/Element',
+	'./TableUtils',
+	"./BindingSelectionAdapter",
+	"sap/base/Log",
+	"sap/base/assert"
+],
+	function(
+		Table,
+		TableRenderer,
+		ClientTreeBindingAdapter,
+		TreeBindingCompatibilityAdapter,
+		library,
+		Element,
+		TableUtils,
+		BindingSelectionAdapter,
+		Log,
+		assert
+	) {
 	"use strict";
 
 	/**
@@ -18,11 +40,15 @@ sap.ui.define(['jquery.sap.global', './Table', 'sap/ui/model/odata/ODataTreeBind
 	 * @class
 	 * The TreeTable control provides a comprehensive set of features to display hierarchical data.
 	 * @extends sap.ui.table.Table
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
 	 * @alias sap.ui.table.TreeTable
+	 * @see {@link topic:08197fa68e4f479cbe30f639cc1cd22c sap.ui.table}
+	 * @see {@link topic:a05fe0659b9c49729168a48697ce0000 sap.ui.table.TreeTable}
+	 * @see {@link topic:148892ff9aea4a18b912829791e38f3e Tables: Which One Should I Choose?}
+	 * @see {@link fiori:/tree-table/ Tree Table}
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var TreeTable = Table.extend("sap.ui.table.TreeTable", /** @lends sap.ui.table.TreeTable.prototype */ { metadata : {
@@ -32,20 +58,21 @@ sap.ui.define(['jquery.sap.global', './Table', 'sap/ui/model/odata/ODataTreeBind
 
 			/**
 			 * Specifies whether the first level is expanded.
-			 * @deprecated As of version 1.46.3, replaced by the corresponding binding parameter <code>numberOfExpandedLevels</code>.
+			 *
+			 * The value of the property is only taken into account if no parameter <code>numberOfExpandedLevels</code> is given in the binding information.
+			 * Changes to this property after the table is bound do not have any effect unless an explicit (re-)bind of the <code>rows</code> aggregation is done.
 			 *
 			 * Example:
 			 * <pre>
 			 *   oTable.bindRows({
-			 *      path: "...",
-			 *      parameters: {
-			 *         numberOfExpandedLevels: 1
-			 *      }
+			 *     path: "...",
+			 *     parameters: {
+			 *       numberOfExpandedLevels: 1
+			 *     }
 			 *   });
 			 * </pre>
 			 *
-			 * The value of the property is only taken into account if no parameter <code>numberOfExpandedLevels</code> is given in the binding information.
-			 * Changes to this property after the table is bound do not have any effect unless an explicit (re-)bind of the <code>rows</code> aggregation is done.
+			 * @deprecated As of version 1.46.3, replaced by the corresponding binding parameter <code>numberOfExpandedLevels</code>.
 			 */
 			expandFirstLevel : {type : "boolean", defaultValue : false, deprecated: true},
 
@@ -112,13 +139,20 @@ sap.ui.define(['jquery.sap.global', './Table', 'sap/ui/model/odata/ODataTreeBind
 	TreeTable.prototype.init = function() {
 		Table.prototype.init.apply(this, arguments);
 		TableUtils.Grouping.setTreeMode(this);
+
+		this._initSelectionAdapter();
+	};
+
+	TreeTable.prototype._initSelectionAdapter = function(){
+		this._oSelectionAdapter = new BindingSelectionAdapter();
+		this._oSelectionAdapter.attachEvent("selectionChange", this._onSelectionChanged, this);
 	};
 
 	TreeTable.prototype.bindRows = function(oBindingInfo) {
 		oBindingInfo = Table._getSanitizedBindingInfo(arguments);
 
-		if (oBindingInfo != null) {
-			if (oBindingInfo.parameters == null) {
+		if (oBindingInfo) {
+			if (!oBindingInfo.parameters) {
 				oBindingInfo.parameters = {};
 			}
 
@@ -144,32 +178,12 @@ sap.ui.define(['jquery.sap.global', './Table', 'sap/ui/model/odata/ODataTreeBind
 
 		var oBinding = this.getBinding("rows");
 
-		if (sName === "rows" && oBinding != null) {
+		if (sName === "rows" && oBinding) {
 			// Table._addBindingListener can not be used here, as the selectionChanged event will be added by an adapter applied in #getBinding.
 			oBinding.attachEvents({
 				selectionChanged: this._onSelectionChanged.bind(this)
 			});
 		}
-	};
-
-	/**
-	 * Sets the selection mode. The current selection is lost.
-	 * @param {string} sSelectionMode the selection mode, see sap.ui.table.SelectionMode
-	 * @public
-	 * @return a reference on the table for chaining
-	 */
-	TreeTable.prototype.setSelectionMode = function (sSelectionMode) {
-		var oBinding = this.getBinding("rows");
-		if (oBinding && oBinding.clearSelection) {
-			oBinding.clearSelection();
-
-			// Check for valid selection modes (e.g. change deprecated mode "Multi" to "MultiToggle")
-			sSelectionMode = TableUtils.sanitizeSelectionMode(this, sSelectionMode);
-			this.setProperty("selectionMode", sSelectionMode);
-		} else {
-			Table.prototype.setSelectionMode.call(this, sSelectionMode);
-		}
-		return this;
 	};
 
 	/**
@@ -179,13 +193,13 @@ sap.ui.define(['jquery.sap.global', './Table', 'sap/ui/model/odata/ODataTreeBind
 	 *
 	 * Default value is <code>0</code>
 	 *
-	 * @param {int} iFixedRowCount  new value for property <code>fixedRowCount</code>
-	 * @return {sap.ui.table.TreeTable} <code>this</code> to allow method chaining
+	 * @param {int} iRowCount New value for property <code>fixedRowCount</code>
+	 * @returns {sap.ui.table.TreeTable} <code>this</code> to allow method chaining
 	 * @public
 	 */
 	TreeTable.prototype.setFixedRowCount = function(iRowCount) {
 		// this property makes no sense for the TreeTable
-		jQuery.sap.log.warning("TreeTable: the property \"fixedRowCount\" is not supported and will be ignored!");
+		Log.warning("TreeTable: the property \"fixedRowCount\" is not supported and will be ignored!");
 		return this;
 	};
 
@@ -203,15 +217,15 @@ sap.ui.define(['jquery.sap.global', './Table', 'sap/ui/model/odata/ODataTreeBind
 		var oBinding = Element.prototype.getBinding.call(this, sName);
 
 		if (oBinding && sName === "rows" && !oBinding.getLength) {
-			if (TableUtils.isInstanceOf(oBinding, "sap/ui/model/odata/ODataTreeBinding")) {
+			if (oBinding.isA("sap.ui.model.odata.ODataTreeBinding")) {
 				// use legacy tree binding adapter
 				TreeBindingCompatibilityAdapter(oBinding, this);
-			} else if (TableUtils.isInstanceOf(oBinding, "sap/ui/model/odata/v2/ODataTreeBinding")) {
+			} else if (oBinding.isA("sap.ui.model.odata.v2.ODataTreeBinding")) {
 				oBinding.applyAdapterInterface();
-			} else if (TableUtils.isInstanceOf(oBinding, "sap/ui/model/ClientTreeBinding")) {
+			} else if (oBinding.isA("sap.ui.model.ClientTreeBinding")) {
 				ClientTreeBindingAdapter.apply(oBinding);
 			} else {
-				jQuery.sap.log.error("Binding not supported by sap.ui.table.TreeTable");
+				Log.error("Binding not supported by sap.ui.table.TreeTable");
 			}
 		}
 
@@ -237,49 +251,39 @@ sap.ui.define(['jquery.sap.global', './Table', 'sap/ui/model/odata/ODataTreeBind
 	};
 
 	/**
-	 * expands the row for the given row index
+	 * Expands one or more rows.
 	 *
-	 * @param {int} iRowIndex
-	 *         index of the row to expand
-	 * @return {sap.ui.table.TreeTable} a reference on the TreeTable control, can be used for chaining
+	 * @param {int|int[]} vRowIndex A single index or an array of indices of the rows to be expanded
+	 * @returns {sap.ui.table.TreeTable} <code>this</code> to allow method chaining
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	TreeTable.prototype.expand = function(iRowIndex) {
-		var oBinding = this.getBinding("rows");
-		if (oBinding && iRowIndex >= 0) {
-			oBinding.expand(iRowIndex);
-		}
-
+	TreeTable.prototype.expand = function(vRowIndex) {
+		TableUtils.Grouping.toggleGroupHeader(this, vRowIndex, true);
 		return this;
 	};
 
 	/**
-	 * collapses the row for the given row index
+	 * Collapses one or more rows.
 	 *
-	 * @param {int} iRowIndex
-	 *         index of the row to collapse
-	 * @return {sap.ui.table.TreeTable} a reference on the TreeTable control, can be used for chaining
+	 * @param {int|int[]} vRowIndex A single index or an array of indices of the rows to be collapsed
+	 * @returns {sap.ui.table.TreeTable} <code>this</code> to allow method chaining
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	TreeTable.prototype.collapse = function(iRowIndex) {
-		var oBinding = this.getBinding("rows");
-		if (oBinding && iRowIndex >= 0) {
-			oBinding.collapse(iRowIndex);
-		}
-
+	TreeTable.prototype.collapse = function(vRowIndex) {
+		TableUtils.Grouping.toggleGroupHeader(this, vRowIndex, false);
 		return this;
 	};
 
 	/**
 	 * Collapses all nodes (and lower if collapseRecursive is activated)
 	 *
-	 * @return {sap.ui.table.TreeTable} a reference on the TreeTable control, can be used for chaining
+	 * @returns {sap.ui.table.TreeTable} <code>this</code> to allow method chaining
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	TreeTable.prototype.collapseAll = function () {
+	TreeTable.prototype.collapseAll = function() {
 		var oBinding = this.getBinding("rows");
 		if (oBinding) {
 			oBinding.collapseToLevel(0);
@@ -298,14 +302,14 @@ sap.ui.define(['jquery.sap.global', './Table', 'sap/ui/model/odata/ODataTreeBind
 	 * Please also see <code>sap.ui.model.odata.OperationMode</code>.
 	 *
 	 * @param {int} iLevel the level to which the trees shall be expanded
-	 * @return {sap.ui.table.TreeTable} a reference on the TreeTable control, can be used for chaining
+	 * @returns {sap.ui.table.TreeTable} a reference on the TreeTable control, can be used for chaining
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	TreeTable.prototype.expandToLevel = function (iLevel) {
+	TreeTable.prototype.expandToLevel = function(iLevel) {
 		var oBinding = this.getBinding("rows");
 
-		jQuery.sap.assert(oBinding && oBinding.expandToLevel, "TreeTable.expandToLevel is not supported with your current Binding. Please check if you are running on an ODataModel V2.");
+		assert(oBinding && oBinding.expandToLevel, "TreeTable.expandToLevel is not supported with your current Binding. Please check if you are running on an ODataModel V2.");
 
 		if (oBinding && oBinding.expandToLevel) {
 			oBinding.expandToLevel(iLevel);
@@ -315,10 +319,10 @@ sap.ui.define(['jquery.sap.global', './Table', 'sap/ui/model/odata/ODataTreeBind
 	};
 
 	/**
-	 * Returns whether the row is expanded or collapsed.
+	 * Checks whether the row is expanded or collapsed.
 	 *
-	 * @param {int} iRowIndex index of the row to check
-	 * @return {boolean} true if the node at "iRowIndex" is expanded, false otherwise (meaning it is collapsed)
+	 * @param {int} iRowIndex The index of the row to be checked
+	 * @returns {boolean} <code>true</code> if the row is expanded, <code>false</code> if it is collapsed
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -331,55 +335,6 @@ sap.ui.define(['jquery.sap.global', './Table', 'sap/ui/model/odata/ODataTreeBind
 	};
 
 	/**
-	 * Checks if the row at the given index is selected.
-	 *
-	 * @param {int} iRowIndex The row index for which the selection state should be retrieved
-	 * @return {boolean} true if the index is selected, false otherwise
-	 * @public
-	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
-	 */
-	TreeTable.prototype.isIndexSelected = function (iRowIndex) {
-		var oBinding = this.getBinding("rows");
-		//when using the treebindingadapter, check if the node is selected
-		if (oBinding && oBinding.isIndexSelected) {
-			return oBinding.isIndexSelected(iRowIndex);
-		} else {
-			return Table.prototype.isIndexSelected.call(this, iRowIndex);
-		}
-	};
-
-	/**
-	 * Overridden from Table.js base class.
-	 * In a TreeTable you can only select indices, which correspond to the currently visualized tree.
-	 * Invisible tree nodes (e.g. collapsed child nodes) can not be selected via Index, because they do not
-	 * correspond to a TreeTable row.
-	 *
-	 * @param {int} iRowIndex The row index which will be selected (if existing)
-	 * @return {sap.ui.table.TreeTable} a reference on the TreeTable control, can be used for chaining
-	 * @public
-	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
-	 */
-	TreeTable.prototype.setSelectedIndex = function (iRowIndex) {
-		if (iRowIndex === -1) {
-			//If Index eq -1 no item is selected, therefore clear selection is called
-			//SelectionModel doesn't know that -1 means no selection
-			this.clearSelection();
-		}
-
-		//when using the treebindingadapter, check if the node is selected
-		var oBinding = this.getBinding("rows");
-
-		if (oBinding && oBinding.findNode && oBinding.setNodeSelection) {
-			// set the found node as selected
-			oBinding.setSelectedIndex(iRowIndex);
-			//this.fireEvent("selectionChanged");
-		} else {
-			Table.prototype.setSelectedIndex.call(this, iRowIndex);
-		}
-		return this;
-	};
-
-	/**
 	 * Returns an array containing the row indices of all selected tree nodes (ordered ascending).
 	 *
 	 * Please be aware of the following:
@@ -387,115 +342,67 @@ sap.ui.define(['jquery.sap.global', './Table', 'sap/ui/model/odata/ODataTreeBind
 	 * of actually selected rows/tree nodes. Unknown rows/nodes (as in "not yet loaded" to the client), will not be
 	 * returned.
 	 *
-	 * @return {int[]} an array containing all selected indices
+	 * @returns {int[]} an array containing all selected indices
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
+	 * @function
+	 * @name sap.ui.table.TreeTable#getSelectedIndices
 	 */
-	TreeTable.prototype.getSelectedIndices = function () {
-		//when using the treebindingadapter, check if the node is selected
-		var oBinding = this.getBinding("rows");
-
-		if (oBinding && oBinding.findNode && oBinding.getSelectedIndices) {
-			/*jQuery.sap.log.warning("When using a TreeTable on a V2 ODataModel, you can also use 'getSelectedContexts' on the underlying TreeBinding," +
-					" for an optimised retrieval of the binding contexts of the all selected rows/nodes.");*/
-			return oBinding.getSelectedIndices();
-		} else {
-			return Table.prototype.getSelectedIndices.call(this);
-		}
-	};
 
 	/**
 	 * Sets the selection of the TreeTable to the given range (including boundaries).
-	 * Beware: The previous selection will be lost/overriden. If this is not wanted, please use "addSelectionInterval" and
-	 * "removeSelectionIntervall".
+	 * Beware: The previous selection will be lost/overridden. If this is not wanted, please use "addSelectionInterval"
+	 * and "removeSelectionInterval".
+	 * Please be aware, that the absolute row index only applies to the tree which is visualized by the TreeTable.
 	 *
 	 * @param {int} iFromIndex the start index of the selection range
 	 * @param {int} iToIndex the end index of the selection range
-	 * @return {sap.ui.table.TreeTable} a reference on the TreeTable control, can be used for chaining
+	 * @returns {sap.ui.table.TreeTable} a reference on the TreeTable control, can be used for chaining
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
+	 * @function
+	 * @name sap.ui.table.TreeTable#setSelectionInterval
 	 */
-	TreeTable.prototype.setSelectionInterval = function (iFromIndex, iToIndex) {
-		var sSelectionMode = this.getSelectionMode();
-
-		if (sSelectionMode === library.SelectionMode.None) {
-			return this;
-		}
-
-		//when using the treebindingadapter, check if the node is selected
-		var oBinding = this.getBinding("rows");
-
-		if (oBinding && oBinding.findNode && oBinding.setSelectionInterval) {
-			if (sSelectionMode === library.SelectionMode.Single) {
-				oBinding.setSelectionInterval(iFromIndex, iFromIndex);
-			} else {
-				oBinding.setSelectionInterval(iFromIndex, iToIndex);
-			}
-		} else {
-			Table.prototype.setSelectionInterval.call(this, iFromIndex, iToIndex);
-		}
-
-		return this;
-	};
 
 	/**
-	 * Marks a range of tree nodes as selected, starting with iFromIndex going to iToIndex.
-	 * The TreeNodes are referenced via their absolute row index.
-	 * Please be aware, that the absolute row index only applies to the tree which is visualized by the TreeTable.
+	 * Sets the selected index
+	 * In a TreeTable you can only select indices, which correspond to the currently visualized tree.
+	 * Invisible tree nodes (e.g. collapsed child nodes) can not be selected via Index, because they do not
+	 * correspond to a TreeTable row.
+	 *
+	 * @param {int} iRowIndex The row index which will be selected (if existing)
+	 * @returns {sap.ui.table.TreeTable} a reference on the TreeTable control, can be used for chaining
+	 * @public
+	 * @function
+	 * @name sap.ui.table.TreeTable#setSelectedIndex
+	 */
+
+	/**
+	 * Adds the given selection interval to the selection. In case of single selection, only <code>iIndexTo</code> is added to the selection.
 	 * Invisible nodes (collapsed child nodes) will not be regarded.
 	 *
 	 * Please also take notice of the fact, that "addSelectionInterval" does not change any other selection.
 	 * To override the current selection, please use "setSelctionInterval" or for a single entry use "setSelectedIndex".
 	 *
-	 * @param {int} iFromIndex The starting index of the range which will be selected.
-	 * @param {int} iToIndex The starting index of the range which will be selected.
-	 * @return {sap.ui.table.TreeTable} a reference on the TreeTable control, can be used for chaining
+	 * @param {int} iIndexFrom Index from which the selection should start
+	 * @param {int} iIndexTo Index up to which to select
+	 * @returns {sap.ui.table.Table} Reference to <code>this</code> in order to allow method chaining
 	 * @public
-	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
+	 * @function
+	 * @name sap.ui.table.TreeTable#addSelectionInterval
 	 */
-	TreeTable.prototype.addSelectionInterval = function (iFromIndex, iToIndex) {
-		var sSelectionMode = this.getSelectionMode();
-
-		if (sSelectionMode === library.SelectionMode.None) {
-			return this;
-		}
-
-		var oBinding = this.getBinding("rows");
-		//TBA check
-		if (oBinding && oBinding.findNode && oBinding.addSelectionInterval) {
-			if (sSelectionMode === library.SelectionMode.Single) {
-				oBinding.setSelectionInterval(iFromIndex, iFromIndex);
-			} else {
-				oBinding.addSelectionInterval(iFromIndex, iToIndex);
-			}
-		} else {
-			Table.prototype.addSelectionInterval.call(this, iFromIndex, iToIndex);
-		}
-		return this;
-	};
 
 	/**
-	 * All rows/tree nodes inside the range (including boundaries) will be deselected.
-	 * Tree nodes are referenced with theit absolute row index inside the tree-
-	 * Please be aware, that the absolute row index only applies to the tree which is visualized by the TreeTable.
+	 * Removes the given selection interval from the selection. In case of single selection, only <code>iIndexTo</code> is removed from the selection.
 	 * Invisible nodes (collapsed child nodes) will not be regarded.
 	 *
-	 * @param {int} iFromIndex The starting index of the range which will be deselected.
-	 * @param {int} iToIndex The starting index of the range which will be deselected.
-	 * @return {sap.ui.table.TreeTable} a reference on the TreeTable control, can be used for chaining
+	 * @param {int} iIndexFrom Index from which the deselection should start
+	 * @param {int} iIndexTo Index up to which to deselect
+	 * @returns {sap.ui.table.Table} Reference to <code>this</code> in order to allow method chaining
 	 * @public
-	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
+	 * @function
+	 * @name sap.ui.table.TreeTable#removeSelectionInterval
 	 */
-	TreeTable.prototype.removeSelectionInterval = function (iFromIndex, iToIndex) {
-		var oBinding = this.getBinding("rows");
-		//TBA check
-		if (oBinding && oBinding.findNode && oBinding.removeSelectionInterval) {
-			oBinding.removeSelectionInterval(iFromIndex, iToIndex);
-		} else {
-			Table.prototype.removeSelectionInterval.call(this, iFromIndex, iToIndex);
-		}
-		return this;
-	};
 
 	/**
 	 * Selects all available nodes/rows.
@@ -504,73 +411,20 @@ sap.ui.define(['jquery.sap.global', './Table', 'sap/ui/model/odata/ODataTreeBind
 	 * Additional rows or tree nodes that come into view through scrolling or paging are also selected immediately as soon as they get visible.
 	 * However, <code>SelectAll</code> does not retrieve any data from the back end in order to improve performance and reduce the network traffic.
 	 *
-	 * @return {sap.ui.table.TreeTable} a reference on the TreeTable control, can be used for chaining
+	 * @returns {sap.ui.table.TreeTable} a reference on the TreeTable control, can be used for chaining
 	 * @public
-	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
+	 * @function
+	 * @name sap.ui.table.TreeTable#selectAll
 	 */
-	TreeTable.prototype.selectAll = function () {
-		if (!TableUtils.hasSelectAll(this)) {
-			return this;
-		}
 
-		//The OData TBA exposes a selectAll function
-		var oBinding = this.getBinding("rows");
-		if (oBinding && oBinding.selectAll) {
-			oBinding.selectAll();
-		} else {
-			//otherwise fallback on the tables own function
-			Table.prototype.selectAll.call(this);
-		}
-
-		return this;
-	};
-
-	/**
-	 * Retrieves the lead selection index. The lead selection index is, among other things, used to determine the
-	 * start/end of a selection range, when using Shift-Click to select multiple entries at once.
-	 *
-	 * @return {int} index of lead selected row
-	 * @public
-	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
-	 */
-	TreeTable.prototype.getSelectedIndex = function() {
-		//when using the treebindingadapter, check if the node is selected
-		var oBinding = this.getBinding("rows");
-
-		if (oBinding && oBinding.findNode) {
-			return oBinding.getSelectedIndex();
-		} else {
-			return Table.prototype.getSelectedIndex.call(this);
-		}
-	};
-
-	/**
-	 * Clears the complete selection (all tree table rows/nodes will lose their selection)
-	 *
-	 * @return {sap.ui.table.TreeTable} a reference on the TreeTable control, can be used for chaining
-	 * @public
-	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
-	 */
-	TreeTable.prototype.clearSelection = function () {
-		var oBinding = this.getBinding("rows");
-
-		if (oBinding && oBinding.clearSelection) {
-			oBinding.clearSelection();
-		} else {
-			Table.prototype.clearSelection.call(this);
-		}
-
-		return this;
-	};
-
-	TreeTable.prototype.getContextByIndex = function (iRowIndex) {
+	TreeTable.prototype.getContextByIndex = function(iRowIndex) {
 		var oBinding = this.getBinding("rows");
 		if (oBinding) {
 			return oBinding.getContextByIndex(iRowIndex);
 		}
 	};
 
-	/**
+	/*
 	 * Set the rootLevel for the hierarchy
 	 * The root level is the level of the topmost tree nodes, which will be used as an entry point for OData services.
 	 * This setting has only effect when the binding is already initialized.
@@ -582,7 +436,7 @@ sap.ui.define(['jquery.sap.global', './Table', 'sap/ui/model/odata/ODataTreeBind
 
 		var oBinding = this.getBinding("rows");
 		if (oBinding) {
-			jQuery.sap.assert(oBinding.setRootLevel, "rootLevel is not supported by the used binding");
+			assert(oBinding.setRootLevel, "rootLevel is not supported by the used binding");
 			if (oBinding.setRootLevel) {
 				oBinding.setRootLevel(iRootLevel);
 			}
@@ -592,7 +446,7 @@ sap.ui.define(['jquery.sap.global', './Table', 'sap/ui/model/odata/ODataTreeBind
 		return this;
 	};
 
-	/**
+	/*
 	 * Sets the node hierarchy to collapse recursive. When set to true, all child nodes will get collapsed as well.
 	 * This setting has only effect when the binding is already initialized.
 	 * @param {boolean} bCollapseRecursive
@@ -600,7 +454,7 @@ sap.ui.define(['jquery.sap.global', './Table', 'sap/ui/model/odata/ODataTreeBind
 	TreeTable.prototype.setCollapseRecursive = function(bCollapseRecursive) {
 		var oBinding = this.getBinding("rows");
 		if (oBinding) {
-			jQuery.sap.assert(oBinding.setCollapseRecursive, "Collapse Recursive is not supported by the used binding");
+			assert(oBinding.setCollapseRecursive, "Collapse Recursive is not supported by the used binding");
 			if (oBinding.setCollapseRecursive) {
 				oBinding.setCollapseRecursive(bCollapseRecursive);
 			}
@@ -614,7 +468,7 @@ sap.ui.define(['jquery.sap.global', './Table', 'sap/ui/model/odata/ODataTreeBind
 	 * Depending on the binding it is either retrieved from the binding or the selection model.
 	 * @private
 	 */
-	TreeTable.prototype._getSelectedIndicesCount = function () {
+	TreeTable.prototype._getSelectedIndicesCount = function() {
 		var iSelectedIndicesCount;
 
 		//when using the treebindingadapter, check if the node is selected
@@ -630,7 +484,7 @@ sap.ui.define(['jquery.sap.global', './Table', 'sap/ui/model/odata/ODataTreeBind
 		return iSelectedIndicesCount;
 	};
 
-	TreeTable.prototype.setUseGroupMode = function (bGroup) {
+	TreeTable.prototype.setUseGroupMode = function(bGroup) {
 		this.setProperty("useGroupMode", !!bGroup);
 		if (!!bGroup) {
 			TableUtils.Grouping.setGroupMode(this);
@@ -654,12 +508,12 @@ sap.ui.define(['jquery.sap.global', './Table', 'sap/ui/model/odata/ODataTreeBind
 	 *
 	 * @deprecated Since version 1.28.
 	 * To get a group-like visualization the <code>useGroupMode</code> property can be used.
-	 * @see {@link sap.ui.table.TreeTable#setUseGroupMode}
-	 * @returns {sap.ui.table.TreeTable} Reference to this in order to allow method chaining
+	 * @returns {sap.ui.table.TreeTable} Reference to <code>this</code> in order to allow method chaining
+	 * @see sap.ui.table.TreeTable#setUseGroupMode
 	 * @public
 	 */
 	TreeTable.prototype.setEnableGrouping = function() {
-		jQuery.sap.log.warning("The property enableGrouping is not supported by the sap.ui.table.TreeTable control");
+		Log.warning("The property enableGrouping is not supported by the sap.ui.table.TreeTable control");
 		return this;
 	};
 
@@ -676,11 +530,11 @@ sap.ui.define(['jquery.sap.global', './Table', 'sap/ui/model/odata/ODataTreeBind
 	 * The <code>groupBy</code> association is not supported by the <code>TreeTable</code> control.
 	 *
 	 * @deprecated Since version 1.28.
-	 * @returns {sap.ui.table.TreeTable} Reference to this in order to allow method chaining
+	 * @returns {sap.ui.table.TreeTable} Reference to <code>this</code> in order to allow method chaining
 	 * @public
 	 */
 	TreeTable.prototype.setGroupBy = function() {
-		jQuery.sap.log.warning("The groupBy association is not supported by the sap.ui.table.TreeTable control");
+		Log.warning("The groupBy association is not supported by the sap.ui.table.TreeTable control");
 		return this;
 	};
 
@@ -695,7 +549,7 @@ sap.ui.define(['jquery.sap.global', './Table', 'sap/ui/model/odata/ODataTreeBind
 	 *
 	 * @param {boolean} bFlat If set to <code>true</code>, the flat mode is enabled
 	 *
-	 * @returns {sap.ui.table.TreeTable} Reference to this in order to allow method chaining
+	 * @returns {sap.ui.table.TreeTable} Reference to <code>this</code> in order to allow method chaining
 	 * @protected
 	 */
 	TreeTable.prototype.setUseFlatMode = function(bFlat) {

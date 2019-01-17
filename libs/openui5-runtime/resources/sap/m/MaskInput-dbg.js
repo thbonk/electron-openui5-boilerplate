@@ -1,15 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.MaskInput.
-sap.ui.define([
-	'jquery.sap.global',
-	'./InputBase',
-	'./MaskEnabler'
-], function (jQuery, InputBase, MaskEnabler) {
+sap.ui.define(['./InputBase', './MaskEnabler', './MaskInputRenderer'], function(InputBase, MaskEnabler, MaskInputRenderer) {
 	"use strict";
 
 
@@ -25,12 +21,13 @@ sap.ui.define([
 	 *
 	 * @author SAP SE
 	 * @extends sap.m.InputBase
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.34.0
 	 * @alias sap.m.MaskInput
+	 * @see {@link fiori:https://experience.sap.com/fiori-design-web/generic-mask-input/ Mask Input}
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var MaskInput = InputBase.extend("sap.m.MaskInput", /** @lends sap.m.MaskInput.prototype */ {
@@ -67,7 +64,16 @@ sap.ui.define([
 
 	MaskEnabler.call(MaskInput.prototype);
 
+	/**
+	 * Returns if the mask is enabled.
+	 *
+	 * @returns {boolean}
+	 * @private
+	 */
+	MaskInput.prototype._isMaskEnabled = function () {
+		return true;
+	};
 
 	return MaskInput;
 
-}, /* bExport= */ true);
+});

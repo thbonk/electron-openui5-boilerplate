@@ -1,10 +1,15 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(["sap/ui/fl/LrepConnector", "sap/ui/fl/Utils", "sap/ui/fl/context/Context"], function(LrepConnector, Utils, Context) {
+sap.ui.define([
+	"sap/ui/fl/LrepConnector",
+	"sap/ui/fl/Utils",
+	"sap/ui/fl/context/Context",
+	"sap/base/Log"
+], function(LrepConnector, Utils, Context, Log) {
 	"use strict";
 
 	/**
@@ -14,7 +19,7 @@ sap.ui.define(["sap/ui/fl/LrepConnector", "sap/ui/fl/Utils", "sap/ui/fl/context/
 	 * @alias sap.ui.fl.context.ContextManager
 	 * @since 1.38.0
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 */
 	var ContextManager;
 
@@ -26,7 +31,7 @@ sap.ui.define(["sap/ui/fl/LrepConnector", "sap/ui/fl/Utils", "sap/ui/fl/context/
 				"switches" : "sap/ui/fl/context/SwitchContextProvider"
 			}
 		}),
-		_oLrepConnector: new LrepConnector(),
+		_oLrepConnector: LrepConnector.createConnector(),
 
 		/**
 		 * Helper to check if a passed change is free of contexts or in a matching context.
@@ -43,7 +48,7 @@ sap.ui.define(["sap/ui/fl/LrepConnector", "sap/ui/fl/Utils", "sap/ui/fl/context/
 				return true;
 			}
 
-			return jQuery.inArray(sChangeContext, aActiveContexts) !== -1;
+			return aActiveContexts && aActiveContexts.indexOf(sChangeContext) !== -1;
 		},
 
 		/**
@@ -118,7 +123,7 @@ sap.ui.define(["sap/ui/fl/LrepConnector", "sap/ui/fl/Utils", "sap/ui/fl/context/
 			var aActiveContexts = [];
 
 			aContextObjects.forEach(function (oContext) {
-				var bContextActive = jQuery.inArray(oContext.id, aDesignTimeContextIdsByUrl) !== -1;
+				var bContextActive = ((aDesignTimeContextIdsByUrl ? Array.prototype.indexOf.call(aDesignTimeContextIdsByUrl, oContext.id) : -1)) !== -1;
 
 				if (bContextActive) {
 					aActiveContexts.push(oContext.id);
@@ -192,7 +197,7 @@ sap.ui.define(["sap/ui/fl/LrepConnector", "sap/ui/fl/Utils", "sap/ui/fl/context/
 				case "NE":
 					return !this._checkEquals(sSelector, oValue, aRuntimeContext);
 				default:
-					jQuery.sap.log.info("A context within a flexibility change with the operator '" + sOperator + "' could not be verified");
+					Log.info("A context within a flexibility change with the operator '" + sOperator + "' could not be verified");
 					return false;
 			}
 		},
@@ -224,6 +229,7 @@ sap.ui.define(["sap/ui/fl/LrepConnector", "sap/ui/fl/Utils", "sap/ui/fl/context/
 		 * @param {String} oPropertyBag.validAppVersions.creation - Original application version
 		 * @param {String} oPropertyBag.validAppVersions.from - Minimum application version
 		 * @param {String} oPropertyBag.validAppVersions.to - Maximum application version
+		 * @param {String} [oPropertyBag.generator] - Tool which is used to generate the context file
 		 */
 		createOrUpdateContextObject: function (oPropertyBag) {
 			if (!oPropertyBag.reference) {
@@ -250,7 +256,7 @@ sap.ui.define(["sap/ui/fl/LrepConnector", "sap/ui/fl/Utils", "sap/ui/fl/context/
 				creation: oPropertyBag.creation || "",
 				originalLanguage: oPropertyBag.originalLanguage || Utils.getCurrentLanguage(),
 				support: oPropertyBag.support || {
-					generator: "",
+					generator: oPropertyBag.generator || "",
 					service: "",
 					user: ""
 				},

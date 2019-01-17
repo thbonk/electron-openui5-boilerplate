@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides default renderer for control sap.ui.commons.Image
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define([],
+	function() {
 	"use strict";
 
 
@@ -20,12 +20,10 @@ sap.ui.define(['jquery.sap.global'],
 	/**
 	 * Renders the HTML for the Image, using the provided {@link sap.ui.core.RenderManager}.
 	 *
-	 * @param {sap.ui.core.RenderManager} oRenderManager The RenderManager that can be used for writing to the render output buffer.
+	 * @param {sap.ui.core.RenderManager} rm The RenderManager that can be used for writing to the render output buffer.
 	 * @param {sap.ui.commons.Image} oImage The control that should be rendered.
 	 */
-	ImageRenderer.render = function(oRenderManager, oImage) {
-		var rm = oRenderManager;
-
+	ImageRenderer.render = function(rm, oImage) {
 		// Open the <img> tag
 		rm.write("<img");
 		rm.writeControlData(oImage);
@@ -35,7 +33,7 @@ sap.ui.define(['jquery.sap.global'],
 		// Hiding the image won't help as hidden images are still loaded.
 		// The HTML5 spec requires empty source tags to be ignored. Anyway, some modern browsers still show border around
 		// empty images.
-		rm.writeAttributeEscaped("src", oImage.getSrc() || sap.ui.resource('sap.ui.commons', 'img/1x1.gif'));
+		rm.writeAttributeEscaped("src", oImage.getSrc() || sap.ui.require.toUrl('sap/ui/commons/img/1x1.gif'));
 
 		rm.addClass("sapUiImg");
 		if (oImage.hasListeners("press")) {
@@ -53,7 +51,7 @@ sap.ui.define(['jquery.sap.global'],
 
 		var sUseMap = oImage.getUseMap();
 		if (sUseMap) {
-			if (!(jQuery.sap.startsWith(sUseMap, "#"))) {
+			if (!(sUseMap.startsWith("#"))) {
 				sUseMap = "#" + sUseMap;
 			}
 			rm.writeAttributeEscaped("useMap", sUseMap);

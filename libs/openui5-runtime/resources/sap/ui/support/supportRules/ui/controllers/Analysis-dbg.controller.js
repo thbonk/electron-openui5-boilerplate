@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
 	"jquery.sap.global",
-	"sap/ui/core/mvc/Controller",
+	"sap/ui/support/supportRules/ui/controllers/BaseController",
 	"sap/ui/model/json/JSONModel",
 	"sap/m/Panel",
 	"sap/m/List",
@@ -23,60 +23,194 @@ sap.ui.define([
 	"sap/ui/support/supportRules/ui/models/SharedModel",
 	"sap/ui/support/supportRules/RuleSerializer",
 	"sap/ui/support/supportRules/Constants",
-	"sap/ui/support/supportRules/RuleSet",
-	"sap/ui/support/supportRules/Storage"
-], function ($, Controller, JSONModel, Panel, List, ListItemBase, StandardListItem, InputListItem, Button, Toolbar, ToolbarSpacer,
-		Label, MessageToast, CommunicationBus, channelNames, SharedModel, RuleSerializer, constants, Ruleset, storage) {
+	"sap/ui/support/supportRules/Storage",
+	"sap/ui/support/supportRules/ui/models/SelectionUtils",
+	"sap/ui/support/supportRules/ui/controllers/PresetsController",
+	"sap/ui/support/supportRules/ui/models/PresetsUtils",
+	"sap/ui/support/supportRules/ui/models/CustomJSONListSelection"
+], function (jQuery, BaseController, JSONModel, Panel, List, ListItemBase, StandardListItem, InputListItem, Button, Toolbar, ToolbarSpacer,
+			 Label, MessageToast, CommunicationBus, channelNames, SharedModel, RuleSerializer, Constants, Storage,
+			 SelectionUtils, PresetsController, PresetsUtils, CustomJSONListSelection) {
 	"use strict";
 
+	return BaseController.extend("sap.ui.support.supportRules.ui.controllers.Analysis", {
 
-	return Controller.extend("sap.ui.support.supportRules.ui.controllers.Analysis", {
 		onInit: function () {
 			this.model = SharedModel;
 			this.setCommunicationSubscriptions();
-			this.initSettingsPopover();
-
-			CommunicationBus.publish(channelNames.ON_INIT_ANALYSIS_CTRL);
 			this.tempRulesLoaded = false;
-
 			this.getView().setModel(this.model);
-			this.treeTable = this.getView().byId("ruleList");
-			this.cookie = storage.readPersistenceCookie(constants.COOKIE_NAME);
-			this.persistingSettings = this.model.getProperty("/persistingSettings");
+			this.treeTable = SelectionUtils.treeTable = this.byId("ruleList");
+			this.ruleSetView = this.byId("ruleSetsView");
+			this.rulesViewContainer = this.byId("rulesNavContainer");
+			this.bAdditionalViewLoaded = false;
+			this.bAdditionalRulesetsLoaded = false;
+			this.oApplicationinfo = {};
+
+			/* eslint-disable no-new */
+			//attach adapter for custom selection
+			new CustomJSONListSelection(this.treeTable, true, "id");
+			/* eslint-enable no-new */
+
+			CommunicationBus.subscribe(channelNames.UPDATE_SUPPORT_RULES, function () {
+				if (!this.bAdditionalViewLoaded) {
+					CommunicationBus.publish(channelNames.RESIZE_FRAME, { bigger: true });
+
+					this.bAdditionalViewLoaded = true;
+					this.loadAdditionalUI();
+				}
+			}, this);
+
+			if (this.model.getProperty("/persistingSettings")) {
+				var aColumnsIds = Storage.getVisibleColumns() || [];
+				if (aColumnsIds.length) {
+					this.setColumnVisibility(aColumnsIds, true);
+				}
+			}
+
+			this.byId("presetVariant").addEventDelegate({
+				onclick: this.onPresetVariantClick.bind(this)
+			});
+
+			this.treeTable.attachEvent("rowSelectionChange", function (oEvent) {
+				if (oEvent.getParameter("userInteraction")) {
+					PresetsUtils.syncCurrentSelectionPreset(SelectionUtils.getSelectedRules());
+				}
+			});
+		},
+
+		loadAdditionalUI: function () {
+			this._ruleDetails = sap.ui.xmlfragment("sap.ui.support.supportRules.ui.views.RuleDetails", this);
+			this.byId("rulesDisplayPage").addContentArea(this._ruleDetails);
+
+			this._ruleCreateUpdatePages = sap.ui.xmlfragment("sap.ui.support.supportRules.ui.views.RuleUpdate", this);
+			this._ruleCreateUpdatePages.forEach(function (rcuPage) {
+				this.byId("rulesNavContainer").insertPage(rcuPage);
+			}, this);
+			this._updateRuleList();
+		},
+
+		onAfterRendering: function () {
+			var fnThemeChangeHandler = function () {
+				CommunicationBus.publish(channelNames.ON_INIT_ANALYSIS_CTRL);
+				sap.ui.getCore().detachThemeChanged(fnThemeChangeHandler);
+			};
+
+			// If the theme is already applied themeChanged event won't be fired.
+			// In IE11 the theme is already applied.
+			if (sap.ui.getCore().isThemeApplied()) {
+				CommunicationBus.publish(channelNames.ON_INIT_ANALYSIS_CTRL);
+			} else {
+				sap.ui.getCore().attachThemeChanged(fnThemeChangeHandler);
+			}
+		},
+
+		onAsyncSwitch: function (oEvent) {
+			var oSource = oEvent.getSource();
+
+			if (oEvent.getParameter("selected")) {
+				var bAsync = oSource.getCustomData()[0].getValue() === "true";
+				var sRule = oSource.getProperty("groupName") === "asyncContext" ? "/newRule" : "/editRule";
+				this.model.setProperty(sRule + "/async", bAsync);
+				this._updateCheckFunction(sRule, bAsync);
+			}
+		},
+
+		/**
+		 * Add fnResolve to the check function when async is set to true otherwise removes it.
+		 * @private
+		 * @param {string} sRule the model path to edit or new rule
+		 * @param {bAsync} bAsync the async property of the rule
+		 */
+		_updateCheckFunction: function (sRule, bAsync) {
+			var sCheckFunction = this.model.getProperty(sRule + "/check");
+
+			if (!sCheckFunction) {
+				return;
+			}
+
+			// Check if a function is found
+			var oMatch = sCheckFunction.match(/function[^(]*\(([^)]*)\)/);
+
+			if (!oMatch) {
+				return;
+			}
+
+			// Get the parameters of the function found and trim, then split by word.
+			var aParams = oMatch[1].trim().split(/\W+/);
+			// Add missing parameters to ensure the resolve function is passed on the correct position.
+			aParams[0] = aParams[0] || "oIssueManager";
+			aParams[1] = aParams[1] || "oCoreFacade";
+			aParams[2] = aParams[2] || "oScope";
+
+			// If async add a fnResolve to the template else remove it.
+			if (bAsync) {
+				aParams[3] = aParams[3] || "fnResolve";
+			} else {
+				aParams = aParams.slice(0, 3);
+			}
+
+			// Replace the current parameters with the new ones.
+			var sNewCheckFunction = sCheckFunction.replace(/function[^(]*\(([^)]*)\)/, "function (" + aParams.join(", ") + ")");
+
+			this.model.setProperty(sRule + "/check", sNewCheckFunction);
 		},
 
 		getTemporaryLib: function () {
 			var libs = this.model.getProperty("/libraries");
 
 			for (var i = 0; i < libs.length; i++) {
-				if (libs[i].title == constants.TEMP_RULESETS_NAME) {
+				if (libs[i].title == Constants.TEMP_RULESETS_NAME) {
 					return libs[i];
 				}
 			}
 		},
+
 		setCommunicationSubscriptions: function () {
 			CommunicationBus.subscribe(channelNames.UPDATE_SUPPORT_RULES, this.updatesupportRules, this);
 
+			// Temporary rules are validated and ready to be loaded in view
 			CommunicationBus.subscribe(channelNames.VERIFY_RULE_CREATE_RESULT, function (data) {
 				var result = data.result,
 					newRule = RuleSerializer.deserialize(data.newRule, true),
-					tempLib = this.getTemporaryLib(),
-					treeTable = this.model.getProperty('/treeViewModel');
+					tempLib = this.getTemporaryLib();
+
 				if (result == "success") {
 					tempLib.rules.push(newRule);
-					this._syncTreeTableVieModelTempRulesLib(tempLib, treeTable);
-					if (this.persistingSettings) {
-						storage.setRules(tempLib.rules);
+
+					if (!this.oJsonModel) {
+						this.oJsonModel = new JSONModel();
+						this.treeTable.setModel(this.oJsonModel, "treeModel");
+					}
+
+					//Sync Selection of temporary rules
+					this._syncTreeTableVieModelTempRulesLib(tempLib, this.model.getProperty("/treeModel"));
+
+					//Set selected rules count to UI and update preset selections
+					PresetsUtils.syncCurrentSelectionPreset(SelectionUtils.getSelectedRules());
+
+					if (Storage.readPersistenceCookie(Constants.COOKIE_NAME)) {
+						SelectionUtils.persistSelection();
+						Storage.setRules(tempLib.rules);
+
 						if (this.showRuleCreatedToast) {
 							MessageToast.show('Your temporary rule "' + newRule.id + '" was persisted in the local storage');
 							this.showRuleCreatedToast = false;
 						}
 					}
 
+					// set data to model
+					this.oJsonModel.setData(this.model.getProperty("/treeModel"));
+
+					//Clean the new rule object
 					var emptyRule = this.model.getProperty("/newEmptyRule");
 					this.model.setProperty("/newRule", jQuery.extend(true, {}, emptyRule));
 					this.goToRuleProperties();
 					this.model.setProperty("/selectedRule", newRule);
+					this._updateRuleList();
+					tempLib = [];
+
+					this.treeTable.updateSelectionFromModel();
 				} else {
 					MessageToast.show("Add rule failed because: " + result);
 				}
@@ -89,24 +223,32 @@ sap.ui.define([
 
 				if (result === "success") {
 					var ruleSource = this.model.getProperty("/editRuleSource"),
-					treeTable = this.model.getProperty('/treeViewModel');
-					var libraries = this.model.getProperty('/libraries');
-					libraries.forEach(function(lib, libIndex){
-						if (lib.title === constants.TEMP_RULESETS_NAME) {
-							lib.rules.forEach(function(rule, ruleIndex){
+						treeTable = this.model.getProperty('/treeModel'),
+						libraries = this.model.getProperty('/libraries');
+
+					libraries.forEach(function (lib, libIndex) {
+						if (lib.title === Constants.TEMP_RULESETS_NAME) {
+							lib.rules.forEach(function (rule, ruleIndex) {
 								if (rule.id === ruleSource.id) {
 									lib.rules[ruleIndex] = updateRule;
-									if (that.persistingSettings) {
-										storage.setRules(lib.rules);
+
+									if (that.model.getProperty("/persistingSettings")) {
+										Storage.setRules(lib.rules);
 									}
 								}
 							});
-							that._syncTreeTableVieModelTempRule(updateRule,treeTable);
+							that._syncTreeTableVieModelTempRule(updateRule, treeTable);
 						}
 					});
 
+					this.oJsonModel.setData(treeTable);
 					this.model.checkUpdate(true);
 					this.model.setProperty('/selectedRule', updateRule);
+
+					//Set selected rules count to UI
+					SelectionUtils.getSelectedRules();
+
+					this.treeTable.updateSelectionFromModel();
 
 					this.goToRuleProperties();
 				} else {
@@ -115,22 +257,23 @@ sap.ui.define([
 			}, this);
 
 			CommunicationBus.subscribe(channelNames.POST_AVAILABLE_LIBRARIES, function (data) {
+				this.bAdditionalRulesetsLoaded = true;
 				this.model.setProperty("/availableLibrariesSet", data.libNames);
+				this.rulesViewContainer.setBusy(false);
+			}, this);
 
-				if (this.loadingFromLoadButton) {
-					MessageToast.show("Libraries ruleset loaded");
-					this.loadingFromLoadButton = false;
-				}
+			CommunicationBus.subscribe(channelNames.POST_APPLICATION_INFORMATION, function (data) {
+				this.oApplicationinfo = data;
 			}, this);
 
 			CommunicationBus.subscribe(channelNames.POST_AVAILABLE_COMPONENTS, function (data) {
 				var executionScopeComponents = [],
 					modelScopeComponents = this.model.getProperty("/executionScopeComponents"),
-					savedComponents = storage.getSelectedScopeComponents(),
+					savedComponents = Storage.getSelectedScopeComponents(),
 					index;
 
 				for (var componentIndex = 0; componentIndex < data.length; componentIndex += 1) {
-					executionScopeComponents.push({text: data[componentIndex]});
+					executionScopeComponents.push({ text: data[componentIndex] });
 				}
 				if (modelScopeComponents && modelScopeComponents.length > 0) {
 					for (index = 0; index < executionScopeComponents.length; index++) {
@@ -145,10 +288,59 @@ sap.ui.define([
 				this.model.setProperty("/executionScopeComponents", executionScopeComponents);
 			}, this);
 
-			CommunicationBus.subscribe(channelNames.GET_RULES_MODEL, function (treeViewModelRules) {
-				this.model.setProperty("/treeViewModel", treeViewModelRules);
+			CommunicationBus.subscribe(channelNames.GET_RULES_MODEL, function (oTreeViewModelRules) {
+				this.oJsonModel = new JSONModel();
+				this.treeTable.setModel(this.oJsonModel, "treeModel");
+				this.oJsonModel.setData(oTreeViewModelRules);
+
+				var bPersistSettings = this.model.getProperty("/persistingSettings"),
+					bLoadingAdditionalRuleSets =  this.model.getProperty("/loadingAdditionalRuleSets");
+
+
+				if (bLoadingAdditionalRuleSets) {
+					//Keep selection when additional rulesets are loaded
+					oTreeViewModelRules = SelectionUtils._syncSelectionAdditionalRuleSetsMainModel(oTreeViewModelRules, this.model.getProperty("/treeModel"));
+					oTreeViewModelRules = SelectionUtils._deselectAdditionalRuleSets(oTreeViewModelRules, this.model.getProperty("/namesOfLoadedAdditionalRuleSets"));
+				}
+				//Keep selection when additional  ruleset are loaded
+				if (bPersistSettings) {
+					// Needed for temp rules init
+					this.model.setProperty('/treeModel', oTreeViewModelRules);
+					this.initializeTempRules();
+					//Selection should be applied from local storage
+					// Syncs selection for all libs except for temporary
+					var oUpdatedRules = SelectionUtils.updateSelectedRulesFromLocalStorage(oTreeViewModelRules);
+					// In case of deleted local storage item
+					if (oUpdatedRules) {
+						oTreeViewModelRules = oUpdatedRules;
+					}
+
+					PresetsUtils.loadCustomPresets();
+				}
+
+				if (bPersistSettings || bLoadingAdditionalRuleSets) {
+					this.oJsonModel.setData(oTreeViewModelRules);
+					this.treeTable.updateSelectionFromModel();
+				} else {
+					this.treeTable.selectAll();
+				}
+				this.model.setProperty('/treeModel', oTreeViewModelRules);
+				this.model.setProperty("/selectedRulesCount", SelectionUtils.getSelectedRules().length);
+
+				PresetsUtils.initializeSelectionPresets(SelectionUtils.getSelectedRules());
+
+
+			}, this);
+
+			CommunicationBus.subscribe(channelNames.POST_MESSAGE, function (data) {
+				MessageToast.show(data.message);
+			}, this);
+
+			CommunicationBus.subscribe(channelNames.ON_ANALYZE_STARTED, function (data) {
+				this.model.setProperty("/showProgressIndicator", true);
 			}, this);
 		},
+
 		/**
 		 * Checks if given execution scope component is selected comparing against an array of settings
 		 * @param {Object} component The current component object to be checked
@@ -165,23 +357,22 @@ sap.ui.define([
 		},
 
 		onAnalyze: function () {
-			var selectedRules = this._getSelectedRules(),
-				executionContext = this._getExecutionContext();
-			if (selectedRules.length > 0) {
-				CommunicationBus.publish(channelNames.ON_ANALYZE_REQUEST, {
-					selectedRules: selectedRules,
-					executionContext: executionContext
-				});
-				this.model.setProperty("/showProgressIndicator", true);
-			} else {
-				MessageToast.show("Select some rules to be analyzed.");
-			}
-		},
+			var currentPreset = this.model.getProperty("/selectionPresetsCurrent"),
+				oExecutionContext = this._getExecutionContext();
 
-		initSettingsPopover: function () {
-			this._settingsPopover = sap.ui.xmlfragment("sap.ui.support.supportRules.ui.views.AnalyzeSettings", this);
-			this._settingsPopover.setModel(SharedModel);
-			this.getView().addDependent(this._oPopover);
+			if (!currentPreset.selections.length > 0) {
+				MessageToast.show("Select some rules to be analyzed.");
+				return;
+			}
+			if (oExecutionContext.type === "components" && oExecutionContext.components.length === 0) {
+				MessageToast.show("Please select some components to be analyzed.");
+				return;
+			}
+
+			CommunicationBus.publish(channelNames.ON_ANALYZE_REQUEST, {
+				rulePreset: currentPreset,
+				executionContext: oExecutionContext
+			});
 		},
 
 		_getExecutionContext: function () {
@@ -208,91 +399,188 @@ sap.ui.define([
 
 			return ctx;
 		},
-		_getSelectedRules: function () {
-			var	selectedRules = [],
-			selectedIndices = this.treeTable.getSelectedIndices(),
-			that = this;
 
-			selectedIndices.forEach(function(index){
-				if (that.treeTable.getContextByIndex(index).getObject().id) {
-					selectedRules.push({
-						libName: that.treeTable.getContextByIndex(index).getObject().libName,
-						ruleId: that.treeTable.getContextByIndex(index).getObject().id
-					});
+		/**
+		 * On selecting "Additional RuleSet" tab, start loading Additional RuleSets by brute search.
+		 * @param {Event} oEvent TreeTable event
+		 */
+		onSelectedRuleSets: function (oEvent) {
+			var bShowRuleProperties = true,
+				oSelectedRule = this.model.getProperty("/selectedRule"),
+				bAdditionalRulesetsTab = oEvent.getParameter("selectedKey") === "additionalRulesets";
+
+			if (bAdditionalRulesetsTab || !oSelectedRule) {
+				bShowRuleProperties = false;
+			}
+
+			// Ensure we don't make unnecessary requests. The requests will be made only
+			// the first time the user clicks AdditionalRulesets tab.
+			if (!this.bAdditionalRulesetsLoaded && bAdditionalRulesetsTab) {
+				this.rulesViewContainer.setBusyIndicatorDelay(0);
+				this.rulesViewContainer.setBusy(true);
+				CommunicationBus.publish(channelNames.GET_NON_LOADED_RULE_SETS, {
+					loadedRulesets: this._getLoadedRulesets()
+				});
+			}
+
+			this.getView().getModel().setProperty("/showRuleProperties", bShowRuleProperties);
+		},
+
+		/**
+		 * @private
+		 * @returns {Array} All currently loaded rulesets.
+		 */
+		_getLoadedRulesets: function () {
+			var oRulesets = this.treeTable.getModel("treeModel").getData(),
+				aLoadedLibraries = [];
+
+			Object.keys(oRulesets).forEach(function (sKey) {
+				var sLibraryName = oRulesets[sKey].name;
+				if (sLibraryName && sLibraryName !== "temporary") {
+					aLoadedLibraries.push(sLibraryName);
 				}
 			});
 
-			return selectedRules;
+			return aLoadedLibraries;
 		},
+
 		/**
 		 * Keeps in sync the TreeViewModel for temporary library that we use for visualisation of sap.m.TreeTable and the model that we use in the Suppport Assistant
 		 * @param {Object} tempLib  temporary library model from Support Assistant
 		 * @param {Object} treeTable Model for sap.m.TreeTable visualization
+		 * @returns {Object} The temp library
 		 */
 		_syncTreeTableVieModelTempRulesLib: function (tempLib, treeTable) {
-			var innerIndex = 0;
-				for (var ruleIndex in tempLib.rules) {
-					for (var i in treeTable) {
-						if (treeTable[i].name === constants.TEMP_RULESETS_NAME) {
-							treeTable[i][innerIndex] = {
-								name: tempLib.rules[ruleIndex].title,
-								description: tempLib.rules[ruleIndex].description,
-								id: tempLib.rules[ruleIndex].id,
-								audiences: tempLib.rules[ruleIndex].audiences,
-								categories: tempLib.rules[ruleIndex].categories,
-								minversion: tempLib.rules[ruleIndex].minversion,
-								resolution: tempLib.rules[ruleIndex].resolution,
-								title: tempLib.rules[ruleIndex].title,
-								libName: treeTable[i].name,
-								check: tempLib.rules[ruleIndex].check
-							};
+			var library,
+				rule,
+				oTempLibCopy,
+				bSelected,
+				aRules,
+				iIndex,
+				fnFilter = function (oRule) {
+					return oRule.id === rule.id;
+				};
 
+			for (var i in treeTable) {
+
+				library = treeTable[i];
+				oTempLibCopy =  treeTable[i].nodes;
+
+				if (library.name !== Constants.TEMP_RULESETS_NAME) {
+					continue;
+				}
+				//reset the model to add the temp rules
+				treeTable[i].nodes = [];
+				for (var ruleIndex in tempLib.rules) {
+
+					rule = tempLib.rules[ruleIndex];
+					bSelected = oTempLibCopy[ruleIndex] !== undefined ?  oTempLibCopy[ruleIndex].selected : true;
+
+					// syncs selection of temporary rules from local storage
+					if (this.tempRulesFromStorage) {
+						aRules = this.tempRulesFromStorage.filter(fnFilter);
+
+						if (aRules.length > 0) {
+							bSelected = aRules[0].selected;
+							iIndex = this.tempRulesFromStorage.indexOf(aRules[0]);
+							this.tempRulesFromStorage.splice(iIndex, 1);
+
+							if (bSelected === false) {
+								library.selected = false;
+							}
+						}
+
+						if (this.tempRulesFromStorage.length === 0) {
+							this.tempRulesFromStorage.length = null;
 						}
 					}
-					innerIndex++;
+
+					library.nodes.push({
+						name: rule.title,
+						description: rule.description,
+						id: rule.id,
+						audiences: rule.audiences.toString(),
+						categories: rule.categories.toString(),
+						minversion: rule.minversion,
+						resolution: rule.resolution,
+						title: rule.title,
+						selected: bSelected,
+						libName: library.name,
+						check: rule.check
+					});
 				}
+
+				this.model.setProperty("/treeModel", treeTable);
+				return library;
+			}
 		},
+
 		/**
 		 * Keeps in sync the TreeViewModel for temporary rules that we use for visualisation of sap.m.TreeTable and the model that we use in the SuppportAssistant
 		 * @param {Object} tempRule Temporary rule
 		 * @param {Object} treeTable Model for sap.m.TreeTable visualization
 		 */
 		_syncTreeTableVieModelTempRule: function (tempRule, treeTable) {
-				var ruleSource = this.model.getProperty("/editRuleSource");
-				for (var i in treeTable) {
-					if (treeTable[i].name === constants.TEMP_RULESETS_NAME) {
-						for (var innerIndex in treeTable[i]) {
-							if (treeTable[i][innerIndex].id === ruleSource.id) {
-								treeTable[i][innerIndex] = {
-									name: tempRule.title,
-									description: tempRule.description,
-									id: tempRule.id,
-									audiences: tempRule.audiences,
-									categories: tempRule.categories,
-									minversion: tempRule.minversion,
-									resolution: tempRule.resolution,
-									title: tempRule.title,
-									libName: treeTable[i].name,
-									check: tempRule.check
-								};
-							}
+			var ruleSource = this.model.getProperty("/editRuleSource");
+			for (var i in treeTable) {
+				if (treeTable[i].name === Constants.TEMP_RULESETS_NAME) {
+					for (var innerIndex in treeTable[i].nodes) {
+						if (treeTable[i].nodes[innerIndex].id === ruleSource.id) {
+							treeTable[i].nodes[innerIndex] = {
+								name: tempRule.title,
+								description: tempRule.description,
+								id: tempRule.id,
+								audiences: tempRule.audiences,
+								categories: tempRule.categories,
+								minversion: tempRule.minversion,
+								resolution: tempRule.resolution,
+								selected: treeTable[i].nodes[innerIndex].selected,
+								title: tempRule.title,
+								libName: treeTable[i].name,
+								check: tempRule.check
+							};
 						}
 					}
 				}
+			}
 		},
+
+		_hasSelectedComponent: function () {
+			var aAllComponentElements = sap.ui.getCore().byId("componentsSelectionContainer").getContent();
+			function isSelected(oComponent) {
+				return oComponent.getSelected();
+			}
+
+			return aAllComponentElements.some(isSelected);
+		},
+
 		onAnalyzeSettings: function (oEvent) {
 			CommunicationBus.publish(channelNames.GET_AVAILABLE_COMPONENTS);
+
+			if (!this._settingsPopover) {
+				this._settingsPopover = sap.ui.xmlfragment("sap.ui.support.supportRules.ui.views.AnalyzeSettings", this);
+				this.getView().addDependent(this._settingsPopover);
+			}
+
 			this._settingsPopover.openBy(oEvent.getSource());
 		},
+
 		onContextSelect: function (oEvent) {
 			if (oEvent.getParameter("selected")) {
 				var source = oEvent.getSource(),
 					radioKey = source.getCustomData()[0].getValue(),
 					execScope = this.model.getProperty("/executionScopes")[radioKey];
+				if (radioKey === "components" && !this._hasSelectedComponent()) {
+					var aComponents = sap.ui.getCore().byId("componentsSelectionContainer").getContent();
+					if (aComponents.length > 0) {
+						aComponents[0].setSelected(true);
+						this.onScopeComponentSelect(null);
+					}
+				}
 				this.model.setProperty("/analyzeContext", execScope);
 			}
 
-			if (this.cookie) {
+			if (Storage.readPersistenceCookie(Constants.COOKIE_NAME)) {
 				this.persistExecutionScope();
 			}
 		},
@@ -304,27 +592,18 @@ sap.ui.define([
 				this.model.setProperty("/subtreeExecutionContextId", value);
 			}
 
-			if (this.cookie) {
+			if (Storage.readPersistenceCookie(Constants.COOKIE_NAME)) {
 				this.persistExecutionScope();
 			}
 		},
 
-		persistExecutionScope: function () {
-			var setting = {
-				analyzeContext: this.model.getProperty("/analyzeContext"),
-				subtreeExecutionContextId: this.model.getProperty("/subtreeExecutionContextId")
-			};
-
-			storage.setSelectedContext(setting);
-		},
-
 		onScopeComponentSelect: function (event) {
 			var scopeComponents = this.model.getProperty("/executionScopeComponents");
-
-			if (this.cookie) {
-				storage.setSelectedScopeComponents(scopeComponents);
+			if (Storage.readPersistenceCookie(Constants.COOKIE_NAME)) {
+				Storage.setSelectedScopeComponents(scopeComponents);
 			}
 		},
+
 		onBeforePopoverOpen: function () {
 			if (this.model.getProperty("/executionScopeComponents").length === 0) {
 				CommunicationBus.publish(channelNames.GET_AVAILABLE_COMPONENTS);
@@ -335,12 +614,15 @@ sap.ui.define([
 			var emptyRule = this.model.getProperty("/newEmptyRule");
 			this.model.setProperty("/selectedSetPreviewKey", "availableRules");
 			this.model.setProperty("/newRule", jQuery.extend(true, {}, emptyRule));
+			this.model.setProperty("/tempLink", { href: "", text: "" });
 			this.goToCreateRule();
 		},
+
 		goToRuleProperties: function () {
-			var navCont = this.getView().byId("rulesNavContainer");
-			navCont.to(this.getView().byId("rulesDisplayPage"), "show");
+			var navCont = this.byId("rulesNavContainer");
+			navCont.to(this.byId("rulesDisplayPage"), "show");
 		},
+
 		createRuleString: function (rule) {
 			// FIXME
 			// Need to return empty string when rule is undefined
@@ -374,6 +656,7 @@ sap.ui.define([
 			str += "}";
 			return str;
 		},
+
 		updateRule: function () {
 			var oldId = this.model.getProperty("/editRuleSource/id"),
 				updateObj = this.model.getProperty("/editRule");
@@ -385,14 +668,15 @@ sap.ui.define([
 				});
 			}
 		},
+
+
 		updatesupportRules: function (data) {
-			data = RuleSerializer.deserialize(data);
+			data = RuleSerializer.deserialize(data.sRuleSet);
 
 			CommunicationBus.publish(channelNames.REQUEST_RULES_MODEL, data);
 
 			var libraries = [],
-				that = this,
-				persistingSettings = this.model.getProperty("/persistingSettings");
+				that = this;
 
 			for (var i in data) {
 				var rules = [],
@@ -409,13 +693,15 @@ sap.ui.define([
 				libraries.push({
 					title: i,
 					type: "library",
-					rules: rules
+					rules: rules,
+					selected: true
 				});
+
 			}
 
 			// Set first rule from first library if there is no temporary rules
 			var firstSelectedRule;
-			if (libraries[0].rules[0] ){
+			if (libraries[0].rules[0]) {
 				firstSelectedRule = libraries[0].rules[0];
 			} else {
 				firstSelectedRule = libraries[1].rules[0];
@@ -425,35 +711,40 @@ sap.ui.define([
 			that.model.setProperty("/selectedRuleStringify", "");
 			that.model.setProperty("/selectedRule", firstSelectedRule);
 			that.model.setProperty("/selectedRuleStringify", that.createRuleString(firstSelectedRule));
-			that.model.setProperty("/libraries",  libraries);
+			that.model.setProperty("/libraries", libraries);
 
-			var tempRules = storage.getRules(),
-				loadingFromAddiotnalRuleSets = that.model.getProperty("/loadingAdditionalRuleSets");
-			if (tempRules && !loadingFromAddiotnalRuleSets && !this.tempRulesLoaded) {
+			var loadingFromAdditionalRuleSets = that.model.getProperty("/loadingAdditionalRuleSets");
+
+			if (loadingFromAdditionalRuleSets) {
+				MessageToast.show("Additional rule set(s) loaded!");
+				this.ruleSetView.setSelectedKey("availableRules");
+			}
+		},
+
+		/**
+		 * Loads temporary rules from the local storage
+		 */
+		initializeTempRules: function () {
+			var tempRules = Storage.getRules(),
+				loadingFromAdditionalRuleSets = this.model.getProperty("/loadingAdditionalRuleSets");
+
+			if (tempRules && !loadingFromAdditionalRuleSets && !this.tempRulesLoaded) {
+				this.tempRulesFromStorage = tempRules;
 				this.tempRulesLoaded = true;
+
 				tempRules.forEach(function (tempRule) {
 					CommunicationBus.publish(channelNames.VERIFY_CREATE_RULE, RuleSerializer.serialize(tempRule));
 				});
+
+				this.persistedTempRulesCount = tempRules.length;
 			}
-			//*This property is needed when we are loading additional rulesets and to not retriger ".VERIFY_CREATE_RULE"*/
-			that.model.setProperty("/loadingAdditionalRuleSets", false);
-			if (persistingSettings) {
-				var selectedRules = storage.getSelectedRules();
-				selectedRules.forEach(function(selectedIndex){
-					that.treeTable.setSelectedIndex(selectedIndex);
-				});
-
-			} else {
-				this.treeTable.selectAll();
-			}
-
-
 		},
+
 		placeTemporaryRulesetAtStart: function (libraries) {
 			for (var i = 0; i < libraries.length; i++) {
 				var ruleSet = libraries[i];
 
-				if (ruleSet.title === constants.TEMP_RULESETS_NAME) {
+				if (ruleSet.title === Constants.TEMP_RULESETS_NAME) {
 					var temp = ruleSet;
 					libraries.splice(i, 1);
 					libraries.unshift(temp);
@@ -461,6 +752,7 @@ sap.ui.define([
 				}
 			}
 		},
+
 		addLinkToRule: function (event) {
 			var tempLink = this.model.getProperty("/tempLink"),
 				copy = jQuery.extend(true, {}, tempLink),
@@ -475,12 +767,16 @@ sap.ui.define([
 				urlProperty.push(copy);
 			}
 
+			this.model.setProperty("/tempLink", { href: "", text: "" });
+
 			this.model.checkUpdate(true, true);
 		},
+
 		goToCreateRule: function () {
-			var navCont = this.getView().byId("rulesNavContainer");
-			navCont.to(this.getView().byId("rulesCreatePage"), "show");
+			var navCont = this.byId("rulesNavContainer");
+			navCont.to(sap.ui.getCore().byId("rulesCreatePage"), "show");
 		},
+
 		checkFunctionString: function (functionString) {
 			try {
 				/* eslint-disable no-eval */
@@ -492,13 +788,16 @@ sap.ui.define([
 			}
 			return true;
 		},
+
 		addNewRule: function () {
 			var newRule = this.model.getProperty("/newRule");
 			if (this.checkFunctionString(newRule.check)) {
 				this.showRuleCreatedToast = true;
+
 				CommunicationBus.publish(channelNames.VERIFY_CREATE_RULE, RuleSerializer.serialize(newRule));
 			}
 		},
+
 		rulesToolbarITHSelect: function (oEvent) {
 			if (oEvent.getParameter("key") === "jsonOutput") {
 				var newRule = this.model.getProperty("/newRule"),
@@ -506,6 +805,7 @@ sap.ui.define([
 				this.model.setProperty("/newRuleStringified", stringifiedJson);
 			}
 		},
+
 		rulesToolbarEditITHSelect: function (oEvent) {
 			if (oEvent.getParameter("key") === "jsonOutput") {
 				var newRule = this.model.getProperty("/editRule"),
@@ -513,127 +813,224 @@ sap.ui.define([
 				this.model.setProperty("/updateRuleStringified", stringifiedJson);
 			}
 		},
+
 		loadMarkedSupportLibraries: function () {
-			var list = this.getView().byId("availableLibrariesSet"),
-				libNames = list.getSelectedItems().map(function (item) {
-					return item.getTitle();
-				});
+			var list = this.byId("availableLibrariesSet"),
+				aLibNames = [],
+				aAvailableRulesets = this.model.getProperty("/availableLibrariesSet");
+
+			aLibNames = list.getSelectedItems().map(function (item) {
+				return item.getTitle();
+			});
 
 			list.getItems().forEach(function (item) {
 				item.setSelected(false);
 
 			});
 
-			if (libNames.length > 0) {
-				this.loadingFromLoadButton = true;
+			if (aLibNames.length > 0) {
+				aAvailableRulesets = aAvailableRulesets.filter(function (sLibName) {
+					return aLibNames.indexOf(sLibName) < 0;
+				});
+				this.model.setProperty("/availableLibrariesSet", aAvailableRulesets);
+
+				this.model.setProperty("/namesOfLoadedAdditionalRuleSets", aLibNames);
 				CommunicationBus.publish(channelNames.LOAD_RULESETS, {
-					libNames: libNames
+					aLibNames: { publicRules: aLibNames, internalRules: aLibNames }
 				});
 				this.model.setProperty("/loadingAdditionalRuleSets", true);
+				this.model.setProperty("/showRuleProperties", true);
+			} else {
+				MessageToast.show("Select additional RuleSet to be loaded.");
 			}
 		},
-		onCellClick: function(event){
-			if (event.getParameter("rowBindingContext")) {
-				var selection = event.getParameter("rowBindingContext").getObject(),
-					selectedRule;
 
-				if (selection.id) {
-					selectedRule = this.getMainModelFromTreeViewModel(selection);
-					var stringifiedJson = this.createRuleString(selectedRule);
-					this.model.setProperty("/selectedRuleStringify", stringifiedJson);
+		onCellClick: function (oEvent) {
+			if (oEvent.getParameter("rowBindingContext")) {
+				var oSelection = oEvent.getParameter("rowBindingContext").getObject(),
+					oSelectedRule,
+					sRule = "",
+					bShowRuleProperties = false;
+
+				if (oSelection.id && oSelection.type !== "lib") {
+					oSelectedRule = this.getMainModelFromTreeViewModel(oSelection);
+					sRule = this.createRuleString(oSelectedRule);
+					bShowRuleProperties = true;
 				}
-				this.model.setProperty("/selectedRule", selectedRule);
+
+				this.model.setProperty("/selectedRuleStringify", sRule);
+				this.model.setProperty("/selectedRule", oSelectedRule);
+				this.model.setProperty("/showRuleProperties", bShowRuleProperties);
 			}
-
 		},
-	getMainModelFromTreeViewModel: function(selectedRule) {
+		getMainModelFromTreeViewModel: function (selectedRule) {
 
-		var structeredRulesModel =  this.model.getProperty("/libraries"),
-			mainModelRule = null;
+			var structeredRulesModel = this.model.getProperty("/libraries"),
+				mainModelRule = null;
 
-		structeredRulesModel.forEach(function(lib, index){
-				structeredRulesModel[index].rules.forEach(function(element){
+			structeredRulesModel.forEach(function (lib, index) {
+				structeredRulesModel[index].rules.forEach(function (element) {
 					if (selectedRule.id === element.id) {
 						mainModelRule = element;
 					}
 				});
-		});
+			});
 
-		return mainModelRule;
-	},
+			return mainModelRule;
+		},
+		_generateRuleId: function (sRuleId) {
+			var i = 0,
+				oTempLib = this.getTemporaryLib(),
+				aTempRuleset = oTempLib.rules,
+				bExists,
+				fnCheckId = function(oRule) {
+					return oRule.id === sRuleId + i;
+				};
 
-	duplicateRule: function(event){
-		var path =  event.getSource().getBindingContext().getPath(),
-			sourceObject = this.getView().getModel().getProperty(path),
-			selectedRule = this.getMainModelFromTreeViewModel(sourceObject),
-			selectedRuleCopy = jQuery.extend(true, {}, selectedRule);
+			while (++i) {
+				bExists = aTempRuleset.some(fnCheckId);
 
-		this.model.setProperty("/newRule", selectedRuleCopy);
-		this.model.checkUpdate(true, false);
-		this.goToCreateRule();
-	},
-
-	editRule: function(event) {
-		var path =  event.getSource().getBindingContext().getPath(),
-			sourceObject = this.getView().getModel().getProperty(path),
-			selectedRule = this.getMainModelFromTreeViewModel(sourceObject);
-
-		this.model.setProperty("/editRuleSource", selectedRule);
-		this.model.setProperty("/editRule", jQuery.extend(true, {}, selectedRule));
-		this.model.checkUpdate(true, true);
-		var navCont = this.getView().byId("rulesNavContainer");
-		navCont.to(this.getView().byId("ruleUpdatePage"), "show");
-	},
-	deleteTemporaryRule: function(event) {
-		var sourceObject = this.getObjectOnTreeRow(event),
-			treeViewModel = this.model.getProperty("/treeViewModel"),
-			mainModel = this.model.getProperty("/libraries"),
-			rulesNotToBeDeleted = [];
-
-
-		mainModel.forEach(function (lib, libIndex) {
-			if (lib.title === constants.TEMP_RULESETS_NAME) {
-				lib.rules.forEach(function (rule, ruleIndex) {
-					if (rule.id === sourceObject.id) {
-						lib.rules.splice(ruleIndex, 1);
-						return;
-					} else {
-						rulesNotToBeDeleted.push(rule);
-					}
-				});
-			}
-		});
-
-		for (var i in treeViewModel) {
-			if (treeViewModel[i].name === constants.TEMP_RULESETS_NAME) {
-				for (var innerIndex in treeViewModel[i]) {
-					if (treeViewModel[i][innerIndex].id === sourceObject.id) {
-						delete treeViewModel[i][innerIndex];
-					}
+				if (!bExists) {
+					return sRuleId + i;
 				}
 			}
-		}
-		this.model.setProperty("/treeViewModel", treeViewModel);
-		storage.removeSelectedRules(rulesNotToBeDeleted);
-	},
-	/**
-	* Gets rule from selected row
-	* @param {Object} Event
-	* @returns {Object} ISelected rule from row
-	***/
-	getObjectOnTreeRow: function(event) {
-		var path =  event.getSource().getBindingContext().getPath(),
-		 sourceObject = this.getView().getModel().getProperty(path),
-		 libs = this.model.getProperty("/libraries");
+		},
 
-		libs.forEach(function (lib, libIndex) {
-			lib.rules.forEach(function (rule) {
-				if (rule.id === sourceObject.id) {
-					sourceObject.check = rule.check;
+		duplicateRule: function (oEvent) {
+			var sPath = oEvent.getSource().getBindingContext("treeModel").getPath(),
+				oSourceObject = this.treeTable.getBinding().getModel().getProperty(sPath),
+				selectedRule = this.getMainModelFromTreeViewModel(oSourceObject),
+				selectedRuleCopy = jQuery.extend(true, {}, selectedRule);
+
+			selectedRuleCopy.id = this._generateRuleId(selectedRuleCopy.id);
+
+			this.model.setProperty("/newRule", selectedRuleCopy);
+			this.model.checkUpdate(true, false);
+			this.goToCreateRule();
+		},
+
+		editRule: function (event) {
+			var sPath = event.getSource().getBindingContext("treeModel").getPath(),
+				oSourceObject = this.treeTable.getBinding().getModel().getProperty(sPath),
+				selectedRule = this.getMainModelFromTreeViewModel(oSourceObject);
+
+			this.model.setProperty("/editRuleSource", selectedRule);
+			this.model.setProperty("/editRule", jQuery.extend(true, {}, selectedRule));
+			this.model.checkUpdate(true, true);
+			var navCont = this.byId("rulesNavContainer");
+			navCont.to(sap.ui.getCore().byId("ruleUpdatePage"), "show");
+		},
+		deleteTemporaryRule: function (event) {
+			var sourceObject = this.getObjectOnTreeRow(event),
+				oTreeModel = this.treeTable.getBinding().getModel().getData(),
+				aLibraries = this.model.getProperty("/libraries"),
+				aRemainingRules;
+
+			aLibraries.forEach(function (oLibrary) {
+				if (oLibrary.title === Constants.TEMP_RULESETS_NAME) {
+					aRemainingRules = oLibrary.rules.filter(function (oRule) {
+						return oRule.id !== sourceObject.id;
+					});
+					oLibrary.rules = aRemainingRules;
 				}
 			});
-		});
-		return sourceObject;
-	}
+
+			for (var oLibrary in oTreeModel) {
+				if (oTreeModel[oLibrary].name === Constants.TEMP_RULESETS_NAME) {
+					for (var iRuleIndex in oTreeModel[oLibrary].nodes) {
+						if (oTreeModel[oLibrary].nodes[iRuleIndex].id === sourceObject.id) {
+							oTreeModel[oLibrary].nodes.splice(iRuleIndex, 1);
+						}
+					}
+				}
+			}
+			this.oJsonModel.setData(oTreeModel);
+
+			CommunicationBus.publish(channelNames.DELETE_RULE, RuleSerializer.serialize(sourceObject));
+
+			this._updateRuleList();
+
+			//Set selected rules count to UI and update preset selections
+			PresetsUtils.syncCurrentSelectionPreset(SelectionUtils.getSelectedRules());
+
+
+			if (Storage.readPersistenceCookie(Constants.COOKIE_NAME)) {
+				Storage.removeSelectedRules(aRemainingRules);
+				SelectionUtils.persistSelection();
+			}
+		},
+
+		/**
+		* Gets rule from selected row
+		* @param {Object} event Event
+		* @returns {Object} ISelected rule from row
+		***/
+		getObjectOnTreeRow: function (event) {
+			var sPath = event.getSource().getBindingContext("treeModel").getPath(),
+				sourceObject = this.treeTable.getBinding().getModel().getProperty(sPath),
+				libs = this.model.getProperty("/libraries");
+
+			libs.forEach(function (lib, libIndex) {
+				lib.rules.forEach(function (rule) {
+					if (rule.id === sourceObject.id) {
+						sourceObject.check = rule.check;
+					}
+				});
+			});
+			return sourceObject;
+		},
+
+		_updateRuleList: function() {
+			var oRuleList = this.getView().byId("ruleList"),
+				aTemplibs = this.getTemporaryLib()["rules"];
+			if (!aTemplibs.length) {
+				oRuleList.setRowActionCount(1);
+			}  else {
+				oRuleList.setRowActionCount(2);
+			}
+		},
+
+		/**
+		 * Sets visibility to columns.
+		 * @param {Array} aColumnsIds Ids of columns
+		 * @param {boolean} bVisibilityValue
+		 **/
+		setColumnVisibility: function (aColumnsIds, bVisibilityValue) {
+			var aColumns = this.treeTable.getColumns();
+
+			aColumns.forEach(function(oColumn) {
+				oColumn.setVisible(!bVisibilityValue);
+				aColumnsIds.forEach(function(sRuleId) {
+					if (oColumn.sId.includes(sRuleId)) {
+						oColumn.setVisible(bVisibilityValue);
+					}
+				});
+			});
+		},
+
+		/**
+		 * On column visibility change persist column visibility selection
+		 * @param {object} oEvent event
+		 **/
+		onColumnVisibilityChange: function (oEvent) {
+			var oColumn = oEvent.getParameter("column"),
+				bNewVisibilityState = oEvent.getParameter("newVisible");
+			if (!this.model.getProperty("/persistingSettings")) {
+				return;
+			}
+			oColumn.setVisible(bNewVisibilityState);
+			this.persistVisibleColumns();
+		},
+
+		/**
+		 * Handles the selection presets variant selector click.
+		 * Opens selection presets popover.
+		 */
+		onPresetVariantClick: function () {
+			if (!this._PresetsController) {
+				this._PresetsController = new PresetsController(this.model, this.getView());
+			}
+			this._PresetsController.openPresetVariant();
+		}
 	});
 });

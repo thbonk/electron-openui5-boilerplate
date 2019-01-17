@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -22,7 +22,7 @@ function(Plugin) {
 	 * @extends sap.ui.dt.Plugin
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @private
@@ -49,10 +49,8 @@ function(Plugin) {
 	 * @private
 	 */
 	MouseSelection.prototype.init = function() {
+		// TODO: check if somebody is inherited from this plugin, if not then we can remove this init() function
 		Plugin.prototype.init.apply(this, arguments);
-		this._mEventDelegate = {
-			"onclick" : this._onClick
-		};
 	};
 
 	/*
@@ -60,14 +58,12 @@ function(Plugin) {
 	 */
 	MouseSelection.prototype.registerElementOverlay = function(oOverlay) {
 		oOverlay.setSelectable(true);
-		oOverlay.addEventDelegate(this._mEventDelegate, oOverlay);
+		oOverlay.attachBrowserEvent('click', this._onClick, oOverlay);
 	};
 
-
-	//  * @override
-
+	// * @override
 	MouseSelection.prototype.deregisterElementOverlay = function(oOverlay) {
-		oOverlay.removeEventDelegate(this._mEventDelegate, oOverlay);
+		oOverlay.detachBrowserEvent('click', this._onClick, oOverlay);
 	};
 
 	/*

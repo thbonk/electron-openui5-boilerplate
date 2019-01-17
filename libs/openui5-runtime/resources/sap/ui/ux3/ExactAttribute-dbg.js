@@ -1,13 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.ux3.ExactAttribute.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './library'],
-	function(jQuery, Element, library) {
+sap.ui.define(['sap/ui/core/Element', './library'],
+	function(Element, library) {
 	"use strict";
+
+	// shortcut for sap.ui.ux3.ExactOrder
+	var ExactOrder = library.ExactOrder;
 
 	/**
 	 * Constructor for a new ExactAttribute.
@@ -20,7 +23,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './library'],
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -53,7 +56,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './library'],
 			 * The order how the sublists of this attribute should be displayed.
 			 * @since 1.7.1
 			 */
-			listOrder : {type : "sap.ui.ux3.ExactOrder", defaultValue : sap.ui.ux3.ExactOrder.Select},
+			listOrder : {type : "sap.ui.ux3.ExactOrder", defaultValue : ExactOrder.Select},
 
 			/**
 			 * Specifies whether the attribute shall have sub values for visual purposes.
@@ -108,7 +111,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './library'],
 		}
 	}});
 
-	(function() {
 
 	ExactAttribute._MINWIDTH = 70;
 	ExactAttribute._MAXWIDTH = 500;
@@ -380,8 +382,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './library'],
 		return iWidth;
 	};
 
-	}());
 
 	return ExactAttribute;
 
-}, /* bExport= */ true);
+});

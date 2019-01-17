@@ -1,12 +1,19 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.m.Fiori20Adapter
-sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProvider', 'sap/ui/base/ManagedObjectObserver', 'sap/ui/Device'],
-	function(jQuery,  Object, EventProvider, ManagedObjectObserver, Device) {
+sap.ui.define([
+	'sap/ui/base/Object',
+	'sap/ui/base/EventProvider',
+	'sap/ui/base/ManagedObjectObserver',
+	'sap/ui/Device',
+	"sap/base/Log",
+	"sap/ui/thirdparty/jquery"
+],
+	function(Object, EventProvider, ManagedObjectObserver, Device, Log, jQuery) {
 	"use strict";
 
 	var oEventProvider = new EventProvider(),
@@ -19,7 +26,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 	 *
 	 *
 	 * @class text
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @private
 	 * @since 1.38
 	 * @alias HeaderAdapter
@@ -29,7 +36,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 		constructor : function(oHeader, oAdaptOptions) {
 
 			if (!oHeader || !oAdaptOptions) {
-				jQuery.sap.log.error("Cannot initialize: Invalid arguments.");
+				Log.error("Cannot initialize: Invalid arguments.");
 				return;
 			}
 
@@ -128,7 +135,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 			return false;
 		}
 		var oParent = oHeader.getParent();
-		return oParent && (isInstanceOf(oParent, "sap/m/Page") || isInstanceOf(oParent, "sap/uxap/ObjectPageHeader"));
+		return oParent && (isInstanceOf(oParent, "sap/m/Page") || isInstanceOf(oParent, "sap/m/MessagePage") || isInstanceOf(oParent, "sap/uxap/ObjectPageHeader"));
 	};
 
 	HeaderAdapter.prototype._detectTitle = function() {
@@ -142,7 +149,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 					id: oTitle.getId(),
 					text: oTitle.getText(),
 					oControl: oTitle,
-					sChangeEventId: "_change"
+					sChangeEventId: "_change",
+					sPropertyName: "text"
 				};
 			}
 		}
@@ -159,7 +167,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 					id: oHeaderTitle.getId(),
 					text: oHeaderTitle.getObjectTitle(),
 					oControl: oHeaderTitle,
-					sChangeEventId: "_titleChange"
+					sChangeEventId: "_titleChange",
+					sPropertyName: "objectTitle"
 				};
 			}
 		}
@@ -176,7 +185,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 				return {
 					id: oBackButton.getId(),
 					oControl: oBackButton,
-					sChangeEventId: "_change"
+					sChangeEventId: "_change",
+					sPropertyName: "visible"
 				};
 			}
 		}
@@ -216,7 +226,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 	 * Constructor for an sap.m.Fiori20Adapter.
 	 *
 	 * @class text
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @private
 	 * @since 1.38
 	 * @alias sap.m.Fiori20Adapter
@@ -249,8 +259,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 			oAdaptOptions: oAdaptOptions
 		}]);
 
-		if (this._getCurrentTopViewId()) {
-			this._fireViewChange(this._getCurrentTopViewId(), oAdaptOptions);
+		if (this._getCurrentlyAdaptedTopViewId()) {
+			this._fireViewChange(this._getCurrentlyAdaptedTopViewId(), oAdaptOptions);
 		}
 	};
 
@@ -276,7 +286,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 
 		var bIsTopNavigableView = this._isTopNavigableView(oNode);
 		if (bIsTopNavigableView) {
-			this._setAsCurrentTopViewId(oNode.getId());
+			this._setAsCurrentlyAdaptedTopViewId(oNode.getId());
 		}
 
 		var oNodeAdaptationResult = this._processNode(oNode, oAdaptOptions);
@@ -327,7 +337,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 
 		this._attachNavigablePageChange(oControl, oAdaptOptions);
 
-		if (isInstanceOf(oControl, "sap/m/Page")) {
+		if (isInstanceOf(oControl, "sap/m/Page") || isInstanceOf(oControl, "sap/ui/core/mvc/XMLView")) {
 			this._attachModifyAggregation(oControl, "content", oAdaptOptions);
 		}
 
@@ -350,8 +360,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 							oNode: oControl.getComponentInstance(),
 							oAdaptOptions: oAdaptOptions
 						}]);
-						if (that._getCurrentTopViewId()) {
-							that._fireViewChange(that._getCurrentTopViewId(), oAdaptOptions);
+						if (that._getCurrentlyAdaptedTopViewId()) {
+							that._fireViewChange(that._getCurrentlyAdaptedTopViewId(), oAdaptOptions);
 						}
 					}
 				};
@@ -380,16 +390,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 			return;
 		}
 
-		var oOwnerViewId = this._getCurrentTopViewId();
+		var oOwnerViewId = this._getCurrentlyAdaptedTopViewId();
 		var fnOnAdaptableContentChange = function(oEvent) {
 			var oChangedContent = oEvent.getParameter("adaptableContent");
-			this._setAsCurrentTopViewId(oOwnerViewId); // restore the view context (so that any findings are saved as belonging to that view)
+			this._setAsCurrentlyAdaptedTopViewId(oOwnerViewId); // restore the view context (so that any findings are saved as belonging to that view)
 			this._doBFS([{ // scan [for adaptable content] the newly added subtree
 				oNode: oChangedContent,
 				oAdaptOptions: oAdaptOptions
 			}]);
-			if (this._getCurrentTopViewId()) {
-				this._fireViewChange(this._getCurrentTopViewId(), oAdaptOptions);
+			if (this._getCurrentlyAdaptedTopViewId()) {
+				this._fireViewChange(this._getCurrentlyAdaptedTopViewId(), oAdaptOptions);
 			}
 		}.bind(this);
 
@@ -418,8 +428,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 				oNode: oNode,
 				oAdaptOptions: oAdaptOptions
 			}]);
-			if (this._getCurrentTopViewId()) {
-				this._fireViewChange(this._getCurrentTopViewId(), oAdaptOptions);
+			if (this._getCurrentlyAdaptedTopViewId()) {
+				this._fireViewChange(this._getCurrentlyAdaptedTopViewId(), oAdaptOptions);
 			}
 		}.bind(this);
 
@@ -436,20 +446,20 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 			return;
 		}
 
-		var oOwnerViewId = this._getCurrentTopViewId(),
+		var oOwnerViewId = this._getCurrentlyAdaptedTopViewId(),
 			fnOnModifyAggregation = function(oChanges) {
 				var sMutation = oChanges.mutation,
 					oChild = oChanges.object;
 
 				if ((sMutation === "add") || (sMutation === "insert")) {
 
-						this._setAsCurrentTopViewId(oOwnerViewId); // restore the view context (so that any findings are saved as belonging to that view)
+						this._setAsCurrentlyAdaptedTopViewId(oOwnerViewId); // restore the view context (so that any findings are saved as belonging to that view)
 						this._doBFS([{ // scan [for adaptable content] the newly added subtree
 							oNode: oControlToRescan ? oControlToRescan : oChild,
 							oAdaptOptions: oAdaptOptions
 						}]);
-						if (this._getCurrentTopViewId()) {
-							this._fireViewChange(oOwnerViewId, oAdaptOptions);
+						if (this._getCurrentlyAdaptedTopViewId()) {
+							this._fireViewChange(this._getCurrentlyAdaptedTopViewId(), oAdaptOptions);
 						}
 				}
 			}.bind(this),
@@ -581,7 +591,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 		 */
 		if (isInstanceOf(oParent, "sap/m/SplitContainer")) {
 
-			var bIsPhone = sap.ui.Device.system.phone,
+			var bIsPhone = Device.system.phone,
 				bMoveTitle = oAdaptOptions.bMoveTitle,
 				bAdaptChildBackButton = oAdaptOptions.bHideBackButton;
 			/**
@@ -595,7 +605,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 			 * 2.1. - on phone
 			 * 2.2. - on the desktop initial page of either master/detail part
 			 */
-			if (bAdaptChildBackButton && !sap.ui.Device.system.phone) {
+			if (bAdaptChildBackButton && !Device.system.phone) {
 				bAdaptChildBackButton = 'initialPage';
 			}
 
@@ -626,11 +636,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 		return oAdaptOptions;
 	};
 
-	Fiori20Adapter._getCurrentTopViewId = function() {
+	Fiori20Adapter._getCurrentlyAdaptedTopViewId = function() {
 		return sCurrentlyAdaptedTopNavigableViewId;
 	};
 
-	Fiori20Adapter._setAsCurrentTopViewId = function(sViewId) {
+	Fiori20Adapter._setAsCurrentlyAdaptedTopViewId = function(sViewId) {
 		sCurrentlyAdaptedTopNavigableViewId = sViewId;
 	};
 
@@ -662,7 +672,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 		var oHeaderAdapter = new HeaderAdapter(oHeader, oAdaptOptions),
 			oAdaptedContent = oHeaderAdapter.adapt();
 
-		var sTopViewId = this._getCurrentTopViewId();
+		var sTopViewId = this._getCurrentlyAdaptedTopViewId();
 
 		/* cache the identified title */
 		if (oAdaptedContent.oTitleInfo) {
@@ -695,6 +705,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 
 			var fnChangeListener = function (oEvent) {
 				var oTitleInfo = aTitleInfoCache[sViewId];
+				if (oEvent.getParameter("name") !== oTitleInfo.sPropertyName) {
+					return; // different property changed
+				}
 				oTitleInfo.text = oEvent.getParameter("newValue");
 				this._fireViewChange(sViewId, oAdaptOptions);
 			}.bind(this);
@@ -711,7 +724,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 		if (oControlInfo && oControlInfo.oControl && oControlInfo.sChangeEventId && !oInfoToMerge.aChangeListeners[oControlInfo.id]) {
 
 			var fnChangeListener = function (oEvent) {
-
+				if (oEvent.getParameter("name") !== oControlInfo.sPropertyName) {
+					return; // different property changed
+				}
 				bVisible = oEvent.getParameter("newValue"); //actualize the value
 				if (!bVisible) {
 					jQuery.each(aControlInfoCache, function(iIndex, oCachedControlInfo) {
@@ -792,4 +807,4 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 
 	return Fiori20Adapter;
 
-}, /* bExport= */ false);
+});

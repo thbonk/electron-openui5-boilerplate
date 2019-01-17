@@ -1,13 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.layout.BorderLayoutArea.
-sap.ui.define(['jquery.sap.global', 'sap/ui/commons/library', 'sap/ui/core/CustomStyleClassSupport', 'sap/ui/core/Element'],
-	function(jQuery, library, CustomStyleClassSupport, Element) {
+sap.ui.define(['sap/ui/commons/library', 'sap/ui/core/CustomStyleClassSupport', 'sap/ui/core/Element'],
+	function(library, CustomStyleClassSupport, Element) {
 	"use strict";
+
+
+
+	 // shortcut for sap.ui.commons.layout.BorderLayoutAreaTypes
+	 var BorderLayoutAreaTypes = library.layout.BorderLayoutAreaTypes;
 
 
 
@@ -22,7 +27,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/library', 'sap/ui/core/Custo
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -40,7 +45,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/library', 'sap/ui/core/Custo
 			 * @deprecated Since version 1.3.3.
 			 * Redundant to the aggregation by the parent border layout.
 			 */
-			areaId : {type : "sap.ui.commons.layout.BorderLayoutAreaTypes", group : "Identification", defaultValue : sap.ui.commons.layout.BorderLayoutAreaTypes.top, deprecated: true},
+			areaId : {type : "sap.ui.commons.layout.BorderLayoutAreaTypes", group : "Identification", defaultValue : BorderLayoutAreaTypes.top, deprecated: true},
 
 			/**
 			 * The overflow mode of the area in horizontal direction as CSS value
@@ -105,4 +110,4 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/library', 'sap/ui/core/Custo
 
 	return BorderLayoutArea;
 
-}, /* bExport= */ true);
+});

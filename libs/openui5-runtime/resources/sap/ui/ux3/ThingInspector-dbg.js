@@ -1,13 +1,35 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.ux3.ThingInspector.
-sap.ui.define(['jquery.sap.global', './ActionBar', './Overlay', './ThingViewer', './library'],
-	function(jQuery, ActionBar, Overlay, ThingViewer) {
+sap.ui.define([
+    './ActionBar',
+    './Overlay',
+    './ThingViewer',
+    './ThingInspectorRenderer',
+    './library',
+    './ThingAction',
+    // jQuery custom selectors ':sapFocusable'
+    'sap/ui/dom/jquery/Selectors',
+    // jQuery Plugin 'lastFocusableDomRef'
+    'sap/ui/dom/jquery/Focusable'
+],
+	function(ActionBar, Overlay, ThingViewer, ThingInspectorRenderer, library, ThingAction) {
 	"use strict";
+
+
+
+	// shortcut for sap.ui.ux3.ActionBarSocialActions
+	var ActionBarSocialActions = library.ActionBarSocialActions;
+
+	// shortcut for sap.ui.ux3.ThingViewerHeaderType
+	var ThingViewerHeaderType = library.ThingViewerHeaderType;
+
+	// shortcut for sap.ui.ux3.FollowActionState
+	var FollowActionState = library.FollowActionState;
 
 
 
@@ -20,11 +42,11 @@ sap.ui.define(['jquery.sap.global', './ActionBar', './Overlay', './ThingViewer',
 	 * @class
 	 * Thing Inspector
 	 * @extends sap.ui.ux3.Overlay
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
-	 * @deprecated Since version 1.38.
+	 * @deprecated as of version 1.38. There is not an exact replacement.
 	 * @alias sap.ui.ux3.ThingInspector
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -56,7 +78,7 @@ sap.ui.define(['jquery.sap.global', './ActionBar', './Overlay', './ThingViewer',
 			/**
 			 * Follow State of a Thing
 			 */
-			followState : {type : "sap.ui.ux3.FollowActionState", group : "Misc", defaultValue : sap.ui.ux3.FollowActionState.Default},
+			followState : {type : "sap.ui.ux3.FollowActionState", group : "Misc", defaultValue : FollowActionState.Default},
 
 			/**
 			 * State of Flag Action
@@ -92,7 +114,7 @@ sap.ui.define(['jquery.sap.global', './ActionBar', './Overlay', './ThingViewer',
 			 * Defines which header type should be used.
 			 * @since 1.16.3
 			 */
-			headerType : {type : "sap.ui.ux3.ThingViewerHeaderType", group : "Misc", defaultValue : sap.ui.ux3.ThingViewerHeaderType.Standard}
+			headerType : {type : "sap.ui.ux3.ThingViewerHeaderType", group : "Misc", defaultValue : ThingViewerHeaderType.Standard}
 		},
 		aggregations : {
 
@@ -192,7 +214,6 @@ sap.ui.define(['jquery.sap.global', './ActionBar', './Overlay', './ThingViewer',
 	}});
 
 
-	(function() {
 		/**
 		 * Initialization hook for the Thinginspector. It creates the instance of the
 		 * Popup helper service and does some basic configuration for it.
@@ -223,13 +244,13 @@ sap.ui.define(['jquery.sap.global', './ActionBar', './Overlay', './ThingViewer',
 						oBarAction = oEvent.getParameters().action,
 						oThingAction;
 
-					if (sActionID.indexOf(sap.ui.ux3.ActionBarSocialActions.Favorite) !== -1 ||
-						sActionID.indexOf(sap.ui.ux3.ActionBarSocialActions.Follow) !== -1 ||
-						sActionID.indexOf(sap.ui.ux3.ActionBarSocialActions.Flag) !== -1) {
+					if (sActionID.indexOf(ActionBarSocialActions.Favorite) !== -1 ||
+						sActionID.indexOf(ActionBarSocialActions.Follow) !== -1 ||
+						sActionID.indexOf(ActionBarSocialActions.Flag) !== -1) {
 						if (that._oSocialActions[sActionID]) {
 							oThingAction = that._oSocialActions[sActionID];
 						} else {
-							oThingAction =  new sap.ui.ux3.ThingAction({
+							oThingAction =  new ThingAction({
 								id: that.getId() + "-" + sActionID.toLowerCase(),
 								text: oBarAction.text,
 								enabled: oBarAction.enabled
@@ -341,13 +362,19 @@ sap.ui.define(['jquery.sap.global', './ActionBar', './Overlay', './ThingViewer',
 		 * @private
 		 */
 		ThingInspector.prototype._setFocusLast = function() {
+		    // jQuery Plugin "lastFocusableDomRef"
 			var oFocus = this.$("thingViewer-toolbar").lastFocusableDomRef();
+			// jQuery custom selectors ":sapFocusable"
 			if (!oFocus && this.getCloseButtonVisible() && this.$("close").is(":sapFocusable")) {
 				oFocus = this.getDomRef("close");
-			} else if (!oFocus && this.getOpenButtonVisible() && this.$("openNew").is(":sapFocusable")) {
+			} else // jQuery custom selectors ":sapFocusable"
+			if (!oFocus && this.getOpenButtonVisible() && this.$("openNew").is(":sapFocusable")) {
 				oFocus = this.getDomRef("openNew");
 			}
-			jQuery.sap.focus(oFocus);
+
+			if (oFocus) {
+				oFocus.focus();
+			}
 		};
 
 		/**
@@ -356,12 +383,20 @@ sap.ui.define(['jquery.sap.global', './ActionBar', './Overlay', './ThingViewer',
 		 * @private
 		 */
 		ThingInspector.prototype._setFocusFirst = function() {
+			// jQuery custom selectors ":sapFocusable"
 			if (this.getOpenButtonVisible() && this.$("openNew").is(":sapFocusable")) {
-				jQuery.sap.focus(this.getDomRef("openNew"));
-			} else if (this.getCloseButtonVisible() && this.$("close").is(":sapFocusable")) {
-				jQuery.sap.focus(this.getDomRef("close"));
+				if (this.getDomRef("openNew")) {
+					this.getDomRef("openNew").focus();
+				}
+			} else // jQuery custom selectors ":sapFocusable"
+			if (this.getCloseButtonVisible() && this.$("close").is(":sapFocusable")) {
+				if (this.getDomRef("close")) {
+					this.getDomRef("close").focus();
+				}
 			} else {
-				jQuery.sap.focus(this.$("thingViewer-content").firstFocusableDomRef());
+				if (this.$("thingViewer-content").firstFocusableDomRef()) {
+					this.$("thingViewer-content").firstFocusableDomRef().focus();
+				}
 			}
 		};
 
@@ -693,6 +728,7 @@ sap.ui.define(['jquery.sap.global', './ActionBar', './Overlay', './ThingViewer',
 		//Implementation of API method
 		ThingInspector.prototype.setFirstTitle = function(sTitle) {
 			this._oThingViewer.setTitle(sTitle);
+			return this;
 		};
 
 		//Implementation of API method
@@ -703,6 +739,7 @@ sap.ui.define(['jquery.sap.global', './ActionBar', './Overlay', './ThingViewer',
 		//Implementation of API method
 		ThingInspector.prototype.setSecondTitle = function(sTitle) {
 			this._oThingViewer.setSubtitle(sTitle);
+			return this;
 		};
 
 		//Implementation of API method
@@ -727,9 +764,8 @@ sap.ui.define(['jquery.sap.global', './ActionBar', './Overlay', './ThingViewer',
 			}
 			return this;
 		};
-	}());
 
 
 	return ThingInspector;
 
-}, /* bExport= */ true);
+});

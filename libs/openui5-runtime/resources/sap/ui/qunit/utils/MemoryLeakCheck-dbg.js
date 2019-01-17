@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -10,9 +10,13 @@ sap.ui.define([ 'jquery.sap.global', 'sap/ui/core/Core', 'sap/ui/base/Object', '
 		function(jQuery, Core, BaseObject, Control) {
 	"use strict";
 
+	//TODO: global jquery call found
 	jQuery.sap.require("sap.ui.qunit.qunit-css");
+	//TODO: global jquery call found
 	jQuery.sap.require("sap.ui.thirdparty.qunit");
+	//TODO: global jquery call found
 	jQuery.sap.require("sap.ui.qunit.qunit-junit");
+	//TODO: global jquery call found
 	jQuery.sap.require("sap.ui.qunit.qunit-coverage");
 
 	QUnit.config.reorder = false;   // make sure results are consistent/stable and the "statistics" test in the end is actually run in the end
@@ -20,11 +24,12 @@ sap.ui.define([ 'jquery.sap.global', 'sap/ui/core/Core', 'sap/ui/base/Object', '
 
 
 	/**
-	 * @namespace
 	 * <code>sap.ui.qunit.utils.MemoryLeakCheck</code> is a utility for finding controls that leak references to other controls. See the <code>checkControl</code> method for usage instructions.
 	 *
+	 * @namespace
+	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @public
 	 * @since 1.48.0
@@ -55,13 +60,13 @@ sap.ui.define([ 'jquery.sap.global', 'sap/ui/core/Core', 'sap/ui/base/Object', '
 		var mProperties = oControl.getMetadata().getAllProperties();
 
 		for (var sPropertyName in mProperties) {
-			var oProperty = mProperties[sPropertyName];
-			try {
-				if (oControl[oProperty._sGetter]() === oProperty.getDefaultValue()) { // if no value has been set yet by the control factory  TODO: use "isPropertyInitial", once available
+			if (oControl.isPropertyInitial(sPropertyName)) { // if no value has been set yet by the control factory
+				var oProperty = mProperties[sPropertyName];
+				try {
 					oControl[oProperty._sMutator]("dummyValueForMemLeakTest"); // just try a string for everything now, TODO: check type
+				} catch (e) {
+					// type check error, ignore (we stupidly always try with a string, even if the property has a different type)
 				}
-			} catch (e) {
-				// type check error, ignore (we stupidly always try with a string, even if the property has a different type)
 			}
 		}
 		if (!oControl.getTooltip()) {
@@ -215,10 +220,11 @@ sap.ui.define([ 'jquery.sap.global', 'sap/ui/core/Core', 'sap/ui/base/Object', '
 			beforeEach: function() { // not needed before EACH, because there is only one test creating controls right now, but 1.) "before" is never called and 2.) there might be more later.
 				mOriginalElements = getAllAliveControls();
 			},
-			afterEach: function() {
+			afterEach: function(assert) {
 				for (var sId in MemoryLeakCheck.oCore.mElements) {
 					if (!mOriginalElements[sId]) {
 						var oControl = sap.ui.getCore().byId(sId);
+						assert.ok(oControl.getMetadata().getName(), "Cleanup of id: " + sId + ", control: " + oControl.getMetadata().getName());
 						oControl.destroy();
 					}
 				}

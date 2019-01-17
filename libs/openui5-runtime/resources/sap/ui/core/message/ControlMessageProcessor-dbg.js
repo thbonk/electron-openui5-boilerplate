@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides the implementation for the ControlControlMessageProcessor implementations
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/message/MessageProcessor'],
-	function(jQuery, MessageProcessor) {
+sap.ui.define(['sap/ui/core/message/MessageProcessor', "sap/ui/thirdparty/jquery"],
+	function(MessageProcessor, jQuery) {
 	"use strict";
 
 
@@ -23,15 +23,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/message/MessageProcessor'],
 	 * @class
 	 * The ControlMessageProcessor implementation.
 	 * This MessageProcessor is able to handle Messages with the following target syntax:
-	 * 		'ControlID/PropertyName'
+	 * 		'ControlID/PropertyName'.
 	 * Creating an instance of this class using the "new" keyword always results in the same instance (Singleton).
 	 *
 	 * @extends sap.ui.core.message.MessageProcessor
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
-	 * @constructor
 	 * @public
 	 * @alias sap.ui.core.message.ControlMessageProcessor
 	 */
@@ -82,8 +81,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/message/MessageProcessor'],
 		//check messages
 		jQuery.each(mMessages, function(sTarget) {
 			var oBinding,
-				aParts = sTarget.split('/'),
-				oControl = sap.ui.getCore().byId(aParts[0]);
+				oControl,
+				aParts = sTarget.split('/');
+
+			// when target starts with a slash we shift the array
+			if (!aParts[0]) {
+				aParts.shift();
+			}
+			oControl = sap.ui.getCore().byId(aParts[0]);
 
 			//if control does not exist: nothing to do
 			if  (!oControl) {

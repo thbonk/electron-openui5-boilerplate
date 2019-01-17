@@ -1,18 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // A renderer for the DOM element control
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define(["sap/base/security/encodeXML"],
+	function(encodeXML) {
 	"use strict";
 
 
 	/**
-	 * @class DOM element renderer.
-	 * @static
+	 * DOM element renderer.
+	 * @namespace
 	 * @alias sap.ui.core.tmpl.DOMElementRenderer
 	 */
 	var DOMElementRenderer = {};
@@ -27,6 +27,7 @@ sap.ui.define(['jquery.sap.global'],
 	 * @param {sap.ui.core.Control}
 	 *            oElement Object representation of the DOM element that should be
 	 *            rendered
+	 * @deprecated since 1.56
 	 */
 	DOMElementRenderer.render = function(oRM, oElement) {
 
@@ -44,7 +45,7 @@ sap.ui.define(['jquery.sap.global'],
 				aClasses.forEach(function(sClass) {
 					var sClass = sClass.trim();
 					if (sClass) {
-						oRM.addClass(jQuery.sap.encodeHTML(sClass));
+						oRM.addClass(encodeXML(sClass));
 					}
 				});
 			} else if (sName === "style") {
@@ -55,11 +56,11 @@ sap.ui.define(['jquery.sap.global'],
 					if (iIndex != -1) {
 						var sKey = sStyle.substring(0, iIndex).trim();
 						var sValue = sStyle.substring(iIndex + 1).trim();
-						oRM.addStyle(jQuery.sap.encodeHTML(sKey), jQuery.sap.encodeHTML(sValue));
+						oRM.addStyle(encodeXML(sKey), encodeXML(sValue));
 					}
 				});
 			} else {
-				oRM.writeAttributeEscaped(jQuery.sap.encodeHTML(oAttribute.getName()), oAttribute.getValue());
+				oRM.writeAttributeEscaped(encodeXML(oAttribute.getName()), oAttribute.getValue());
 			}
 		});
 

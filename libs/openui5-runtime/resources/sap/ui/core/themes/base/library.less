@@ -2,7 +2,7 @@
 
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -302,6 +302,9 @@ link[id^="sap-ui-theme-"]::after,
 .sapUiPseudoInvisibleText {
 	position: absolute !important;
 	clip: rect(1px, 1px, 1px, 1px);
+	user-select: none;
+	left: 0;
+	top: 0;
 }
 
 /* CSS classes for bridging two buttons in the technical info dialog */
@@ -371,6 +374,81 @@ link[id^="sap-ui-theme-"]::after,
 }
 /* END "BusyIndicator.less" */
 
+/* START "DragAndDrop.less" */
+.sapUiDnDDragging {
+	opacity: 0.5;
+}
+
+.sapUiDnDGhostContainer {
+	position: absolute;
+	top: -9999px;
+	left: -9999px;
+}
+
+.sapUiDnDIndicator {
+	position: absolute;
+	pointer-events: none;
+	z-index: 99;
+
+	&[data-drop-position=Between] {
+		background: @sapUiDragAndDropActiveBorderColor;
+
+		&:before {
+			content: "";
+			position: absolute;
+			width: 0.25rem;
+			height: 0.25rem;
+			border-radius: 0.25rem;
+			border: 0.125rem solid @sapUiDragAndDropActiveBorderColor;
+			background: @sapUiWhiteBG;
+			pointer-events: none;
+		}
+
+		&[data-drop-layout=Vertical] {
+			height: 0.125rem;
+
+			&:before {
+				top: -0.175rem;
+			}
+
+			&:before {
+				left: 0;
+			}
+		}
+
+		&[data-drop-layout=Horizontal] {
+			width: 0.125rem;
+
+			&:before {
+				left: -0.175rem;
+			}
+
+			&:before {
+				top: 0;
+			}
+		}
+	}
+
+	&[data-drop-position=On] {
+		background: @sapUiDragAndDropActiveBackground;
+		border: 0.125rem solid @sapUiDragAndDropActiveBorderColor;
+		box-sizing: border-box;
+	}
+}
+
+[data-sap-ui-draggable=true] {
+	cursor: grab;
+	cursor: -moz-grab;
+	cursor: -webkit-grab;
+}
+
+[data-sap-ui-draggable=true]:active {
+	cursor: grabbing;
+	cursor: -moz-grabbing;
+	cursor: -webkit-grabbing;
+}
+/* END "DragAndDrop.less" */
+
 /* START "Icon.less" */
 /* ================================= */
 /* CSS for control sap.ui.core/Icon  */
@@ -383,6 +461,7 @@ link[id^="sap-ui-theme-"]::after,
 	text-align: center;
 	display: inline-block;
 	vertical-align: baseline;
+	line-height: 1;
 }
 
 .sapUiIconPointer {
@@ -450,6 +529,10 @@ html[dir=rtl] .sapUiIconMirrorInRTL:not(.sapUiIconSuppressMirrorInRTL) {
 .sapUiIconColorDefault {
 	color: @sapUiContentIconColor;
 }
+
+.sapUiIconColorContrast {
+	color: @sapUiContentContrastIconColor;
+}
 /* END "Icon.less" */
 
 /* START "LocalBusyIndicator.less" */
@@ -468,21 +551,38 @@ html[dir=rtl] .sapUiIconMirrorInRTL:not(.sapUiIconSuppressMirrorInRTL) {
 @_sap_ui_core_LocalBusyIndicator_SizeMedium: 1rem;
 @_sap_ui_core_LocalBusyIndicator_SizeBig: 2rem;
 
-.sapUiLocalBusyIndicator {
+.sapUiBlockLayer, .sapUiLocalBusyIndicator {
 	background-color: @_sap_ui_core_LocalBusyIndicator_Background;
 	position: absolute;
 	top: 0;
 	left: 0;
 	bottom: 0;
 	right: 0;
+}
 
+.sapUiLocalBusyIndicator {
 	opacity: 0;
 	transition: opacity 0.3s ease-in;
 	-webkit-transition: opacity 0.3s ease-in;
+
+	&:focus {
+		outline: 1px dotted @sapUiContentFocusColor;
+		html[data-sap-ui-browser^="ie"] & {
+			outline-style: dashed;
+		}
+	}
 }
 
-/* Make sure busy indicators are not "nested", and the animations do not overlay each other */
-.sapUiLocalBusy .sapUiLocalBusy .sapUiLocalBusyIndicator {
+.sapUiBlockLayer:not(:last-child) {
+	display: none;
+}
+
+//  Make sure blocked layers are not "nested", and in case of busy indicators the animations do not overlay each other
+.sapUiLocalBusy .sapUiLocalBusy .sapUiBlockLayer {
+	display: none;
+}
+
+.sapUiHiddenBusyIndicatorAnimation .sapUiLocalBusyIndicatorAnimation {
 	display: none;
 }
 

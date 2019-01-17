@@ -1,12 +1,17 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.core.format.FileSizeFormat
-sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/core/Locale', 'sap/ui/core/LocaleData', 'sap/ui/core/format/NumberFormat'],
-	function(jQuery, BaseObject, Locale, LocaleData, NumberFormat) {
+sap.ui.define([
+	'sap/ui/base/Object',
+	'sap/ui/core/Locale',
+	'sap/ui/core/LocaleData',
+	'sap/ui/core/format/NumberFormat'
+],
+	function(BaseObject, Locale, LocaleData, NumberFormat) {
 	"use strict";
 
 
@@ -48,6 +53,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/core/Locale', 
 	 * </ul>
 	 *
 	 * @public
+	 * @hideconstructor
 	 * @alias sap.ui.core.format.FileSizeFormat
 	 * @extends sap.ui.base.Object
 	 */
@@ -205,19 +211,19 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/core/Locale', 
 		var sPattern = oBundle.getText("FileSize." + sUnit),
 			_oPattern;
 
-		if (jQuery.sap.startsWith(sPattern, "{0}")) {
+		if (sPattern.startsWith("{0}")) {
 			_oPattern = sPattern.substr(3, sPattern.length);
-			if (jQuery.sap.endsWithIgnoreCase(sValue, _oPattern)) {
+			if ((typeof _oPattern == "string" && _oPattern != "" ? sValue.toLowerCase().endsWith(_oPattern.toLowerCase()) : false)) {
 				return sValue.substr(0, sValue.length - _oPattern.length);
 			}
-		} else if (jQuery.sap.endsWith(sPattern, "{0}")) {
+		} else if (sPattern.endsWith("{0}")) {
 			_oPattern = sPattern.substr(0, sPattern.length - 3);
-			if (jQuery.sap.startsWithIgnoreCase(sValue, _oPattern)) {
+			if ((typeof _oPattern == "string" && _oPattern != "" ? sValue.toLowerCase().startsWith(_oPattern.toLowerCase()) : false)) {
 				return sValue.substr(_oPattern.length, sValue.length);
 			}
 		} else {
 			_oPattern = sPattern.split("{0}");
-			if (_oPattern.length == 2 && jQuery.sap.startsWithIgnoreCase(sValue, _oPattern[0]) && jQuery.sap.endsWithIgnoreCase(sValue, _oPattern[1])) {
+			if (_oPattern.length == 2 && ((typeof _oPattern[0] == "string" && _oPattern[0] != "" ? sValue.toLowerCase().startsWith(_oPattern[0].toLowerCase()) : false)) && ((typeof _oPattern[1] == "string" && _oPattern[1] != "" ? sValue.toLowerCase().endsWith(_oPattern[1].toLowerCase()) : false))) {
 				return sValue.substr(_oPattern[0].length, sValue.length - _oPattern[1].length);
 			}
 		}

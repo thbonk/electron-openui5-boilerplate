@@ -1,15 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 /**
  * Initialization Code and shared classes of library sap.ui.layout.
  */
-sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
+sap.ui.define([
+	'sap/ui/base/DataType',
 	'sap/ui/core/library'], // library dependency
-	function(jQuery, DataType) {
+	function(DataType, library) {
 
 	"use strict";
 
@@ -19,15 +20,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @namespace
 	 * @name sap.ui.layout
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @public
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.layout",
-		version: "1.50.6",
-		dependencies : ["sap.ui.core"],
+		version: "1.61.2",
+		dependencies: ["sap.ui.core"],
+		designtime: "sap/ui/layout/designtime/library.designtime",
 		types: [
 			"sap.ui.layout.BackgroundDesign",
 			"sap.ui.layout.GridIndent",
@@ -35,9 +37,19 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 			"sap.ui.layout.GridSpan",
 			"sap.ui.layout.BlockBackgroundType",
 			"sap.ui.layout.form.GridElementCells",
-			"sap.ui.layout.form.SimpleFormLayout"
+			"sap.ui.layout.form.SimpleFormLayout",
+			"sap.ui.layout.form.ColumnsXL",
+			"sap.ui.layout.form.ColumnsL",
+			"sap.ui.layout.form.ColumnsM",
+			"sap.ui.layout.form.ColumnCells",
+			"sap.ui.layout.form.EmptyCells",
+			"sap.ui.layout.cssgrid.CSSGridTrack",
+			"sap.ui.layout.cssgrid.CSSGridLine",
+			"sap.ui.layout.cssgrid.CSSGridGapShortHand"
 		],
-		interfaces: [],
+		interfaces: [
+			"sap.ui.layout.cssgrid.IGridConfigurable"
+		],
 		controls: [
 			"sap.ui.layout.AlignedFlowLayout",
 			"sap.ui.layout.DynamicSideContent",
@@ -55,9 +67,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 			"sap.ui.layout.form.Form",
 			"sap.ui.layout.form.FormLayout",
 			"sap.ui.layout.form.GridLayout",
+			"sap.ui.layout.form.ColumnLayout",
 			"sap.ui.layout.form.ResponsiveGridLayout",
 			"sap.ui.layout.form.ResponsiveLayout",
-			"sap.ui.layout.form.SimpleForm"
+			"sap.ui.layout.form.SimpleForm",
+			"sap.ui.layout.cssgrid.CSSGrid"
 		],
 		elements: [
 			"sap.ui.layout.GridData",
@@ -68,12 +82,34 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 			"sap.ui.layout.form.GridContainerData",
 			"sap.ui.layout.PaneContainer",
 			"sap.ui.layout.SplitPane",
-			"sap.ui.layout.form.GridElementData"
+			"sap.ui.layout.form.GridElementData",
+			"sap.ui.layout.form.ColumnElementData",
+			"sap.ui.layout.form.ColumnContainerData",
+			"sap.ui.layout.cssgrid.GridItemLayoutData"
 		],
 		extensions: {
 			flChangeHandlers: {
+				"sap.ui.layout.BlockLayout": {
+					"moveControls": "default"
+				},
+				"sap.ui.layout.BlockLayoutRow": {
+					"moveControls": "default",
+					"hideControl": "default",
+					"unhideControl": "default"
+				},
+				"sap.ui.layout.BlockLayoutCell": "sap/ui/layout/flexibility/BlockLayoutCell",
+				"sap.ui.layout.DynamicSideContent": {
+					"moveControls": "default",
+					"hideControl": "default",
+					"unhideControl": "default"
+				},
 				"sap.ui.layout.form.SimpleForm": "sap/ui/layout/flexibility/SimpleForm",
 				"sap.ui.layout.Grid": {
+					"moveControls": "default",
+					"hideControl": "default",
+					"unhideControl": "default"
+				},
+				"sap.ui.layout.FixFlex": {
 					"moveControls": "default",
 					"hideControl": "default",
 					"unhideControl": "default"
@@ -86,14 +122,54 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 					"hideControl": "default",
 					"unhideControl": "default"
 				},
+				"sap.ui.layout.Splitter": {
+					"moveControls": "default",
+					"hideControl": "default",
+					"unhideControl": "default"
+				},
 				"sap.ui.layout.VerticalLayout": {
 					"moveControls": "default",
 					"hideControl": "default",
 					"unhideControl": "default"
 				}
+			},
+			//Configuration used for rule loading of Support Assistant
+			"sap.ui.support": {
+				publicRules:true,
+				internalRules:true
 			}
 		}
 	});
+
+	/**
+	 * Defines the functions that need to be implemented by a Control which wants
+	 * to have display:grid behavior via sap.ui.layout.cssgrid.GridLayoutDelegate
+	 *
+	 * @since 1.60.0
+	 * @public
+	 * @interface
+	 * @name sap.ui.layout.cssgrid.IGridConfigurable
+	 */
+
+	/**
+	 * The function is used by GridLayoutDelegate to determine on which HTML Elements the display:grid styles should be applied
+	 *
+	 * @returns {sap.ui.core.Control[]|HTMLElement[]} The controls or HTML elements on which display:grid styles should be applied
+	 * @since 1.60.0
+	 * @public
+	 * @function
+	 * @name sap.ui.layout.cssgrid.IGridConfigurable.getGridDomRefs
+	 */
+
+	/**
+	 * The function is used by GridLayoutDelegate to get the grid layout (display:grid styles) to apply
+	 *
+	 * @returns {sap.ui.layout.cssgrid.GridLayoutBase} The display:grid layout to apply
+	 * @since 1.60.0
+	 * @public
+	 * @function
+	 * @name sap.ui.layout.cssgrid.IGridConfigurable.getGridLayoutConfiguration
+	 */
 
 	/**
 	 * Available Background Design.
@@ -126,7 +202,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	};
 
 	/**
-	 * @classdesc A string type that represents Grid's indent values for large, medium and small screens. Allowed values are separated by space Letters L, M or S followed by number of columns from 1 to 11 that the container has to take, for example: "L2 M4 S6", "M11", "s10" or "l4 m4". Note that the parameters have to be provided in the order large  medium  small.
+	 * @classdesc
+	 * A string type that represents the indent values of the <code>Grid</code> for large, medium and small screens.
+	 *
+	 * Allowed values are separated by space Letters L, M or S followed by number of columns from 1 to 11
+	 * that the container has to take, for example: <code>L2 M4 S6</code>, <code>M11</code>, <code>s10</code>
+	 * or <code>l4 m4</code>.
+	 *
+	 * <b>Note:</b> The parameters must be provided in the order <large medium small>.
 	 *
 	 * @final
 	 * @namespace
@@ -143,7 +226,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	);
 
 	/**
-	 * The position of the Grid. Can be "Left", "Center" or "Right". "Left" is default.
+	 * The position of the {@link sap.ui.layout.Grid}. Can be <code>Left</code> (default), <code>Center</code>
+	 * or <code>Right</code>.
 	 *
 	 * @enum {string}
 	 * @public
@@ -152,19 +236,19 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	sap.ui.layout.GridPosition = {
 
 		/**
-		 * Grid is aligned left.
+		 * <code>Grid</code> is aligned left.
 		 * @public
 		 */
 		Left : "Left",
 
 		/**
-		 * Grid is aligned to the right.
+		 * <code>Grid</code> is aligned to the right.
 		 * @public
 		 */
 		Right : "Right",
 
 		/**
-		 * Grid is centered on the screen.
+		 * <code>Grid</code> is centered on the screen.
 		 * @public
 		 */
 		Center : "Center"
@@ -173,7 +257,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 
 
 	/**
-	 * @classdesc A string type that represents Grid's span values for large, medium and small screens. Allowed values are separated by space Letters L, M or S followed by number of columns from 1 to 12 that the container has to take, for example: "L2 M4 S6", "M12", "s10" or "l4 m4". Note that the parameters have to be provided in the order large  medium  small.
+	 * @classdesc
+	 * A string type that represents the span values of the <code>Grid</code> for large, medium and small screens.
+	 *
+	 * Allowed values are separated by space Letters L, M or S followed by number of columns from 1 to 12
+	 * that the container has to take, for example: <code>L2 M4 S6</code>, <code>M12</code>,
+	 * <code>s10</code> or <code>l4 m4</code>.
+	 *
+	 * <b>Note:</b> The parameters must be provided in the order <large medium small>.
 	 *
 	 * @final
 	 * @namespace
@@ -209,6 +300,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 		Light: "Light",
 		/**
 		 * Background with bright and dark background colors
+		 * @deprecated since 1.50
 		 * @public
 		 */
 		Mixed: "Mixed",
@@ -418,23 +510,30 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	sap.ui.layout.form.SimpleFormLayout = {
 
 		/**
-		 * Uses the <code>ResponsiveLayout</code> to render the <code>SimpleForm</code>
+		 * Uses the <code>ResponsiveLayout</code> layout to render the <code>SimpleForm</code> control
 		 * @public
 		 */
 		ResponsiveLayout : "ResponsiveLayout",
 
 		/**
-		 * Uses the <code>GridLayout</code> to render the <code>SimpleForm</code>
+		 * Uses the <code>GridLayout</code> layout to render the <code>SimpleForm</code> control
 		 * @public
 		 */
 		GridLayout : "GridLayout",
 
 		/**
-		 * Uses the <code>ResponsiveGridLayout</code> to render the <code>SimpleForm</code>
+		 * Uses the <code>ResponsiveGridLayout</code> layout to render the <code>SimpleForm</code> control
 		 * @public
 		 * @since 1.16.0
 		 */
-		ResponsiveGridLayout : "ResponsiveGridLayout"
+		ResponsiveGridLayout : "ResponsiveGridLayout",
+
+		/**
+		 * Uses the <code>ColumnLayout</code> layout to render the <code>SimpleForm</code> control
+		 * @public
+		 * @since 1.56.0
+		 */
+		ColumnLayout : "ColumnLayout"
 
 	};
 
@@ -526,6 +625,132 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 		Begin : "Begin"
 	};
 
+	/**
+	 * @classdesc An <code>int</code> type that defines how many columns a <code>Form</code> control using
+	 * the <code>ColumnLayout</code> as layout can have if it has extra-large size
+	 *
+	 * Allowed values are numbers from 1 to 4.
+	 *
+	 * @final
+	 * @namespace
+	 * @public
+	 * @since 1.56.0
+	 * @ui5-metamodel This simple type also will be described in the UI5 (legacy) designtime metamodel
+	 */
+	sap.ui.layout.form.ColumnsXL = DataType.createType('sap.ui.layout.form.ColumnsXL', {
+		isValid : function(vValue) {
+			if (vValue > 0 && vValue <= 4) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+	},
+	DataType.getType('int')
+	);
+
+	/**
+	 * @classdesc An <code>int</code> type that defines how many columns a <code>Form</code> control using
+	 * the <code>ColumnLayout</code> as layout can have if it has large size
+	 *
+	 * Allowed values are numbers from 1 to 3.
+	 *
+	 * @final
+	 * @namespace
+	 * @public
+	 * @since 1.56.0
+	 * @ui5-metamodel This simple type also will be described in the UI5 (legacy) designtime metamodel
+	 */
+	sap.ui.layout.form.ColumnsL = DataType.createType('sap.ui.layout.form.ColumnsL', {
+		isValid : function(vValue) {
+			if (vValue > 0 && vValue <= 3) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+	},
+	DataType.getType('int')
+	);
+
+	/**
+	 * @classdesc An <code>int</code> type that defines how many columns a <code>Form</code> control using
+	 * the <code>ColumnLayout</code> as layout can have if it has medium size
+	 *
+	 * Allowed values are numbers from 1 to 2.
+	 *
+	 * @final
+	 * @namespace
+	 * @public
+	 * @since 1.56.0
+	 * @ui5-metamodel This simple type also will be described in the UI5 (legacy) designtime metamodel
+	 */
+	sap.ui.layout.form.ColumnsM = DataType.createType('sap.ui.layout.form.ColumnsM', {
+		isValid : function(vValue) {
+			if (vValue > 0 && vValue <= 2) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+	},
+	DataType.getType('int')
+	);
+
+	/**
+	 * @classdesc An <code>int</code> type that defines how many cells a control inside of a column
+	 * of a <code>Form</code> control using the <code>ColumnLayout</code> control as layout can use.
+	 *
+	 * Allowed values are numbers from 1 to 12.
+	 *
+	 * @final
+	 * @namespace
+	 * @public
+	 * @since 1.56.0
+	 * @ui5-metamodel This simple type also will be described in the UI5 (legacy) designtime metamodel
+	 */
+	sap.ui.layout.form.ColumnCells = DataType.createType('sap.ui.layout.form.ColumnCells', {
+		isValid : function(vValue) {
+			if (vValue > 0 && vValue <= 12) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+	},
+	DataType.getType('int')
+	);
+
+	/**
+	 * @classdesc An <code>int</code> type that defines how many cells beside the controls
+	 * inside of a column of a <code>Form</code> control using the <code>ColumnLayout</code> control as layout
+	 * are empty.
+	 *
+	 * Allowed values are numbers from 0 to 11.
+	 *
+	 * @final
+	 * @namespace
+	 * @public
+	 * @since 1.56.0
+	 * @ui5-metamodel This simple type also will be described in the UI5 (legacy) designtime metamodel
+	 */
+	sap.ui.layout.form.EmptyCells = DataType.createType('sap.ui.layout.form.EmptyCells', {
+		isValid : function(vValue) {
+			if (vValue >= 0 && vValue < 12) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+	},
+	DataType.getType('int')
+	);
+
 	// factory for Form to create labels and buttons to be overwritten by commons and mobile library
 	if (!sap.ui.layout.form.FormHelper) {
 		sap.ui.layout.form.FormHelper = {
@@ -538,6 +763,165 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 			bFinal: false /* if true, the helper must not be overwritten by an other library */
 		};
 	}
+
+	if (!sap.ui.layout.GridHelper) {
+		sap.ui.layout.GridHelper = {
+			getLibrarySpecificClass: function () {
+				return "";
+			},
+			bFinal: false /* if true, the helper must not be overwritten by an other library */
+		};
+	}
+
+	/**
+	 * @classdesc A string type that represents a grid track (the space between two grid lines)
+	 *
+	 * @see {@link https://developer.mozilla.org/en-US/docs/Glossary/Grid_tracks}
+	 * @since 1.60.0
+	 * @public
+	 * @namespace
+	 * @final
+	 * @ui5-metamodel This simple type will also be described in the UI5 (legacy) designtime metamodel
+	 */
+	sap.ui.layout.cssgrid.CSSGridTrack = DataType.createType("sap.ui.layout.cssgrid.CSSGridTrack", {
+			isValid: function (sValue) {
+				var sCSSSizeRegex = /(auto|inherit|(([0-9]+|[0-9]*\.[0-9]+)([rR][eE][mM]|[eE][mM]|[eE][xX]|[pP][xX]|[cC][mM]|[mM][mM]|[iI][nN]|[pP][tT]|[pP][cC]|[vV][wW]|[vV][hH]|[vV][mM][iI][nN]|[vV][mM][aA][xX]|%))|calc\(\s*(\(\s*)*[-+]?(([0-9]+|[0-9]*\.[0-9]+)([rR][eE][mM]|[eE][mM]|[eE][xX]|[pP][xX]|[cC][mM]|[mM][mM]|[iI][nN]|[pP][tT]|[pP][cC]|[vV][wW]|[vV][hH]|[vV][mM][iI][nN]|[vV][mM][aA][xX]|%)?)(\s*(\)\s*)*(\s[-+]\s|[*\/])\s*(\(\s*)*([-+]?(([0-9]+|[0-9]*\.[0-9]+)([rR][eE][mM]|[eE][mM]|[eE][xX]|[pP][xX]|[cC][mM]|[mM][mM]|[iI][nN]|[pP][tT]|[pP][cC]|[vV][wW]|[vV][hH]|[vV][mM][iI][nN]|[vV][mM][aA][xX]|%)?)))*\s*(\)\s*)*\))/g;
+
+				// Remove valid keywords that can be used as part of a grid track property value
+				sValue = sValue.replace(/(minmax|repeat|fit-content|max-content|min-content|auto-fill|auto-fit|fr|min|max)/g, "");
+				// Remove valid CSSSizes
+				sValue = sValue.replace(sCSSSizeRegex, "");
+				// Remove expression syntax
+				sValue = sValue.replace(/\(|\)|\+|\-|\*|\/|calc|\%|\,/g, "");
+				// Remove any number leftovers which are not CSSSizes
+				sValue = sValue.replace(/[0-9]/g, "");
+				// Remove whitespace
+				sValue = sValue.replace(/\s/g, "");
+
+				return sValue.length === 0;
+			},
+			parseValue: function (sValue) {
+				return sValue.trim().split(/\s+/).join(" ");
+			}
+		},
+		DataType.getType("string")
+	);
+
+	/**
+	 * @classdesc A string type that represents a short hand CSS grid gap.
+	 *
+	 * @since 1.60.0
+	 * @public
+	 * @namespace
+	 * @final
+	 * @ui5-metamodel This simple type will also be described in the UI5 (legacy) designtime metamodel
+	 */
+	sap.ui.layout.cssgrid.CSSGridGapShortHand = DataType.createType("sap.ui.layout.cssgrid.CSSGridGapShortHand", {
+			isValid: function (vValue) {
+				var bResult = true,
+					aValues = vValue.split(/\s+/);
+
+				aValues.forEach(function (sValue) {
+					if (!library.CSSSize.isValid(sValue)) {
+						bResult = false;
+					}
+				});
+
+				return bResult;
+			},
+			parseValue: function (sValue) {
+				return sValue.trim().split(/\s+/).join(" ");
+			}
+		},
+		DataType.getType("string")
+	);
+
+	/**
+	 * @classdesc A string type that represents one or two grid lines. Used to define the position and size of a single grid item.
+	 *
+	 * Valid values:
+	 * auto
+	 * inherit
+	 * 1
+	 * span 2
+	 * span 2 / 5
+	 * span 2 / -5
+	 * 5 / 7
+	 * 7 / span 5
+	 * span 7 / span 5
+	 *
+	 * @see {@link https://developer.mozilla.org/en-US/docs/Glossary/Grid_lines}
+	 * @since 1.60.0
+	 * @public
+	 * @namespace
+	 * @final
+	 * @ui5-metamodel This simple type will also be described in the UI5 (legacy) designtime metamodel
+	 */
+	sap.ui.layout.cssgrid.CSSGridLine = DataType.createType("sap.ui.layout.cssgrid.CSSGridLine", {
+			isValid: function (sValue) {
+				return /^(auto|inherit|((span)?(\s)?-?[0-9]+(\s\/\s(span)?(\s)?-?[0-9]*)?)?)$/.test(sValue);
+			}
+		},
+		DataType.getType("string")
+	);
+
+	/**
+	 * A string type that is used for CSS grid to control how the auto-placement algorithm works,
+	 * specifying exactly how auto-placed items get flowed into the grid.
+	 *
+	 * @see {@link https://developer.mozilla.org/en-US/docs/Web/CSS/grid-auto-flow}
+	 * @enum {string}
+	 * @since 1.60.0
+	 * @public
+	 * @ui5-metamodel This simple type will also be described in the UI5 (legacy) designtime metamodel
+	 */
+	sap.ui.layout.cssgrid.CSSGridAutoFlow = {
+
+		/**
+		 * Insert auto-placed items by filling each row.
+		 * @public
+		 */
+		Row: "Row",
+
+		/**
+		 * Insert auto-placed items by filling each column.
+		 * @public
+		 */
+		Column: "Column",
+
+		/**
+		 * Insert auto-placed items by filling each row, and fill any holes in the grid.
+		 * @public
+		 */
+		RowDense: "RowDense",
+
+		/**
+		 * Insert auto-placed items by filling each column, and fill any holes in the grid.
+		 * @public
+		 */
+		ColumnDense: "ColumnDense"
+	};
+
+	/**
+	 * @classdesc A string type that represents how many boxes per row should be displayed for each screen size. The breakpoints are for extra large (XL), large (L), medium (M) and small (S) screen sizes.
+	 *
+	 * <b>Note:</b> The parameters must be provided in the order <XL L M S>.
+	 *
+	 * @example <code>XL7 L6 M4 S2</code>
+	 * @example <code>XL12 L12 M12 S1</code>
+	 * @since 1.61.0
+	 * @public
+	 * @namespace
+	 * @final
+	 * @ui5-metamodel This simple type will also be described in the UI5 (legacy) designtime metamodel
+	 */
+	sap.ui.layout.BoxesPerRowConfig = DataType.createType("sap.ui.layout.BoxesPerRowConfig", {
+			isValid : function(vValue) {
+				return /^(([Xx][Ll](?:[1-9]|1[0-2]))? ?([Ll](?:[1-9]|1[0-2]))? ?([Mm](?:[1-9]|1[0-2]))? ?([Ss](?:[1-9]|1[0-2]))?)$/.test(vValue);
+			}
+		},
+		DataType.getType("string")
+	);
 
 	return sap.ui.layout;
 

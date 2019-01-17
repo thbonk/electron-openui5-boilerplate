@@ -1,12 +1,15 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './library'],
-	function(jQuery, library) {
+sap.ui.define(['./library', 'sap/ui/core/library', "sap/base/Log"],
+	function(library, coreLibrary, Log) {
 		"use strict";
+
+		// shortcut for sap.ui.core.TitleLevel
+		var TitleLevel = coreLibrary.TitleLevel;
 
 		var BlockLayoutCellRenderer = {};
 
@@ -37,7 +40,7 @@ sap.ui.define(['jquery.sap.global', './library'],
 			if (!sColorSet && !sColorIndex) {
 				return "";
 			} else if (( sColorSet && !sColorIndex ) || ( !sColorSet && sColorIndex )) { // XOR check. Both values need to be either defined or not defined.
-				jQuery.sap.log.warning("Both, backgroundColorSet and backgroundColorShade should be defined. ColoSet is not applied to " + oBlockLayoutCell.getId() + ".");
+				Log.warning("Both, backgroundColorSet and backgroundColorShade should be defined. ColoSet is not applied to " + oBlockLayoutCell.getId() + ".");
 				return "";
 			}
 
@@ -66,7 +69,11 @@ sap.ui.define(['jquery.sap.global', './library'],
 		};
 
 		BlockLayoutCellRenderer.addTitle = function (rm, blockLayoutCell) {
-			if (blockLayoutCell.getTitle()) {
+			var oTitleLink = blockLayoutCell.getTitleLink();
+
+			var sTitleText = blockLayoutCell.getTitle();
+
+			if (sTitleText || oTitleLink) {
 				var alignmentClass = "sapUiBlockCell" + blockLayoutCell.getTitleAlignment(),
 					titleClass = "sapUiBlockCellTitle " + alignmentClass;
 
@@ -76,11 +83,17 @@ sap.ui.define(['jquery.sap.global', './library'],
 				}
 
 				var level = blockLayoutCell.getTitleLevel(),
-					autoLevel = level === sap.ui.core.TitleLevel.Auto,
+					autoLevel = level === TitleLevel.Auto,
 					tag = autoLevel ? "h2" : level;
 
 				rm.write("<" + tag + " id='" + this.getTitleId(blockLayoutCell) + "' class='" + titleClass + "'>");
-				rm.writeEscaped(blockLayoutCell.getTitle());
+
+				if (oTitleLink) {
+					rm.renderControl(oTitleLink);
+				} else {
+					rm.writeEscaped(sTitleText);
+				}
+
 				rm.write("</" + tag + ">");
 			}
 		};
@@ -99,7 +112,7 @@ sap.ui.define(['jquery.sap.global', './library'],
 
 			rm.write("<div class='" + contentClass + "' aria-labelledby='" + this.getTitleId(blockLayoutCell) +  "' >");
 			this.addTitle(rm, blockLayoutCell);
-			content.forEach(rm.renderControl);
+			content.forEach(rm.renderControl, rm);
 			rm.write("</div>");
 		};
 
@@ -108,5 +121,4 @@ sap.ui.define(['jquery.sap.global', './library'],
 		};
 
 		return BlockLayoutCellRenderer;
-
 	}, /* bExport= */ true);

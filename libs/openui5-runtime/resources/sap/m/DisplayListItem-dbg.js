@@ -1,13 +1,22 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.DisplayListItem.
-sap.ui.define(['jquery.sap.global', './ListItemBase', './library'],
-	function(jQuery, ListItemBase, library) {
+sap.ui.define([
+	"sap/ui/core/library",
+	"./library",
+	"./ListItemBase",
+	"./DisplayListItemRenderer"
+],
+	function(coreLibrary, library, ListItemBase, DisplayListItemRenderer) {
 	"use strict";
+
+
+	// shortcut for sap.ui.core.TextDirection
+	var TextDirection = coreLibrary.TextDirection;
 
 
 	/**
@@ -21,7 +30,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library'],
 	 * @extends sap.m.ListItemBase
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -47,7 +56,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library'],
 			 * Defines the <code>value</code> text directionality with enumerated options. By default, the control inherits text direction from the DOM.
 			 * @since 1.28.0
 			 */
-			valueTextDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : sap.ui.core.TextDirection.Inherit}
+			valueTextDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : TextDirection.Inherit}
 		}
 	}});
 
@@ -57,4 +66,4 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library'],
 
 	return DisplayListItem;
 
-}, /* bExport= */ true);
+});

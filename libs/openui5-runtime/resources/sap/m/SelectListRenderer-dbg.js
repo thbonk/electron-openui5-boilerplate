@@ -1,10 +1,10 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define(["sap/ui/core/Element", "sap/ui/core/Icon", "sap/ui/core/IconPool", "sap/ui/Device"],
+	function(Element, Icon, IconPool, Device) {
 		"use strict";
 
 		/**
@@ -70,16 +70,24 @@ sap.ui.define(['jquery.sap.global'],
 		 * @param {sap.ui.core.Control} oList An object representation of the control that should be rendered.
 		 */
 		SelectListRenderer.renderItems = function(oRm, oList) {
-			var iSize = oList.getItems().length,
-				oSelectedItem = oList.getSelectedItem();
+			var iSize = oList._getNonSeparatorItemsCount(),
+				aItems = oList.getItems(),
+				oSelectedItem = oList.getSelectedItem(),
+				iCurrentPosInSet = 1,
+				oItemStates;
 
-			for (var i = 0, aItems = oList.getItems(); i < aItems.length; i++) {
-				this.renderItem(oRm, oList, aItems[i], {
+			for (var i = 0; i < aItems.length; i++) {
+				oItemStates = {
 					selected: oSelectedItem === aItems[i],
 					setsize: iSize,
-					posinset: i + 1,
 					elementData: true
-				});
+				};
+
+				if (!(aItems[i] instanceof sap.ui.core.SeparatorItem)) {
+					oItemStates.posinset = iCurrentPosInSet++;
+				}
+
+				this.renderItem(oRm, oList, aItems[i], oItemStates);
 			}
 		};
 
@@ -93,7 +101,7 @@ sap.ui.define(['jquery.sap.global'],
 		 */
 		SelectListRenderer.renderItem = function(oRm, oList, oItem, mStates) {
 
-			if (!(oItem instanceof sap.ui.core.Element)) {
+			if (!(oItem instanceof Element)) {
 				return;
 			}
 
@@ -133,7 +141,7 @@ sap.ui.define(['jquery.sap.global'],
 					oRm.addClass(CSS_CLASS + "ItemBaseDisabled");
 				}
 
-				if (bEnabled && sap.ui.Device.system.desktop) {
+				if (bEnabled && Device.system.desktop) {
 					oRm.addClass(CSS_CLASS + "ItemBaseHoverable");
 				}
 
@@ -162,7 +170,11 @@ sap.ui.define(['jquery.sap.global'],
 				oRm.addClass(CSS_CLASS + "Cell");
 				oRm.addClass(CSS_CLASS + "FirstCell");
 				oRm.writeClasses();
+				oRm.writeAttribute("disabled", "disabled"); // fixes span obtaining focus in IE
 				oRm.write(">");
+
+				this._renderIcon(oRm, oItem);
+
 				oRm.writeEscaped(oItem.getText());
 				oRm.write("</span>");
 
@@ -170,6 +182,7 @@ sap.ui.define(['jquery.sap.global'],
 				oRm.addClass(CSS_CLASS + "Cell");
 				oRm.addClass(CSS_CLASS + "LastCell");
 				oRm.writeClasses();
+				oRm.writeAttribute("disabled", "disabled"); // fixes span obtaining focus in IE
 				oRm.write(">");
 
 				if (typeof oItem.getAdditionalText === "function") {
@@ -178,6 +191,8 @@ sap.ui.define(['jquery.sap.global'],
 
 				oRm.write("</span>");
 			} else {
+				this._renderIcon(oRm, oItem);
+
 				oRm.writeEscaped(oItem.getText());
 			}
 
@@ -207,14 +222,34 @@ sap.ui.define(['jquery.sap.global'],
 		 * @param {object} mStates
 		 */
 		SelectListRenderer.writeItemAccessibilityState = function(oRm, oList, oItem, mStates) {
-			var sRole = (oItem instanceof sap.ui.core.SeparatorItem) ? "separator" : "option";
+			var sRole = (oItem.isA("sap.ui.core.SeparatorItem")) ? "separator" : "option";
+
+			var sDesc;
+
+			if (!oItem.getText() && oItem.getIcon && oItem.getIcon()) {
+				var oIconInfo = IconPool.getIconInfo(oItem.getIcon());
+				if (oIconInfo) {
+					sDesc = oIconInfo.text || oIconInfo.name;
+				}
+			}
 
 			oRm.writeAccessibilityState(oItem, {
 				role: sRole,
 				selected: mStates.selected,
 				setsize: mStates.setsize,
-				posinset: mStates.posinset
+				posinset: mStates.posinset,
+				label: sDesc
 			});
+		};
+
+		SelectListRenderer._renderIcon = function(oRm, oItem) {
+			if (oItem.getIcon && oItem.getIcon()) {
+				var oIcon = new Icon({src: oItem.getIcon()});
+
+				oIcon.addStyleClass("sapMSelectListItemIcon");
+
+				oRm.renderControl(oIcon);
+			}
 		};
 
 		return SelectListRenderer;

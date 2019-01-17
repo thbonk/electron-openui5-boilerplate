@@ -1,11 +1,13 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './FormLayoutRenderer'],
-	function(jQuery, Renderer, FormLayoutRenderer) {
+sap.ui.define([
+	'sap/ui/core/Renderer',
+	'./FormLayoutRenderer'
+	], function(Renderer, FormLayoutRenderer) {
 	"use strict";
 
 
@@ -22,16 +24,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './FormLayoutRendere
 
 	ResponsiveLayoutRenderer.renderContainers = function(rm, oLayout, oForm){
 
-		var aContainers = oForm.getFormContainers();
-		var aVisibleContainers = [];
-		var iLength = 0;
-		for ( var i = 0; i < aContainers.length; i++) {
-			var oContainer = aContainers[i];
-			if (oContainer.getVisible()) {
-				iLength++;
-				aVisibleContainers.push(oContainer);
-			}
-		}
+		var aVisibleContainers = oForm.getVisibleFormContainers();
+		var iLength = aVisibleContainers.length;
 
 		if (iLength > 0) {
 			// special case: only one container -> do not render an outer ResponsiveFlowLayout

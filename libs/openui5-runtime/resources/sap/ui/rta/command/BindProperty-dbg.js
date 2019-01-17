@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 sap.ui.define([
@@ -26,9 +26,9 @@ sap.ui.define([
 	 *
 	 *
 	 * @class
-	 * @extends sap.ui.base.ManagedObject
+	 * @extends sap.ui.rta.command.FlexCommand
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @constructor
 	 * @private
 	 * @since 1.38
@@ -44,8 +44,7 @@ sap.ui.define([
 					type : "string"
 				},
 				newBinding : {
-					type : "string",
-					bindable : false
+					type : "string"
 				},
 				changeType : {
 					type : "string",

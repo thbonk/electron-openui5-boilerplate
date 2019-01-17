@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides an abstraction for model bindings
-sap.ui.define(['sap/ui/base/Object'],
-	function(BaseObject) {
+sap.ui.define(['sap/ui/base/Object', "sap/base/util/isPlainObject"],
+	function(BaseObject, isPlainObject) {
 	"use strict";
 
 
@@ -21,7 +21,7 @@ sap.ui.define(['sap/ui/base/Object'],
 	 * or by using createBindingContext.
 	 *
 	 * @param {sap.ui.model.Model} oModel the model
-	 * @param {String} sPath the binding path
+	 * @param {string} sPath the binding path
 	 * @abstract
 	 * @public
 	 * @alias sap.ui.model.Context
@@ -35,6 +35,7 @@ sap.ui.define(['sap/ui/base/Object'],
 
 			this.oModel = oModel;
 			this.sPath = sPath;
+			this.bForceRefresh = false;
 
 		},
 
@@ -60,8 +61,8 @@ sap.ui.define(['sap/ui/base/Object'],
 	/**
 	 * Getter for path of the context itself or a subpath
 	 * @public
-	 * @param {String} sPath the binding path
-	 * @return {String} the binding path
+	 * @param {string} [sPath] the binding path (optional)
+	 * @return {string} the binding path
 	 */
 	Context.prototype.getPath = function(sPath) {
 		return this.sPath + (sPath ? "/" + sPath : "");
@@ -70,7 +71,7 @@ sap.ui.define(['sap/ui/base/Object'],
 	/**
 	 * Gets the property with the given relative binding path
 	 * @public
-	 * @param {String} sPath the binding path
+	 * @param {string} sPath the binding path
 	 * @return {any} the property value
 	 */
 	Context.prototype.getProperty = function(sPath) {
@@ -80,16 +81,98 @@ sap.ui.define(['sap/ui/base/Object'],
 	/**
 	 * Gets the (model dependent) object the context points to or the object with the given relative binding path
 	 * @public
-	 * @param {String} [sPath] the binding path
+	 * @param {string} [sPath] the binding path
 	 * @param {object} [mParameters] additional model specific parameters (optional)
 	 * @return {object} the context object
 	 */
 	Context.prototype.getObject = function(sPath, mParameters) {
-		if (jQuery.isPlainObject(sPath)) {
+		if (isPlainObject(sPath)) {
 			mParameters = sPath;
 			sPath = undefined;
 		}
 		return this.oModel.getObject(sPath, this, mParameters);
+	};
+
+	/**
+	 * Sets the force refresh flag of the context. If this is set, the context will force a refresh of dependent
+	 * bindings, when the context is propagated.
+	 * @private
+	 * @param {boolean} bForceRefresh the force refresh flag
+	 */
+	Context.prototype.setForceRefresh = function(bForceRefresh) {
+		this.bForceRefresh = bForceRefresh;
+	};
+
+	/**
+	 * This method returns, whether dependent bindings need to be refreshed.
+	 * @private
+	 * @return {boolean} the force refresh flag
+	 */
+	Context.prototype.isRefreshForced = function() {
+		return this.bForceRefresh;
+	};
+
+	/**
+	 * Sets the preliminary flag of the context. If this is set, the context is not yet linked to actual model
+	 * data, but does just contain path information. This can be used by dependent bindings to send their request
+	 * in parallel to the request of the context binding.
+	 * @private
+	 * @param {boolean} bPreliminary the preliminary flag
+	 */
+	Context.prototype.setPreliminary = function(bPreliminary) {
+		this.bPreliminary = bPreliminary;
+	};
+
+	/**
+	 * This method returns, whether the context is preliminary.
+	 * @private
+	 * @sap-restricted sap.suite.ui.generic
+	 * @return {boolean} the preliminary flag
+	 */
+	Context.prototype.isPreliminary = function() {
+		return this.bPreliminary;
+	};
+
+	/**
+	 * Sets the updated flag of the context. If this is set, the context was updated. E.g. the path changed from
+	 * a preliminary path to the canonical one.
+	 * @private
+	 * @param {boolean} bUpdated the preliminary flag
+	 */
+	Context.prototype.setUpdated = function(bUpdated) {
+		this.bUpdated = bUpdated;
+	};
+
+	/**
+	 * This method returns, whether the context is updated.
+	 * @private
+	 * @return {boolean} the updated flag
+	 */
+	Context.prototype.isUpdated = function() {
+		return this.bUpdated;
+	};
+
+	/**
+	 * Compares the two given Contexts. Returns true if the context instances are not equal,
+	 * if the new context is updated or if the new context is refreshed.
+	 *
+	 * @param {sap.ui.model.Context} oOldContext The old Context
+	 * @param {sap.ui.model.Context} oNewContext The new Context
+	 * @return {boolean} Whether oNewContext has changed
+	 * @private
+	 */
+	Context.hasChanged = function(oOldContext, oNewContext) {
+		var bChanged = false;
+
+		if (oOldContext !== oNewContext) {
+			bChanged = true;
+		} else if (oNewContext && oNewContext.isUpdated()) {
+			bChanged = true;
+		} else if (oNewContext && oNewContext.isRefreshForced()) {
+			bChanged = true;
+		}
+
+		return bChanged;
 	};
 
 	/**
@@ -98,7 +181,6 @@ sap.ui.define(['sap/ui/base/Object'],
 	Context.prototype.toString = function() {
 		return this.sPath;
 	};
-
 
 	return Context;
 

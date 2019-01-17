@@ -1,13 +1,38 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.Button.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/EnabledPropagator', 'sap/ui/core/IconPool', 'sap/ui/Device', 'sap/ui/core/ContextMenuSupport'],
-	function(jQuery, library, Control, EnabledPropagator, IconPool, Device, ContextMenuSupport) {
+sap.ui.define([
+	'./library',
+	'sap/ui/core/Control',
+	'sap/ui/core/EnabledPropagator',
+	'sap/ui/core/IconPool',
+	'sap/ui/Device',
+	'sap/ui/core/ContextMenuSupport',
+	'sap/ui/core/library',
+	'./ButtonRenderer',
+	"sap/ui/events/KeyCodes"
+], function(
+	library,
+	Control,
+	EnabledPropagator,
+	IconPool,
+	Device,
+	ContextMenuSupport,
+	coreLibrary,
+	ButtonRenderer,
+	KeyCodes
+) {
 	"use strict";
+
+	// shortcut for sap.ui.core.TextDirection
+	var TextDirection = coreLibrary.TextDirection;
+
+	// shortcut for sap.m.ButtonType
+	var ButtonType = library.ButtonType;
 
 	/**
 	 * Constructor for a new <code>Button</code>.
@@ -41,11 +66,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @mixes sap.ui.core.ContextMenuSupport
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
 	 * @alias sap.m.Button
+	 * @see {@link fiori:https://experience.sap.com/fiori-design-web/button/ Button}
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var Button = Control.extend("sap.m.Button", /** @lends sap.m.Button.prototype */ { metadata : {
@@ -62,7 +88,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			/**
 			 * Defines the <code>Button</code> type.
 			 */
-			type : {type : "sap.m.ButtonType", group : "Appearance", defaultValue : sap.m.ButtonType.Default},
+			type : {type : "sap.m.ButtonType", group : "Appearance", defaultValue : ButtonType.Default},
 
 			/**
 			 * Defines the <code>Button</code> width.
@@ -104,7 +130,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			 * This property specifies the element's text directionality with enumerated options. By default, the control inherits text direction from the DOM.
 			 * @since 1.28.0
 			 */
-			textDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : sap.ui.core.TextDirection.Inherit}
+			textDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : TextDirection.Inherit}
 		},
 		associations : {
 
@@ -122,7 +148,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 			/**
 			 * Fired when the user taps the control.
-			 * @deprecated As of version 1.20, use the press event instead
+			 * @deprecated as of version 1.20, replaced by <code>press</code> event
 			 */
 			tap : {deprecated: true},
 
@@ -131,7 +157,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			 */
 			press : {}
 		},
-		designTime: true
+		designtime: "sap/m/designtime/Button.designtime"
 	}});
 
 
@@ -273,13 +299,17 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 */
 	Button.prototype.onkeydown = function(oEvent) {
 
-		if (oEvent.which === jQuery.sap.KeyCodes.SPACE || oEvent.which === jQuery.sap.KeyCodes.ENTER) {
+		if (oEvent.which === KeyCodes.SPACE || oEvent.which === KeyCodes.ENTER) {
 
 			// mark the event for components that needs to know if the event was handled by the button
 			oEvent.setMarked();
 
 			// set active button state
 			this._activeButton();
+		}
+
+		if (oEvent.which === KeyCodes.ENTER) {
+			this.firePress({/* no parameters */});
 		}
 	};
 
@@ -291,13 +321,16 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 */
 	Button.prototype.onkeyup = function(oEvent) {
 
-		if (oEvent.which === jQuery.sap.KeyCodes.SPACE || oEvent.which === jQuery.sap.KeyCodes.ENTER) {
+		if (oEvent.which === KeyCodes.SPACE || oEvent.which === KeyCodes.ENTER) {
 
 			// mark the event for components that needs to know if the event was handled by the button
 			oEvent.setMarked();
 
 			// set inactive button state
 			this._inactiveButton();
+		}
+
+		if (oEvent.which === KeyCodes.SPACE) {
 			this.firePress({/* no parameters */});
 		}
 	};
@@ -455,7 +488,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	Button.prototype._isUnstyled = function() {
 		var bUnstyled = false;
 
-		if (this.getType()	=== sap.m.ButtonType.Unstyled) {
+		if (this.getType()	=== ButtonType.Unstyled) {
 			bUnstyled = true;
 		}
 
@@ -477,7 +510,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		}
 
 		if (sValue !== sText) {
-			var oDomRef = this.getDomRef("content");
+			var oDomRef = this.getDomRef("BDI-content") || this.getDomRef("content");
 			var bShouldSupressRendering = !!oDomRef;
 
 			// Render control if element is not available in the DOM
@@ -486,7 +519,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			if (bShouldSupressRendering) {
 				// Get text to have the type conversation for non-string values done by the framework
 				sText = this.getText();
-				oDomRef.innerHTML = jQuery.sap.encodeHTML(sText);
+				oDomRef.textContent = sText;
 				this.$("inner").toggleClass("sapMBtnText", !!sText);
 			}
 		}
@@ -537,7 +570,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 		if (!sTooltip && !this.getText()) {
 			// get icon-font info. will return null if the icon is an image
-			var oIconInfo = sap.ui.core.IconPool.getIconInfo(this.getIcon());
+			var oIconInfo = IconPool.getIconInfo(this.getIcon());
 
 			// add tooltip if available
 			if (oIconInfo && oIconInfo.text) {
@@ -548,47 +581,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		return sTooltip;
 	};
 
-	Button.prototype.setType = function(sType) {
-
-		this.setProperty("type", sType);
-
-		// Aria desciption for type
-		var sTypeText = "";
-		var oRb;
-
-		switch (sType) {
-		case sap.m.ButtonType.Accept:
-			if (!Button._oStaticAcceptText) {
-				oRb = sap.ui.getCore().getLibraryResourceBundle("sap.m");
-				sTypeText = oRb.getText("BUTTON_ARIA_TYPE_ACCEPT");
-				Button._oStaticAcceptText = new sap.ui.core.InvisibleText({text: sTypeText});
-				Button._oStaticAcceptText.toStatic(); //Put to Static UiArea
-			}
-			break;
-		case sap.m.ButtonType.Reject:
-			if (!Button._oStaticRejectText) {
-				oRb = sap.ui.getCore().getLibraryResourceBundle("sap.m");
-				sTypeText = oRb.getText("BUTTON_ARIA_TYPE_REJECT");
-				Button._oStaticRejectText = new sap.ui.core.InvisibleText({text: sTypeText});
-				Button._oStaticRejectText.toStatic(); //Put to Static UiArea
-			}
-			break;
-		case sap.m.ButtonType.Emphasized:
-			if (!Button._oStaticEmphasizedText) {
-				oRb = sap.ui.getCore().getLibraryResourceBundle("sap.m");
-				sTypeText = oRb.getText("BUTTON_ARIA_TYPE_EMPHASIZED");
-				Button._oStaticEmphasizedText = new sap.ui.core.InvisibleText({text: sTypeText});
-				Button._oStaticEmphasizedText.toStatic(); //Put to Static UiArea
-			}
-			break;
-		default: // No need to do anything for other button types
-			break;
-		}
-
-		return this;
-
-	};
-
 	/**
 	 * @see sap.ui.core.Control#getAccessibilityInfo
 	 * @returns {Object} Current accessibility state of the control
@@ -597,7 +589,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	Button.prototype.getAccessibilityInfo = function() {
 		var sDesc = this.getText() || this.getTooltip_AsString();
 		if (!sDesc && this.getIcon()) {
-			var oIconInfo = sap.ui.core.IconPool.getIconInfo(this.getIcon());
+			var oIconInfo = IconPool.getIconInfo(this.getIcon());
 			if (oIconInfo) {
 				sDesc = oIconInfo.text || oIconInfo.name;
 			}
@@ -614,4 +606,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 	return Button;
 
-}, /* bExport= */ true);
+});

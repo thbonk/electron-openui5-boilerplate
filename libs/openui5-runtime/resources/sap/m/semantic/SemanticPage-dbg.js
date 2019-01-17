@@ -1,43 +1,115 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/m/semantic/SegmentedContainer', 'sap/m/semantic/SemanticConfiguration', 'sap/m/Button', 'sap/m/Title', 'sap/m/ActionSheet', 'sap/m/Page', 'sap/m/OverflowToolbar', 'sap/m/OverflowToolbarButton', 'sap/m/OverflowToolbarLayoutData', 'sap/m/ToolbarSpacer', 'sap/m/Bar', 'sap/ui/core/CustomData', 'sap/ui/base/ManagedObject', 'sap/m/PageAccessibleLandmarkInfo','sap/ui/base/ManagedObjectObserver'],
-function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, ActionSheet, Page, OverflowToolbar, OverflowToolbarButton, OverflowToolbarLayoutData, ToolbarSpacer, Bar, CustomData, ManagedObject, PageAccessibleLandmarkInfo, ManagedObjectObserver) {
+sap.ui.define([
+	'sap/m/semantic/SegmentedContainer',
+	'sap/m/semantic/SemanticConfiguration',
+	'sap/m/Button',
+	'sap/m/Title',
+	'sap/m/Page',
+	'sap/m/OverflowToolbar',
+	'sap/m/ToolbarSpacer',
+	'sap/m/Bar',
+	'sap/ui/core/CustomData',
+	'sap/ui/base/ManagedObject',
+	'sap/m/PageAccessibleLandmarkInfo',
+	'sap/ui/base/ManagedObjectObserver',
+	'sap/ui/core/Control',
+	'sap/ui/core/library',
+	'sap/m/library',
+	"./SemanticPageRenderer",
+	"sap/base/Log",
+	"sap/ui/thirdparty/jquery"
+],
+function(
+	SegmentedContainer,
+	SemanticConfiguration,
+	Button,
+	Title,
+	Page,
+	OverflowToolbar,
+	ToolbarSpacer,
+	Bar,
+	CustomData,
+	ManagedObject,
+	PageAccessibleLandmarkInfo,
+	ManagedObjectObserver,
+	Control,
+	coreLibrary,
+	library,
+	SemanticPageRenderer,
+	Log,
+	jQuery
+) {
 	"use strict";
 
+	// shortcut for sap.m.ButtonType
+	var ButtonType = library.ButtonType;
+
+	// shortcut for sap.m.PageBackgroundDesign
+	var PageBackgroundDesign = library.PageBackgroundDesign;
+
+	// shortcut for sap.m.semantic.SemanticRuleSetType
+	var SemanticRuleSetType = library.semantic.SemanticRuleSetType;
+
+	// shortcut for sap.ui.core.TitleLevel
+	var TitleLevel = coreLibrary.TitleLevel;
+
 	/**
-	 * Constructor for a new SemanticPage
+	 * Constructor for a new <code>SemanticPage</code>.
 	 * @param {string} [sId] ID for the new control, generated automatically if no ID is given
 	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
-	 * A semantic page is an enhanced {@link sap.m.Page}, that can contain controls with semantic meaning, see {@link sap.m.semantic.SemanticControl}.
+	 * An enhanced {@link sap.m.Page}, that can contain controls with semantic meaning,
+	 * see {@link sap.m.semantic.SemanticControl}.
 	 *
-	 * <b>Note:</b> This control implements the SAP Fiori 1.0 design guidelines. For SAP Fiori 2.0, see the {@link sap.f.semantic.SemanticPage}.
+	 * <b>Note:</b> This control implements the SAP Fiori 1.0 design guidelines.
+	 * For SAP Fiori 2.0, see the {@link sap.f.semantic.SemanticPage}.
 	 *
-	 * Content specified in the {@link sap.m.semantic.SemanticPage#semanticControls} aggregations will be automatically positioned in dedicated sections of the footer or the header of the page, depending on the control's semantics.<br>
-	 * For example, a semantic button of type {@link sap.m.semantic.PositiveAction} will be positioned in the right side of the footer, and in logically correct sequence order with respect to any other included semantic controls.<br>
+	 * <h3>Overview</h3>
 	 *
-	 * The full list of what we internally define for semantic content is:
-	 *  <ul>
-	 *      <li>Visual properties (e.g. AddAction will be styled as an icon button)</li>
-	 *      <li>Position in the page (UX guidelines specify that some buttons should be in the header only, while others are in the footer or the "share" menu, so we do the correct positioning)</li>
-	 *      <li>Sequence order (UX guidelines define a specific sequence order of semantic controls with respect to each other)</li>
-	 *      <li>Default localized tooltip for icon-only buttons</li>
-	 *      <li>Overflow behavior (UX quidelines define which buttons are allowed to go to the overflow of the toolbar when the screen gets narrower). For icon buttons, we ensure that the text label of the button appears when the button is in overflow, as specified by UX.</li>
-	 *      <li>Screen reader support (invisible text for reading the semantic type)</li>
-	 *  </ul>
+	 * The main functionality of the <code>SemanticPage</code> is to predefine the placement,
+	 * behavior and styles of the page elements.
 	 *
-	 * In addition to the predefined semantic controls, the SemanticPage can host also custom application-provided controls. It preserves most of the API of {@link sap.m.Page} for specifying page content.<br>
+	 * Content specified in the semantic aggregations will be automatically positioned in
+	 * dedicated sections of the footer or the header of the page.
+	 *
+	 * <h3>Structure</h3>
+	 *
+	 * The semantics of the content are the following:
+	 * <ul>
+	 * <li>Visual properties (for example, <code>AddAction</code> will be styled as an icon button)</li>
+	 * <li>Position in the page (UX guidelines specify that some buttons should be in the header only,
+	 *  while others are in the footer or the "share" menu, so we do the correct positioning)</li>
+	 * <li>Sequence order (UX guidelines define a specific sequence order of semantic controls with
+	 * respect to each other)</li>
+	 * <li>Default localized tooltip for icon-only buttons</li>
+	 * <li>Overflow behavior (UX guidelines define which buttons are allowed to go to the overflow of
+	 * the toolbar when the screen gets narrower). For icon buttons, we ensure that the text label of
+	 * the button appears when the button is in overflow, as specified by UX.</li>
+	 * <li>Screen reader support (invisible text for reading the semantic type)</li>
+	 * </ul>
+	 *
+	 * In addition to the predefined semantic controls, the <code>SemanticPage</code> can host also
+	 * custom app controls. It preserves most of the API of the {@link sap.m.Page} for specifying page content.
+	 *
+	 * <h3>Usage</h3>
+	 *
+	 * The app developer only has to specify the action type, and the required styling and
+	 * positioning are automatically added.
+	 *
+	 * @see {@link topic:4a97a07ec8f5441d901994d82eaab1f5 Semantic Page}
+	 * @see {@link topic:84f3d52f492648d5b594e4f45dca7727 Semantic Pages}
 	 *
 	 * @extends sap.ui.core.Control
 	 * @abstract
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -45,7 +117,7 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 	 * @alias sap.m.semantic.SemanticPage
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	var SemanticPage = sap.ui.core.Control.extend("sap.m.semantic.SemanticPage", /** @lends sap.m.semantic.SemanticPage.prototype */ {
+	var SemanticPage = Control.extend("sap.m.semantic.SemanticPage", /** @lends sap.m.semantic.SemanticPage.prototype */ {
 		metadata: {
 
 			library: "sap.m",
@@ -67,7 +139,7 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 				titleLevel: {
 					type: "sap.ui.core.TitleLevel",
 					group: "Appearance",
-					defaultValue: sap.ui.core.TitleLevel.Auto
+					defaultValue: TitleLevel.Auto
 				},
 
 				/**
@@ -124,7 +196,7 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 				semanticRuleSet: {
 					type: "sap.m.semantic.SemanticRuleSetType",
 					group: "Misc",
-					defaultValue: sap.m.semantic.SemanticRuleSetType.Classic
+					defaultValue: SemanticRuleSetType.Classic
 				},
 
 				/**
@@ -135,7 +207,7 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 				backgroundDesign: {
 					type: "sap.m.PageBackgroundDesign",
 					group: "Appearance",
-					defaultValue: sap.m.PageBackgroundDesign.Standard
+					defaultValue: PageBackgroundDesign.Standard
 				}
 			},
 			defaultAggregation: "content",
@@ -154,7 +226,11 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 				content: {
 					type: "sap.ui.core.Control",
 					multiple: true,
-					singularName: "content"
+					singularName: "content",
+					forwarding: {
+						getter: "_getPage",
+						aggregation: "content"
+					}
 				},
 
 				/**
@@ -180,7 +256,7 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 				 *
 				 * If not set, no landmarks will be written.
 				 */
-				landmarkInfo : {type : "sap.m.PageAccessibleLandmarkInfo", multiple : false},
+				landmarkInfo : {type : "sap.m.PageAccessibleLandmarkInfo", multiple : false, forwarding: {getter: "_getPage", aggregation: "landmarkInfo"}},
 
 				/**
 				 * Wrapped instance of {@link sap.m.Page}
@@ -199,7 +275,8 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 				 */
 				navButtonPress: {}
 			},
-			designTime : true
+			dnd: { draggable: false, droppable: true },
+			designtime: "sap/m/designtime/semantic/SemanticPage.designtime"
 		}
 	});
 
@@ -209,7 +286,7 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 		this._currentMode = SemanticConfiguration._PageMode.display;
 		this._getPage().setCustomHeader(this._getInternalHeader());
 		this._getPage().setFooter(new OverflowToolbar(this.getId() + "-footer"));
-		this._getPage().setLandmarkInfo(new PageAccessibleLandmarkInfo());
+		this.setLandmarkInfo(new PageAccessibleLandmarkInfo());
 		this._getPage().setShowHeader(false);
 	};
 
@@ -289,42 +366,6 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 		return this;
 	};
 
-	/*
-
-	 INNER CONTENT
-	 */
-
-	SemanticPage.prototype.getContent = function () {
-		return this._getPage().getContent();
-	};
-
-	SemanticPage.prototype.addContent = function (oControl, bSuppressInvalidate) {
-		this._getPage().addContent(oControl, bSuppressInvalidate);
-		return this;
-	};
-
-	SemanticPage.prototype.indexOfContent = function (oControl) {
-		return this._getPage().indexOfContent(oControl);
-	};
-
-	SemanticPage.prototype.insertContent = function (oControl, iIndex, bSuppressInvalidate) {
-		this._getPage().insertContent(oControl, iIndex, bSuppressInvalidate);
-		return this;
-	};
-
-	SemanticPage.prototype.removeContent = function (oControl, bSuppressInvalidate) {
-		return this._getPage().removeContent(oControl, bSuppressInvalidate);
-	};
-
-	SemanticPage.prototype.removeAllContent = function (bSuppressInvalidate) {
-		return this._getPage().removeAllContent(bSuppressInvalidate);
-	};
-
-	SemanticPage.prototype.destroyContent = function (bSuppressInvalidate) {
-		this._getPage().destroyContent(bSuppressInvalidate);
-		return this;
-	};
-
 	SemanticPage.prototype.setTitle = function (sTitle) {
 		var oTitle = this._getTitle();
 
@@ -363,18 +404,6 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 		this._getPage().setEnableScrolling(bEnable);
 		this.setProperty("enableScrolling", bEnable, true);
 		return this;
-	};
-
-	SemanticPage.prototype.setLandmarkInfo = function (oLandmarkInfo) {
-		return this._getPage().setLandmarkInfo(oLandmarkInfo);
-	};
-
-	SemanticPage.prototype.getLandmarkInfo = function () {
-		return this._getPage().getLandmarkInfo();
-	};
-
-	SemanticPage.prototype.destroyLandmarkInfo = function () {
-		return this._getPage().destroyLandmarkInfo();
 	};
 
 	SemanticPage.prototype.setBackgroundDesign = function (sBgDesign) {
@@ -564,7 +593,7 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 	SemanticPage.prototype._getNavButton = function () {
 		if (!this._oNavButton) {
 			this._oNavButton = new Button(this.getId() + "-navButton", {
-				type: sap.m.ButtonType.Up,
+				type: ButtonType.Up,
 				tooltip: sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("PAGE_NAVBUTTON_TEXT"),
 				press: jQuery.proxy(this.fireNavButtonPress, this)
 			});
@@ -758,7 +787,7 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 
 			var oHeader = this._getInternalHeader();
 			if (!oHeader) {
-				jQuery.sap.log.error("missing page header", this);
+				Log.error("missing page header", this);
 				return null;
 			}
 
@@ -784,7 +813,7 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 
 			var oFooter = this._getPage().getFooter();
 			if (!oFooter) {
-				jQuery.sap.log.error("missing page footer", this);
+				Log.error("missing page footer", this);
 				return null;
 			}
 
@@ -835,7 +864,7 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 
 		if ((typeof iSortIndex1 === 'undefined') ||
 				(typeof iSortIndex2 === 'undefined')) {
-			jQuery.sap.log.warning("sortIndex missing", this);
+			Log.warning("sortIndex missing", this);
 			return null;
 		}
 
@@ -843,4 +872,4 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 	}
 
 	return SemanticPage;
-}, /* bExport= */ false);
+});

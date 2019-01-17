@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -13,8 +13,8 @@
  */
 
 // Provides class ODataModelAdapter
-sap.ui.define(['jquery.sap.global', './AnalyticalBinding', "./AnalyticalTreeBindingAdapter", './odata4analytics', './AnalyticalVersionInfo'],
-	function(jQuery, AnalyticalBinding, AnalyticalTreeBindingAdapter, odata4analytics, AnalyticalVersionInfo) {
+sap.ui.define(['./AnalyticalBinding', "./AnalyticalTreeBindingAdapter", './odata4analytics', './AnalyticalVersionInfo', "sap/base/Log"],
+	function(AnalyticalBinding, AnalyticalTreeBindingAdapter, odata4analytics, AnalyticalVersionInfo, Log) {
 	"use strict";
 
 
@@ -33,7 +33,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalBinding', "./AnalyticalTreeBind
 		var iModelVersion = AnalyticalVersionInfo.getVersion(this);
 
 		// ensure only ODataModel are enhanced which have not been enhanced yet
-		if (this.iModelVersion === AnalyticalVersionInfo.NONE || this.getAnalyticalExtensions) {
+		if (iModelVersion === AnalyticalVersionInfo.NONE || this.getAnalyticalExtensions) {
 			return;
 		}
 
@@ -56,20 +56,20 @@ sap.ui.define(['jquery.sap.global', './AnalyticalBinding', "./AnalyticalTreeBind
 		/*if (iModelVersion === AnalyticalVersionInfo.V2 && !(this.oMetadata && this.oMetadata.isLoaded())) {
 			var that = this;
 			this.attachMetadataLoaded(function () {
-				jQuery.sap.log.info("ODataModelAdapter: Running on ODataModel V2, Metadata was loaded; initialising analytics model.");
+				Log.info("ODataModelAdapter: Running on ODataModel V2, Metadata was loaded; initialising analytics model.");
 				that.getAnalyticalExtensions();
 			});
 		}*/
 
 		// disable the count support (inline count is required for AnalyticalBinding)
 		if (iModelVersion === AnalyticalVersionInfo.V1 && this.isCountSupported()) {
-			jQuery.sap.log.info("ODataModelAdapter: switched ODataModel to use inlinecount (mandatory for the AnalyticalBinding)");
+			Log.info("ODataModelAdapter: switched ODataModel to use inlinecount (mandatory for the AnalyticalBinding)");
 			this.setCountSupported(false);
 		}
 
 	};
 
-	/**
+	/*
 	 * @see sap.ui.model.odata.ODataModel#bindList
 	 * @see sap.ui.model.odata.v2.ODataModel#bindList
 	 */
@@ -85,7 +85,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalBinding', "./AnalyticalTreeBind
 		}
 	};
 
-	/**
+	/*
 	 * @see sap.ui.model.odata.ODataModel#bindTree
 	 * @see sap.ui.model.odata.v2.ODataModel#bindTree
 	 */

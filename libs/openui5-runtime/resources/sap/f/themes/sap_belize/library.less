@@ -2,7 +2,7 @@
 
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -45,6 +45,63 @@
 /* Belize theme                       */
 /* ================================== */
 
+.sapFDynamicPage {
+	.sapFDynamicPageContent {
+		background: @sapUiGlobalBackgroundColor;
+	}
+
+	// DynamicPageTitle and Toggle Header Visual Indicator hover state
+	&.sapFDynamicPageTitleClickEnabled {
+
+		.sapFDynamicPageTitle:hover,
+		&.sapFDynamicPageTitleForceHovered .sapFDynamicPageTitle {
+			.title-hover(@sapUiObjectHeaderBackground);
+		}
+
+		.sapFDynamicPageTitleTranslucent:hover,
+		&.sapFDynamicPageTitleForceHovered .sapFDynamicPageTitleTranslucent {
+			.title-hover(lighten(@sapUiObjectHeaderBackground, 10));
+		}
+
+		.sapFDynamicPageTitleTransparent:hover,
+		&.sapFDynamicPageTitleForceHovered .sapFDynamicPageTitleTransparent {
+			.title-hover(transparent);
+		}
+
+		&.sapFDynamicPageTitleForceHovered {
+			.sapFDynamicPageToggleHeaderIndicator {
+				.sapMBtnInner {
+					background-color: darken(@sapUiObjectHeaderBorderColor, 3);
+				}
+			}
+		}
+	}
+
+	// Toggle Header Visual Indicator
+	.sapFDynamicPageToggleHeaderIndicator.sapMBtn {
+
+		& > .sapMBtnInner {
+			border: none;
+			background-color: @sapUiObjectHeaderBorderColor;
+		}
+
+		// hover state
+		&:hover > .sapMBtnInner.sapMBtnHoverable {
+			background-color: darken(@sapUiObjectHeaderBorderColor, 3);
+		}
+
+		// active state
+		&:focus > .sapMBtnInner.sapMFocusable.sapMBtnActive {
+			background: @sapUiSelected;
+			color: @sapUiButtonActiveBackground;
+		}
+	}
+}
+
+// Note:
+// The footer selector can`t be nested in the sapFDynamicPage less structure,
+// because the contrast container would not work, as the theme generates css like ".sapContrast.sapFDynamicPageFooter"
+// and will never match ".sapFDynamicPage .sapFDynamicPageFooter"
 .sapFDynamicPageFooter .sapFDynamicPageActualFooterControl {
 	background: fade(@sapUiPageFooterBackground, 90);
 	color: @sapUiPageFooterTextColor;
@@ -52,10 +109,42 @@
 	border-bottom: 0 none;
 }
 
-.sapFDynamicPage .sapFDynamicPageContent {
-	background: @sapUiGlobalBackgroundColor;
+.title-hover(@backgroundColor) {
+	background-color: darken(@backgroundColor, 3);
 }
 /* END "DynamicPage.less" */
+
+/* START "DynamicPageHeader.less" */
+/* ================================== */
+/* CSS for control sap.f/DynamicPageHeader  */
+/* Belize theme                       */
+/* ================================== */
+
+
+.sapFDynamicPageHeader.sapFDynamicPageHeaderTranslucent {
+	background: lighten(@sapUiObjectHeaderBackground, 10);
+}
+
+.sapFDynamicPageHeader.sapFDynamicPageHeaderTransparent {
+	background: transparent;
+}
+/* END "DynamicPageHeader.less" */
+
+/* START "DynamicPageTitle.less" */
+/* ================================== */
+/* CSS for control sap.f/DynamicPageTitle  */
+/* Belize theme                       */
+/* ================================== */
+
+
+.sapFDynamicPageTitle.sapFDynamicPageTitleTranslucent {
+	background: lighten(@sapUiObjectHeaderBackground, 10);
+}
+
+.sapFDynamicPageTitle.sapFDynamicPageTitleTransparent {
+	background: transparent;
+}
+/* END "DynamicPageTitle.less" */
 
 /* START "FlexibleColumnLayout.less" */
 /* =========================================== */

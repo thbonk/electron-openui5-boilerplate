@@ -1,19 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.layout.form.GridLayout.
-sap.ui.define(['jquery.sap.global', './FormLayout', './GridContainerData', './GridElementData', 'sap/ui/layout/library'],
-	function(jQuery, FormLayout, GridContainerData, GridElementData, library) {
+sap.ui.define(['sap/ui/layout/library', './FormLayout', './GridLayoutRenderer'], function(library, FormLayout, GridLayoutRenderer) {
 	"use strict";
 
 	/**
 	 * Constructor for a new sap.ui.layout.form.GridLayout.
 	 *
 	 * @param {string} [sId] ID for the new control, generated automatically if no ID is given
-	 * @param {object} [mSettings] initial settings for the new control
+	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
 	 * This <code>FormLayout</code> renders a <code>Form</code> using an HTML-table based grid.
@@ -29,7 +28,7 @@ sap.ui.define(['jquery.sap.global', './FormLayout', './GridContainerData', './Gr
 	 * @extends sap.ui.layout.form.FormLayout
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -64,26 +63,13 @@ sap.ui.define(['jquery.sap.global', './FormLayout', './GridContainerData', './Gr
 		// directly to the expander
 		var oForm = this.getParent();
 		if (oForm) {
-			var aContainers = oForm.getFormContainers();
+			var aContainers = oForm.getVisibleFormContainers();
 			for ( var i = 0; i < aContainers.length; i++) {
 				var oContainer = aContainers[i];
 				if (oContainer.getExpandable() && oContainer._oExpandButton) {
 					oContainer._oExpandButton.$().attr("tabindex", "-1");
 				}
 			}
-		}
-
-	};
-
-	/*
-	 * If onAfterRendering of a field is processed the width must be set to 100%
-	 */
-	GridLayout.prototype.contentOnAfterRendering = function(oFormElement, oControl){
-
-		FormLayout.prototype.contentOnAfterRendering.apply(this, arguments);
-
-		if (!oControl.getFormDoNotAdjustWidth || !oControl.getFormDoNotAdjustWidth()) {
-			oControl.$().css("width", "100%");
 		}
 
 	};
@@ -119,7 +105,7 @@ sap.ui.define(['jquery.sap.global', './FormLayout', './GridContainerData', './Gr
 			return FormLayout.prototype.findPrevFieldOfElement.apply(this, arguments);
 		}
 
-		if (!oElement.getVisible()) {
+		if (!oElement.isVisible()) {
 			return null;
 		}
 
@@ -154,7 +140,7 @@ sap.ui.define(['jquery.sap.global', './FormLayout', './GridContainerData', './Gr
 		var iCurrentIndex = oContainer.indexOfFormElement(oElement);
 		var oNewDomRef;
 
-		if (oContainer.getVisible()) {
+		if (oContainer.isVisible()) {
 			var aElements = oContainer.getFormElements();
 			var iMax = aElements.length;
 			var i = iCurrentIndex + 1;
@@ -184,7 +170,7 @@ sap.ui.define(['jquery.sap.global', './FormLayout', './GridContainerData', './Gr
 		var iCurrentIndex = oContainer.indexOfFormElement(oElement);
 		var oNewDomRef;
 
-		if (oContainer.getVisible()) {
+		if (oContainer.isVisible()) {
 			var aElements = oContainer.getFormElements();
 			var i = iCurrentIndex - 1;
 			var iLeft = oControl.$().offset().left;
@@ -235,10 +221,9 @@ sap.ui.define(['jquery.sap.global', './FormLayout', './GridContainerData', './Gr
 			var bSingleColumn = this.getSingleColumn();
 			var oContainer = oElement.getParent();
 			var oContainerData = this.getLayoutDataForElement(oContainer, "sap.ui.layout.form.GridContainerData");
-			var that = this;
 
-			if ((bSingleColumn || !oContainerData || !oContainerData.getHalfGrid()) && !this.getRenderer().checkFullSizeElement(that, oElement) ) {
-				return jQuery.sap.domById(oElement.getId());
+			if ((bSingleColumn || !oContainerData || !oContainerData.getHalfGrid()) && !this.getRenderer().checkFullSizeElement(this, oElement) ) {
+				return (oElement.getId() ? window.document.getElementById(oElement.getId()) : null);
 			}
 		}
 
@@ -248,4 +233,4 @@ sap.ui.define(['jquery.sap.global', './FormLayout', './GridContainerData', './Gr
 
 	return GridLayout;
 
-}, /* bExport= */ true);
+});

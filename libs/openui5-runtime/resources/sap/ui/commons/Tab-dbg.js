@@ -1,13 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.Tab.
-sap.ui.define(['jquery.sap.global', './Panel', './library'],
-	function(jQuery, Panel, library) {
+sap.ui.define(['./Panel', './library', 'sap/ui/core/library'],
+	function(Panel, library, coreLibrary) {
 	"use strict";
+
+
+
+	// shortcut for sap.ui.core.Scrolling
+	var Scrolling = coreLibrary.Scrolling;
 
 
 
@@ -22,7 +27,7 @@ sap.ui.define(['jquery.sap.global', './Panel', './library'],
 	 * @extends sap.ui.commons.Panel
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -38,12 +43,12 @@ sap.ui.define(['jquery.sap.global', './Panel', './library'],
 			/**
 			 * Specifies the vertical scrolling.
 			 */
-			verticalScrolling : {type : "sap.ui.core.Scrolling", group : "Behavior", defaultValue : sap.ui.core.Scrolling.None},
+			verticalScrolling : {type : "sap.ui.core.Scrolling", group : "Behavior", defaultValue : Scrolling.None},
 
 			/**
 			 * Specifies the horizontal scrolling.
 			 */
-			horizontalScrolling : {type : "sap.ui.core.Scrolling", group : "Behavior", defaultValue : sap.ui.core.Scrolling.None},
+			horizontalScrolling : {type : "sap.ui.core.Scrolling", group : "Behavior", defaultValue : Scrolling.None},
 
 			/**
 			 * Specifies whether the tab contains a close button.
@@ -190,7 +195,7 @@ sap.ui.define(['jquery.sap.global', './Panel', './library'],
 		var oDomRef = this.getDomRef();
 		var oParent = this.getParent();
 
-		if (!oDomRef || (!bEnabled && jQuery(this.getDomRef()).hasClass("sapUiTabSel")) ||
+		if (!oDomRef || (!bEnabled && this.$().hasClass("sapUiTabSel")) ||
 			(bEnabled && oParent && oParent.getSelectedIndex && oParent.getSelectedIndex() < 0)) {
 			this.setProperty("enabled", bEnabled, false); // rendering needed
 
@@ -201,7 +206,7 @@ sap.ui.define(['jquery.sap.global', './Panel', './library'],
 		} else {
 			this.setProperty("enabled", bEnabled, true); // no re-rendering!
 			// if already rendered, adapt rendered control without complete re-rendering
-			jQuery(this.getDomRef()).toggleClass("sapUiTab", bEnabled).toggleClass("sapUiTabDsbl", !bEnabled).attr("aria-disabled",!bEnabled);
+			this.$().toggleClass("sapUiTab", bEnabled).toggleClass("sapUiTabDsbl", !bEnabled).attr("aria-disabled",!bEnabled);
 		}
 		return this;
 
@@ -239,4 +244,4 @@ sap.ui.define(['jquery.sap.global', './Panel', './library'],
 
 	return Tab;
 
-}, /* bExport= */ true);
+});

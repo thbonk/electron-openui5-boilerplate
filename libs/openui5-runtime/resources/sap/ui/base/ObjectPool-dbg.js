@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -11,8 +11,8 @@ sap.ui.define(['./Object'],
 
 
 	/**
-	 * Creates an ObjectPool instance based on the given oObjectClass.&lt;br/&gt;
-	 * If there is a free pooled instance, returns that one, otherwise creates a new one.&lt;br/&gt;
+	 * Creates an ObjectPool instance based on the given oObjectClass.<br/>;
+	 * If there is a free pooled instance, returns that one, otherwise creates a new one.<br/>;
 	 * In order to be maintained by the ObjectPool, oObjectClass must implement
 	 * methods described in the class description.
 	 *
@@ -40,9 +40,8 @@ sap.ui.define(['./Object'],
 	 * </pre>
 	 *
 	 * @extends sap.ui.base.Object
-	 * @author Malte Wedel
-	 * @version 1.50.6
-	 * @constructor
+	 * @author SAP SE
+	 * @version 1.61.2
 	 * @alias sap.ui.base.ObjectPool
 	 * @public
 	 */

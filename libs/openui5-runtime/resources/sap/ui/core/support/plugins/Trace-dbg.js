@@ -1,22 +1,25 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.core.support.plugins.Trace (Trace support plugin)
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin', "sap/ui/core/format/DateFormat"],
-	function(jQuery, Plugin, DateFormat) {
+sap.ui.define([
+	'sap/ui/core/support/Plugin',
+	'sap/ui/core/format/DateFormat',
+	"sap/base/Log",
+	"sap/base/security/encodeXML"
+],
+	function(Plugin, DateFormat, Log, encodeXML) {
 	"use strict";
 
 		/**
 		 * Creates an instance of sap.ui.core.support.plugins.Trace.
 		 * @class This class represents the trace plugin for the support tool functionality of UI5. This class is internal and all its functions must not be used by an application.
 		 *
-		 * @abstract
 		 * @extends sap.ui.core.support.Plugin
-		 * @version 1.50.6
-		 * @constructor
+		 * @version 1.61.2
 		 * @private
 		 * @alias sap.ui.core.support.plugins.Trace
 		 */
@@ -28,13 +31,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin', "sap/ui/core/f
 
 				if (this.runsAsToolPlugin()) {
 					this._aLogEntries = [];
-					this._iLogLevel = jQuery.sap.log.Level.ALL;
+					this._iLogLevel = Log.Level.ALL;
 					this._oDateFormat = DateFormat.getDateTimeInstance();
 				} else {
 					var that = this;
-					this._oldLogLevel = jQuery.sap.log.getLevel();
-					jQuery.sap.log.setLevel(jQuery.sap.log.Level.ALL);
-					jQuery.sap.log.addLogListener({
+					this._oldLogLevel = Log.getLevel();
+					Log.setLevel(Log.Level.ALL);
+					Log.addLogListener({
 						onLogEntry: function(oLogEntry){
 							if (that.isActive()) {
 								oSupportStub.sendEvent(that.getId() + "Entry", {"entry": oLogEntry});
@@ -129,7 +132,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin', "sap/ui/core/f
 					this._fLogLevelHandler = null;
 				}
 			} else {
-				jQuery.sap.log.setLevel(this._oldLogLevel);
+				Log.setLevel(this._oldLogLevel);
 				this._oldLogLevel = null;
 			}
 			Plugin.prototype.exit.apply(this, arguments);
@@ -142,7 +145,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin', "sap/ui/core/f
 				jContentRef.html("");
 				oPlugin._aLogEntries = [];
 			} else if (typeof (oEntry) === "string") {
-				jContentRef.html(jQuery.sap.encodeHTML(oEntry));
+				jContentRef.html(encodeXML(oEntry));
 				jContentRef[0].scrollTop = jContentRef[0].scrollHeight;
 			} else {
 				oEntry._levelInfo = getLevel(oEntry.level);
@@ -160,7 +163,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin', "sap/ui/core/f
 			var sStyle = " style='color:" + aLevelInfo[1] + ";'";
 			var sResult = "<div class='sapUiSupportTraceEntry'><span class='sapUiSupportTraceEntryLevel'" + sStyle + ">" + aLevelInfo[0] +
 					"</span><span class='sapUiSupportTraceEntryTime'" + sStyle + ">" + oPlugin._oDateFormat.format(new Date(oEntry.timestamp)) +
-					"</span><span class='sapUiSupportTraceEntryMessage'>" + jQuery.sap.escapeHTML(oEntry.message || "") + "</div>";
+					"</span><span class='sapUiSupportTraceEntryMessage'>" + encodeXML(oEntry.message || "") + "</div>";
 			return sResult;
 		}
 
@@ -184,17 +187,17 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin', "sap/ui/core/f
 
 		function getLevel(iLogLevel){
 			switch (iLogLevel) {
-				case jQuery.sap.log.Level.FATAL:
+				case Log.Level.FATAL:
 					return ["FATAL", "#E60000", iLogLevel];
-				case jQuery.sap.log.Level.ERROR:
+				case Log.Level.ERROR:
 					return ["ERROR", "#E60000", iLogLevel];
-				case jQuery.sap.log.Level.WARNING:
+				case Log.Level.WARNING:
 					return ["WARNING", "#FFAA00", iLogLevel];
-				case jQuery.sap.log.Level.INFO:
+				case Log.Level.INFO:
 					return ["INFO", "#000000", iLogLevel];
-				case jQuery.sap.log.Level.DEBUG:
+				case Log.Level.DEBUG:
 					return ["DEBUG", "#000000", iLogLevel];
-				case jQuery.sap.log.Level.TRACE:
+				case Log.Level.TRACE:
 					return ["TRACE", "#000000", iLogLevel];
 			}
 			return ["unknown", "#000000", iLogLevel];

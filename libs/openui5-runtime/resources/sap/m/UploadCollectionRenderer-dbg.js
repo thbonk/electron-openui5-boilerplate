@@ -1,17 +1,15 @@
 /*!
-* UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
-*/
-sap.ui.define([ 'jquery.sap.global', './ListItemBaseRenderer'],
-	function(jQuery, ListItemBaseRenderer) {
+ */
+sap.ui.define(['./ListItemBaseRenderer'], function(ListItemBaseRenderer) {
 	"use strict";
 
-
 	/**
-	* UploadCollection renderer.
-	* @namespace
-	*/
+	 * UploadCollection renderer.
+	 * @namespace
+	 */
 	var UploadCollectionRenderer = {};
 
 	/**
@@ -32,7 +30,7 @@ sap.ui.define([ 'jquery.sap.global', './ListItemBaseRenderer'],
 		oRm.write("</div>");
 	};
 
-	UploadCollectionRenderer.renderNoData = function (oRm, oControl) {
+	UploadCollectionRenderer.renderNoData = function(oRm, oControl) {
 		// If noDataText or noDataDescription property are set by user, the user's text will be rendered.
 		// If it is not set, the default no data text or description from resource bundle will be rendered.
 		var oUploadCollection = oControl.getParent();

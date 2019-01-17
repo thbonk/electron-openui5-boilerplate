@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.Callout.
-sap.ui.define(['jquery.sap.global', './CalloutBase', './library'],
-	function(jQuery, CalloutBase, library) {
+sap.ui.define(['./CalloutBase', './library', './CalloutRenderer'],
+	function(CalloutBase, library, CalloutRenderer) {
 	"use strict";
 
 
@@ -22,11 +22,11 @@ sap.ui.define(['jquery.sap.global', './CalloutBase', './library'],
 	 * @extends sap.ui.commons.CalloutBase
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
-	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Popover</code> control.
+	 * @deprecated Since version 1.38. Tf you want to achieve a similar behavior, use a <code>sap.m.Popover</code> control and open it next to your control.
 	 * @alias sap.ui.commons.Callout
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -42,10 +42,6 @@ sap.ui.define(['jquery.sap.global', './CalloutBase', './library'],
 		}
 	}});
 
-	///**
-	// * This file defines behavior for the Callout control
-	// */
-
 	return Callout;
 
-}, /* bExport= */ true);
+});

@@ -1,9 +1,9 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global', './IconPool', './library'], function(jQuery, IconPool, library) {
+sap.ui.define(['./IconPool', './library', "sap/base/security/encodeXML"], function(IconPool, library, encodeXML) {
 	"use strict";
 
 	// shortcut for enum(s)
@@ -24,23 +24,40 @@ sap.ui.define(['jquery.sap.global', './IconPool', './library'], function(jQuery,
 	 */
 	IconRenderer.render = function(oRm, oControl) {
 		// write the HTML into the render manager
-		var oIconInfo = IconPool.getIconInfo(oControl.getSrc()),
+		var vIconInfo = IconPool.getIconInfo(oControl.getSrc(), undefined, "mixed"),
 			sWidth = oControl.getWidth(),
 			sHeight = oControl.getHeight(),
 			sColor = oControl.getColor(),
 			sBackgroundColor = oControl.getBackgroundColor(),
 			sSize = oControl.getSize(),
 			bNoTabStop = oControl.getNoTabStop(),
-			aLabelledBy = oControl.getAriaLabelledBy(),
-			oAccAttributes = oControl._getAccessibilityAttributes(),
-			sTitle = oControl._getOutputTitle(),
+			sTitle = oControl._getOutputTitle(vIconInfo),
+			aLabelledBy,
+			oInvisibleText,
+			oAccAttributes,
+			bIconInfo = false;
+
+		if (vIconInfo instanceof Promise) {
+			// if the icon info is still being loaded,
+			// an invalidation is triggered after the icon info is available
+			vIconInfo.then(oControl.invalidate.bind(oControl));
+		} else if (vIconInfo) {
+			// render icon info in renderer
+			bIconInfo = true;
+			aLabelledBy = oControl.getAriaLabelledBy();
+
+			oAccAttributes = oControl._getAccessibilityAttributes(vIconInfo);
 			// oInvisibleText must be retrieved after calling _getAccessibilityAttributes
 			// because it may be created within the function
 			oInvisibleText = oControl.getAggregation("_invisibleText");
+		}
 
 		oRm.write("<span");
 		oRm.writeControlData(oControl);
-		oRm.writeAccessibilityState(oControl, oAccAttributes);
+		if (bIconInfo) {
+			oRm.writeAccessibilityState(oControl, oAccAttributes);
+		}
+
 
 		if (sTitle) {
 			oRm.writeAttributeEscaped("title", sTitle);
@@ -50,9 +67,9 @@ sap.ui.define(['jquery.sap.global', './IconPool', './library'], function(jQuery,
 			oRm.writeAttribute("tabindex", 0);
 		}
 
-		if (oIconInfo) {
-			oRm.writeAttributeEscaped("data-sap-ui-icon-content", oIconInfo.content);
-			oRm.addStyle("font-family", "'" + jQuery.sap.encodeHTML(oIconInfo.fontFamily) + "'");
+		if (bIconInfo) {
+			oRm.writeAttributeEscaped("data-sap-ui-icon-content", vIconInfo.content);
+			oRm.addStyle("font-family", "'" + encodeXML(vIconInfo.fontFamily) + "'");
 		}
 
 		if (sWidth) {
@@ -65,11 +82,11 @@ sap.ui.define(['jquery.sap.global', './IconPool', './library'], function(jQuery,
 		}
 
 		if (sColor && !(sColor in IconColor)) {
-			oRm.addStyle("color", jQuery.sap.encodeHTML(sColor));
+			oRm.addStyle("color", encodeXML(sColor));
 		}
 
 		if (sBackgroundColor && !(sBackgroundColor in IconColor)) {
-			oRm.addStyle("background-color", jQuery.sap.encodeHTML(sBackgroundColor));
+			oRm.addStyle("background-color", encodeXML(sBackgroundColor));
 		}
 
 		if (sSize) {
@@ -78,7 +95,7 @@ sap.ui.define(['jquery.sap.global', './IconPool', './library'], function(jQuery,
 
 		oRm.addClass("sapUiIcon");
 
-		if (oIconInfo && !oIconInfo.suppressMirroring) {
+		if (bIconInfo && !vIconInfo.suppressMirroring) {
 			oRm.addClass("sapUiIconMirrorInRTL");
 		}
 
@@ -91,9 +108,9 @@ sap.ui.define(['jquery.sap.global', './IconPool', './library'], function(jQuery,
 
 		oRm.write(">");
 
-			if (aLabelledBy.length && oInvisibleText) {
-				oRm.renderControl(oInvisibleText);
-			}
+		if (aLabelledBy && aLabelledBy.length && oInvisibleText) {
+			oRm.renderControl(oInvisibleText);
+		}
 
 		oRm.write("</span>");
 	};

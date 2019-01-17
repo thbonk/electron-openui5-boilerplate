@@ -1,9 +1,9 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global'], function(jQuery) {
+sap.ui.define(["sap/base/Log"], function(Log) {
 	"use strict";
 
 	/**
@@ -18,7 +18,7 @@ sap.ui.define(['jquery.sap.global'], function(jQuery) {
 		 *
 		 * @param {string|string[]} vTargets the key of the target as specified in the {@link #constructor}. To display multiple targets you may also pass an array of keys.
 		 * @param {object} [vData] an object that will be passed to the display event in the data property. If the target has parents, the data will also be passed to them.
-		 * @param {string} [sTitleTarget] the name of the target from which the title option is taken for firing the {@link sap.ui.core.routing.Targets#event:titleChanged|titleChanged} event
+		 * @param {string} [sTitleTarget] the name of the target from which the title option is taken for firing the {@link sap.ui.core.routing.Targets#event:titleChanged titleChanged} event
 		 * @private
 		 * @returns {Promise} resolving with {{name: *, view: *, control: *}|undefined} for every vTargets, object for single, array for multiple
 		 */
@@ -32,7 +32,7 @@ sap.ui.define(['jquery.sap.global'], function(jQuery) {
 		 * @param {array|object} vTargets targets or single target to be displayed
 		 * @param {object} vData  an object that will be passed to the display event in the data property. If the
 				target has parents, the data will also be passed to them.
-		 * @param {string} [sTitleTarget] the name of the target from which the title option is taken for firing the {@link sap.ui.core.routing.Targets#event:titleChanged|titleChanged} event
+		 * @param {string} [sTitleTarget] the name of the target from which the title option is taken for firing the {@link sap.ui.core.routing.Targets#event:titleChanged titleChanged} event
 		 * @return {Promise} resolving with {{name: *, view: *, control: *}|undefined} for every vTargets, object for single, array for multiple
 		 *
 		 * @private
@@ -70,7 +70,7 @@ sap.ui.define(['jquery.sap.global'], function(jQuery) {
 				return oTarget._display(vData, oSequencePromise);
 			} else {
 				var sErrorMessage = "The target with the name \"" + sName + "\" does not exist!";
-				jQuery.sap.log.error(sErrorMessage, this);
+				Log.error(sErrorMessage, this);
 				return Promise.resolve({
 					name: sName,
 					error: sErrorMessage

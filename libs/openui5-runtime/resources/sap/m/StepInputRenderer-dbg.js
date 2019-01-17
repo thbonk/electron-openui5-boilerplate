@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 sap.ui.define([], function () {
@@ -14,16 +14,10 @@ sap.ui.define([], function () {
 
 
 		StepInputRenderer.render = function (oRm, oControl) {
-			var oIncrementButton = oControl._getIncrementButton(),
-				oDecrementButton = oControl._getDecrementButton(),
-				oInput = oControl._getInput(),
+			var oInput = oControl._getInput(),
 				sWidth = oControl.getWidth(),
 				bEnabled = oControl.getEnabled(),
-				bEditable = oControl.getEditable(),
-				fMin = oControl.getMin(),
-				fMax = oControl.getMax(),
-				fValue = oControl.getValue(),
-				bDisableButton = false;
+				bEditable = oControl.getEditable();
 
 			oRm.write("<div ");
 			if (bEnabled && bEditable) {
@@ -41,30 +35,9 @@ sap.ui.define([], function () {
 			oRm.writeClasses();
 			oRm.write(">");
 
-			if (bEditable && oDecrementButton) {
-				bDisableButton = !bEnabled || (fValue <= fMin);
-				this.renderButton(oRm, oDecrementButton, ["sapMStepInputBtnDecrease"], bDisableButton);
-			}
-
 			oRm.renderControl(oInput);
 
-			if (bEditable && oIncrementButton) {
-				bDisableButton = !bEnabled || (fValue >= fMax);
-				this.renderButton(oRm, oIncrementButton, ["sapMStepInputBtnIncrease"], bDisableButton);
-			}
-
 			oRm.write("</div>");
-		};
-
-		StepInputRenderer.renderButton = function (oRm, oButton, aWrapperClasses, bDisableButton) {
-			oButton.addStyleClass("sapMStepInputBtn");
-
-			aWrapperClasses.forEach(function (sClass) {
-				oButton.addStyleClass(sClass);
-			});
-
-			bDisableButton ? oButton.addStyleClass("sapMStepInputIconDisabled") : oButton.removeStyleClass("sapMStepInputIconDisabled");
-			oRm.renderControl(oButton);
 		};
 
 	return StepInputRenderer;

@@ -1,13 +1,17 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides default renderer for control sap.ui.unified.SplitContainer
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define(["sap/ui/core/library"],
+	function(coreLibrary) {
 	"use strict";
+
+
+	// shortcut for sap.ui.core.Orientation
+	var Orientation = coreLibrary.Orientation;
 
 
 	/**
@@ -25,7 +29,7 @@ sap.ui.define(['jquery.sap.global'],
 	SplitContainerRenderer.render = function(rm, oControl){
 		var sId = oControl.getId();
 
-		var bVertical = oControl.getOrientation() == sap.ui.core.Orientation.Vertical;
+		var bVertical = oControl.getOrientation() == Orientation.Vertical;
 
 		rm.write("<div");
 		rm.writeControlData(oControl);

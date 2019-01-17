@@ -1,15 +1,13 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 //Provides control sap.ui.unified.PlanningCalendarRow.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './StandardListItem', './StandardListItemRenderer',
-		'sap/ui/core/Renderer', './library', 'sap/ui/unified/library', 'sap/ui/unified/DateRange', 'sap/ui/unified/CalendarRow'],
-	function (jQuery, Element, StandardListItem, StandardListItemRenderer, Renderer, library, unifiedLibrary, DateRange,
-			  CalendarRow) {
+sap.ui.define(['sap/ui/core/Element'], function (Element) {
 	"use strict";
+
 
 	/**
 	 * Constructor for a new <code>PlanningCalendarRow</code>.
@@ -18,16 +16,18 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './StandardListItem',
 	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
-	 * Row in the {@link sap.m.PlanningCalendar}.
+	 * Represents a row in the {@link sap.m.PlanningCalendar}.
 	 *
-	 * This element holds the data of one row in the @link sap.m.PlanningCalendar}. Once the header information (e.g. person information)
-	 * is assigned, the appointments are assigned.
+	 * This element holds the data of one row in the {@link sap.m.PlanningCalendar}. Once the header information
+	 * (for example, person information) is assigned, the appointments are assigned.
+	 * The <code>sap.m.PlanningCalendarRow</code> allows you to modify appointments at row level.
+	 *
 	 * @extends sap.ui.core.Element
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
-	 * @since 1.34.0
+	 * @since 1.34
 	 * @alias sap.m.PlanningCalendarRow
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -81,7 +81,90 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './StandardListItem',
 			/**
 			 * Defines the identifier of the row.
 			 */
-			key : {type : "string", group : "Data", defaultValue : null}
+			key : {type : "string", group : "Data", defaultValue : null},
+
+			/**
+			 * Determines whether the appointments in the row are draggable.
+			 *
+			 * The drag and drop interaction is visualized by a placeholder highlighting the area where the
+			 * appointment can be dropped by the user.
+			 *
+			 * By default, appointments can be dragged only within their original <code>PlanningCalendarRow</code>. When
+			 * <code>enableAppointmentsDragAndDrop</code> is set to true, attaching the
+			 * {@link #event:appointmentDragEnter appointmentDragEnter} event can change the default behavior and allow
+			 * appointments to be dragged between calendar rows.
+			 *
+			 * Specifics based on the intervals (hours, days or months) displayed in the <code>PlanningCalendar</code> views:
+			 *
+			 * Hours:<br>
+			 * For views where the displayed intervals are hours, the placeholder snaps on every interval
+			 * of 30 minutes. After the appointment is dropped, the {@link #event:appointmentDrop appointmentDrop} event is fired, containing
+			 * the new start and end JavaScript date objects.<br>
+			 * For example, an appointment with start date "Nov 13 2017 12:17:00" and end date "Nov 13 2017 12:45:30"
+			 * lasts for 27 minutes and 30 seconds. After dragging and dropping to a new time, the possible new
+			 * start date has time that is either "hh:00:00" or "hh:30:00" because of the placeholder that can
+			 * snap on every 30 minutes. The new end date is calculated to be 27 minutes and 30 seconds later
+			 * and would be either "hh:27:30" or "hh:57:30".
+			 *
+			 * Days:<br>
+			 * For views where intervals are days, the placeholder highlights the whole day and after the
+			 * appointment is dropped the {@link #event:appointmentDrop appointmentDrop} event is fired. The event contains the new start and
+			 * end JavaScript date objects with changed date but the original time (hh:mm:ss) is preserved.
+			 *
+			 * Months:<br>
+			 * For views where intervals are months, the placeholder highlights the whole month and after the
+			 * appointment is dropped the {@link #event:appointmentDrop appointmentDrop} event is fired. The event contains the new start and
+			 * end JavaScript date objects with changed month but the original date and time is preserved.
+			 *
+			 * <b>Note:</b> In "One month" view, the appointments are not draggable on small screen (as there they are
+			 * displayed as a list below the dates). Group appointments are also not draggable.
+			 *
+			 * @since 1.54
+			 */
+			enableAppointmentsDragAndDrop : {type : "boolean", group : "Misc", defaultValue : false},
+
+			/**
+			 * Determines whether the appointments in the row are resizable.
+			 *
+			 * The resize interaction is visualized by making the appointment transparent.
+			 *
+			 * Specifics based on the intervals (hours, days or months) displayed in the <code>PlanningCalendar</code> views:
+			 *
+			 * Hours:
+			 * For views where the displayed intervals are hours, the appointment snaps on every interval
+			 * of 30 minutes. After the resize is finished, the {@link #event:appointmentResize appointmentResize} event is fired, containing
+			 * the new start and end JavaScript date objects.
+			 *
+			 * Days:
+			 * For views where intervals are days, the appointment snaps to the end of the day. After the resize is finished,
+			 * the {@link #event:appointmentResize appointmentResize} event is fired, containing the new start and end JavaScript date objects.
+			 * The <code>endDate</code> time is changed to 00:00:00
+			 *
+			 * Months:
+			 * For views where intervals are months, the appointment snaps to the end of the month.
+			 * The {@link #event:appointmentResize appointmentResize} event is fired, containing the new start and end JavaScript date objects.
+			 * The <code>endDate</code> is set to the 00:00:00 and first day of the following month.
+			 *
+			 * <b>Notes:</b>
+			 * In "One month" view, the appointments are not resizable on small screen (as there they are
+			 * displayed as a list below the dates). Group appointments are also not resizable
+			 *
+			 * @since 1.56
+			 */
+			enableAppointmentsResize : {type : "boolean", group : "Misc", defaultValue : false},
+
+			/**
+			 * Determines whether the appointments can be created by dragging on empty cells.
+			 *
+			 * See {@link #property:enableAppointmentsResize enableAppointmentsResize} for the specific points for events snapping
+			 *
+			 * <b>Notes:</b>
+			 * In "One month" view, the appointments cannot be created on small screen (as there they are
+			 * displayed as a list below the dates).
+			 *
+			 * @since 1.56
+			 */
+			enableAppointmentsCreate : {type : "boolean", group : "Misc", defaultValue : false}
 
 		},
 		aggregations : {
@@ -91,7 +174,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './StandardListItem',
 			 *
 			 * <b>Note:</b> For performance reasons, only appointments in the visible time range or nearby should be assigned.
 			 */
-			appointments : {type : "sap.ui.unified.CalendarAppointment", multiple : true, singularName : "appointment"},
+			appointments : {type : "sap.ui.unified.CalendarAppointment", multiple : true, singularName : "appointment", dnd : {draggable: true}},
 
 			/**
 			 * The appointments to be displayed at the top of the intervals (for example, for public holidays).
@@ -104,353 +187,137 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './StandardListItem',
 			 */
 			intervalHeaders : {type : "sap.ui.unified.CalendarAppointment", multiple : true, singularName : "intervalHeader"},
 
-			_nonWorkingDates : {type : "sap.ui.unified.DateRange", multiple : true, visibility : "hidden"}
+			/**
+			 * Holds the special dates in the context of a row. A single date or a date range can be set.
+			 *
+			 * <b>Note</b> Only date or date ranges of type <code>sap.ui.unified.CalendarDayType.NonWorking</code> will
+			 * be visualized in the <code>PlanningCalendarRow</code>. If the aggregation is set as another type,
+			 * the date or date range will be ignored and will not be displayed in the control.
+			 * @since 1.56
+			 */
+			specialDates : {type : "sap.ui.unified.DateTypeRange", multiple : true, singularName : "specialDate"}
 
+		},
+		events : {
+			/**
+			 * Fired if an appointment is dropped.
+			 * @since 1.54
+			 */
+			appointmentDrop : {
+				parameters : {
+					/**
+					 * The dropped appointment.
+					 */
+					appointment : {type : "sap.ui.unified.CalendarAppointment"},
+
+					/**
+					 * Start date of the dropped appointment, as a JavaScript date object.
+					 */
+					startDate : {type : "object"},
+
+					/**
+					 * Dropped appointment end date as a JavaScript date object.
+					 */
+					endDate : {type : "object"},
+
+					/**
+					 * The row of the appointment.
+					 */
+					calendarRow : {type : "sap.m.PlanningCalendarRow"},
+
+					/**
+					 * The drop type. If true - it's "Copy", if false - it's "Move".
+					 */
+					copy : {type : "boolean"}
+				}
+			},
+
+			/**
+			 * Fired if an appointment is dropped.
+			 *
+			 * When this event handler is attached, the default behavior of the <code>enableAppointmentsDragAndDrop</code>
+			 * property to move appointments only within their original calendar row is no longer valid. You can move
+			 * the appointment around all rows for which <code>enableAppointmentsDragAndDrop</code> is set to true.
+			 * In this case, the drop target area is indicated by a placeholder. In the event handler you can call the
+			 * <code>preventDefault</code> method of the event to prevent this default behavior. In this case,
+			 * the placeholder will no longer be available and it will not be possible to drop the appointment in the row.
+			 *
+			 * @since 1.56
+			 */
+			appointmentDragEnter : {
+				allowPreventDefault : true,
+				parameters : {
+					/**
+					 * The dropped appointment.
+					 */
+					appointment : {type : "sap.ui.unified.CalendarAppointment"},
+
+					/**
+					 * Start date of the dropped appointment, as a JavaScript date object.
+					 */
+					startDate : {type : "object"},
+
+					/**
+					 * Dropped appointment end date as a JavaScript date object.
+					 */
+					endDate : {type : "object"},
+
+					/**
+					 * The row of the appointment.
+					 */
+					calendarRow : {type : "sap.m.PlanningCalendarRow"}
+				}
+			},
+
+			/**
+			 * Fired if an appointment is resized.
+			 * @since 1.56
+			 */
+			appointmentResize : {
+				parameters : {
+					/**
+					 * The resized appointment.
+					 */
+					appointment : {type : "sap.ui.unified.CalendarAppointment"},
+
+					/**
+					 * Start date of the resized appointment, as a JavaScript date object.
+					 */
+					startDate : {type : "object"},
+
+					/**
+					 * End date of the resized appointment, as a JavaScript date object.
+					 */
+					endDate : {type : "object"}
+				}
+			},
+
+			/**
+			 * Fired if an appointment is created.
+			 * @since 1.56
+			 */
+			appointmentCreate : {
+				parameters : {
+					/**
+					 * Start date of the created appointment, as a JavaScript date object.
+					 */
+					startDate : {type : "object"},
+
+					/**
+					 * End date of the created appointment, as a JavaScript date object.
+					 */
+					endDate : {type : "object"},
+
+					/**
+					 * The row of the appointment.
+					 */
+					calendarRow : {type : "sap.m.PlanningCalendarRow"}
+				}
+			}
 		}
 	}});
 
-	/**
-	 * Used to link the items (DateRange) in aggregation _nonWorkingDates to any PlanningCalendar specialDates of type NonWorking
-	 * @private
-	 */
-	PlanningCalendarRow.PC_FOREIGN_KEY_NAME = "relatedToPCDateRange";
-
-	/**
-	 * Holds the name of the aggregation corresponding to non working dates
-	 * @private
-	 */
-	PlanningCalendarRow.AGGR_NONWORKING_DATES_NAME = "_nonWorkingDates";
-
-	var CalenderRowHeader = StandardListItem.extend("CalenderRowHeader", {
-
-		metadata : {
-
-			associations: {
-				parentRow: { type: "sap.m.PlanningCalendarRow", multiple: false}
-			}
-
-		},
-
-		setParentRow: function(sId) {
-
-			this.setAssociation("parentRow", sId, true);
-
-			if (!sId) {
-				this._oRow = undefined;
-			} else if (typeof sId == "string") {
-				this._oRow = sap.ui.getCore().byId(sId);
-			} else {
-				this._oRow = sId;
-			}
-
-			return this;
-
-		},
-
-		renderer: Renderer.extend(StandardListItemRenderer)
-
-	});
-
-	/*global CalenderRowHeaderRenderer:true*/
-	CalenderRowHeaderRenderer.openItemTag = function(oRm, oLI) {
-		oRm.write("<div");
-	};
-
-	CalenderRowHeaderRenderer.closeItemTag = function(oRm, oLI) {
-		oRm.write("</div>");
-	};
-
-	CalenderRowHeaderRenderer.renderTabIndex = function(oRm, oLI) {
-	};
-
-	PlanningCalendarRow.prototype.init = function(){
-
-		var sId = this.getId();
-		var oCalendarRowHeader = new CalenderRowHeader(sId + "-Head", {parentRow: this});
-		var oCalendarRow = new CalendarRow(sId + "-CalRow", {
-			checkResize: false,
-			updateCurrentTime: false,
-			ariaLabelledBy: sId + "-Head"
-		});
-		oCalendarRow._oPlanningCalendarRow = this;
-
-		oCalendarRow.getAppointments = function() {
-
-			if (this._oPlanningCalendarRow) {
-				return this._oPlanningCalendarRow.getAppointments();
-			}else {
-				return [];
-			}
-
-		};
-
-		oCalendarRow.getIntervalHeaders = function() {
-
-			if (this._oPlanningCalendarRow) {
-				return this._oPlanningCalendarRow.getIntervalHeaders();
-			}else {
-				return [];
-			}
-
-		};
-
-		this._oColumnListItem = new sap.m.ColumnListItem(this.getId() + "-CLI", {
-			cells: [ oCalendarRowHeader,
-					 oCalendarRow]
-		});
-
-	};
-
-	PlanningCalendarRow.prototype.exit = function(){
-
-		if (this._oColumnListItem.getCells()[1]) {//destroy associated CalendarRow
-			this._oColumnListItem.getCells()[1].destroy();
-		}
-		this._oColumnListItem.destroy();
-		this._oColumnListItem = undefined;
-
-	};
-
-	PlanningCalendarRow.prototype.setTooltip = function(vTooltip){
-
-		this.setAggregation("tooltip", vTooltip, true); // do not invalidate, only real rendered control must be invalidated
-		this._oColumnListItem.getCells()[0].setTooltip(vTooltip);
-
-		return this;
-
-	};
-
-	PlanningCalendarRow.prototype.setTitle = function(sTitle){
-
-		this.setProperty("title", sTitle, true); // do not invalidate, only real rendered control must be invalidated
-		this._oColumnListItem.getCells()[0].setTitle(sTitle);
-
-		return this;
-
-	};
-
-	PlanningCalendarRow.prototype.setText = function(sText){
-
-		this.setProperty("text", sText, true); // do not invalidate, only real rendered control must be invalidated
-		this._oColumnListItem.getCells()[0].setDescription(sText);
-
-		if (sText) {
-			this._oColumnListItem.getCells()[1].addStyleClass("sapMPlanCalRowLarge");
-		} else {
-			this._oColumnListItem.getCells()[1].removeStyleClass("sapMPlanCalRowLarge");
-		}
-
-		return this;
-
-	};
-
-	PlanningCalendarRow.prototype.setIcon = function(sIcon){
-
-		this.setProperty("icon", sIcon, true); // do not invalidate, only real rendered control must be invalidated
-		this._oColumnListItem.getCells()[0].setIcon(sIcon);
-
-		return this;
-
-	};
-
-	PlanningCalendarRow.prototype.setNonWorkingDays = function(aNonWorkingDays){
-
-		this.setProperty("nonWorkingDays", aNonWorkingDays, true); // do not invalidate, only real rendered control must be invalidated
-		this.getCalendarRow().setNonWorkingDays(aNonWorkingDays);
-
-		return this;
-
-	};
-
-	PlanningCalendarRow.prototype.setNonWorkingHours = function(aNonWorkingHours){
-
-		this.setProperty("nonWorkingHours", aNonWorkingHours, true); // do not invalidate, only real rendered control must be invalidated
-		this.getCalendarRow().setNonWorkingHours(aNonWorkingHours);
-
-		return this;
-
-	};
-
-	PlanningCalendarRow.prototype.invalidate = function(oOrigin) {
-
-		if (!oOrigin || !(oOrigin instanceof sap.ui.unified.CalendarAppointment)) {
-			Element.prototype.invalidate.apply(this, arguments);
-		}else if (this._oColumnListItem) {
-			// Appointment changed -> only invalidate internal CalendarRow (not if ColumnListItem is already destroyed)
-			this.getCalendarRow().invalidate(oOrigin);
-		}
-
-	};
-
-	// overwrite removing of appointments because invalidate don't get information about it
-	PlanningCalendarRow.prototype.removeAppointment = function(vObject) {
-
-		var oRemoved = this.removeAggregation("appointments", vObject, true);
-		this.getCalendarRow().invalidate();
-		return oRemoved;
-
-	};
-
-	PlanningCalendarRow.prototype.removeAllAppointments = function() {
-
-		var aRemoved = this.removeAllAggregation("appointments", true);
-		this.getCalendarRow().invalidate();
-		return aRemoved;
-
-	};
-
-	PlanningCalendarRow.prototype.destroyAppointments = function() {
-
-		var oDestroyed = this.destroyAggregation("appointments", true);
-		this.getCalendarRow().invalidate();
-		return oDestroyed;
-
-	};
-
-	PlanningCalendarRow.prototype.removeIntervalHeader = function(vObject) {
-
-		var oRemoved = this.removeAggregation("intervalHeaders", vObject, true);
-		this.getCalendarRow().invalidate();
-		return oRemoved;
-
-	};
-
-	PlanningCalendarRow.prototype.removeAllIntervalHeaders = function() {
-
-		var aRemoved = this.removeAllAggregation("intervalHeaders", true);
-		this.getCalendarRow().invalidate();
-		return aRemoved;
-
-	};
-
-	PlanningCalendarRow.prototype.destroyIntervalHeaders = function() {
-
-		var oDestroyed = this.destroyAggregation("intervalHeaders", true);
-		this.getCalendarRow().invalidate();
-		return oDestroyed;
-
-	};
-
-	PlanningCalendarRow.prototype.setSelected = function(bSelected){
-
-		this.setProperty("selected", bSelected, true);
-		this._oColumnListItem.setSelected(bSelected);
-
-		return this;
-
-	};
-
-	/**
-	 * A <code>PlanningCalendarRow</code> is rendered inside a <code>sap.m.Table</code> as a <code>sap.m.ColumnListItem</code>.
-	 *
-	 * @returns {sap.m.ColumnListItem} <code>sap.m.ColumnListItem</code> that represents <code>PlanningCalendarRow</code> in the table.
-	 * @private
-	 */
-	PlanningCalendarRow.prototype.getColumnListItem = function(){
-
-		return this._oColumnListItem;
-
-	};
-
-	/**
-	 * The <code>PlanningCalendarRow</code> appointments are rendered in a <ode>CalendarRow</code> control.
-	 *
-	 * @returns {sap.ui.uinified.CalendarRow} <code>sap.ui.uinified.CalendarRow</code> that renders <code>PlanningCalendarRow</code> appointments.
-	 * @private
-	 */
-	PlanningCalendarRow.prototype.getCalendarRow = function(){
-		if (!this._oColumnListItem) {
-			return null;
-		}
-		return this._oColumnListItem.getCells()[1];
-
-	};
-
-	PlanningCalendarRow.prototype.applyFocusInfo = function (oFocusInfo) {
-
-		// forward to CalendarRow
-		this.getCalendarRow().applyFocusInfo(oFocusInfo);
-
-		return this;
-
-	};
-
-
-	PlanningCalendarRow.prototype.addAggregation = function (sAggregationName, oObject, bSuppressInvalidate) {
-		if (CalendarRow.AGGR_NONWORKING_DATES_NAME === sAggregationName) {
-			// forward to CalendarRow
-			this.getCalendarRow().addAggregation(CalendarRow.AGGR_NONWORKING_DATES_NAME, this._buildCalendarRowDateRange(oObject),
-				bSuppressInvalidate);
-		}
-		return Element.prototype.addAggregation.apply(this, arguments);
-	};
-
-	PlanningCalendarRow.prototype.insertAggregation = function(sAggregationName, oObject, iIndex, bSuppressInvalidate) {
-		if (PlanningCalendarRow.AGGR_NONWORKING_DATES_NAME === sAggregationName) {
-			// forward to CalendarRow
-			this.getCalendarRow().insertAggregation(CalendarRow.AGGR_NONWORKING_DATES_NAME, this._buildCalendarRowDateRange(oObject),
-				iIndex, bSuppressInvalidate);
-		 }
-
-		return Element.prototype.insertAggregation.apply(this, arguments);
-	 };
-
-	PlanningCalendarRow.prototype.removeAggregation = function(sAggregationName, oObject, bSuppressInvalidate) {
-		var aRemovableNonWorkingDate;
-
-		if (PlanningCalendarRow.AGGR_NONWORKING_DATES_NAME === sAggregationName && this.getAggregation(PlanningCalendarRow.AGGR_NONWORKING_DATES_NAME)) {
-			aRemovableNonWorkingDate = this.getCalendarRow().getAggregation(CalendarRow.AGGR_NONWORKING_DATES_NAME).filter(function(oNonWorkingDate) {
-				return oNonWorkingDate.data(CalendarRow.PCROW_FOREIGN_KEY_NAME) === oObject.getId();
-			});
-			if (aRemovableNonWorkingDate.length) {
-				jQuery.sap.assert(aRemovableNonWorkingDate.length == 1, "Inconsistency between PlanningCalendarRow " +
-					"_nonWorkingDate instance and CalendarRow _nonWorkingDates instance. For PCRow instance " +
-					"there are more than one(" + aRemovableNonWorkingDate.length + ") nonWorkingDates in CalendarRow ");
-				this.getCalendarRow().removeAggregation("_nonWorkingDates", aRemovableNonWorkingDate[0]);
-			}
-		}
-		return Element.prototype.removeAggregation.apply(this, arguments);
-	};
-
-	PlanningCalendarRow.prototype.removeAllAggregation = function(sAggregationName, bSuppressInvalidate) {
-		if (PlanningCalendarRow.AGGR_NONWORKING_DATES_NAME === sAggregationName) {
-			// forward to CalendarRow
-			this.getCalendarRow().removeAllAggregation(CalendarRow.AGGR_NONWORKING_DATES_NAME, bSuppressInvalidate);
-		}
-
-		return Element.prototype.removeAllAggregation.apply(this, arguments);
-	};
-
-	PlanningCalendarRow.prototype.destroyAggregation = function(sAggregationName, bSuppressInvalidate) {
-		if (PlanningCalendarRow.AGGR_NONWORKING_DATES_NAME === sAggregationName) {
-			// forward to CalendarRow
-			if (this.getCalendarRow()) {
-				this.getCalendarRow().destroyAggregation(CalendarRow.AGGR_NONWORKING_DATES_NAME, bSuppressInvalidate);
-			}
-		}
-		return Element.prototype.destroyAggregation.apply(this, arguments);
-	};
-
-	/**
-	 * Clone from the passed DateRange and sets the foreign key to the source DateRange, that is used for cloning
-	 * @param {sap.ui.unified.DateRange} oSource The date range to be copied
-	 * @returns {sap.ui.unified.DateRange} The copied date range
-	 * @private
-	 */
-	PlanningCalendarRow.prototype._buildCalendarRowDateRange = function (oSource) {
-		var oRangeCopy = new DateRange();
-
-		if (oSource.getStartDate()) {
-			oRangeCopy.setStartDate(new Date(oSource.getStartDate().getTime()));
-		}
-		if (oSource.getEndDate()) {
-			oRangeCopy.setEndDate(new Date(oSource.getEndDate().getTime()));
-		}
-		oRangeCopy.data(CalendarRow.PCROW_FOREIGN_KEY_NAME, oSource.getId());
-
-		return oRangeCopy;
-	};
 
 	return PlanningCalendarRow;
 
-}, /* bExport= */ true);
+});

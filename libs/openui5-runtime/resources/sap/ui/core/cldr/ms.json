@@ -1,7 +1,7 @@
 {
 	"__license": "This file has been derived from Unicode Common Locale Data Repository (CLDR) files (http://cldr.unicode.org). See the copyright and permission notice in the Unicode-Data-Files-LICENSE.txt available at the same location as this file or visit http://www.unicode.org/copyright.html",
 	"languages": {
-		"aa": "aa",
+		"aa": "Afar",
 		"ab": "Abkhazia",
 		"ace": "Aceh",
 		"ach": "Akoli",
@@ -13,16 +13,17 @@
 		"agq": "Aghem",
 		"ain": "Ainu",
 		"ak": "Akan",
-		"ale": "ale",
+		"ale": "Aleut",
 		"alt": "Altai Selatan",
 		"am": "Amharic",
 		"an": "Aragon",
-		"anp": "anp",
+		"anp": "Angika",
 		"ar": "Arab",
 		"ar_001": "Arab Standard Moden",
 		"arn": "Mapuche",
 		"arp": "Arapaho",
 		"arq": "Arab Algeria",
+		"ars": "Arab Najdi",
 		"ary": "Arab Maghribi",
 		"arz": "Arab Mesir",
 		"as": "Assam",
@@ -67,6 +68,7 @@
 		"byv": "Medumba",
 		"ca": "Catalonia",
 		"cay": "Cayuga",
+		"ccp": "ccp",
 		"ce": "Chechen",
 		"ceb": "Cebuano",
 		"cgg": "Chiga",
@@ -131,6 +133,7 @@
 		"fr": "Perancis",
 		"fr_CA": "Perancis Kanada",
 		"fr_CH": "Perancis Switzerland",
+		"frc": "Perancis Cajun",
 		"fur": "Friulian",
 		"fy": "Frisian Barat",
 		"ga": "Ireland",
@@ -190,7 +193,7 @@
 		"kac": "Kachin",
 		"kaj": "Jju",
 		"kam": "Kamba",
-		"kbd": "Kabardian",
+		"kbd": "Kabardia",
 		"kbl": "Kanembu",
 		"kcg": "Tyap",
 		"kde": "Makonde",
@@ -237,6 +240,7 @@
 		"lkt": "Lakota",
 		"ln": "Lingala",
 		"lo": "Laos",
+		"lou": "Kreol Louisiana",
 		"loz": "Lozi",
 		"lrc": "Luri Utara",
 		"lt": "Lithuania",
@@ -272,7 +276,7 @@
 		"moh": "Mohawk",
 		"mos": "Mossi",
 		"mr": "Marathi",
-		"ms": "Bahasa Melayu",
+		"ms": "Melayu",
 		"mt": "Malta",
 		"mua": "Mundang",
 		"mul": "Pelbagai Bahasa",
@@ -311,7 +315,7 @@
 		"nyn": "Nyankole",
 		"oc": "Occitania",
 		"om": "Oromo",
-		"or": "Oriya",
+		"or": "Odia",
 		"os": "Ossete",
 		"pa": "Punjabi",
 		"pag": "Pangasinan",
@@ -320,7 +324,7 @@
 		"pau": "Palauan",
 		"pcm": "Nigerian Pidgin",
 		"pl": "Poland",
-		"prg": "Prussian",
+		"prg": "Prusia",
 		"ps": "Pashto",
 		"ps_alt-variant": "Pushto",
 		"pt": "Portugis",
@@ -477,6 +481,7 @@
 		"Cprt": "Cprt",
 		"Cyrl": "Cyril",
 		"Deva": "Devanagari",
+		"Dogr": "Dogr",
 		"Dsrt": "Dsrt",
 		"Dupl": "Dupl",
 		"Egyp": "Egyp",
@@ -484,12 +489,14 @@
 		"Ethi": "Ethiopia",
 		"Geor": "Georgia",
 		"Glag": "Glag",
+		"Gong": "Gong",
+		"Gonm": "Gonm",
 		"Goth": "Goth",
 		"Gran": "Gran",
 		"Grek": "Greek",
 		"Gujr": "Gujarat",
 		"Guru": "Gurmukhi",
-		"Hanb": "Hanb",
+		"Hanb": "Han dengan Bopomofo",
 		"Hang": "Hangul",
 		"Hani": "Han",
 		"Hano": "Hano",
@@ -527,9 +534,11 @@
 		"Lyci": "Lyci",
 		"Lydi": "Lydi",
 		"Mahj": "Mahj",
+		"Maka": "Maka",
 		"Mand": "Mand",
 		"Mani": "Mani",
 		"Marc": "Marc",
+		"Medf": "Medf",
 		"Mend": "Mend",
 		"Merc": "Merc",
 		"Mero": "Mero",
@@ -544,6 +553,7 @@
 		"Nbat": "Nbat",
 		"Newa": "Newa",
 		"Nkoo": "Nkoo",
+		"Nshu": "Nshu",
 		"Ogam": "Ogam",
 		"Olck": "Olck",
 		"Orkh": "Orkh",
@@ -559,7 +569,9 @@
 		"Phnx": "Phnx",
 		"Plrd": "Plrd",
 		"Prti": "Prti",
+		"Qaag": "Qaag",
 		"Rjng": "Rjng",
+		"Rohg": "Rohg",
 		"Runr": "Runr",
 		"Samr": "Samr",
 		"Sarb": "Sarb",
@@ -570,7 +582,10 @@
 		"Sidd": "Sidd",
 		"Sind": "Sind",
 		"Sinh": "Sinhala",
+		"Sogd": "Sogd",
+		"Sogo": "Sogo",
 		"Sora": "Sora",
+		"Soyo": "Soyo",
 		"Sund": "Sund",
 		"Sylo": "Sylo",
 		"Syrc": "Syrc",
@@ -594,6 +609,7 @@
 		"Xpeo": "Xpeo",
 		"Xsux": "Xsux",
 		"Yiii": "Yiii",
+		"Zanb": "Zanb",
 		"Zinh": "Zinh",
 		"Zmth": "Tatatanda matematik",
 		"Zsye": "Emoji",
@@ -610,6 +626,7 @@
 		"151": "Eropah Timur",
 		"154": "Eropah Utara",
 		"155": "Eropah Barat",
+		"202": "Afrika Sub-Sahara",
 		"419": "Amerika Latin",
 		"001": "Dunia",
 		"002": "Afrika",
@@ -659,7 +676,7 @@
 		"BH": "Bahrain",
 		"BI": "Burundi",
 		"BJ": "Benin",
-		"BL": "Saint Barthélemy",
+		"BL": "St. Barthelemy",
 		"BM": "Bermuda",
 		"BN": "Brunei",
 		"BO": "Bolivia",
@@ -711,7 +728,7 @@
 		"ES": "Sepanyol",
 		"ET": "Ethiopia",
 		"EU": "Kesatuan Eropah",
-		"EZ": "EZ",
+		"EZ": "Zon Euro",
 		"FI": "Finland",
 		"FJ": "Fiji",
 		"FK": "Kepulauan Falkland",
@@ -900,6 +917,8 @@
 		"VU": "Vanuatu",
 		"WF": "Wallis dan Futuna",
 		"WS": "Samoa",
+		"XA": "XA",
+		"XB": "XB",
 		"XK": "Kosovo",
 		"YE": "Yaman",
 		"YT": "Mayotte",
@@ -925,20 +944,25 @@
 		"dateTimeFormats": {
 			"full": "{1} {0}",
 			"long": "{1} {0}",
-			"medium": "{1} {0}",
-			"short": "{1} {0}",
+			"medium": "{1}, {0}",
+			"short": "{1}, {0}",
 			"availableFormats": {
+				"Bh": "h B",
+				"Bhm": "h:mm B",
+				"Bhms": "h:mm:ss B",
 				"d": "d",
 				"E": "ccc",
+				"EBhm": "E h:mm B",
+				"EBhms": "E h:mm:ss B",
 				"Ed": "d E",
 				"Ehm": "E h:mm a",
 				"EHm": "E HH:mm",
 				"Ehms": "E h:mm:ss a",
 				"EHms": "E HH:mm:ss",
-				"Gy": "G y",
-				"GyMMM": "G y MMM",
-				"GyMMMd": "G y MMM d",
-				"GyMMMEd": "G y MMM d, E",
+				"Gy": "y G",
+				"GyMMM": "MMM y G",
+				"GyMMMd": "d MMM y G",
+				"GyMMMEd": "E, d MMM y G",
 				"h": "h a",
 				"H": "HH",
 				"hm": "h:mm a",
@@ -965,11 +989,11 @@
 				"yMMM": "MMM y",
 				"yMMMd": "d MMM y",
 				"yMMMEd": "E, d MMM y",
-				"yMMMM": "y MMMM",
+				"yMMMM": "MMMM y",
 				"yQQQ": "QQQ y",
 				"yQQQQ": "QQQQ y",
 				"MMMMW": "'week' W 'of' MMM",
-				"yw": "'week' w 'of' y"
+				"yw": "'week' w 'of' Y"
 			},
 			"appendItems": {
 				"Day": "{0} ({2}: {1})",
@@ -988,6 +1012,44 @@
 				"intervalFormatFallback": "{0} – {1}",
 				"d": {
 					"d": "d–d"
+				},
+				"Gy": {
+					"G": "G y – G y",
+					"y": "G y–y"
+				},
+				"GyM": {
+					"G": "GGGGG y-MM – GGGGG y-MM",
+					"M": "GGGGG y-MM – y-MM",
+					"y": "GGGGG y-MM – y-MM"
+				},
+				"GyMd": {
+					"d": "GGGGG y-MM-dd – y-MM-dd",
+					"G": "GGGGG y-MM-dd – GGGGG y-MM-dd",
+					"M": "GGGGG y-MM-dd – y-MM-dd",
+					"y": "GGGGG y-MM-dd – y-MM-dd"
+				},
+				"GyMEd": {
+					"d": "GGGGG y-MM-dd, E – y-MM-dd, E",
+					"G": "GGGGG y-MM-dd, E – GGGGG y-MM-dd, E",
+					"M": "GGGGG y-MM-dd, E – y-MM-dd, E",
+					"y": "GGGGG y-MM-dd, E – y-MM-dd, E"
+				},
+				"GyMMM": {
+					"G": "G y MMM – G y MMM",
+					"M": "G y MMM–MMM",
+					"y": "G y MMM – y MMM"
+				},
+				"GyMMMd": {
+					"d": "G y MMM d–d",
+					"G": "G y MMM d – G y MMM d",
+					"M": "G y MMM d – MMM d",
+					"y": "G y MMM d – y MMM d"
+				},
+				"GyMMMEd": {
+					"d": "G y MMM d, E – MMM d, E",
+					"G": "G y MMM d, E – G y MMM d, E",
+					"M": "G y MMM d, E – MMM d, E",
+					"y": "G y MMM d, E – y MMM d, E"
 				},
 				"h": {
 					"a": "h a – h a",
@@ -1352,8 +1414,13 @@
 			"medium": "{1} {0}",
 			"short": "{1} {0}",
 			"availableFormats": {
+				"Bh": "h B",
+				"Bhm": "h:mm B",
+				"Bhms": "h:mm:ss B",
 				"d": "d",
 				"E": "ccc",
+				"EBhm": "E h:mm B",
+				"EBhms": "E h:mm:ss B",
 				"Ed": "E, d",
 				"Ehm": "E h:mm a",
 				"EHm": "E HH:mm",
@@ -1406,6 +1473,44 @@
 				"intervalFormatFallback": "{0} – {1}",
 				"d": {
 					"d": "d–d"
+				},
+				"Gy": {
+					"G": "G y – G y",
+					"y": "G y–y"
+				},
+				"GyM": {
+					"G": "GGGGG y-MM – GGGGG y-MM",
+					"M": "GGGGG y-MM – y-MM",
+					"y": "GGGGG y-MM – y-MM"
+				},
+				"GyMd": {
+					"d": "GGGGG y-MM-dd – y-MM-dd",
+					"G": "GGGGG y-MM-dd – GGGGG y-MM-dd",
+					"M": "GGGGG y-MM-dd – y-MM-dd",
+					"y": "GGGGG y-MM-dd – y-MM-dd"
+				},
+				"GyMEd": {
+					"d": "GGGGG y-MM-dd, E – y-MM-dd, E",
+					"G": "GGGGG y-MM-dd, E – GGGGG y-MM-dd, E",
+					"M": "GGGGG y-MM-dd, E – y-MM-dd, E",
+					"y": "GGGGG y-MM-dd, E – y-MM-dd, E"
+				},
+				"GyMMM": {
+					"G": "G y MMM – G y MMM",
+					"M": "G y MMM–MMM",
+					"y": "G y MMM – y MMM"
+				},
+				"GyMMMd": {
+					"d": "G y MMM d–d",
+					"G": "G y MMM d – G y MMM d",
+					"M": "G y MMM d – MMM d",
+					"y": "G y MMM d – y MMM d"
+				},
+				"GyMMMEd": {
+					"d": "G y MMM d, E – MMM d, E",
+					"G": "G y MMM d, E – G y MMM d, E",
+					"M": "G y MMM d, E – MMM d, E",
+					"y": "G y MMM d, E – y MMM d, E"
 				},
 				"h": {
 					"a": "h a – h a",
@@ -1767,8 +1872,13 @@
 			"medium": "{1} {0}",
 			"short": "{1} {0}",
 			"availableFormats": {
+				"Bh": "h B",
+				"Bhm": "h:mm B",
+				"Bhms": "h:mm:ss B",
 				"d": "d",
 				"E": "ccc",
+				"EBhm": "E h:mm B",
+				"EBhms": "E h:mm:ss B",
 				"Ed": "E, d",
 				"Ehm": "E h:mm a",
 				"EHm": "E HH:mm",
@@ -1821,6 +1931,44 @@
 				"intervalFormatFallback": "{0} – {1}",
 				"d": {
 					"d": "d–d"
+				},
+				"Gy": {
+					"G": "G y – G y",
+					"y": "G y–y"
+				},
+				"GyM": {
+					"G": "GGGGG y-MM – GGGGG y-MM",
+					"M": "GGGGG y-MM – y-MM",
+					"y": "GGGGG y-MM – y-MM"
+				},
+				"GyMd": {
+					"d": "GGGGG y-MM-dd – y-MM-dd",
+					"G": "GGGGG y-MM-dd – GGGGG y-MM-dd",
+					"M": "GGGGG y-MM-dd – y-MM-dd",
+					"y": "GGGGG y-MM-dd – y-MM-dd"
+				},
+				"GyMEd": {
+					"d": "GGGGG y-MM-dd, E – y-MM-dd, E",
+					"G": "GGGGG y-MM-dd, E – GGGGG y-MM-dd, E",
+					"M": "GGGGG y-MM-dd, E – y-MM-dd, E",
+					"y": "GGGGG y-MM-dd, E – y-MM-dd, E"
+				},
+				"GyMMM": {
+					"G": "G y MMM – G y MMM",
+					"M": "G y MMM–MMM",
+					"y": "G y MMM – y MMM"
+				},
+				"GyMMMd": {
+					"d": "G y MMM d–d",
+					"G": "G y MMM d – G y MMM d",
+					"M": "G y MMM d – MMM d",
+					"y": "G y MMM d – y MMM d"
+				},
+				"GyMMMEd": {
+					"d": "G y MMM d, E – MMM d, E",
+					"G": "G y MMM d, E – G y MMM d, E",
+					"M": "G y MMM d, E – MMM d, E",
+					"y": "G y MMM d, E – y MMM d, E"
 				},
 				"h": {
 					"a": "h a – h a",
@@ -2191,8 +2339,13 @@
 			"medium": "{1} {0}",
 			"short": "{1} {0}",
 			"availableFormats": {
+				"Bh": "h B",
+				"Bhm": "h:mm B",
+				"Bhms": "h:mm:ss B",
 				"d": "d",
 				"E": "ccc",
+				"EBhm": "E h:mm B",
+				"EBhms": "E h:mm:ss B",
 				"Ed": "E, d",
 				"Ehm": "E h:mm a",
 				"EHm": "E HH:mm",
@@ -2245,6 +2398,44 @@
 				"intervalFormatFallback": "{0} – {1}",
 				"d": {
 					"d": "d–d"
+				},
+				"Gy": {
+					"G": "G y – G y",
+					"y": "G y–y"
+				},
+				"GyM": {
+					"G": "GGGGG y-MM – GGGGG y-MM",
+					"M": "GGGGG y-MM – y-MM",
+					"y": "GGGGG y-MM – y-MM"
+				},
+				"GyMd": {
+					"d": "GGGGG y-MM-dd – y-MM-dd",
+					"G": "GGGGG y-MM-dd – GGGGG y-MM-dd",
+					"M": "GGGGG y-MM-dd – y-MM-dd",
+					"y": "GGGGG y-MM-dd – y-MM-dd"
+				},
+				"GyMEd": {
+					"d": "GGGGG y-MM-dd, E – y-MM-dd, E",
+					"G": "GGGGG y-MM-dd, E – GGGGG y-MM-dd, E",
+					"M": "GGGGG y-MM-dd, E – y-MM-dd, E",
+					"y": "GGGGG y-MM-dd, E – y-MM-dd, E"
+				},
+				"GyMMM": {
+					"G": "G y MMM – G y MMM",
+					"M": "G y MMM–MMM",
+					"y": "G y MMM – y MMM"
+				},
+				"GyMMMd": {
+					"d": "G y MMM d–d",
+					"G": "G y MMM d – G y MMM d",
+					"M": "G y MMM d – MMM d",
+					"y": "G y MMM d – y MMM d"
+				},
+				"GyMMMEd": {
+					"d": "G y MMM d, E – MMM d, E",
+					"G": "G y MMM d, E – G y MMM d, E",
+					"M": "G y MMM d, E – MMM d, E",
+					"y": "G y MMM d, E – y MMM d, E"
 				},
 				"h": {
 					"a": "h a – h a",
@@ -2587,17 +2778,475 @@
 			"0": "AP"
 		}
 	},
+	"ca-buddhist": {
+		"dateFormats": {
+			"full": "EEEE, d MMMM y G",
+			"long": "d MMMM y G",
+			"medium": "dd/MM/y G",
+			"short": "d/MM/y GGGGG"
+		},
+		"timeFormats": {
+			"full": "h:mm:ss a zzzz",
+			"long": "h:mm:ss a z",
+			"medium": "h:mm:ss a",
+			"short": "h:mm a"
+		},
+		"dateTimeFormats": {
+			"full": "{1} {0}",
+			"long": "{1} {0}",
+			"medium": "{1} {0}",
+			"short": "{1} {0}",
+			"availableFormats": {
+				"Bh": "h B",
+				"Bhm": "h:mm B",
+				"Bhms": "h:mm:ss B",
+				"d": "d",
+				"E": "ccc",
+				"EBhm": "E h:mm B",
+				"EBhms": "E h:mm:ss B",
+				"Ed": "E, d",
+				"Ehm": "E h:mm a",
+				"EHm": "E HH:mm",
+				"Ehms": "E h:mm:ss a",
+				"EHms": "E HH:mm:ss",
+				"Gy": "y G",
+				"GyMMM": "MMM y G",
+				"GyMMMd": "d MMM y G",
+				"GyMMMEd": "E, d MMM y G",
+				"h": "h a",
+				"H": "HH",
+				"hm": "h:mm a",
+				"Hm": "HH:mm",
+				"hms": "h:mm:ss a",
+				"Hms": "HH:mm:ss",
+				"M": "L",
+				"Md": "d/M",
+				"MEd": "E, d/M",
+				"MMM": "LLL",
+				"MMMd": "d MMM",
+				"MMMEd": "E, d MMM",
+				"MMMMd": "d MMMM",
+				"ms": "mm:ss",
+				"y": "y G",
+				"yyyy": "y G",
+				"yyyyM": "M/y G",
+				"yyyyMd": "d/M/y G",
+				"yyyyMEd": "E, d/M/y G",
+				"yyyyMMM": "MMM y G",
+				"yyyyMMMd": "d MMM y G",
+				"yyyyMMMEd": "E, d MMM y G",
+				"yyyyMMMM": "MMMM y G",
+				"yyyyQQQ": "QQQ y G",
+				"yyyyQQQQ": "QQQQ y G"
+			},
+			"appendItems": {
+				"Day": "{0} ({2}: {1})",
+				"Day-Of-Week": "{0} {1}",
+				"Era": "{1} {0}",
+				"Hour": "{0} ({2}: {1})",
+				"Minute": "{0} ({2}: {1})",
+				"Month": "{0} ({2}: {1})",
+				"Quarter": "{0} ({2}: {1})",
+				"Second": "{0} ({2}: {1})",
+				"Timezone": "{0} {1}",
+				"Week": "{0} ({2}: {1})",
+				"Year": "{1} {0}"
+			},
+			"intervalFormats": {
+				"intervalFormatFallback": "{0} – {1}",
+				"d": {
+					"d": "d–d"
+				},
+				"Gy": {
+					"G": "G y – G y",
+					"y": "G y–y"
+				},
+				"GyM": {
+					"G": "GGGGG y-MM – GGGGG y-MM",
+					"M": "GGGGG y-MM – y-MM",
+					"y": "GGGGG y-MM – y-MM"
+				},
+				"GyMd": {
+					"d": "GGGGG y-MM-dd – y-MM-dd",
+					"G": "GGGGG y-MM-dd – GGGGG y-MM-dd",
+					"M": "GGGGG y-MM-dd – y-MM-dd",
+					"y": "GGGGG y-MM-dd – y-MM-dd"
+				},
+				"GyMEd": {
+					"d": "GGGGG y-MM-dd, E – y-MM-dd, E",
+					"G": "GGGGG y-MM-dd, E – GGGGG y-MM-dd, E",
+					"M": "GGGGG y-MM-dd, E – y-MM-dd, E",
+					"y": "GGGGG y-MM-dd, E – y-MM-dd, E"
+				},
+				"GyMMM": {
+					"G": "G y MMM – G y MMM",
+					"M": "G y MMM–MMM",
+					"y": "G y MMM – y MMM"
+				},
+				"GyMMMd": {
+					"d": "G y MMM d–d",
+					"G": "G y MMM d – G y MMM d",
+					"M": "G y MMM d – MMM d",
+					"y": "G y MMM d – y MMM d"
+				},
+				"GyMMMEd": {
+					"d": "G y MMM d, E – MMM d, E",
+					"G": "G y MMM d, E – G y MMM d, E",
+					"M": "G y MMM d, E – MMM d, E",
+					"y": "G y MMM d, E – y MMM d, E"
+				},
+				"h": {
+					"a": "h a – h a",
+					"h": "h–h a"
+				},
+				"H": {
+					"H": "HH–HH"
+				},
+				"hm": {
+					"a": "h:mm a – h:mm a",
+					"h": "h:mm–h:mm a",
+					"m": "h:mm–h:mm a"
+				},
+				"Hm": {
+					"H": "HH:mm–HH:mm",
+					"m": "HH:mm–HH:mm"
+				},
+				"hmv": {
+					"a": "h:mm a – h:mm a v",
+					"h": "h:mm–h:mm a v",
+					"m": "h:mm–h:mm a v"
+				},
+				"Hmv": {
+					"H": "HH:mm–HH:mm v",
+					"m": "HH:mm–HH:mm v"
+				},
+				"hv": {
+					"a": "h a – h a v",
+					"h": "h–h a v"
+				},
+				"Hv": {
+					"H": "HH–HH v"
+				},
+				"M": {
+					"M": "M–M"
+				},
+				"Md": {
+					"d": "d/M – d/M",
+					"M": "d/M – d/M"
+				},
+				"MEd": {
+					"d": "E, d/M – E, d/M",
+					"M": "E, d/M – E, d/M"
+				},
+				"MMM": {
+					"M": "MMM–MMM"
+				},
+				"MMMd": {
+					"d": "d–d MMM",
+					"M": "d MMM – d MMM"
+				},
+				"MMMEd": {
+					"d": "E, d MMM – E, d MMM",
+					"M": "E, d MMM – E, d MMM"
+				},
+				"y": {
+					"y": "y–y G"
+				},
+				"yM": {
+					"M": "M/y – M/y G",
+					"y": "M/y – M/y G"
+				},
+				"yMd": {
+					"d": "d/M/y – d/M/y G",
+					"M": "d/M/y – d/M/y G",
+					"y": "d/M/y – d/M/y G"
+				},
+				"yMEd": {
+					"d": "E, d/M/y – E, d/M/y G",
+					"M": "E, d/M/y – E, d/M/y G",
+					"y": "E, d/M/y – E, d/M/y G"
+				},
+				"yMMM": {
+					"M": "MMM–MMM y G",
+					"y": "MMM y – MMM y G"
+				},
+				"yMMMd": {
+					"d": "d–d MMM y G",
+					"M": "d MMM – d MMM, y G",
+					"y": "d MMM y – d MMM y G"
+				},
+				"yMMMEd": {
+					"d": "E, d MMM – E, d MMM, y G",
+					"M": "E, d MMM – E, d MMM, y G",
+					"y": "E, d MMM y – E, d MMM y G"
+				},
+				"yMMMM": {
+					"M": "MMMM–MMMM y G",
+					"y": "MMMM y – MMMM y G"
+				}
+			}
+		},
+		"months": {
+			"format": {
+				"abbreviated": [
+					"Jan",
+					"Feb",
+					"Mac",
+					"Apr",
+					"Mei",
+					"Jun",
+					"Jul",
+					"Ogo",
+					"Sep",
+					"Okt",
+					"Nov",
+					"Dis"
+				],
+				"narrow": [
+					"J",
+					"F",
+					"M",
+					"A",
+					"M",
+					"J",
+					"J",
+					"O",
+					"S",
+					"O",
+					"N",
+					"D"
+				],
+				"wide": [
+					"Januari",
+					"Februari",
+					"Mac",
+					"April",
+					"Mei",
+					"Jun",
+					"Julai",
+					"Ogos",
+					"September",
+					"Oktober",
+					"November",
+					"Disember"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"Jan",
+					"Feb",
+					"Mac",
+					"Apr",
+					"Mei",
+					"Jun",
+					"Jul",
+					"Ogo",
+					"Sep",
+					"Okt",
+					"Nov",
+					"Dis"
+				],
+				"narrow": [
+					"J",
+					"F",
+					"M",
+					"A",
+					"M",
+					"J",
+					"J",
+					"O",
+					"S",
+					"O",
+					"N",
+					"D"
+				],
+				"wide": [
+					"Januari",
+					"Februari",
+					"Mac",
+					"April",
+					"Mei",
+					"Jun",
+					"Julai",
+					"Ogos",
+					"September",
+					"Oktober",
+					"November",
+					"Disember"
+				]
+			}
+		},
+		"days": {
+			"format": {
+				"abbreviated": [
+					"Ahd",
+					"Isn",
+					"Sel",
+					"Rab",
+					"Kha",
+					"Jum",
+					"Sab"
+				],
+				"narrow": [
+					"A",
+					"I",
+					"S",
+					"R",
+					"K",
+					"J",
+					"S"
+				],
+				"short": [
+					"Ah",
+					"Is",
+					"Se",
+					"Ra",
+					"Kh",
+					"Ju",
+					"Sa"
+				],
+				"wide": [
+					"Ahad",
+					"Isnin",
+					"Selasa",
+					"Rabu",
+					"Khamis",
+					"Jumaat",
+					"Sabtu"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"Ahd",
+					"Isn",
+					"Sel",
+					"Rab",
+					"Kha",
+					"Jum",
+					"Sab"
+				],
+				"narrow": [
+					"A",
+					"I",
+					"S",
+					"R",
+					"K",
+					"J",
+					"S"
+				],
+				"short": [
+					"Ah",
+					"Is",
+					"Se",
+					"Ra",
+					"Kh",
+					"Ju",
+					"Sa"
+				],
+				"wide": [
+					"Ahad",
+					"Isnin",
+					"Selasa",
+					"Rabu",
+					"Khamis",
+					"Jumaat",
+					"Sabtu"
+				]
+			}
+		},
+		"quarters": {
+			"format": {
+				"abbreviated": [
+					"S1",
+					"S2",
+					"S3",
+					"S4"
+				],
+				"narrow": [
+					"1",
+					"2",
+					"3",
+					"4"
+				],
+				"wide": [
+					"Suku pertama",
+					"Suku Ke-2",
+					"Suku Ke-3",
+					"Suku Ke-4"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"S1",
+					"S2",
+					"S3",
+					"S4"
+				],
+				"narrow": [
+					"1",
+					"2",
+					"3",
+					"4"
+				],
+				"wide": [
+					"Suku pertama",
+					"Suku Ke-2",
+					"Suku Ke-3",
+					"Suku Ke-4"
+				]
+			}
+		},
+		"dayPeriods": {
+			"format": {
+				"abbreviated": [
+					"PG",
+					"PTG"
+				],
+				"narrow": [
+					"a",
+					"p"
+				],
+				"wide": [
+					"PG",
+					"PTG"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"PG",
+					"PTG"
+				],
+				"narrow": [
+					"a",
+					"p"
+				],
+				"wide": [
+					"PG",
+					"PTG"
+				]
+			}
+		},
+		"era-wide": {
+			"0": "BE"
+		},
+		"era-abbreviated": {
+			"0": "BE"
+		},
+		"era-narrow": {
+			"0": "BE"
+		}
+	},
 	"dateFields": {
 		"era": {
-			"displayName": "Era"
+			"displayName": "era"
 		},
 		"year-wide": {
-			"displayName": "Tahun",
+			"displayName": "tahun",
 			"relative-type--1": "tahun lalu",
 			"relative-type-0": "tahun ini",
 			"relative-type-1": "tahun depan",
 			"relativeTime-type-future": {
-				"relativeTimePattern-count-other": "dalam {0} saat"
+				"relativeTimePattern-count-other": "dalam {0} tahun"
 			},
 			"relativeTime-type-past": {
 				"relativeTimePattern-count-other": "{0} tahun lalu"
@@ -2628,7 +3277,7 @@
 			}
 		},
 		"quarter-wide": {
-			"displayName": "Suku Tahun",
+			"displayName": "suku tahun",
 			"relative-type--1": "suku tahun lalu",
 			"relative-type-0": "suku tahun ini",
 			"relative-type-1": "suku tahun seterusnya",
@@ -2645,10 +3294,10 @@
 			"relative-type-0": "suku ini",
 			"relative-type-1": "suku seterusnya",
 			"relativeTime-type-future": {
-				"relativeTimePattern-count-other": "dlm {0} suku tahun"
+				"relativeTimePattern-count-other": "dlm {0} suku thn"
 			},
 			"relativeTime-type-past": {
-				"relativeTimePattern-count-other": "{0} suku tahun lalu"
+				"relativeTimePattern-count-other": "{0} suku thn lalu"
 			}
 		},
 		"quarter-narrow": {
@@ -2657,14 +3306,14 @@
 			"relative-type-0": "suku ini",
 			"relative-type-1": "suku seterusnya",
 			"relativeTime-type-future": {
-				"relativeTimePattern-count-other": "dlm {0} suku tahun"
+				"relativeTimePattern-count-other": "dlm {0} suku thn"
 			},
 			"relativeTime-type-past": {
-				"relativeTimePattern-count-other": "{0} suku tahun lalu"
+				"relativeTimePattern-count-other": "{0} suku thn lalu"
 			}
 		},
 		"month-wide": {
-			"displayName": "Bulan",
+			"displayName": "bulan",
 			"relative-type--1": "bulan lalu",
 			"relative-type-0": "bulan ini",
 			"relative-type-1": "bulan depan",
@@ -2700,7 +3349,7 @@
 			}
 		},
 		"week-wide": {
-			"displayName": "Minggu",
+			"displayName": "minggu",
 			"relative-type--1": "minggu lalu",
 			"relative-type-0": "minggu ini",
 			"relative-type-1": "minggu depan",
@@ -2739,7 +3388,7 @@
 			"relativePeriod": "minggu ke-{0}"
 		},
 		"day-wide": {
-			"displayName": "Hari",
+			"displayName": "hari",
 			"relative-type--2": "kelmarin",
 			"relative-type--1": "semalam",
 			"relative-type-0": "hari ini",
@@ -2784,7 +3433,7 @@
 			"displayName": "Hari dalam Minggu"
 		},
 		"hour-wide": {
-			"displayName": "Jam",
+			"displayName": "jam",
 			"relative-type-0": "jam ini",
 			"relativeTime-type-future": {
 				"relativeTimePattern-count-other": "dalam {0} jam"
@@ -2814,7 +3463,7 @@
 			}
 		},
 		"minute-wide": {
-			"displayName": "Minit",
+			"displayName": "minit",
 			"relative-type-0": "pada minit ini",
 			"relativeTime-type-future": {
 				"relativeTimePattern-count-other": "dalam {0} minit"
@@ -2844,7 +3493,7 @@
 			}
 		},
 		"second-wide": {
-			"displayName": "Saat",
+			"displayName": "saat",
 			"relative-type-0": "sekarang",
 			"relativeTime-type-future": {
 				"relativeTimePattern-count-other": "dalam {0} saat"
@@ -2874,7 +3523,7 @@
 			}
 		},
 		"zone": {
-			"displayName": "Zon Waktu"
+			"displayName": "zon waktu"
 		}
 	},
 	"decimalFormat": {
@@ -2974,32 +3623,644 @@
 		"XAF": "FCFA",
 		"XCD": "EC$",
 		"XOF": "CFA",
-		"XPF": "CFPF"
+		"XPF": "CFPF",
+		"XXX": "¤"
 	},
 	"rtl": false,
+	"listPattern-standard-wide": {
+		"2": "{0} dan {1}",
+		"start": "{0}, {1}",
+		"middle": "{0}, {1}",
+		"end": "{0} dan {1}"
+	},
+	"listPattern-or-wide": {
+		"2": "{0} atau {1}",
+		"start": "{0}, {1}",
+		"middle": "{0}, {1}",
+		"end": "{0}, atau {1}"
+	},
+	"listPattern-or-short": {
+		"2": "{0} atau {1}",
+		"start": "{0}, {1}",
+		"middle": "{0}, {1}",
+		"end": "{0}, atau {1}"
+	},
+	"listPattern-standard-short": {
+		"2": "{0} dan {1}",
+		"start": "{0}, {1}",
+		"middle": "{0}, {1}",
+		"end": "{0} dan {1}"
+	},
+	"units": {
+		"short": {
+			"per": {
+				"compoundUnitPattern": "{0}/{1}"
+			},
+			"acceleration-g-force": {
+				"displayName": "daya g",
+				"unitPattern-count-other": "{0} G"
+			},
+			"acceleration-meter-per-second-squared": {
+				"displayName": "meter/s²",
+				"unitPattern-count-other": "{0} m/s²"
+			},
+			"angle-revolution": {
+				"displayName": "rev",
+				"unitPattern-count-other": "{0} rev"
+			},
+			"angle-radian": {
+				"displayName": "radian",
+				"unitPattern-count-other": "{0} rad"
+			},
+			"angle-degree": {
+				"displayName": "darjah",
+				"unitPattern-count-other": "{0} darjah"
+			},
+			"angle-arc-minute": {
+				"displayName": "min arka",
+				"unitPattern-count-other": "{0} min arka"
+			},
+			"angle-arc-second": {
+				"displayName": "saat arka",
+				"unitPattern-count-other": "{0} saat arka"
+			},
+			"area-square-kilometer": {
+				"displayName": "km²",
+				"unitPattern-count-other": "{0} km²",
+				"perUnitPattern": "{0}/km²"
+			},
+			"area-hectare": {
+				"displayName": "hektar",
+				"unitPattern-count-other": "{0} ha"
+			},
+			"area-square-meter": {
+				"displayName": "m²",
+				"unitPattern-count-other": "{0} m²",
+				"perUnitPattern": "{0}/m²"
+			},
+			"area-square-centimeter": {
+				"displayName": "cm²",
+				"unitPattern-count-other": "{0} cm²",
+				"perUnitPattern": "{0}/cm²"
+			},
+			"area-square-mile": {
+				"displayName": "batu persegi",
+				"unitPattern-count-other": "{0} bt²",
+				"perUnitPattern": "{0}/bt²"
+			},
+			"area-acre": {
+				"displayName": "ekar",
+				"unitPattern-count-other": "{0} ekar"
+			},
+			"area-square-yard": {
+				"displayName": "ela²",
+				"unitPattern-count-other": "{0} ela²"
+			},
+			"area-square-foot": {
+				"displayName": "ka persegi",
+				"unitPattern-count-other": "{0} ka²"
+			},
+			"area-square-inch": {
+				"displayName": "inci²",
+				"unitPattern-count-other": "{0} in²",
+				"perUnitPattern": "{0}/in²"
+			},
+			"concentr-karat": {
+				"displayName": "karat",
+				"unitPattern-count-other": "{0} kt"
+			},
+			"concentr-milligram-per-deciliter": {
+				"displayName": "mg/dL",
+				"unitPattern-count-other": "{0} mg/dL"
+			},
+			"concentr-millimole-per-liter": {
+				"displayName": "mmol/L",
+				"unitPattern-count-other": "{0} mmol/L"
+			},
+			"concentr-part-per-million": {
+				"displayName": "ppm",
+				"unitPattern-count-other": "{0} ppm"
+			},
+			"concentr-percent": {
+				"displayName": "peratus",
+				"unitPattern-count-other": "{0}%"
+			},
+			"concentr-permille": {
+				"displayName": "per seribu",
+				"unitPattern-count-other": "{0}‰"
+			},
+			"consumption-liter-per-kilometer": {
+				"displayName": "liter/km",
+				"unitPattern-count-other": "{0} L/km"
+			},
+			"consumption-liter-per-100kilometers": {
+				"displayName": "L/100km",
+				"unitPattern-count-other": "{0} L/100km"
+			},
+			"consumption-mile-per-gallon": {
+				"displayName": "batu/gal",
+				"unitPattern-count-other": "{0} bpg"
+			},
+			"consumption-mile-per-gallon-imperial": {
+				"displayName": "mpg Imp.",
+				"unitPattern-count-other": "{0} mpg Imp."
+			},
+			"digital-petabyte": {
+				"displayName": "PB",
+				"unitPattern-count-other": "{0} PB"
+			},
+			"digital-terabyte": {
+				"displayName": "TBait",
+				"unitPattern-count-other": "{0} TB"
+			},
+			"digital-terabit": {
+				"displayName": "Tbit",
+				"unitPattern-count-other": "{0} Tb"
+			},
+			"digital-gigabyte": {
+				"displayName": "GBait",
+				"unitPattern-count-other": "{0} GB"
+			},
+			"digital-gigabit": {
+				"displayName": "Gbit",
+				"unitPattern-count-other": "{0} Gb"
+			},
+			"digital-megabyte": {
+				"displayName": "MBait",
+				"unitPattern-count-other": "{0} MB"
+			},
+			"digital-megabit": {
+				"displayName": "Mbit",
+				"unitPattern-count-other": "{0} Mb"
+			},
+			"digital-kilobyte": {
+				"displayName": "kBait",
+				"unitPattern-count-other": "{0} kB"
+			},
+			"digital-kilobit": {
+				"displayName": "kbit",
+				"unitPattern-count-other": "{0} kb"
+			},
+			"digital-byte": {
+				"displayName": "bait",
+				"unitPattern-count-other": "{0} bait"
+			},
+			"digital-bit": {
+				"displayName": "bit",
+				"unitPattern-count-other": "{0} bit"
+			},
+			"duration-century": {
+				"displayName": "abad",
+				"unitPattern-count-other": "{0} abad"
+			},
+			"duration-year": {
+				"displayName": "tahun",
+				"unitPattern-count-other": "{0} thn",
+				"perUnitPattern": "{0}/thn"
+			},
+			"duration-month": {
+				"displayName": "bulan",
+				"unitPattern-count-other": "{0} bln",
+				"perUnitPattern": "{0}/bln"
+			},
+			"duration-week": {
+				"displayName": "minggu",
+				"unitPattern-count-other": "{0} mgu",
+				"perUnitPattern": "{0}/mgu"
+			},
+			"duration-day": {
+				"displayName": "hari",
+				"unitPattern-count-other": "{0} hari",
+				"perUnitPattern": "{0}/h"
+			},
+			"duration-hour": {
+				"displayName": "jam",
+				"unitPattern-count-other": "{0} j",
+				"perUnitPattern": "{0}/j"
+			},
+			"duration-minute": {
+				"displayName": "minit",
+				"unitPattern-count-other": "{0} min",
+				"perUnitPattern": "{0}/min"
+			},
+			"duration-second": {
+				"displayName": "saat",
+				"unitPattern-count-other": "{0} saat",
+				"perUnitPattern": "{0}/s"
+			},
+			"duration-millisecond": {
+				"displayName": "milisaat",
+				"unitPattern-count-other": "{0} ms"
+			},
+			"duration-microsecond": {
+				"displayName": "μsaat",
+				"unitPattern-count-other": "{0} μs"
+			},
+			"duration-nanosecond": {
+				"displayName": "nanosaat",
+				"unitPattern-count-other": "{0} ns"
+			},
+			"electric-ampere": {
+				"displayName": "amp",
+				"unitPattern-count-other": "{0} A"
+			},
+			"electric-milliampere": {
+				"displayName": "miliamp",
+				"unitPattern-count-other": "{0} mA"
+			},
+			"electric-ohm": {
+				"displayName": "ohm",
+				"unitPattern-count-other": "{0} Ω"
+			},
+			"electric-volt": {
+				"displayName": "volt",
+				"unitPattern-count-other": "{0} V"
+			},
+			"energy-kilocalorie": {
+				"displayName": "kkal",
+				"unitPattern-count-other": "{0} kkal"
+			},
+			"energy-calorie": {
+				"displayName": "kal",
+				"unitPattern-count-other": "{0} kal"
+			},
+			"energy-foodcalorie": {
+				"displayName": "Kal",
+				"unitPattern-count-other": "{0} Kal"
+			},
+			"energy-kilojoule": {
+				"displayName": "kilojoule",
+				"unitPattern-count-other": "{0} kJ"
+			},
+			"energy-joule": {
+				"displayName": "joule",
+				"unitPattern-count-other": "{0} J"
+			},
+			"energy-kilowatt-hour": {
+				"displayName": "kWh",
+				"unitPattern-count-other": "{0} kWh"
+			},
+			"frequency-gigahertz": {
+				"displayName": "GHz",
+				"unitPattern-count-other": "{0} GHz"
+			},
+			"frequency-megahertz": {
+				"displayName": "MHz",
+				"unitPattern-count-other": "{0} MHz"
+			},
+			"frequency-kilohertz": {
+				"displayName": "kHz",
+				"unitPattern-count-other": "{0} kHz"
+			},
+			"frequency-hertz": {
+				"displayName": "Hz",
+				"unitPattern-count-other": "{0} Hz"
+			},
+			"length-kilometer": {
+				"displayName": "kilometer",
+				"unitPattern-count-other": "{0} km",
+				"perUnitPattern": "{0}/km"
+			},
+			"length-meter": {
+				"displayName": "meter",
+				"unitPattern-count-other": "{0} m",
+				"perUnitPattern": "{0}/m"
+			},
+			"length-decimeter": {
+				"displayName": "dm",
+				"unitPattern-count-other": "{0} dm"
+			},
+			"length-centimeter": {
+				"displayName": "sentimeter",
+				"unitPattern-count-other": "{0} cm",
+				"perUnitPattern": "{0}/cm"
+			},
+			"length-millimeter": {
+				"displayName": "mm",
+				"unitPattern-count-other": "{0} mm"
+			},
+			"length-micrometer": {
+				"displayName": "µmeter",
+				"unitPattern-count-other": "{0} µm"
+			},
+			"length-nanometer": {
+				"displayName": "nm",
+				"unitPattern-count-other": "{0} nm"
+			},
+			"length-picometer": {
+				"displayName": "pm",
+				"unitPattern-count-other": "{0} pm"
+			},
+			"length-mile": {
+				"displayName": "batu",
+				"unitPattern-count-other": "{0} bt"
+			},
+			"length-yard": {
+				"displayName": "ela",
+				"unitPattern-count-other": "{0} ela"
+			},
+			"length-foot": {
+				"displayName": "kaki",
+				"unitPattern-count-other": "{0} ka",
+				"perUnitPattern": "{0}/ka"
+			},
+			"length-inch": {
+				"displayName": "inci",
+				"unitPattern-count-other": "{0} in",
+				"perUnitPattern": "{0}/in"
+			},
+			"length-parsec": {
+				"displayName": "pc",
+				"unitPattern-count-other": "{0} pc"
+			},
+			"length-light-year": {
+				"displayName": "thn cahaya",
+				"unitPattern-count-other": "{0} thn cahaya"
+			},
+			"length-astronomical-unit": {
+				"displayName": "au",
+				"unitPattern-count-other": "{0} au"
+			},
+			"length-furlong": {
+				"displayName": "furlong",
+				"unitPattern-count-other": "{0} fur"
+			},
+			"length-fathom": {
+				"displayName": "fathom",
+				"unitPattern-count-other": "{0} fth"
+			},
+			"length-nautical-mile": {
+				"displayName": "btn",
+				"unitPattern-count-other": "{0} btn"
+			},
+			"length-mile-scandinavian": {
+				"displayName": "smi",
+				"unitPattern-count-other": "{0} smi"
+			},
+			"length-point": {
+				"displayName": "mata",
+				"unitPattern-count-other": "{0} mt"
+			},
+			"light-lux": {
+				"displayName": "lux",
+				"unitPattern-count-other": "{0} lx"
+			},
+			"mass-metric-ton": {
+				"displayName": "t",
+				"unitPattern-count-other": "{0} t"
+			},
+			"mass-kilogram": {
+				"displayName": "kilogram",
+				"unitPattern-count-other": "{0} kg",
+				"perUnitPattern": "{0}/kg"
+			},
+			"mass-gram": {
+				"displayName": "gram",
+				"unitPattern-count-other": "{0} g",
+				"perUnitPattern": "{0}/g"
+			},
+			"mass-milligram": {
+				"displayName": "mg",
+				"unitPattern-count-other": "{0} mg"
+			},
+			"mass-microgram": {
+				"displayName": "µg",
+				"unitPattern-count-other": "{0} µg"
+			},
+			"mass-ton": {
+				"displayName": "tan",
+				"unitPattern-count-other": "{0} tn"
+			},
+			"mass-stone": {
+				"displayName": "stone",
+				"unitPattern-count-other": "{0} st"
+			},
+			"mass-pound": {
+				"displayName": "paun",
+				"unitPattern-count-other": "{0} lb",
+				"perUnitPattern": "{0}/lb"
+			},
+			"mass-ounce": {
+				"displayName": "auns",
+				"unitPattern-count-other": "{0} oz",
+				"perUnitPattern": "{0}/oz"
+			},
+			"mass-ounce-troy": {
+				"displayName": "oz troy",
+				"unitPattern-count-other": "{0} oz t"
+			},
+			"mass-carat": {
+				"displayName": "karat",
+				"unitPattern-count-other": "{0} CD"
+			},
+			"power-gigawatt": {
+				"displayName": "GW",
+				"unitPattern-count-other": "{0} GW"
+			},
+			"power-megawatt": {
+				"displayName": "MW",
+				"unitPattern-count-other": "{0} MW"
+			},
+			"power-kilowatt": {
+				"displayName": "kW",
+				"unitPattern-count-other": "{0} kW"
+			},
+			"power-watt": {
+				"displayName": "watt",
+				"unitPattern-count-other": "{0} W"
+			},
+			"power-milliwatt": {
+				"displayName": "mW",
+				"unitPattern-count-other": "{0} mW"
+			},
+			"power-horsepower": {
+				"displayName": "hp",
+				"unitPattern-count-other": "{0} hp"
+			},
+			"pressure-hectopascal": {
+				"displayName": "hPa",
+				"unitPattern-count-other": "{0} hPa"
+			},
+			"pressure-millimeter-of-mercury": {
+				"displayName": "mm Hg",
+				"unitPattern-count-other": "{0} mm Hg"
+			},
+			"pressure-pound-per-square-inch": {
+				"displayName": "psi",
+				"unitPattern-count-other": "{0} psi"
+			},
+			"pressure-inch-hg": {
+				"displayName": "inHg",
+				"unitPattern-count-other": "{0} inHg"
+			},
+			"pressure-millibar": {
+				"displayName": "mbar",
+				"unitPattern-count-other": "{0} mbar"
+			},
+			"pressure-atmosphere": {
+				"displayName": "atm",
+				"unitPattern-count-other": "{0} atm"
+			},
+			"speed-kilometer-per-hour": {
+				"displayName": "km/jam",
+				"unitPattern-count-other": "{0} kmj"
+			},
+			"speed-meter-per-second": {
+				"displayName": "meter/saat",
+				"unitPattern-count-other": "{0} m/s"
+			},
+			"speed-mile-per-hour": {
+				"displayName": "batu/jam",
+				"unitPattern-count-other": "{0} bsj"
+			},
+			"speed-knot": {
+				"displayName": "kn",
+				"unitPattern-count-other": "{0} kn"
+			},
+			"temperature-generic": {
+				"displayName": "°",
+				"unitPattern-count-other": "{0}°"
+			},
+			"temperature-celsius": {
+				"displayName": "darjah C",
+				"unitPattern-count-other": "{0}°C"
+			},
+			"temperature-fahrenheit": {
+				"displayName": "darjah F",
+				"unitPattern-count-other": "{0}°F"
+			},
+			"temperature-kelvin": {
+				"displayName": "K",
+				"unitPattern-count-other": "{0} K"
+			},
+			"volume-cubic-kilometer": {
+				"displayName": "km³",
+				"unitPattern-count-other": "{0} km³"
+			},
+			"volume-cubic-meter": {
+				"displayName": "m³",
+				"unitPattern-count-other": "{0} m³",
+				"perUnitPattern": "{0}/m³"
+			},
+			"volume-cubic-centimeter": {
+				"displayName": "cm³",
+				"unitPattern-count-other": "{0} cm³",
+				"perUnitPattern": "{0}/cm³"
+			},
+			"volume-cubic-mile": {
+				"displayName": "bt³",
+				"unitPattern-count-other": "{0} bt³"
+			},
+			"volume-cubic-yard": {
+				"displayName": "yd³",
+				"unitPattern-count-other": "{0} yd³"
+			},
+			"volume-cubic-foot": {
+				"displayName": "ka³",
+				"unitPattern-count-other": "{0} ka³"
+			},
+			"volume-cubic-inch": {
+				"displayName": "in³",
+				"unitPattern-count-other": "{0} in³"
+			},
+			"volume-megaliter": {
+				"displayName": "ML",
+				"unitPattern-count-other": "{0} ML"
+			},
+			"volume-hectoliter": {
+				"displayName": "hL",
+				"unitPattern-count-other": "{0} hL"
+			},
+			"volume-liter": {
+				"displayName": "liter",
+				"unitPattern-count-other": "{0} l",
+				"perUnitPattern": "{0}/l"
+			},
+			"volume-deciliter": {
+				"displayName": "dL",
+				"unitPattern-count-other": "{0} dL"
+			},
+			"volume-centiliter": {
+				"displayName": "cL",
+				"unitPattern-count-other": "{0} cL"
+			},
+			"volume-milliliter": {
+				"displayName": "mL",
+				"unitPattern-count-other": "{0} mL"
+			},
+			"volume-pint-metric": {
+				"displayName": "mpt",
+				"unitPattern-count-other": "{0} mpt"
+			},
+			"volume-cup-metric": {
+				"displayName": "cawan metrik",
+				"unitPattern-count-other": "{0} mc"
+			},
+			"volume-acre-foot": {
+				"displayName": "ekar ka",
+				"unitPattern-count-other": "{0} ekar ka"
+			},
+			"volume-bushel": {
+				"displayName": "bu",
+				"unitPattern-count-other": "{0} bu"
+			},
+			"volume-gallon": {
+				"displayName": "gal",
+				"unitPattern-count-other": "{0} gal",
+				"perUnitPattern": "{0}/gal"
+			},
+			"volume-gallon-imperial": {
+				"displayName": "Imp. gal",
+				"unitPattern-count-other": "{0} gal Imp.",
+				"perUnitPattern": "{0}/gal Imp."
+			},
+			"volume-quart": {
+				"displayName": "qt",
+				"unitPattern-count-other": "{0} qt"
+			},
+			"volume-pint": {
+				"displayName": "pain",
+				"unitPattern-count-other": "{0} pt"
+			},
+			"volume-cup": {
+				"displayName": "cawan",
+				"unitPattern-count-other": "{0} c"
+			},
+			"volume-fluid-ounce": {
+				"displayName": "fl oz",
+				"unitPattern-count-other": "{0} fl oz"
+			},
+			"volume-tablespoon": {
+				"displayName": "sudu besar",
+				"unitPattern-count-other": "{0} sudu besar"
+			},
+			"volume-teaspoon": {
+				"displayName": "sudu teh",
+				"unitPattern-count-other": "{0} sudu teh"
+			},
+			"coordinateUnit": {
+				"displayName": "arah",
+				"east": "{0}E",
+				"north": "{0}N",
+				"south": "{0}S",
+				"west": "{0}W"
+			}
+		}
+	},
 	"currencyDigits": {
 		"ADP": 0,
 		"AFN": 0,
 		"ALL": 0,
-		"AMD": 0,
 		"BHD": 3,
 		"BIF": 0,
-		"BYN": 2,
 		"BYR": 0,
-		"CAD": 2,
-		"CHF": 2,
 		"CLF": 4,
 		"CLP": 0,
-		"COP": 0,
-		"CRC": 0,
-		"CZK": 0,
 		"DEFAULT": 2,
 		"DJF": 0,
 		"ESP": 0,
 		"GNF": 0,
-		"GYD": 0,
 		"HUF": 0,
-		"IDR": 0,
 		"IQD": 0,
 		"IRR": 0,
 		"ISK": 0,
@@ -3017,11 +4278,8 @@
 		"MGA": 0,
 		"MGF": 0,
 		"MMK": 0,
-		"MNT": 0,
 		"MRO": 0,
-		"MUR": 0,
 		"OMR": 3,
-		"PKR": 0,
 		"PYG": 0,
 		"RSD": 0,
 		"RWF": 0,
@@ -3033,10 +4291,9 @@
 		"TND": 3,
 		"TRL": 0,
 		"TWD": 0,
-		"TZS": 0,
 		"UGX": 0,
 		"UYI": 0,
-		"UZS": 0,
+		"UYW": 4,
 		"VND": 0,
 		"VUV": 0,
 		"XAF": 0,
@@ -3071,6 +4328,11 @@
 	"eras-persian": {
 		"0": {
 			"_start": "622-01-01"
+		}
+	},
+	"eras-buddhist": {
+		"0": {
+			"_start": "-542-01-01"
 		}
 	},
 	"eras-japanese": {

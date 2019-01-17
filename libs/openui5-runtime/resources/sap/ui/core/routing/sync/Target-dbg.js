@@ -1,9 +1,9 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global'], function(jQuery) {
+sap.ui.define(["sap/base/Log"], function(Log) {
 	"use strict";
 
 	/**
@@ -51,7 +51,7 @@ sap.ui.define(['jquery.sap.global'], function(jQuery) {
 				oViewContainingTheControl = sap.ui.getCore().byId(oOptions.rootView);
 
 				if (!oViewContainingTheControl) {
-					jQuery.sap.log.error("Did not find the root view with the id " + oOptions.rootView, this);
+					Log.error("Did not find the root view with the id " + oOptions.rootView, this);
 					return;
 				}
 			}
@@ -70,7 +70,7 @@ sap.ui.define(['jquery.sap.global'], function(jQuery) {
 				}
 
 				if (!oControl) {
-					jQuery.sap.log.error("Control with ID " + oOptions.controlId + " could not be found", this);
+					Log.error("Control with ID " + oOptions.controlId + " could not be found", this);
 					return;
 				}
 
@@ -79,26 +79,22 @@ sap.ui.define(['jquery.sap.global'], function(jQuery) {
 			var oAggregationInfo = oControl.getMetadata().getJSONKeys()[oOptions.controlAggregation];
 
 			if (!oAggregationInfo) {
-				jQuery.sap.log.error("Control " + oOptions.controlId + " does not have an aggregation called " + oOptions.controlAggregation, this);
+				Log.error("Control " + oOptions.controlId + " does not have an aggregation called " + oOptions.controlAggregation, this);
 				return;
 			}
 
 			//Set view for content
-			var sViewName = this._getEffectiveViewName(oOptions.viewName);
+			var sViewName = this._getEffectiveObjectName(oOptions.viewName);
 
 			var oViewOptions = {
-				viewName : sViewName,
+				name : sViewName,
 				type : oOptions.viewType,
 				id : oOptions.viewId
 			};
 
-			// Hook in the route for deprecated global view id, it has to be supported to stay compatible
-			if (this._bUseRawViewId) {
-				oView = this._oViews._getViewWithGlobalId(oViewOptions);
-			} else {
-				// Target way of getting the view
-				oView = this._oViews._getView(oViewOptions);
-			}
+			oView = this._oCache._get(oViewOptions, "View",
+				// Hook in the route for deprecated global view id, it has to be supported to stay compatible
+				this._bUseRawViewId);
 
 			// adapt the container before placing the view into it to make the rendering occur together with the next
 			// aggregation modification.
@@ -116,7 +112,7 @@ sap.ui.define(['jquery.sap.global'], function(jQuery) {
 				oControl[oAggregationInfo._sRemoveAllMutator]();
 			}
 
-			jQuery.sap.log.info("Did place the view '" + sViewName + "' with the id '" + oView.getId() + "' into the aggregation '" + oOptions.controlAggregation + "' of a control with the id '" + oControl.getId() + "'", this);
+			Log.info("Did place the view '" + sViewName + "' with the id '" + oView.getId() + "' into the aggregation '" + oOptions.controlAggregation + "' of a control with the id '" + oControl.getId() + "'", this);
 			oControl[oAggregationInfo._sMutator](oView);
 
 			this.fireDisplay({
@@ -148,22 +144,22 @@ sap.ui.define(['jquery.sap.global'], function(jQuery) {
 				sLogMessage = "";
 
 			if (!bHasTargetControl) {
-				sLogMessage = "The target " + oOptions.name + " has no controlId set and no parent so the target cannot be displayed.";
+				sLogMessage = "The target " + oOptions._name + " has no controlId set and no parent so the target cannot be displayed.";
 				bIsValid = false;
 			}
 
 			if (!oOptions.controlAggregation) {
-				sLogMessage = "The target " + oOptions.name + " has a control id or a parent but no 'controlAggregation' was set, so the target could not be displayed.";
+				sLogMessage = "The target " + oOptions._name + " has a control id or a parent but no 'controlAggregation' was set, so the target could not be displayed.";
 				bIsValid = false;
 			}
 
 			if (!oOptions.viewName) {
-				sLogMessage = "The target " + oOptions.name + " no viewName defined.";
+				sLogMessage = "The target " + oOptions._name + " no viewName defined.";
 				bIsValid = false;
 			}
 
 			if (bLog && sLogMessage) {
-				jQuery.sap.log.error(sLogMessage, this);
+				Log.error(sLogMessage, this);
 			}
 
 			return bIsValid;

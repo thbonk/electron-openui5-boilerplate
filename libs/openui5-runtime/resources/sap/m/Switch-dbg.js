@@ -1,13 +1,35 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.Switch.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/EnabledPropagator', 'sap/ui/core/IconPool', 'sap/ui/core/theming/Parameters'],
-	function(jQuery, library, Control, EnabledPropagator, IconPool, Parameters) {
+sap.ui.define([
+	'./library',
+	'sap/ui/core/Control',
+	'sap/ui/core/EnabledPropagator',
+	'sap/ui/core/IconPool',
+	'sap/ui/core/theming/Parameters',
+	'./SwitchRenderer',
+	"sap/base/assert"
+],
+function(
+	library,
+	Control,
+	EnabledPropagator,
+	IconPool,
+	Parameters,
+	SwitchRenderer,
+	assert
+	) {
 		"use strict";
+
+		// shortcut for sap.m.touch
+		var touch = library.touch;
+
+		// shortcut for sap.m.SwitchType
+		var SwitchType = library.SwitchType;
 
 		/**
 		 * Constructor for a new Switch.
@@ -16,11 +38,15 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		 * @param {object} [mSettings] initial settings for the new control
 		 *
 		 * @class
-		 * A switch is a user interface control on mobile devices that is used for change between binary states. The user can also drag the button handle or tap to change the state.
+		 * A switch is a user interface control on mobile devices that is used for change between binary states.
+		 * The user can also drag the button handle or tap to change the state.
+		 *
+		 * @see {@link fiori:https://experience.sap.com/fiori-design-web/switch/ Switch}
+		 *
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.61.2
 		 *
 		 * @constructor
 		 * @public
@@ -29,6 +55,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		 */
 		var Switch = Control.extend("sap.m.Switch", /** @lends sap.m.Switch.prototype */ { metadata: {
 
+			interfaces: ["sap.ui.core.IFormContent"],
 			library: "sap.m",
 			properties: {
 
@@ -66,7 +93,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				/**
 				 * Type of a Switch. Possibles values "Default", "AcceptReject".
 				 */
-				type: { type : "sap.m.SwitchType", group: "Appearance", defaultValue: sap.m.SwitchType.Default }
+				type: { type : "sap.m.SwitchType", group: "Appearance", defaultValue: SwitchType.Default }
 			},
 			associations: {
 
@@ -90,7 +117,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 						state: { type: "boolean" }
 					}
 				}
-			}
+			},
+			designtime: "sap/m/designtime/Switch.designtime"
 		}});
 
 		IconPool.insertFontFaceStyle();
@@ -152,6 +180,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 			oHandleDomRef.setAttribute("data-sap-ui-swt", sState);
 
+			this._getInvisibleElement().text(this.getInvisibleElementText(bState));
+
 			if (bState) {
 				$Switch.removeClass(CSS_CLASS + "Off").addClass(CSS_CLASS + "On");
 				oDomRef.setAttribute("aria-checked", "true");
@@ -159,8 +189,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				$Switch.removeClass(CSS_CLASS + "On").addClass(CSS_CLASS + "Off");
 				oDomRef.setAttribute("aria-checked", "false");
 			}
-
-			this._getInvisibleElement().text(this.getInvisibleElementText(bState));
 
 			if (sap.ui.getCore().getConfiguration().getAnimation()) {
 				$Switch.addClass(CSS_CLASS + "Trans");
@@ -183,12 +211,21 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			var sText = "";
 
 			switch (this.getType()) {
-				case sap.m.SwitchType.Default:
-					sText = this.getCustomTextOn() || (bState ? oBundle.getText("SWITCH_ON") : oBundle.getText("SWITCH_OFF"));
+				case SwitchType.Default:
+					if (bState) {
+						sText = this.getCustomTextOn().trim() || oBundle.getText("SWITCH_ON");
+					} else {
+						sText = this.getCustomTextOff().trim() || oBundle.getText("SWITCH_OFF");
+					}
 					break;
 
-				case sap.m.SwitchType.AcceptReject:
-					sText = oBundle.getText("SWITCH_ARIA_ACCEPT");
+				case SwitchType.AcceptReject:
+					if (bState) {
+						sText = oBundle.getText("SWITCH_ARIA_ACCEPT");
+					} else {
+						sText = oBundle.getText("SWITCH_ARIA_REJECT");
+					}
+
 					break;
 
 				// no default
@@ -238,7 +275,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			oEvent.setMarked();
 
 			// only process single touches (only the first active touch point)
-			if (sap.m.touch.countContained(oEvent.touches, this.getId()) > 1 ||
+			if (touch.countContained(oEvent.touches, this.getId()) > 1 ||
 				!this.getEnabled() ||
 
 				// detect which mouse button caused the event and only process the standard click
@@ -260,7 +297,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			this._bDragging = false;
 
 			// note: force ie browsers to set the focus to switch
-			jQuery.sap.delayedCall(0, this, "focus");
+			setTimeout(this["focus"].bind(this), 0);
 
 			// add active state
 			this.$("switch").addClass(CSS_CLASS + "Pressed")
@@ -283,7 +320,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 			var oTouch,
 				iPosition,
-				fnTouch = sap.m.touch;
+				fnTouch = touch;
 
 			if (!this.getEnabled() ||
 
@@ -297,7 +334,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 			// only process single touches (only the first active touch point),
 			// the active touch has to be in the list of touches
-			jQuery.sap.assert(fnTouch.find(oEvent.touches, this._iActiveTouchId), "missing touchend");
+			assert(fnTouch.find(oEvent.touches, this._iActiveTouchId), "missing touchend");
 
 			// find the active touch point
 			oTouch = fnTouch.find(oEvent.changedTouches, this._iActiveTouchId);
@@ -338,8 +375,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			oEvent.setMarked();
 
 			var oTouch,
-				fnTouch = sap.m.touch,
-				assert = jQuery.sap.assert;
+				fnTouch = touch;
 
 			if (!this.getEnabled() ||
 
@@ -370,7 +406,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				this._setDomState(this._bDragging ? this._bTempState : !this.getState());
 
 				// fire the change event after the CSS transition is completed
-				jQuery.sap.delayedCall(Switch._TRANSITIONTIME, this, function() {
+				setTimeout(function() {
 					var bState = this.getState();
 
 					// change the state
@@ -379,7 +415,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 					if (bState !== this.getState()) {
 						this.fireChange({ state: this.getState() });
 					}
-				});
+				}.bind(this), Switch._TRANSITIONTIME);
 			}
 		};
 
@@ -413,9 +449,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				bState = this.getState();
 
 				// fire the change event after the CSS transition is completed
-				jQuery.sap.delayedCall(Switch._TRANSITIONTIME, this, function() {
+				setTimeout(function() {
 					this.fireChange({ state: bState });
-				});
+				}.bind(this), Switch._TRANSITIONTIME);
 			}
 		};
 
@@ -426,9 +462,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		/**
 		 * Change the switch state between on and off.
 		 *
-		 * @param {boolean} bState
+		 * @param {boolean} bState The new state - true for 'on' and false for 'off'
 		 * @public
-		 * @return {sap.m.Switch} <code>this</code> to allow method chaining.
+		 * @returns {sap.m.Switch} <code>this</code> to allow method chaining.
 		 */
 		Switch.prototype.setState = function(bState) {
 			this.setProperty("state", bState, true);
@@ -436,14 +472,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			return this;
 		};
 
-		Switch.prototype.getAccessibilityInfo = function(bState) {
-			var oBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m");
-
-			var sDesc = "";
-
-			if (this.getState()) {
+		Switch.prototype.getAccessibilityInfo = function() {
+			var oBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m"),
+				bState = this.getState(),
 				sDesc = oBundle.getText("ACC_CTR_STATE_CHECKED") + " " + this.getInvisibleElementText(bState);
-			}
 
 			return {
 				role: "checkbox",
@@ -455,5 +487,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		};
 
 		return Switch;
-
-	}, /* bExport= */ true);
+	});

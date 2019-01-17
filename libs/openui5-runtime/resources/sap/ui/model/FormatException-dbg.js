@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -11,11 +11,12 @@ sap.ui.define(['sap/ui/base/Exception'],
 
 
 	/**
-	 * FormatException class
+	 * Creates a new FormatException.
 	 *
-	 * This exception is thrown, when an error occurs while trying to convert a value of the model to
-	 * a specific property value in the UI.
+	 * @class Instances of this exception are thrown when an error occurs while
+	 * trying to convert a value of the model to a specific property value in the UI.
 	 *
+	 * @param {string} message Message explaining how the validation failed
 	 * @alias sap.ui.model.FormatException
 	 * @public
 	 */

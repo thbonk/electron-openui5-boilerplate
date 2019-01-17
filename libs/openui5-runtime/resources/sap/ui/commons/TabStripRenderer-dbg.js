@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides default renderer for control sap.ui.commons.TabStrip
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define(["sap/base/Log"],
+	function(Log) {
 	"use strict";
 
 
@@ -21,12 +21,11 @@ sap.ui.define(['jquery.sap.global'],
 	/**
 	 * Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
 	 *
-	 * @param {sap.ui.core.RenderManager} oRenderManager the RenderManager that can be used for writing to the Render-Output-Buffer
+	 * @param {sap.ui.core.RenderManager} rm the RenderManager that can be used for writing to the Render-Output-Buffer
 	 * @param {sap.ui.core.Control} oControl an object representation of the control that should be rendered
 	 */
-	TabStripRenderer.render = function(oRenderManager, oControl){
+	TabStripRenderer.render = function(rm, oControl){
 		// convenience variable
-		var rm = oRenderManager;
 		var rb = sap.ui.getCore().getLibraryResourceBundle("sap.ui.commons");
 		var sControlId = oControl.getId();
 
@@ -154,7 +153,7 @@ sap.ui.define(['jquery.sap.global'],
 				}
 				rm.writeEscaped(oTitle.getText());
 			} else {
-				jQuery.sap.log.warning("No title configured for " + oTab + ". Either set a string as 'text' property or an sap.ui.core.Title as 'title' aggregation.");
+				Log.warning("No title configured for " + oTab + ". Either set a string as 'text' property or an sap.ui.core.Title as 'title' aggregation.");
 			}
 			if (oTab.getClosable()) {
 				// close button

@@ -1,11 +1,25 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/Global', 'sap/ui/core/Core', 'sap/ui/core/ElementMetadata'],
-	function (jQuery, library, Global, Core, ElementMetadata) {
+sap.ui.define([
+	'sap/ui/core/library',
+	'sap/ui/Global',
+	'sap/ui/core/Core',
+	'sap/ui/core/ElementMetadata',
+	"sap/base/util/LoaderExtensions",
+	"sap/base/util/UriParameters"
+],
+	function(
+		library,
+		Global,
+		Core,
+		ElementMetadata,
+		LoaderExtensions,
+		UriParameters
+	) {
 		'use strict';
 
 		var configurationInfo = sap.ui.getCore().getConfiguration();
@@ -113,9 +127,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/Global', 'sap
 
 				loadedLibraries: _getLoadedLibraries(),
 
-				loadedModules: jQuery.sap.getAllDeclaredModules().sort(),
+				loadedModules: LoaderExtensions.getAllRequiredModules().sort(),
 
-				URLParameters: jQuery.sap.getUriParameters().mParams
+				URLParameters: new UriParameters(window.location.href).mParams
 			};
 		}
 

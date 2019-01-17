@@ -196,6 +196,11 @@
 			"theme": "sap_hcb"
 		},
 		{
+			"name": "PlanningCalendar.less",
+			"designtime": true,
+			"theme": "sap_hcb"
+		},
+		{
 			"name": "Popover.less",
 			"designtime": true,
 			"theme": "sap_hcb"
@@ -317,6 +322,11 @@
 		},
 		{
 			"name": "TimePicker.less",
+			"designtime": true,
+			"theme": "sap_hcb"
+		},
+		{
+			"name": "TimePickerSliders.less",
 			"designtime": true,
 			"theme": "sap_hcb"
 		},

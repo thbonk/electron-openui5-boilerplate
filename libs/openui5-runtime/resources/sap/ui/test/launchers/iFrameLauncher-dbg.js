@@ -1,22 +1,21 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 sap.ui.define([
-		'jquery.sap.global',
 		'sap/ui/thirdparty/URI',
 		'sap/ui/Device',
 		'sap/ui/test/_LogCollector',
-		'sap/ui/test/autowaiter/_autoWaiter'
-	], function (jQuery, URI, Device, _LogCollector, _autoWaiter) {
+		"sap/base/Log",
+		"sap/ui/thirdparty/jquery",
+		'sap/base/util/ObjectPath'
+	], function (URI, Device, _LogCollector, Log, jQueryDOM, ObjectPath) {
 	"use strict";
 
 	/*global CollectGarbage */
 
-	var sLogPrefix = "sap.ui.test.Opa5",
-		$ = jQuery,
-		oFrameWindow = null,
+	var oFrameWindow = null,
 		$Frame = null,
 		oFramePlugin = null,
 		oFrameUtils = null,
@@ -24,7 +23,8 @@ sap.ui.define([
 		bRegisteredToUI5Init = false,
 		bUi5Loaded = false,
 		oAutoWaiter = null,
-		FrameHashChanger = null;
+		FrameHashChanger = null,
+		sOpaLogLevel;
 
 	/*
 	 * INTERNALS
@@ -38,10 +38,28 @@ sap.ui.define([
 		checkForUI5ScriptLoaded();
 	}
 
+	function setFrameSize(sWidth, sHeight) {
+		// by default the frame is scaled down from 100% of the page in both dimensions
+		// user-defined dimensions should not be scaled
+		if (sWidth) {
+			$Frame.css("width", sWidth);
+		} else {
+			$Frame.addClass("default-scale-x");
+		}
+		if (sHeight) {
+			$Frame.css("height", sHeight);
+		} else {
+			$Frame.addClass("default-scale-y");
+		}
+		if (!sWidth && !sHeight) {
+			$Frame.addClass("default-scale-both");
+		}
+	}
+
 	function registerOnError () {
 		var fnFrameOnError = oFrameWindow.onerror;
 
-		oFrameWindow.onerror = function (sErrorMsg, sUrl, iLine) {
+		oFrameWindow.onerror = function (sErrorMsg, sUrl, iLine, iColumn, oError) {
 			var vReturnValue = false;
 
 			if (fnFrameOnError) {
@@ -53,7 +71,10 @@ sap.ui.define([
 			// function is wrapped in QUnits onerror function the exception needs to be thrown in a setTimeout
 			// to make sure the QUnit onerror can run to the end
 			setTimeout(function () {
-				throw new Error("OpaFrame error message: " + sErrorMsg + ",\nurl: " + sUrl + ",\nline: " + iLine);
+				// column number and error object may be missing in older browsers. Currently, Edge doesn't provide the oError object
+				var sColumn = iColumn ? "\ncolumn: " + iColumn : "";
+				var sIFrameError = oError && "\niFrame error: " + (oError.stack ? oError.message + "\n" + oError.stack : oError) || "";
+				throw new Error("Error in launched application iFrame: " + sErrorMsg + "\nurl: " + sUrl + "\nline: " + iLine + sColumn + sIFrameError);
 			}, 0);
 			return vReturnValue;
 		};
@@ -93,7 +114,7 @@ sap.ui.define([
 	}
 
 	function handleUi5Loaded () {
-		registerFrameModulePaths();
+		registerFrameResourcePaths();
 
 		if (Device.browser.firefox) {
 			// In Firefox there is a bug when the app loads sinon and OPA loads it from outside.
@@ -108,18 +129,19 @@ sap.ui.define([
 
 	function afterModulesLoaded () {
 		// forward OPA log messages from the inner iframe to the Log listener of the outer frame
+		// the listener should already be created and started by OPA
 		oFrameJQuery.sap.log.addLogListener(_LogCollector.getInstance()._oListener);
 
 		bUi5Loaded = true;
 	}
 
-	function registerFrameModulePaths () {
+	function registerFrameResourcePaths () {
 		oFrameJQuery = oFrameWindow.jQuery;
 		//All Opa related resources in the iframe should be the same version
 		//that is running in the test and not the (evtl. not available) version of Opa of the running App.
-		registerAbsoluteModulePathInIframe("sap.ui.test");
-		registerAbsoluteModulePathInIframe("sap.ui.qunit");
-		registerAbsoluteModulePathInIframe("sap.ui.thirdparty");
+		registerAbsoluteResourcePathInIframe("sap/ui/test");
+		registerAbsoluteResourcePathInIframe("sap/ui/qunit");
+		registerAbsoluteResourcePathInIframe("sap/ui/thirdparty");
 	}
 
 	/**
@@ -207,7 +229,7 @@ sap.ui.define([
 				sNewPreviousHash = oHistory.aHistory[oHistory.iHistoryPosition];
 
 			if (sNewCurrentHash === undefined) {
-				jQuery.sap.log.error("Could not navigate forwards, there is no history entry in the forwards direction", this);
+				Log.error("Could not navigate forwards, there is no history entry in the forwards direction", this);
 				return;
 			}
 
@@ -227,7 +249,7 @@ sap.ui.define([
 				return;
 			}
 
-			jQuery.sap.log.error("Using history.go with a number greater than 1 is not supported by OPA5", this);
+			Log.error("Using history.go with a number greater than 1 is not supported by OPA5", this);
 			return fnOriginalGo.apply(oFrameWindow.history, arguments);
 		};
 	}
@@ -236,6 +258,7 @@ sap.ui.define([
 		oFrameWindow.sap.ui.require([
 			"sap/ui/test/OpaPlugin",
 			"sap/ui/test/autowaiter/_autoWaiter",
+			"sap/ui/test/_OpaLogger",
 			"sap/ui/qunit/QUnitUtils",
 			"sap/ui/thirdparty/hasher",
 			"sap/ui/core/routing/History",
@@ -243,12 +266,14 @@ sap.ui.define([
 		], function (
 			OpaPlugin,
 			_autoWaiter,
+			_OpaLogger,
 			QUnitUtils,
 			hasher,
 			History,
 			HashChanger
 		) {
-			oFramePlugin = new OpaPlugin(sLogPrefix);
+			_OpaLogger.setLevel(sOpaLogLevel);
+			oFramePlugin = new OpaPlugin();
 			oAutoWaiter = _autoWaiter;
 			oFrameUtils = QUnitUtils;
 			modifyIFrameNavigation(hasher, History, HashChanger);
@@ -257,18 +282,29 @@ sap.ui.define([
 		});
 	}
 
-	function registerAbsoluteModulePathInIframe(sModule) {
-		var sOpaLocation = jQuery.sap.getModulePath(sModule);
+	function registerAbsoluteResourcePathInIframe(sResource) {
+		var sOpaLocation = sap.ui.require.toUrl(sResource);
 		var sAbsoluteOpaPath = new URI(sOpaLocation).absoluteTo(document.baseURI).search("").toString();
-		oFrameJQuery.sap.registerModulePath(sModule,sAbsoluteOpaPath);
+		var fnConfig = ObjectPath.get("sap.ui._ui5loader.config", oFrameWindow) || ObjectPath.get("sap.ui.loader.config", oFrameWindow);
+		if (fnConfig) {
+			var paths = {};
+			paths[sResource] = sAbsoluteOpaPath;
+			fnConfig({
+				paths: paths
+			});
+		} else if (oFrameJQuery && oFrameJQuery.sap && oFrameJQuery.sap.registerResourcePath) {
+			oFrameJQuery.sap.registerResourcePath(sResource, sAbsoluteOpaPath);
+		} else {
+			throw new Error("iFrameLauncher.js: UI5 module system not found.");
+		}
 	}
 
 	function destroyFrame () {
 		if (!oFrameWindow) {
-			throw new Error("sap.ui.test.launchers.iFrameLauncher: Teardown has been called but there was no start");
+			throw new Error("sap.ui.test.launchers.iFrameLauncher: Teardown was called before launch. No iFrame was loaded.");
 		}
 		// Workaround for IE - there are errors even after removing the frame so setting the onerror to noop again seems to be fine
-		oFrameWindow.onerror = $.noop;
+		oFrameWindow.onerror = jQueryDOM.noop;
 		for (var i = 0; i < $Frame.length; i++) {
 			$Frame[0].src = "about:blank";
 			$Frame[0].contentWindow.document.write('');
@@ -297,20 +333,20 @@ sap.ui.define([
 	return {
 		launch: function (options) {
 			if (oFrameWindow) {
-				$.sap.log.error("sap.ui.test.launchers.iFrameLauncher: Only one IFrame may be loaded at a time.");
-				return;
+				throw new Error("sap.ui.test.launchers.iFrameLauncher: Launch was called twice without teardown. Only one iFrame may be loaded at a time.");
 			}
 
 			//invalidate the cache
-			$Frame = $("#" + options.frameId);
+			$Frame = jQueryDOM("#" + options.frameId);
 
 			if (!$Frame.length) {
 				if (!options.source) {
-					$.sap.log.error("No source was given to launch the IFrame", this);
+					Log.error("No source was given to launch the IFrame", this);
 				}
 				//invalidate other caches
-				$Frame = $('<IFrame id="' + options.frameId + '" class="opaFrame" src="' + options.source + '"></IFrame>');
-				$("body").append($Frame);
+				$Frame = jQueryDOM('<IFrame id="' + options.frameId + '" class="opaFrame" src="' + options.source + '"></IFrame>');
+				jQueryDOM("body").append($Frame);
+				setFrameSize(options.width, options.height);
 			}
 
 			if ($Frame[0].contentDocument && $Frame[0].contentDocument.readyState === "complete") {
@@ -318,8 +354,15 @@ sap.ui.define([
 			} else {
 				$Frame.on("load", handleFrameLoad);
 			}
-
+			sOpaLogLevel = options.opaLogLevel;
 			return checkForUI5ScriptLoaded();
+		},
+		hasLaunched: function () {
+			checkForUI5ScriptLoaded();
+			return bUi5Loaded;
+		},
+		teardown: function () {
+			destroyFrame();
 		},
 		getHashChanger: function () {
 			if (!FrameHashChanger) {
@@ -337,20 +380,11 @@ sap.ui.define([
 		getUtils: function () {
 			return oFrameUtils;
 		},
-		hasLaunched: function () {
-			checkForUI5ScriptLoaded();
-			return bUi5Loaded;
-		},
 		getWindow: function () {
 			return oFrameWindow;
 		},
-		_getAutoWaiter:function () {
-			return  oAutoWaiter || _autoWaiter;
-		},
-		teardown: function () {
-			destroyFrame();
-		},
-		_sLogPrefix :sLogPrefix
+		_getAutoWaiter: function () {
+			return oAutoWaiter;
+		}
 	};
 }, /* export= */ true);
-

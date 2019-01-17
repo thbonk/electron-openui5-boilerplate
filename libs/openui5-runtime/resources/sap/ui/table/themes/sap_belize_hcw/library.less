@@ -2,7 +2,7 @@
 
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -59,6 +59,15 @@
 .sapUiTableRowHdr.sapUiTableRowHvr::after {
 	background-color: @sapUiSelected;
 }
+
+.sapUiTableColRowHdrIco::before,
+.sapUiTableRowHdr::before {
+	color: @sapUiContentIconColor;
+}
+
+.sapUiTableRowHighlight.sapUiTableRowHighlightInformation {
+	background-color: @sapUiAccent6;
+}
 /* END "Table.less" */
 
 /* START "Scrolling.less" */
@@ -71,8 +80,8 @@ html.sap-desktop {
 
 	.sapUiTableHSb::-webkit-scrollbar,
 	.sapUiTableVSb::-webkit-scrollbar {
-		width: @_sap_ui_table_Scrolling_DefaultScrollBarSize;
-		height: @_sap_ui_table_Scrolling_DefaultScrollBarSize;
+		width: @_sap_ui_table_Scrolling_DefaultScrollbarSize;
+		height: @_sap_ui_table_Scrolling_DefaultScrollbarSize;
 		border: none;
 	}
 
@@ -92,11 +101,6 @@ html.sap-desktop {
 /* ====================================== */
 
 @_sap_ui_table_DragDrop_ColumnDnDHighlightColor: @sapUiContentHelpColor;
-
-.sapUiTableColReorderFade:after {
-	background-color: lighten(@sapUiBaseColor, 50);
-	opacity: 0.5;
-}
 /* END "DragDrop.less" */
 
 /* START "Grouping.less" */

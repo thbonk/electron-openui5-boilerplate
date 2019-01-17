@@ -9,6 +9,7 @@
    Enables the vertical scrolling */
 .sapUiOpaBodyComponent #qunit {
 	position: fixed;
+	top: 0;
 	left: 0;
 	width: 20%;
 	height: 100%;
@@ -40,17 +41,54 @@
 
 /* Layout settings for starting in a frame */
 .opaFrame {
+	position: absolute;
+	top: 20%;
+	right: 0;
 	width: 100%;
 	height: 100%;
-	position: absolute;
+	box-sizing: border-box;
 	opacity: 0.7;
-	bottom: -20%;
+}
+
+.opaFrame.default-scale-x {
 	right: -20%;
+	transform: scaleX(0.6);
+}
+
+.opaFrame.default-scale-y {
 	top: 0;
-	transform: scale(0.6) ;
+	transform: scaleY(0.6);
+}
+
+.opaFrame.default-scale-both {
+	top: 0;
+	right: -20%;
+	transform: scale(0.6);
 }
 
 /* The :hover selector is used to select elements (in our case the OPA-Frame) when you mouse over them */
 .opaFrame:hover {
 	opacity: 1;
+}
+
+/* Layout settings for starting with FLP sandbox */
+
+.sapUiOpaBodyFLP #qunit {
+	position: absolute;
+	top: 0;
+	height: 100%;
+	width: 30%;
+	overflow: auto;
+	opacity: 0.7;
+}
+
+.sapUiOpaBodyFLP #qunit:hover {
+	opacity: 1;
+}
+
+.sapUiOpaBodyFLP #qunit-header {
+	border-radius: 0 !important;
+}
+.sapUiOpaBodyFLP #qunit .test-message {
+	width: 100%;
 }

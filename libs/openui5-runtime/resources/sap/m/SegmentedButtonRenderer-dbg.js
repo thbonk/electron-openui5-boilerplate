@@ -1,12 +1,15 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define(["sap/ui/core/library"],
+	function(coreLibrary) {
 	"use strict";
+
+	// shortcut for sap.ui.core.TextDirection
+	var TextDirection = coreLibrary.TextDirection;
 
 	/**
 	 * Segmented renderer.
@@ -79,6 +82,13 @@ sap.ui.define(['jquery.sap.global'],
 					sIconAriaLabel = "",
 					oImage;
 
+				for (var k = aButtons.length - 1; k > 0; k--) {
+					if (aButtons[k].getVisible()) {
+						aButtons[k].addStyleClass("sapMSegBtnLastVisibleButton");
+						break;
+					}
+				}
+
 				if (oButtonIcon) {
 					oImage = oButton._getImage((oButton.getId() + "-img"), oButtonIcon);
 					if (oImage instanceof sap.m.Image) {
@@ -122,7 +132,7 @@ sap.ui.define(['jquery.sap.global'],
 				oRM.writeAttribute("tabindex", oButton.getEnabled() ? "0" : "-1");
 
 				sButtonTextDirection = oButton.getTextDirection();
-				if (sButtonTextDirection !== sap.ui.core.TextDirection.Inherit) {
+				if (sButtonTextDirection !== TextDirection.Inherit) {
 					oRM.writeAttribute("dir", sButtonTextDirection.toLowerCase());
 				}
 

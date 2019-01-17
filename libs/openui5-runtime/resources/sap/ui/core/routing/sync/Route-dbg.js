@@ -1,9 +1,9 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global'], function(jQuery) {
+sap.ui.define(["sap/base/Log", "sap/ui/thirdparty/jquery"], function(Log, jQuery) {
 	"use strict";
 
 	/**
@@ -61,7 +61,7 @@ sap.ui.define(['jquery.sap.global'], function(jQuery) {
 			if (this._oTarget) {
 				oTarget = this._oTarget;
 				// update the targets config so defaults are taken into account - since targets cannot be added in runtime they don't merge configs like routes do
-				oTarget._oOptions = this._convertToTargetOptions(oConfig);
+				oTarget._updateOptions(this._convertToTargetOptions(oConfig));
 
 				// validate if it makes sense to display the target (Route does not have all params required) - no error logging will be done during validation
 				if (oTarget._isValid(oParentPlaceInfo, false)) {
@@ -91,7 +91,7 @@ sap.ui.define(['jquery.sap.global'], function(jQuery) {
 
 			// skip this event in the recursion
 			if (bInital) {
-				jQuery.sap.log.info("The route named '" + oConfig.name + "' did match with its pattern", this);
+				Log.info("The route named '" + oConfig.name + "' did match with its pattern", this);
 				this.fireEvent("patternMatched", oEventData);
 				oRouter.fireRoutePatternMatched(oEventData);
 			}

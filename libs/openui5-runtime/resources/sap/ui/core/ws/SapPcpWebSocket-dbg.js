@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.core.ws.WebSocket for WebSocket support with SAP-PCP Protocol
-sap.ui.define(['jquery.sap.global', './WebSocket'],
-	function(jQuery, WebSocket) {
+sap.ui.define(['./WebSocket', "sap/base/Log"],
+	function(WebSocket, Log) {
 	"use strict";
 
 	/**
@@ -21,7 +21,7 @@ sap.ui.define(['jquery.sap.global', './WebSocket'],
 	 * @class WebSocket class implementing the pcp-protocol
 	 * @extends sap.ui.core.ws.WebSocket
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @alias sap.ui.core.ws.SapPcpWebSocket
 	 */
 	var SapPcpWebSocket = WebSocket.extend("sap.ui.core.ws.SapPcpWebSocket", /** @lends sap.ui.core.ws.SapPcpWebSocket.prototype */ {
@@ -58,10 +58,12 @@ sap.ui.define(['jquery.sap.global', './WebSocket'],
 	 */
 
 	/**
-	 * @class Protocol versions.<br>
+	 * Protocol versions.
+	 *
 	 * One (or more) of these have to be selected to create an SapPcpWebSocket connection
 	 * (or no protocol at all).
 	 *
+	 * @enum {string}
 	 * @public
 	 * @static
 	 */
@@ -121,7 +123,7 @@ sap.ui.define(['jquery.sap.global', './WebSocket'],
 		if (bSuccess) {
 			this.fireOpen();
 		} else {
-			jQuery.sap.log.error("Unsupported protocol '" + this.getProtocol() + "' selected by the server. " +
+			Log.error("Unsupported protocol '" + this.getProtocol() + "' selected by the server. " +
 				"Connection will be closed.");
 			this.close("Unsupported protocol selected by the server");
 		}
@@ -145,7 +147,7 @@ sap.ui.define(['jquery.sap.global', './WebSocket'],
 			oEventData.pcpFields = this._extractPcpFields(oMessageEvent.data.substring(0, iSplitPos));
 			oEventData.data = oMessageEvent.data.substr(iSplitPos + SapPcpWebSocket._SEPARATOR.length);
 		} else {
-			jQuery.sap.log.warning("Invalid PCP message received: " + oMessageEvent.data);
+			Log.warning("Invalid PCP message received: " + oMessageEvent.data);
 			oEventData.pcpFields = {};
 			oEventData.data = oMessageEvent.data; // Fall back, just pass through original data
 		}

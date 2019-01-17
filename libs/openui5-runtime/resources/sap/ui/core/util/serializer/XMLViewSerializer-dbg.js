@@ -1,11 +1,11 @@
 /*
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider', './Serializer', './delegate/XML', 'sap/ui/thirdparty/vkbeautify'],
-	function(jQuery, EventProvider, Serializer, XML, vkbeautify) {
+sap.ui.define(['sap/ui/base/EventProvider', './Serializer', './delegate/XML', 'sap/ui/thirdparty/vkbeautify'],
+	function(EventProvider, Serializer, XML, vkbeautify) {
 	"use strict";
 
 	/**
@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider', './Serializer',
 	 * @class XMLViewSerializer class.
 	 * @extends sap.ui.base.EventProvider
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @alias sap.ui.core.util.serializer.XMLViewSerializer
 	 * @private
 	 * @sap-restricted sap.watt com.sap.webide

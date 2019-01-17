@@ -1,12 +1,9 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define([
-	'jquery.sap.global',
-	'./Matcher'
-], function (jQuery, Matcher) {
+sap.ui.define(['sap/ui/test/matchers/Matcher', "sap/base/strings/capitalize"], function(Matcher, capitalize) {
 	"use strict";
 
 	/**
@@ -80,7 +77,7 @@ sap.ui.define([
 				sModelName = this.getModelName(),
 				oModel = oControl.getModel(sModelName),
 				oBundle,
-				fnProperty = oControl["get" + jQuery.sap.charToUpperCase(sPropertyName, 0)],
+				fnProperty = oControl["get" + capitalize(sPropertyName, 0)],
 				sPropertyValue,
 				sText,
 				bResult;
@@ -135,4 +132,4 @@ sap.ui.define([
 		}
 	});
 
-}, /* bExport= */ true);
+});

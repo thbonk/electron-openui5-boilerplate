@@ -1,13 +1,17 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-	"jquery.sap.global"
+	"sap/ui/thirdparty/jquery",
+	"sap/base/Log",
+	"sap/base/strings/capitalize"
 ], function(
-	jQuery
+	jQuery,
+	Log,
+	capitalize
 ) {
 	"use strict";
 
@@ -18,7 +22,7 @@ sap.ui.define([
 	 *
 	 * @private
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @experimental Since 1.49.0 This class is experimental and provides only limited functionality. Also the API might be
 	 *               changed in future.
@@ -76,7 +80,7 @@ sap.ui.define([
 
 		// If entry already exists, extend existing content and set initialized to false
 		if (iIndex > -1) {
-			jQuery.extend(this._aChangeHandlerSettings[iIndex].content,
+			Object.assign(this._aChangeHandlerSettings[iIndex].content,
 				mNewChangeHandlerSettings.content);
 			this._aChangeHandlerSettings[iIndex].scenarioInitialized = false;
 		} else {
@@ -145,7 +149,7 @@ sap.ui.define([
 				this._aChangeHandlerSettings[iIndex].scenarioInitialized = true;
 				return true;
 			} catch (e){
-				jQuery.sap.log.warning("Required library not available: " + sLibraryName + " - "
+				Log.warning("Required library not available: " + sLibraryName + " - "
 					+ mFoundChangeHandlerSettings.key.scenario + " could not be initialized");
 				return false;
 			}
@@ -153,7 +157,7 @@ sap.ui.define([
 	};
 
 	ChangeHandlerMediator._createChangeHandlerSettingsGetter = function(mChangeHandlerSettings){
-		var sGetterName = 'get' + jQuery.sap.charToUpperCase(mChangeHandlerSettings.key.scenario) + 'Settings';
+		var sGetterName = 'get' + capitalize(mChangeHandlerSettings.key.scenario) + 'Settings';
 		if (!ChangeHandlerMediator[sGetterName]) {
 			/**
 			 * Retrieves the settings for the specified scenario, getting the oData
@@ -169,7 +173,7 @@ sap.ui.define([
 				try {
 					sODataServiceVersion = oControl.getModel().getMetaModel().getProperty("/dataServices/dataServiceVersion");
 				} catch (e) {
-					jQuery.sap.log.warning("Data service version could not be retrieved");
+					Log.warning("Data service version could not be retrieved");
 				}
 
 				mFoundChangeHandlerSettings = this.getChangeHandlerSettings({

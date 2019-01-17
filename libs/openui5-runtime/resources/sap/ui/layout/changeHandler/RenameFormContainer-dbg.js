@@ -1,14 +1,14 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 /*global sap */
 
 sap.ui.define([
-	"jquery.sap.global", "sap/ui/fl/changeHandler/Base", "sap/ui/fl/changeHandler/JsControlTreeModifier", "sap/ui/fl/Utils"
-], function(jQuery, BaseChangeHandler, JsControlTreeModifier, Utils) {
+	"sap/ui/fl/changeHandler/Base", "sap/ui/fl/Utils"
+], function(BaseChangeHandler, Utils) {
 	"use strict";
 
 	/**
@@ -16,7 +16,7 @@ sap.ui.define([
 	 *
 	 * @alias sap.ui.layout.changeHandler.RenameFormContainer
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @since 1.48
 	 * @private
 	 * @experimental Since 1.48. This class is experimental and provides only limited functionality. Also the API might be changed in future.
@@ -33,10 +33,9 @@ sap.ui.define([
 	 *
 	 * @param {sap.ui.fl.Change} oChangeWrapper Change object with instructions to be applied on the control
 	 * @param {object} oControl The control which has been determined by the selector id
-	 * @param {object} mPropertyBag Map containing the control modifier object (either sap.ui.fl.changeHandler.JsControlTreeModifier or
-	 *                                sap.ui.fl.changeHandler.XmlTreeModifier), the view object where the controls are embedded and the application component
+	 * @param {object} mPropertyBag Map containing the control modifier object (either sap.ui.core.util.reflection.JsControlTreeModifier or
+	 *                                sap.ui.core.util.reflection.XmlTreeModifier), the view object where the controls are embedded and the application component
 	 * @private
-	 * @name sap.ui.layout.changeHandler.RenameFormControl#applyChange
 	 */
 	RenameFormContainer.applyChange = function(oChangeWrapper, oControl, mPropertyBag) {
 		var oModifier = mPropertyBag.modifier,
@@ -49,8 +48,10 @@ sap.ui.define([
 			var sValue = oChangeDefinition.texts.formText.value;
 
 			if (typeof oTitle === "string") {
+				oChangeWrapper.setRevertData(oModifier.getProperty(oRenamedElement, "title"));
 				oModifier.setProperty(oRenamedElement, "title", sValue);
 			} else {
+				oChangeWrapper.setRevertData(oModifier.getProperty(oTitle, "text"));
 				oModifier.setProperty(oTitle, "text", sValue);
 			}
 
@@ -83,6 +84,34 @@ sap.ui.define([
 		oChangeWrapper.addDependentControl(oSpecificChangeInfo.renamedElement.id, _CONSTANTS.TARGET_ALIAS, mPropertyBag);
 		BaseChangeHandler.setTextInChange(oChangeDefinition, "formText", oSpecificChangeInfo.value, "XGRP");
 
+	};
+
+	/**
+	 * Reverts the applied change
+	 *
+	 * @param {sap.ui.fl.Change} oChangeWrapper Change wrapper object with instructions to be applied to the control map
+	 * @param {sap.ui.core.Control} oControl Control that matches the change selector for applying the change
+	 * @param {object} mPropertyBag Property bag containing the modifier, the appComponent and the view
+	 * @param {object} mPropertyBag.modifier Modifier for the controls
+	 * @param {object} mPropertyBag.appComponent Component in which the change should be applied
+	 * @param {object} mPropertyBag.view Application view
+	 * @returns {boolean} True if successful
+	 * @public
+	 */
+	RenameFormContainer.revertChange = function(oChangeWrapper, oControl, mPropertyBag) {
+		var sOldText = oChangeWrapper.getRevertData(),
+			oModifier = mPropertyBag.modifier,
+			oRenamedElement = oChangeWrapper.getDependentControl(_CONSTANTS.TARGET_ALIAS, mPropertyBag),
+			oTitle = oModifier.getAggregation(oRenamedElement, "title");
+
+		if (typeof oTitle === "string") {
+			oModifier.setProperty(oRenamedElement, "title", sOldText);
+		} else {
+			oModifier.setProperty(oTitle, "text", sOldText);
+		}
+		oChangeWrapper.resetRevertData();
+
+		return true;
 	};
 
 	RenameFormContainer._isProvided = function(sString){

@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -142,9 +142,9 @@ sap.ui.define([], function () {
 		 * Recursively constructs tree nodes in a format that it can be bound to a sap.m.Tree control
 		 * @param {object} oHierarchy The module hierarchy node with selected state
 		 * @param {object} oTree The tree node to be filled with the hierarchy information
-		 * @param {number} iDepth The current depth of the recursion
+		 * @param {int} iDepth The current depth of the recursion
 		 * @param {boolean} bSelected The selected state of the parent node
-		 * @return {number} The depth of the deepest node in the tree
+		 * @return {int} The depth of the deepest node in the tree
 		 */
 		setTreeNode: function (oHierarchy, oTree, iDepth, bSelected) {
 			var iSelectionDepth,
@@ -182,11 +182,32 @@ sap.ui.define([], function () {
 		 */
 		toHierarchy: function (oTree) {
 			var oResult = {};
-
+			oTree.selected = this.isNodeSelected(oTree);
 			this.setHierarchyNode(oResult, oTree);
 			return oResult;
 		},
 
+		/**
+		 * Checks and update the tree model based on selected child nodes.
+		 * @param oNode The tree to be updated
+		 * @returns {boolean} The selected of the node.
+		 */
+		isNodeSelected: function (oNode) {
+			var iSelectedNodesCount = 0,
+				oChildNode;
+
+			for (var i = 0; i < oNode.nodes.length; i++) {
+				oChildNode = oNode.nodes[i];
+				if (oChildNode.nodes.length) {
+					oChildNode.selected = this.isNodeSelected(oChildNode);
+				}
+				if (oChildNode.selected) {
+					iSelectedNodesCount++;
+				}
+			}
+
+			return iSelectedNodesCount === oNode.nodes.length;
+		},
 		/**
 		 * Recursively converts a bindable tree node to a hierarchical model tree node
 	 	 * @param {object} oHierarchy The module hierarchy node with selected state
@@ -274,7 +295,7 @@ sap.ui.define([], function () {
 		/**
 		 * Calculates the number of currently selected debug modules
 		 * @param {object} oTree The tree to be analyzed
-		 * @return {number} The amount selected tree nodes
+		 * @return {int} The amount of selected tree nodes
 		 */
 		getSelectionCount: function (oTree) {
 			var sDebugString = this.toDebugInfo(oTree);

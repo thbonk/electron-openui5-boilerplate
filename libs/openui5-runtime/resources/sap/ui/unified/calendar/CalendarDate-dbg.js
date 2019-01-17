@@ -1,12 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.unified.calendar.CalendarDate
-sap.ui.define(['sap/ui/base/Object', 'sap/ui/core/date/UniversalDate'],
-	function (BaseObject, UniversalDate) {
+sap.ui.define([
+	'sap/ui/base/Object',
+	'sap/ui/core/date/UniversalDate',
+	"sap/ui/thirdparty/jquery"
+],
+	function(BaseObject, UniversalDate, jQuery) {
 		"use strict";
 
 		/*
@@ -284,7 +288,13 @@ sap.ui.define(['sap/ui/base/Object', 'sap/ui/core/date/UniversalDate'],
 		 * @returns {sap.ui.unified.calendar.CalendarDate} the calendar date corresponding to the given JavaScript Date.
 		 */
 		CalendarDate.fromLocalJSDate = function (oJSDate, sCalendarType) {
-			if (!(oJSDate instanceof Date)) {
+			// Cross frame check for a date should be performed here otherwise setDateValue would fail in OPA tests
+			// because Date object in the test is different than the Date object in the application (due to the iframe).
+			// We can use jQuery.type or this method:
+			// function isValidDate (date) {
+			//	return date && Object.prototype.toString.call(date) === "[object Date]" && !isNaN(date);
+			//}
+			if (jQuery.type(oJSDate) !== "date") {
 				throw new Error("Date parameter must be a JavaScript Date object: [" + oJSDate + "].");
 			}
 			return new CalendarDate(oJSDate.getFullYear(), oJSDate.getMonth(), oJSDate.getDate(), sCalendarType);
@@ -338,5 +348,4 @@ sap.ui.define(['sap/ui/base/Object', 'sap/ui/core/date/UniversalDate'],
 
 		return CalendarDate;
 
-}, /* bExport= */ true);
-
+});

@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -12,14 +12,14 @@
  */
 
 // Provides class sap.m.semantic.Segment
-sap.ui.define(['jquery.sap.global', 'sap/ui/base/Metadata'], function(jQuery, Metadata) {
+sap.ui.define(['sap/ui/base/Metadata', "sap/base/Log"], function(Metadata, Log) {
 	"use strict";
 
 	/**
 	 * Constructor for an sap.m.semantic.Segment.
 	 *
 	 * @class Abstraction for a segment in a SegmentedContainer
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @private
 	 * @since 1.30.0
 	 * @alias sap.m.semantic.Segment
@@ -30,7 +30,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Metadata'], function(jQuery, Me
 
 		constructor : function(aContent, oContainer, sContainerAggregationName, fnSortFunction) {
 			if (!oContainer) {
-				jQuery.sap.log.error("missing argumment: constructor expects a container reference", this);
+				Log.error("missing argumment: constructor expects a container reference", this);
 				return;
 			}
 
@@ -61,7 +61,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Metadata'], function(jQuery, Me
 
 	Segment.prototype.indexOfContent = function (oControl) {
 
-		return jQuery.inArray( oControl, this._aContent );
+		return this._aContent.indexOf(oControl);
 	};
 
 	Segment.prototype.addContent = function (oControl, bSuppressInvalidate) {
@@ -99,7 +99,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Metadata'], function(jQuery, Me
 
 	Segment.prototype.removeContent = function (oControl, bSuppressInvalidate) {
 
-		var iLocalIndex = jQuery.inArray(oControl, this._aContent),
+		var iLocalIndex = this._aContent.indexOf(oControl),
 			sAggregationMethod  = "remove" + fnCapitalize(this._sContainerAggregationName);
 
 		if (iLocalIndex > -1) {

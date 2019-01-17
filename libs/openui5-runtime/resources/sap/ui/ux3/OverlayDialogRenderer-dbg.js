@@ -1,15 +1,15 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides default renderer for the sap.ui.ux3.OverlayDialog
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './OverlayRenderer'],
-	function(jQuery, Renderer, OverlayRenderer) {
+sap.ui.define(['sap/ui/core/Renderer', './OverlayRenderer'],
+	function(Renderer, OverlayRenderer) {
 	"use strict";
 
-/**
+	/**
 	 * OverlayDialog renderer.
 	 * @namespace
 	 */
@@ -19,14 +19,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './OverlayRenderer']
 	 * Renders the Overlay content
 	 *
 	 * @param {sap.ui.core.RenderManager}
-	 *            oRenderManager the RenderManager that can be used for writing to
+	 *            rm the RenderManager that can be used for writing to
 	 *            the Render-Output-Buffer
 	 * @param {sap.ui.core.Control}
 	 *            oControl an object representation of the control that should be
 	 *            rendered
 	 */
-	OverlayDialogRenderer.renderContent = function(oRenderManager, oControl) {
-		var rm = oRenderManager;
+	OverlayDialogRenderer.renderContent = function(rm, oControl) {
 		rm.write("<div role='Main' class='sapUiUx3ODContent' id='" + oControl.getId() + "-content'>");
 		var content = oControl.getContent();
 		for (var i = 0; i < content.length; i++) {
@@ -40,14 +39,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './OverlayRenderer']
 	 * Add root class to Overlay
 	 *
 	 * @param {sap.ui.core.RenderManager}
-	 *            oRenderManager the RenderManager that can be used for writing to
+	 *            rm the RenderManager that can be used for writing to
 	 *            the Render-Output-Buffer
 	 * @param {sap.ui.core.Control}
 	 *            oControl an object representation of the control that should be
 	 *            rendered
 	 */
-	OverlayDialogRenderer.addRootClasses = function(oRenderManager, oControl) {
-		var rm = oRenderManager;
+	OverlayDialogRenderer.addRootClasses = function(rm, oControl) {
 		rm.addClass("sapUiUx3OD");
 	};
 
@@ -55,14 +53,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './OverlayRenderer']
 	 * Add class to Overlay
 	 *
 	 * @param {sap.ui.core.RenderManager}
-	 *            oRenderManager the RenderManager that can be used for writing to
+	 *            rm the RenderManager that can be used for writing to
 	 *            the Render-Output-Buffer
 	 * @param {sap.ui.core.Control}
 	 *            oControl an object representation of the control that should be
 	 *            rendered
 	 */
-	OverlayDialogRenderer.addOverlayClasses = function(oRenderManager, oControl) {
-		var rm = oRenderManager;
+	OverlayDialogRenderer.addOverlayClasses = function(rm, oControl) {
 		rm.addClass("sapUiUx3ODOverlay");
 	};
 

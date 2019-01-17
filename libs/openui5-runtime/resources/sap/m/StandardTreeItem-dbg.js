@@ -1,12 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.StandardTreeItem.
-sap.ui.define(['jquery.sap.global', './TreeItemBase', './library', 'sap/ui/core/EnabledPropagator', 'sap/ui/core/IconPool',  'sap/ui/core/Icon', './StandardListItem'],
-	function(jQuery, TreeItemBase, library, EnabledPropagator, IconPool, Icon, StandardListItem) {
+sap.ui.define([
+	'./TreeItemBase',
+	'./library',
+	'sap/ui/core/IconPool',
+	'./Image',
+	'./StandardTreeItemRenderer'
+],
+	function(TreeItemBase, library, IconPool, Image, StandardTreeItemRenderer) {
 	"use strict";
 
 	/**
@@ -20,7 +26,7 @@ sap.ui.define(['jquery.sap.global', './TreeItemBase', './library', 'sap/ui/core/
 	 * @extends sap.m.TreeItemBase
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -63,19 +69,13 @@ sap.ui.define(['jquery.sap.global', './TreeItemBase', './library', 'sap/ui/core/
 			src: sURI,
 			useIconTooltip: false,
 			noTabStop: true
-		}, sap.m.Image).setParent(this, null, true).addStyleClass("sapMSTIIcon");
+		}, Image).setParent(this, null, true).addStyleClass("sapMSTIIcon");
 
 		return this._oIconControl;
 	};
 
 	StandardTreeItem.prototype.getContentAnnouncement = function() {
-		var sAnnouncement = "",
-		oIconInfo = IconPool.getIconInfo(this.getIcon()) || {};
-
-		sAnnouncement += (oIconInfo.text || oIconInfo.name || "") + " ";
-		sAnnouncement += this.getTitle() + " ";
-
-		return sAnnouncement;
+		return " "; // Labeling is done via aria-labelledby (see StandardTreeItemRenderer.getAriaLabelledBy)
 	};
 
 	StandardTreeItem.prototype.exit = function() {
@@ -83,6 +83,19 @@ sap.ui.define(['jquery.sap.global', './TreeItemBase', './library', 'sap/ui/core/
 		this.destroyControls(["Icon"]);
 	};
 
+	StandardTreeItem.prototype.setIcon = function(sIcon) {
+		var sOldIcon = this.getIcon();
+		this.setProperty("icon", sIcon);
+
+		// destroy the internal control if it is changed from Icon to Image or Image to Icon
+		if (this._oIconControl && (!sIcon || IconPool.isIconURI(sIcon) != IconPool.isIconURI(sOldIcon))) {
+			this._oIconControl.destroy("KeepDom");
+			this._oIconControl = undefined;
+		}
+
+		return this;
+	};
+
 	return StandardTreeItem;
 
-}, /* bExport= */ true);
+});

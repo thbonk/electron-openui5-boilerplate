@@ -1,19 +1,42 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-   'jquery.sap.global',
-   'sap/ui/model/BindingMode', 'sap/ui/base/BindingParser', 'sap/ui/model/Context',
-   'sap/ui/base/ManagedObject', 'sap/ui/model/ClientContextBinding',
-   'sap/ui/model/FilterProcessor', 'sap/ui/model/json/JSONModel',
-   'sap/ui/model/json/JSONListBinding', 'sap/ui/model/json/JSONPropertyBinding',
-   'sap/ui/model/json/JSONTreeBinding', 'sap/ui/model/MetaModel', './_ODataMetaModelUtils'
-], function (jQuery, BindingMode, BindingParser, Context, ManagedObject, ClientContextBinding,
-		FilterProcessor, JSONModel, JSONListBinding, JSONPropertyBinding, JSONTreeBinding,
-		MetaModel, Utils) {
+	'sap/ui/model/BindingMode',
+	'sap/ui/base/BindingParser',
+	'sap/ui/model/Context',
+	'sap/ui/base/ManagedObject',
+	'sap/ui/model/ClientContextBinding',
+	'sap/ui/model/FilterProcessor',
+	'sap/ui/model/json/JSONModel',
+	'sap/ui/model/json/JSONListBinding',
+	'sap/ui/model/json/JSONPropertyBinding',
+	'sap/ui/model/json/JSONTreeBinding',
+	'sap/ui/model/MetaModel',
+	'./_ODataMetaModelUtils',
+	"sap/ui/performance/Measurement",
+	"sap/base/Log",
+	"sap/ui/thirdparty/jquery"
+], function (
+	BindingMode,
+	BindingParser,
+	Context,
+	ManagedObject,
+	ClientContextBinding,
+	FilterProcessor,
+	JSONModel,
+	JSONListBinding,
+	JSONPropertyBinding,
+	JSONTreeBinding,
+	MetaModel,
+	Utils,
+	Measurement,
+	Log,
+	jQuery
+) {
 	"use strict";
 
 	var sODataMetaModel = "sap.ui.model.odata.ODataMetaModel",
@@ -45,10 +68,10 @@ sap.ui.define([
 		});
 
 	ODataMetaListBinding.prototype.applyFilter = function () {
-		var that = this;
+		var that = this,
+			oCombinedFilter = FilterProcessor.combineFilters(this.aFilters, this.aApplicationFilters);
 
-		this.aIndices = FilterProcessor.apply(this.aIndices,
-			this.aFilters.concat(this.aApplicationFilters), function (vRef, sPath) {
+		this.aIndices = FilterProcessor.apply(this.aIndices, oCombinedFilter, function (vRef, sPath) {
 			return sPath === "@sapui.name"
 				? vRef
 				: that.oModel.getProperty(sPath, that.oList[vRef]);
@@ -101,6 +124,7 @@ sap.ui.define([
 	 * are added, if they are not yet defined in the V4 annotations:
 	 * <ul>
 	 * <li><code>label</code>;</li>
+	 * <li><code>schema-version</code> (since 1.53.0) on schemas;</li>
 	 * <li><code>creatable</code>, <code>deletable</code>, <code>deletable-path</code>,
 	 * <code>pageable</code>, <code>requires-filter</code>, <code>searchable</code>,
 	 * <code>topable</code>, <code>updatable</code> and <code>updatable-path</code> on entity sets;
@@ -128,8 +152,13 @@ sap.ui.define([
 	 * <code>com.sap.vocabularies.Communication.v1.Message</code>);</li>
 	 * <li>"completed", "due", "percent-complete" and "priority" (mapped to V4 annotation
 	 * <code>com.sap.vocabularies.Communication.v1.Task</code>);</li>
-	 * <li>"year", "yearmonth", "yearmonthday" (mapped to the corresponding V4 annotation
-	 * <code>com.sap.vocabularies.Common.v1.IsCalendar(Year|YearMonth|Date)</code>).</li>
+	 * <li>"fiscalyear", "fiscalyearperiod" (mapped to the corresponding V4 annotation
+	 * <code>com.sap.vocabularies.Common.v1.IsFiscal(Year|YearPeriod)</code>);</li>
+	 * <li>"year", "yearmonth", "yearmonthday", "yearquarter", "yearweek" (mapped to the
+	 * corresponding V4 annotation
+	 * <code>com.sap.vocabularies.Common.v1.IsCalendar(Year|YearMonth|Date|YearQuarter|YearWeek)</code>);
+	 * </li>
+	 * <li>"url" (mapped to V4 annotation <code>Org.OData.Core.V1.IsURL"</code>).</li>
 	 * </ul>
 	 * </ul>
 	 * For example:
@@ -143,6 +172,22 @@ sap.ui.define([
 			}
 		}
 	 * </pre>
+	 * <b>Note:</b> Annotation terms are not merged, but replaced as a whole ("PUT" semantics). That
+	 * means, if you have, for example, an OData V2 annotation <code>sap:sortable=false</code> at a
+	 * property <code>PropA</code>, the corresponding OData V4 annotation is added to each entity
+	 * set to which this property belongs:
+	 * <pre>
+		"Org.OData.Capabilities.V1.SortRestrictions": {
+			"NonSortableProperties" : [
+				{"PropertyPath" : "BusinessPartnerID"}
+			]
+		}
+	 * </pre>
+	 * If the same term <code>"Org.OData.Capabilities.V1.SortRestrictions"</code> targeting one of
+	 * these entity sets is also contained in an annotation file, the complete OData V4 annotation
+	 * converted from the OData V2 annotation is replaced by the one contained in the annotation
+	 * file for the specified target. Converted annotations never use a qualifier and are only
+	 * overwritten by the same annotation term without a qualifier.
 	 *
 	 * This model is read-only and thus only supports
 	 * {@link sap.ui.model.BindingMode.OneTime OneTime} binding mode. No events
@@ -174,7 +219,7 @@ sap.ui.define([
 	 * {@link #loaded loaded} has been resolved!
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @alias sap.ui.model.odata.ODataMetaModel
 	 * @extends sap.ui.model.MetaModel
 	 * @public
@@ -190,12 +235,12 @@ sap.ui.define([
 					if (that.bDestroyed) {
 						throw new Error("Meta model already destroyed");
 					}
-					jQuery.sap.measure.average(sPerformanceLoad, "", aPerformanceCategories);
+					Measurement.average(sPerformanceLoad, "", aPerformanceCategories);
 					oData = JSON.parse(JSON.stringify(oMetadata.getServiceMetadata()));
 					that.oModel = new JSONModel(oData);
 					that.oModel.setDefaultBindingMode(that.sDefaultBindingMode);
 					Utils.merge(oAnnotations ? oAnnotations.getAnnotationsData() : {}, oData, that);
-					jQuery.sap.measure.end(sPerformanceLoad);
+					Measurement.end(sPerformanceLoad);
 				}
 
 				oODataModelInterface = oODataModelInterface || {};
@@ -251,7 +296,7 @@ sap.ui.define([
 		if (!oContext || oContext instanceof Context) {
 			sResolvedPath = this.resolve(sPath || "", oContext);
 			if (!sResolvedPath) {
-				jQuery.sap.log.error("Invalid relative path w/o context", sPath,
+				Log.error("Invalid relative path w/o context", sPath,
 					sODataMetaModel);
 				return null;
 			}
@@ -271,8 +316,8 @@ sap.ui.define([
 				try {
 					oResult = BindingParser.parseExpression(sResolvedPath, 1);
 					iEnd = oResult.at;
-					if (iEnd >= 0 && (sResolvedPath.length === iEnd + 1
-							|| sResolvedPath.charAt(iEnd + 1) === '/')) {
+					if (sResolvedPath.length === iEnd + 1
+							|| sResolvedPath.charAt(iEnd + 1) === '/') {
 						oBinding = oResult.result;
 						vPart = sResolvedPath.slice(0, iEnd + 1);
 						sResolvedPath = sResolvedPath.slice(iEnd + 2);
@@ -296,8 +341,8 @@ sap.ui.define([
 				}
 			}
 			if (!oNode) {
-				if (jQuery.sap.log.isLoggable(jQuery.sap.log.Level.WARNING, sODataMetaModel)) {
-					jQuery.sap.log.warning("Invalid part: " + vPart,
+				if (Log.isLoggable(Log.Level.WARNING, sODataMetaModel)) {
+					Log.warning("Invalid part: " + vPart,
 						"path: " + sPath + ", context: "
 							+ (oContext instanceof Context ? oContext.getPath() : oContext),
 						sODataMetaModel);
@@ -306,13 +351,13 @@ sap.ui.define([
 			}
 			if (oBinding) {
 				if (oBaseNode === oContext) {
-					jQuery.sap.log.error(
+					Log.error(
 						"A query is not allowed when an object context has been given", sPath,
 						sODataMetaModel);
 					return null;
 				}
 				if (!Array.isArray(oNode)) {
-					jQuery.sap.log.error(
+					Log.error(
 						"Invalid query: '" + sProcessedPath + "' does not point to an array",
 						sPath, sODataMetaModel);
 					return null;
@@ -458,6 +503,21 @@ sap.ui.define([
 	};
 
 	/**
+	 * Returns the module path to the model specific adapter factory.
+	 *
+	 * @returns {string}
+	 *   The module path to the model specific adapter factory
+	 *
+	 * @private
+	 * @see sap.ui.model.MetaModel#getAdapterFactoryModulePath
+	 * @since 1.55.0
+	 */
+	// @override
+	ODataMetaModel.prototype.getAdapterFactoryModulePath = function () {
+		return "sap/ui/mdc/experimental/adapter/odata/v2/ODataAdapterFactory";
+	};
+
+	/**
 	 * Returns the OData meta model context corresponding to the given OData model path.
 	 *
 	 * @param {string} [sPath]
@@ -475,10 +535,12 @@ sap.ui.define([
 		var oAssocationEnd,
 			oEntitySet,
 			oEntityType,
+			oFunctionImport,
 			sMetaPath,
 			sNavigationPropertyName,
+			sPart,
 			aParts,
-			sQualifiedName; // qualified name of current entity type across navigations
+			sQualifiedName; // qualified name of current (entity) type across navigations
 
 		/*
 		 * Strips the OData key predicate from a resource path segment.
@@ -504,21 +566,38 @@ sap.ui.define([
 		aParts.shift();
 
 		// from entity set to entity type
-		oEntitySet = this.getODataEntitySet(stripKeyPredicate(aParts[0]));
-		if (!oEntitySet) {
-			throw new Error("Entity set not found: " + aParts[0]);
+		sPart = stripKeyPredicate(aParts[0]);
+		oEntitySet = this.getODataEntitySet(sPart);
+		if (oEntitySet) {
+			sQualifiedName = oEntitySet.entityType;
+		} else {
+			oFunctionImport = this.getODataFunctionImport(sPart);
+			if (oFunctionImport) {
+				if (aParts.length === 1) {
+					sMetaPath = this.getODataFunctionImport(sPart, true);
+				}
+				sQualifiedName = oFunctionImport.returnType;
+				if (sQualifiedName.lastIndexOf("Collection(", 0) === 0) {
+					sQualifiedName = sQualifiedName.slice(11, -1);
+				}
+			} else {
+				throw new Error("Entity set or function import not found: " + sPart);
+			}
 		}
 		aParts.shift();
-		sQualifiedName = oEntitySet.entityType;
 
 		// follow (navigation) properties
 		while (aParts.length) {
 			oEntityType = this.getODataEntityType(sQualifiedName);
-			sNavigationPropertyName = stripKeyPredicate(aParts[0]);
-			oAssocationEnd = this.getODataAssociationEnd(oEntityType, sNavigationPropertyName);
+			if (oEntityType) {
+				sNavigationPropertyName = stripKeyPredicate(aParts[0]);
+				oAssocationEnd = this.getODataAssociationEnd(oEntityType, sNavigationPropertyName);
+			} else { // function import's return type may be a complex type
+				oEntityType = this.getODataComplexType(sQualifiedName);
+			}
 
 			if (oAssocationEnd) {
-				// navigation property
+				// navigation property (Note: can appear in entity types, but not complex types)
 				sQualifiedName = oAssocationEnd.type;
 				if (oAssocationEnd.multiplicity === "1" && sNavigationPropertyName !== aParts[0]) {
 					// key predicate not allowed here
@@ -843,9 +922,8 @@ sap.ui.define([
 					resolve : function (oResponse) {
 						// enhance property by annotations from response to get value lists
 						jQuery.extend(oProperty,
-							((oResponse.annotations.propertyAnnotations || {})
-								[sQualifiedTypeName] || {})
-									[oProperty.name]
+							(oResponse.annotations.propertyAnnotations[sQualifiedTypeName] || {})
+								[oProperty.name]
 						);
 						mValueLists = Utils.getValueLists(oProperty);
 						if (jQuery.isEmptyObject(mValueLists)) {

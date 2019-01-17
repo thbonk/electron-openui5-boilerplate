@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define([],
+	function() {
 	"use strict";
 
 var FeedInputRenderer = {
@@ -22,6 +22,10 @@ var FeedInputRenderer = {
 
 		oRm.write("<div");
 		oRm.writeControlData(oControl);
+		oRm.addClass("sapMFeedInBase");
+		oRm.writeClasses();
+		oRm.write(">");
+		oRm.write('<div id="' + sMyId + '-outerContainer"');
 		oRm.addClass("sapMFeedIn");
 		if (!oControl.getShowIcon()) {
 			oRm.addClass("sapMFeedInNoIcon");
@@ -41,6 +45,12 @@ var FeedInputRenderer = {
 		var oTextArea = oControl._getTextArea();
 		oRm.renderControl(oTextArea);
 		oRm.renderControl(oControl._getPostButton());
+		oRm.write("</div>");
+		oRm.write("</div>");
+		oRm.write('<div id="' + sMyId + '-counterContainer"');
+		oRm.addClass("sapMFeedInCounter");
+		oRm.writeClasses();
+		oRm.write(">");
 		oRm.write("</div>");
 		oRm.write("</div>");
 	};

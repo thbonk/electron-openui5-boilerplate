@@ -3,8 +3,10 @@
 <Template name="sap.ui.fl.transport.TransportDialog" alias="TransportDialog,Dialog">
 	<jsTemplate><![CDATA[new sap.ui.fl.transport.TransportDialog({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	icon: undefined, // sap.ui.core.URI
@@ -28,6 +30,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	content: [], // sap.ui.core.Control
 	subHeader: undefined, // sap.m.IBar, since 1.12.2
 	customHeader: undefined, // sap.m.IBar, since 1.15.1
@@ -64,8 +67,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<transport/TransportDialog xmlns="sap.ui.fl"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	icon=""
@@ -100,6 +105,7 @@
 	cancel="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<content></content> <!-- sap.ui.core.Control -->
 		<subHeader></subHeader> <!-- sap.m.IBar, since 1.12.2 -->
 		<customHeader></customHeader> <!-- sap.m.IBar, since 1.15.1 -->
@@ -112,23 +118,23 @@
 <Template name="sap.ui.fl.variants.VariantManagement" alias="VariantManagement,Management">
 	<jsTemplate><![CDATA[new sap.ui.fl.variants.VariantManagement({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	showExecuteOnSelection: false, // boolean
-	showShare: false, // boolean
 	showSetAsDefault: true, // boolean
-	showFavorites: false, // boolean
-	industrySolutionMode: false, // boolean
-	vendorLayer: false, // boolean
 	manualVariantKey: false, // boolean
-	showSave: true, // boolean
-	showSaveAs: true, // boolean
-	showManage: true, // boolean
+	inErrorState: false, // boolean
+	editable: true, // boolean
+	modelName: undefined, // string
+	updateVariantInURL: false, // boolean
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	"for": [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -138,31 +144,39 @@
 	}, this],
 	manage: [function (oEvent) {
 		var ${control} = oEvent.getSource();
+	}, this],
+	initialized: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	select: [function (oEvent) {
+		var ${control} = oEvent.getSource();
 	}, this]
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<variants/VariantManagement xmlns="sap.ui.fl"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	showExecuteOnSelection="false"
-	showShare="false"
 	showSetAsDefault="true"
-	showFavorites="false"
-	industrySolutionMode="false"
-	vendorLayer="false"
 	manualVariantKey="false"
-	showSave="true"
-	showSaveAs="true"
-	showManage="true"
+	inErrorState="false"
+	editable="true"
+	modelName=""
+	updateVariantInURL="false"
 	"for"=""
 	validateFieldGroup=""
 	save=""
-	manage="">
+	manage=""
+	initialized=""
+	select="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 </variants/VariantManagement>
 ]]></xmlTemplate>
 </Template>

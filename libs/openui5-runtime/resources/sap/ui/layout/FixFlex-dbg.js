@@ -1,14 +1,28 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.layout.FixFlex.
-sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/EnabledPropagator", "sap/ui/core/ResizeHandler",
-				"./library", 'sap/ui/core/delegate/ScrollEnablement'],
-	function (jQuery, Control, EnabledPropagator,
-				ResizeHandler, library, ScrollEnablement) {
+sap.ui.define([
+	"sap/ui/core/Control",
+	"sap/ui/core/EnabledPropagator",
+	"sap/ui/core/ResizeHandler",
+	"./library",
+	"sap/ui/core/delegate/ScrollEnablement",
+	"./FixFlexRenderer",
+	"sap/ui/thirdparty/jquery"
+],
+	function(
+		Control,
+		EnabledPropagator,
+		ResizeHandler,
+		library,
+		ScrollEnablement,
+		FixFlexRenderer,
+		jQuery
+	) {
 		"use strict";
 
 		/**
@@ -43,7 +57,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/EnabledP
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.61.2
 		 *
 		 * @constructor
 		 * @public
@@ -90,7 +104,8 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/EnabledP
 					 * Control in the stretching part of the layout.
 					 */
 					flexContent: {type: "sap.ui.core.Control", multiple: false}
-				}
+				},
+				designtime: "sap/ui/layout/designtime/FixFlex.designtime"
 			}
 		});
 
@@ -215,7 +230,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/EnabledP
 			}
 
 			// Add scrolling for entire FixFlex
-			if (nFlexSize <= parseInt(this.getMinFlexSize(), 10)) {
+			if (nFlexSize <= parseInt(this.getMinFlexSize())) {
 				$this.addClass("sapUiFixFlexScrolling");
 				$this.removeClass("sapUiFixFlexInnerScrolling");
 
@@ -317,13 +332,6 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/EnabledP
 		 * @private
 		 */
 		FixFlex.prototype.onAfterRendering = function () {
-			// Fallback for older browsers
-			if (!jQuery.support.hasFlexBoxSupport) {
-				this.sResizeListenerNoFlexBoxSupportFixedId = ResizeHandler.register(this.getDomRef("Fixed"), jQuery.proxy(this._handlerResizeNoFlexBoxSupport, this));
-				this.sResizeListenerNoFlexBoxSupportId = ResizeHandler.register(this.getDomRef(), jQuery.proxy(this._handlerResizeNoFlexBoxSupport, this));
-				this._handlerResizeNoFlexBoxSupport();
-			}
-
 			// Add handler for FixFlex scrolling option
 			if (this.getMinFlexSize() !== 0) {
 				this.sResizeListenerFixFlexScroll = ResizeHandler.register(this.getDomRef(), jQuery.proxy(this._changeScrolling, this));
@@ -340,4 +348,4 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/EnabledP
 
 		return FixFlex;
 
-	}, /* bExport= */ true);
+	});

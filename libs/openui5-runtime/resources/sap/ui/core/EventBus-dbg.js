@@ -1,12 +1,17 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.core.EventBus
-sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProvider'],
-	function(jQuery, BaseObject, EventProvider) {
+sap.ui.define([
+	'sap/ui/base/Object',
+	'sap/ui/base/EventProvider',
+	"sap/base/assert",
+	"sap/base/Log"
+],
+	function(BaseObject, EventProvider, assert, Log) {
 	"use strict";
 
 
@@ -18,8 +23,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 	 *
 	 * @extends sap.ui.base.Object
 	 * @author SAP SE
-	 * @version 1.50.6
-	 * @constructor
+	 * @version 1.61.2
 	 * @public
 	 * @since 1.8.0
 	 * @alias sap.ui.core.EventBus
@@ -62,10 +66,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 			sChannelId = null;
 		}
 
-		jQuery.sap.assert(!sChannelId || typeof (sChannelId) === "string", "EventBus.subscribe: sChannelId must be empty or a non-empty string");
-		jQuery.sap.assert(typeof (sEventId) === "string" && sEventId, "EventBus.subscribe: sEventId must be a non-empty string");
-		jQuery.sap.assert(typeof (fnFunction) === "function", "EventBus.subscribe: fnFunction must be a function");
-		jQuery.sap.assert(!oListener || typeof (oListener) === "object", "EventBus.subscribe: oListener must be empty or an object");
+		assert(!sChannelId || typeof (sChannelId) === "string", "EventBus.subscribe: sChannelId must be empty or a non-empty string");
+		assert(typeof (sEventId) === "string" && sEventId, "EventBus.subscribe: sEventId must be a non-empty string");
+		assert(typeof (fnFunction) === "function", "EventBus.subscribe: fnFunction must be a function");
+		assert(!oListener || typeof (oListener) === "object", "EventBus.subscribe: oListener must be empty or an object");
 
 		var oChannel = getOrCreateChannel(this, sChannelId);
 		oChannel.attachEvent(sEventId, fnFunction, oListener);
@@ -134,10 +138,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 			sChannelId = null;
 		}
 
-		jQuery.sap.assert(!sChannelId || typeof (sChannelId) === "string", "EventBus.unsubscribe: sChannelId must be empty or a non-empty string");
-		jQuery.sap.assert(typeof (sEventId) === "string" && sEventId, "EventBus.unsubscribe: sEventId must be a non-empty string");
-		jQuery.sap.assert(typeof (fnFunction) === "function", "EventBus.unsubscribe: fnFunction must be a function");
-		jQuery.sap.assert(!oListener || typeof (oListener) === "object", "EventBus.unsubscribe: oListener must be empty or an object");
+		assert(!sChannelId || typeof (sChannelId) === "string", "EventBus.unsubscribe: sChannelId must be empty or a non-empty string");
+		assert(typeof (sEventId) === "string" && sEventId, "EventBus.unsubscribe: sEventId must be a non-empty string");
+		assert(typeof (fnFunction) === "function", "EventBus.unsubscribe: fnFunction must be a function");
+		assert(!oListener || typeof (oListener) === "object", "EventBus.unsubscribe: oListener must be empty or an object");
 
 		var oChannel = getChannel(this, sChannelId);
 		if (!oChannel) {
@@ -191,12 +195,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 
 		oData = oData ? oData : {};
 
-		jQuery.sap.assert(!sChannelId || typeof (sChannelId) === "string", "EventBus.publish: sChannelId must be empty or a non-empty string");
-		jQuery.sap.assert(typeof (sEventId) === "string" && sEventId, "EventBus.publish: sEventId must be a non-empty string");
-		jQuery.sap.assert(typeof (oData) === "object", "EventBus.publish: oData must be an object");
+		assert(!sChannelId || typeof (sChannelId) === "string", "EventBus.publish: sChannelId must be empty or a non-empty string");
+		assert(typeof (sEventId) === "string" && sEventId, "EventBus.publish: sEventId must be a non-empty string");
+		assert(typeof (oData) === "object", "EventBus.publish: oData must be an object");
 
 		var oChannel = getChannel(this, sChannelId);
 		if (!oChannel) {
+			// no channel
+			if (Log.isLoggable(Log.Level.DEBUG, "sap.ui.core.EventBus")) {
+				Log.debug("Failed to publish into channel '" + sChannelId + "'." + " No such channel.", sChannelId, "sap.ui.core.EventBus");
+			}
 			return;
 		}
 
@@ -208,14 +216,22 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/base/EventProv
 			var oInfo;
 			for (var i = 0, iL = aEventListeners.length; i < iL; i++) {
 				oInfo = aEventListeners[i];
-				oInfo.fFunction.call(oInfo.oListener || this, sChannelId, sEventId, oData);
+				this._callListener(oInfo.fFunction, oInfo.oListener || this, sChannelId, sEventId, oData);
 			}
+		} else if (Log.isLoggable(Log.Level.DEBUG, "sap.ui.core.EventBus")) {
+			// no listeners
+			Log.debug("Failed to publish Event '" + sEventId + "' in '" + sChannelId + "'." + " No listeners found.", sChannelId + "#" + sEventId, "sap.ui.core.EventBus");
 		}
 	};
 
 	EventBus.prototype.getInterface = function() {
 		return this;
 	};
+
+	EventBus.prototype._callListener = function (fnCallback, oListener, sChannelId, sEventId, mData) {
+		fnCallback.call(oListener, sChannelId, sEventId, mData);
+	};
+
 
 	/**
 	 * Cleans up the internal structures and removes all event handlers.

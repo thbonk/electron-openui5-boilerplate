@@ -1,24 +1,20 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-	'jquery.sap.global',
 	'sap/ui/rta/library',
-	'sap/ui/core/Popup',
-	'sap/m/Toolbar',
-	'sap/ui/core/BusyIndicator',
-	'sap/ui/rta/util/Animation'
+	'sap/m/HBox',
+	'sap/ui/rta/util/Animation',
+	'sap/ui/dt/util/getNextZIndex'
 ],
 function(
-	jQuery,
 	library,
-	Popup,
-	Toolbar,
-	BusyIndicator,
-	Animation
+	HBox,
+	Animation,
+	getNextZIndex
 ) {
 	"use strict";
 
@@ -27,10 +23,10 @@ function(
 	 *
 	 * @class
 	 * Base class for Toolbar control
-	 * @extends sap.m.Toolbar
+	 * @extends sap.m.HBox
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @private
@@ -39,7 +35,7 @@ function(
 	 * @experimental Since 1.48. This class is experimental. The API might be changed in future.
 	 */
 
-	var Base = Toolbar.extend("sap.ui.rta.toolbar.Base", {
+	var Base = HBox.extend("sap.ui.rta.toolbar.Base", {
 		metadata: {
 			library: "sap.ui.rta",
 			properties: {
@@ -60,8 +56,9 @@ function(
 		},
 		constructor: function() {
 			// call parent constructor
-			Toolbar.apply(this, arguments);
+			HBox.apply(this, arguments);
 
+			this.setAlignItems("Center");
 			this.setVisible(false);
 			this.placeToContainer();
 			this.buildContent();
@@ -85,7 +82,7 @@ function(
 	 * @override
 	 */
 	Base.prototype.init = function() {
-		Toolbar.prototype.init.apply(this, arguments);
+		HBox.prototype.init.apply(this, arguments);
 	};
 
 	/**
@@ -93,7 +90,7 @@ function(
 	 * @protected
 	 */
 	Base.prototype.onBeforeRendering = function () {
-		Toolbar.prototype.onBeforeRendering.apply(this, arguments);
+		HBox.prototype.onBeforeRendering.apply(this, arguments);
 	};
 
 	/**
@@ -101,7 +98,7 @@ function(
 	 * @protected
 	 */
 	Base.prototype.onAfterRendering = function () {
-		Toolbar.prototype.onAfterRendering.apply(this, arguments);
+		HBox.prototype.onAfterRendering.apply(this, arguments);
 	};
 
 	/**
@@ -129,7 +126,7 @@ function(
 	 */
 	Base.prototype.placeToContainer = function () {
 		// Render toolbar
-		this.placeAt(jQuery('#sap-ui-static').get(0));
+		this.placeAt(sap.ui.getCore().getStaticAreaRef());
 	};
 
 	/**
@@ -137,7 +134,7 @@ function(
 	 * @protected
 	 */
 	Base.prototype.buildContent = function () {
-		this.buildControls().forEach(this.addContent, this);
+		this.buildControls().forEach(this.addItem, this);
 	};
 
 	/**
@@ -196,7 +193,7 @@ function(
 	 */
 	Base.prototype.getControl = function(sName) {
 		return this
-			.getAggregation('content')
+			.getAggregation('items')
 			.filter(function (oControl) {
 				return oControl.data('name') === sName;
 			})
@@ -208,17 +205,7 @@ function(
 	 * @public
 	 */
 	Base.prototype.bringToFront = function () {
-		var iNextZIndex;
-		var oBusyIndicatorPopup = BusyIndicator.oPopup;
-
-		if (oBusyIndicatorPopup && oBusyIndicatorPopup.isOpen() && oBusyIndicatorPopup.getModal()) {
-			// '-3' because overlay is on the '-2' level, see implementation of the sap.ui.core.Popup
-			iNextZIndex = oBusyIndicatorPopup._iZIndex - 3;
-		} else {
-			iNextZIndex = Popup.getNextZIndex();
-		}
-
-		return this.setZIndex(iNextZIndex);
+		this.setZIndex(getNextZIndex());
 	};
 
 	/**

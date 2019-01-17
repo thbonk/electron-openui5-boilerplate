@@ -1,40 +1,32 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 /**
  * Initialization Code and shared classes of library sap.ui.unified.
  */
-sap.ui.define(['jquery.sap.global',
-	'sap/ui/core/library'], // library dependency
-	function(jQuery) {
+sap.ui.define(['sap/ui/core/Core', 'sap/ui/base/Object', 'sap/ui/core/library'], function(Core, BaseObject) {
 
 	"use strict";
-
-	/**
-	 * Unified controls intended for both, mobile and desktop scenarios
-	 *
-	 * @namespace
-	 * @name sap.ui.unified
-	 * @author SAP SE
-	 * @version 1.50.6
-	 * @public
-	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.unified",
-		version: "1.50.6",
+		version: "1.61.2",
 		dependencies : ["sap.ui.core"],
+		designtime: "sap/ui/unified/designtime/library.designtime",
 		types: [
 			"sap.ui.unified.CalendarDayType",
 			"sap.ui.unified.GroupAppointmentsMode",
 			"sap.ui.unified.ContentSwitcherAnimation",
-			"sap.ui.unified.ColorPickerMode"
+			"sap.ui.unified.ColorPickerMode",
+			"sap.ui.unified.ColorPickerDisplayMode"
 		],
-		interfaces: [],
+		interfaces: [
+			"sap.ui.unified.IProcessableBlobs"
+		],
 		controls: [
 			"sap.ui.unified.calendar.DatesRow",
 			"sap.ui.unified.calendar.Header",
@@ -52,6 +44,7 @@ sap.ui.define(['jquery.sap.global',
 			"sap.ui.unified.CalendarRow",
 			"sap.ui.unified.ContentSwitcher",
 			"sap.ui.unified.ColorPicker",
+			"sap.ui.unified.ColorPickerPopover",
 			"sap.ui.unified.Currency",
 			"sap.ui.unified.FileUploader",
 			"sap.ui.unified.Menu",
@@ -66,14 +59,31 @@ sap.ui.define(['jquery.sap.global',
 			"sap.ui.unified.DateRange",
 			"sap.ui.unified.DateTypeRange",
 			"sap.ui.unified.FileUploaderParameter",
+			"sap.ui.unified.FileUploaderXHRSettings",
 			"sap.ui.unified.MenuItem",
 			"sap.ui.unified.MenuItemBase",
 			"sap.ui.unified.MenuTextFieldItem",
 			"sap.ui.unified.ShellHeadItem",
 			"sap.ui.unified.ShellHeadUserItem"
-		]
+		],
+		extensions: {
+			//Configuration used for rule loading of Support Assistant
+			"sap.ui.support": {
+				publicRules:true
+			}
+		}
 	});
 
+	/**
+	 * Unified controls intended for both, mobile and desktop scenarios
+	 *
+	 * @namespace
+	 * @alias sap.ui.unified
+	 * @author SAP SE
+	 * @version 1.61.2
+	 * @public
+	 */
+	var thisLib = sap.ui.unified;
 
 	/**
 	 * Types of a calendar day used for visualization.
@@ -83,7 +93,7 @@ sap.ui.define(['jquery.sap.global',
 	 * @since 1.24.0
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	sap.ui.unified.CalendarDayType = {
+	thisLib.CalendarDayType = {
 
 		/**
 		 * No special type is used.
@@ -236,7 +246,7 @@ sap.ui.define(['jquery.sap.global',
 	 * @since 1.50
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	sap.ui.unified.StandardCalendarLegendItem = {
+	thisLib.StandardCalendarLegendItem = {
 		/**
 		 * Type used for visualization of the current date.
          * @public
@@ -270,7 +280,7 @@ sap.ui.define(['jquery.sap.global',
 	 * @since 1.34.0
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	sap.ui.unified.CalendarIntervalType = {
+	thisLib.CalendarIntervalType = {
 
 		/**
 		 * Intervals have the size of one hour.
@@ -318,7 +328,7 @@ sap.ui.define(['jquery.sap.global',
 	 * @since 1.48.0
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	sap.ui.unified.GroupAppointmentsMode = {
+	thisLib.GroupAppointmentsMode = {
 
 		/**
 		 * Overlapping appointments are displayed as a collapsed group appointment.
@@ -342,7 +352,7 @@ sap.ui.define(['jquery.sap.global',
 	 * @since 1.40.0
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	sap.ui.unified.CalendarAppointmentVisualization = {
+	thisLib.CalendarAppointmentVisualization = {
 
 		/**
 		 * Standard visualization with no fill color.
@@ -368,7 +378,7 @@ sap.ui.define(['jquery.sap.global',
 	 * API is not yet finished and might change completely
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	sap.ui.unified.ContentSwitcherAnimation = {
+	thisLib.ContentSwitcherAnimation = {
 
 		/**
 		 * No animation. Content is switched instantly.
@@ -421,7 +431,7 @@ sap.ui.define(['jquery.sap.global',
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	sap.ui.unified.ColorPickerMode = {
+	thisLib.ColorPickerMode = {
 
 		/**
 		 * Color picker works with HSV values.
@@ -437,9 +447,65 @@ sap.ui.define(['jquery.sap.global',
 
 	};
 
-	sap.ui.base.Object.extend("sap.ui.unified._ContentRenderer", {
+	/**
+	 * Types of a color picker display mode
+	 *
+	 * @enum {string}
+	 * @public
+	 * @since 1.58.0
+	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 */
+	thisLib.ColorPickerDisplayMode = {
+
+		/**
+		 * Default display mode.
+		 * @public
+		 */
+		Default : "Default",
+
+		/**
+		 * Large display mode.
+		 * @public
+		 */
+		Large : "Large",
+
+		/**
+		 * Simplified display mode.
+		 * @public
+		 */
+		Simplified : "Simplified"
+
+	};
+
+	/**
+	 * Marker interface for controls that process instances of <code>window.Blob</code>, such as <code>window.File</code>.
+	 * The implementation of this Interface should implement the following Interface methods:
+	 * <ul>
+	 * <li><code>getProcessedBlobsFromArray</code></li>
+	 * </ul>
+	 *
+	 * @name sap.ui.unified.IProcessableBlobs
+	 * @interface
+	 * @public
+	 * @ui5-metamodel This interface also will be described in the UI5 (legacy) designtime metamodel
+	 */
+
+	/**
+	 * Allows to process Blobs before they get uploaded. This API can be used to create custom Blobs
+	 * and upload these custom Blobs instead of the received/initials Blobs in the parameter <code>aBlobs</code>.
+	 * One use case could be to create and upload zip archives based on the passed Blobs.
+	 * The default implementation of this API should simply resolve with the received Blobs (parameter <code>aBlobs</code>).
+	 * @public
+         * @since 1.52
+         * @param {Blob[]} aBlobs The initial Blobs which can be used to determine a new array of Blobs for further processing.
+	 * @return {Promise} A Promise that resolves with an array of Blobs which is used for the final uploading.
+	 * @function
+	 * @name sap.ui.unified.IProcessableBlobs.getProcessedBlobsFromArray
+	 */
+
+	thisLib._ContentRenderer = BaseObject.extend("sap.ui.unified._ContentRenderer", {
 		constructor : function(oControl, sContentContainerId, oContent, fAfterRenderCallback) {
-			sap.ui.base.Object.apply(this);
+			BaseObject.apply(this);
 			this._id = sContentContainerId;
 			this._cntnt = oContent;
 			this._ctrl = oControl;
@@ -455,10 +521,10 @@ sap.ui.define(['jquery.sap.global',
 			delete this._cb;
 			delete this._ctrl;
 			if (this._rerenderTimer) {
-				jQuery.sap.clearDelayedCall(this._rerenderTimer);
+				clearTimeout(this._rerenderTimer);
 				delete this._rerenderTimer;
 			}
-			sap.ui.base.Object.prototype.destroy.apply(this, arguments);
+			BaseObject.prototype.destroy.apply(this, arguments);
 		},
 
 		render : function() {
@@ -467,14 +533,13 @@ sap.ui.define(['jquery.sap.global',
 			}
 
 			if (this._rerenderTimer) {
-				jQuery.sap.clearDelayedCall(this._rerenderTimer);
+				clearTimeout(this._rerenderTimer);
 			}
 
-			this._rerenderTimer = jQuery.sap.delayedCall(0, this, function(){
-				var $content = jQuery.sap.byId(this._id);
-				var doRender = $content.length > 0;
+			this._rerenderTimer = setTimeout(function(){
+				var oContent = document.getElementById(this._id);
 
-				if (doRender) {
+				if (oContent) {
 					if (typeof (this._cntnt) === "string") {
 						var aContent = this._ctrl.getAggregation(this._cntnt, []);
 						for (var i = 0; i < aContent.length; i++) {
@@ -483,20 +548,20 @@ sap.ui.define(['jquery.sap.global',
 					} else {
 						this._cntnt(this._rm);
 					}
-					this._rm.flush($content[0]);
+					this._rm.flush(oContent);
 				}
 
-				this._cb(doRender);
-			});
+				this._cb(!!oContent);
+			}.bind(this), 0);
 		}
 	});
 
 
-	sap.ui.unified._iNumberOfOpenedShellOverlays = 0;
+	thisLib._iNumberOfOpenedShellOverlays = 0;
 
 	// Default implementation of ColorPickerHelper - to be overwritten by commons or mobile library
-	if (!sap.ui.unified.ColorPickerHelper) {
-		sap.ui.unified.ColorPickerHelper = {
+	if (!thisLib.ColorPickerHelper) {
+		thisLib.ColorPickerHelper = {
 			isResponsive: function () { return false; },
 			factory: {
 				createLabel:  function () { throw new Error("no Label control available"); },
@@ -510,8 +575,8 @@ sap.ui.define(['jquery.sap.global',
 	}
 
 	//factory for the FileUploader to create TextField and Button to be overwritten by commons and mobile library
-	if (!sap.ui.unified.FileUploaderHelper) {
-		sap.ui.unified.FileUploaderHelper = {
+	if (!thisLib.FileUploaderHelper) {
+		thisLib.FileUploaderHelper = {
 			createTextField: function(sId){ throw new Error("no TextField control available!"); }, /* must return a TextField control */
 			setTextFieldContent: function(oTextField, sWidth){ throw new Error("no TextField control available!"); },
 			createButton: function(){ throw new Error("no Button control available!"); }, /* must return a Button control */
@@ -520,8 +585,8 @@ sap.ui.define(['jquery.sap.global',
 		};
 	}
 
-	sap.ui.unified.calendar = sap.ui.unified.calendar || {};
+	thisLib.calendar = thisLib.calendar || {};
 
-	return sap.ui.unified;
+	return thisLib;
 
 });

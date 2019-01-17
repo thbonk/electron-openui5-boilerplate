@@ -1,13 +1,31 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.StandardTile.
-sap.ui.define(['jquery.sap.global', './Tile', './library', 'sap/ui/core/IconPool'],
-	function(jQuery, Tile, library, IconPool) {
+sap.ui.define([
+	'./Tile',
+	'./library',
+	'sap/ui/core/IconPool',
+	'sap/ui/core/library',
+	'sap/ui/Device',
+	'./StandardTileRenderer'
+],
+	function(Tile, library, IconPool, coreLibrary, Device, StandardTileRenderer) {
 	"use strict";
+
+
+
+	// shortcut for sap.m.ImageHelper
+	var ImageHelper = library.ImageHelper;
+
+	// shortcut for sap.m.StandardTileType
+	var StandardTileType = library.StandardTileType;
+
+	// shortcut for sap.ui.core.ValueState
+	var ValueState = coreLibrary.ValueState;
 
 
 
@@ -22,12 +40,12 @@ sap.ui.define(['jquery.sap.global', './Tile', './library', 'sap/ui/core/IconPool
 	 * @extends sap.m.Tile
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.12
-	 * @deprecated As of version 1.50, use {@link sap.m.GenericTile} instead
+	 * @deprecated as of version 1.50, replaced by {@link sap.m.GenericTile}
 	 * @alias sap.m.StandardTile
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -69,12 +87,12 @@ sap.ui.define(['jquery.sap.global', './Tile', './library', 'sap/ui/core/IconPool
 			/**
 			 * Defines the color of the info text. Possible values are Error, Warning, Success and so on.
 			 */
-			infoState : {type : "sap.ui.core.ValueState", group : "Misc", defaultValue : sap.ui.core.ValueState.None},
+			infoState : {type : "sap.ui.core.ValueState", group : "Misc", defaultValue : ValueState.None},
 
 			/**
 			 * Defines the type of the StandardTile.
 			 */
-			type : {type : "sap.m.StandardTileType", group : "Misc", defaultValue : sap.m.StandardTileType.None},
+			type : {type : "sap.m.StandardTileType", group : "Misc", defaultValue : StandardTileType.None},
 
 			/**
 			 * By default, this is set to true but then one or more requests are sent trying to get the density perfect version of image if this version of image doesn't exist on the server.
@@ -104,6 +122,14 @@ sap.ui.define(['jquery.sap.global', './Tile', './library', 'sap/ui/core/IconPool
 		}
 	};
 
+	StandardTile.prototype.ontap = function() {
+		// on IE when you click the focus is not applied so we have to set it explicitly
+		if (Device.browser.msie) {
+			this.focus();
+		}
+		Tile.prototype.ontap.apply(this, arguments);
+	};
+
 	/**
 	 * Gets the icon of the <code>StandardTile</code> control.
 	 * @returns {Object} The icon of the control
@@ -126,7 +152,7 @@ sap.ui.define(['jquery.sap.global', './Tile', './library', 'sap/ui/core/IconPool
 	StandardTile.prototype._getImage = function() {
 
 		var sImgId = this.getId() + "-img";
-		var sSize = sap.ui.Device.system.phone ? "1.3rem" : "2rem";
+		var sSize = Device.system.phone ? "1.3rem" : "2rem";
 
 		var mProperties = {
 			src : this.getIcon(),
@@ -137,7 +163,7 @@ sap.ui.define(['jquery.sap.global', './Tile', './library', 'sap/ui/core/IconPool
 			useIconTooltip : false
 		};
 
-		this._oImageControl = sap.m.ImageHelper.getImageControl(sImgId, this._oImageControl, this, mProperties);
+		this._oImageControl = ImageHelper.getImageControl(sImgId, this._oImageControl, this, mProperties);
 
 		return this._oImageControl;
 	};
@@ -145,4 +171,4 @@ sap.ui.define(['jquery.sap.global', './Tile', './library', 'sap/ui/core/IconPool
 
 	return StandardTile;
 
-}, /* bExport= */ true);
+});

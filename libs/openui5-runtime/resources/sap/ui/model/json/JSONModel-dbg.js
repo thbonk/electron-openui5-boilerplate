@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -13,29 +13,46 @@
  */
 
 // Provides the JSON object based model implementation
-sap.ui.define(['jquery.sap.global', 'sap/ui/model/ClientModel', 'sap/ui/model/Context', './JSONListBinding', './JSONPropertyBinding', './JSONTreeBinding'],
-	function(jQuery, ClientModel, Context, JSONListBinding, JSONPropertyBinding, JSONTreeBinding) {
+sap.ui.define([
+	'sap/ui/model/ClientModel',
+	'sap/ui/model/Context',
+	'./JSONListBinding',
+	'./JSONPropertyBinding',
+	'./JSONTreeBinding',
+	"sap/base/Log",
+	"sap/ui/thirdparty/jquery",
+	"sap/base/util/isPlainObject"
+],
+	function(
+		ClientModel,
+		Context,
+		JSONListBinding,
+		JSONPropertyBinding,
+		JSONTreeBinding,
+		Log,
+		jQuery,
+		isPlainObject
+	) {
 	"use strict";
 
 
 	/**
 	 * Constructor for a new JSONModel.
 	 *
-	 * @class
-	 * Model implementation for JSON format
-	 *
 	 * The observation feature is experimental! When observation is activated, the application can directly change the
 	 * JS objects without the need to call setData, setProperty or refresh. Observation does only work for existing
-	 * properties in the JSON, it can not detect new properties or new array entries.
+	 * properties in the JSON, it cannot detect new properties or new array entries.
+	 *
+	 * @param {object|string} oData Either the URL where to load the JSON from or a JS object
+	 * @param {boolean} bObserve Whether to observe the JSON data for property changes (experimental)
+	 *
+	 * @class
+	 * Model implementation for JSON format
 	 *
 	 * @extends sap.ui.model.ClientModel
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
-	 *
-	 * @param {object} oData either the URL where to load the JSON from or a JS object
-	 * @param {boolean} bObserve whether to observe the JSON data for property changes (experimental)
-	 * @constructor
+	 * @version 1.61.2
 	 * @public
 	 * @alias sap.ui.model.json.JSONModel
 	 */
@@ -58,7 +75,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ClientModel', 'sap/ui/model/Co
 	});
 
 	/**
-	 * Sets the JSON encoded data to the model.
+	 * Sets the data, passed as a JS object tree, to the model.
 	 *
 	 * @param {object} oData the data to set on the model
 	 * @param {boolean} [bMerge=false] whether to merge the data instead of replacing it
@@ -113,7 +130,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ClientModel', 'sap/ui/model/Co
 				for (var i = 0; i < oObject.length; i++) {
 					observeRecursive(oObject[i], oObject, i);
 				}
-			} else if (jQuery.isPlainObject(oObject)) {
+			} else if (isPlainObject(oObject)) {
 				for (var i in oObject) {
 					observeRecursive(oObject[i], oObject, i);
 				}
@@ -126,20 +143,20 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ClientModel', 'sap/ui/model/Co
 	};
 
 	/**
-	 * Sets the JSON encoded string data to the model.
+	 * Sets the data, passed as a string in JSON format, to the model.
 	 *
-	 * @param {string} sJSONText the string data to set on the model
+	 * @param {string} sJSON the JSON data to set on the model
 	 * @param {boolean} [bMerge=false] whether to merge the data instead of replacing it
 	 *
 	 * @public
 	 */
-	JSONModel.prototype.setJSON = function(sJSONText, bMerge){
+	JSONModel.prototype.setJSON = function(sJSON, bMerge){
 		var oJSONData;
 		try {
-			oJSONData = jQuery.parseJSON(sJSONText);
+			oJSONData = jQuery.parseJSON(sJSON);
 			this.setData(oJSONData, bMerge);
 		} catch (e) {
-			jQuery.sap.log.fatal("The following problem occurred: JSON parse Error: " + e);
+			Log.fatal("The following problem occurred: JSON parse Error: " + e);
 			this.fireParseError({url : "", errorCode : -1,
 				reason : "", srcText : e, line : -1, linepos : -1, filepos : -1});
 		}
@@ -173,8 +190,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ClientModel', 'sap/ui/model/Co
 	 * @param {string} [sType=GET] The type of request to make ("POST" or "GET"), default is "GET".
 	 * Note: Other HTTP request methods, such as PUT and DELETE, can also be used here, but
 	 * they are not supported by all browsers.
-	 * @param {boolean} [bMerge=false] whether the data should be merged instead of replaced
-	 * @param {string} [bCache=false] force no caching if false. Default is false
+	 * @param {boolean} [bMerge=false] Whether the data should be merged instead of replaced
+	 * @param {boolean} [bCache=true] Disables caching if set to false. Default is true.
 	 * @param {object} [mHeaders] An object of additional header key/value pairs to send along with the request
 	 *
 	 * @public
@@ -191,17 +208,29 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ClientModel', 'sap/ui/model/Co
 
 		var fnSuccess = function(oData) {
 			if (!oData) {
-				jQuery.sap.log.fatal("The following problem occurred: No data was retrieved by service: " + sURL);
+				Log.fatal("The following problem occurred: No data was retrieved by service: " + sURL);
 			}
 			this.setData(oData, bMerge);
 			this.fireRequestCompleted({url : sURL, type : sType, async : bAsync, headers: mHeaders,
 				info : "cache=" + bCache + ";bMerge=" + bMerge, infoObject: {cache : bCache, merge : bMerge}, success: true});
 		}.bind(this);
 
-		var fnError = function(oParams){
-			var oError = { message : oParams.textStatus, statusCode : oParams.request.status, statusText : oParams.request.statusText, responseText : oParams.request.responseText};
-			jQuery.sap.log.fatal("The following problem occurred: " + oParams.textStatus, oParams.request.responseText + ","
-						+ oParams.request.status + "," + oParams.request.statusText);
+		var fnError = function(oParams, sTextStatus){
+			// the textStatus is either passed by jQuery via arguments,
+			// or by us from a promise reject() in the async case
+			var sMessage = sTextStatus || oParams.textStatus;
+			var oParams = bAsync ? oParams.request : oParams;
+			var iStatusCode = oParams.status;
+			var sStatusText = oParams.statusText;
+			var sResponseText = oParams.responseText;
+
+			var oError = {
+				message : sMessage,
+				statusCode : iStatusCode,
+				statusText : sStatusText,
+				responseText : sResponseText
+			};
+			Log.fatal("The following problem occurred: " + sMessage, sResponseText + ","	+ iStatusCode + "," + sStatusText);
 
 			this.fireRequestCompleted({url : sURL, type : sType, async : bAsync, headers: mHeaders,
 				info : "cache=" + bCache + ";bMerge=" + bMerge, infoObject: {cache : bCache, merge : bMerge}, success: false, errorobject: oError});
@@ -232,7 +261,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ClientModel', 'sap/ui/model/Co
 
 			this.pSequentialImportCompleted = this.pSequentialImportCompleted.then(function() {
 				//must always resolve
-				return pImportCompleted.then(fnSuccess, fnError).catch(function() {});
+				return pImportCompleted.then(fnSuccess, fnError).catch(function(oError) {
+					Log.error("Loading of data failed: " + oError.stack);
+				});
 			});
 		} else {
 			_loadData(fnSuccess, fnError);

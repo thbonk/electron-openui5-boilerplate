@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -39,7 +39,7 @@ sap.ui.define('sap/ui/debug/LogViewer', function() {
 			this.oWindow.document.body.appendChild(oDiv);
 			this.oDomNode = oDiv;
 		}
-		this.iLogLevel = 3; /* jQuery.sap.log.LogLevel.INFO */
+		this.iLogLevel = 3; /* Log.LogLevel.INFO */
 		this.sLogEntryClassPrefix = undefined;
 		this.clear();
 		this.setFilter(LogViewer.NO_FILTER);
@@ -108,8 +108,8 @@ sap.ui.define('sap/ui/debug/LogViewer', function() {
 		}
 
 		// when attached to a log, clear the dom node and add all entries from the log
-		var aLog = this.oLogger.getLog();
-		for (var i = this.iFirstEntry,l = aLog.length;i < l;i++) {
+		var aLog = this.oLogger.getLogEntries();
+		for (var i = this.iFirstEntry,l = aLog.length;i < l; i++) {
 			if ( aLog[i].level <= this.iLogLevel ) {
 				this.addEntry(aLog[i]);
 			}
@@ -124,7 +124,7 @@ sap.ui.define('sap/ui/debug/LogViewer', function() {
 
 	LogViewer.prototype.truncate = function() {
 		this.clear();
-		this.fillFromLogger(this.oLogger.getLog().length);
+		this.fillFromLogger(this.oLogger.getLogEntries().length);
 	};
 
 	LogViewer.prototype.setFilter = function(oFilter) {

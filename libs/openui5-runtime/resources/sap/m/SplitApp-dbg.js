@@ -1,15 +1,20 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.SplitApp.
-sap.ui.define(['jquery.sap.global', './SplitContainer', './library'],
-	function(jQuery, SplitContainer, library) {
+sap.ui.define([
+	'./SplitContainer',
+	'./library',
+	'sap/ui/Device',
+	'./SplitAppRenderer',
+	"sap/ui/util/Mobile",
+	"sap/ui/thirdparty/jquery"
+],
+	function(SplitContainer, library, Device, SplitAppRenderer, Mobile, jQuery) {
 	"use strict";
-
-
 
 	/**
 	 * Constructor for a new SplitApp.
@@ -45,11 +50,13 @@ sap.ui.define(['jquery.sap.global', './SplitContainer', './library'],
 	 * @extends sap.m.SplitContainer
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
 	 * @alias sap.m.SplitApp
+	 * @see {@link topic:eedfe79e4c19462eafe8780aeab16a3c Split App}
+	 * @see {@link fiori:https://experience.sap.com/fiori-design-web/split-screen/ Split App}
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var SplitApp = SplitContainer.extend("sap.m.SplitApp", /** @lends sap.m.SplitApp.prototype */ { metadata : {
@@ -80,7 +87,7 @@ sap.ui.define(['jquery.sap.global', './SplitContainer', './library'],
 			 *
 			 * On Android, these icons may or may not be used by the device. Chances can be improved by adding glare effect, rounded corners, setting the file name to end with "-precomposed.png", and setting the homeIconPrecomposed property to true.
 			 */
-			homeIcon : {type : "any", group : "Misc", defaultValue : null}
+			homeIcon : {type : "any", group : "Misc", defaultValue : null} // TODO remove after 1.62 version
 		},
 		events : {
 
@@ -96,19 +103,26 @@ sap.ui.define(['jquery.sap.global', './SplitContainer', './library'],
 					landscape : {type : "boolean"}
 				}
 			}
-		}
+		},
+		designtime: "sap/m/designtime/SplitApp.designtime"
 	}});
 
 
 	//**************************************************************
 	//* START - Life Cycle Methods
 	//**************************************************************/
+
+	/**
+	 * Initializes the control.
+	 *
+	 * @private
+	 */
 	SplitApp.prototype.init = function() {
 		if (SplitContainer.prototype.init) {
 			SplitContainer.prototype.init.apply(this, arguments);
 		}
 		this.addStyleClass("sapMSplitApp");
-		jQuery.sap.initMobile({
+		Mobile.init({
 			viewport: !this._debugZoomAndScroll,
 			statusBar: "default",
 			hideBrowser: true,
@@ -117,15 +131,25 @@ sap.ui.define(['jquery.sap.global', './SplitContainer', './library'],
 		});
 	};
 
+	/**
+	 * Overwrites the onBeforeRendering.
+	 *
+	 * @private
+	 */
 	SplitApp.prototype.onBeforeRendering = function() {
 		if (SplitContainer.prototype.onBeforeRendering) {
 			SplitContainer.prototype.onBeforeRendering.apply(this, arguments);
 		}
-		jQuery.sap.initMobile({
+		Mobile.init({
 			homeIcon: this.getHomeIcon()
 		});
 	};
 
+	/**
+	 * Overwrites the onAfterRendering.
+	 *
+	 * @private
+	 */
 	SplitApp.prototype.onAfterRendering = function(){
 		if (SplitContainer.prototype.onAfterRendering) {
 			SplitContainer.prototype.onAfterRendering.apply(this, arguments);
@@ -155,14 +179,14 @@ sap.ui.define(['jquery.sap.global', './SplitContainer', './library'],
 	/**
 	 * Fires the orientationChange event after SplitApp has reacted to the browser orientationChange event.
 	 *
-	 * @protected
+	 * @private
 	 */
 	SplitApp.prototype._onOrientationChange = function(){
 		this.fireOrientationChange({
-			landscape: sap.ui.Device.orientation.landscape
+			landscape: Device.orientation.landscape
 		});
 	};
 
 	return SplitApp;
 
-}, /* bExport= */ true);
+});

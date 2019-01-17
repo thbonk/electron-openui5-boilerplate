@@ -1,22 +1,23 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-// Provides class sap.ui.rta.plugin.CutPaste.
 sap.ui.define([
-	'jquery.sap.global',
 	'sap/ui/dt/plugin/CutPaste',
-	'sap/ui/dt/OverlayUtil',
+	'sap/ui/dt/Util',
 	'sap/ui/rta/plugin/Plugin',
-	'sap/ui/rta/plugin/RTAElementMover'
+	'sap/ui/rta/plugin/RTAElementMover',
+	'sap/ui/rta/Utils'
 ],
-function(jQuery,
-		ControlCutPaste,
-		OverlayUtil,
-		Plugin,
-		RTAElementMover) {
+function(
+	ControlCutPaste,
+	DtUtil,
+	Plugin,
+	RTAElementMover,
+	Utils
+) {
 	"use strict";
 
 	/**
@@ -30,7 +31,7 @@ function(jQuery,
 	 * @extends sap.ui.dt.plugin.CutPaste
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @private
@@ -62,6 +63,11 @@ function(jQuery,
 		}
 	});
 
+	// Extends the CutPaste Plugin with all the functions from our rta base plugin
+	Utils.extendWith(CutPaste.prototype, Plugin.prototype, function(vDestinationValue, vSourceValue, sProperty) {
+		return sProperty !== "getMetadata";
+	});
+
 	/**
 	 * @override
 	 */
@@ -71,16 +77,39 @@ function(jQuery,
 	};
 
 	/**
+	 * @override
+	 */
+	CutPaste.prototype._isEditable = function(oOverlay, mPropertyBag) {
+		return this.getElementMover().isEditable(oOverlay, mPropertyBag.onRegistration) || this._isPasteEditable(oOverlay);
+	};
+
+	CutPaste.prototype._isPasteEditable = function (oOverlay) {
+		var	oDesignTimeMetadata = oOverlay.getDesignTimeMetadata();
+
+		return this.hasStableId(oOverlay) &&
+			this.getElementMover()._isMoveAvailableOnRelevantContainer(oOverlay) &&
+			oDesignTimeMetadata.isActionAvailableOnAggregations("move");
+	};
+
+	/**
+	 * @override
+	 * @param {sap.ui.dt.ElementOverlay[]} aElementOverlays - Target overlays
+	 * @return {boolean} - true if the plugin is available
+	 */
+	CutPaste.prototype.isAvailable = function (aElementOverlays) {
+		return aElementOverlays.every(function (oElementOverlay) {
+			return oElementOverlay.getMovable();
+		});
+	};
+
+	/**
 	 * Register an overlay
 	 * @param  {sap.ui.dt.Overlay} oOverlay overlay object
 	 * @override
 	 */
 	CutPaste.prototype.registerElementOverlay = function(oOverlay) {
 		ControlCutPaste.prototype.registerElementOverlay.apply(this, arguments);
-
-		if (oOverlay.isMovable()) {
-			Plugin.prototype.addToPluginsList.apply(this, arguments);
-		}
+		Plugin.prototype.registerElementOverlay.apply(this, arguments);
 	};
 
 	/**
@@ -100,11 +129,69 @@ function(jQuery,
 
 		this._executePaste(oTargetOverlay);
 
-		this.fireElementModified({
-			"command" : this.getElementMover().buildMoveCommand()
+		this.getElementMover().buildMoveCommand()
+
+		.then(function(oMoveCommand) {
+			this.fireElementModified({
+				"command" : oMoveCommand
+			});
+			this.stopCutAndPaste();
+		}.bind(this))
+
+		.catch(function(oMessage) {
+			throw DtUtil.createError("CutPaste#paste", oMessage, "sap.ui.rta");
 		});
 
-		this.stopCutAndPaste();
+	};
+
+	/**
+	 * @override
+	 */
+	CutPaste.prototype.cut = function(oOverlay) {
+		ControlCutPaste.prototype.cut.apply(this, arguments);
+		oOverlay.setSelected(false);
+	};
+
+	/**
+	 * Retrieve the context menu item for the actions.
+	 * Two items are returned here: one for "cut" and one for "paste".
+	 * @param {sap.ui.dt.ElementOverlay[]} aElementOverlays - Target overlays
+	 * @return {object[]} - array of the items with required data
+	 */
+	CutPaste.prototype.getMenuItems = function (aElementOverlays) {
+		var aMenuItems = [],
+			oCutMenuItem = {
+				id: 'CTX_CUT',
+				text: sap.ui.getCore().getLibraryResourceBundle('sap.ui.rta').getText('CTX_CUT'),
+				handler: function (aElementOverlays) {
+					return this.cut(aElementOverlays[0]);
+				}.bind(this),
+				enabled: function (aElementOverlays) {
+					return aElementOverlays.length === 1;
+				},
+				rank: 70,
+				icon: "sap-icon://scissors"
+			},
+			oPasteMenuItem = {
+				id: 'CTX_PASTE',
+				text: sap.ui.getCore().getLibraryResourceBundle('sap.ui.rta').getText('CTX_PASTE'),
+				handler: function (aElementOverlays) {
+					return this.paste(aElementOverlays[0]);
+				}.bind(this),
+				enabled: function (aElementOverlays) {
+					return this.isElementPasteable(aElementOverlays[0]);
+				}.bind(this),
+				rank: 80,
+				icon: "sap-icon://paste"
+			};
+
+		if (this.isAvailable(aElementOverlays)) {
+			aMenuItems.push(oCutMenuItem, oPasteMenuItem);
+		} else if (this._isPasteEditable(aElementOverlays[0])) {
+			aMenuItems.push(oPasteMenuItem);
+		}
+
+		return aMenuItems;
 	};
 
 	return CutPaste;

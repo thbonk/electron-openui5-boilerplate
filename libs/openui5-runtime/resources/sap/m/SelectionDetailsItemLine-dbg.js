@@ -1,19 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-// Provides control sap.m.SelectionDetailsItemLine.
-sap.ui.define([ 'jquery.sap.global', 'sap/ui/core/Element' ],
-	function(jQuery, Element) {
+sap.ui.define(["sap/ui/core/Element", "sap/base/Log", "sap/base/util/isPlainObject", "sap/ui/thirdparty/jquery"],
+	function(Element, Log, isPlainObject, jQuery) {
 	"use strict";
 
 	/**
 	 * Constructor for a new SelectionDetailsItemLine.
 	 *
-	 * @param {string} [sId] Id for the new control, generated automatically if no id is given
-	 * @param {object} [mSettings] Initial settings for the new control
+	 * @param {string} [sId] ID for the new element, generated automatically if no ID is given
+	 * @param {object} [mSettings] Initial settings for the new element
 	 *
 	 * @class
 	 * This Element provides a means to fill an {@link sap.m.SelectionDetailsItem} with content.
@@ -24,18 +23,18 @@ sap.ui.define([ 'jquery.sap.global', 'sap/ui/core/Element' ],
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @protected
 	 * @alias sap.m.SelectionDetailsItemLine
 	 * @since 1.48.0
-	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
+	 * @ui5-metamodel This element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var SelectionDetailsItemLine = Element.extend("sap.m.SelectionDetailsItemLine", /** @lends sap.m.SelectionDetailsItemLine.prototype */ {
-		metadata : {
-			library : "sap.m",
-			properties : {
+		metadata: {
+			library: "sap.m",
+			properties: {
 				/**
 				 * The label that is shown as the first part of the line.
 				 * It may contain the name of the currently selected dimension or measure.
@@ -44,7 +43,7 @@ sap.ui.define([ 'jquery.sap.global', 'sap/ui/core/Element' ],
 
 				/**
 				 * The value of the line, for example the value of the currently selected measure.
-				 * Expected type is a string or a plain object, including date and time properties of type string.
+				 * Expected type is a string, number or a plain object, including date and time properties of type string.
 				 */
 				value: { type: "any", group: "Data" },
 
@@ -56,7 +55,13 @@ sap.ui.define([ 'jquery.sap.global', 'sap/ui/core/Element' ],
 				/**
 				 * The unit of the given value. If this unit is given, the line is displayed bold.
 				 */
-				unit: { type: "string", defaultValue: null, group: "Data" }
+				unit: { type: "string", defaultValue: null, group: "Data" },
+
+				/**
+				 * A string to be rendered by the control as a line marker. This string must be a valid SVG definition.
+				 * The only valid tags are: svg, path, line.
+				 */
+				lineMarker: {type: "string", defaultValue: null, group: "Data"}
 
 			}
 		}
@@ -73,13 +78,17 @@ sap.ui.define([ 'jquery.sap.global', 'sap/ui/core/Element' ],
 			oValue = this.getValue();
 		if (jQuery.type(oValue) === "string") {
 			sValue = oValue;
-		} else if (jQuery.isPlainObject(oValue)) {
+		} else if (jQuery.type(oValue) === "number") {
+			sValue = oValue.toString();
+		} else if (isPlainObject(oValue)) {
 			if (oValue.day && oValue.day.length > 0) {
 				sValue = oValue.day;
 			}
 			if (oValue.time && oValue.time.length > 0) {
 				sValue = (sValue.length > 0) ? oValue.time + " " + sValue : oValue.time;
 			}
+		} else {
+			Log.warning("Value '" + oValue + "' is not supported. Expected type is a string, number or a plain object, including date and time properties of type string.");
 		}
 		return sValue;
 	};

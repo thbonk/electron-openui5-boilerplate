@@ -1,27 +1,29 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.base.Event
-sap.ui.define(['jquery.sap.global', './Object'],
-	function(jQuery, BaseObject) {
+sap.ui.define(['./Object', "sap/base/assert"],
+	function(BaseObject, assert) {
 	"use strict";
 
 
 	/**
+	 *
 	 * Creates an event with the given <code>sId</code>, linked to the provided <code>oSource</code> and enriched with the <code>mParameters</code>.
+	 * @class An Event object consisting of an ID, a source and a map of parameters.
+	 * Implements {@link sap.ui.base.Poolable} and therefore an event object in the event handler will be reset by {@link sap.ui.base.ObjectPool} after the event handler is done.
 	 *
 	 * @param {string} sId The id of the event
 	 * @param {sap.ui.base.EventProvider} oSource The source of the event
 	 * @param {object} mParameters A map of parameters for this event
 	 *
-	 * @class An Event object consisting of an id, a source and a map of parameters
 	 * @extends sap.ui.base.Object
 	 * @implements sap.ui.base.Poolable
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @alias sap.ui.base.Event
 	 * @public
 	 */
@@ -54,8 +56,8 @@ sap.ui.define(['jquery.sap.global', './Object'],
 	 * @see sap.ui.base.Poolable.prototype#init
 	 */
 	Event.prototype.init = function(sId, oSource, mParameters) {
-		jQuery.sap.assert(typeof sId === "string", "Event.init: sId must be a string");
-		jQuery.sap.assert(sap.ui.require('sap/ui/base/EventProvider') && oSource instanceof sap.ui.require('sap/ui/base/EventProvider'), "Event.init: oSource must be an EventProvider");
+		assert(typeof sId === "string", "Event.init: sId must be a string");
+		assert(sap.ui.require('sap/ui/base/EventProvider') && oSource instanceof sap.ui.require('sap/ui/base/EventProvider'), "Event.init: oSource must be an EventProvider");
 
 		this.sId = sId;
 		this.oSource = oSource;
@@ -122,7 +124,7 @@ sap.ui.define(['jquery.sap.global', './Object'],
 	 */
 	Event.prototype.getParameter = function(sName) {
 
-		jQuery.sap.assert(typeof sName === "string" && sName, "Event.getParameter: sName must be a non-empty string");
+		assert(typeof sName === "string" && sName, "Event.getParameter: sName must be a non-empty string");
 
 		return this.mParameters[sName];
 

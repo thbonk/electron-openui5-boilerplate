@@ -1,33 +1,38 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides an abstraction for list bindings
-sap.ui.define(['jquery.sap.global', './Binding', './Filter', './Sorter'],
-	function(jQuery, Binding, Filter, Sorter) {
+sap.ui.define(['./Binding', './Filter', './Sorter'],
+	function(Binding, Filter, Sorter) {
 	"use strict";
 
 
 	/**
-	 * Constructor for TreeBinding
+	 * Constructor for TreeBinding.
 	 *
+	 * This constructor should only be called by subclasses or model implementations, not by application or control code.
+	 * Such code should use {@link sap.ui.model.Model#bindTree Model#bindTree} on the corresponding model instead.
+	 *
+	 * @abstract
 	 * @class
 	 * The TreeBinding is a specific binding for trees in the model, which can be used
 	 * to populate Trees.
 	 *
-	 * @param {sap.ui.model.Model} oModel
+	 * @param {sap.ui.model.Model}
+	 *         oModel Model instance that this binding is created for and that it belongs to
 	 * @param {string}
-	 *         sPath the path pointing to the tree / array that should be bound
+	 *         sPath Path pointing to the tree / array that should be bound
 	 * @param {object}
-	 *         [oContext=null] the context object for this databinding (optional)
-	 * @param {array}
-	 *         [aFilters=null] predefined filter/s contained in an array (optional)
-	 * @param {object}
-	 *         [mParameters=null] additional model specific parameters (optional)
-	 * @param {array}
-	 *         [aSorters=null] predefined sap.ui.model.sorter/s contained in an array (optional)
+	 *         [oContext=null] Context object for this binding (optional)
+	 * @param {sap.ui.model.Filter|sap.ui.model.Filter[]}
+	 *         [aFilters=null] Predefined filter or an array of filters (optional)
+	 * @param {string}
+	 *         [mParameters=null] Additional model specific parameters (optional)
+	 * @param {sap.ui.model.Sorter|sap.ui.model.Sorter[]}
+	 *         [aSorters=null] Predefined sorter or an array of sorters (optional)
 	 * @public
 	 * @alias sap.ui.model.TreeBinding
 	 * @extends sap.ui.model.Binding
@@ -40,6 +45,7 @@ sap.ui.define(['jquery.sap.global', './Binding', './Filter', './Sorter'],
 
 			this.aSorters = makeArray(aSorters, Sorter);
 			this.aApplicationFilters = makeArray(aFilters, Filter);
+			this.oCombinedFilter = null;
 
 			this.bDisplayRootNode = mParameters && mParameters.displayRootNode === true;
 		},
@@ -138,7 +144,7 @@ sap.ui.define(['jquery.sap.global', './Binding', './Filter', './Sorter'],
 	 * @param {function} fnFunction The function to call, when the event occurs.
 	 * @param {object} [oListener] object on which to call the given function.
 	 * @protected
-	 * @deprecated use the change event. It now contains a parameter (reason : "filter") when a filter event is fired.
+	 * @deprecated As of version 1.11, use the change event. It now contains a parameter (reason : "filter") when a filter event is fired.
 	 */
 	TreeBinding.prototype.attachFilter = function(fnFunction, oListener) {
 		this.attachEvent("_filter", fnFunction, oListener);
@@ -149,7 +155,7 @@ sap.ui.define(['jquery.sap.global', './Binding', './Filter', './Sorter'],
 	 * @param {function} fnFunction The function to call, when the event occurs.
 	 * @param {object} [oListener] object on which to call the given function.
 	 * @protected
-	 * @deprecated use the change event.
+	 * @deprecated As of version 1.11, use the change event.
 	 */
 	TreeBinding.prototype.detachFilter = function(fnFunction, oListener) {
 		this.detachEvent("_filter", fnFunction, oListener);
@@ -159,13 +165,66 @@ sap.ui.define(['jquery.sap.global', './Binding', './Filter', './Sorter'],
 	 * Fire event _filter to attached listeners.
 	 * @param {Map} [mArguments] the arguments to pass along with the event.
 	 * @private
-	 * @deprecated use the change event. It now contains a parameter (reason : "filter") when a filter event is fired.
+	 * @deprecated As of version 1.11, use the change event. It now contains a parameter (reason : "filter") when a filter event is fired.
 	 */
 	TreeBinding.prototype._fireFilter = function(mArguments) {
 		this.fireEvent("_filter", mArguments);
 	};
 
+	/**
+	 * Checks whether an update of the data state of this binding is required.
+	 *
+	 * @param {map} mPaths A Map of paths to check if update needed
+	 * @private
+	 * @since 1.58
+	 */
+	TreeBinding.prototype.checkDataState = function(mPaths) {
+		var oDataState = this.getDataState(),
+			sResolvedPath = this.oModel ? this.oModel.resolve(this.sPath, this.oContext) : null,
+			that = this;
 
+		function fireChange() {
+			that.fireEvent("AggregatedDataStateChange", { dataState: oDataState });
+			oDataState.changed(false);
+			that._sDataStateTimout = null;
+		}
+
+		if (!mPaths || sResolvedPath && sResolvedPath in mPaths) {
+			if (sResolvedPath) {
+				oDataState.setModelMessages(this.oModel.getMessagesByPath(sResolvedPath));
+			}
+			if (oDataState && oDataState.changed()) {
+				if (this.mEventRegistry["DataStateChange"]) {
+					this.fireEvent("DataStateChange", { dataState: oDataState });
+				}
+				if (this.bIsBeingDestroyed) {
+					fireChange();
+				} else if (this.mEventRegistry["AggregatedDataStateChange"]) {
+					if (!this._sDataStateTimout) {
+						this._sDataStateTimout = setTimeout(fireChange, 0);
+					}
+				}
+			}
+		}
+	};
+
+	/**
+	 * Return the filter information as an AST. The default implementation checks for this.oCombinedFilter,
+	 * models not using this member may override the method.
+	 * Consumers must not rely on the origin information to be available, future filter implementations will
+	 * not provide this information.
+	 *
+	 * @param {boolean} bIncludeOrigin include information about the filter objects the tree has been created from
+	 * @returns {object} The AST of the filter tree
+	 * @private
+	 * @ui5-restricted sap.ui.table, sap.ui.export
+	 */
+	TreeBinding.prototype.getFilterInfo = function(bIncludeOrigin) {
+		if (this.oCombinedFilter) {
+			return this.oCombinedFilter.getAST(bIncludeOrigin);
+		}
+		return null;
+	};
 	return TreeBinding;
 
 });

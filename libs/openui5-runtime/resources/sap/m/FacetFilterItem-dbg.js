@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.FacetFilterItem.
-sap.ui.define(['jquery.sap.global', './ListItemBase', './library'],
-	function(jQuery, ListItemBase, library) {
+sap.ui.define(['./ListItemBase', './library', './FacetFilterItemRenderer'],
+	function(ListItemBase, library, FacetFilterItemRenderer) {
 	"use strict";
 
 
@@ -20,11 +20,12 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library'],
 	 * @class
 	 * Represents a value for the {@link sap.m.FacetFilterList} control.
 	 * @extends sap.m.ListItemBase
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
 	 * @alias sap.m.FacetFilterItem
+	 * @see {@link topic:395392f30f2a4c4d80d110d5f923da77 Facet Filter Item}
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var FacetFilterItem = ListItemBase.extend("sap.m.FacetFilterItem", /** @lends sap.m.FacetFilterItem.prototype */ { metadata : {
@@ -44,7 +45,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library'],
 
 			/**
 			 * Defines the number of objects that match this item in the target data set.
-			 * @deprecated Since version 1.18.11. Use setCounter instead.
+			 * @deprecated as of version 1.18.11, replaced by <code>setCounter</code> method
 			 */
 			count : {type : "int", group : "Misc", defaultValue : null, deprecated: true}
 		}
@@ -107,4 +108,4 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library'],
 
 	return FacetFilterItem;
 
-}, /* bExport= */ true);
+});

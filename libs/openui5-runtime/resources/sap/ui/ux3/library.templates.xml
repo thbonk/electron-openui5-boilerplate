@@ -3,8 +3,10 @@
 <Template name="sap.ui.ux3.ActionBar" alias="ActionBar,Bar">
 	<jsTemplate><![CDATA[new sap.ui.ux3.ActionBar({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	followState: sap.ui.ux3.FollowActionState.Default, // sap.ui.ux3.FollowActionState
@@ -22,6 +24,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	businessActions: [], // sap.ui.ux3.ThingAction
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -36,8 +39,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<ActionBar xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	followState="Default"
@@ -57,6 +62,7 @@
 	feedSubmit="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<businessActions></businessActions> <!-- sap.ui.ux3.ThingAction -->
 </ActionBar>
 ]]></xmlTemplate>
@@ -70,6 +76,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	items: [], // sap.ui.core.Item
 	selectedItems: [], // sap.ui.core.Item
 	selectionChanged: [function (oEvent) {
@@ -90,6 +97,7 @@
 	propertyChanged="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<items></items> <!-- sap.ui.core.Item -->
 </Collection>
 ]]></xmlTemplate>
@@ -97,8 +105,10 @@
 <Template name="sap.ui.ux3.CollectionInspector" alias="CollectionInspector,Inspector">
 	<jsTemplate><![CDATA[new sap.ui.ux3.CollectionInspector({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	sidebarVisible: true, // boolean
@@ -106,6 +116,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	collections: [], // sap.ui.ux3.Collection
 	content: [], // sap.ui.core.Control
 	selectedCollection: undefined, // sap.ui.ux3.Collection
@@ -125,8 +136,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<CollectionInspector xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	sidebarVisible="true"
@@ -138,6 +151,7 @@
 	editCollection="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<collections></collections> <!-- sap.ui.ux3.Collection -->
 		<content></content> <!-- sap.ui.core.Control -->
 </CollectionInspector>
@@ -146,8 +160,10 @@
 <Template name="sap.ui.ux3.DataSet" alias="DataSet,Set">
 	<jsTemplate><![CDATA[new sap.ui.ux3.DataSet({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	showToolbar: true, // boolean
@@ -157,6 +173,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	items: [], // sap.ui.ux3.DataSetItem
 	views: [], // sap.ui.ux3.DataSetView
 	filter: [], // sap.ui.core.Control
@@ -174,8 +191,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<DataSet xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	showToolbar="true"
@@ -188,6 +207,7 @@
 	search="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<items></items> <!-- sap.ui.ux3.DataSetItem -->
 		<views></views> <!-- sap.ui.ux3.DataSetView -->
 		<filter></filter> <!-- sap.ui.core.Control -->
@@ -204,6 +224,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	selected: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this]
@@ -218,14 +239,17 @@
 	selected="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 </DataSetItem>
 ]]></xmlTemplate>
 </Template>
 <Template name="sap.ui.ux3.DataSetSimpleView" alias="DataSetSimpleView,View">
 	<jsTemplate><![CDATA[new sap.ui.ux3.DataSetSimpleView({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	floating: true, // boolean
@@ -242,6 +266,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	template: undefined, // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -250,8 +275,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<DataSetSimpleView xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	floating="true"
@@ -268,6 +295,7 @@
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<template></template> <!-- sap.ui.core.Control -->
 </DataSetSimpleView>
 ]]></xmlTemplate>
@@ -275,14 +303,17 @@
 <Template name="sap.ui.ux3.Exact" alias="Exact">
 	<jsTemplate><![CDATA[new sap.ui.ux3.Exact({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	resultText: undefined, // string
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	settingsMenu: undefined, // sap.ui.commons.Menu
 	attributes: [], // sap.ui.ux3.ExactAttribute
 	validateFieldGroup: [function (oEvent) {
@@ -298,8 +329,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<Exact xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	resultText=""
@@ -308,6 +341,7 @@
 	refineSearch="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<settingsMenu></settingsMenu> <!-- sap.ui.commons.Menu -->
 		<attributes></attributes> <!-- sap.ui.ux3.ExactAttribute -->
 </Exact>
@@ -316,14 +350,17 @@
 <Template name="sap.ui.ux3.ExactArea" alias="ExactArea,Area">
 	<jsTemplate><![CDATA[new sap.ui.ux3.ExactArea({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	toolbarVisible: true, // boolean
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	content: [], // sap.ui.core.Control
 	toolbarItems: [], // sap.ui.commons.ToolbarItem
 	validateFieldGroup: [function (oEvent) {
@@ -333,14 +370,17 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<ExactArea xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	toolbarVisible="true"
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<content></content> <!-- sap.ui.core.Control -->
 		<toolbarItems></toolbarItems> <!-- sap.ui.commons.ToolbarItem -->
 </ExactArea>
@@ -360,6 +400,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	attributes: [], // sap.ui.ux3.ExactAttribute
 	supplyAttributes: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -379,6 +420,7 @@
 	supplyAttributes="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<attributes></attributes> <!-- sap.ui.ux3.ExactAttribute -->
 </ExactAttribute>
 ]]></xmlTemplate>
@@ -386,8 +428,10 @@
 <Template name="sap.ui.ux3.ExactBrowser" alias="ExactBrowser,Browser">
 	<jsTemplate><![CDATA[new sap.ui.ux3.ExactBrowser({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	title: undefined, // string
@@ -403,6 +447,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	attributes: [], // sap.ui.ux3.ExactAttribute
 	optionsMenu: undefined, // sap.ui.commons.Menu
 	followUpControl: undefined, // sap.ui.core.Control
@@ -419,8 +464,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<ExactBrowser xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	title=""
@@ -439,6 +486,7 @@
 	save="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<attributes></attributes> <!-- sap.ui.ux3.ExactAttribute -->
 		<optionsMenu></optionsMenu> <!-- sap.ui.commons.Menu -->
 </ExactBrowser>
@@ -447,8 +495,10 @@
 <Template name="sap.ui.ux3.ExactList" alias="ExactList,List">
 	<jsTemplate><![CDATA[new sap.ui.ux3.ExactList({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	showClose: false, // boolean
@@ -457,6 +507,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	subLists: [], // sap.ui.ux3.ExactList
 	data: undefined, // sap.ui.ux3.ExactAttribute
 	validateFieldGroup: [function (oEvent) {
@@ -469,8 +520,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<ExactList xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	showClose="false"
@@ -481,6 +534,7 @@
 	attributeSelected="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<subLists></subLists> <!-- sap.ui.ux3.ExactList -->
 </ExactList>
 ]]></xmlTemplate>
@@ -488,14 +542,17 @@
 <Template name="sap.ui.ux3.FacetFilter" alias="FacetFilter,Filter">
 	<jsTemplate><![CDATA[new sap.ui.ux3.FacetFilter({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	visibleItemCountMode: sap.ui.ux3.VisibleItemCountMode.Fixed, // sap.ui.ux3.VisibleItemCountMode
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	lists: [], // sap.ui.ux3.FacetFilterList
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -504,14 +561,17 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<FacetFilter xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	visibleItemCountMode="Fixed"
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<lists></lists> <!-- sap.ui.ux3.FacetFilterList -->
 </FacetFilter>
 ]]></xmlTemplate>
@@ -519,8 +579,10 @@
 <Template name="sap.ui.ux3.FacetFilterList" alias="FacetFilterList,List">
 	<jsTemplate><![CDATA[new sap.ui.ux3.FacetFilterList({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	title: undefined, // string
@@ -531,6 +593,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	items: [], // sap.ui.core.ListItem
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -542,8 +605,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<FacetFilterList xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	title=""
@@ -555,6 +620,7 @@
 	select="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<items></items> <!-- sap.ui.core.ListItem -->
 </FacetFilterList>
 ]]></xmlTemplate>
@@ -562,8 +628,10 @@
 <Template name="sap.ui.ux3.Feed" alias="Feed">
 	<jsTemplate><![CDATA[new sap.ui.ux3.Feed({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	feederThumbnailSrc: undefined, // sap.ui.core.URI
@@ -573,6 +641,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	filterItems: [], // sap.ui.core.ListItem
 	chunks: [], // sap.ui.ux3.FeedChunk
 	toolsMenuItems: [], // sap.ui.commons.MenuItem
@@ -598,8 +667,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<Feed xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	feederThumbnailSrc=""
@@ -614,6 +685,7 @@
 	toggleLive="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<filterItems></filterItems> <!-- sap.ui.core.ListItem -->
 		<chunks></chunks> <!-- sap.ui.ux3.FeedChunk -->
 		<toolsMenuItems></toolsMenuItems> <!-- sap.ui.commons.MenuItem -->
@@ -623,8 +695,10 @@
 <Template name="sap.ui.ux3.FeedChunk" alias="FeedChunk,Chunk">
 	<jsTemplate><![CDATA[new sap.ui.ux3.FeedChunk({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	thumbnailSrc: undefined, // sap.ui.core.URI
@@ -646,6 +720,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	comments: [], // sap.ui.ux3.FeedChunk
 	actionMenuItems: [], // sap.ui.commons.MenuItem
 	validateFieldGroup: [function (oEvent) {
@@ -682,8 +757,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<FeedChunk xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	thumbnailSrc=""
@@ -714,6 +791,7 @@
 	actionItemSelected="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<comments></comments> <!-- sap.ui.ux3.FeedChunk -->
 		<actionMenuItems></actionMenuItems> <!-- sap.ui.commons.MenuItem -->
 </FeedChunk>
@@ -722,8 +800,10 @@
 <Template name="sap.ui.ux3.Feeder" alias="Feeder">
 	<jsTemplate><![CDATA[new sap.ui.ux3.Feeder({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	thumbnailSrc: undefined, // sap.ui.core.URI
@@ -733,6 +813,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -743,8 +824,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<Feeder xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	thumbnailSrc=""
@@ -755,14 +838,17 @@
 	submit="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 </Feeder>
 ]]></xmlTemplate>
 </Template>
 <Template name="sap.ui.ux3.NavigationBar" alias="NavigationBar,Bar">
 	<jsTemplate><![CDATA[new sap.ui.ux3.NavigationBar({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	toplevelVariant: false, // boolean
@@ -770,6 +856,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	items: [], // sap.ui.ux3.NavigationItem
 	selectedItem: undefined, // sap.ui.ux3.NavigationItem
 	associatedItems: [], // sap.ui.ux3.NavigationItem
@@ -783,8 +870,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<NavigationBar xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	toplevelVariant="false"
@@ -795,6 +884,7 @@
 	select="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<items></items> <!-- sap.ui.ux3.NavigationItem -->
 </NavigationBar>
 ]]></xmlTemplate>
@@ -811,6 +901,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	subItems: [] // sap.ui.ux3.NavigationItem
 })
 ]]></jsTemplate>
@@ -824,6 +915,7 @@
 	href="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<subItems></subItems> <!-- sap.ui.ux3.NavigationItem -->
 </NavigationItem>
 ]]></xmlTemplate>
@@ -831,8 +923,10 @@
 <Template name="sap.ui.ux3.NotificationBar" alias="NotificationBar,Bar">
 	<jsTemplate><![CDATA[new sap.ui.ux3.NotificationBar({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	visibleStatus: sap.ui.ux3.NotificationBarStatus.Default, // sap.ui.ux3.NotificationBarStatus
@@ -841,6 +935,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	messageNotifier: undefined, // sap.ui.core.Element
 	notifiers: [], // sap.ui.core.Element
 	validateFieldGroup: [function (oEvent) {
@@ -856,8 +951,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<NotificationBar xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	visibleStatus="Default"
@@ -868,6 +965,7 @@
 	resize="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<messageNotifier></messageNotifier> <!-- sap.ui.core.Element -->
 		<notifiers></notifiers> <!-- sap.ui.core.Element -->
 </NotificationBar>
@@ -881,6 +979,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	messages: [], // sap.ui.core.Message
 	messageSelected: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -894,6 +993,7 @@
 	messageSelected="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<messages></messages> <!-- sap.ui.core.Message -->
 </Notifier>
 ]]></xmlTemplate>
@@ -901,8 +1001,10 @@
 <Template name="sap.ui.ux3.Overlay" alias="Overlay">
 	<jsTemplate><![CDATA[new sap.ui.ux3.Overlay({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	openButtonVisible: true, // boolean
@@ -910,6 +1012,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -929,8 +1032,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<Overlay xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	openButtonVisible="true"
@@ -942,14 +1047,17 @@
 	open="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 </Overlay>
 ]]></xmlTemplate>
 </Template>
 <Template name="sap.ui.ux3.OverlayContainer" alias="OverlayContainer,Container">
 	<jsTemplate><![CDATA[new sap.ui.ux3.OverlayContainer({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	openButtonVisible: true, // boolean
@@ -957,6 +1065,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	content: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -977,8 +1086,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<OverlayContainer xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	openButtonVisible="true"
@@ -990,6 +1101,7 @@
 	open="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<content></content> <!-- sap.ui.core.Control -->
 </OverlayContainer>
 ]]></xmlTemplate>
@@ -997,8 +1109,10 @@
 <Template name="sap.ui.ux3.OverlayDialog" alias="OverlayDialog,Dialog">
 	<jsTemplate><![CDATA[new sap.ui.ux3.OverlayDialog({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	openButtonVisible: true, // boolean
@@ -1008,6 +1122,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	content: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -1028,8 +1143,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<OverlayDialog xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	openButtonVisible="true"
@@ -1043,6 +1160,7 @@
 	open="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<content></content> <!-- sap.ui.core.Control -->
 </OverlayDialog>
 ]]></xmlTemplate>
@@ -1050,8 +1168,10 @@
 <Template name="sap.ui.ux3.QuickView" alias="QuickView,View">
 	<jsTemplate><![CDATA[new sap.ui.ux3.QuickView({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	text: "", // string
@@ -1081,6 +1201,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	content: [], // sap.ui.core.Element
 	actions: [], // sap.ui.ux3.ThingAction
 	actionBar: undefined, // sap.ui.ux3.ActionBar
@@ -1115,8 +1236,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<QuickView xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	text=""
@@ -1154,6 +1277,7 @@
 	navigate="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<content></content> <!-- sap.ui.core.Element -->
 		<actions></actions> <!-- sap.ui.ux3.ThingAction -->
 		<actionBar></actionBar> <!-- sap.ui.ux3.ActionBar -->
@@ -1163,8 +1287,10 @@
 <Template name="sap.ui.ux3.Shell" alias="Shell">
 	<jsTemplate><![CDATA[new sap.ui.ux3.Shell({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	appTitle: undefined, // string
@@ -1186,6 +1312,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	worksetItems: [], // sap.ui.ux3.NavigationItem
 	paneBarItems: [], // sap.ui.core.Item
 	paneContent: [], // sap.ui.core.Control
@@ -1219,8 +1346,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<Shell xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	appTitle=""
@@ -1249,6 +1378,7 @@
 	paneClosed="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<worksetItems></worksetItems> <!-- sap.ui.ux3.NavigationItem -->
 		<paneBarItems></paneBarItems> <!-- sap.ui.core.Item -->
 		<paneContent></paneContent> <!-- sap.ui.core.Control -->
@@ -1267,6 +1397,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	select: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this]
@@ -1279,6 +1410,7 @@
 	select="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 </ThingAction>
 ]]></xmlTemplate>
 </Template>
@@ -1290,6 +1422,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	content: [], // sap.ui.core.Control
 	actions: [] // sap.ui.ux3.ThingGroup
 })
@@ -1300,6 +1433,7 @@
 	colspan="false">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<content></content> <!-- sap.ui.core.Control -->
 		<actions></actions> <!-- sap.ui.ux3.ThingGroup -->
 </ThingGroup>
@@ -1308,8 +1442,10 @@
 <Template name="sap.ui.ux3.ThingInspector" alias="ThingInspector,Inspector">
 	<jsTemplate><![CDATA[new sap.ui.ux3.ThingInspector({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	openButtonVisible: true, // boolean
@@ -1329,6 +1465,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	actions: [], // sap.ui.ux3.ThingAction
 	headerContent: [], // sap.ui.ux3.ThingGroup
 	facets: [], // sap.ui.ux3.NavigationItem
@@ -1363,8 +1500,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<ThingInspector xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	openButtonVisible="true"
@@ -1392,6 +1531,7 @@
 	feedSubmit="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<actions></actions> <!-- sap.ui.ux3.ThingAction -->
 		<headerContent></headerContent> <!-- sap.ui.ux3.ThingGroup -->
 		<facets></facets> <!-- sap.ui.ux3.NavigationItem -->
@@ -1403,8 +1543,10 @@
 <Template name="sap.ui.ux3.ThingViewer" alias="ThingViewer,Viewer">
 	<jsTemplate><![CDATA[new sap.ui.ux3.ThingViewer({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	title: undefined, // string
@@ -1417,6 +1559,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	headerContent: [], // sap.ui.ux3.ThingGroup
 	facets: [], // sap.ui.ux3.NavigationItem
 	facetContent: [], // sap.ui.ux3.ThingGroup
@@ -1432,8 +1575,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<ThingViewer xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	title=""
@@ -1448,6 +1593,7 @@
 	facetSelected="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<headerContent></headerContent> <!-- sap.ui.ux3.ThingGroup -->
 		<facets></facets> <!-- sap.ui.ux3.NavigationItem -->
 		<facetContent></facetContent> <!-- sap.ui.ux3.ThingGroup -->
@@ -1458,8 +1604,10 @@
 <Template name="sap.ui.ux3.ToolPopup" alias="ToolPopup,Popup">
 	<jsTemplate><![CDATA[new sap.ui.ux3.ToolPopup({
 	id: "${id}", // sap.ui.core.ID
+	blocked: false, // boolean
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
+	busyIndicatorSize: sap.ui.core.BusyIndicatorSize.Medium, // sap.ui.core.BusyIndicatorSize, since 1.54
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	title: undefined, // string
@@ -1476,6 +1624,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Element, since 1.19
+	dragDropConfig: [], // sap.ui.core.dnd.DragDropBase, since 1.56
 	buttons: [], // sap.ui.core.Control
 	content: [], // sap.ui.core.Control
 	initialFocus: undefined, // sap.ui.core.Control
@@ -1506,8 +1655,10 @@
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<ToolPopup xmlns="sap.ui.ux3"
 	id="${id}"
+	blocked="false"
 	busy="false"
 	busyIndicatorDelay="1000"
+	busyIndicatorSize="Medium"
 	visible="true"
 	fieldGroupIds=""
 	title=""
@@ -1533,6 +1684,7 @@
 	opened="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
+		<dragDropConfig></dragDropConfig> <!-- sap.ui.core.dnd.DragDropBase, since 1.56 -->
 		<buttons></buttons> <!-- sap.ui.core.Control -->
 		<content></content> <!-- sap.ui.core.Control -->
 </ToolPopup>

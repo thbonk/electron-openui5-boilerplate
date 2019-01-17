@@ -1,12 +1,30 @@
 /*
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides base class sap.ui.core.Component for all components
-sap.ui.define(['jquery.sap.global', '../base/ManagedObject', './Component', './library', './UIComponentMetadata', './mvc/Controller', './mvc/View'],
-	function(jQuery, ManagedObject, Component, library, UIComponentMetadata, Controller, View) {
+sap.ui.define([
+	'../base/ManagedObject',
+	'./Component',
+	'./library',
+	'./UIComponentMetadata',
+	'./mvc/Controller',
+	'./mvc/View',
+	"sap/base/util/ObjectPath",
+	"sap/base/Log"
+],
+	function(
+		ManagedObject,
+		Component,
+		library,
+		UIComponentMetadata,
+		Controller,
+		View,
+		ObjectPath,
+		Log
+	) {
 	"use strict";
 
 	// shortcut for enum(s)
@@ -14,11 +32,6 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject', './Component', './l
 
 
 	/**
-	 * Base Class for UIComponent.
-	 *
-	 * If you are extending a UIComponent make sure you read the {@link #.extend} documentation since the metadata is special.
-	 *
-	 * @class
 	 * Creates and initializes a new UIComponent with the given <code>sId</code> and
 	 * settings.
 	 *
@@ -28,17 +41,21 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject', './Component', './l
 	 *
 	 * @param {string}
 	 *            [sId] Optional ID for the new control; generated automatically if
-	 *            no non-empty ID is given Note: this can be omitted, no matter
-	 *            whether <code>mSettings</code> will be given or not!
+	 *            no non-empty ID is given; Note: this can be omitted, no matter
+	 *            whether <code>mSettings</code> will be given or not
 	 * @param {object}
-	 *            [mSettings] optional map/JSON-object with initial settings for the
+	 *            [mSettings] Optional map/JSON-object with initial settings for the
 	 *            new component instance
-	 * @public
 	 *
+	 * @class Base Class for UIComponent.
+	 *
+	 * If you are extending a UIComponent make sure you read the {@link #.extend} documentation since the metadata is special.
+	 *
+	 * @public
 	 * @extends sap.ui.core.Component
 	 * @abstract
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @alias sap.ui.core.UIComponent
 	 * @since 1.9.2
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
@@ -72,7 +89,7 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject', './Component', './l
 				 */
 				"rootControl": { type: "sap.ui.core.Control", multiple: false, visibility: "hidden" }
 			},
-			designTime : true,
+			designtime: "sap/ui/core/designtime/UIComponent.designtime",
 			routing: {
 			}
 			//autoDestroy: false // TODO: destroy component when view should be destroyed (not implemented yet!)
@@ -310,9 +327,9 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject', './Component', './l
 	function getConstructorFunctionFor (vRoutingObjectConstructor) {
 		var fnConstructor;
 		if (typeof vRoutingObjectConstructor === "string") {
-			fnConstructor = jQuery.sap.getObject(vRoutingObjectConstructor);
+			fnConstructor = ObjectPath.get(vRoutingObjectConstructor);
 			if (!fnConstructor) {
-				jQuery.sap.log.error("The specified class for router or targets '" + vRoutingObjectConstructor + "' is undefined.", this);
+				Log.error("The specified class for router or targets '" + vRoutingObjectConstructor + "' is undefined.", this);
 			}
 		} else {
 			fnConstructor = vRoutingObjectConstructor;
@@ -337,21 +354,24 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject', './Component', './l
 	};
 
 	UIComponent.prototype._destroyCreatedInstances = function () {
-		// destroy the router
-		if (this._oRouter) {
+		if (this._oRouter) { // destroy the router
+			// the _oTargets and _oViews will be destroyed
+			// internally in the _oRouter
 			this._oRouter.destroy();
 			delete this._oRouter;
+		} else { // if _oTargets and _oViews are created without
+			// a Router, they need to be destroyed here
+			if (this._oTargets) {
+				this._oTargets.destroy();
+				this._oTargets = null;
+			}
+
+			if (this._oViews) {
+				this._oViews.destroy();
+				this._oViews = null;
+			}
 		}
 
-		if (this._oTargets) {
-			this._oTargets.destroy();
-			this._oTargets = null;
-		}
-
-		if (this._oViews) {
-			this._oViews.destroy();
-			this._oViews = null;
-		}
 	};
 
 	/**
@@ -506,7 +526,7 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject', './Component', './l
 			// to convert the string into a configuration object for the view factory in
 			// case of the manifest first approach.
 			// !This should be kept in sync with the UIComponentMetadata functionality!
-			return sap.ui.view({
+			return View._legacyCreate({
 				viewName: oRootView,
 				type: ViewType.XML
 			});
@@ -515,7 +535,7 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject', './Component', './l
 			if (oRootView.id) {
 				oRootView.id = this.createId(oRootView.id);
 			}
-			return sap.ui.view(oRootView);
+			return View._legacyCreate(oRootView);
 		} else if (oRootView) {
 			throw new Error("Configuration option 'rootView' of component '" + this.getMetadata().getName() + "' is invalid! 'rootView' must be type of string or object!");
 		}

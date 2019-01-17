@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -19,7 +19,7 @@ function () {
 
 	/**
 	 * @class A Plugin to access the UI5 Core
-	 * This class is containing the core functionalities of the OpaPlugin to avoid circular dependencies,
+	 * This class is containing the core functionality of the OpaPlugin to avoid circular dependencies,
 	 * since the OpaPlugin uses Interactable to filter
 	 *
 	 * @private

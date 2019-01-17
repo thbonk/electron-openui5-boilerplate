@@ -1,12 +1,28 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.DropdownBox.
-sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/History', 'sap/ui/core/SeparatorItem'],
-	function(jQuery, ComboBox, library, History, SeparatorItem) {
+sap.ui.define([
+    'sap/ui/thirdparty/jquery',
+    'sap/base/Log',
+    './ComboBox',
+    './library',
+    'sap/ui/core/History',
+    'sap/ui/core/SeparatorItem',
+    './DropdownBoxRenderer',
+    'sap/ui/Device',
+    './TextField',
+    'sap/ui/core/ListItem',
+    'sap/ui/dom/containsOrEquals',
+    'sap/ui/events/jquery/EventExtension',
+    'sap/ui/events/KeyCodes',
+    'sap/ui/dom/jquery/cursorPos', // jQuery.fn.cursorPos
+    'sap/ui/dom/jquery/selectText' // jQuery.fn.selectText
+],
+	function(jQuery, Log, ComboBox, library, History, SeparatorItem, DropdownBoxRenderer, Device, TextField, ListItem, containsOrEquals, EventExtension, KeyCodes) {
 	"use strict";
 
 
@@ -20,11 +36,11 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 	 * The control provides a field that allows end users to an entry out of a list of pre-defined items.
 	 * The choosable items can be provided in the form of a complete <code>ListBox</code>, single <code>ListItems</code>.
 	 * @extends sap.ui.commons.ComboBox
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
-	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.ComboBox</code> control.
+	 * @deprecated as of version 1.38, replaced by {@link sap.m.ComboBox}
 	 * @alias sap.ui.commons.DropdownBox
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -221,7 +237,7 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 
 			if (typeof (vElement) == "number") { // "vElement" is the index now
 				if (vElement < 0 || vElement >= this.__aItems.length) {
-					jQuery.sap.log.warning("Element.removeAggregation called with invalid index: Items, " + vElement);
+					Log.warning("Element.removeAggregation called with invalid index: Items, " + vElement);
 
 				} else {
 					oItem = this.__aItems[vElement];
@@ -478,7 +494,7 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 			return;
 		}
 
-		if (oEvent.which === jQuery.sap.KeyCodes.F4 && this._searchHelpItem) {
+		if (oEvent.which === KeyCodes.F4 && this._searchHelpItem) {
 			this._close();
 			this.fireSearchHelp({value: jQuery(this.getInputDomRef()).val()});
 			oEvent.preventDefault();
@@ -509,13 +525,13 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 			return;
 		}
 
-		if (!!sap.ui.Device.browser.webkit && (oEvent.which == jQuery.sap.KeyCodes.DELETE || oEvent.which == jQuery.sap.KeyCodes.BACKSPACE)) {
+		if (Device.browser.webkit && (oEvent.which == KeyCodes.DELETE || oEvent.which == KeyCodes.BACKSPACE)) {
 			// Webkit do not fire keypress event for DELETE or BACKSPACE
 			// IE also fires no keypress but an input event, so it's handled there
 			this.onkeypress(oEvent);
 		}
 
-		if (!sap.ui.Device.browser.internet_explorer || oEvent.which !== jQuery.sap.KeyCodes.BACKSPACE) {
+		if (!Device.browser.msie || oEvent.which !== KeyCodes.BACKSPACE) {
 			return;
 		}
 
@@ -589,13 +605,12 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 			return;
 		}
 
-		var iKC = oEvent.which,
-			oKC = jQuery.sap.KeyCodes;
+		var iKC = oEvent.which;
 
 		// call keyup function of TextField to get liveChange event
-		sap.ui.commons.TextField.prototype.onkeyup.apply(this, arguments);
+		TextField.prototype.onkeyup.apply(this, arguments);
 
-		if (!(!!sap.ui.Device.browser.internet_explorer && iKC === oKC.BACKSPACE) && this._oValueBeforePaste === null || iKC === oKC.TAB) {
+		if (!(Device.browser.msie && iKC === KeyCodes.BACKSPACE) && this._oValueBeforePaste === null || iKC === KeyCodes.TAB) {
 			return;
 		}
 		// it's either backspace in IE or after paste (cumulating potentially multiple pastes, too)
@@ -609,7 +624,7 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 		var $Ref = jQuery(this.getInputDomRef()),
 			bValid = false;
 		// the first case (backspace-handling) could only be true in IE. For FF we do this (less 'tricky') in keypress handler
-		if (iKC === oKC.BACKSPACE && this._iCursorPosBeforeBackspace !== null) {
+		if (iKC === KeyCodes.BACKSPACE && this._iCursorPosBeforeBackspace !== null) {
 			var iCursorPos = $Ref.cursorPos();
 			if (this._iCursorPosBeforeBackspace !== iCursorPos) {
 				iCursorPos++;
@@ -641,7 +656,7 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 		}
 
 		if ((!this.oPopup || !this.oPopup.isOpen()) && this.getEditable() && this.getEnabled()) {
-			sap.ui.commons.TextField.prototype.onsaphome.apply(this, arguments); // before setting the cursor to have old cursor position in there
+			TextField.prototype.onsaphome.apply(this, arguments); // before setting the cursor to have old cursor position in there
 			var $Ref = jQuery(this.getInputDomRef());
 			$Ref.cursorPos(0);
 			this._updateSelection();
@@ -707,14 +722,14 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 		}
 
 		var iKC = oEvent.which,
-			iKeyCode = oEvent.keyCode,
-			oKC = jQuery.sap.KeyCodes;
+			iKeyCode = oEvent.keyCode;
+
 		if (( ComboBox._isHotKey(oEvent)
-				|| ( !!sap.ui.Device.browser.firefox && iKeyCode === oKC.HOME ) || // IE & webkit fires no keypress on HOME, but "$" has the same keyCode
-				iKeyCode === oKC.F4 && oEvent.which === 0 ) /*this is the Firefox case and ensures 's' with same charCode is accepted*/
+				|| ( Device.browser.firefox && iKeyCode === KeyCodes.HOME ) || // IE & webkit fires no keypress on HOME, but "$" has the same keyCode
+				iKeyCode === KeyCodes.F4 && oEvent.which === 0 ) /*this is the Firefox case and ensures 's' with same charCode is accepted*/
 				&& !(oEvent.ctrlKey && oEvent.which == 120)/*Ctrl+X*/ ) {
 			return;
-		} else if (iKeyCode == oKC.ESCAPE) {
+		} else if (iKeyCode == KeyCodes.ESCAPE) {
 			var sValue = this.getProperty("value");
 			var oInput = this.getInputDomRef();
 			if (oInput && oInput.value !== sValue) {
@@ -726,14 +741,14 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 			$Ref = jQuery(this.getInputDomRef()),
 			iCursorPos = $Ref.cursorPos(),
 			sVal = $Ref.val();
-		//jQuery.sap.log.debug("current value is: " + sVal + " with cursorPos: " + iCursorPos + " and newChar is: " + oNewChar);
+		//Log.debug("current value is: " + sVal + " with cursorPos: " + iCursorPos + " and newChar is: " + oNewChar);
 
 		if (!this.oPopup || !this.oPopup.isOpen()) {
 			this.noTypeAheadByOpen = true; // no typeahead and rerendering during open because of ARIA update issues
 			this._open();
 			this.noTypeAheadByOpen = undefined;
 		}
-		if (iKC === oKC.BACKSPACE) {// only happens in FF or other non-IE-browsers. Webkit or IE does not support BACKSPACE in keypress, but in Webkit it's called from keydown
+		if (iKC === KeyCodes.BACKSPACE) {// only happens in FF or other non-IE-browsers. Webkit or IE does not support BACKSPACE in keypress, but in Webkit it's called from keydown
 			this._doTypeAhead(sVal.substr(0, iCursorPos - 1), "");
 		} else {
 			this._doTypeAhead(sVal.substr(0, iCursorPos), oNewChar);
@@ -834,7 +849,7 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 	 * @private
 	 */
 	DropdownBox.prototype._callDoSelectAfterFocusIn = function(iStart, iEnd) {
-		if (!sap.ui.Device.browser.internet_explorer) {
+		if (!Device.browser.msie) {
 			this._doSelect(iStart, iEnd);
 		} else {
 			// Enum _eDoSelectAfterFocusIn as well describes the IE flow:  undefined -> "onfocusin" -> "_doSelect",
@@ -1116,7 +1131,9 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 		if (!bValid) {
 			$Ref = this.$();
 			$Ref.addClass("sapUiTfErr");
-			jQuery.sap.delayedCall(300, $Ref, "removeClass", ["sapUiTfErr"]);
+			setTimeout(function() {
+				$Ref.removeClass("sapUiTfErr");
+			}, 300);
 			// move cursor back to old position and select from there
 			$Ref.cursorPos(oValue.length);
 			this._doSelect(oValue.length, sText.length);
@@ -1158,7 +1175,7 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 
 		ComboBox.prototype._handleOpened.apply(this, arguments);
 
-		if (!sap.ui.Device.browser.internet_explorer) {
+		if (!Device.browser.msie) {
 			// because in IE already async made in ComboBox
 			jQuery(this.getInputDomRef()).focus();
 		} else {
@@ -1224,7 +1241,7 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 		// add items from history still matching given set of items
 		for (var i = 0, j = 0; j < this.getMaxHistoryItems() && i < l; i++) {
 			if (!rFilter || rFilter.test(aHistory[i])) {
-				oItem = (oItem = sap.ui.getCore().byId(sIdPrefix + j)) && oItem.setText(aHistory[i]) || new sap.ui.core.ListItem(sIdPrefix + j, {text: aHistory[i]});
+				oItem = (oItem = sap.ui.getCore().byId(sIdPrefix + j)) && oItem.setText(aHistory[i]) || new ListItem(sIdPrefix + j, {text: aHistory[i]});
 				aNewItems.push(oItem);
 				j++;
 			}
@@ -1337,7 +1354,7 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 	 * @private
 	 */
 	DropdownBox.prototype._focusAfterListBoxClick = function() {
-		if (!sap.ui.Device.browser.webkit) {
+		if (!Device.browser.webkit) {
 			this.focus();
 		} else {
 			var oLB = this._getListBox();
@@ -1359,7 +1376,7 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 	DropdownBox.prototype.onsapfocusleave = function(oEvent) {
 
 		var oLB = this._getListBox();
-		if (oEvent.relatedControlId && jQuery.sap.containsOrEquals(oLB.getFocusDomRef(), sap.ui.getCore().byId(oEvent.relatedControlId).getFocusDomRef())) {
+		if (oEvent.relatedControlId && containsOrEquals(oLB.getFocusDomRef(), sap.ui.getCore().byId(oEvent.relatedControlId).getFocusDomRef())) {
 			this._focusAfterListBoxClick();
 		} else {
 			// we left the DropdownBox to another (unrelated) control and thus have to fire the change (if needed).
@@ -1368,7 +1385,7 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 				this._close();
 			}
 
-			sap.ui.commons.TextField.prototype.onsapfocusleave.apply(this, arguments);
+			TextField.prototype.onsapfocusleave.apply(this, arguments);
 		}
 
 	};
@@ -1413,7 +1430,7 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 	DropdownBox.prototype._handleSelect = function(oControlEvent) {
 		if (this._searchHelpItem && oControlEvent.getParameter("selectedItem") === this._searchHelpItem[0]) {
 			var oEvent = new jQuery.Event("sapshow");
-			oEvent.which = jQuery.sap.KeyCodes.F4;
+			oEvent.which = KeyCodes.F4;
 			this.onsapshow(oEvent);
 		} else {
 			// if history item is selected search for corresponding real item in list
@@ -1501,9 +1518,9 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 				sAdditionalText = sAdditionalText || rb.getText("DDBX_SHIF4");
 				sAdditionalText = sAdditionalText === "DDBX_SHIF4" ? "F4" : sAdditionalText;
 			}
-			sIcon = sIcon || sap.ui.resource("sap.ui.commons", "images/dropdown/ico12_f4.gif");
+			sIcon = sIcon || sap.ui.require.toUrl("sap/ui/commons/images/dropdown/ico12_f4.gif");
 			if (!this._searchHelpItem) {
-				this._searchHelpItem = [new sap.ui.core.ListItem(this.getId() + "_shi", {
+				this._searchHelpItem = [new ListItem(this.getId() + "_shi", {
 					text: sText,
 					additionalText: sAdditionalText,
 					enabled: true,
@@ -1678,7 +1695,7 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 		}
 		// new items are added automatically by opening listbox (no support to change property while
 		// listbox is open)
-
+		return this;
 	};
 
 
@@ -1730,4 +1747,4 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 
 	return DropdownBox;
 
-}, /* bExport= */ true);
+});

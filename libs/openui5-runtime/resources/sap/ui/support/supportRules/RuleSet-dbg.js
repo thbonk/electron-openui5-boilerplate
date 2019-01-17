@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -20,7 +20,7 @@ function (jQuery, storage, constants) {
 	 *
 	 * @readonly
 	 * @name sap.ui.support.RuleSet.mRuleSets
-	 * @memberof sap.ui.support.RuleSet
+	 * @memberof sap.ui.support
 	 */
 	var mRuleSets = {};
 
@@ -37,7 +37,7 @@ function (jQuery, storage, constants) {
 	 * @name sap.ui.support.RuleSet
 	 * @memberof sap.ui.support
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @param {object} oSettings Name of the initiated
 	 * @returns {void}
 	 */
@@ -199,9 +199,9 @@ function (jQuery, storage, constants) {
 	 * @param {object} oSettings Settings object with rule information
 	 * @returns {string} sRuleVerificationStatus Verification status
 	 */
-	RuleSet.prototype.addRule = function (oSettings) {
+	RuleSet.prototype.addRule = function (oSettings, oVersionInfo) {
 
-		var sCurrentVersion = RuleSet.versionInfo ? RuleSet.versionInfo.version : '';
+		var sCurrentVersion = RuleSet.versionInfo ? RuleSet.versionInfo.version : oVersionInfo.version;
 
 		var sRuleVersion = oSettings.minversion ? oSettings.minversion : '';
 
@@ -227,21 +227,16 @@ function (jQuery, storage, constants) {
 	};
 
 	/**
-	 * Adds all previously created temporary rules to the current library rules.
+	 * Remove rule from RuleSet.
 	 * @public
-	 * @static
 	 * @method
-	 * @name sap.ui.support.RuleSet.addToTempRules
+	 * @name sap.ui.support.RuleSet.removeRule
 	 * @memberof sap.ui.support.RuleSet
-	 * @param {object} oLibraries The loaded libraries and their rules
-	 * @param {string[]} aTempRules The temporary rules previously created by the user
+	 * @param {object} oRule Rule object that will be removed
 	 */
-	RuleSet.addToTempRules = function (oLibraries, aTempRules) {
-		if (aTempRules) {
-			aTempRules.forEach(function (tempRule) {
-				var ruleName = tempRule.id;
-				oLibraries[constants.TEMP_RULESETS_NAME].RuleSet._mRules[ruleName] = tempRule;
-			});
+	RuleSet.prototype.removeRule = function (oRule) {
+		if (this._mRules[oRule.id]) {
+			delete this._mRules[oRule.id];
 		}
 	};
 

@@ -1,10 +1,10 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define("sap/ui/fl/support/apps/contentbrowser/utils/ErrorUtils",[
+sap.ui.define([
 	"sap/m/MessagePopoverItem",
 	"sap/m/MessagePopover"],
 	function (MessagePopoverItem, MessagePopover) {
@@ -16,7 +16,7 @@ sap.ui.define("sap/ui/fl/support/apps/contentbrowser/utils/ErrorUtils",[
 		 * @constructor
 		 * @alias sap.ui.fl.support.apps.contentbrowser.utils.ErrorUtils
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.61.2
 		 * @experimental Since 1.45
 		 */
 		var ErrorUtils = {};

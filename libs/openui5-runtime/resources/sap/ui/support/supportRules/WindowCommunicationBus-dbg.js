@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -21,7 +21,7 @@ function (jQuery) {
 	 * @name sap.ui.support.WindowCommunicationBus
 	 * @memberof sap.ui.support
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @private
 	 */
 	var CommunicationBus = {
@@ -62,6 +62,11 @@ function (jQuery) {
 	 * @param {object} oContext Context for the subscribed channel
 	 */
 	CommunicationBus.subscribe = function (sChannelName, fnCallback, oContext) {
+
+		if (this.bSilentMode) {
+			return;
+		}
+
 		if (!this.channels[sChannelName]) {
 			this.channels[sChannelName] = [{
 				callback: fnCallback,
@@ -87,6 +92,11 @@ function (jQuery) {
 	 * @param {string} aParams Settings passed to the SupportAssistant
 	 */
 	CommunicationBus.publish = function (sChannelName, aParams) {
+
+		if (this.bSilentMode) {
+			return;
+		}
+
 		var receivingWindow = this._getReceivingWindow(),
 			dataObject = {
 				channelName: sChannelName,
@@ -106,10 +116,10 @@ function (jQuery) {
 	 * @private
 	 * @static
 	 * @method
-	 * @name sap.ui.support.WindowCommunicationBus.destroyChanels
+	 * @name sap.ui.support.WindowCommunicationBus.destroyChannels
 	 * @memberof sap.ui.support.WindowCommunicationBus
 	 */
-	CommunicationBus.destroyChanels = function () {
+	CommunicationBus.destroyChannels = function () {
 		CommunicationBus.channels = {};
 	};
 

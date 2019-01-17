@@ -1,25 +1,13 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 /**
  * Provides a private class <code>sap.f.semantic.SemanticTitle</code>.
  */
-sap.ui.define([
-	"jquery.sap.global",
-	"sap/m/library",
-	"sap/m/ToolbarSeparator",
-	"sap/m/ToolbarSpacer",
-	"./SemanticConfiguration",
-	"./SemanticContainer"
-], function(jQuery,
-			mobileLibrary,
-			ToolbarSeparator,
-			ToolBarSpacer,
-			SemanticConfiguration,
-			SemanticContainer) {
+sap.ui.define(["sap/m/library", "./SemanticContainer"], function(mobileLibrary, SemanticContainer) {
 	"use strict";
 
 	// shortcut for sap.m.ButtonType
@@ -43,9 +31,6 @@ sap.ui.define([
 			this._aSemanticNavIconActions = [];
 			this._aCustomTextActions = [];
 			this._aCustomIconActions = [];
-
-			this._insertSeparator();
-			this._attachContainerWidthChange();
 		}
 	});
 
@@ -95,7 +80,6 @@ sap.ui.define([
 		this._aCustomTextActions = null;
 		this._aCustomIconActions = null;
 		this._aSemanticNavIconActions = null;
-		this._oSeparator = null;
 
 		return SemanticContainer.prototype.destroy.call(this);
 	};
@@ -270,18 +254,20 @@ sap.ui.define([
 	*/
 	SemanticTitle.prototype._insertSemanticIconContent = function(oSemanticControl) {
 		var oControl = this._getControl(oSemanticControl),
-			iInsertIndex = 0;
+			sContainerAggregationMethod,
+			iInsertIndex;
 
 		if (this._isNavigationAction(oSemanticControl)) {
 			this._aSemanticNavIconActions.push(oSemanticControl);
 			iInsertIndex = this._getSemanticNavIconActionInsertIndex(oSemanticControl);
-
+			sContainerAggregationMethod = "insertNavigationAction";
 		} else {
 			this._aSemanticSimpleIconActions.push(oSemanticControl);
 			iInsertIndex = this._getSemanticSimpleIconActionInsertIndex(oSemanticControl);
+			sContainerAggregationMethod = "insertAction";
 		}
 
-		this._callContainerAggregationMethod("insertAction", oControl, iInsertIndex);
+		this._callContainerAggregationMethod(sContainerAggregationMethod, oControl, iInsertIndex);
 		return this;
 	};
 
@@ -293,17 +279,21 @@ sap.ui.define([
 	* @returns {sap.f.semantic.SemanticTitle}
 	*/
 	SemanticTitle.prototype._removeSemanticIconContent = function(oSemanticControl) {
-		var oControl = this._getControl(oSemanticControl), iControlIndex;
+		var oControl = this._getControl(oSemanticControl),
+			sContainerAggregationMethod,
+			iControlIndex;
 
 		if (this._isNavigationAction(oSemanticControl)) {
 			iControlIndex = this._aSemanticNavIconActions.indexOf(oSemanticControl);
 			this._aSemanticNavIconActions.splice(iControlIndex, 1);
+			sContainerAggregationMethod = "removeNavigationAction";
 		} else {
 			iControlIndex = this._aSemanticTextActions.indexOf(oSemanticControl);
 			this._aSemanticSimpleIconActions.splice(iControlIndex, 1);
+			sContainerAggregationMethod = "removeAction";
 		}
 
-		this._callContainerAggregationMethod("removeAction", oControl);
+		this._callContainerAggregationMethod(sContainerAggregationMethod, oControl);
 		return this;
 	};
 
@@ -442,130 +432,24 @@ sap.ui.define([
 	* that is about to be added in the <code>titleIcon</code> area with <code>navigation=true</code>,
 	* defined in <code>SemanticConfiguration</code>.
 	*
-	* <b>Note:</b> The semantic <code>Navigation</code> icon actions should be inserted right after the title actions separator,
-	* based on the semantic order requirements.
-	*
 	* @private
 	* @param {sap.f.semantic.SemanticControl}
 	* @returns {Number}
 	*/
 	SemanticTitle.prototype._getSemanticNavIconActionInsertIndex = function(oSemanticControl) {
 		this._aSemanticNavIconActions.sort(this._sortControlByOrder.bind(this));
-		return this._getSeparatorIndex() + this._aSemanticNavIconActions.indexOf(oSemanticControl) + 1;
+		return this._aSemanticNavIconActions.indexOf(oSemanticControl);
 	};
 
 	/*
 	* Determines the insert index of the <code>sap.f.semantic.SemanticControl</code>,
 	* that is about to be added in the <code>titleIcon</code> area with constraint <code>shareIcon</code>.
 	*
-	* Note: The semantic "navigation" icon actions should be inserted right before the title actions separator
-	* and after the semantic simple icon actions, based on the semantic order requirements.
-	*
 	* @private
 	* @returns {Number}
 	*/
 	SemanticTitle.prototype._getSemanticShareMenuInsertIndex = function() {
-		return this._getSeparatorIndex();
-	};
-
-	/*
-	* Retrieves the <code>sap.m.ToolbarSeparator</code> index within the container.
-	*
-	* @private
-	* @returns {Number}
-	*/
-	SemanticTitle.prototype._getSeparatorIndex = function() {
-		return this._callContainerAggregationMethod("indexOfAction", this._oSeparator);
-	};
-
-	/*
-	* Updates the <code>sap.m.ToolbarSeparator</code> visibility.
-	*
-	* @private
-	*/
-	SemanticTitle.prototype._updateSeparatorVisibility = function () {
-		var oContainerBar = this._getContainerBar(), aVisibleContent;
-
-		if (!oContainerBar) {
-			return;
-		}
-
-		aVisibleContent = oContainerBar._getVisibleAndNonOverflowContent();
-
-		if (aVisibleContent.length > 0) {
-			this._toggleSeparator(this._shouldSeparatorBeVisible(aVisibleContent));
-		}
-	};
-
-	/*
-	* Determines if the <code>sap.m.ToolbarSeparator</code> should be <code>visible</code> or not.
-	*
-	* @private
-	* @returns {Boolean}
-	*/
-	SemanticTitle.prototype._shouldSeparatorBeVisible = function (aVisibleContent) {
-		var oFirstContentItem = aVisibleContent[0],
-			oLastContentItem = aVisibleContent[aVisibleContent.length - 1];
-
-			return !(oFirstContentItem instanceof ToolbarSeparator || oLastContentItem instanceof ToolbarSeparator);
-	};
-
-	/*
-	* Shows/hides the <code>sap.m.ToolbarSeparator</code>.
-	*
-	* @private
-	*/
-	SemanticTitle.prototype._toggleSeparator = function (bShow) {
-		var $separator = this._getSeparator().$();
-		if ($separator.length > 0) {
-			$separator.toggleClass("sapUiHidden", !bShow);
-		}
-	};
-
-	/*
-	* Inserts a <code>sap.m.ToolbarSeparator</code> in the container.
-	*
-	* @private
-	* @returns {sap.f.semantic.SemanticTitle}
-	*/
-	SemanticTitle.prototype._insertSeparator = function () {
-		this._callContainerAggregationMethod("addAction", this._getSeparator());
-		return this;
-	};
-
-	/*
-	* Retrieves lazily a <code>sap.m.ToolbarSeparator</code> instance.
-	*
-	* @private
-	* @returns {sap.m.ToolbarSeparator}
-	*/
-	SemanticTitle.prototype._getSeparator = function () {
-		if (!this._oSeparator) {
-			this._oSeparator = new ToolbarSeparator();
-			this._oSeparator.addStyleClass("sapUiHidden");
-		}
-		return this._oSeparator;
-	};
-
-	/*
-	* Attaches an event for container width change.
-	*
-	* @private
-	*/
-	SemanticTitle.prototype._attachContainerWidthChange = function () {
-		var oContainerBar = this._getContainerBar();
-		if (oContainerBar) {
-			oContainerBar.attachEvent("_controlWidthChanged", this._onContainerWidthChanged, this);
-		}
-	};
-
-	/*
-	* Handles the container width change event.
-	*
-	* @private
-	*/
-	SemanticTitle.prototype._onContainerWidthChanged = function () {
-		jQuery.sap.delayedCall(0, this, this._updateSeparatorVisibility);
+		return this._callContainerAggregationMethod("getActions").length;
 	};
 
 	/**
@@ -586,4 +470,4 @@ sap.ui.define([
 
 	return SemanticTitle;
 
-}, /* bExport= */ false);
+});

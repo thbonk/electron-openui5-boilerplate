@@ -1,13 +1,13 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 //Provides control sap.ui.unified.CalendarWeekInterval.
-sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sap/ui/unified/calendar/CalendarDate', './library',
+sap.ui.define(['sap/ui/unified/calendar/CalendarUtils', 'sap/ui/unified/calendar/CalendarDate', './library',
 		'sap/ui/unified/CalendarDateInterval', 'sap/ui/unified/CalendarDateIntervalRenderer'],
-	function (jQuery, CalendarUtils, CalendarDate, library, CalendarDateInterval, CalendarDateIntervalRenderer) {
+	function (CalendarUtils, CalendarDate, library, CalendarDateInterval, CalendarDateIntervalRenderer) {
 		"use strict";
 
 		/*
@@ -39,15 +39,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sa
 		 * its start date to the first date of the same week as the date the user chose.
 		 *
 		 * @extends sap.ui.unified.CalendarDateInterval
-		 * @version 1.50.6
+		 * @version 1.61.2
 		 *
 		 * @constructor
 		 * @private
 		 * @since 1.44.0
 		 * @alias sap.ui.unified.CalendarWeekInterval
-		 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 		 */
-		var CalendarWeekInterval = CalendarDateInterval.extend("CalendarWeekInterval", /** @lends sap.ui.unified.CalendarWeekInterval.prototype */  {
+		var CalendarWeekInterval = CalendarDateInterval.extend("sap.ui.unified.CalendarWeekInterval", /** @lends sap.ui.unified.CalendarWeekInterval.prototype */  {
 			renderer: CalendarDateIntervalRenderer
 		});
 
@@ -162,23 +161,41 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/unified/calendar/CalendarUtils', 'sa
 
 		CalendarWeekInterval.prototype._handleCalendarPickerDateSelect = function(oEvent) {
 			var oCalPicker = this._getCalendarPicker(),
-				oFocusedDate = oCalPicker._getFocusedDate(),
+				oSelectedDate = oCalPicker.getSelectedDates()[0].getStartDate(),
+				oFocusedDate = new CalendarDate.fromLocalJSDate(oSelectedDate),
 				oFirstWeekDate;
 
 			if (this._dateMatchesVisibleRange(oFocusedDate.toLocalJSDate())) {
-				this._oFocusDateWeek = oCalPicker._getFocusedDate();
+				this._oFocusDateWeek = oFocusedDate;
 				this._focusDate(this._oFocusDateWeek, false, true); // true means no fire startDateChange event (no start date change)
 			} else {
 				oFirstWeekDate = CalendarUtils._getFirstDateOfWeek(oFocusedDate);
 
 				this._setStartDate(oFirstWeekDate);
-				this._oFocusDateWeek = oCalPicker._getFocusedDate();
+				this._oFocusDateWeek = oFocusedDate;
 				this._focusDate(this._oFocusDateWeek, false, true); // true means no fire startDateChange event (we already did it in _setStartDate)
 			}
 
 			this._closeCalendarPicker(true);
 		};
 
+		/**
+		 * Calculates the startDate of the interval, corrected to the minDate and maxDate
+		 *
+		 * @param {sap.ui.unified.calendar.CalendarDate} oMaxDate maxDate of the Interval
+		 * @param {sap.ui.unified.calendar.CalendarDate} oMinDate minDate of the Interval
+		 * @param {sap.ui.unified.calendar.CalendarDate} oStartDate initial startDate
+		 * @private
+		 */
+		CalendarWeekInterval.prototype._calculateStartDate = function (oMaxDate, oMinDate, oStartDate) {
+			var oMaxDate = new CalendarDate(this._oMaxDate, this.getPrimaryCalendarType());
+
+			oMaxDate = this._getMaxDateAlignedToMinDate(oMaxDate, this._oMinDate);
+			oStartDate = this._getStartDateAlignedToMinAndMaxDate(oMaxDate, this._oMinDate, oStartDate);
+
+			return oStartDate;
+		};
+
 		return CalendarWeekInterval;
 
-	}, /* bExport= */ true);
+	});

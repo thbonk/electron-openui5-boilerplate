@@ -1,12 +1,42 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.ObjectMarker.
-sap.ui.define(['jquery.sap.global', "sap/ui/core/Control", 'sap/ui/core/Renderer'], function(jQuery, Control, Renderer) {
+sap.ui.define([
+	"sap/ui/core/Control",
+	"sap/ui/core/Renderer",
+	"sap/ui/Device",
+	"sap/m/library",
+	"sap/ui/core/library",
+	"sap/ui/core/Icon",
+	"sap/m/TextRenderer",
+	"sap/m/Text",
+	"sap/m/LinkRenderer",
+	"sap/m/Link",
+	"./ObjectMarkerRenderer"
+], function(
+	Control,
+	Renderer,
+	Device,
+	library,
+	coreLibrary,
+	Icon,
+	TextRenderer,
+	Text,
+	LinkRenderer,
+	Link,
+	ObjectMarkerRenderer
+) {
 	"use strict";
+
+	// shortcut for sap.ui.core.TextAlign
+	var TextAlign = coreLibrary.TextAlign;
+
+	// shortcut for sap.m.ObjectMarkerVisibility
+	var ObjectMarkerVisibility = library.ObjectMarkerVisibility;
 
 	/**
 	 * Constructor for a new ObjectMarker.
@@ -32,17 +62,19 @@ sap.ui.define(['jquery.sap.global', "sap/ui/core/Control", 'sap/ui/core/Renderer
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.38
 	 * @alias sap.m.ObjectMarker
+	 * @see {@link fiori:https://experience.sap.com/fiori-design-web/object-display-elements/#-object-status Object Marker}
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var ObjectMarker = Control.extend("sap.m.ObjectMarker", /** @lends sap.m.ObjectMarker.prototype */ {
 		metadata: {
 			library: "sap.m",
+			designtime: "sap/m/designtime/ObjectMarker.designtime",
 			properties: {
 
 				/**
@@ -83,6 +115,18 @@ sap.ui.define(['jquery.sap.global', "sap/ui/core/Control", 'sap/ui/core/Renderer
 				 * for non-interactive <code>ObjectMarker</code>.
 				 */
 				_innerControl: {type: "sap.ui.core.Control", multiple: false, visibility: "hidden"}
+			},
+			associations: {
+
+				/**
+				 * Association to controls / ids which describe this control (see WAI-ARIA attribute aria-describedby).
+				 */
+				ariaDescribedBy: {type: "sap.ui.core.Control", multiple: true, singularName: "ariaDescribedBy"},
+
+				/**
+				 * Association to controls / ids which label this control (see WAI-ARIA attribute aria-labelledby).
+				 */
+				ariaLabelledBy: {type: "sap.ui.core.Control", multiple: true, singularName: "ariaLabelledBy"}
 			},
 			events: {
 
@@ -234,7 +278,7 @@ sap.ui.define(['jquery.sap.global', "sap/ui/core/Control", 'sap/ui/core/Renderer
 	 */
 	ObjectMarker.prototype.init = function() {
 		// Defines custom screen range set: smaller or equal 600px defines 'small' and bigger that defines 'large' screen
-		sap.ui.Device.media.initRangeSet("DeviceSet", [600], "px", ["small", "large"]);
+		Device.media.initRangeSet("DeviceSet", [600], "px", ["small", "large"]);
 	};
 
 	/**
@@ -256,7 +300,7 @@ sap.ui.define(['jquery.sap.global', "sap/ui/core/Control", 'sap/ui/core/Renderer
 		this._cleanup();
 
 		// Inner control can be determined here as all property values are known
-		this._adjustControl();
+		this._adjustControl(true);
 	};
 
 	/**
@@ -335,10 +379,13 @@ sap.ui.define(['jquery.sap.global', "sap/ui/core/Control", 'sap/ui/core/Renderer
 	/**
 	 * Determines if the icon/text should be visible, etc.
 	 *
+	 * @param {boolean} [bSuppressInvalidate=false] if the setters called inside the function should invalidate the internal controls.
+	 * This is done since the function is called onBeforeRendering, where there is no need of invalidation,
+	 * since the internal controls are not rendered yet.
 	 * @returns {boolean} <code>true</code> if the adjustment is done and <code>false</code> if there is no inner control and no adjustment happened.
 	 * @private
 	 */
-	ObjectMarker.prototype._adjustControl  = function() {
+	ObjectMarker.prototype._adjustControl  = function(bSuppressInvalidate) {
 
 		var oType = ObjectMarker.M_PREDEFINED_TYPES[this.getType()],
 			oInnerControl = this._getInnerControl(),
@@ -356,22 +403,22 @@ sap.ui.define(['jquery.sap.global', "sap/ui/core/Control", 'sap/ui/core/Renderer
 		}
 
 		if (this._isIconVisible()) {
-			oInnerControl.setIcon(oType.icon.src);
+			oInnerControl.setIcon(oType.icon.src, bSuppressInvalidate);
 			this.addStyleClass("sapMObjectMarkerIcon");
 		} else {
-			oInnerControl.setIcon(null);
+			oInnerControl.setIcon(null, bSuppressInvalidate);
 			this.removeStyleClass("sapMObjectMarkerIcon");
 		}
 
 		if (this._isTextVisible()) {
-			oInnerControl.setTooltip(null);
-			oInnerControl.setText(sText);
+			oInnerControl.setAggregation("tooltip", null, bSuppressInvalidate);
+			oInnerControl.setText(sText, bSuppressInvalidate);
 			this.addStyleClass("sapMObjectMarkerText");
 		} else {
 			if (oInnerControl.getIcon()) {
-				oInnerControl.setTooltip(sText);
+				oInnerControl.setAggregation("tooltip", sText, bSuppressInvalidate);
 			}
-			oInnerControl.setText(null);
+			oInnerControl.setText(null, bSuppressInvalidate);
 			this.removeStyleClass("sapMObjectMarkerText");
 		}
 
@@ -411,9 +458,9 @@ sap.ui.define(['jquery.sap.global', "sap/ui/core/Control", 'sap/ui/core/Renderer
 			sDeviceType = this._getDeviceType(),
 			bTypeIconVisibility = oType && oType.icon.visibility[sDeviceType] || false;
 
-		return sVisibility === sap.m.ObjectMarkerVisibility.IconOnly ||
-			sVisibility === sap.m.ObjectMarkerVisibility.IconAndText ||
-			(sVisibility !== sap.m.ObjectMarkerVisibility.TextOnly && bTypeIconVisibility);
+		return sVisibility === ObjectMarkerVisibility.IconOnly ||
+			sVisibility === ObjectMarkerVisibility.IconAndText ||
+			(sVisibility !== ObjectMarkerVisibility.TextOnly && bTypeIconVisibility);
 	};
 
 	/**
@@ -428,9 +475,9 @@ sap.ui.define(['jquery.sap.global', "sap/ui/core/Control", 'sap/ui/core/Renderer
 			sDeviceType = this._getDeviceType(),
 			bTypeTextVisibility = oType && oType.text.visibility[sDeviceType] || false;
 
-		return sVisibility === sap.m.ObjectMarkerVisibility.TextOnly ||
-			sVisibility === sap.m.ObjectMarkerVisibility.IconAndText ||
-			(sVisibility !== sap.m.ObjectMarkerVisibility.IconOnly && bTypeTextVisibility);
+		return sVisibility === ObjectMarkerVisibility.TextOnly ||
+			sVisibility === ObjectMarkerVisibility.IconAndText ||
+			(sVisibility !== ObjectMarkerVisibility.IconOnly && bTypeTextVisibility);
 	};
 
 	/**
@@ -445,6 +492,10 @@ sap.ui.define(['jquery.sap.global', "sap/ui/core/Control", 'sap/ui/core/Renderer
 
 	/**
 	 * Returns the inner control.
+	 *
+	 * We don't need to invalidate control here since _getInnerControl is called either in renderer or in attachPress or detachPress
+	 * where the control is invalidated in case if its not from the correct type.
+	 * That's why _adjustControl is called with true in order to suppress invalidation.
 	 * @returns {object} The inner control
 	 * @private
 	 */
@@ -454,7 +505,7 @@ sap.ui.define(['jquery.sap.global', "sap/ui/core/Control", 'sap/ui/core/Renderer
 		if (!oInnerControl && this.getType()) {
 			oInnerControl = this._createInnerControl();
 			this.setAggregation("_innerControl", oInnerControl, true);
-			this._adjustControl();
+			this._adjustControl(true);
 		}
 
 		return oInnerControl;
@@ -502,21 +553,35 @@ sap.ui.define(['jquery.sap.global', "sap/ui/core/Control", 'sap/ui/core/Renderer
 	 */
 	ObjectMarker.prototype._createCustomText = function () {
 		return new CustomText(this.getId() + "-text", {
-			textAlign: sap.ui.core.TextAlign.Initial
+			textAlign: TextAlign.Initial
 		});
 	};
 
+	["getAriaLabelledBy", "addAriaLabelledBy", "removeAriaLabelledBy", "removeAllAriaLabelledBy",
+		"getAriaDescribedBy", "addAriaDescribedBy", "removeAriaDescribedBy", "removeAllAriaDescribedBy",
+		"getAccessibilityInfo"].map(function(sFn) {
+		ObjectMarker.prototype[sFn] = function() {
+			var oInnerControl = this._getInnerControl(),
+				oResult;
+			if (oInnerControl && oInnerControl[sFn]) {
+				oResult = oInnerControl[sFn].apply(oInnerControl, arguments);
+			}
+			return oResult === oInnerControl ? this : oResult;
+		};
+	});
+
 	/****************************************** CUSTOM TEXT CONTROL ****************************************************/
 
-	var CustomTextRenderer = Renderer.extend(sap.m.TextRenderer);
+	var CustomTextRenderer = Renderer.extend(TextRenderer);
 
 	CustomTextRenderer.renderText = function(oRm, oControl) {
 		oRm.renderControl(oControl._getIconAggregation());
-		sap.m.TextRenderer.renderText(oRm, oControl);
+		TextRenderer.renderText(oRm, oControl);
 	};
 
-	var CustomText = sap.m.Text.extend("CustomText", {
+	var CustomText = Text.extend("sap.m.internal.ObjectMarkerCustomText", {
 		metadata: {
+			library: "sap.m",
 			properties: {
 				icon: {type : "sap.ui.core.URI", group : "Data", defaultValue : null}
 			},
@@ -527,39 +592,49 @@ sap.ui.define(['jquery.sap.global', "sap/ui/core/Control", 'sap/ui/core/Renderer
 		renderer: CustomTextRenderer
 	});
 
-	CustomText.prototype.setIcon = function(sIcon) {
+	CustomText.prototype.setIcon = function(sIcon, bSuppressInvalidate) {
 		var oIcon = this._getIconAggregation();
 
-		this.setProperty("icon", sIcon , false);
+		this.setProperty("icon", sIcon , bSuppressInvalidate);
 		oIcon.setSrc(sIcon);
 	};
 
+	/**
+	 * Returns the _iconControl aggregation.
+	 *
+	 * The callers of this function must take care of the rendering, because it does not invalidate the control,
+	 * it creates and sets the aggregation in case it is not already created.
+	 *
+	 * @returns {*} _iconControl aggregation
+	 * @private
+	 */
 	CustomText.prototype._getIconAggregation = function() {
 		var oIcon = this.getAggregation("_iconControl");
 
 		if (!oIcon) {
-			oIcon = new sap.ui.core.Icon();
-			this.setAggregation("_iconControl", oIcon);
+			oIcon = new Icon();
+			this.setAggregation("_iconControl", oIcon, true);
 		}
 
 		return oIcon;
 	};
 
-	CustomText.prototype.setText = function(sText) {
-		this.setProperty("text", sText , true);
+	CustomText.prototype.setText = function(sText, bSuppressInvalidate) {
+		this.setProperty("text", sText , bSuppressInvalidate);
 	};
 
 	/****************************************** CUSTOM LINK CONTROL ****************************************************/
 
-	var CustomLinkRenderer = Renderer.extend(sap.m.LinkRenderer);
+	var CustomLinkRenderer = Renderer.extend(LinkRenderer);
 
 	CustomLinkRenderer.renderText = function(oRm, oControl) {
 		oRm.renderControl(oControl._getIconAggregation());
-		sap.m.LinkRenderer.renderText(oRm, oControl);
+		LinkRenderer.renderText(oRm, oControl);
 	};
 
-	var CustomLink = sap.m.Link.extend("CustomLink", {
+	var CustomLink = Link.extend("sap.m.internal.ObjectMarkerCustomLink", {
 		metadata: {
+			library: "sap.m",
 			properties: {
 				icon: {type : "sap.ui.core.URI", group : "Data", defaultValue : null}
 			},
@@ -571,29 +646,40 @@ sap.ui.define(['jquery.sap.global', "sap/ui/core/Control", 'sap/ui/core/Renderer
 
 	});
 
-	CustomLink.prototype.setIcon = function(sIcon) {
+	CustomLink.prototype.setIcon = function(sIcon, bSuppressInvalidate) {
 		var oIcon = this._getIconAggregation();
 
-		this.setProperty("icon", sIcon , false);
+		this.setProperty("icon", sIcon , bSuppressInvalidate);
 		oIcon.setSrc(sIcon);
 	};
 
+	CustomLink.prototype._getTabindex = function () {
+		return "0";
+	};
+
+	/**
+	 * Returns the _iconControl aggregation.
+	 *
+	 * The callers of this function must take care of the rendering, because it does not invalidate the control,
+	 * it creates and sets the aggregation in case it is not already created.
+	 *
+	 * @returns {*} _iconControl aggregation
+	 * @private
+	 */
 	CustomLink.prototype._getIconAggregation = function() {
 		var oIcon = this.getAggregation("_iconControl");
 
 		if (!oIcon) {
-			oIcon = new sap.ui.core.Icon();
-			this.setAggregation("_iconControl", oIcon);
+			oIcon = new Icon();
+			this.setAggregation("_iconControl", oIcon, true);
 		}
 
 		return oIcon;
 	};
 
-	CustomLink.prototype.setText = function(sText){
-		this.setProperty("text", sText, true);
+	CustomLink.prototype.setText = function(sText, bSuppressInvalidate){
+		this.setProperty("text", sText, bSuppressInvalidate);
 	};
 
-
 	return ObjectMarker;
-
-}, /* bExport= */ true);
+});

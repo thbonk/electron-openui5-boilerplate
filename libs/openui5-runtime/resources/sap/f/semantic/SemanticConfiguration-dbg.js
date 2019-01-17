@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -8,13 +8,11 @@
 * Provides a private class <code>sap.f.semantic.SemanticConfiguration</code>.
 */
 sap.ui.define([
-	"jquery.sap.global",
 	"sap/ui/base/Metadata",
 	"sap/ui/core/IconPool",
 	"sap/m/library",
 	"sap/m/OverflowToolbarLayoutData"
-], function(jQuery,
-			Metadata,
+], function(Metadata,
 			IconPool,
 			mobileLibrary,
 			OverflowToolbarLayoutData) {
@@ -32,7 +30,7 @@ sap.ui.define([
 	* @class
 	* Defines the visual properties and placement for each supported semantic type.
 	*
-	* @version 1.50.6
+	* @version 1.61.2
 	* @private
 	* @since 1.46.0
 	* @alias sap.f.semantic.SemanticConfiguration
@@ -265,9 +263,10 @@ sap.ui.define([
 			}
 		};
 
+		// Title Semantic Icon navigation Actions
 		oTypeConfigs["sap.f.semantic.FullScreenAction"] = {
 			placement: SemanticConfiguration._Placement.titleIcon,
-			order: 3,
+			order: 0,
 			constraints: "IconOnly",
 			navigation : true,
 			getSettings: function() {
@@ -284,7 +283,7 @@ sap.ui.define([
 
 		oTypeConfigs["sap.f.semantic.ExitFullScreenAction"] = {
 			placement: SemanticConfiguration._Placement.titleIcon,
-			order: 4,
+			order: 1,
 			constraints: "IconOnly",
 			navigation : true,
 			getSettings: function() {
@@ -301,7 +300,7 @@ sap.ui.define([
 
 		oTypeConfigs["sap.f.semantic.CloseAction"] = {
 			placement: SemanticConfiguration._Placement.titleIcon,
-			order: 5,
+			order: 2,
 			constraints: "IconOnly",
 			navigation : true,
 			getSettings: function() {

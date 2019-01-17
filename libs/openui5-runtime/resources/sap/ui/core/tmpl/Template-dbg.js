@@ -1,12 +1,30 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides base class sap.ui.core.tmpl.Template for all templates
-sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/base/BindingParser', 'sap/ui/core/Control', 'sap/ui/core/RenderManager', 'jquery.sap.sjax'],
-	function(jQuery, ManagedObject, BindingParser, Control, RenderManager /*, jQuerySap1 */) {
+sap.ui.define([
+	'sap/ui/base/ManagedObject',
+	'sap/ui/base/BindingParser',
+	'sap/ui/core/Control',
+	'sap/ui/core/RenderManager',
+	'sap/base/util/ObjectPath',
+	'sap/base/Log',
+	'sap/base/assert',
+	'sap/ui/thirdparty/jquery'
+],
+function(
+	ManagedObject,
+	BindingParser,
+	Control,
+	RenderManager,
+	ObjectPath,
+	Log,
+	assert,
+	jQuery
+) {
 	"use strict";
 
 
@@ -30,9 +48,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/base/Bi
 	 * @extends sap.ui.base.ManagedObject
 	 * @abstract
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @alias sap.ui.core.tmpl.Template
 	 * @since 1.15
+	 * @deprecated since 1.56, use an {@link sap.ui.core.mvc.XMLView XMLView} or {@link sap.ui.core.mvc.JSView JSView} instead.
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var Template = ManagedObject.extend("sap.ui.core.tmpl.Template", /** @lends sap.ui.core.tmpl.Template.prototype */
@@ -76,7 +95,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/base/Bi
 
 		if ( oOldTemplate && this !== oOldTemplate ) {
 			sMsg = "adding template with duplicate id '" + sId + "'";
-			jQuery.sap.log.error(sMsg);
+			Log.error(sMsg);
 			throw new Error("Error: " + sMsg);
 		}
 
@@ -210,7 +229,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/base/Bi
 	 */
 	Template.prototype.declareControl = function(sControl) {
 
-		jQuery.sap.assert(!!sControl, "A fully qualified name must be specified!");
+		assert(!!sControl, "A fully qualified name must be specified!");
 
 		if (sControl) {
 
@@ -240,7 +259,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/base/Bi
 			});
 
 			// returns the constructor function
-			return jQuery.sap.getObject(sControl);
+			return ObjectPath.get(sControl || "");
 
 		}
 
@@ -301,7 +320,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/base/Bi
 		if (!(oRef instanceof Control) && bInline) {
 
 			// lookup the DOM element in which to place the template
-			var $this = typeof oRef === "string" ? jQuery.sap.byId(oRef) : jQuery(oRef);
+			var $this = typeof oRef === "string" ? jQuery(document.getElementById(oRef)) : jQuery(oRef);
 
 			// the DOM element must exist
 			if ($this.length > 0) {
@@ -344,7 +363,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/base/Bi
 	 * @abstract
 	 */
 	Template.prototype.createMetadata = function() {
-		jQuery.sap.log.error("The function createMetadata is an abstract function which needs to be implemented by subclasses.");
+		Log.error("The function createMetadata is an abstract function which needs to be implemented by subclasses.");
 	};
 
 
@@ -356,7 +375,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/base/Bi
 	 * @abstract
 	 */
 	Template.prototype.createRenderer = function() {
-		jQuery.sap.log.error("The function createRenderer is an abstract function which needs to be implemented by subclasses.");
+		Log.error("The function createRenderer is an abstract function which needs to be implemented by subclasses.");
 	};
 
 
@@ -420,15 +439,25 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/base/Bi
 	 * @param {string} oTemplate.id - the ID of the Template / the ID  of the DOM element containing the source of the Template</li>
 	 * @param {Element} oTemplate.domref - the DOM element containing the source of the Template</li>
 	 * @param {string} [oTemplate.type] - the type of the Template</li>
+	 * @param {object} [oTemplate.context] the context for the renderer/templating
 	 * @param {string} [oTemplate.src] - the URL to lookup the template</li> (<i>experimental!</i>)
 	 * @param {string} oTemplate.control - the fully qualified name of the control to declare</li> (<i>experimental!</i>)
 	 * @return {sap.ui.core.tmpl.Template | sap.ui.core.tmpl.Template[]} the created Template instance
 	 *         or in case of usage without parameters any array of templates is returned
-	 *
+	 * @deprecated since 1.56, use an {@link sap.ui.core.mvc.XMLView XMLView} or {@link sap.ui.core.mvc.JSView JSView} instead.
 	 * @public
 	 * @static
 	 */
 	sap.ui.template = function(oTemplate) {
+
+		var fnLogDeprecation = function(sName) {
+			Log.warning("The usage of Template Views is deprecated since 1.56. Please make use of the asynchronous create functions of the different view classes, e.g. XMLView.create()","Deprecation", null, function() {
+				return {
+					type: "sap.ui.template",
+					name: sName
+				};
+			});
+		};
 
 		// when no oTemplate is defined we need to lookup the elements in the document
 		// and retrieve elements which have a type attribute which contains a value
@@ -469,7 +498,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/base/Bi
 				type: Template.DEFAULT_TEMPLATE
 			}, oTemplate);
 
-			// in case of specifiying a src attribute for the configuration object
+			fnLogDeprecation(oTemplate.id);
+
+			// in case of specifying a src attribute for the configuration object
 			// we load the template from a remote resource
 			var sId, sType, sControl, sContent, sController = false,
 				bLoadTemplate = typeof oTemplate.src === "string",
@@ -477,37 +508,38 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/base/Bi
 			if (bLoadTemplate) {
 
 				// load the template from the specified URL
-				var oResponse = jQuery.sap.sjax({
-					url : oTemplate.src,
-					dataType: "text"
-				});
+				jQuery.ajax({
+					url: oTemplate.src,
+					dataType: "text",
+					async: false,
+					success: function(data) {
+						// apply the content as template content
+						// set the id, type and control if defined in the object
+						sId = oTemplate.id;
+						sType = oTemplate.type;
+						sControl = oTemplate.control;
+						sContent = data;
 
-				// apply the content as template content
-				// set the id, type and control if defined in the object
-				if (oResponse.success) {
-					sId = oTemplate.id;
-					sType = oTemplate.type;
-					sControl = oTemplate.control;
-					sContent = oResponse.data;
-
-					//Check for inline template information
-					var rTmplInfo = /^<!--\sUI5:Template\stype=([a-z\/\-]*)\s(?:controller=([A-Za-z.]*)\s)?-->/,
-						aTmplInfo = sContent.match(rTmplInfo);
-					if (aTmplInfo) {
-						sType = aTmplInfo[1];
-						if (aTmplInfo.length == 3) {
-							sController = aTmplInfo[2];
+						//Check for inline template information
+						var rTmplInfo = /^<!--\sUI5:Template\stype=([a-z\/\-]*)\s(?:controller=([A-Za-z.]*)\s)?-->/,
+							aTmplInfo = sContent.match(rTmplInfo);
+						if (aTmplInfo) {
+							sType = aTmplInfo[1];
+							if (aTmplInfo.length == 3) {
+								sController = aTmplInfo[2];
+							}
+							sContent = sContent.substr(aTmplInfo[0].length);
 						}
-						sContent = sContent.substr(aTmplInfo[0].length);
+					},
+					error: function() {
+						throw new Error("The template could not be loaded from " + oTemplate.src + "!");
 					}
-				} else {
-					throw new Error("The template could not be loaded from " + oTemplate.src + "!");
-				}
+				});
 
 			} else {
 
 				// retrieve the required properties
-				var oElement = oTemplate.domref || jQuery.sap.domById(oTemplate.id),
+				var oElement = oTemplate.domref || ((oTemplate.id ? window.document.getElementById(oTemplate.id) : null)),
 					$element = jQuery(oElement);
 
 				bInline = false;
@@ -560,11 +592,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/base/Bi
 			}
 
 			// require and instantiate the proper template
-			jQuery.sap.require(sClass);
-			var oClass = jQuery.sap.getObject(sClass);
+			var fnClass = sap.ui.requireSync(sClass.replace(/\./g, "/"));
+			fnClass = fnClass || ObjectPath.get(sClass || "");
 
 			// create a new instance of the template
-			var oInstance = new oClass({
+			var oInstance = new fnClass({
 				id: sId,
 				content: sContent
 			});

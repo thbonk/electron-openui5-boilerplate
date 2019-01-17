@@ -1,12 +1,17 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides the implementation for a Message
-sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
-	function(jQuery, Object, MessageProcessor) {
+sap.ui.define([
+	'sap/ui/base/Object',
+	'./MessageProcessor',
+	"sap/base/util/uid",
+	"sap/base/Log"
+],
+	function(Object, MessageProcessor, uid, Log) {
 	"use strict";
 
 	/**
@@ -22,22 +27,20 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	 * @extends sap.ui.base.Object
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
-	 * @constructor
-	 *
-	 * @param {object} [mParameters] (optional) a map which contains the following parameter properties:
-	 * @param {string} [mParameters.id] The message id: will be defaulted if no id is set
+	 * @param {object} [mParameters] a map which contains the following parameter properties:
+	 * @param {string} [mParameters.id] The message id: will be generated if no id is set
 	 * @param {string} [mParameters.message] The message text
 	 * @param {string} [mParameters.description] The message description
 	 * @param {string} [mParameters.descriptionUrl] The message description url to get a more detailed message
 	 * @param {string} [mParameters.additionalText] The message additionalText
-	 * @param {sap.ui.core.MessageType} [mParameters.type] The message type
+	 * @param {sap.ui.core.MessageType} [mParameters.type=sap.ui.core.MessageType.None] The message type
 	 * @param {string} [mParameters.code] The message code
 	 * @param {boolean} [mParameters.technical=false] If the message is set as technical message
 	 * @param {sap.ui.core.message.MessageProcessor} [mParameters.processor]
-	 * @param {string} [mParameters.target] The message target: The syntax MessageProcessor dependent. Read the documentation of the respective MessageProcessor.
-	 * @param {boolean} [mParameters.persistent] Sets message persistent: If persistent is set <code>true</code> the message lifecycle is controlled by the application
+	 * @param {string} [mParameters.target] The message target: The syntax is MessageProcessor dependent. Read the documentation of the respective MessageProcessor.
+	 * @param {boolean} [mParameters.persistent=false] Sets message persistent: If persistent is set <code>true</code> the message lifecycle is controlled by the application
 	 * @param {int} [mParameters.date=Date.now()] Sets message date which can be used to remove old messages. Number of milliseconds elapsed since 1 January 1970 00:00:00 UTC
 	 *
 	 * @public
@@ -47,13 +50,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 
 		constructor : function (mParameters) {
 			Object.apply(this, arguments);
+			mParameters = mParameters || {};
 
-			this.id = mParameters.id ? mParameters.id : jQuery.sap.uid();
+			this.id = mParameters.id ? mParameters.id : uid();
 			this.message = mParameters.message;
 			this.description = mParameters.description;
 			this.descriptionUrl = mParameters.descriptionUrl;
 			this.additionalText = mParameters.additionalText;
-			this.setType(mParameters.type);
+			this.setType(mParameters.type || sap.ui.core.MessageType.None);
 			this.code = mParameters.code;
 			this.target = mParameters.target;
 			this.processor = mParameters.processor;
@@ -62,6 +66,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 			this.references = mParameters.references || {};
 			this.validation = !!mParameters.validation;
 			this.date = mParameters.date || Date.now();
+			this.controlIds = [];
 		}
 	});
 
@@ -93,6 +98,64 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	 */
 	Message.prototype.getMessage = function() {
 		return this.message;
+	};
+
+	/**
+	 * Returns the control ID if set.
+	 *
+	 * NOTE: The control ID is only set for Controls based on <code>sap.m.InputBase</code>
+	 * The Control must be bound to a Model so the Message could be propagated to this Control.
+	 * The propagation happens only if the Control is created and visible on the screen.
+	 * Is this the case the control ID is set.
+	 * The ID is not set in all other cases and cannot be set manually.
+	 *
+	 * If a Message is propagated to multiple Controls bound to the same target the last Control wins.
+	 *
+	 * @returns {string} sControlId
+	 * @public
+	 */
+	Message.prototype.getControlId = function() {
+		return this.controlIds[this.controlIds.length - 1];
+	};
+
+	/**
+	 * Add a control id
+	 *
+	 * @param {string} sControlId The control id to add; An id gets added only once
+	 * @private
+	 */
+	Message.prototype.addControlId = function(sControlId) {
+		if (this.controlIds.indexOf(sControlId) == -1) {
+			this.controlIds.push(sControlId);
+		}
+	};
+
+	/**
+	 * Remove a control id
+	 *
+	 * @param {string} sControlId The control id to remove
+	 * @private
+	 */
+	Message.prototype.removeControlId = function(sControlId) {
+		var iIndex = this.controlIds.indexOf(sControlId);
+		if (iIndex != -1) {
+			this.controlIds.splice(iIndex, 1);
+		}
+	};
+
+	/**
+	 * Returns an array of control IDs.
+	 *
+	 * NOTE: The control ID is only set for Controls based on <code>sap.m.InputBase</code>.
+	 * The Control must be bound to a Model so the Message could be propagated to this Control.
+	 * The propagation happens only if the Control is created and visible on the screen.
+	 * The ID is not set in all other cases and cannot be set manually.
+	 *
+	 * @returns {array} aControlIds
+	 * @public
+	 */
+	Message.prototype.getControlIds = function() {
+		return this.controlIds;
 	};
 
 	/**
@@ -148,7 +211,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	/**
 	 * Set message description URL which should be used to download the description content
 	 *
-	 * @param {string} sDescription The URL pointing to the description long text
+	 * @param {string} sDescriptionUrl The URL pointing to the description long text
 	 * @public
 	 */
 	Message.prototype.setDescriptionUrl = function(sDescriptionUrl) {
@@ -165,7 +228,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 		if (sType in sap.ui.core.MessageType) {
 			this.type = sType;
 		} else {
-			jQuery.sap.log.error("MessageType must be of type sap.ui.core.MessageType");
+			Log.error("MessageType must be of type sap.ui.core.MessageType");
 		}
 	};
 
@@ -180,7 +243,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	};
 
 	/**
-	 * Set message target: The syntax MessageProcessor dependent. See the documentation of the
+	 * Set message target: The syntax is MessageProcessor dependent. See the documentation of the
 	 * respective MessageProcessor.
 	 *
 	 * @param {string} sTarget The Message target
@@ -210,7 +273,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 		if (oMessageProcessor instanceof MessageProcessor) {
 			this.processor = oMessageProcessor;
 		} else {
-			jQuery.sap.log.error("MessageProcessor must be an instance of sap.ui.core.message.MessageProcessor");
+			Log.error("MessageProcessor must be an instance of sap.ui.core.message.MessageProcessor");
 		}
 	};
 
@@ -306,10 +369,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 		if (sId in this.references) {
 			if (!sProperty) {
 				delete this.references[sId];
-			} else {
-				if (this.references[sId].properties[sProperty]) {
-					delete this.references[sId].properties[sProperty];
-				}
+			} else if (this.references[sId].properties[sProperty]) {
+				delete this.references[sId].properties[sProperty];
 			}
 		}
 	};

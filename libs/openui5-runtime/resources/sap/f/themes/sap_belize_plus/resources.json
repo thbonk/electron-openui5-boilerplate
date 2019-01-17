@@ -11,6 +11,16 @@
 			"theme": "sap_belize_plus"
 		},
 		{
+			"name": "Card.less",
+			"designtime": true,
+			"theme": "sap_belize_plus"
+		},
+		{
+			"name": "DynamicPage.less",
+			"designtime": true,
+			"theme": "sap_belize_plus"
+		},
+		{
 			"name": "DynamicPageHeader.less",
 			"designtime": true,
 			"theme": "sap_belize_plus"

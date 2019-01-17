@@ -1,11 +1,27 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './InputBase', './library', 'sap/ui/core/InvisibleText'],
-	function(jQuery, InputBase, library, InvisibleText) {
+sap.ui.define([
+	'./InputBase',
+	'./library',
+	'sap/ui/core/InvisibleText',
+	'sap/ui/core/library',
+	'sap/ui/Device',
+	'sap/ui/core/LabelEnablement',
+	"./ComboBoxTextFieldRenderer"
+],
+	function(
+		InputBase,
+		library,
+		InvisibleText,
+		coreLibrary,
+		Device,
+		LabelEnablement,
+		ComboBoxTextFieldRenderer
+	) {
 		"use strict";
 
 		/**
@@ -19,7 +35,7 @@ sap.ui.define(['jquery.sap.global', './InputBase', './library', 'sap/ui/core/Inv
 		 * @extends sap.m.InputBase
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.61.2
 		 *
 		 * @constructor
 		 * @public
@@ -57,34 +73,46 @@ sap.ui.define(['jquery.sap.global', './InputBase', './library', 'sap/ui/core/Inv
 			}
 		});
 
-		ComboBoxTextField.prototype.init = function() {
+		ComboBoxTextField.prototype.init = function () {
 			InputBase.prototype.init.apply(this, arguments);
-			var oRb, oArrowDownInvisibleLabel;
+			var oRb = sap.ui.getCore().getLibraryResourceBundle("sap.m");
 
-			if (sap.ui.getCore().getConfiguration().getAccessibility()) {
-				oRb = sap.ui.getCore().getLibraryResourceBundle("sap.m");
-				oArrowDownInvisibleLabel = new InvisibleText({
-					text: oRb.getText("COMBOBOX_BUTTON")
-				});
+			var oIcon = this.addEndIcon({
+				id: this.getId() + "-arrow",
+				src: "sap-icon://slim-arrow-down",
+				noTabStop: true,
+				alt: oRb.getText("COMBOBOX_BUTTON"),
+				decorative: false
+			});
 
-				this.setAggregation("_buttonLabelText", oArrowDownInvisibleLabel, true);
-			}
+			oIcon.addAriaLabelledBy("");
 		};
 
-		ComboBoxTextField.prototype.updateValueStateClasses = function(sValueState, sOldValueState) {
-			InputBase.prototype.updateValueStateClasses.apply(this, arguments);
+		/**
+		 * Returns the arrow icon
+		 * @returns {sap.ui.core.Icon} Icon
+		 * @protected
+		 */
+		ComboBoxTextField.prototype.getIcon = function () {
+			return this.getAggregation("_endIcon")[0];
+		};
 
-			var mValueState = sap.ui.core.ValueState,
-				CSS_CLASS = this.getRenderer().CSS_CLASS_COMBOBOXTEXTFIELD,
-				$DomRef = this.$();
+		ComboBoxTextField.prototype.onBeforeRendering = function () {
+			InputBase.prototype.onBeforeRendering.apply(this, arguments);
 
-			if (sOldValueState !== mValueState.None) {
-				$DomRef.removeClass(CSS_CLASS + "State " + CSS_CLASS + sOldValueState);
-			}
+			var aReferencingLabels = LabelEnablement.getReferencingLabels(this) || [];
 
-			if (sValueState !== mValueState.None) {
-				$DomRef.addClass(CSS_CLASS + "State " + CSS_CLASS + sValueState);
-			}
+			aReferencingLabels.forEach(function (sLabelId) {
+				if (this.getIcon().getAriaLabelledBy().indexOf(sLabelId) === -1) {
+					this.getIcon().addAssociation("ariaLabelledBy", sLabelId, true);
+				}
+			}, this);
+		};
+
+		ComboBoxTextField.prototype.setShowButton = function(bShowButton) {
+			this.getIcon().setVisible(bShowButton);
+
+			return this.setProperty("showButton", bShowButton, true);
 		};
 
 		/**
@@ -93,19 +121,9 @@ sap.ui.define(['jquery.sap.global', './InputBase', './library', 'sap/ui/core/Inv
 		 * @returns {Element | null} The element that is used as trigger to open the control's picker popup.
 		 */
 		ComboBoxTextField.prototype.getOpenArea = function() {
-			return this.getDomRef("arrow");
+			return this.getIcon().getDomRef();
 		};
 
-		/**
-		 * Checks whether the provided element is the open area.
-		 *
-		 * @param {Element} oDomRef
-		 * @returns {boolean}
-		 */
-		ComboBoxTextField.prototype.isOpenArea = function(oDomRef) {
-			var oOpenAreaDomRef = this.getOpenArea();
-			return oOpenAreaDomRef && oOpenAreaDomRef.contains(oDomRef);
-		};
 
 		/**
 		 * Handles the <code>sapenter</code> event when enter key is pressed.
@@ -131,14 +149,6 @@ sap.ui.define(['jquery.sap.global', './InputBase', './library', 'sap/ui/core/Inv
 			// deselect text
 			this.selectText(iValueLength, iValueLength);
 		};
-
-		/**
-		 * Indicates whether the custom placeholder is used.
-		 *
-		 * IE9 does not have a native placeholder support.
-		 * IE10+ fires the input event when an input field with a native placeholder is focused.
-		 */
-		ComboBoxTextField.prototype.bShowLabelAsPlaceholder = sap.ui.Device.browser.msie;
 
 		/* =========================================================== */
 		/* API methods                                                 */
@@ -182,4 +192,4 @@ sap.ui.define(['jquery.sap.global', './InputBase', './library', 'sap/ui/core/Inv
 		};
 
 		return ComboBoxTextField;
-	}, true);
+	});

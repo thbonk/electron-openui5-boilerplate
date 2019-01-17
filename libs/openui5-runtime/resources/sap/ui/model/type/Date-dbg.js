@@ -1,12 +1,26 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides the base implementation for all model implementations
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/format/DateFormat', 'sap/ui/model/SimpleType', 'sap/ui/model/FormatException', 'sap/ui/model/ParseException', 'sap/ui/model/ValidateException'],
-	function(jQuery, DateFormat, SimpleType, FormatException, ParseException, ValidateException) {
+sap.ui.define([
+	'sap/ui/core/format/DateFormat',
+	'sap/ui/model/SimpleType',
+	'sap/ui/model/FormatException',
+	'sap/ui/model/ParseException',
+	'sap/ui/model/ValidateException',
+	"sap/ui/thirdparty/jquery"
+],
+	function(
+		DateFormat,
+		SimpleType,
+		FormatException,
+		ParseException,
+		ValidateException,
+		jQuery
+	) {
 	"use strict";
 
 
@@ -19,9 +33,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/format/DateFormat', 'sap/ui/mod
 	 * @extends sap.ui.model.SimpleType
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
-	 * @constructor
 	 * @public
 	 * @param {object} [oFormatOptions] Formatting options. For a list of all available options, see {@link sap.ui.core.format.DateFormat.getDateInstance DateFormat}.
 	 * @param {object} [oFormatOptions.source] Additional set of options used to create a second <code>DateFormat</code> object for conversions between
@@ -98,6 +111,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/format/DateFormat', 'sap/ui/mod
 				aViolatedConstraints = [],
 				aMessages = [],
 				oInputFormat = this.oInputFormat,
+				sContent,
 				that = this;
 
 			// convert date into date object to compare
@@ -109,22 +123,25 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/format/DateFormat', 'sap/ui/mod
 				if (oInputFormat) {
 					oContent = oInputFormat.parse(oContent);
 				}
+				sContent = that.oOutputFormat.format(oContent);
+
 				switch (sName) {
 					case "minimum":
 						if (oValue < oContent) {
 							aViolatedConstraints.push("minimum");
-							aMessages.push(oBundle.getText(that.sName + ".Minimum", [oContent]));
+							aMessages.push(oBundle.getText(that.sName + ".Minimum", [sContent]));
 						}
 						break;
 					case "maximum":
 						if (oValue > oContent) {
 							aViolatedConstraints.push("maximum");
-							aMessages.push(oBundle.getText(that.sName + ".Maximum", [oContent]));
+							aMessages.push(oBundle.getText(that.sName + ".Maximum", [sContent]));
 						}
+						break;
 				}
 			});
 			if (aViolatedConstraints.length > 0) {
-				throw new ValidateException(aMessages.join(" "), aViolatedConstraints);
+				throw new ValidateException(this.combineMessages(aMessages), aViolatedConstraints);
 			}
 		}
 	};
@@ -141,7 +158,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/format/DateFormat', 'sap/ui/mod
 				if (isNaN(oValue)) {
 					throw new FormatException("Cannot format date: " + oValue + " is not a valid Timestamp");
 				} else {
-					oValue = parseInt(oValue, 10);
+					oValue = parseInt(oValue);
 				}
 			}
 			oValue = new Date(oValue);

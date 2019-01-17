@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 sap.ui.define([
@@ -14,7 +14,7 @@ sap.ui.define([
 	 * @class
 	 * @extends sap.ui.rta.command.FlexCommand
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @constructor
 	 * @private
 	 * @since 1.44
@@ -36,11 +36,20 @@ sap.ui.define([
 				bindingString : {
 					type : "string"
 				},
+				entityType : {
+					type : "string"
+				},
 				parentId : {
 					type : "string"
 				},
 				oDataServiceVersion : {
 					type : "string"
+				},
+				oDataServiceUri: {
+					type: "string"
+				},
+				propertyName: {
+					type: "string"
 				}
 			}
 		}
@@ -49,12 +58,17 @@ sap.ui.define([
 	AddODataProperty.prototype._getChangeSpecificData = function() {
 		// general format
 		return {
-			changeType : this.getChangeType(),
-			index : this.getIndex(),
-			newControlId : this.getNewControlId(),
-			bindingPath : this.getBindingString(),
-			parentId : this.getParentId(),
-			oDataServiceVersion : this.getODataServiceVersion()
+			changeType: this.getChangeType(),
+			index: this.getIndex(),
+			newControlId: this.getNewControlId(),
+			bindingPath: this.getBindingString(),
+			parentId: this.getParentId(),
+			oDataServiceVersion: this.getODataServiceVersion(),
+			oDataInformation: {
+				oDataServiceUri: this.getODataServiceUri(),
+				propertyName: this.getPropertyName(),
+				entityType: this.getEntityType()
+			}
 		};
 	};
 

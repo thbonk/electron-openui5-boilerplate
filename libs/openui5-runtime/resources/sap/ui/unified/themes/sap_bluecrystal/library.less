@@ -2,7 +2,7 @@
 
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -94,7 +94,7 @@ html.sap-desktop .sapUiCalHead > .sapUiCalHeadB:active{
 }
 
 /* hover and focus makes only sense on desktops. On mobile devices it's not needed */
-html.sap-desktop .sapUiCalItem:hover{
+html.sap-desktop .sapUiCalItem:not(.sapUiCalItemSel) .sapUiCalItemText:hover{
 	background-color: darken(@sapUiContentForegroundColor,5);
 }
 
@@ -119,7 +119,7 @@ html.sap-desktop .sapUiCalYearPicker .sapUiCalItemSel:focus{
 html[data-sap-ui-browser^="ie"].sap-desktop,
 html[data-sap-ui-browser^="ed"].sap-desktop {
 	// do this only for the Planing Calendar
-	.sapMPlanCal .sapUiCalItem:focus {
+	.sapMPlanCal :not(.sapUiCalFirstWDay).sapUiCalItem:focus {
 		overflow: hidden;
 	}
 
@@ -156,8 +156,8 @@ html[data-sap-ui-browser^="ed"].sap-desktop {
 	}
 }
 
-html.sap-desktop .sapUiCalItemWeekEnd:hover,
-html.sap-desktop .sapUiCalItemWeekEnd:focus {
+html.sap-desktop .sapUiCalItemWeekEnd:not(.sapUiCalItemSel) .sapUiCalItemText:hover,
+html.sap-desktop .sapUiCalItemWeekEnd:not(.sapUiCalItemSel) .sapUiCalItemText:focus {
 	background-color: darken(@sapUiContentForegroundColor,10);
 }
 
@@ -168,11 +168,6 @@ html.sap-desktop .sapUiCalItemWeekEnd:focus {
 .sapUiCalItemOtherMonth {
 	background-color: transparent;
 	color: lighten(@sapUiBaseText, 50);
-}
-
-html.sap-desktop .sapUiCalItemOtherMonth:hover,
-html.sap-desktop .sapUiCalItemOtherMonth:focus {
-	background-color: darken(@sapUiListBackground , 10);
 }
 
 .sapUiCalItemSel {
@@ -575,27 +570,16 @@ html.sap-desktop .sapUiCalendarApp.sapUiCalendarAppSel:hover:not(:active)  > .sa
 	border-left-color: @sapUiListBackground;
 }
 
-.sapUiCalendarApp.sapUiCalendarAppSel.sapUiCalendarAppWithIcon > .sapUiCalendarAppCont > .sapUiCalendarAppIcon,
-.sapUiCalendarApp.sapUiCalendarAppWithIcon:active > .sapUiCalendarAppCont > .sapUiCalendarAppIcon,
-.sapUiCalendarApp.sapUiCalendarAppWithIcon.sapUiCalendarAppSel:active > .sapUiCalendarAppCont > .sapUiCalendarAppIcon{
-	left: 0.3125rem;
-}
-
-.sapUiCalendarApp.sapUiCalendarAppSel.sapUiCalendarAppWithIcon > .sapUiCalendarAppCont > .sapUiCalendarAppTitle,
-.sapUiCalendarApp.sapUiCalendarAppSel.sapUiCalendarAppWithIcon > .sapUiCalendarAppCont > .sapUiCalendarAppText,
-.sapUiCalendarApp.sapUiCalendarAppWithIcon:active > .sapUiCalendarAppCont > .sapUiCalendarAppTitle,
-.sapUiCalendarApp.sapUiCalendarAppWithIcon:active > .sapUiCalendarAppCont > .sapUiCalendarAppText,
-.sapUiCalendarApp.sapUiCalendarAppWithIcon.sapUiCalendarAppSel:active > .sapUiCalendarAppCont > .sapUiCalendarAppTitle,
-.sapUiCalendarApp.sapUiCalendarAppWithIcon.sapUiCalendarAppSel:active > .sapUiCalendarAppCont > .sapUiCalendarAppText{
-	padding-left: 1.6875rem;
-}
-
 .sapUiCalendarApp.sapUiCalendarAppSel > .sapUiCalendarAppCont > .sapUiCalendarAppIcon,
-.sapUiCalendarApp.sapUiCalendarAppSel > .sapUiCalendarAppCont > .sapUiCalendarAppTitle,
-.sapUiCalendarApp.sapUiCalendarAppSel > .sapUiCalendarAppCont > .sapUiCalendarAppText,
+.sapUiCalendarApp.sapUiCalendarAppSel > .sapUiCalendarAppCont > .sapUiCalendarAppArrowIconLeft,
+.sapUiCalendarApp.sapUiCalendarAppSel > .sapUiCalendarAppCont > .sapUiCalendarAppArrowIconRight,
+.sapUiCalendarApp.sapUiCalendarAppSel > .sapUiCalendarAppCont .sapUiCalendarAppTitle,
+.sapUiCalendarApp.sapUiCalendarAppSel > .sapUiCalendarAppCont .sapUiCalendarAppText,
 .sapUiCalendarApp:active > .sapUiCalendarAppCont > .sapUiCalendarAppIcon,
-.sapUiCalendarApp:active > .sapUiCalendarAppCont > .sapUiCalendarAppTitle,
-.sapUiCalendarApp:active > .sapUiCalendarAppCont > .sapUiCalendarAppText{
+.sapUiCalendarApp:active > .sapUiCalendarAppCont .sapUiCalendarAppTitle,
+.sapUiCalendarApp:active > .sapUiCalendarAppCont .sapUiCalendarAppText,
+.sapUiCalendarApp:active > .sapUiCalendarAppCont > .sapUiCalendarAppArrowIconLeft,
+.sapUiCalendarApp:active > .sapUiCalendarAppCont > .sapUiCalendarAppArrowIconRight {
 	color: @sapUiListActiveTextColor;
 }
 

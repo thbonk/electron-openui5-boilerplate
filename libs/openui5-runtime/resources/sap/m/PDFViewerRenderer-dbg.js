@@ -1,25 +1,72 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define([
-	"sap/m/PDFViewer"
-	],
+ /* global ActiveXObject:false */
 
-	function (PDFViewer) {
+sap.ui.define(['sap/ui/Device'],
+	function (Device) {
 		"use strict";
 
 		function shouldShowToolbar(oControl) {
-			return (!!oControl.getTitle() || oControl.getShowDownloadButton()) && !oControl._bIsPopupOpen;
+			return (!!oControl.getTitle() || oControl._isDisplayDownloadButton()) && !oControl._bIsPopupOpen;
 		}
+
+		var aAllowedMimeTypes = Object.freeze([
+			"application/pdf",
+			"application/x-google-chrome-pdf"
+		]);
 
 		/**
 		 * Pdf viewer renderer.
 		 * @namespace
 		 */
 		var PDFViewerRenderer = {};
+
+		/**
+		 * Check whether Mime type is supported
+		 * @private
+		 */
+		PDFViewerRenderer._isSupportedMimeType = function (sMimeType) {
+			var iFoundIndex = aAllowedMimeTypes.indexOf(sMimeType);
+			return iFoundIndex > -1;
+		};
+
+		/**
+		 * @returns {boolean}
+		 * @private
+		 */
+		PDFViewerRenderer._isPdfPluginEnabled = function () {
+			var bIsEnabled = true;
+			if (Device.browser.firefox) {
+				// https://bugzilla.mozilla.org/show_bug.cgi?id=1293406
+				// mimeType is missing for firefox even though it is enabled
+				return bIsEnabled;
+			}
+
+			if (Device.browser.internet_explorer) {
+				// hacky code how to recognize that pdf plugin is installed and enabled
+				try {
+					/* eslint-disable no-new */
+					new ActiveXObject("AcroPDF.PDF");
+					/* eslint-enable no-new */
+				} catch (e) {
+					bIsEnabled = false;
+				}
+
+				return bIsEnabled;
+			}
+
+			var aMimeTypes = navigator.mimeTypes;
+			bIsEnabled = aAllowedMimeTypes.some(function (sAllowedMimeType) {
+				var oMimeTypeItem = aMimeTypes.namedItem(sAllowedMimeType);
+				return oMimeTypeItem !== null;
+			});
+
+			return bIsEnabled;
+		};
 
 		/**
 		 * Renders the HTML for the given control, using the provided
@@ -45,7 +92,7 @@ sap.ui.define([
 				oRm.renderControl(oControl._objectsRegister.getOverflowToolbarControl());
 			}
 
-			if (oControl._isSourceValidToDisplay() && oControl._isEmbeddedModeAllowed() && PDFViewer._isPdfPluginEnabled()) {
+			if (oControl._isEmbeddedModeAllowed()) {
 				this.renderPdfContent(oRm, oControl);
 			}
 
@@ -70,6 +117,10 @@ sap.ui.define([
 				oRm.write("</iframe>");
 			} else {
 				this.renderErrorContent(oRm, oControl);
+				if (!PDFViewerRenderer._isPdfPluginEnabled()) {
+					jQuery.sap.log.warning("The PDF plug-in is not available on this device.");
+					oControl.fireEvent("error", {}, true);
+				}
 			}
 		};
 

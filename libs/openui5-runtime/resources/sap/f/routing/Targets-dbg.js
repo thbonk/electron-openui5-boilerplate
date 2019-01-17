@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 sap.ui.define(['sap/ui/core/routing/Targets', './TargetHandler', './Target', './async/Targets'],
@@ -248,7 +248,7 @@ sap.ui.define(['sap/ui/core/routing/Targets', './TargetHandler', './Target', './
 		 *
 		 * @param {int} [oOptions.targets.anyName.viewLevel]
 		 * If you are having an application that has a logical order of views (eg: a create account process, first provide user data, then review and confirm them).
-		 * You always want to always show a backwards transition if a navigation from the confirm to the userData page takes place.
+		 * You always want to show a backwards transition if a navigation from the confirm to the userData page takes place.
 		 * Therefore you may use the viewLevel. The viewLevel has to be an integer. The user data page should have a lower number than the confirm page.
 		 * These levels should represent the user process of your application and they do not have to match the container structure of your Targets.
 		 * If the user navigates between views with the same viewLevel, a forward transition is taken. If you pass a direction into the display function, the viewLevel will be ignored.<br/>
@@ -341,7 +341,7 @@ sap.ui.define(['sap/ui/core/routing/Targets', './TargetHandler', './Target', './
 			},
 
 			_constructTarget : function (oOptions, oParent) {
-				return new Target(oOptions, this._oViews, oParent, this._oTargetHandler);
+				return new Target(oOptions, this.getViews(), oParent, this._oTargetHandler);
 			},
 
 			/**
@@ -365,4 +365,4 @@ sap.ui.define(['sap/ui/core/routing/Targets', './TargetHandler', './Target', './
 		});
 
 		return MobileTargets;
-	}, /* bExport= */ true);
+	});

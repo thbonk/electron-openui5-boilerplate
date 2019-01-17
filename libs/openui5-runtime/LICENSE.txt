@@ -215,7 +215,7 @@ OpenUI5 includes the following subcomponents that are subject to separate licens
 Your use of these subcomponents is subject to the separate license terms applicable to
 each subcomponent.
 
-Component: ace 1.2.6
+Component: ace 1.2.8
 Licensor: Ajax.org B.V.
 Website: https://ace.c9.io/
 License: BSD 3-clause "New" or "Revised" License
@@ -277,9 +277,9 @@ License: MIT License
 <year> = unspecified
 <copyright holders> = Microsoft
 
-Component: es6-promise 2.3.0 - a tiny implementation of Promises/A+.
-Licensor: Jake Archibald
-Website: https://github.com/jakearchibald/es6-promise
+Component: es6-promise v4.2.4 - a tiny implementation of Promises/A+.
+Licensor: Stefan Penner
+Website: https://github.com/stefanpenner/es6-promise
 License: MIT License
 <year> = 2014
 <copyright holders> = Yehuda Katz, Tom Dale, Stefan Penner, Jake Archibald and contributors
@@ -398,7 +398,7 @@ License: MIT License
 
 Component: JUnit Reporter for QUnit
 Licensor: jQuery Foundation and other contributors
-Website: https://github.com/jquery/qunit-reporter-junit
+Website: https://github.com/JamesMGreene/qunit-reporter-junit
 License: MIT License
 
 Component: klay.js 0.4.1
@@ -431,6 +431,11 @@ Website: https://github.com/isaacs/node-lru-cache/blob/v2.7.3/
 License: ISC License
 <year> = 2015
 <copyright holders> = Isaac Z. Schlueter and Contributors
+
+Component: Object assign Method
+Licensor: Mozilla Developer Network
+Website: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#Polyfill
+License: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
 
 Component: punycode.js 1.2.3
 Licensor: Acid Media
@@ -483,6 +488,56 @@ License: BSD 3-clause "New" or "Revised" License
 <ORGANIZATION> = Christian Johansen
 <YEAR> = 2010-2014
 
+Component: Sinon.JS 4.4.6
+Licensor: Christian Johansen
+Website: http://github.com/cjohansen/Sinon.JS/
+License: BSD 3-clause "New" or "Revised" License
+<OWNER> = Christian Johansen
+<ORGANIZATION> = Christian Johansen
+<YEAR> = 2010-2017
+
+Component: String startsWith Method 0.2.0
+Licensor: Mathias Bynens
+Website: https://github.com/mathiasbynens/String.prototype.startsWith
+License: MIT License
+<year> = unspecified
+<copyright holders> = Mathias Bynens <https://mathiasbynens.be/>
+
+Component: String endsWith Method 0.2.0
+Licensor: Mathias Bynens
+Website: https://github.com/mathiasbynens/String.prototype.endsWith
+License: MIT License
+<year> = unspecified
+<copyright holders> = Mathias Bynens <https://mathiasbynens.be/>
+
+Component: String includes Method 1.0.0
+Licensor: Mathias Bynens
+Website: https://github.com/mathiasbynens/String.prototype.includes
+License: MIT License
+<year> = unspecified
+<copyright holders> = Mathias Bynens <https://mathiasbynens.be/>
+
+Component: String repeat Method 0.2.0
+Licensor: Mathias Bynens
+Website: https://github.com/mathiasbynens/String.prototype.repeat
+License: MIT License
+<year> = unspecified
+<copyright holders> = Mathias Bynens <https://mathiasbynens.be/>
+
+Component: String padStart Method 1.0.1
+Licensor: Behnam Mohammadi (بهنام محمدی)
+Website: https://github.com/uxitten/polyfill
+License: MIT License
+<year> = 2017
+<copyright holders> = Behnam Mohammadi (بهنام محمدی)
+
+Component: String padEnd Method 1.0.1
+Licensor: Behnam Mohammadi (بهنام محمدی)
+Website: https://github.com/uxitten/polyfill
+License: MIT License
+<year> = 2017
+<copyright holders> = Behnam Mohammadi (بهنام محمدی)
+
 Component: SwipeView 1.0
 Licensor: Matteo Spinelli
 Website: http://github.com/cubiq/SwipeView/
@@ -507,7 +562,7 @@ License: MIT License
 <copyright holders> = Bjarke Walling
 <year> = 2014
 
-Component: URI.js 1.11.2
+Component: URI.js 1.19.1
 Licensor: Rodney Rehm
 Website: http://github.com/medialize/URI.js/
 License: MIT License
@@ -534,6 +589,27 @@ Website: https://github.com/jalaali/jalaali-js/
 License: MIT License
 <copyright holders> = Behrang Noruzi Niya
 <year> = unspecified
+
+Component: bignumber.js 6.0.0
+Licensor: Michael Mclaughlin
+Website: https://github.com/MikeMcl/bignumber.js/
+License: MIT License
+<year> = 2018
+<copyright holders> = Michael Mclaughlin
+
+Component: lodash 4.17.10
+Licensor: JS Foundation and other contributors
+Website: https://github.com/lodash/lodash
+License: MIT License
+<year> = 2018
+<copyright holders> = JS Foundation and other contributors
+
+Component: mnater/Hyphenopoly 2.4.0
+Licensor: Mathias Nater
+Website: https://github.com/mnater/Hyphenopoly/
+License: MIT License
+<year> = 2018
+<copyright holders> = Mathias Nater
 
 
 --------------------------------------------------------------------------------------------------------------------------

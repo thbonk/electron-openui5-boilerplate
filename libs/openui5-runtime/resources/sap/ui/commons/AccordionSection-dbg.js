@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.AccordionSection.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element'],
-	function(jQuery, library, Element) {
+sap.ui.define(['./library', 'sap/ui/core/Element'],
+	function(library, Element) {
 	"use strict";
 
 
@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element'],
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -174,7 +174,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element'],
 		//Bind the scroll event (does not bubble)
 		var fnScrollProxy = this.__scrollproxy__;
 		if (!fnScrollProxy) {
-			fnScrollProxy = this.__scrollproxy__ = jQuery.proxy(this.onscroll, this);
+			fnScrollProxy = this.__scrollproxy__ = typeof this.onscroll === "function" ? this.onscroll.bind(this) : undefined; // function seems not to exist?
 		}
 		this.$("cont").bind("scroll", fnScrollProxy);
 
@@ -200,9 +200,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element'],
 		if (root) {
 			// if already rendered, adapt rendered control without complete re-rendering
 			if (bEnabled) {
-				jQuery(root).removeClass("sapUiAcdSectionDis");
+				this.$().removeClass("sapUiAcdSectionDis");
 			} else {
-				jQuery(root).addClass("sapUiAcdSectionDis");
+				this.$().addClass("sapUiAcdSectionDis");
 			}
 		}
 		return this;
@@ -259,7 +259,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element'],
 				if (!this.getParent().getWidth()) {
 					this.getDomRef().style.width = this.getDomRef().offsetWidth + "px"; // maintain the current width
 				}
-				jQuery(this.getDomRef()).addClass("sapUiAcdSectionColl");
+				this.$().addClass("sapUiAcdSectionColl");
 				if (tb) {
 					tb.style.display = "none";
 				}
@@ -281,7 +281,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element'],
 					this.invalidate();
 				} else {
 					// content exists already, just make it visible again
-					jQuery(this.getDomRef()).removeClass("sapUiAcdSectionColl");
+					this.$().removeClass("sapUiAcdSectionColl");
 					if (tb) {
 						tb.style.display = "block";
 					}
@@ -335,4 +335,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element'],
 
 	return AccordionSection;
 
-}, /* bExport= */ true);
+});

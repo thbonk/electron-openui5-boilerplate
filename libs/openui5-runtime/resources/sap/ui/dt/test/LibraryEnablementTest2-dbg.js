@@ -1,16 +1,14 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.dt.test.LibraryEnablementTest.
 sap.ui.define([
-	'jquery.sap.global',
 	'sap/ui/base/ManagedObject',
-	'sap/ui/dt/test/ElementEnablementTest2'
-],
-function(jQuery, ManagedObject, ElementEnablementTest2) {
+	'sap/ui/dt/test/ElementEnablementTest2'],
+function(ManagedObject, ElementEnablementTest2) {
 	"use strict";
 
 
@@ -26,7 +24,7 @@ function(jQuery, ManagedObject, ElementEnablementTest2) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @private
@@ -58,8 +56,8 @@ function(jQuery, ManagedObject, ElementEnablementTest2) {
 		this._aResult = [];
 
 		this.aElementEnablementTest = [];
-		var aLibraryControls = [];
 		this._aControlsCollection = [];
+		var aLoadLibraryPromises = [];
 
 		if (aLibraries.length === 0) {
 			var oVersionInfo = sap.ui.getVersionInfo();
@@ -67,62 +65,64 @@ function(jQuery, ManagedObject, ElementEnablementTest2) {
 				if (oLib.name.indexOf("sap.ui.server") === -1 &&
 						oLib.name.indexOf("themelib_") === -1 &&
 						oLib.name.indexOf("sap.ui.dev") === -1 &&
+						oLib.name.indexOf("sap.ui.demoapps") === -1 &&
 						oLib.name !== "sap.ui.core" &&
 						oLib.name !== "sap.ui.fl") {
-					sap.ui.getCore().loadLibrary(oLib.name);
+					aLoadLibraryPromises.push( sap.ui.getCore().loadLibrary(oLib.name, { async:true }) );
 				}
 			});
 		} else {
 			aLibraries.forEach(function(sLib) {
-				sap.ui.getCore().loadLibrary(sLib);
+				aLoadLibraryPromises.push( sap.ui.getCore().loadLibrary(sLib, { async:true }) );
 			});
 		}
 
-		var oLoadedLibs = sap.ui.getCore().getLoadedLibraries();
-		for (var sLibraryName in oLoadedLibs) {
-			if (aLibraries.length > 0 && aLibraries.indexOf(sLibraryName) === -1) {
-				continue;
+		return Promise.all(aLoadLibraryPromises).then(function () {
+			var oLoadedLibs = sap.ui.getCore().getLoadedLibraries();
+			for (var sLibraryName in oLoadedLibs) {
+				if (aLibraries.length > 0 && aLibraries.indexOf(sLibraryName) === -1) {
+					continue;
+				}
+				var oLib = sap.ui.getCore().getLoadedLibraries()[sLibraryName];
+				if (oLib && sLibraryName !== "sap.ui.core") {
+					var aLibraryControls = oLib.controls;
+					var aLibraryElements = oLib.elements;
+					var aAllControls = aLibraryControls.concat(aLibraryElements).sort();
+					aAllControls.forEach(this._fillElementArray, this);
+				}
 			}
-			var oLib = sap.ui.getCore().getLoadedLibraries()[sLibraryName];
-			if (oLib && sLibraryName !== "sap.ui.core") {
-				var aLibraryControls = oLib.controls;
-				var aLibraryElements = oLib.elements;
-				var aAllControls = aLibraryControls.concat(aLibraryElements).sort();
-				aAllControls.forEach(this._fillElementArray, this);
-			}
-		}
 
-		var aResults = [];
-		var fnIterate = function(mResult) {
-			if (mResult && mResult.actions) {
-				aResults.push(mResult);
-			}
-			var oElementEnablementTest = this.aElementEnablementTest.shift();
-			if (oElementEnablementTest) {
-				return oElementEnablementTest.run().then(function(mResult) {
-					oElementEnablementTest.destroy();
-					return fnIterate(mResult);
+			var aResults = [];
+			var fnIterate = function (mResult) {
+				if (mResult && mResult.actions) {
+					aResults.push(mResult);
+				}
+				var oElementEnablementTest = this.aElementEnablementTest.shift();
+				if (oElementEnablementTest) {
+					return oElementEnablementTest.run().then(function (mResult) {
+						oElementEnablementTest.destroy();
+						return fnIterate(mResult);
+					});
+				} else {
+					return Promise.resolve(aResults);
+				}
+			}.bind(this);
+
+
+			return fnIterate().then(function (aResults) {
+				var mResult = {
+					results: []
+				};
+
+				aResults.forEach(function (mElementTestResult) {
+					mResult.results.push(mElementTestResult);
 				});
-			} else {
-				return Promise.resolve(aResults);
-			}
-		}.bind(this);
 
 
-		return fnIterate().then(function(aResults) {
-			var mResult = {
-					results : []
-			};
-
-			aResults.forEach(function(mElementTestResult) {
-				mResult.results.push(mElementTestResult);
+				return mResult;
 			});
 
-
-			return mResult;
-		});
-
-
+		}.bind(this));
 	};
 
 	return LibraryEnablementTest2;

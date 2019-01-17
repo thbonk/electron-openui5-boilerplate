@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.core.date.Gregorian
-sap.ui.define(['jquery.sap.global', './UniversalDate', 'sap/ui/core/Locale', 'sap/ui/core/LocaleData'],
-	function(jQuery, UniversalDate, Locale, LocaleData) {
+sap.ui.define(['./UniversalDate', '../CalendarType'],
+	function(UniversalDate, CalendarType) {
 	"use strict";
 
 
@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', './UniversalDate', 'sap/ui/core/Locale', 'sa
 	var Gregorian = UniversalDate.extend("sap.ui.core.date.Gregorian", /** @lends sap.ui.core.date.Gregorian.prototype */ {
 		constructor: function() {
 			this.oDate = this.createDate(Date, arguments);
-			this.sCalendarType = sap.ui.core.CalendarType.Gregorian;
+			this.sCalendarType = CalendarType.Gregorian;
 		}
 	});
 

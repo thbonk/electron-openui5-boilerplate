@@ -1,10 +1,10 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['sap/ui/core/routing/Target', './async/Target', './sync/Target'],
-	function(Target, asyncTarget, syncTarget) {
+sap.ui.define(['sap/ui/core/routing/Target', './async/Target', './sync/Target', "sap/base/Log", "sap/base/util/UriParameters"],
+	function(Target, asyncTarget, syncTarget, Log, UriParameters) {
 		"use strict";
 
 		/**
@@ -25,8 +25,8 @@ sap.ui.define(['sap/ui/core/routing/Target', './async/Target', './sync/Target'],
 				this._oTargetHandler = oTargetHandler;
 				// temporarily: for checking the url param
 				function checkUrl() {
-					if (jQuery.sap.getUriParameters().get("sap-ui-xx-asyncRouting") === "true") {
-						jQuery.sap.log.warning("Activation of async view loading in routing via url parameter is only temporarily supported and may be removed soon", "MobileTarget");
+					if (new UriParameters(window.location.href).get("sap-ui-xx-asyncRouting") === "true") {
+						Log.warning("Activation of async view loading in routing via url parameter is only temporarily supported and may be removed soon", "MobileTarget");
 						return true;
 					}
 					return false;
@@ -52,4 +52,4 @@ sap.ui.define(['sap/ui/core/routing/Target', './async/Target', './sync/Target'],
 
 		return MobileTarget;
 
-	}, /* bExport= */ true);
+	});

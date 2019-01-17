@@ -78,6 +78,10 @@
 			"theme": "base"
 		},
 		{
+			"name": "img-RTL/ColorPicker/PickingCursor-Default.png",
+			"theme": "base"
+		},
+		{
 			"name": "img-RTL/ColorPicker/Swatch_BG.png",
 			"theme": "base"
 		},
@@ -99,6 +103,10 @@
 		},
 		{
 			"name": "img/ColorPicker/GradientBox.png",
+			"theme": "base"
+		},
+		{
+			"name": "img/ColorPicker/PickingCursor-Default.png",
 			"theme": "base"
 		},
 		{

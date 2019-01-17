@@ -1,10 +1,10 @@
  /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/library'],
-	function(jQuery, coreLibrary) {
+sap.ui.define(['sap/ui/core/library', "sap/base/security/encodeCSS"],
+	function(coreLibrary, encodeCSS) {
 	"use strict";
 
 	// shortcut for sap.ui.core.Orientation
@@ -26,9 +26,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library'],
 		var sTooltip = oControl.getTooltip_AsString();
 		var sOrientationClass = oControl.getOrientation();
 		if (sOrientationClass) {
-			sOrientationClass = jQuery.sap.encodeCSS(sOrientationClass);
+			sOrientationClass = encodeCSS(sOrientationClass);
 		}
-		var sBackgroundClass = jQuery.sap.encodeCSS("sapMHdrCntrBG" + oControl.getBackgroundDesign());
+		var sBackgroundClass = encodeCSS("sapMHdrCntrBG" + oControl.getBackgroundDesign());
 		// write the HTML into the render manager
 		oRm.write("<div");
 		oRm.writeControlData(oControl);
@@ -100,7 +100,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library'],
 		oRm.write("<div");
 		oRm.writeAttribute("id", oControl.getId() + "-after");
 		oRm.writeAttribute("tabindex", "0");
-		oRm.write("/>");
+		oRm.write("></div>");
 		oRm.write("</div>");
 	};
 

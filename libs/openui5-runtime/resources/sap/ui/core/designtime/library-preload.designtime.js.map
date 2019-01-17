@@ -1,0 +1,9 @@
+{
+"version":3,
+"file":"sap/ui/core/designtime/library-preload.designtime.js",
+"sourceroot":".",
+"sources":["ComponentContainer.designtime-dbg.js","CustomData.designtime-dbg.js","Icon.designtime-dbg.js","UIComponent.designtime-dbg.js","library.designtime-dbg.js","mvc/ControllerExtensionTemplate-dbg.js","mvc/View.designtime-dbg.js","mvc/XMLView.designtime-dbg.js"],
+"names":["oUIComponent","ControllerExtension"],
+"mappings":";;;;;AAOA,gBAAa,wDAAC,GACb,QAAS,EAAG,CACX,aAEA,MAAO,CACN,aAAc,CACb,UAAW,CACV,eAAgB,CAAE,IACnB,CACD,CACD,EACD,EAAkB;ACXnB,gBAAa,gDAAC,GACb,UAAW,CACX,aAEA,MAAO,CACN,aAAc,CACb,WAAY,CACX,QAAS,IACV,CACD,CACD,EAED,EAAkB;ACZlB,gBAAa,0CAAC,GACb,UAAW,CACV,aAEA,MAAO,CACN,QAAS,CACR,MAAO,UACP,MAAO,CACN,IAAK,sCACN,CACD,CACD,EAEF,EAAkB;ACblB,gBAAa,iDAAC,GACb,QAAS,EAAG,CACX,aAEA,MAAO,CACN,OAAQ,SAASA,CAAY,CAAE,CAC9B,EAAG,CAACA,CAAY,YAAa,CAC5B,OAAOA,CAAY,gCACpB,CACD,EACA,aAAc,CACb,YAAa,CACZ,MAAO,CAAE,KACV,CACD,CACD,EACD,EAAkB;ACdnB,gBAAa,6CAAC,GAAI,UAAW,CAC5B,aACA,MAAO,GACR;ACNC,gBAAa,0DAAC,CACd,qCAED,EACA,SACCC,CAED,CAAE,CACD,aACA,OAAOA,CAAmB,sCAAuC,CAwEjE,GACD;ACjFA,gBAAa,8CAAC,GACb,UAAW,CACX,aAEA,MAAO,CACN,2BAA4B,CAAE,wDAC/B,EAED,EAAkB;ACRlB,gBAAa,iDAAC,GACb,UAAW,CACX,aAEA,MAAO,CACN,YAAa,CAAE,CACd,OAAQ,CAAE,CACT,MAAO,CAAE,aACV,CACD,CACD,EAED,EAAkB;",
+"x_com_sap_openui5_sections":[0,351,351,501,501,681,681,912,912,1013,1013,1206,1206,1398,1398,1554]
+}

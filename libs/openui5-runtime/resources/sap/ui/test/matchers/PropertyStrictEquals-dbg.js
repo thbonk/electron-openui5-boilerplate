@@ -1,10 +1,10 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './Matcher'], function (jQuery, Matcher) {
+sap.ui.define(['sap/ui/test/matchers/Matcher', "sap/base/strings/capitalize"], function(Matcher, capitalize) {
 	"use strict";
 
 	/**
@@ -47,22 +47,21 @@ sap.ui.define(['jquery.sap.global', './Matcher'], function (jQuery, Matcher) {
 		 */
 		isMatching : function (oControl) {
 			var sPropertyName = this.getName(),
-				sId = oControl.getId(),
-				fnProperty = oControl["get" + jQuery.sap.charToUpperCase(sPropertyName, 0)];
+				fnProperty = oControl["get" + capitalize(sPropertyName, 0)];
 
 			if (!fnProperty) {
-				this._oLogger.error("Control '" + sId + "' does not have a property called '" + sPropertyName + "'");
+				this._oLogger.error("Control '" + oControl + "' does not have a property '" + sPropertyName + "'");
 				return false;
 			}
 
 			var vPropertyValue = fnProperty.call(oControl);
 			var bMatches = vPropertyValue === this.getValue();
 			if (!bMatches) {
-				this._oLogger.debug("The property '" + sPropertyName + "' of '" + sId + "' has the value '" + vPropertyValue + "' expected '" + this.getValue() + "'");
+				this._oLogger.debug("Control '" + oControl + "' property '" + sPropertyName +
+					"' has value '" + vPropertyValue + "' but should have value '" + this.getValue() + "'");
 			}
 			return bMatches;
 
 		}
 	});
-
-}, /* bExport= */ true);
+});

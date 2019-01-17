@@ -1,16 +1,25 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/theming/Parameters', './ListItemBaseRenderer'],
-	function(jQuery, Parameters, ListItemBaseRenderer) {
+sap.ui.define(["sap/m/library", "sap/ui/Device", "./ListItemBaseRenderer"],
+	function(library, Device, ListItemBaseRenderer) {
 	"use strict";
 
 
+	// shortcut for sap.m.ListGrowingDirection
+	var ListGrowingDirection = library.ListGrowingDirection;
+
+	// shortcut for sap.m.ListKeyboardMode
+	var ListKeyboardMode = library.ListKeyboardMode;
+
+	// shortcut for sap.m.ToolbarDesign
+	var ToolbarDesign = library.ToolbarDesign;
+
+
 	/**
-	 * List renderer.
+	 * ListBase renderer.
 	 * @namespace
 	 */
 	var ListBaseRenderer = {};
@@ -47,7 +56,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/theming/Parameters', './ListIte
 		rm.write("<div");
 		rm.addClass("sapMList");
 		rm.writeControlData(oControl);
-		rm.writeAttribute("tabindex", "-1");
 
 		if (oControl.getInset()) {
 			rm.addClass("sapMListInsetBG");
@@ -78,11 +86,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/theming/Parameters', './ListIte
 		var sHeaderText = oControl.getHeaderText();
 		var oHeaderTBar = oControl.getHeaderToolbar();
 		if (oHeaderTBar) {
-			oHeaderTBar.setDesign(sap.m.ToolbarDesign.Transparent, true);
+			oHeaderTBar.setDesign(ToolbarDesign.Transparent, true);
+			oHeaderTBar.addStyleClass("sapMListHdr");
 			oHeaderTBar.addStyleClass("sapMListHdrTBar");
+			oHeaderTBar.addStyleClass("sapMTBHeader-CTX");
 			rm.renderControl(oHeaderTBar);
 		} else if (sHeaderText) {
-			rm.write("<header class='sapMListHdr'");
+			rm.write("<header class='sapMListHdr sapMListHdrText'");
 			rm.writeAttribute("id", oControl.getId("header"));
 			rm.write(">");
 			rm.writeEscaped(sHeaderText);
@@ -92,17 +102,21 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/theming/Parameters', './ListIte
 		// render info bar
 		var oInfoTBar = oControl.getInfoToolbar();
 		if (oInfoTBar) {
-			oInfoTBar.setDesign(sap.m.ToolbarDesign.Info, true);
+			oInfoTBar.setDesign(ToolbarDesign.Info, true);
 			oInfoTBar.addStyleClass("sapMListInfoTBar");
+			// render div for infoToolbar, as there is margin in HCB and HCW
+			// when sticky is enabled, the content behind the infoToolbar is visible due to the margins
+			rm.write("<div class='sapMListInfoTBarContainer'>");
 			rm.renderControl(oInfoTBar);
+			rm.write("</div>");
 		}
 
 		// determine items rendering
 		var aItems = oControl.getItems(),
 			bShowNoData = oControl.getShowNoData(),
 			bRenderItems = oControl.shouldRenderItems() && aItems.length,
-			iTabIndex = oControl.getKeyboardMode() == sap.m.ListKeyboardMode.Edit ? -1 : 0,
-			bUpwardGrowing = oControl.getGrowingDirection() == sap.m.ListGrowingDirection.Upwards && oControl.getGrowing();
+			iTabIndex = oControl.getKeyboardMode() == ListKeyboardMode.Edit ? -1 : 0,
+			bUpwardGrowing = oControl.getGrowingDirection() == ListGrowingDirection.Upwards && oControl.getGrowing();
 
 		// render top growing
 		if (bUpwardGrowing) {
@@ -197,6 +211,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/theming/Parameters', './ListIte
 	 * @param {sap.ui.core.Control} oControl an object representation of the control that should be rendered
 	 */
 	ListBaseRenderer.renderContainerAttributes = function(rm, oControl) {
+		// add sticky style classes
+		var iStickyValue = oControl.getStickyStyleValue();
+		if (iStickyValue) {
+			rm.addClass("sapMSticky");
+			rm.addClass("sapMSticky" + iStickyValue);
+		}
 	};
 
 	/**
@@ -216,6 +236,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/theming/Parameters', './ListIte
 	 */
 	ListBaseRenderer.renderListStartAttributes = function(rm, oControl) {
 		rm.write("<ul");
+		rm.addClass("sapMListItems");
 		oControl.addNavSection(oControl.getId("listUl"));
 	};
 
@@ -236,13 +257,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/theming/Parameters', './ListIte
 	 * @returns {String|undefined}
 	 */
 	ListBaseRenderer.getAriaLabelledBy = function(oControl) {
-		var oHeaderTBar = oControl.getHeaderToolbar();
-		if (oHeaderTBar) {
-			return oHeaderTBar.getTitleId();
-		}
-		if (oControl.getHeaderText()) {
-			return oControl.getId("header");
-		}
 	};
 
 	/**
@@ -265,6 +279,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/theming/Parameters', './ListIte
 	ListBaseRenderer.getAccessibilityState = function(oControl) {
 		return {
 			role : this.getAriaRole(oControl),
+			multiselectable : oControl._bSelectionMode ? oControl.getMode() == "MultiSelect" : undefined,
 			labelledby : {
 				value : this.getAriaLabelledBy(oControl),
 				append : true
@@ -294,7 +309,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/theming/Parameters', './ListIte
 	 */
 	ListBaseRenderer.renderNoData = function(rm, oControl) {
 		rm.write("<li");
-		rm.writeAttribute("tabindex", oControl.getKeyboardMode() == sap.m.ListKeyboardMode.Navigation ? -1 : 0);
+		rm.writeAttribute("tabindex", oControl.getKeyboardMode() == ListKeyboardMode.Navigation ? -1 : 0);
 		rm.writeAttribute("id", oControl.getId("nodata"));
 		rm.addClass("sapMLIB sapMListNoData sapMLIBTypeInactive");
 		ListItemBaseRenderer.addFocusableClasses.call(ListItemBaseRenderer, rm);
@@ -318,7 +333,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/theming/Parameters', './ListIte
 		rm.writeAttribute("id", oControl.getId(sAreaId));
 		rm.writeAttribute("tabindex", iTabIndex);
 
-		if (sap.ui.Device.system.desktop) {
+		if (Device.system.desktop) {
 			rm.addClass("sapMListDummyArea").writeClasses();
 		}
 

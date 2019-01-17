@@ -1,19 +1,20 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-	'jquery.sap.global',
-	'sap/ui/core/format/NumberFormat',
-	'sap/ui/model/FormatException',
+	"sap/base/Log",
+	"sap/ui/core/format/NumberFormat",
+	"sap/ui/model/FormatException",
+	"sap/ui/model/ParseException",
+	"sap/ui/model/ValidateException",
 	"sap/ui/model/odata/ODataUtils",
-	'sap/ui/model/odata/type/ODataType',
-	'sap/ui/model/ParseException',
-	'sap/ui/model/ValidateException'
-], function(jQuery, NumberFormat, FormatException, BaseODataUtils, ODataType, ParseException,
-		ValidateException) {
+	"sap/ui/model/odata/type/ODataType",
+	"sap/ui/thirdparty/jquery"
+], function (Log, NumberFormat, FormatException, ParseException, ValidateException, BaseODataUtils,
+		ODataType, jQuery) {
 	"use strict";
 
 	var rDecimal = /^[-+]?(\d+)(?:\.(\d+))?$/;
@@ -82,11 +83,11 @@ sap.ui.define([
 		var vNullable, iPrecision, vPrecision, iScale, vScale;
 
 		function logWarning(vValue, sName) {
-			jQuery.sap.log.warning("Illegal " + sName + ": " + vValue, null, oType.getName());
+			Log.warning("Illegal " + sName + ": " + vValue, null, oType.getName());
 		}
 
 		function validateInt(vValue, iDefault, iMinimum, sName) {
-			var iValue = typeof vValue === "string" ? parseInt(vValue, 10) : vValue;
+			var iValue = typeof vValue === "string" ? parseInt(vValue) : vValue;
 
 			if (iValue === undefined) {
 				return iDefault;
@@ -142,7 +143,7 @@ sap.ui.define([
 			iScale = vScale === "variable" ? Infinity : validateInt(vScale, 0, 0, "scale");
 			iPrecision = validateInt(vPrecision, Infinity, 1, "precision");
 			if (iScale !== Infinity && iPrecision <= iScale) {
-				jQuery.sap.log.warning("Illegal scale: must be less than precision (precision="
+				Log.warning("Illegal scale: must be less than precision (precision="
 					+ vPrecision + ", scale=" + vScale + ")", null, oType.getName());
 				iScale = Infinity; // "variable"
 			}
@@ -177,7 +178,7 @@ sap.ui.define([
 	 * @extends sap.ui.model.odata.type.ODataType
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @alias sap.ui.model.odata.type.Decimal
 	 * @param {object} [oFormatOptions]
@@ -240,7 +241,7 @@ sap.ui.define([
 	 *   if <code>sTargetType</code> is unsupported
 	 * @public
 	 */
-	Decimal.prototype.formatValue = function(sValue, sTargetType) {
+	Decimal.prototype.formatValue = function (sValue, sTargetType) {
 		if (sValue === null || sValue === undefined) {
 			return null;
 		}
@@ -278,7 +279,7 @@ sap.ui.define([
 	 *   Decimal
 	 * @public
 	 */
-	Decimal.prototype.parseValue = function(vValue, sSourceType) {
+	Decimal.prototype.parseValue = function (vValue, sSourceType) {
 		var sResult;
 
 		if (vValue === null || vValue === "") {
@@ -368,7 +369,7 @@ sap.ui.define([
 				[iPrecision - iScale]));
 		}
 		if (sMinimum) {
-			bMinimumExclusive = this.oConstraints && this.oConstraints.minimumExclusive;
+			bMinimumExclusive = this.oConstraints.minimumExclusive;
 			if (BaseODataUtils.compare(sMinimum, sValue, true) >= (bMinimumExclusive ? 0 : 1)) {
 				throw new ValidateException(
 					getText(bMinimumExclusive
@@ -378,7 +379,7 @@ sap.ui.define([
 			}
 		}
 		if (sMaximum) {
-			bMaximumExclusive = this.oConstraints && this.oConstraints.maximumExclusive;
+			bMaximumExclusive = this.oConstraints.maximumExclusive;
 			if (BaseODataUtils.compare(sMaximum, sValue, true) <= (bMaximumExclusive ? 0 : -1)) {
 				throw new ValidateException(
 					getText(bMaximumExclusive

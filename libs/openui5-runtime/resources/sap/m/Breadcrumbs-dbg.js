@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -14,24 +14,44 @@ sap.ui.define([
 	"sap/ui/core/delegate/ItemNavigation",
 	"sap/ui/core/ResizeHandler",
 	"sap/ui/core/IconPool",
-	"sap/ui/Device"
-], function (Control, Text, Link, Select, Item, ItemNavigation, ResizeHandler, IconPool, Device) {
+	"sap/ui/Device",
+	"sap/m/library",
+	"./BreadcrumbsRenderer"
+], function(
+	Control,
+	Text,
+	Link,
+	Select,
+	Item,
+	ItemNavigation,
+	ResizeHandler,
+	IconPool,
+	Device,
+	library,
+	BreadcrumbsRenderer
+) {
 	"use strict";
 
+	// shortcut for sap.m.SelectType
+	var SelectType = library.SelectType;
+
 	/**
-	 * Constructor for a new Breadcrumbs
+	 * Constructor for a new <code>Breadcrumbs</code>.
 	 *
 	 * @param {string} [sId] ID for the new control, generated automatically if no ID is given
 	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
 	 * Enables users to navigate between items by providing a list of links to previous steps in the user's
-	 * navigation path. The last three steps can be accessed as links directly The remaining links prior to them
+	 * navigation path. The last three steps can be accessed as links directly, while the remaining links prior to them
 	 * are available in a drop-down menu.
+	 *
+	 * @see {@link fiori:https://experience.sap.com/fiori-design-web/breadcrumb/ Breadcrumbs}
+	 *
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -43,6 +63,8 @@ sap.ui.define([
 	var Breadcrumbs = Control.extend("sap.m.Breadcrumbs", {
 		metadata: {
 			library: "sap.m",
+			interfaces: ["sap.m.IBreadcrumbs"],
+			designtime: "sap/m/designtime/Breadcrumbs.designtime",
 			properties: {
 
 				/**
@@ -115,10 +137,6 @@ sap.ui.define([
 
 	Breadcrumbs.PAGEUP_AND_PAGEDOWN_JUMP_SIZE = 5;
 
-	Breadcrumbs._getResourceBundle = function () {
-		return sap.ui.getCore().getLibraryResourceBundle("sap.m");
-	};
-
 	/*************************************** Internal aggregation handling  ******************************************/
 
 	Breadcrumbs.prototype._getAugmentedId = function (sSuffix) {
@@ -133,8 +151,8 @@ sap.ui.define([
 				forceSelection: false,
 				autoAdjustWidth: true,
 				icon: IconPool.getIconURI("slim-arrow-down"),
-				type: sap.m.SelectType.IconOnly,
-				tooltip: Breadcrumbs._getResourceBundle().getText("BREADCRUMB_SELECT_TOOLTIP")
+				type: SelectType.IconOnly,
+				tooltip: BreadcrumbsRenderer._getResourceBundleText("BREADCRUMB_SELECT_TOOLTIP")
 			})));
 		}
 		return this.getAggregation("_select");
@@ -363,11 +381,15 @@ sap.ui.define([
 		return this._oDistributedControls;
 	};
 
+	Breadcrumbs.prototype._getSelectWidth = function() {
+		return this._getSelect().getVisible() && this._iSelectWidth || 0;
+	};
+
 	Breadcrumbs.prototype._determineControlDistribution = function (iMaxContentSize) {
 		var index,
 			oControlInfo,
 			aControlInfo = this._getControlsInfo().aControlInfo,
-			iSelectWidth = this._iSelectWidth,
+			iSelectWidth = this._getSelectWidth(),
 			aControlsForSelect = [],
 			aControlsForBreadcrumbTrail = [],
 			iUsedSpace = iSelectWidth; // account for the selectWidth initially;
@@ -402,8 +424,9 @@ sap.ui.define([
 	};
 
 	/**
-	 * Stores the sizes and other info of controls so they don't need to be recalculated again until they change
+	 * Stores the sizes and other info of controls so they don't need to be recalculated again until they change.
 	 * @private
+	 * @returns {Object} The <code>Breadcrumbs</code> control information
 	 */
 	Breadcrumbs.prototype._getControlsInfo = function () {
 		if (!this._bControlsInfoCached) {
@@ -483,6 +506,10 @@ sap.ui.define([
 			iSelectedDomIndex = -1,
 			aItemsToNavigate = this._getItemsToNavigate(),
 			aNavigationDomRefs = [];
+
+		if (aItemsToNavigate.length === 0) {
+			return;
+		}
 
 		aItemsToNavigate.forEach(function (oItem, iIndex) {
 			if (iIndex === 0) {
@@ -566,4 +593,4 @@ sap.ui.define([
 
 	return Breadcrumbs;
 
-}, /* bExport= */ true);
+});

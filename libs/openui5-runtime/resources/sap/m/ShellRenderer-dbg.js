@@ -1,12 +1,25 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
- sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define([
+	'jquery.sap.global',
+	'sap/ui/core/library',
+	'sap/m/library',
+	'sap/ui/Device',
+	"sap/base/security/encodeXML"
+],
+function(jQuery, coreLibrary, library, Device, encodeXML) {
 	"use strict";
+
+
+	// shortcut for sap.m.BackgroundHelper
+	var BackgroundHelper = library.BackgroundHelper;
+
+	// shortcut for sap.ui.core.TitleLevel
+	var TitleLevel = coreLibrary.TitleLevel;
 
 
 	/**
@@ -24,7 +37,7 @@
 	 * @param {sap.ui.core.Control} oControl An object representation of the control that should be rendered
 	 */
 	ShellRenderer.render = function(rm, oControl) {
-		var sTitleLevel = (oControl.getTitleLevel() === sap.ui.core.TitleLevel.Auto) ? sap.ui.core.TitleLevel.H1 : oControl.getTitleLevel();
+		var sTitleLevel = (oControl.getTitleLevel() === TitleLevel.Auto) ? TitleLevel.H1 : oControl.getTitleLevel();
 
 		rm.write("<div");
 		rm.writeControlData(oControl);
@@ -34,7 +47,7 @@
 			rm.addClass("sapMShellAppWidthLimited");
 		}
 
-		sap.m.BackgroundHelper.addBackgroundColorStyles(rm, oControl.getBackgroundColor(),  oControl.getBackgroundImage(), "sapMShellGlobalOuterBackground");
+		BackgroundHelper.addBackgroundColorStyles(rm, oControl.getBackgroundColor(),  oControl.getBackgroundImage(), "sapMShellGlobalOuterBackground");
 
 		rm.writeClasses();
 		rm.writeStyles();
@@ -47,7 +60,7 @@
 		rm.write(">");
 
 		/* The background in "SAP_Belize_Deep" must be dark. The contrast class is set to the element wihout any children to avoid unnecessary propagation. */
-		sap.m.BackgroundHelper.renderBackgroundImageTag(rm, oControl, ["sapContrastPlus", "sapMShellBG", "sapUiGlobalBackgroundImageForce"],  oControl.getBackgroundImage(), oControl.getBackgroundRepeat(), oControl.getBackgroundOpacity());
+		BackgroundHelper.renderBackgroundImageTag(rm, oControl, ["sapContrastPlus", "sapMShellBG", "sapUiGlobalBackgroundImageForce"],  oControl.getBackgroundImage(), oControl.getBackgroundRepeat(), oControl.getBackgroundOpacity());
 
 		rm.write("<div class='sapMShellBrandingBar'></div>");
 
@@ -82,7 +95,7 @@
 		if (!oControl.getHeaderRightText()) {
 			rm.writeAttribute("style", "display:none;");
 		}
-		rm.write("class='sapMShellHeaderRightText'>" + jQuery.sap.encodeHTML(oControl.getHeaderRightText()) + "</span>");
+		rm.write("class='sapMShellHeaderRightText'>" + encodeXML(oControl.getHeaderRightText()) + "</span>");
 
 
 		// logout button
@@ -104,6 +117,7 @@
 	ShellRenderer.getLogoImageHtml = function(oControl) {
 		var sImage = oControl.getLogo(); // configured logo
 		if (!sImage) {
+			//TODO: global jquery call found
 			jQuery.sap.require("sap.ui.core.theming.Parameters");
 			sImage = sap.ui.core.theming.Parameters._getThemeImage(); // theme logo
 		}
@@ -112,11 +126,11 @@
 		if (sImage) {
 			var oRb = sap.ui.getCore().getLibraryResourceBundle("sap.m");
 			result = "<div class='sapMShellLogo'>";
-			if (sap.ui.Device.browser.msie) {
+			if (Device.browser.msie) {
 				result += "<span class='sapMShellLogoImgAligner'></span>";
 			}
 			result += "<img id='" + oControl.getId() + "-logo' class='sapMShellLogoImg' src='";
-			result += jQuery.sap.encodeHTML(sImage);
+			result += encodeXML(sImage);
 			result += "' alt='";
 			result += oRb.getText("SHELL_ARIA_LOGO");
 			result += "' /></div>";
@@ -126,4 +140,4 @@
 
 	return ShellRenderer;
 
- }, /* bExport= */ true);
+}, /* bExport= */ true);

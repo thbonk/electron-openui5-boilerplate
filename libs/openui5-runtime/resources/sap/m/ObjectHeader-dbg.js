@@ -1,14 +1,57 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.ObjectHeader.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/IconPool'],
-	function(jQuery, library, Control, IconPool) {
+sap.ui.define([
+	'./library',
+	'sap/ui/core/Control',
+	'sap/ui/core/IconPool',
+	'sap/ui/core/library',
+	'sap/ui/Device',
+	'sap/m/Text',
+	'./ObjectHeaderRenderer',
+	"sap/ui/thirdparty/jquery"
+],
+	function(
+		library,
+		Control,
+		IconPool,
+		coreLibrary,
+		Device,
+		Text,
+		ObjectHeaderRenderer,
+		jQuery
+	) {
 	"use strict";
 
+
+
+	// shortcut for sap.m.BackgroundDesign
+	var BackgroundDesign = library.BackgroundDesign;
+
+	// shortcut for sap.ui.core.TextAlign
+	var TextAlign = coreLibrary.TextAlign;
+
+	// shortcut for sap.m.ImageHelper
+	var ImageHelper = library.ImageHelper;
+
+	// shortcut for sap.m.ObjectMarkerType
+	var ObjectMarkerType = library.ObjectMarkerType;
+
+	// shortcut for sap.ui.core.TitleLevel
+	var TitleLevel = coreLibrary.TitleLevel;
+
+	// shortcut for sap.ui.core.TextDirection
+	var TextDirection = coreLibrary.TextDirection;
+
+	// shortcut for sap.ui.core.ValueState
+	var ValueState = coreLibrary.ValueState;
+
+	// shortcut for sap.m.ObjectHeaderPictureShape
+	var ObjectHeaderPictureShape = library.ObjectHeaderPictureShape;
 
 
 	/**
@@ -22,7 +65,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * a specific object. The object header title is the key identifier of the object and
 	 * additional text and icons can be used to further distinguish it from other objects.
 	 * @extends sap.ui.core.Control
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -33,6 +76,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	var ObjectHeader = Control.extend("sap.m.ObjectHeader", /** @lends sap.m.ObjectHeader.prototype */ { metadata : {
 
 		library : "sap.m",
+		designtime: "sap/m/designtime/ObjectHeader.designtime",
 		properties : {
 
 			/**
@@ -102,14 +146,21 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			iconDensityAware : {type : "boolean", group : "Misc", defaultValue : true},
 
 			/**
+			 * Determines whether the picture should be displayed in a square or with a circle-shaped mask just like in {@link sap.uxap.ObjectPageHeader}.
+			 *
+			 * <b>Note:</b> This property takes effect only on Images and it is ignored for Icons.
+			 * @since 1.61
+			 */
+			imageShape: {type: "sap.m.ObjectHeaderPictureShape", group : "Appearance", defaultValue: ObjectHeaderPictureShape.Square},
+
+			/**
 			 * Sets the favorite state for the <code>ObjectHeader</code>. The <code>showMarkers</code>
 			 * property must be set to <code>true</code> for this property to take effect.
 			 *
-			 * <b>Note:</b> As this property is deprecated, we recommend that you use the <code>markers</code>
-			 * aggregation - add <code>sap.m.ObjectMarker</code> with type <code>sap.m.ObjectMarkerType.Favorite</code>.
-			 * You should use either this property or the <code>markers</code> aggregation, using both may lead to unpredicted behavior.
 			 * @since 1.16.0
-			 * @deprecated Since version 1.42.0.
+			 * @deprecated as of version 1.42.0, replaced by <code>markers</code> aggregation.
+			 * Add {@link sap.m.ObjectMarker} with type <code>sap.m.ObjectMarkerType.Favorite</code>.
+			 * You should use either this property or the <code>markers</code> aggregation, using both may lead to unpredicted behavior.
 			 */
 			markFavorite : {type : "boolean", group : "Misc", defaultValue : false, deprecated: true},
 
@@ -117,21 +168,20 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			 * Sets the flagged state for the <code>ObjectHeader</code>. The <code>showMarkers</code> property
 			 * must be set to <code>true</code> for this property to take effect.
 			 *
-			 * <b>Note:</b> As this property is deprecated, we recommend that you use the <code>markers</code>
-			 * aggregation - add <code>sap.m.ObjectMarker</code> with type <code>sap.m.ObjectMarkerType.Flagged</code>.
-			 * You should use either this property or the <code>markers</code> aggregation, using both may lead to unpredicted behavior.
 			 * @since 1.16.0
-			 * @deprecated Since version 1.42.0.
+			 * @deprecated as of version 1.42.0, replaced by <code>markers</code> aggregation.
+			 * Add {@link sap.m.ObjectMarker} with type <code>sap.m.ObjectMarkerType.Flagged</code>.
+			 * You should use either this property or the <code>markers</code> aggregation, using both may lead to unpredicted behavior.
 			 */
 			markFlagged : {type : "boolean", group : "Misc", defaultValue : false, deprecated: true},
 
 			/**
 			 * If set to <code>true</code>, the <code>ObjectHeader</code> can be marked with icons such as favorite and flag.
 			 *
-			 * <b>Note:</b> This property is valid only if you are using the already deprecated properties - <code>markFlagged</code> and <code>markFavorite</code>.
-			 * If you are using the <code>markers</code> aggregation, the visibility of the markers depends on what is set in the aggregation itself.
 			 * @since 1.16.0
-			 * @deprecated Since version 1.42.0.
+			 * @deprecated as of version 1.42.0, replaced by <code>markers</code> aggregationv.
+			 * This property is valid only if you are using the already deprecated properties - <code>markFlagged</code> and <code>markFavorite</code>.
+			 * If you are using <code>markers</code>, the visibility of the markers depends on what is set in the aggregation itself.
 			 */
 			showMarkers : {type : "boolean", group : "Misc", defaultValue : false, deprecated: true},
 
@@ -145,7 +195,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			 * Determines the value state of the <code>number</code> and <code>numberUnit</code> properties.
 			 * @since 1.16.0
 			 */
-			numberState : {type : "sap.ui.core.ValueState", group : "Misc", defaultValue : sap.ui.core.ValueState.None},
+			numberState : {type : "sap.ui.core.ValueState", group : "Misc", defaultValue : ValueState.None},
 
 			/**
 			 * <code>ObjectHeader</code> with title, one attribute, number, and number unit.
@@ -242,19 +292,19 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			 * Specifies the title text directionality with enumerated options. By default, the control inherits text direction from the DOM.
 			 * @since 1.28.0
 			 */
-			titleTextDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : sap.ui.core.TextDirection.Inherit},
+			titleTextDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : TextDirection.Inherit},
 
 			/**
 			 * Specifies the intro text directionality with enumerated options. By default, the control inherits text direction from the DOM.
 			 * @since 1.28.0
 			 */
-			introTextDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : sap.ui.core.TextDirection.Inherit},
+			introTextDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : TextDirection.Inherit},
 
 			/**
 			 * Specifies the number and unit text directionality with enumerated options. By default, the control inherits text direction from the DOM.
 			 * @since 1.28.0
 			 */
-			numberTextDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : sap.ui.core.TextDirection.Inherit},
+			numberTextDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : TextDirection.Inherit},
 
 			/**
 			 * Determines a custom text for the tooltip of the select title arrow. If not set, a default text of the tooltip will be displayed.
@@ -268,7 +318,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			 * This information is used by assistive technologies, such as screen readers to create a hierarchical site map for faster navigation.
 			 * Depending on this setting an HTML h1-h6 element is used.
 			 */
-			titleLevel : {type : "sap.ui.core.TitleLevel", group : "Appearance", defaultValue : sap.ui.core.TitleLevel.H1}
+			titleLevel : {type : "sap.ui.core.TitleLevel", group : "Appearance", defaultValue : TitleLevel.H1}
 
 		},
 		defaultAggregation : "attributes",
@@ -282,16 +332,14 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			/**
 			 * First status shown on the right side of the attributes above the second status.
 			 * If it is not set the first attribute will expand to take the entire row.
-			 * @deprecated Since version 1.16.0.
-			 * Use the statuses aggregation instead.
+			 * @deprecated as of version 1.16.0, replaced by <code>statuses</code> aggregation
 			 */
 			firstStatus : {type : "sap.m.ObjectStatus", multiple : false, deprecated: true},
 
 			/**
 			 * Second status shown on the right side of the attributes below the first status.
 			 * If it is not set the second attribute will expand to take the entire row.
-			 * @deprecated Since version 1.16.0.
-			 * Use the statuses aggregation instead.
+			 * @deprecated as of version 1.16.0, replaced by <code>statuses</code> aggregation
 			 */
 			secondStatus : {type : "sap.m.ObjectStatus", multiple : false, deprecated: true},
 
@@ -413,7 +461,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		});
 
 		this._fNumberWidth = undefined;
-		this._titleText = new sap.m.Text(this.getId() + "-titleText");
+		this._titleText = new Text(this.getId() + "-titleText");
 		this._titleText.setMaxLines(3);
 
 	};
@@ -583,7 +631,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @returns {sap.m.ObjectHeader} this pointer for chaining
 	 */
 	ObjectHeader.prototype.setMarkFavorite = function (bMarked) {
-		return this._setOldMarkers(sap.m.ObjectMarkerType.Favorite, bMarked);
+		return this._setOldMarkers(ObjectMarkerType.Favorite, bMarked);
 	};
 
 	/**
@@ -594,7 +642,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @returns {sap.m.ObjectHeader} this pointer for chaining
 	 */
 	ObjectHeader.prototype.setMarkFlagged = function (bMarked) {
-		return this._setOldMarkers(sap.m.ObjectMarkerType.Flagged, bMarked);
+		return this._setOldMarkers(ObjectMarkerType.Flagged, bMarked);
 	};
 
 	/**
@@ -614,8 +662,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		for (i = 0; i < aAllMarkers.length; i++) {
 			sMarkerType = aAllMarkers[i].getType();
 
-			if ((sMarkerType === sap.m.ObjectMarkerType.Flagged && this.getMarkFlagged()) ||
-				(sMarkerType === sap.m.ObjectMarkerType.Favorite && this.getMarkFavorite())) {
+			if ((sMarkerType === ObjectMarkerType.Flagged && this.getMarkFlagged()) ||
+				(sMarkerType === ObjectMarkerType.Favorite && this.getMarkFavorite())) {
 					aAllMarkers[i].setVisible(bMarked);
 			}
 		}
@@ -719,7 +767,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		if (this.getIntroActive() && sSourceId === this.getId() + "-intro") {
 			if (!this.getIntroHref()) {
 				this.fireIntroPress({
-					domRef : jQuery.sap.domById(sSourceId)
+					domRef : window.document.getElementById(sSourceId)
 				});
 			}
 		} else if (!this.getResponsive() && this.getTitleActive() && ( sSourceId === this.getId() + "-title" ||
@@ -730,7 +778,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				sSourceId = this.getId() + "-title";
 
 				this.fireTitlePress({
-					domRef : jQuery.sap.domById(sSourceId)
+					domRef : window.document.getElementById(sSourceId)
 				});
 			}
 		} else if (this.getResponsive() && this.getTitleActive() && ( sSourceId === this.getId() + "-txt" || jQuery(oEvent.target).parent().attr('id') === this.getId() + "-txt" )) {
@@ -740,17 +788,22 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				sSourceId = this.getId() + "-txt";
 
 				this.fireTitlePress({
-					domRef : jQuery.sap.domById(sSourceId)
+					domRef : window.document.getElementById(sSourceId)
 				});
 			}
 		} else if (this.getIconActive() && (sSourceId === this.getId() + "-img" || sSourceId === this.getId() + "-icon")) {
 			this.fireIconPress({
-				domRef : jQuery.sap.domById(sSourceId)
+				domRef : window.document.getElementById(sSourceId)
 			});
 		} else if (sSourceId === this.getId() + "-titleArrow") {
 			this.fireTitleSelectorPress({
-				domRef : jQuery.sap.domById(sSourceId)
+				domRef : window.document.getElementById(sSourceId)
 			});
+		} else if (sSourceId.indexOf(this.getId()) !== -1) {
+			// we didn't click on any of the active parts of the ObjectHeader
+			// event should not trigger any further actions
+			oEvent.setMarked();
+			oEvent.preventDefault();
 		}
 	};
 
@@ -776,7 +829,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			if (!this.getTitleHref()) {
 				oEvent.preventDefault();
 				this.fireTitlePress({
-					domRef : jQuery.sap.domById(sSourceId)
+					domRef : (sSourceId ? window.document.getElementById(sSourceId) : null)
 				});
 			} else {
 				if (oEvent.type === "sapspace") {
@@ -793,7 +846,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			if (!this.getTitleHref()) {
 				oEvent.preventDefault();
 				this.fireTitlePress({
-					domRef : jQuery.sap.domById(sSourceId)
+					domRef : (sSourceId ? window.document.getElementById(sSourceId) : null)
 				});
 			} else {
 				if (oEvent.type === "sapspace") {
@@ -806,7 +859,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			}
 			if (!this.getIntroHref()) {
 				this.fireIntroPress({
-					domRef : jQuery.sap.domById(sSourceId)
+					domRef : (sSourceId ? window.document.getElementById(sSourceId) : null)
 				});
 			}
 		} else if (this.getIconActive() && jQuery(oEvent.target).is('.sapMOHIcon,.sapMOHRIcon')){
@@ -814,9 +867,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				oEvent.preventDefault();
 			}
 
-			var iconOrImg = jQuery.sap.domById(this.getId() + "-icon");
+			var iconOrImg = (this.getId() + "-icon" ? window.document.getElementById(this.getId() + "-icon") : null);
 			if (!iconOrImg) {
-				iconOrImg = jQuery.sap.domById(this.getId() + "-img");
+				iconOrImg = (this.getId() + "-img" ? window.document.getElementById(this.getId() + "-img") : null);
 			}
 
 			this.fireIconPress({
@@ -827,7 +880,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				oEvent.preventDefault();
 			}
 			this.fireTitleSelectorPress({
-				domRef : jQuery.sap.domById(sSourceId)
+				domRef : (sSourceId ? window.document.getElementById(sSourceId) : null)
 			});
 		}
 	};
@@ -860,7 +913,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		// To make the browser REALLY do the same (history, referrer, frames, target,...), create a new "click" event and let the browser "do the needful".
 		var oClickEvent = document.createEvent('MouseEvents');
 		oClickEvent.initEvent('click', false, true); //event type, non-bubbling, cancelable
-		jQuery.sap.domById(sSourceId).dispatchEvent(oClickEvent);
+		((sSourceId ? window.document.getElementById(sSourceId) : null)).dispatchEvent(oClickEvent);
 	};
 
 	/**
@@ -872,31 +925,31 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	ObjectHeader.prototype._onOrientationChange = function() {
 		var sId = this.getId();
 
-		if (sap.ui.Device.system.tablet && this.getFullScreenOptimized() && (this._hasAttributes() || this._hasStatus())){
+		if (Device.system.tablet && this.getFullScreenOptimized() && (this._hasAttributes() || this._hasStatus())){
 			this._rerenderStates();
 		}
 
-		if (sap.ui.Device.system.phone) {
+		if (Device.system.phone) {
 
-			if (sap.ui.Device.orientation.portrait){
+			if (Device.orientation.portrait){
 
 				if (this.getTitle().length > 50) { // if on phone portrait mode, cut the title to 50 characters
 					this._rerenderTitle(50);
 				}
 
 				if (this.getIcon()){
-					jQuery.sap.byId(sId + "-titlediv").removeClass("sapMOHRTitleIcon");
-					jQuery.sap.byId(sId + "-titleIcon").addClass("sapMOHRHideIcon");
+					jQuery(document.getElementById(sId + "-titlediv")).removeClass("sapMOHRTitleIcon");
+					jQuery(document.getElementById(sId + "-titleIcon")).addClass("sapMOHRHideIcon");
 				}
 			} else {
-				if (sap.ui.Device.orientation.landscape) {
+				if (Device.orientation.landscape) {
 
 					if (this.getTitle().length > 80) { // if on phone landscape mode, cut the title to 80 characters
 						this._rerenderTitle(80);
 					}
 					if (this.getIcon()){
-						jQuery.sap.byId(sId + "-titlediv").addClass("sapMOHRTitleIcon");
-						jQuery.sap.byId(sId + "-titleIcon").removeClass("sapMOHRHideIcon");
+						jQuery(document.getElementById(sId + "-titlediv")).addClass("sapMOHRTitleIcon");
+						jQuery(document.getElementById(sId + "-titleIcon")).removeClass("sapMOHRHideIcon");
 					}
 				}
 			}
@@ -935,12 +988,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @private
 	 */
 	ObjectHeader.prototype.exit = function() {
-		if (!sap.ui.Device.system.phone) {
-			this._detachMediaContainerWidthChange(this._rerenderOHR, this, sap.ui.Device.media.RANGESETS.SAP_STANDARD);
+		if (!Device.system.phone) {
+			this._detachMediaContainerWidthChange(this._rerenderOHR, this, Device.media.RANGESETS.SAP_STANDARD);
 		}
 
-		if (sap.ui.Device.system.tablet || sap.ui.Device.system.phone) {
-			sap.ui.Device.orientation.detachHandler(this._onOrientationChange, this);
+		if (Device.system.tablet || Device.system.phone) {
+			Device.orientation.detachHandler(this._onOrientationChange, this);
 		}
 
 		if (this._oImageControl) {
@@ -984,17 +1037,17 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				IconPool.isIconURI(this.getIcon()) ? { size : sSize } : {}
 		);
 
-		this._oImageControl = sap.m.ImageHelper.getImageControl(sImgId, this._oImageControl, this, mProperties);
+		this._oImageControl = ImageHelper.getImageControl(sImgId, this._oImageControl, this, mProperties);
 
 		return this._oImageControl;
 	};
 
 	ObjectHeader.prototype.onBeforeRendering = function() {
-		if (sap.ui.Device.system.tablet || sap.ui.Device.system.phone) {
-			sap.ui.Device.orientation.detachHandler(this._onOrientationChange, this);
+		if (Device.system.tablet || Device.system.phone) {
+			Device.orientation.detachHandler(this._onOrientationChange, this);
 		}
-		if (!sap.ui.Device.system.phone) {
-			this._detachMediaContainerWidthChange(this._rerenderOHR, this, sap.ui.Device.media.RANGESETS.SAP_STANDARD);
+		if (!Device.system.phone) {
+			this._detachMediaContainerWidthChange(this._rerenderOHR, this, Device.media.RANGESETS.SAP_STANDARD);
 		}
 
 		if (this._introText) {
@@ -1014,26 +1067,26 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			this._adjustIntroDiv();
 
 			if (oObjectNumber && oObjectNumber.getNumber()) {// adjust alignment according the design specification
-				if (sap.ui.Device.system.desktop && jQuery('html').hasClass("sapUiMedia-Std-Desktop") && this.getFullScreenOptimized() && this._iCountVisAttrStat >= 1 && this._iCountVisAttrStat <= 3) {
-					oObjectNumber.setTextAlign(bPageRTL ? sap.ui.core.TextAlign.Right : sap.ui.core.TextAlign.Left);
+				if (Device.system.desktop && jQuery('html').hasClass("sapUiMedia-Std-Desktop") && this.getFullScreenOptimized() && this._iCountVisAttrStat >= 1 && this._iCountVisAttrStat <= 3) {
+					oObjectNumber.setTextAlign(bPageRTL ? TextAlign.Right : TextAlign.Left);
 				} else {
-					oObjectNumber.setTextAlign(bPageRTL ? sap.ui.core.TextAlign.Left : sap.ui.core.TextAlign.Right);
+					oObjectNumber.setTextAlign(bPageRTL ? TextAlign.Left : TextAlign.Right);
 				}
 			}
 			// adjust number div after initial alignment
 			this._adjustNumberDiv();
 
 			// watch for orientation change only on tablet and phone
-			if (sap.ui.Device.system.tablet || sap.ui.Device.system.phone) {
-				sap.ui.Device.orientation.attachHandler(this._onOrientationChange, this);
+			if (Device.system.tablet || Device.system.phone) {
+				Device.orientation.attachHandler(this._onOrientationChange, this);
 			}
 
 			// When size of the browser window is changed and sap ui media query is changed rerender Responsive OH
-			if (!sap.ui.Device.system.phone) {
-				this._attachMediaContainerWidthChange(this._rerenderOHR, this, sap.ui.Device.media.RANGESETS.SAP_STANDARD);
+			if (!Device.system.phone) {
+				this._attachMediaContainerWidthChange(this._rerenderOHR, this, Device.media.RANGESETS.SAP_STANDARD);
 			}
 		} else {
-			var sTextAlign = bPageRTL ? sap.ui.core.TextAlign.Left : sap.ui.core.TextAlign.Right;
+			var sTextAlign = bPageRTL ? TextAlign.Left : TextAlign.Right;
 			if (oObjectNumber && oObjectNumber.getNumber()) { // adjust alignment according the design specification
 				oObjectNumber.setTextAlign(sTextAlign);
 			}
@@ -1063,13 +1116,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		var bPageRTL = sap.ui.getCore().getConfiguration().getRTL();
 
 		if (oObjectNumber && oObjectNumber.getNumber()) {
-			var $numberDiv = jQuery.sap.byId(sId + "-number");
-			var $titleDiv = jQuery.sap.byId(sId + "-titlediv");
+			var $numberDiv = jQuery(document.getElementById(sId + "-number"));
+			var $titleDiv = jQuery(document.getElementById(sId + "-titlediv"));
 
 			if (this._isMediaSize("Phone")) {
 				if ($numberDiv.hasClass("sapMObjectNumberBelowTitle")) {
 					// change alignment to fit the design depending
-					oObjectNumber.setTextAlign(bPageRTL ? sap.ui.core.TextAlign.Left : sap.ui.core.TextAlign.Right);
+					oObjectNumber.setTextAlign(bPageRTL ? TextAlign.Left : TextAlign.Right);
 					$numberDiv.removeClass("sapMObjectNumberBelowTitle");
 					$titleDiv.removeClass("sapMOHRTitleDivFull");
 				}
@@ -1078,7 +1131,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 				if ($numberDiv.outerWidth() > nParentWidth40) {
 					// change alignment to fit the design
-					oObjectNumber.setTextAlign(bPageRTL ? sap.ui.core.TextAlign.Right : sap.ui.core.TextAlign.Left);
+					oObjectNumber.setTextAlign(bPageRTL ? TextAlign.Right : TextAlign.Left);
 					$numberDiv.addClass("sapMObjectNumberBelowTitle");
 					$titleDiv.addClass("sapMOHRTitleDivFull");
 				}
@@ -1093,9 +1146,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 */
 	ObjectHeader.prototype._adjustIntroDiv = function() {
 		var sId = this.getId();
-		var $titleTxt = jQuery.sap.byId(sId + "-txt");
-		var $titleArrow = jQuery.sap.byId(sId + "-titleArrow");
-		var $intro = jQuery.sap.byId(sId + "-intro");
+		var $titleTxt = jQuery(document.getElementById(sId + "-txt"));
+		var $titleArrow = jQuery(document.getElementById(sId + "-titleArrow"));
+		var $intro = jQuery(document.getElementById(sId + "-intro"));
 
 		if ($intro.parent().hasClass("sapMOHRIntroMargin")) {
 			$intro.parent().removeClass("sapMOHRIntroMargin");
@@ -1177,9 +1230,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	ObjectHeader.prototype._hasMarkers = function() {
 		var aMarkers = this.getMarkers(),
 			bHasOldMarkers = this.getShowMarkers() && (this.getMarkFavorite() || this.getMarkFlagged()),
-			bHasMаrkers = aMarkers && aMarkers.length;
+			bHasMarkers = aMarkers && aMarkers.length;
 
-		return (bHasOldMarkers || bHasMаrkers);
+		return (bHasOldMarkers || bHasMarkers);
 	};
 
 	/**
@@ -1189,12 +1242,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 */
 	ObjectHeader.prototype._getDefaultBackgroundDesign = function() {
 		if (this.getCondensed()) {
-			return sap.m.BackgroundDesign.Solid;
+			return BackgroundDesign.Solid;
 		} else {
 			if (this.getResponsive()) {
-				return sap.m.BackgroundDesign.Translucent;
+				return BackgroundDesign.Translucent;
 			} else { // old none responsive OH
-				return sap.m.BackgroundDesign.Transparent;
+				return BackgroundDesign.Transparent;
 			}
 		}
 
@@ -1236,9 +1289,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @private
 	 */
 	ObjectHeader.prototype._isMediaSize = function (sRangeName) {
-		return this._getCurrentMediaContainerRange(sap.ui.Device.media.RANGESETS.SAP_STANDARD).name === sRangeName;
+		return this._getCurrentMediaContainerRange(Device.media.RANGESETS.SAP_STANDARD).name === sRangeName;
 	};
 
 	return ObjectHeader;
 
-}, /* bExport= */ true);
+});

@@ -1,10 +1,10 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './TabStripItem', './TabStrip'], function(jQuery, TabStripItem, TabStrip) {
+sap.ui.define(['./TabStripItem', 'sap/ui/Device', 'sap/ui/core/InvisibleText'], function(TabStripItem,  Device, InvisibleText) {
 	"use strict";
 
 	/**
@@ -29,7 +29,7 @@ sap.ui.define(['jquery.sap.global', './TabStripItem', './TabStrip'], function(jQ
 		this.beginTabStrip(oRm, oControl);
 
 		// for phones show only the select component of the strip & "+" button
-		if (sap.ui.Device.system.phone === true) {
+		if (Device.system.phone === true) {
 			this.renderTouchArea(oRm, oControl);
 		} else {
 			oRm.write("<div id='" + oControl.getId() + "-leftOverflowButtons' class='" + this.LEFT_OVERRFLOW_BTN_CLASS_NAME + "'>");
@@ -140,6 +140,7 @@ sap.ui.define(['jquery.sap.global', './TabStripItem', './TabStrip'], function(jQ
 	TabStripRenderer.beginTabStrip = function (oRm, oControl) {
 		oRm.write("<div");
 		oRm.addClass("sapMTabStrip");
+		oRm.addClass("sapContrastPlus");
 		oRm.writeControlData(oControl);
 		oRm.writeClasses();
 		oRm.write(">");
@@ -246,9 +247,9 @@ sap.ui.define(['jquery.sap.global', './TabStripItem', './TabStrip'], function(jQ
 	 */
 	function getTabStripItemAccAttributes(oItem, oTabStripParent, oSelectedItem) {
 		var mAccAttributes = { role: "tab"},
-			sDescribedBy = TabStrip.ARIA_STATIC_TEXTS.closable.getId() + " ";
+			sDescribedBy = InvisibleText.getStaticId("sap.m", "TABSTRIP_ITEM_CLOSABLE") + " ";
 
-		sDescribedBy += oItem.getModified() ? TabStrip.ARIA_STATIC_TEXTS.modified.getId() : TabStrip.ARIA_STATIC_TEXTS.notModified.getId();
+		sDescribedBy += InvisibleText.getStaticId("sap.m", oItem.getModified() ? "TABSTRIP_ITEM_MODIFIED" : "TABSTRIP_ITEM_NOT_MODIFIED");
 		mAccAttributes["describedby"] = sDescribedBy;
 		mAccAttributes["labelledby"] = getTabTextDomId(oItem);
 		if (oTabStripParent && oTabStripParent.getRenderer && oTabStripParent.getRenderer().getContentDomId) {

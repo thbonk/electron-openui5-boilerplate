@@ -1,12 +1,19 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.core.tmpl.DOMElement.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/library', './DOMAttribute'],
-	function(jQuery, Control, library, DOMAttribute) {
+sap.ui.define([
+	'sap/ui/core/Control',
+	'sap/ui/core/library',
+	'./DOMAttribute',
+	"./DOMElementRenderer",
+	"sap/base/Log",
+	"sap/ui/thirdparty/jquery"
+],
+	function(Control, library, DOMAttribute, DOMElementRenderer, Log, jQuery) {
 	"use strict";
 
 
@@ -20,11 +27,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/library'
 	 * @class
 	 * Represents a DOM element. It allows to use databinding for the properties and nested DOM attributes.
 	 * @extends sap.ui.core.Control
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
-	 * @constructor
 	 * @public
 	 * @since 1.15
+	 * @deprecated since 1.56
 	 * @alias sap.ui.core.tmpl.DOMElement
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -85,7 +92,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/library'
 					}
 				});
 			} else {
-				jQuery.sap.log.warning("DOMElement#" + this.getId() + ": custom attributes in settings will be ignored since attributes are provided!");
+				Log.warning("DOMElement#" + this.getId() + ": custom attributes in settings will be ignored since attributes are provided!");
 			}
 		}
 
@@ -234,6 +241,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/library'
 				$this.text(this.getProperty("text"));
 			}
 		}
+		return this;
 	};
 
 

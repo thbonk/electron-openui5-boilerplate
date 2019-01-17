@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -12,7 +12,7 @@
  * @public
  */
 
-sap.ui.define(['jquery.sap.global'], function(jQuery) {
+sap.ui.define(["sap/base/Log"], function(Log) {
 	"use strict";
 
 	var AnalyticalVersionInfo = {
@@ -33,7 +33,7 @@ sap.ui.define(['jquery.sap.global'], function(jQuery) {
 				case "sap.ui.model.odata.ODataModel": iVersion = this.V1; break;
 				case "sap.ui.model.odata.v2.ODataModel": iVersion = this.V2; break;
 				default: iVersion = this.NONE;
-						 jQuery.sap.log.info("AnalyticalVersionInfo.getVersion(...) - The given object is no instance of ODataModel V1 or V2!");
+						 Log.info("AnalyticalVersionInfo.getVersion(...) - The given object is no instance of ODataModel V1 or V2!");
 						 break;
 			}
 			return iVersion;

@@ -1,20 +1,23 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-// Provides class sap.ui.rta.plugin.DragDrop.
 sap.ui.define([
-	'jquery.sap.global',
 	'sap/ui/dt/plugin/ControlDragDrop',
+	'sap/ui/dt/Util',
 	'sap/ui/rta/plugin/RTAElementMover',
-	'sap/ui/rta/plugin/Plugin'
+	'sap/ui/rta/plugin/Plugin',
+	'sap/ui/rta/Utils'
 ],
-function(jQuery,
-		ControlDragDrop,
-		RTAElementMover,
-		Plugin) {
+function(
+	ControlDragDrop,
+	DtUtil,
+	RTAElementMover,
+	Plugin,
+	Utils
+) {
 	"use strict";
 
 	/**
@@ -25,10 +28,10 @@ function(jQuery,
 	 *
 	 * @class
 	 * The DragDrop plugin adds functionality/styling required for RTA.
-	 * @extends sap.ui.dt.ControlDragDrop
+	 * @extends sap.ui.dt.plugin.ControlDragDrop
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @private
@@ -60,6 +63,11 @@ function(jQuery,
 		}
 	});
 
+	// Extends the DragDrop Plugin with all the functions from our rta base plugin
+	Utils.extendWith(DragDrop.prototype, Plugin.prototype, function(vDestinationValue, vSourceValue, sProperty, mDestination, mSource) {
+		return sProperty !== "getMetadata";
+	});
+
 	/**
 	 * @override
 	 */
@@ -74,17 +82,20 @@ function(jQuery,
 	};
 
 	/**
+	 * @override
+	 */
+	DragDrop.prototype._isEditable = function(oOverlay, mPropertyBag) {
+		return this.getElementMover().isEditable(oOverlay, mPropertyBag.onRegistration);
+	};
+
+	/**
 	 * Register an overlay
 	 * @param  {sap.ui.dt.Overlay} oOverlay overlay object
 	 * @override
 	 */
 	DragDrop.prototype.registerElementOverlay = function(oOverlay) {
 		ControlDragDrop.prototype.registerElementOverlay.apply(this, arguments);
-
-		if (oOverlay.isMovable()) {
-			this._attachMovableBrowserEvents(oOverlay);
-			Plugin.prototype.addToPluginsList.apply(this, arguments);
-		}
+		Plugin.prototype.registerElementOverlay.apply(this, arguments);
 	};
 
 	/**
@@ -95,27 +106,7 @@ function(jQuery,
 	DragDrop.prototype.deregisterElementOverlay = function(oOverlay) {
 		ControlDragDrop.prototype.deregisterElementOverlay.apply(this, arguments);
 		Plugin.prototype.removeFromPluginsList.apply(this, arguments);
-		this._detachMovableBrowserEvents(oOverlay);
 	};
-
-	/**
-	 * @param  {sap.ui.dt.Overlay} oOverlay overlay object
-	 * @private
-	 */
-	DragDrop.prototype._attachMovableBrowserEvents = function(oOverlay) {
-		oOverlay.attachBrowserEvent("mouseover", this._onMouseOver, this);
-		oOverlay.attachBrowserEvent("mouseleave", this._onMouseLeave, this);
-	};
-
-	/**
-	 * @param  {sap.ui.dt.Overlay} oOverlay overlay object
-	 * @private
-	 */
-	DragDrop.prototype._detachMovableBrowserEvents = function(oOverlay) {
-		oOverlay.detachBrowserEvent("mouseover", this._onMouseOver, this);
-		oOverlay.detachBrowserEvent("mouseleave", this._onMouseLeave, this);
-	};
-
 
 	/**
 	 * Additionally to super->onDragStart this method stores the parent's id in an instance variable
@@ -127,7 +118,7 @@ function(jQuery,
 
 		ControlDragDrop.prototype.onDragStart.apply(this, arguments);
 
-		this.getDesignTime().getSelection().forEach(function(oOverlay) {
+		this.getSelectedOverlays().forEach(function(oOverlay) {
 			oOverlay.setSelected(false);
 		});
 
@@ -140,15 +131,27 @@ function(jQuery,
 	 * @override
 	 */
 	DragDrop.prototype.onDragEnd = function(oOverlay) {
-		this.fireElementModified({
-			"command" : this.getElementMover().buildMoveCommand()
+		this.getElementMover().buildMoveCommand()
+
+		.then(function(oCommand) {
+			this.fireElementModified({
+				"command" : oCommand
+			});
+
+			oOverlay.$().removeClass("sapUiRtaOverlayPlaceholder");
+			oOverlay.setSelected(true);
+			oOverlay.focus();
+
+			ControlDragDrop.prototype.onDragEnd.apply(this, arguments);
+		}.bind(this))
+
+		.catch(function(vError) {
+			throw DtUtil.propagateError(
+				vError,
+				"DragDrop#onDragEnd",
+				"Error accured during onDragEnd execution",
+				"sap.ui.rta.plugin");
 		});
-
-		oOverlay.$().removeClass("sapUiRtaOverlayPlaceholder");
-		oOverlay.setSelected(true);
-		oOverlay.focus();
-
-		ControlDragDrop.prototype.onDragEnd.apply(this, arguments);
 	};
 
 	/**
@@ -158,43 +161,6 @@ function(jQuery,
 	 */
 	DragDrop.prototype.onMovableChange = function(oOverlay) {
 		ControlDragDrop.prototype.onMovableChange.apply(this, arguments);
-		if (oOverlay.isMovable()) {
-			this._attachMovableBrowserEvents(oOverlay);
-		} else {
-			this._detachMovableBrowserEvents(oOverlay);
-		}
-	};
-	/**
-	 * Handle mouse over event
-	 * @param  {sap.ui.base.Event} oEvent event object
-	 * @private
-	 */
-	DragDrop.prototype._onMouseOver = function(oEvent) {
-		var oOverlay = sap.ui.getCore().byId(oEvent.currentTarget.id);
-		if (oOverlay !== this._oPreviousHoverTarget) {
-			if (this._oPreviousHoverTarget) {
-				this._oPreviousHoverTarget.$().removeClass("sapUiRtaOverlayHover");
-			}
-			this._oPreviousHoverTarget = oOverlay;
-			oOverlay.$().addClass("sapUiRtaOverlayHover");
-		}
-		oEvent.preventDefault();
-		oEvent.stopPropagation();
-
-	};
-
-	/**
-	 * Handle mouse leave event
-	 * @param  {sap.ui.base.Event} oEvent event object
-	 * @private
-	 */
-	DragDrop.prototype._onMouseLeave = function(oEvent) {
-		if (this._oPreviousHoverTarget) {
-			this._oPreviousHoverTarget.$().removeClass("sapUiRtaOverlayHover");
-		}
-		delete this._oPreviousHoverTarget;
-		oEvent.preventDefault();
-		oEvent.stopPropagation();
 	};
 
 	return DragDrop;

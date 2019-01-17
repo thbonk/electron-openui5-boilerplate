@@ -1,11 +1,17 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['sap/ui/core/Control', './library', 'sap/ui/core/theming/Parameters'],
-	function (Control, library, Parameters) {
+sap.ui.define([
+	'sap/ui/core/Control',
+	'./library',
+	"./BlockLayoutCellRenderer",
+	"sap/base/Log",
+	"sap/ui/thirdparty/jquery"
+],
+	function(Control, library, BlockLayoutCellRenderer, Log, jQuery) {
 		"use strict";
 
 		/**
@@ -20,7 +26,7 @@ sap.ui.define(['sap/ui/core/Control', './library', 'sap/ui/core/theming/Paramete
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.61.2
 		 *
 		 * @constructor
 		 * @public
@@ -34,7 +40,8 @@ sap.ui.define(['sap/ui/core/Control', './library', 'sap/ui/core/theming/Paramete
 				library: "sap.ui.layout",
 				properties: {
 					/**
-					 * Defines the title of the cell
+					 * Defines the title of the cell.
+					 * <b>Note:</b> When the <code>titleLink</code> aggregation is provided, the title of the cell will be replaced with the text from the <code>titleLink</code>.
 					 */
 					title: {type: "string", group: "Appearance", defaultValue: null},
 
@@ -84,9 +91,15 @@ sap.ui.define(['sap/ui/core/Control', './library', 'sap/ui/core/theming/Paramete
 					/**
 					 * The content to be included inside the cell
 					 */
-					content: {type: "sap.ui.core.Control", multiple: true, singularName: "content"}
-
-				}
+					content: {type: "sap.ui.core.Control", multiple: true, singularName: "content"},
+					/**
+					 * The link that will replace the title of the cell.
+					 * <b>Note:</b> The only possible value is the <code>sap.m.Link</code> control.
+					 * @since 1.56
+					 */
+					titleLink: {type: "sap.ui.core.Control", multiple : false}
+				},
+				designtime: "sap/ui/layout/designtime/BlockLayoutCell.designtime"
 			}
 		});
 
@@ -105,6 +118,18 @@ sap.ui.define(['sap/ui/core/Control', './library', 'sap/ui/core/theming/Paramete
 
 			return this;
 		};
+
+		BlockLayoutCell.prototype.setTitleLink = function(oObject) {
+				if (oObject && oObject.getMetadata().getName() !== "sap.m.Link") {
+					Log.warning("sap.ui.layout.BlockLayoutCell " + this.getId() + ": Can't add value for titleLink aggregation different than sap.m.Link.");
+					return;
+				}
+
+				this.setAggregation("titleLink", oObject);
+
+			return this;
+		};
+
 		BlockLayoutCell.prototype._setParentRowScrollable = function (scrollable) {
 			this._parentRowScrollable = scrollable;
 		};
@@ -123,4 +148,4 @@ sap.ui.define(['sap/ui/core/Control', './library', 'sap/ui/core/theming/Paramete
 
 		return BlockLayoutCell;
 
-	}, /* bExport= */ true);
+	});

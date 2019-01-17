@@ -1,13 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides basic internal functions for sap.ui.model.odata.AnnotationHelper
 sap.ui.define([
-	'jquery.sap.global', 'sap/ui/base/BindingParser'
-], function(jQuery, BindingParser) {
+	"sap/base/Log",
+	"sap/ui/base/BindingParser",
+	"sap/ui/performance/Measurement",
+	"sap/ui/thirdparty/jquery"
+], function (Log, BindingParser, Measurement, jQuery) {
 	'use strict';
 
 	var sAnnotationHelper = "sap.ui.model.odata.AnnotationHelper",
@@ -86,7 +89,7 @@ sap.ui.define([
 		 */
 		error : function (oPathValue, sMessage, sComponent) {
 			sMessage = oPathValue.path + ": " + sMessage;
-			jQuery.sap.log.error(sMessage, Basics.toErrorString(oPathValue.value),
+			Log.error(sMessage, Basics.toErrorString(oPathValue.value),
 				sComponent || sAnnotationHelper);
 			throw new SyntaxError(sMessage);
 		},
@@ -169,11 +172,11 @@ sap.ui.define([
 				sSegment,
 				oType;
 
-			jQuery.sap.measure.average(sPerformanceFollowPath, "", aPerformanceCategories);
+			Measurement.average(sPerformanceFollowPath, "", aPerformanceCategories);
 			sPath = Basics.getPath(oRawValue);
 			sContextPath = sPath !== undefined && Basics.getStartingPoint(oInterface, sPath);
 			if (!sContextPath) {
-				jQuery.sap.measure.end(sPerformanceFollowPath);
+				Measurement.end(sPerformanceFollowPath);
 				return undefined;
 			}
 			aParts = sPath.split("/");
@@ -211,7 +214,7 @@ sap.ui.define([
 			}
 
 			oResult.resolvedPath = sContextPath;
-			jQuery.sap.measure.end(sPerformanceFollowPath);
+			Measurement.end(sPerformanceFollowPath);
 			return oResult;
 		},
 

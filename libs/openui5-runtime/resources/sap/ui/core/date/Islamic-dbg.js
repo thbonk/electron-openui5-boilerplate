@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.core.date.Islamic
-sap.ui.define(['jquery.sap.global', './UniversalDate'],
-	function(jQuery, UniversalDate) {
+sap.ui.define(['./UniversalDate', '../CalendarType', 'sap/base/Log'],
+	function(UniversalDate, CalendarType, Log) {
 	"use strict";
 
 
@@ -28,7 +28,7 @@ sap.ui.define(['jquery.sap.global', './UniversalDate'],
 				aArgs = toGregorianArguments(aArgs);
 			}
 			this.oDate = this.createDate(Date, aArgs);
-			this.sCalendarType = sap.ui.core.CalendarType.Islamic;
+			this.sCalendarType = CalendarType.Islamic;
 		}
 	});
 
@@ -214,12 +214,12 @@ sap.ui.define(['jquery.sap.global', './UniversalDate'],
 		oCustomizationJSON = oCustomizationJSON || [];
 
 		if (!sDateFormat && !oCustomizationJSON.length) {//working with no customization
-			jQuery.sap.log.info("No calendar customizations.");
+			Log.info("No calendar customizations.");
 			return;
 		}
 
 		if ((sDateFormat && !oCustomizationJSON.length) || (!sDateFormat && oCustomizationJSON.length)) {
-			jQuery.sap.log.warning("There is an inconsistency between customization data [" + JSON.stringify(oCustomizationJSON) +
+			Log.warning("There is an inconsistency between customization data [" + JSON.stringify(oCustomizationJSON) +
 			"] and the date format [" + sDateFormat + "]. Calendar customization won't be used.");
 			return;
 		}
@@ -237,14 +237,14 @@ sap.ui.define(['jquery.sap.global', './UniversalDate'],
 				oCustomizationMap[iIslamicMonths] = iIslamicMonthStartDays;
 			}
 		});
-		jQuery.sap.log.info("Working with date format: [" + sDateFormat + "] and customization: " + JSON.stringify(oCustomizationJSON));
+		Log.info("Working with date format: [" + sDateFormat + "] and customization: " + JSON.stringify(oCustomizationJSON));
 	}
 
 	function parseDate(sDate) {
 		return {
-			year: parseInt(sDate.substr(0, 4), 10),
-			month: parseInt(sDate.substr(4, 2), 10),
-			day: parseInt(sDate.substr(6, 2), 10)
+			year: parseInt(sDate.substr(0, 4)),
+			month: parseInt(sDate.substr(4, 2)),
+			day: parseInt(sDate.substr(6, 2))
 		};
 	}
 

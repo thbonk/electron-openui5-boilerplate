@@ -2,7 +2,7 @@
 
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -153,11 +153,11 @@
 	text-align: start;
 }
 
-/* special handling for IE, as it does not support text-align: start */
+/* special handling for IE, as it does not support text-align: start */ // TODO remove after 1.62 version
 html[data-sap-ui-browser^="ie"] .sapUiAcdSectionHdr {
 	text-align: left;
 }
-html[dir=rtl][data-sap-ui-browser^="ie"] .sapUiAcdSectionHdr {
+html[dir=rtl][data-sap-ui-browser^="ie"] .sapUiAcdSectionHdr {// TODO remove after 1.62 version
 	text-align: right;
 }
 
@@ -190,7 +190,7 @@ html[dir=rtl][data-sap-ui-browser^="ie"] .sapUiAcdSectionHdr {
 .sapUiAcdSectionCont {
 	/* 'position' will be set by the renderer if required. Do not set any positioning here! */
 	/* It will be set to 'absolute' if sizes are set, in order to extend the content to fully use the available space.
-	Otherwise to 'relative', to fix an IE7 bug which would leave overflowing content with 'position relative' visible. */
+	Otherwise to 'relative', to fix an IE7 bug which would leave overflowing content with 'position relative' visible. */// TODO remove after 1.62 version
 	margin-bottom: 0px; /* will be overwritten in the sapUiAcdSectionFlexHeight case */
 	border: 0;
 	border-bottom: 10px solid @sapUiWhiteBorder;
@@ -913,7 +913,7 @@ html[data-sap-ui-browser="ff3"] .sapUiDlgHdrBtns > a {
 .sapUiDlgCont {
 	/* 'position' will be set by the renderer if required. Do not set any positioning here! */
 	/* It will be set to 'absolute' if sizes are set, in order to extend the content to fully use the available space.
-       Otherwise to 'relative', to fix an IE7 bug which would leave overflowing content with 'position relative' visible. */
+       Otherwise to 'relative', to fix an IE7 bug which would leave overflowing content with 'position relative' visible. */// TODO remove after 1.62 version
 	background-color: @sapUiExtraLightBG;
 	border-width: 0 1px;
 	border-color: @sapUiMediumBorder;
@@ -2886,7 +2886,7 @@ html[data-sap-ui-browser*="ie"] .sapUiPanelTb {
 }
 
 .sapUiRb:hover > label {
-	position: static;  /* IE11 bug: even though "static" is the default, we need to make SOME change to make background-position work */
+	position: static;  /* IE11 bug: even though "static" is the default, we need to make SOME change to make background-position work */ // TODO remove after 1.62 version
 }
 
 /* disabled */
@@ -2900,12 +2900,12 @@ html[data-sap-ui-browser*="ie"] .sapUiPanelTb {
 	outline-offset: -1px;
 }
 
-html[data-sap-ui-browser^="ie"] .sapUiRb:focus{
+html[data-sap-ui-browser^="ie"] .sapUiRb:focus{ // TODO remove after 1.62 version
 	outline: none;
 	position: relative; /* otherwise the Border is not displayed */
 }
 
-html[data-sap-ui-browser^="ie"] .sapUiRb:focus:after {
+html[data-sap-ui-browser^="ie"] .sapUiRb:focus:after { // TODO remove after 1.62 version
 	content: "";
 	position: absolute;
 	top: 0;
@@ -2935,7 +2935,7 @@ html[data-sap-ui-browser^="ie"] .sapUiRb:focus:after {
 	display: flex;
 }
 
-html[data-sap-ui-browser^="ie"] .sapUiRbGTab{
+html[data-sap-ui-browser^="ie"] .sapUiRbGTab{// TODO remove after 1.62 version
 	display: table;
 	table-layout: fixed;
 }
@@ -2953,7 +2953,7 @@ html[data-sap-ui-browser^="ie"] .sapUiRbGTab{
 	-ms-flex: 1;
 }
 
-html[data-sap-ui-browser^="ie"] .sapUiRbGCol{
+html[data-sap-ui-browser^="ie"] .sapUiRbGCol{ // TODO remove after 1.62 version
 	display: table-cell;
 	padding-right: 15px;
 }
@@ -2966,7 +2966,7 @@ html[data-sap-ui-browser^="ie"] .sapUiRbGCol{
 	min-width: 1px;
 }
 
-html[data-sap-ui-browser^="ie"] .sapUiRbGDummy{
+html[data-sap-ui-browser^="ie"] .sapUiRbGDummy{ // TODO remove after 1.62 version
 	display: table-cell;
 	width: 1px;
 }
@@ -4031,7 +4031,7 @@ span.sapUiTabIco {
 	outline: none;
 	-webkit-user-select: none;  /* Chrome all / Safari all */
 	-moz-user-select: none;     /* Firefox all */
-	-ms-user-select: none;      /* IE 10+ */
+	-ms-user-select: none;      /* IE 10+ */// TODO remove after 1.62 version
 	user-select: none;
 }
 
@@ -4870,7 +4870,7 @@ html[dir=rtl] .sapUiTreeTitle {
 		font-weight: normal;
 		font-size: 12px;
 	}
-	
+
 	> .sapUiTf,
 	> .sapUiSearchField,
 	> .sapUiSearchField > .sapUiTfCombo,

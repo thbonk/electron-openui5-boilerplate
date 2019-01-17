@@ -1,11 +1,31 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 // Provides control sap.m.SelectionDetails.
-sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/Button', 'sap/ui/base/Interface', 'sap/ui/Device', 'sap/ui/core/library' ],
-	function(jQuery, library, Control, Button, Interface, Device, CoreLibrary) {
+sap.ui.define([
+	'./library',
+	'sap/ui/core/Control',
+	'sap/m/Button',
+	'sap/ui/base/Interface',
+	'sap/ui/Device',
+	'sap/ui/core/library',
+	'./SelectionDetailsRenderer',
+	"sap/base/util/uid",
+	"sap/ui/thirdparty/jquery"
+],
+function(
+	library,
+	Control,
+	Button,
+	Interface,
+	Device,
+	CoreLibrary,
+	SelectionDetailsRenderer,
+	uid,
+	jQuery
+) {
 	"use strict";
 
 	/**
@@ -15,11 +35,11 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 * @param {object} [mSettings] initial settings for the new control
 	 *
 	 * @class
-	 * The protected control provides a popover that displays the details of the items selected in the chart. This control should only be used in the suite.ui.commons.ChartContainer toolbar and sap.ui.comp.smartchart.SmartChart controls. Initially, the control is rendered as a button that opens the popup after clicking on it.
-	 * <b><i>Note:</i></b>It is protected and should ony be used within the framework itself.
+	 * The protected control provides a popover that displays the details of the items selected in the chart. This control should only be used in the toolbars of sap.suite.ui.commons.ChartContainer and sap.ui.comp.smartchart.SmartChart controls. Initially, the control is rendered as a button that opens the popup after clicking on it.
+	 * <b><i>Note:</i></b>It is protected and should only be used within the framework itself.
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @extends sap.ui.core.Control
 	 * @constructor
@@ -86,7 +106,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 					 */
 					direction: {type: "string"},
 					/**
-					 * The content of the currently viewed page that was previously added via {@link sap.m.SelectionDetails#navTo}.
+					 * The content of the currently viewed page that was previously added via {@link sap.m.SelectionDetailsFacade#navTo}.
 					 * This contains the content of the page before the navigation was triggered.
 					 * Can be null in case of first event triggering.
 					 */
@@ -131,6 +151,9 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	/* Lifecycle methods                                           */
 	/* =========================================================== */
 	SelectionDetails.prototype.init = function() {
+		// Indicates whether the labels are wrapped
+		this._bWrapLabels = false;
+
 		this._oRb = sap.ui.getCore().getLibraryResourceBundle("sap.m");
 		this.setAggregation("_button", new Button({
 			id: this.getId() + "-button",
@@ -213,6 +236,35 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 		return this;
 	};
 
+	/**
+	 * Returns <code>true</code> if the labels of the {@link sap.m.SelectionDetailsItemLine} elements are wrapped, <code>false</code> otherwise.
+	 * @returns {boolean} True if the labels of the {@link sap.m.SelectionDetailsItemLine} elements are wrapped, false otherwise.
+	 * @public
+	 * @function
+	 * @name sap.m.SelectionDetailsFacade#getWrapLabels
+	 */
+	SelectionDetails.prototype.getWrapLabels = function () {
+		return this._bWrapLabels;
+	};
+
+	/**
+	 * Enables line wrapping for the labels of the of the {@link sap.m.SelectionDetailsItemLine} elements.
+	 * @param {boolean} bWrap True to apply wrapping to the labels of the {@link sap.m.SelectionDetailsItemLine} elements.
+	 * @returns {sap.m.SelectionDetails} To ensure method chaining, returns SelectionDetails.
+	 * @public
+	 * @function
+	 * @name sap.m.SelectionDetailsFacade#setWrapLabels
+	 */
+	SelectionDetails.prototype.setWrapLabels = function (bWrap) {
+		var oPopover = this.getAggregation("_popover");
+		this._bWrapLabels = bWrap;
+
+		if (oPopover && oPopover.isOpen()) {
+			oPopover.invalidate();
+		}
+		return this;
+	};
+
 	/* =========================================================== */
 	/* Protected API methods                                       */
 	/* =========================================================== */
@@ -241,7 +293,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 * @private
 	 */
 	SelectionDetails.prototype._handleNavLazy = function(pageTitle, content, Page, Toolbar, ToolbarSpacer, Title, Button) {
-		var sPageId = this.getId() + "-page-for-" + content.getId() + "-uid-" + jQuery.sap.uid();
+		var sPageId = this.getId() + "-page-for-" + content.getId() + "-uid-" + uid();
 
 		this._setPopoverHeight(SelectionDetails._POPOVER_MAX_HEIGHT);
 		var oPage = new Page(sPageId, {
@@ -389,7 +441,8 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 		"attachActionPress", "detachActionPress",
 		"addAction", "removeAction", "removeAllActions",
 		"addActionGroup", "removeActionGroup", "removeAllActionGroups",
-		"navTo"
+		"navTo",
+		"getWrapLabels", "setWrapLabels"
 	];
 
 	/**
@@ -401,7 +454,9 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 		var oFacade = new Interface(this, SelectionDetails.prototype._aFacadeMethods, true);
 		oFacade.getItems = this._getItemFacades.bind(this);
 
-		this.getFacade = jQuery.sap.getter(oFacade);
+		this.getFacade = function() {
+			return oFacade;
+		};
 		return oFacade;
 	};
 
@@ -513,8 +568,11 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 		});
 		this.destroyAggregation("items", true);
 		for (var i = 0; i < aSelection.length; i++) {
-			oResult = fnFactory(aSelection[i].displayData, aSelection[i].data, aSelection[i].context, oData);
-			this.addAggregation("items", oResult, true);
+			oResult = fnFactory(aSelection[i].displayData, aSelection[i].data, aSelection[i].context, oData, aSelection[i].shapeString);
+			if (oResult) {
+				oResult._sMarkerShapeString = aSelection[i].shapeString;
+				this.addAggregation("items", oResult, true);
+			}
 		}
 		this.fireEvent("afterUpdate", {
 			items: this.getItems()
@@ -613,6 +671,12 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 					onAfterRendering: this._updatePopoverContentHeight.bind(this)
 				});
 			}
+
+			oPopover.addEventDelegate({
+				onBeforeRendering: function () {
+					this.getWrapLabels() ? oPopover.addStyleClass("sapMSDWrapLabels") : oPopover.removeStyleClass("sapMSDWrapLabels");
+				}.bind(this)
+			});
 
 			this.setAggregation("_popover", oPopover, true);
 		}

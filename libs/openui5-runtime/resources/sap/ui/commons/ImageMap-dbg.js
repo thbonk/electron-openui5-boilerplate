@@ -1,12 +1,20 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.ImageMap.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/delegate/ItemNavigation'],
-	function(jQuery, library, Control, ItemNavigation) {
+sap.ui.define([
+    'sap/ui/thirdparty/jquery',
+    './library',
+    'sap/ui/core/Control',
+    'sap/ui/core/delegate/ItemNavigation',
+    './ImageMapRenderer',
+    './Area',
+    'sap/ui/Device'
+],
+	function(jQuery, library, Control, ItemNavigation, ImageMapRenderer, Area, Device) {
 	"use strict";
 
 
@@ -22,11 +30,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
-	 * @deprecated Since version 1.38.
+	 * @deprecated as of version 1.38. There's not replacement because of the archaic design pattern.
 	 * @alias sap.ui.commons.ImageMap
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -76,15 +84,15 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	ImageMap.prototype.createArea = function() {
-		var oArea = new sap.ui.commons.Area();
+		var oArea = new Area();
 
 		for ( var i = 0; i < arguments.length; i++) {
 			var oContent = arguments[i];
 			var oArea;
-			if (oContent instanceof sap.ui.commons.Area) {
+			if (oContent instanceof Area) {
 				oArea = oContent;
 			} else {
-				oArea = new sap.ui.commons.Area(oContent);
+				oArea = new Area(oContent);
 			}
 			this.addArea(oArea);
 		}
@@ -105,7 +113,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			this.oItemNavigation = new ItemNavigation();
 		}
 
-		if (!!sap.ui.Device.browser.internet_explorer) {
+		if (Device.browser.msie) {
 
 			var that = this;
 			var aImageControls = [];
@@ -154,7 +162,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	ImageMap.prototype.exit = function() {
 		// Remove the item navigation delegate
 		if (this.oItemNavigation) {
-			if (!!sap.ui.Device.browser.internet_explorer) {
+			if (Device.browser.msie) {
 				for ( var i = 0; i < this.aImageControls.length; i++) {
 					this.aImageControls[i].removeDelegate(this.oItemNavigation);
 				}
@@ -170,4 +178,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 	return ImageMap;
 
-}, /* bExport= */ true);
+});

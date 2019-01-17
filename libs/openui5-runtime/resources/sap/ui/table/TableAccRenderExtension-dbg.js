@@ -1,13 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides helper sap.ui.table.TableAccRenderExtension.
-sap.ui.define([
-	"jquery.sap.global", "./TableExtension", "./library"
-], function(jQuery, TableExtension, library) {
+sap.ui.define(["./TableExtension", "./TableUtils", "./library"], function(TableExtension, TableUtils, library) {
 	"use strict";
 
 	// Shortcuts
@@ -41,7 +39,7 @@ sap.ui.define([
 	 * @class Extension for sap.ui.table.TableRenderer which handles ACC related things.
 	 * @extends sap.ui.table.TableExtension
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @constructor
 	 * @private
 	 * @alias sap.ui.table.TableAccRenderExtension
@@ -69,8 +67,7 @@ sap.ui.define([
 				return;
 			}
 
-			var oBundle = oTable._oResBundle,
-				sTableId = oTable.getId();
+			var sTableId = oTable.getId();
 
 			oRm.write("<div class='sapUiTableHiddenTexts' style='display:none;' aria-hidden='true'>");
 
@@ -80,19 +77,19 @@ sap.ui.define([
 			// aria description for the row and column count
 			_writeAccText(oRm, sTableId, "ariacount");
 			// aria description for toggling the edit mode
-			_writeAccText(oRm, sTableId, "toggleedit", oBundle.getText("TBL_TOGGLE_EDIT_KEY"));
+			_writeAccText(oRm, sTableId, "toggleedit", TableUtils.getResourceText("TBL_TOGGLE_EDIT_KEY"));
 			// aria description for select all button
-			_writeAccText(oRm, sTableId, "ariaselectall", oBundle.getText("TBL_SELECT_ALL"));
+			_writeAccText(oRm, sTableId, "ariaselectall", TableUtils.getResourceText("TBL_SELECT_ALL"));
 			// aria label for row headers
-			_writeAccText(oRm, sTableId, "ariarowheaderlabel", oBundle.getText("TBL_ROW_HEADER_LABEL"));
+			_writeAccText(oRm, sTableId, "ariarowheaderlabel", TableUtils.getResourceText("TBL_ROW_HEADER_LABEL"));
 			// aria label for group rows
-			_writeAccText(oRm, sTableId, "ariarowgrouplabel", oBundle.getText("TBL_ROW_GROUP_LABEL"));
+			_writeAccText(oRm, sTableId, "ariarowgrouplabel", TableUtils.getResourceText("TBL_ROW_GROUP_LABEL"));
 			// aria label for grand total sums
-			_writeAccText(oRm, sTableId, "ariagrandtotallabel", oBundle.getText("TBL_GRAND_TOTAL_ROW"));
+			_writeAccText(oRm, sTableId, "ariagrandtotallabel", TableUtils.getResourceText("TBL_GRAND_TOTAL_ROW"));
 			// aria label for group total sums
-			_writeAccText(oRm, sTableId, "ariagrouptotallabel", oBundle.getText("TBL_GROUP_TOTAL_ROW"));
+			_writeAccText(oRm, sTableId, "ariagrouptotallabel", TableUtils.getResourceText("TBL_GROUP_TOTAL_ROW"));
 			// aria label for column row header
-			_writeAccText(oRm, sTableId, "ariacolrowheaderlabel", oBundle.getText("TBL_ROW_COL_HEADER_LABEL"));
+			_writeAccText(oRm, sTableId, "ariacolrowheaderlabel", TableUtils.getResourceText("TBL_ROW_COL_HEADER_LABEL"));
 			// aria description for table row count
 			_writeAccText(oRm, sTableId, "rownumberofrows");
 			// aria description for table column count
@@ -100,29 +97,38 @@ sap.ui.define([
 			// aria description for table cell content
 			_writeAccText(oRm, sTableId, "cellacc");
 			// aria description for selected row
-			_writeAccText(oRm, sTableId, "ariarowselected", oBundle.getText("TBL_ROW_DESC_SELECTED"));
+			_writeAccText(oRm, sTableId, "ariarowselected", TableUtils.getResourceText("TBL_ROW_DESC_SELECTED"));
 			// aria description for column menu
-			_writeAccText(oRm, sTableId, "ariacolmenu", oBundle.getText("TBL_COL_DESC_MENU"));
+			_writeAccText(oRm, sTableId, "ariacolmenu", TableUtils.getResourceText("TBL_COL_DESC_MENU"));
 			// aria description for column header span
 			_writeAccText(oRm, sTableId, "ariacolspan");
 			// aria description for a filtered column
-			_writeAccText(oRm, sTableId, "ariacolfiltered", oBundle.getText("TBL_COL_DESC_FILTERED"));
+			_writeAccText(oRm, sTableId, "ariacolfiltered", TableUtils.getResourceText("TBL_COL_DESC_FILTERED"));
 			// aria description for a sorted column
-			_writeAccText(oRm, sTableId, "ariacolsortedasc", oBundle.getText("TBL_COL_DESC_SORTED_ASC"));
+			_writeAccText(oRm, sTableId, "ariacolsortedasc", TableUtils.getResourceText("TBL_COL_DESC_SORTED_ASC"));
 			// aria description for a sorted column
-			_writeAccText(oRm, sTableId, "ariacolsorteddes", oBundle.getText("TBL_COL_DESC_SORTED_DES"));
+			_writeAccText(oRm, sTableId, "ariacolsorteddes", TableUtils.getResourceText("TBL_COL_DESC_SORTED_DES"));
 			// aria description for invalid table (table with overlay)
-			_writeAccText(oRm, sTableId, "ariainvalid", oBundle.getText("TBL_TABLE_INVALID"));
+			_writeAccText(oRm, sTableId, "ariainvalid", TableUtils.getResourceText("TBL_TABLE_INVALID"));
+			// aria description for column vsisiblity menu item (Show Column)
+			_writeAccText(oRm, sTableId, "ariashowcolmenu", TableUtils.getResourceText("TBL_COL_VISBILITY_MENUITEM_SHOW"));
+			// aria description for column vsisiblity menu item (Hide Column)
+			_writeAccText(oRm, sTableId, "ariahidecolmenu", TableUtils.getResourceText("TBL_COL_VISBILITY_MENUITEM_HIDE"));
+			// aria description for row expansion via keyboard
+			_writeAccText(oRm, sTableId, "rowexpandtext", TableUtils.getResourceText("TBL_ROW_EXPAND_KEY"));
+			// aria description for row collapse via keyboard
+			_writeAccText(oRm, sTableId, "rowcollapsetext", TableUtils.getResourceText("TBL_ROW_COLLAPSE_KEY"));
 
 			var oSelectionMode = oTable.getSelectionMode();
 			if (oSelectionMode !== SelectionMode.None) {
 				// aria description for selection mode in table
-				_writeAccText(oRm, sTableId, "ariaselection", oBundle.getText(oSelectionMode == SelectionMode.MultiToggle ? "TBL_TABLE_SELECTION_MULTI" : "TBL_TABLE_SELECTION_SINGLE"));
+				_writeAccText(oRm, sTableId, "ariaselection",
+					TableUtils.getResourceText(oSelectionMode == SelectionMode.MultiToggle ? "TBL_TABLE_SELECTION_MULTI" : "TBL_TABLE_SELECTION_SINGLE"));
 			}
 
-			if (oTable.getFixedColumnCount() > 0) {
+			if (oTable.getComputedFixedColumnCount() > 0) {
 				// aria description for fixed columns
-				_writeAccText(oRm, sTableId, "ariafixedcolumn", oBundle.getText("TBL_FIXED_COLUMN"));
+				_writeAccText(oRm, sTableId, "ariafixedcolumn", TableUtils.getResourceText("TBL_FIXED_COLUMN"));
 			}
 
 			oRm.write("</div>");
@@ -135,8 +141,8 @@ sap.ui.define([
 		 * @param {sap.ui.table.Table} oTable Instance of the table.
 		 * @param {sap.ui.table.TableAccExtension.ELEMENTTYPES} sType The type of the table area to write the aria attributes for.
 		 * @param {Object} mParams Accessibility parameters.
-		 * @public
 		 * @see sap.ui.table.TableAccExtension#getAriaAttributesFor
+		 * @public
 		 */
 		writeAriaAttributesFor: function(oRm, oTable, sType, mParams) {
 			var oExtension = oTable._getAccExtension();
@@ -150,7 +156,7 @@ sap.ui.define([
 			var oValue, sKey;
 			for (sKey in mAttributes) {
 				oValue = mAttributes[sKey];
-				if (jQuery.isArray(oValue)) {
+				if (Array.isArray(oValue)) {
 					oValue = oValue.join(" ");
 				}
 				if (oValue) {
@@ -166,8 +172,8 @@ sap.ui.define([
 		 * @param {sap.ui.table.Table} oTable Instance of the table.
 		 * @param {sap.ui.table.Row} oRow Instance of the row.
 		 * @param {int} iRowIndex The index of the row.
-		 * @public
 		 * @see sap.ui.table.TableRenderer.writeRowSelectorContent
+		 * @public
 		 */
 		writeAccRowSelectorText: function(oRm, oTable, oRow, iRowIndex) {
 			if (!oTable._getAccExtension().getAccMode()) {
@@ -188,8 +194,8 @@ sap.ui.define([
 		 * @param {sap.ui.table.Table} oTable Instance of the table.
 		 * @param {sap.ui.table.Row} oRow Instance of the row.
 		 * @param {int} iRowIndex The index of the row.
-		 * @public
 		 * @see sap.ui.table.TableRenderer#writeRowHighlightContent
+		 * @public
 		 */
 		writeAccRowHighlightText: function(oRm, oTable, oRow, iRowIndex) {
 			if (!oTable._getAccExtension().getAccMode()) {

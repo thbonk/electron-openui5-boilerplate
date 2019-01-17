@@ -1,13 +1,13 @@
 /*
  * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.P13nItem.
 sap.ui.define([
-	'jquery.sap.global', './library', 'sap/ui/core/Element'
-], function(jQuery, library, Element) {
+	'./library', 'sap/ui/core/Element'
+], function(library, Element) {
 	"use strict";
 
 	/**
@@ -16,8 +16,8 @@ sap.ui.define([
 	 * @param {string} [sId] ID for the new control, generated automatically if no ID is given
 	 * @param {object} [mSettings] initial settings for the new control
 	 * @class Base type for <code>items</code> aggregation in <code>P13nPanel</code> control.
-	 * @extends sap.ui.core.Item
-	 * @version 1.50.6
+	 * @extends sap.ui.core.Element
+	 * @version 1.61.2
 	 * @constructor
 	 * @public
 	 * @since 1.26.0
@@ -66,12 +66,42 @@ sap.ui.define([
 				},
 
 				/**
+				 * data type instance of the column. Can be used instead of the type, precision, scale and formatSettings properties
+				 */
+				typeInstance: {
+					type: "object",
+					group: "Misc",
+					defaultValue: null,
+					since: "1.56"
+				},
+
+				/**
 				 * if type==numeric the precision will be used to format the entered value (maxIntegerDigits of the used Formatter)
 				 */
 				precision: {
 					type: "string",
 					group: "Misc",
 					defaultValue: null
+				},
+
+				/**
+				 * A JSON object containing the formatSettings which will be used to pass additional type/format settings for the entered value.
+				 * if type==time or date or datetime the object will be used for the DateFormatter, TimeFormatter or DateTimeFormatter
+				 *
+				 *<i>Below you can find a brief example</i>
+				 *
+				 * <pre><code>
+				 * {
+				 *		UTC: false,
+				 * 		style: "medium" //"short" or "long"
+				 * }
+				 * </code></pre>
+				 */
+				formatSettings: {
+					type: "object",
+					group: "Misc",
+					defaultValue: null,
+					since: "1.52"
 				},
 
 				/**
@@ -168,6 +198,15 @@ sap.ui.define([
 				press: {
 					type: "object",
 					defaultValue: null
+				},
+				/**
+				 * Defines additional information of the link.
+				 *
+				 * @since 1.56.0
+				 */
+				description: {
+					type: "string",
+					defaultValue: null
 				}
 			}
 		}
@@ -175,4 +214,4 @@ sap.ui.define([
 
 	return P13nItem;
 
-}, /* bExport= */true);
+});

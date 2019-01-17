@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 sap.ui.define([], function() {
@@ -17,25 +17,26 @@ sap.ui.define([], function() {
 		/**
 		 * @private
 		 */
-		display: function () {
+		_display: function () {
 			var iViewLevel,
 				sName;
 
 			// don't remember previous displays
 			this._oLastDisplayedTarget = null;
 
-			var oPromise = this._super.display.apply(this, arguments);
+			var oPromise = this._super._display.apply(this, arguments);
 
 			return oPromise.then(function(oViewInfo) {
 				// maybe a wrong name was provided then there is no last displayed target
 				if (this._oLastDisplayedTarget) {
 					iViewLevel = this._getViewLevel(this._oLastDisplayedTarget);
-					sName = this._oLastDisplayedTarget._oOptions.name;
+					sName = this._oLastDisplayedTarget._oOptions._name;
 				}
 
 				this._oTargetHandler.navigate({
 					viewLevel: iViewLevel,
-					navigationIdentifier: sName
+					navigationIdentifier: sName,
+					askHistory: true
 				});
 
 				return oViewInfo;

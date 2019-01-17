@@ -1,16 +1,22 @@
 /*
  * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-// Provides class sap.ui.dt.plugin.CutPaste.
 sap.ui.define([
 	'sap/ui/dt/Plugin',
 	'sap/ui/dt/plugin/ElementMover',
 	'sap/ui/dt/OverlayUtil',
-	'sap/ui/dt/OverlayRegistry'
-], function(Plugin, ElementMover, OverlayUtil, OverlayRegistry) {
+	'sap/ui/dt/OverlayRegistry',
+	"sap/ui/events/KeyCodes"
+], function(
+	Plugin,
+	ElementMover,
+	OverlayUtil,
+	OverlayRegistry,
+	KeyCodes
+) {
 	"use strict";
 
 	/**
@@ -19,9 +25,9 @@ sap.ui.define([
 	 * @param {string} [sId] id for the new object, generated automatically if no id is given
 	 * @param {object} [mSettings] initial settings for the new object
 	 * @class The CutPaste enables Cut & Paste functionality for the overlays based on aggregation types
-	 * @extends sap.ui.dt.Plugin"
+	 * @extends sap.ui.dt.Plugin
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -31,9 +37,6 @@ sap.ui.define([
 	var CutPaste = Plugin.extend("sap.ui.dt.plugin.CutPaste", /** @lends sap.ui.dt.plugin.CutPaste.prototype */
 	{
 		metadata: {
-			// ---- object ----
-
-			// ---- control specific ----
 			library: "sap.ui.dt",
 			properties: {
 				movableTypes: {
@@ -58,10 +61,14 @@ sap.ui.define([
 	 * @override
 	 */
 	CutPaste.prototype.registerElementOverlay = function(oOverlay) {
-		var oElement = oOverlay.getElementInstance();
+		var oElement = oOverlay.getElement();
 		//Register key down so that ESC is possible on all overlays
 		oOverlay.attachBrowserEvent("keydown", this._onKeyDown, this);
-		if (this.getElementMover().isMovableType(oElement) && this.getElementMover().checkMovable(oOverlay)) {
+		if (
+			this.getElementMover().isMovableType(oElement)
+			&& this.getElementMover().checkMovable(oOverlay)
+			&& !OverlayUtil.isInAggregationBinding(oOverlay, oElement.sParentAggregationName)
+		) {
 			oOverlay.setMovable(true);
 		}
 
@@ -106,22 +113,22 @@ sap.ui.define([
 	};
 
 	CutPaste.prototype._onKeyDown = function(oEvent) {
-		var oOverlay = sap.ui.getCore().byId(oEvent.currentTarget.id);
+		var oOverlay = OverlayRegistry.getOverlay(oEvent.currentTarget.id);
 
 		// on macintosh os cmd-key is used instead of ctrl-key
 		var bCtrlKey = sap.ui.Device.os.macintosh ? oEvent.metaKey : oEvent.ctrlKey;
 
-		if ((oEvent.keyCode === jQuery.sap.KeyCodes.X) && (oEvent.shiftKey === false) && (oEvent.altKey === false) && (bCtrlKey === true)) {
+		if ((oEvent.keyCode === KeyCodes.X) && (oEvent.shiftKey === false) && (oEvent.altKey === false) && (bCtrlKey === true)) {
 			// CTRL+X
 			this.cut(oOverlay);
 			oEvent.stopPropagation();
-		} else if ((oEvent.keyCode === jQuery.sap.KeyCodes.V) && (oEvent.shiftKey === false) && (oEvent.altKey === false) && (bCtrlKey === true)) {
+		} else if ((oEvent.keyCode === KeyCodes.V) && (oEvent.shiftKey === false) && (oEvent.altKey === false) && (bCtrlKey === true)) {
 			// CTRL+V
 			if (this.getElementMover().getMovedOverlay()) {
 				this.paste(oOverlay);
 			}
 			oEvent.stopPropagation();
-		} else if (oEvent.keyCode === jQuery.sap.KeyCodes.ESCAPE) {
+		} else if (oEvent.keyCode === KeyCodes.ESCAPE) {
 			// ESC
 			this.stopCutAndPaste();
 			oEvent.stopPropagation();
@@ -200,7 +207,7 @@ sap.ui.define([
 	};
 
 	CutPaste.prototype._isForSameElement = function(oCutOverlay, oTargetOverlay) {
-		return oTargetOverlay.getElementInstance() === oCutOverlay.getElementInstance();
+		return oTargetOverlay.getElement() === oCutOverlay.getElement();
 	};
 
 	CutPaste.prototype._getTargetZoneAggregation = function(oTargetOverlay) {

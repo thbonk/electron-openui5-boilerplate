@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -38,9 +38,11 @@ sap.ui.define([],
 			rm.write('>');
 
 			if (header) {
+				rm.write("<header>");
 				rm.write('<div id="' + control.getId() + '-header" class="sapTntToolPageHeader">');
 				rm.renderControl(header);
 				rm.write('</div>');
+				rm.write("</header>");
 			}
 
 			this.renderContentWrapper(rm, control);
@@ -64,6 +66,10 @@ sap.ui.define([],
 		};
 
 		ToolPageRenderer.renderAsideContent = function (rm, control) {
+			if (!control.getSideContent()) {
+				return;
+			}
+
 			var isDesktop = sap.ui.Device.system.desktop;
 			var sideContentAggregation = control.getAggregation('sideContent');
 			var isSideExpanded = control.getSideExpanded();
@@ -97,7 +103,7 @@ sap.ui.define([],
 
 				rm.write('<div class="sapTntToolPageMainContent">');
 				rm.write('<div class="sapTntToolPageMainContentWrapper">');
-				mainContentAggregations.forEach(rm.renderControl);
+				mainContentAggregations.forEach(rm.renderControl, rm);
 				rm.renderControl();
 				rm.write('</div>');
 				rm.write('</div>');

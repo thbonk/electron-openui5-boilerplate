@@ -1,15 +1,26 @@
 /*
  * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.QuickViewCard.
 sap.ui.define([
-	'jquery.sap.global', './library', 'sap/ui/core/Control',
-		'./QuickViewBase', './NavContainer', './Page', './ScrollContainer'],
-	function(jQuery, library, Control,
-			QuickViewBase, NavContainer, Page, ScrollContainer) {
+	'./library',
+	'./QuickViewBase',
+	'./NavContainer',
+	'./Page',
+	'./ScrollContainer',
+	'./QuickViewCardRenderer'
+],
+	function(
+	library,
+	QuickViewBase,
+	NavContainer,
+	Page,
+	ScrollContainer,
+	QuickViewCardRenderer
+	) {
 	"use strict";
 
 	/**
@@ -26,7 +37,7 @@ sap.ui.define([
 	 * @extends sap.m.QuickViewBase
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -46,7 +57,8 @@ sap.ui.define([
 							group : "Behavior",
 							defaultValue : true
 						}
-					}
+					},
+					designtime: "sap/m/designtime/QuickViewCard.designtime"
 
 				}
 			});
@@ -125,4 +137,4 @@ sap.ui.define([
 
 	return QuickViewCard;
 
-}, /* bExport= */true);
+});

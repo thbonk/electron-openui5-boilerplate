@@ -1,14 +1,41 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 //Provides control sap.ui.unified.Calendar.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate/ItemNavigation',
-		'sap/ui/model/type/Date', 'sap/ui/unified/calendar/CalendarUtils', 'sap/ui/unified/calendar/CalendarDate', 'sap/ui/core/date/UniversalDate', 'sap/ui/unified/library'],
-	function(jQuery, Control, ItemNavigation, Date1, CalendarUtils, CalendarDate, UniversalDate, library) {
+sap.ui.define([
+	'sap/ui/core/Control',
+	'sap/ui/Device',
+	'sap/ui/core/delegate/ItemNavigation',
+	'sap/ui/unified/calendar/CalendarUtils',
+	'sap/ui/unified/calendar/CalendarDate',
+	'sap/ui/core/date/UniversalDate',
+	'sap/ui/unified/library',
+	'sap/ui/core/format/DateFormat',
+	'sap/ui/core/library',
+	"./YearPickerRenderer",
+	"sap/ui/events/KeyCodes",
+	"sap/ui/thirdparty/jquery"
+], function(
+	Control,
+	Device,
+	ItemNavigation,
+	CalendarUtils,
+	CalendarDate,
+	UniversalDate,
+	library,
+	DateFormat,
+	coreLibrary,
+	YearPickerRenderer,
+	KeyCodes,
+	jQuery
+) {
 	"use strict";
+
+	// shortcut for sap.ui.core.CalendarType
+	var CalendarType = coreLibrary.CalendarType;
 
 	/*
 	* Inside the YearPicker CalendarDate objects are used. But in the API JS dates are used.
@@ -25,7 +52,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 	 * renders a YearPicker with ItemNavigation
 	 * This is used inside the calendar. Not for stand alone usage
 	 * @extends sap.ui.core.Control
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -41,7 +68,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 			/**
 			 * The year is initial focused and selected
 			 * The value must be between 0 and 9999
-			 * @deprecated Since version 1.34.0 Use <code>date</code> instead
+			 * @deprecated as of version 1.34.0, replaced by <code>date</code> property
 			 */
 			year : {type : "int", group : "Data", defaultValue : 2000},
 
@@ -96,8 +123,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 		this.setProperty("primaryCalendarType", sCalendarType);
 
 		// to format year with era in Japanese
-		this._oYearFormat = sap.ui.core.format.DateFormat.getDateInstance({format: "y", calendarType: sCalendarType});
-		this._oFormatYyyymmdd = sap.ui.core.format.DateFormat.getInstance({pattern: "yyyyMMdd", calendarType: sap.ui.core.CalendarType.Gregorian});
+		this._oYearFormat = DateFormat.getDateInstance({format: "y", calendarType: sCalendarType});
+		this._oFormatYyyymmdd = DateFormat.getInstance({pattern: "yyyyMMdd", calendarType: CalendarType.Gregorian});
 
 		this._oMinDate = CalendarUtils._minDate(this.getPrimaryCalendarType());
 		this._oMaxDate = CalendarUtils._maxDate(this.getPrimaryCalendarType());
@@ -179,7 +206,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 
 		this.setProperty("primaryCalendarType", sCalendarType);
 
-		this._oYearFormat = sap.ui.core.format.DateFormat.getDateInstance({format: "y", calendarType: sCalendarType});
+		this._oYearFormat = DateFormat.getDateInstance({format: "y", calendarType: sCalendarType});
 
 		if (this._oDate) {
 			this._oDate = new CalendarDate(this._oDate, sCalendarType);
@@ -242,12 +269,26 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 
 	};
 
+	YearPicker.prototype.onmousedown = function (oEvent) {
+		this._oMousedownPosition = {
+			clientX: oEvent.clientX,
+			clientY: oEvent.clientY
+		};
+	};
+
 	YearPicker.prototype.onmouseup = function(oEvent){
 
 		// fire select event on mouseup to prevent closing MonthPicker during click
 
 		if (this._bMousedownChange) {
 			this._bMousedownChange = false;
+			this.fireSelect();
+		} else if (Device.support.touch
+			&& this._isValueInThreshold(this._oMousedownPosition.clientX, oEvent.clientX, 10)
+			&& this._isValueInThreshold(this._oMousedownPosition.clientY, oEvent.clientY, 10)
+		) {
+			var iIndex = this._oItemNavigation.getFocusedIndex();
+			_selectYear.call(this, iIndex);
 			this.fireSelect();
 		}
 
@@ -273,6 +314,18 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 
 		return oFirstDate;
 
+	};
+
+	/**
+	 * Returns if value is in predefined threshold.
+	 *
+	 * @private
+	 */
+	YearPicker.prototype._isValueInThreshold = function (iReference, iValue, iThreshold) {
+		var iLowerThreshold = iReference - iThreshold,
+			iUpperThreshold = iReference + iThreshold;
+
+		return iValue >= iLowerThreshold && iValue <= iUpperThreshold;
 	};
 
 	/**
@@ -391,8 +444,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 
 	function _handleMousedown(oEvent, iIndex){
 
-		if (oEvent.button) {
-			// only use left mouse button
+		if (oEvent.button || Device.support.touch) {
+			// only use left mouse button or not touch
 			return;
 		}
 
@@ -420,7 +473,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 			switch (oEvent.type) {
 			case "sapnext":
 			case "sapnextmodifiers":
-				if (oEvent.keyCode == jQuery.sap.KeyCodes.ARROW_DOWN && iColumns < iYears) {
+				if (oEvent.keyCode == KeyCodes.ARROW_DOWN && iColumns < iYears) {
 					//same column in first row of next group (only if more than one row)
 					_updatePage.call(this, true, this._oItemNavigation.getFocusedIndex() - iYears + iColumns, true);
 				} else {
@@ -431,7 +484,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 
 			case "sapprevious":
 			case "sappreviousmodifiers":
-				if (oEvent.keyCode == jQuery.sap.KeyCodes.ARROW_UP && iColumns < iYears) {
+				if (oEvent.keyCode == KeyCodes.ARROW_UP && iColumns < iYears) {
 					//same column in last row of previous group (only if more than one row)
 					_updatePage.call(this, false, iYears - iColumns + this._oItemNavigation.getFocusedIndex(), true);
 				} else {
@@ -593,4 +646,4 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 
 	return YearPicker;
 
-}, /* bExport= */ true);
+});

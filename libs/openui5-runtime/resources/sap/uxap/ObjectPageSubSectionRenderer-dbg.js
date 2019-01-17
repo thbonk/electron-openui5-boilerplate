@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -14,7 +14,8 @@ sap.ui.define(function () {
 	var ObjectPageSubSectionRenderer = {};
 
 	ObjectPageSubSectionRenderer.render = function (oRm, oControl) {
-		var aActions, bHasTitle, bHasTitleLine, bHasActions, bUseTitleOnTheLeft, bHasVisibleActions;
+		var aActions, bHasTitle, bHasTitleLine, bHasActions, bUseTitleOnTheLeft, bHasVisibleActions,
+			bAccessibilityOn = sap.ui.getCore().getConfiguration().getAccessibility();
 
 		if (!oControl.getVisible() || !oControl._getInternalVisible()) {
 			return;
@@ -29,10 +30,23 @@ sap.ui.define(function () {
 		oRm.write("<div ");
 		oRm.writeAttribute("role", "region");
 		oRm.writeControlData(oControl);
+
+		if (oControl._getHeight()) {
+		    oRm.writeAttribute("style", "height:" + oControl._getHeight() + ";");
+		}
 		oRm.addClass("sapUxAPObjectPageSubSection");
 		oRm.addClass("ui-helper-clearfix");
 		oRm.writeClasses(oControl);
 		oRm.writeClasses();
+
+		if (bAccessibilityOn) {
+			if (bHasTitle) {
+				oRm.writeAttributeEscaped("aria-labelledby", oControl.getId() + "-headerTitle");
+			} else {
+				oRm.writeAttribute("aria-label", sap.uxap.ObjectPageSubSection._getLibraryResourceBundle().getText("SUBSECTION_CONTROL_NAME"));
+			}
+		}
+
 		oRm.write(">");
 
 		if (bHasTitleLine) {
@@ -44,7 +58,7 @@ sap.ui.define(function () {
 			}
 
 			bUseTitleOnTheLeft = oControl._getUseTitleOnTheLeft();
-			if (bUseTitleOnTheLeft && oControl._onDesktopMediaRange()) {
+			if (bUseTitleOnTheLeft) {
 				oRm.addClass("titleOnLeftLayout");
 			}
 			oRm.writeAttributeEscaped("id", oControl.getId() + "-header");
@@ -75,7 +89,7 @@ sap.ui.define(function () {
 				oRm.writeClasses();
 				oRm.writeAttribute("data-sap-ui-customfastnavgroup", true);
 				oRm.write(">");
-				aActions.forEach(oRm.renderControl);
+				aActions.forEach(oRm.renderControl, oRm);
 				oRm.write("</div>");
 			}
 

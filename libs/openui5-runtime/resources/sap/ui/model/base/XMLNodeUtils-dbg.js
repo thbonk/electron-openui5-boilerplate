@@ -1,12 +1,16 @@
 /*
  * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-	'jquery.sap.global', 'sap/ui/base/DataType', 'sap/ui/base/ManagedObject'
-], function(jQuery, DataType, ManagedObject) {
+	'sap/ui/thirdparty/jquery',
+	'sap/ui/base/DataType',
+	'sap/ui/base/ManagedObject',
+	'sap/base/util/ObjectPath',
+	'sap/base/Log'
+], function(jQuery, DataType, ManagedObject, ObjectPath, Log) {
 	"use strict";
 
 	return {
@@ -48,13 +52,26 @@ sap.ui.define([
 			sClassName = sClassName || sNamespaceURI + "." + sLocalName;
 
 			// ensure that control and library are loaded
-			jQuery.sap.require(sClassName); // make sure oClass.getMetadata() exists
-			var oClassObject = jQuery.sap.getObject(sClassName);
-			if (oClassObject) {
-				return oClassObject;
+			var fnClass = sap.ui.requireSync(sClassName.replace(/\./g, "/")); // make sure oClass.getMetadata() exists
+			fnClass = fnClass || ObjectPath.get(sClassName);
+			if (fnClass) {
+				return fnClass;
 			} else {
-				jQuery.sap.log.error("Can't find object class '" + sClassName + "' for XML-view", "", "XMLTemplateProcessor.js");
+				Log.error("Can't find object class '" + sClassName + "' for XML-view", "", "XMLTemplateProcessor.js");
 			}
+		},
+		getChildren: function(oNode) {
+			var i, oNodeList = oNode.childNodes, n = oNodeList.length, aChildren = [];
+
+			// cache live collection so that removing a template node does not hurt
+			for (i = 0; i < n; i++) {
+				// process only ELEMENT_NODEs
+				if (oNodeList.item(i).nodeType === 1 /* Node.ELEMENT_NODE */) {
+					aChildren.push(oNodeList.item(i));
+				}
+			}
+
+			return aChildren;
 		}
 
 	};

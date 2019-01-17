@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/ui/commons/CalloutBaseRenderer', 'sap/ui/core/Renderer', 'sap/ui/core/IconPool'],
-	function(jQuery, CalloutBaseRenderer, Renderer, IconPool) {
+sap.ui.define(['sap/ui/commons/CalloutBaseRenderer', 'sap/ui/core/Renderer', 'sap/ui/core/IconPool'],
+	function(CalloutBaseRenderer, Renderer, IconPool) {
 	"use strict";
 
 
@@ -19,12 +19,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/CalloutBaseRenderer', 'sap/u
 	/**
 	 * Renders the HTML for the CalloutBase content, using the provided {@link sap.ui.core.RenderManager}.
 	 *
-	 * @param {sap.ui.core.RenderManager} oRenderManager the RenderManager that can be used for writing to the Render-Output-Buffer
+	 * @param {sap.ui.core.RenderManager} rm the RenderManager that can be used for writing to the Render-Output-Buffer
 	 * @param {sap.ui.core.Control} oControl an object representation of the control that should be rendered
 	 */
-	QuickViewRenderer.renderContent = function(oRenderManager, oControl){
-
-		var rm = oRenderManager;
+	QuickViewRenderer.renderContent = function(rm, oControl){
 
 		// accessibility
 		var bAcc = sap.ui.getCore().getConfiguration().getAccessibility();
@@ -145,7 +143,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/CalloutBaseRenderer', 'sap/u
 	 * Renders the HTML for the QuickView body content (form or )
 	 *
 	 * @param {sap.ui.core.RenderManager}
-	 *            oRenderManager the RenderManager that can be used for writing to
+	 *            rm the RenderManager that can be used for writing to
 	 *            the Render-Output-Buffer
 	 * @param {sap.ui.core.Control}
 	 *            oControl an object representation of the control that should be

@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -11,8 +11,17 @@
  */
 
 // Provides class sap.ui.core.delegate.ItemNavigation
-sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
-	function(jQuery, EventProvider) {
+sap.ui.define([
+	'sap/ui/base/EventProvider',
+	"sap/base/assert",
+	"sap/base/Log",
+	"sap/ui/dom/containsOrEquals",
+	"sap/ui/events/KeyCodes",
+	"sap/ui/thirdparty/jquery",
+	// jQuery custom selectors ":sapFocusable"
+	"sap/ui/dom/jquery/Selectors"
+],
+	function(EventProvider, assert, Log, containsOrEquals, KeyCodes, jQuery) {
 	"use strict";
 	/* eslint-disable no-lonely-if */
 
@@ -73,8 +82,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 * @param {Element[]} aItemDomRefs Array of DOM references representing the items for the navigation
 	 * @param {boolean} [bNotInTabChain=false] Whether the selected element should be in the tab chain or not
 	 *
-	 * @version 1.50.6
-	 * @constructor
+	 * @version 1.61.2
 	 * @alias sap.ui.core.delegate.ItemNavigation
 	 * @public
 	 */
@@ -231,7 +239,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 * Check whether given event has disabled modifier or not
 	 *
 	 * @param {jQuery.Event} oEvent jQuery event
-	 * @return {Boolean} Flag if disabled modifiers are set
+	 * @return {boolean} Flag if disabled modifiers are set
 	 * @public
 	 */
 	ItemNavigation.prototype.hasDisabledModifier = function(oEvent) {
@@ -299,7 +307,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 * @public
 	 */
 	ItemNavigation.prototype.setItemDomRefs = function(aItemDomRefs) {
-		jQuery.sap.assert(typeof aItemDomRefs === "object" && typeof aItemDomRefs.length === "number", "aItemDomRefs must be an array of DOM elements");
+		assert(typeof aItemDomRefs === "object" && typeof aItemDomRefs.length === "number", "aItemDomRefs must be an array of DOM elements");
 		this.aItemDomRefs = aItemDomRefs;
 
 		if (this.iFocusedIndex > aItemDomRefs.length - 1) {
@@ -518,7 +526,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 */
 	ItemNavigation.prototype.focusItem = function(iIndex, oEvent) {
 
-		jQuery.sap.log.info("FocusItem: " + iIndex + " iFocusedIndex: " + this.iFocusedIndex, "focusItem", "ItemNavigation");
+		Log.info("FocusItem: " + iIndex + " iFocusedIndex: " + this.iFocusedIndex, "focusItem", "ItemNavigation");
 
 		if (iIndex == this.iFocusedIndex && this.aItemDomRefs[this.iFocusedIndex] == document.activeElement) {
 			this.fireEvent(ItemNavigation.Events.FocusAgain, {
@@ -533,11 +541,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 			if (this.bTableMode) {
 				var iCol = iIndex % this.iColumns;
 				var iOldIndex = iIndex;
-				if (oEvent && oEvent.keyCode == jQuery.sap.KeyCodes.ARROW_RIGHT) {
+				if (oEvent && oEvent.keyCode == KeyCodes.ARROW_RIGHT) {
 					if (iCol < this.iColumns - 1) {
 						iIndex += this.oConfiguration.getRTL() ? -1 : 1;
 					}
-				} else if (oEvent && oEvent.keyCode == jQuery.sap.KeyCodes.ARROW_LEFT) {
+				} else if (oEvent && oEvent.keyCode == KeyCodes.ARROW_LEFT) {
 					if (iCol > 1) {
 						iIndex -= this.oConfiguration.getRTL() ? -1 : 1;
 					}
@@ -568,8 +576,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 			oItemItemNavigation._sFocusEvent = oEvent.type;
 		}
 
-		jQuery.sap.log.info("Set Focus on ID: " + this.aItemDomRefs[this.iFocusedIndex].id, "focusItem", "ItemNavigation");
-		jQuery.sap.focus(this.aItemDomRefs[this.iFocusedIndex]);
+		Log.info("Set Focus on ID: " + this.aItemDomRefs[this.iFocusedIndex].id, "focusItem", "ItemNavigation");
+		this.aItemDomRefs[this.iFocusedIndex].focus();
 
 		this.fireEvent(ItemNavigation.Events.AfterFocus, {
 			index: iIndex,
@@ -763,7 +771,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 * @private
 	 */
 	ItemNavigation.prototype.onsapfocusleave = function(oEvent) {
-		if (!oEvent.relatedControlId || !jQuery.sap.containsOrEquals(this.oDomRef, sap.ui.getCore().byId(oEvent.relatedControlId).getFocusDomRef())) {
+		if (!oEvent.relatedControlId || !containsOrEquals(this.oDomRef, sap.ui.getCore().byId(oEvent.relatedControlId).getFocusDomRef())) {
 
 			// entirely leaving the control handled by this ItemNavigation instance
 			var iIndex;
@@ -791,7 +799,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 					}
 				}
 
-				if (!oEvent.relatedControlId || jQuery.sap.containsOrEquals(oParentDomRef, sap.ui.getCore().byId(oEvent.relatedControlId).getFocusDomRef())) {
+				if (!oEvent.relatedControlId || containsOrEquals(oParentDomRef, sap.ui.getCore().byId(oEvent.relatedControlId).getFocusDomRef())) {
 					jQuery(this.aItemDomRefs[this.iFocusedIndex]).attr("tabIndex", -1);
 				}
 			}
@@ -841,12 +849,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 
 		};
 
-		if (jQuery.sap.containsOrEquals(this.oDomRef, oSource)) {
+		if (containsOrEquals(this.oDomRef, oSource)) {
 
 			// the mouse down occured inside the main dom ref
 			for (var i = 0; i < this.aItemDomRefs.length;i++) {
 				var oItem = this.aItemDomRefs[i];
-				if (jQuery.sap.containsOrEquals(oItem,oSource)) {
+				if (containsOrEquals(oItem,oSource)) {
 					if (!this.bTableMode) {
 
 						// the mousedown occured inside of an item
@@ -893,7 +901,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 */
 	ItemNavigation.prototype.onsapnext = function(oEvent) {
 
-		if (!jQuery.sap.containsOrEquals(this.oDomRef, oEvent.target)) {
+		if (!containsOrEquals(this.oDomRef, oEvent.target)) {
 
 			// current element is not part of the navigation content
 			return;
@@ -922,7 +930,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 					iRow = Math.floor(iIndex / this.iColumns),
 					iCol = iIndex % this.iColumns;
 
-				if (oEvent.keyCode == jQuery.sap.KeyCodes.ARROW_DOWN) {
+				if (oEvent.keyCode == KeyCodes.ARROW_DOWN) {
 					if (iRow  < iRowCount - 1) {
 						iIndex += this.iColumns;
 					}
@@ -933,7 +941,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 				}
 			} else {
 				do {
-					if (this.iColumns > 1 && oEvent.keyCode == jQuery.sap.KeyCodes.ARROW_DOWN) {
+					if (this.iColumns > 1 && oEvent.keyCode == KeyCodes.ARROW_DOWN) {
 						if ((iIndex + this.iColumns) >= this.aItemDomRefs.length) {
 							if (!this.bNoColumnChange) {
 								// on bottom -> begin on top of next column
@@ -1026,7 +1034,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 */
 	ItemNavigation.prototype.onsapprevious = function(oEvent) {
 
-		if (!jQuery.sap.containsOrEquals(this.oDomRef, oEvent.target)) {
+		if (!containsOrEquals(this.oDomRef, oEvent.target)) {
 
 			// current element is not part of the navigation content
 			return;
@@ -1054,7 +1062,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 				var iRow = Math.floor(iIndex / this.iColumns);
 				iCol = iIndex % this.iColumns;
 
-				if (oEvent.keyCode == jQuery.sap.KeyCodes.ARROW_UP) {
+				if (oEvent.keyCode == KeyCodes.ARROW_UP) {
 					if (iRow  > 0) {
 						iIndex -= this.iColumns;
 					}
@@ -1065,7 +1073,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 				}
 			} else {
 				do {
-					if (this.iColumns > 1 && oEvent.keyCode == jQuery.sap.KeyCodes.ARROW_UP) {
+					if (this.iColumns > 1 && oEvent.keyCode == KeyCodes.ARROW_UP) {
 						if ((iIndex - this.iColumns) < 0) {
 							if (!this.bNoColumnChange) {
 								// on top -> begin on end of previous column
@@ -1168,7 +1176,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 */
 	ItemNavigation.prototype.onsappageup = function(oEvent) {
 
-		if (!jQuery.sap.containsOrEquals(this.oDomRef, oEvent.target)) {
+		if (!containsOrEquals(this.oDomRef, oEvent.target)) {
 
 			// current element is not part of the navigation content
 			return;
@@ -1231,7 +1239,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 */
 	ItemNavigation.prototype.onsappagedown = function(oEvent) {
 
-		if (!jQuery.sap.containsOrEquals(this.oDomRef, oEvent.target)) {
+		if (!containsOrEquals(this.oDomRef, oEvent.target)) {
 
 			// current element is not part of the navigation content
 			return;
@@ -1295,7 +1303,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 */
 	ItemNavigation.prototype.onsaphome = function(oEvent) {
 
-		if (!jQuery.sap.containsOrEquals(this.oDomRef, oEvent.target)) {
+		if (!containsOrEquals(this.oDomRef, oEvent.target)) {
 
 			// current element is not part of the navigation content
 			// or shift or alt key is pressed
@@ -1369,7 +1377,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 */
 	ItemNavigation.prototype.onsapend = function(oEvent) {
 
-		if (!jQuery.sap.containsOrEquals(this.oDomRef, oEvent.target)) {
+		if (!containsOrEquals(this.oDomRef, oEvent.target)) {
 
 			// current element is not part of the navigation content
 			// or shift or alt key is pressed
@@ -1459,7 +1467,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 */
 	ItemNavigation.prototype.onkeyup = function(oEvent) {
 
-		if (oEvent.keyCode == jQuery.sap.KeyCodes.F2) {
+		if (oEvent.keyCode == KeyCodes.F2) {
 
 			var $DomRef = jQuery(this.oDomRef);
 

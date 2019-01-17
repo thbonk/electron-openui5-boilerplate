@@ -1,39 +1,47 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-	"sap/ui/fl/descriptorRelated/api/DescriptorInlineChangeFactory",
 	"sap/ui/fl/Utils",
-	"sap/ui/fl/LrepConnector",
 	"sap/ui/fl/descriptorRelated/internal/Utils",
-	"sap/ui/fl/registry/Settings"
-], function(DescriptorInlineChangeFactory, FlexUtils, LrepConnector, Utils, Settings) {
+	"sap/ui/fl/registry/Settings",
+	"sap/ui/thirdparty/jquery",
+	"sap/base/util/merge"
+], function(
+	FlexUtils,
+	Utils,
+	Settings,
+	jQuery,
+	fnBaseMerge
+) {
 	"use strict";
 
 	/**
-	 * Descriptor Variant
+	 * App variant/CDM app config
 	 *
 	 * @param {object} mParameters parameters
-	 * @param {string} mParameters.id the id of the descriptor variant id to be provided for a new descriptor variant and for deleting a descriptor variant
-	 * @param {string} mParameters.reference the referenced descriptor or descriptor variant id to be provided when creating a new descriptor variant
-	 * @param {boolean} [mParameters.isAppVariantRoot=true]
-	 * @param {object} mFileContent file content of the existing descriptor variant to be provided if descriptor variant shall be created from an existing
-	 * @param {boolean} [bDeletion=false] deletion indicator to be provided if descriptor variant shall be deleted
+	 * @param {string} mParameters.id the id of the app variant/CDM app config id to be provided for a new app variant/CDM app config and for deleting a app variant/CDM app config
+	 * @param {string} mParameters.reference the proposed referenced descriptor or app variant/CDM app config id (might be overwritten by the backend) to be provided when creating a new app variant/CDM app config
+	 * @param {string} [mParameters.version] version of the app variant (optional)
+	 * @param {string} [mParameters.layer='CUSTOMER] the proposed layer (might be overwritten by the backend) when creating a new app variant/CDM app config
+	 * @param {boolean} [mParameters.isAppVariantRoot=true] indicator whether this is an app variant, default is true
+	 * @param {object} mFileContent file content of the existing app variant/CDM app config to be provided if app variant/CDM app config shall be created from an existing
+	 * @param {boolean} [bDeletion=false] deletion indicator to be provided if app variant/CDM app config shall be deleted
 	 * @param {sap.ui.fl.registry.Settings} oSettings settings
 	 *
 	 * @constructor
 	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorVariant
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @private
 	 * @sap-restricted
 	 */
 
 
-	//Descriptor Variant
+	//App variant/CDM app config
 	var DescriptorVariant = function(mParameters, mFileContent, bDeletion, oSettings) {
 		if (mParameters && bDeletion) {
 			this._id = mParameters.id;
@@ -44,27 +52,26 @@ sap.ui.define([
 			this._id = mParameters.id;
 			this._reference = mParameters.reference;
 			this._layer = mParameters.layer;
-			if ( typeof mParameters.isAppVariantRoot != undefined){
+			if ( typeof mParameters.isAppVariantRoot != "undefined"){
 				this._isAppVariantRoot = mParameters.isAppVariantRoot;
 			}
-			if ( typeof mParameters.referenceVersion != undefined){
+			if ( typeof mParameters.referenceVersion != "undefined"){
 				this._referenceVersion = mParameters.referenceVersion;
 			}
 			this._mode = 'NEW';
-
+			this._skipIam = mParameters.skipIam;
+			this._version = mParameters.version;
 		} else if (mFileContent) {
 			this._mMap = mFileContent;
 			this._mode = 'FROM_EXISTING';
-
 		}
-
 		this._oSettings = oSettings;
 		this._sTransportRequest = null;
 		this._content = [];
 	};
 
 	/**
-	 * Adds a descriptor inline change to the descriptor variant
+	 * Adds a descriptor inline change to the app variant/CDM app config
 	 *
 	 * @param {sap.ui.fl.descriptorRelated.api.DescriptorInlineChange} oDescriptorInlineChange the inline change
 	 *
@@ -79,7 +86,7 @@ sap.ui.define([
 
 			var fSetHostingIdForTextKey = function(_oDescriptorInlineChange, sId){
 				//providing "hosting id" for appdescr_app_setTitle and similar
-				//"hosting id" is descriptor variant id
+				//"hosting id" is app variant/CDM app config id
 				if ( _oDescriptorInlineChange["setHostingIdForTextKey"] ){
 					_oDescriptorInlineChange.setHostingIdForTextKey(sId);
 				}
@@ -144,9 +151,9 @@ sap.ui.define([
 	};
 
 	/**
-	 * Submits the descriptor variant to the backend
+	 * Submits the app variant to the backend
 	 *
-	 * @return {Promise} resolving when submitting the descriptor variant was successful
+	 * @return {Promise} resolving when submitting the app variant was successful
 	 *
 	 * @private
 	 * @sap-restricted
@@ -179,22 +186,55 @@ sap.ui.define([
 		} else if ( this._oSettings.isAtoEnabled() && FlexUtils.isCustomerDependentLayer(mMap.layer) ) {
 			sRoute += '?changelist=ATO_NOTIFICATION';
 		}
+		if (this._skipIam) {
+			sRoute += ( sRoute.indexOf('?') < 0 ) ? '?' : '&';
+				sRoute += 'skipIam=' + this._skipIam;
+		}
 
-		var oLREPConnector = LrepConnector.createConnector();
+		return Utils.sendRequest(sRoute, sMethod, mMap);
+	};
 
-		return oLREPConnector.send(sRoute, sMethod, mMap);
+	DescriptorVariant.prototype.getId = function() {
+		return this._id;
 	};
 
 	/**
-	 * Returns a copy of the JSON object of the descriptor variant
+	 * Set the reference of the app variant/CDM app config
 	 *
-	 * @return {object} copy of JSON object of the descriptor variant
+	 * @param {string} sReference the new reference
+	 *
+	 * @private
+	 * @sap-restricted
+	 */
+	DescriptorVariant.prototype.setReference = function(sReference) {
+		if (sReference === undefined || typeof sReference !== "string") {
+			throw new Error("No parameter sReference of type string provided");
+		}
+		this._reference = sReference;
+	};
+
+	DescriptorVariant.prototype.getReference = function() {
+		return this._reference;
+	};
+
+	DescriptorVariant.prototype.getNamespace = function() {
+		return this._getMap().namespace;
+	};
+
+	DescriptorVariant.prototype.getSettings = function() {
+		return this._oSettings;
+	};
+
+	/**
+	 * Returns a copy of the JSON object of the app variant/CDM app config
+	 *
+	 * @return {object} copy of JSON object of the app variant/CDM app config
 	 *
 	 * @private
 	 * @sap-restricted
 	 */
 	DescriptorVariant.prototype.getJson = function() {
-		return jQuery.extend(true, {}, this._getMap());
+		return fnBaseMerge({}, this._getMap());
 	};
 
 	DescriptorVariant.prototype._getMap = function() {
@@ -212,11 +252,17 @@ sap.ui.define([
 
 					"content": this._content
 				};
-				if ( typeof this._isAppVariantRoot != undefined ) {
+				if ( typeof this._isAppVariantRoot != "undefined" ) {
 					mResult.isAppVariantRoot = this._isAppVariantRoot;
 				}
-				if ( typeof this._referenceVersion != undefined ) {
+				if (mResult.isAppVariantRoot != undefined && !mResult.isAppVariantRoot) {
+					mResult.fileType = "cdmapp_config";
+				}
+				if ( typeof this._referenceVersion != "undefined" ) {
 					mResult.referenceVersion = this._referenceVersion;
+				}
+				if (this._version){
+					mResult.version = this._version;
 				}
 				return mResult;
 
@@ -234,11 +280,11 @@ sap.ui.define([
 	};
 
 	/**
-	 * Factory for Descriptor Variants
+	 * Factory for App variant/CDM app configs
 	 * @namespace
 	 * @alias sap.ui.fl.descriptorRelated.api.DescriptorVariantFactory
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @private
 	 * @sap-restricted
 	 */
@@ -246,19 +292,20 @@ sap.ui.define([
 
 	DescriptorVariantFactory._getDescriptorVariant = function(sId) {
 		var sRoute = '/sap/bc/lrep/appdescr_variants/' + sId;
-		var oLREPConnector = LrepConnector.createConnector();
-		return oLREPConnector.send(sRoute, 'GET');
+		return Utils.sendRequest(sRoute, 'GET');
 	};
 
 	/**
-	 * Creates a new descriptor variant
+	 * Creates a new app variant/CDM app config
 	 *
 	 * @param {object} mParameters the parameters
-	 * @param {string} mParameters.reference the referenced descriptor or descriptor variant id
-	 * @param {string} mParameters.id the id for the descriptor variant id
-	 * @param {string} [mParameters.layer='CUSTOMER'] the layer for the descriptor variant
-	 * @param {boolean} [mParameters.isAppVariantRoot=true] if descriptor variant is 'appVariantRoot'
-	 *
+	 * @param {string} mParameters.reference the proposed referenced descriptor or app variant/CDM app config id (might be overwritten by the backend)
+	 * @param {string} mParameters.id the id for the app variant/CDM app config id
+	 * @param {string} mParameters.version optional version of the app variant
+	 * @param {string} [mParameters.layer='CUSTOMER'] the proposed layer for the app variant/CDM app config (might be overwritten by the backend)
+	 * @param {boolean} [mParameters.isAppVariantRoot=true] indicator whether this is an app variant, default is true
+	 * @param {boolean} [mParameters.skipIam=false] indicator whether the default IAM item creation and registration is skipped
+
 	 * @return {Promise} resolving the new DescriptorVariant instance
 	 *
 	 * @private
@@ -267,6 +314,10 @@ sap.ui.define([
 	DescriptorVariantFactory.createNew = function(mParameters) {
 		Utils.checkParameterAndType(mParameters, "reference", "string");
 		Utils.checkParameterAndType(mParameters, "id", "string");
+
+		if (mParameters.version){
+			Utils.checkParameterAndType(mParameters, "version", "string");
+		}
 
 		//default layer to CUSTOMER
 		if (!mParameters.layer){
@@ -284,15 +335,19 @@ sap.ui.define([
 		if (mParameters.isAppVariantRoot){
 			Utils.checkParameterAndType(mParameters, "isAppVariantRoot", "boolean");
 		}
+		if (mParameters.skipIam){
+			Utils.checkParameterAndType(mParameters, "skipIam", "boolean");
+		}
+
 		return Settings.getInstance().then(function(oSettings) {
 			return Promise.resolve( new DescriptorVariant(mParameters,null,false,oSettings) );
 		});
 	};
 
 	/**
-	 * Creates a descriptor variant instance for an existing descriptor variant id
+	 * Creates an app variant/CDM app config instance for an existing app variant/CDM app config id
 	 *
-	 * @param {string} sId the id of the descriptor variant id
+	 * @param {string} sId the id of the app variant/CDM app config id
 	 *
 	 * @return {Promise} resolving the DescriptorVariant instance
 	 *
@@ -319,9 +374,28 @@ sap.ui.define([
 	};
 
 	/**
-	 * Creates a descriptor variant deletion
+	 * Creates a app variant/CDM app config instance from a json
 	 *
-	 * @param {string} sId the id of the descriptor variant id
+	 * @param {object} mParameters DT content of app variant/CDM app config
+	 *
+	 * @return {Promise} resolving the DescriptorVariant instance
+	 *
+	 * @private
+	 * @sap-restricted
+	 */
+	DescriptorVariantFactory.createFromJson = function(mParameters) {
+		if (!jQuery.isPlainObject(mParameters)) {
+			throw new Error("Parameter \"mParameters\" must be provided of type object");
+		}
+		return Settings.getInstance().then( function(oSettings){
+			return Promise.resolve(new DescriptorVariant(null,mParameters,false,oSettings));
+		});
+	};
+
+	/**
+	 * Creates an app variant/CDM app config deletion
+	 *
+	 * @param {string} sId the id of the app variant/CDM app config id
 	 *
 	 * @return {Promise} resolving the DescriptorVariant instance
 	 *

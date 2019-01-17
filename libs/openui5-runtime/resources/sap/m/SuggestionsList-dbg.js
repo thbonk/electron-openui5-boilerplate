@@ -1,18 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.SuggestionsList.
-sap.ui.define(['./library'],
-	function(library) {
+sap.ui.define(['./library', 'sap/ui/core/Control'],
+	function(library, Control) {
 		"use strict";
 
 		//
 		// SuggestionsList has to be used exclusively by Suggest.js
 		//
-		var SuggestionsList = sap.ui.core.Control.extend("sap.m.SuggestionsList", {
+		var SuggestionsList = Control.extend("sap.m.SuggestionsList", {
 
 			metadata: {
 
@@ -110,7 +110,7 @@ sap.ui.define(['./library'],
 			var descendantAttr = "aria-activedecendant";
 
 			// selectByIndex(null || undefined || -1) -> remove selection
-			if (isNaN(parseInt(iIndex, 10))) {
+			if (isNaN(parseInt(iIndex))) {
 				iIndex = -1;
 				bRelative = false;
 			}
@@ -144,7 +144,11 @@ sap.ui.define(['./library'],
 			if (parentInput) {
 				if (index >= 0) {
 					item = parentInput.getSuggestionItems()[index];
-					itemId = item && item.getId();
+
+					if (item) {
+						itemId = item.getId();
+						this._scrollToItem(item);
+					}
 				}
 				if (itemId) {
 					parentInput.$("I").attr(descendantAttr, itemId);
@@ -156,10 +160,40 @@ sap.ui.define(['./library'],
 			return this._iSelectedItem;
 		};
 
+		/**
+		 * Scroll to the item if it is not visible on the popover.
+		 *
+		 * @private
+		 * @param {object} oItem The item to scroll to.
+		 */
+		SuggestionsList.prototype._scrollToItem = function(oItem) {
+			var oPopoverDomRef = this.getParent().$().find(".sapMPopoverCont")[0],
+				oPopoverRect,
+				oItemRect,
+				iTop,
+				iBottom;
+
+			if (!oItem || !oItem.getDomRef() || !oPopoverDomRef) {
+				return;
+			}
+
+			oItemRect = oItem.getDomRef().getBoundingClientRect();
+			oPopoverRect = oPopoverDomRef.getBoundingClientRect();
+
+			// If the item is outside of the popover scroll to it.
+			iTop = oPopoverRect.top - oItemRect.top;
+			iBottom = oItemRect.bottom - oPopoverRect.bottom;
+			if (iTop > 0) {
+				oPopoverDomRef.scrollTop = Math.max(oPopoverDomRef.scrollTop - iTop, 0);
+			} else if (iBottom > 0) {
+				oPopoverDomRef.scrollTop = oPopoverDomRef.scrollTop + iBottom;
+			}
+		};
+
 		SuggestionsList.prototype.getSelectedItemIndex = function(){
 			return this._iSelectedItem;
 		};
 
 		return SuggestionsList;
 
-	}, /* bExport= */ true);
+	});

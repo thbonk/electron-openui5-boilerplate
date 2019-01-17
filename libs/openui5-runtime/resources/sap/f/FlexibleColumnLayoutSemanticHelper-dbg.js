@@ -1,14 +1,14 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-	"jquery.sap.global",
 	"./library",
-	"./FlexibleColumnLayout"
-], function (jQuery, library, FlexibleColumnLayout) {
+	"./FlexibleColumnLayout",
+	"sap/base/assert"
+], function (library, FlexibleColumnLayout, assert) {
 	"use strict";
 
 	// shortcut for sap.f.LayoutType
@@ -30,7 +30,7 @@ sap.ui.define([
 	 * Sample usage of the class:
 	 *
 	 * <pre>
- 	 * <code>
+	 * <code>
 	 *  var helper = sap.f.FlexibleColumnLayoutSemanticHelper.getInstanceFor(myFlexibleColumnLayout);
 	 *  helper.getCurrentUIState();
 	 *  helper.getNextUIState(2);
@@ -49,7 +49,7 @@ sap.ui.define([
 	 *
 	 * For more information, see {@link sap.f.FlexibleColumnLayoutSemanticHelper#getCurrentUIState} and {@link sap.f.FlexibleColumnLayoutSemanticHelper#getNextUIState}
 	 *
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @param {sap.f.FlexibleColumnLayout} oFlexibleColumnLayout
 	 * The <code>sap.f.FlexibleColumnLayout</code> object whose state will be manipulated.
 	 *
@@ -120,7 +120,7 @@ sap.ui.define([
 		if (["Normal", "MasterDetail", "SingleColumn"].indexOf(oSettings.mode) !== -1 && !oSettings.maxColumnsCount) {
 			iMax = oModeToMaxColumnsCountMapping[oSettings.mode];
 		} else {
-			iMax = oSettings.maxColumnsCount ? parseInt(oSettings.maxColumnsCount, 10) : 3;
+			iMax = oSettings.maxColumnsCount ? parseInt(oSettings.maxColumnsCount) : 3;
 			if (iMax < 1 || iMax > 3) {
 				iMax = 3;
 			}
@@ -128,7 +128,7 @@ sap.ui.define([
 		this._maxColumnsCount = iMax;
 
 		// Initial number of columns (1 by default, can be set to 2 for MasterDetail or Normal modes only)
-		iInitial = oSettings.initialColumnsCount ? parseInt(oSettings.initialColumnsCount, 10) : 1;
+		iInitial = oSettings.initialColumnsCount ? parseInt(oSettings.initialColumnsCount) : 1;
 		if (iInitial < 1 || iInitial > 2 || this._maxColumnsCount === 1) {
 			iInitial = 1;
 		}
@@ -152,11 +152,11 @@ sap.ui.define([
 	 *
 	 * @public
 	 * @static
-	 * @returns {sap.f.FlexibleColumnLayoutSemanticHelper}
+	 * @returns {sap.f.FlexibleColumnLayoutSemanticHelper} The <code>sap.f.FlexibleColumnLayoutSemanticHelper</code> instance
 	 */
 	FlexibleColumnLayoutSemanticHelper.getInstanceFor = function (oFlexibleColumnLayout, oSettings) {
 
-		jQuery.sap.assert(oFlexibleColumnLayout instanceof FlexibleColumnLayout, "Passed control is not FlexibleColumnLayout");
+		assert(oFlexibleColumnLayout instanceof FlexibleColumnLayout, "Passed control is not FlexibleColumnLayout");
 
 		var sId = oFlexibleColumnLayout.getId();
 
@@ -224,7 +224,7 @@ sap.ui.define([
 	 *  </code>
 	 *  </pre>
 	 * @public
-	 * @returns {{layout: string, maxColumnsCount: number, columnsSizes: {beginColumn, midColumn, endColumn}, columnsVisibility: {beginColumn, midColumn, endColumn}, isFullScreen, isLogicallyFullScreen, actionButtonsInfo: {midColumn, endColumn}}}
+	 * @returns {Object} The object describing the current UI state
 	 */
 	FlexibleColumnLayoutSemanticHelper.prototype.getCurrentUIState = function () {
 		var sCurrentLayout = this._oFCL.getLayout();
@@ -240,7 +240,7 @@ sap.ui.define([
 	 * 2 - master-detail-detail, 3 and above - subsequent views
 	 *
 	 * @public
-	 * @returns {{layout: string, maxColumnsCount: number, columnsSizes: {beginColumn, midColumn, endColumn}, columnsVisibility: {beginColumn, midColumn, endColumn}, isFullScreen, isLogicallyFullScreen, actionButtonsInfo: {midColumn, endColumn}}}
+	 * @returns {Object} The object describing the next UI state
 	 */
 	FlexibleColumnLayoutSemanticHelper.prototype.getNextUIState = function (iNextLevel) {
 
@@ -404,7 +404,7 @@ sap.ui.define([
 
 			}
 
-			if (sColumnWidthDistribution === "25/50/25" || sColumnWidthDistribution === "25/25/50" || sColumnWidthDistribution === "0/67/33") {
+			if (sColumnWidthDistribution === "25/50/25" || sColumnWidthDistribution === "25/25/50" || sColumnWidthDistribution === "0/67/33" || sColumnWidthDistribution === "0/33/67") {
 
 				oEndColumn.fullScreen = LT.EndColumnFullScreen;
 				oEndColumn.closeColumn = this._defaultTwoColumnLayoutType;
@@ -449,7 +449,7 @@ sap.ui.define([
 	 * <li>defaultThreeColumnLayoutType - the layout that will be suggested by default when 3 columns have to be shown side by side</li></ul>
 	 *
 	 * @public
-	 * @returns {{defaultLayoutType: string, defaultTwoColumnLayoutType: string, defaultThreeColumnLayoutType: string}}
+	 * @returns {Object} The object describing the default layout types for the different numbers of columns
 	 */
 	FlexibleColumnLayoutSemanticHelper.prototype.getDefaultLayouts = function () {
 		return {

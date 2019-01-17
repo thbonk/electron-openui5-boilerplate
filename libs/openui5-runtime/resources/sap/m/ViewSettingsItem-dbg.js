@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.ViewSettingsItem.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Item'],
-	function(jQuery, library, Item) {
+sap.ui.define(['./library', 'sap/ui/core/Item', 'sap/ui/base/ManagedObject'],
+	function(library, Item, ManagedObject) {
 	"use strict";
 
 
@@ -20,10 +20,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Item'],
 	 * @class
 	 * ViewSettingsItem is used for modelling filter behaviour in the ViewSettingsDialog.
 	 * It is derived from a core Item, but does not support the base class properties "textDirection" and "enabled", setting these properties will not have any effects.
+	 * Apps should use the core Item's property <code>key/</code> and provide a unique value for it. Not providing a key
+	 * may lead to unexpected behavior of the sap.m.ViewSettingsDialog.
 	 * @extends sap.ui.core.Item
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -80,7 +82,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Item'],
 	 * @param {boolean} bFireEvent Whether the event must be fired
 	 */
 	ViewSettingsItem.prototype.setProperty = function (sName, vValue, bSupressInvalidation, bFireEvent) {
-		sap.ui.base.ManagedObject.prototype.setProperty.apply(this, arguments);
+		ManagedObject.prototype.setProperty.apply(this, arguments);
 
 		bFireEvent = bFireEvent === undefined ? true : bFireEvent;
 
@@ -95,4 +97,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Item'],
 
 	return ViewSettingsItem;
 
-}, /* bExport= */ true);
+});

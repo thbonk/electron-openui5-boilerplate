@@ -21,6 +21,11 @@
 			"theme": "sap_belize_plus"
 		},
 		{
+			"name": "ObjectPageLayout.less",
+			"designtime": true,
+			"theme": "sap_belize_plus"
+		},
+		{
 			"name": "ObjectPageSection.less",
 			"designtime": true,
 			"theme": "sap_belize_plus"

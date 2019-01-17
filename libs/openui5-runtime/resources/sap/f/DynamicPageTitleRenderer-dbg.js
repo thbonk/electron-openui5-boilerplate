@@ -1,9 +1,10 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define([], function () {
+sap.ui.define([
+	"./library"], function (library) {
 	"use strict";
 
 	/**
@@ -19,50 +20,136 @@ sap.ui.define([], function () {
 	 * @param {sap.ui.core.Control} oDynamicPageTitle An object representation of the control that should be rendered
 	 */
 	DynamicPageTitleRenderer.render = function (oRm, oDynamicPageTitle) {
-		var oDynamicPageTitleState = oDynamicPageTitle._getState();
+		var oDynamicPageTitleState = oDynamicPageTitle._getState(),
+			sSapFDynamicPageTitle = "sapFDynamicPageTitle",
+			sBackgroundDesign = oDynamicPageTitle.getBackgroundDesign();
 
 		// DynamicPageTitle Root DOM Element.
 		oRm.write("<div");
-		oRm.writeAttribute("tabindex", 0);
 		oRm.writeControlData(oDynamicPageTitle);
-		oRm.writeAccessibilityState({role: "heading", level: 2});
-		oRm.addClass("sapFDynamicPageTitle");
+		oRm.writeAccessibilityState({
+			role: "heading",
+			level: 2
+		});
+		oRm.addClass(sSapFDynamicPageTitle);
+
+		if (sBackgroundDesign) {
+			oRm.addClass(sSapFDynamicPageTitle + sBackgroundDesign);
+		}
+
+		oRm.writeClasses();
+		oRm.write(">");
+
+		oRm.renderControl(oDynamicPageTitleState.focusSpan);
+
+		this._renderTopArea(oRm, oDynamicPageTitleState);
+		this._renderMainArea(oRm, oDynamicPageTitleState);
+		oRm.renderControl(oDynamicPageTitleState.expandButton);
+
+		oRm.write("</div>");
+	};
+
+	DynamicPageTitleRenderer._renderTopArea = function (oRm, oDynamicPageTitleState) {
+		if (oDynamicPageTitleState.hasTopContent) {
+			oRm.write("<div id=" + oDynamicPageTitleState.id + "-top");
+			oRm.addClass("sapFDynamicPageTitleTop");
+			if (oDynamicPageTitleState.hasOnlyBreadcrumbs){
+				oRm.addClass("sapFDynamicPageTitleTopBreadCrumbsOnly");
+			}
+			if (oDynamicPageTitleState.hasOnlyNavigationActions){
+				oRm.addClass("sapFDynamicPageTitleTopNavActionsOnly");
+			}
+			oRm.writeClasses();
+			oRm.write(">");
+
+			this._renderTopBreadcrumbsArea(oRm, oDynamicPageTitleState);
+			this._renderTopNavigationArea(oRm, oDynamicPageTitleState);
+
+			oRm.write("</div>");
+		}
+	};
+
+	DynamicPageTitleRenderer._renderTopBreadcrumbsArea = function (oRm, oDynamicPageTitleState) {
+		if (oDynamicPageTitleState.breadcrumbs) {
+			oRm.write("<div");
+			oRm.writeAttribute("id", oDynamicPageTitleState.id + "-breadcrumbs");
+			oRm.addClass("sapFDynamicPageTitleTopLeft");
+			oRm.writeClasses();
+			oRm.write(">");
+			oRm.renderControl(oDynamicPageTitleState.breadcrumbs);
+			oRm.write("</div>");
+		}
+	};
+
+	DynamicPageTitleRenderer._renderTopNavigationArea = function (oRm, oDynamicPageTitleState) {
+		if (oDynamicPageTitleState.hasNavigationActions) {
+			oRm.write("<div");
+			oRm.writeAttribute("id", oDynamicPageTitleState.id + "-topNavigationArea");
+			oRm.addClass("sapFDynamicPageTitleTopRight");
+			oRm.writeClasses();
+			oRm.write(">");
+			oRm.write("</div>");
+		}
+	};
+
+	DynamicPageTitleRenderer._renderMainArea = function (oRm, oDynamicPageTitleState) {
+		oRm.write("<div id=" + oDynamicPageTitleState.id + "-main");
+		oRm.addClass("sapFDynamicPageTitleMain");
 		if (!oDynamicPageTitleState.hasContent) {
-			oRm.addClass("sapFDynamicPageTitleWithoutContent");
+			oRm.addClass("sapFDynamicPageTitleMainNoContent");
 		}
 		oRm.writeClasses();
 		oRm.write(">");
-		this._renderLeftArea(oRm, oDynamicPageTitleState);
-		this._renderRightArea(oRm, oDynamicPageTitleState);
-		oRm.write("<span id=\"" + oDynamicPageTitleState.id + "-Descr\" class=\"sapUiInvisibleText\">" + oDynamicPageTitleState.ariaText + "</span>");
+
+		oRm.write("<div");
+		oRm.addClass("sapFDynamicPageTitleMainInner");
+		oRm.writeClasses();
+		oRm.write(">");
+
+		this._renderMainHeadingArea(oRm, oDynamicPageTitleState);
+		this._renderMainContentArea(oRm, oDynamicPageTitleState);
+		this._renderMainActionsArea(oRm, oDynamicPageTitleState);
+
+		oRm.write("</div>");
+
+		this._renderMainNavigationArea(oRm, oDynamicPageTitleState);
+
 		oRm.write("</div>"); // Root end.
 	};
 
-	DynamicPageTitleRenderer._renderLeftArea = function (oRm, oDynamicPageTitleState) {
-		// Left Area
-		oRm.write("<div");
-		oRm.addClass("sapFDynamicPageTitleLeft");
-		oRm.writeClasses();
-		oRm.write(">");
-
+	DynamicPageTitleRenderer._renderMainHeadingArea = function (oRm, oDynamicPageTitleState) {
+		// Heading Area
 		oRm.write("<div");
 		oRm.writeAttribute("id", oDynamicPageTitleState.id + "-left-inner");
-		oRm.addClass("sapFDynamicPageTitleLeftInner");
-		oRm.addClass(oDynamicPageTitleState.isPrimaryAreaBegin ? "sapFDynamicPageTitleAreaHighPriority" : "sapFDynamicPageTitleAreaLowPriority");
+		oRm.addClass("sapFDynamicPageTitleMainHeading");
 		oRm.writeClasses();
+		oRm.addStyle("flex-shrink", oDynamicPageTitleState.headingAreaShrinkFactor);
+		oRm.writeStyles();
 		oRm.write(">");
 		// Left Area -> heading aggregation
 		oRm.write("<div");
-		oRm.addClass("sapFDynamicPageTitleLeftHeading");
+		oRm.addClass("sapFDynamicPageTitleHeading-CTX");
+		oRm.addClass("sapFDynamicPageTitleMainHeadingInner");
 		oRm.writeClasses();
 		oRm.write(">");
-		oRm.renderControl(oDynamicPageTitleState.heading);
+		if (oDynamicPageTitleState.heading) {
+			// If heading is given, it should be used
+			oRm.renderControl(oDynamicPageTitleState.heading);
+		} else {
+			// Otherwise, snapped and expanded heading should be used
+			if (oDynamicPageTitleState.snappedHeading) {
+				DynamicPageTitleRenderer._renderSnappedHeading(oRm, oDynamicPageTitleState);
+			}
+			if (oDynamicPageTitleState.expandedHeading) {
+				DynamicPageTitleRenderer._renderExpandHeading(oRm, oDynamicPageTitleState);
+			}
+		}
 		oRm.write("</div>");
 
-		// Left Area -> snappedContent/expandContent aggregation
+		// Heading Area -> snappedContent/expandContent aggregation
 		if (oDynamicPageTitleState.hasAdditionalContent) {
 			oRm.write("<div");
-			oRm.addClass("sapFDynamicPageTitleLeftSnappedExpandContent");
+			oRm.addClass("sapFDynamicPageTitleMainHeadingSnappedExpandContent");
 			oRm.writeClasses();
 			oRm.write(">");
 			if (oDynamicPageTitleState.hasSnappedContent) {
@@ -74,38 +161,80 @@ sap.ui.define([], function () {
 			oRm.write("</div>");
 		}
 		oRm.write("</div>");
+	};
 
+	DynamicPageTitleRenderer._renderMainContentArea = function (oRm, oDynamicPageTitleState) {
 		// Content aggregation
 		oRm.write("<div");
 		oRm.writeAttributeEscaped("id", oDynamicPageTitleState.id + "-content");
-		oRm.addClass("sapFDynamicPageTitleContent");
-		oRm.addClass(oDynamicPageTitleState.isPrimaryAreaBegin ? "sapFDynamicPageTitleAreaLowPriority" : "sapFDynamicPageTitleAreaHighPriority");
+		oRm.addClass("sapFDynamicPageTitleMainContent");
+		oRm.addClass("sapFDynamicPageTitleContent-CTX");
 		oRm.writeClasses();
+		oRm.addStyle("flex-shrink", oDynamicPageTitleState.contentAreaShrinkFactor);
+		if (oDynamicPageTitleState.contentAreaFlexBasis) {
+			oRm.addStyle("flex-basis", oDynamicPageTitleState.contentAreaFlexBasis);
+		}
+		oRm.writeStyles();
 		oRm.write(">");
-		oDynamicPageTitleState.content.forEach(oRm.renderControl);
-		oRm.write("</div>");
-
-		// Dummy invisible element just to let display:flex with justify-content: space between
-		// to allocate space between the Middle area and the Actions,
-		// otherwise the areas would be stickied together.
-		oRm.write("<span class=\"sapFDynamicPageTitleInvisibleEl\"></span>");
+		oDynamicPageTitleState.content.forEach(oRm.renderControl, oRm);
 		oRm.write("</div>");
 	};
 
-	DynamicPageTitleRenderer._renderRightArea = function (oRm, oDynamicPageTitleState) {
-		// Right Area
+	DynamicPageTitleRenderer._renderMainActionsArea = function (oRm, oDynamicPageTitleState) {
 		oRm.write("<div");
-		oRm.addClass("sapFDynamicPageTitleRight");
+		oRm.writeAttribute("id", oDynamicPageTitleState.id + "-mainActions");
+		oRm.addClass("sapFDynamicPageTitleMainActions");
 		oRm.writeClasses();
-		oRm.write(">");
-		oRm.write("<div");
-		oRm.addClass("sapFDynamicPageTitleRightActions");
-		oRm.writeClasses();
+		oRm.addStyle("flex-shrink", oDynamicPageTitleState.actionsAreaShrinkFactor);
+		if (oDynamicPageTitleState.actionsAreaFlexBasis) {
+			oRm.addStyle("flex-basis", oDynamicPageTitleState.actionsAreaFlexBasis);
+		}
+		oRm.writeStyles();
 		oRm.write(">");
 		if (oDynamicPageTitleState.hasActions) {
 			oRm.renderControl(oDynamicPageTitleState.actionBar);
 		}
 		oRm.write("</div>");
+	};
+
+	DynamicPageTitleRenderer._renderMainNavigationArea = function (oRm, oDynamicPageTitleState) {
+		if (oDynamicPageTitleState.hasNavigationActions) {
+			oRm.write("<div");
+			oRm.writeAttribute("id", oDynamicPageTitleState.id + "-mainNavigationAreaWrapper");
+			oRm.addClass("sapFDynamicPageTitleMainNavigationArea");
+			oRm.writeClasses();
+			oRm.write(">");
+
+			oRm.renderControl(oDynamicPageTitleState.separator);
+
+			oRm.write("<div");
+			oRm.writeAttribute("id", oDynamicPageTitleState.id + "-mainNavigationArea");
+			oRm.addClass("sapFDynamicPageTitleMainNavigationAreaInner");
+			oRm.writeClasses();
+			oRm.write(">");
+			oRm.write("</div>");
+			oRm.write("</div>");
+		}
+	};
+
+	DynamicPageTitleRenderer._renderExpandHeading = function (oRm, oDynamicPageTitleState) {
+		oRm.write("<div");
+		oRm.writeAttribute("id", oDynamicPageTitleState.id + "-expand-heading-wrapper");
+		oRm.writeClasses();
+		oRm.write(">");
+		oRm.renderControl(oDynamicPageTitleState.expandedHeading);
+		oRm.write("</div>");
+	};
+
+	DynamicPageTitleRenderer._renderSnappedHeading = function (oRm, oDynamicPageTitleState) {
+		oRm.write("<div");
+		oRm.writeAttribute("id", oDynamicPageTitleState.id + "-snapped-heading-wrapper");
+		if (!oDynamicPageTitleState.isSnapped) {
+			oRm.addClass("sapUiHidden");
+		}
+		oRm.writeClasses();
+		oRm.write(">");
+		oRm.renderControl(oDynamicPageTitleState.snappedHeading);
 		oRm.write("</div>");
 	};
 
@@ -114,20 +243,20 @@ sap.ui.define([], function () {
 		oRm.writeAttributeEscaped("id", oDynamicPageTitleState.id + "-expand-wrapper");
 		oRm.writeClasses();
 		oRm.write(">");
-		oDynamicPageTitleState.expandedContent.forEach(oRm.renderControl);
+		oDynamicPageTitleState.expandedContent.forEach(oRm.renderControl, oRm);
 		oRm.write("</div>");
 	};
 
 	DynamicPageTitleRenderer._renderSnappedContent = function (oRm, oDynamicPageTitleState) {
 		oRm.write("<div");
 		oRm.writeAttributeEscaped("id", oDynamicPageTitleState.id + "-snapped-wrapper");
-		if (!oDynamicPageTitleState.showSnapContent) {
+		if (!oDynamicPageTitleState.isSnapped) {
 			oRm.addClass("sapUiHidden");
 		}
 		oRm.addClass("sapFDynamicPageTitleSnapped");
 		oRm.writeClasses();
 		oRm.write(">");
-		oDynamicPageTitleState.snappedContent.forEach(oRm.renderControl);
+		oDynamicPageTitleState.snappedContent.forEach(oRm.renderControl, oRm);
 		oRm.write("</div>");
 	};
 

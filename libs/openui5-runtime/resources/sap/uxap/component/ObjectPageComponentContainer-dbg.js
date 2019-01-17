@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['sap/ui/core/ComponentContainer', "sap/ui/core/Component"],
-	function(ComponentContainer /*, Component */) {
+sap.ui.define(['sap/ui/core/ComponentContainer', "sap/base/Log", 'sap/ui/core/Component'],
+	function(ComponentContainer, Log /*, Component */) {
 		"use strict";
 
 		/**
@@ -63,7 +63,7 @@ sap.ui.define(['sap/ui/core/ComponentContainer', "sap/ui/core/Component"],
 				if (this._oComponent && this._oComponent._oView) {
 					oObjectPageLayoutInstance = this._oComponent._oView.byId("ObjectPageLayout");
 				} else {
-					jQuery.sap.log.error("ObjectPageComponentContainer :: cannot find children ObjectPageLayout, has it been rendered already?");
+					Log.error("ObjectPageComponentContainer :: cannot find children ObjectPageLayout, has it been rendered already?");
 				}
 
 				return oObjectPageLayoutInstance;

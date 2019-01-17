@@ -1,16 +1,25 @@
 /*
  * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.dt.MutationObserver.
 sap.ui.define([
-	'jquery.sap.global',
+	"sap/ui/thirdparty/jquery",
 	'sap/ui/dt/OverlayUtil',
 	'sap/ui/dt/ElementUtil',
-	'sap/ui/base/ManagedObject'
-], function(jQuery, OverlayUtil, ElementUtil, ManagedObject) {
+	'sap/ui/base/ManagedObject',
+	'sap/ui/dt/DOMUtil',
+	'sap/ui/dt/Util'
+], function(
+	jQuery,
+	OverlayUtil,
+	ElementUtil,
+	ManagedObject,
+	DOMUtil,
+	Util
+) {
 	"use strict";
 
 	/**
@@ -21,7 +30,7 @@ sap.ui.define([
 	 * @class The MutationObserver observes changes of a ManagedObject and propagates them via events.
 	 * @extends sap.ui.base.ManagedObject
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @constructor
 	 * @private
 	 * @since 1.30
@@ -37,41 +46,34 @@ sap.ui.define([
 				 * Event fired when the observed object is modified or some changes which might affect dom position and styling of overlays happens
 				 */
 				domChanged: {
-					parameters : {
-						type : { type : "string" },
-						elemenIds : { type : "string[]"},
-						targetNodes : { type : "element[]" }
+					parameters: {
+						type: {
+							type : "string"
+						},
+						targetNodes: {
+							type : "element[]"
+						}
 					}
 				}
 			}
 		}
 	});
 
-	/**
-	 * Called when the MutationObserver is created
-	 *
-	 * @protected
-	 */
 	MutationObserver.prototype.init = function() {
-		this._fnFireDomChanged = function() {
-			this.fireDomChanged();
-		}.bind(this);
-		this._onScroll = this._fireDomChangeOnScroll.bind(this);
+		this._fireDomChangeOnTransitionEnd = this._fireDomChangeOnTransitionEnd.bind(this);
+		this._fireDomChangeOnAnimationEnd = this._fireDomChangeOnAnimationEnd.bind(this);
+		this._fireDomChangeOnResize = this._fireDomChangeOnResize.bind(this);
+		this._fireDomChangeOnScroll = this._fireDomChangeOnScroll.bind(this);
+
+		window.addEventListener("transitionend", this._fireDomChangeOnTransitionEnd, true);
+		window.addEventListener("animationend", this._fireDomChangeOnAnimationEnd, true);
+		window.addEventListener("scroll", this._fireDomChangeOnScroll, true);
+		jQuery(window).on("resize", this._fireDomChangeOnResize);
+
+		this._aIgnoredMutations = [];
+		this._aWhiteList = [];
 
 		this._startMutationObserver();
-
-		// after CSS transition / animation ends, domChanged event is triggered
-		window.addEventListener("transitionend", this._fnFireDomChanged, true);
-		window.addEventListener("webkitTransitionEnd", this._fnFireDomChanged, true);
-		window.addEventListener("otransitionend", this._fnFireDomChanged, true);
-		window.addEventListener("animationend", this._fnFireDomChanged, true);
-		window.addEventListener("webkitAnimationEnd", this._fnFireDomChanged, true);
-		window.addEventListener("oanimationend", this._fnFireDomChanged, true);
-
-		jQuery(window).on("resize", this._fnFireDomChanged);
-
-		window.addEventListener("scroll", this._onScroll, true);
-		this._aIgnoredMutations = [];
 	};
 
 	/**
@@ -82,106 +84,129 @@ sap.ui.define([
 	MutationObserver.prototype.exit = function() {
 		this._stopMutationObserver();
 
-		window.removeEventListener("transitionend", this._fnFireDomChanged, true);
-		window.removeEventListener("animationend", this._fnFireDomChanged, true);
-
-		jQuery(window).off("resize", this._fnFireDomChanged);
-
-		window.removeEventListener("scroll", this._onScroll, true);
+		window.removeEventListener("transitionend", this._fireDomChangeOnTransitionEnd, true);
+		window.removeEventListener("animationend", this._fireDomChangeOnAnimationEnd, true);
+		window.removeEventListener("scroll", this._fireDomChangeOnScroll, true);
+		jQuery(window).off("resize", this._fireDomChangeOnResize);
 	};
 
 	/**
-	 * Ignores a Mutation once
+	 * Ignores a mutation once
 	 *
-	 * @param {object} mParams
-	 * @param {object} mParams.target domNode of the target
-	 * @param {object} mParams.type type of the mutation
+	 * @param {object} mParams - Map of params
+	 * @param {HTMLElement} mParams.target - DOM Node of the target
+	 * @param {string} mParams.type - Type of the mutation, possible values = childList | attributes, see {@link https://developer.mozilla.org/en-US/docs/Web/API/MutationRecord}
 	 */
-	MutationObserver.prototype.ignoreOnce = function(mParams) {
+	MutationObserver.prototype.ignoreOnce = function (mParams) {
 		this._aIgnoredMutations.push(mParams);
 	};
 
-	/**
-	 * @private
-	 */
-	MutationObserver.prototype._startMutationObserver = function() {
-		if (this._oMutationObserver) {
-			return;
-		}
+	MutationObserver.prototype.addToWhiteList = function (sId) {
+		this._aWhiteList.push(sId);
+	};
 
-		var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-		if (MutationObserver) {
-			this._oMutationObserver = new MutationObserver(function(aMutations) {
-				var aTargetNodes = [];
-				var aElementIds = [];
-				aMutations.forEach(function(oMutation) {
-					var oTarget = oMutation.target;
+	MutationObserver.prototype.removeFromWhiteList = function (sId) {
+		this._aWhiteList = this._aWhiteList.filter(function (sCurrentId) {
+			return sCurrentId !== sId;
+		});
+	};
 
-					// text mutations have no class list, so we use a parent node as a target
-					if (oMutation.type === "characterData") {
-						oTarget = oMutation.target.parentNode;
-					}
+	MutationObserver.prototype._isRelevantNode = function (oNode) {
+		return (
+			// 1. Mutation happened in Node which is still in actual DOM Tree
+			// Must be always on the first place since sometimes mutations for detached nodes may come
+			document.body.contains(oNode)
 
-					// TODO: ignore all RTA dom elements (dialogs, context menus, toolbars etc.)
-					var bIsFromRTA = OverlayUtil.isInOverlayContainer(oTarget)
-						|| jQuery(oTarget).closest(".sapUiDtContextMenu").length > 0
-						|| jQuery(oTarget).closest(".sapUiRtaToolbar").length > 0;
+			// 2. Ignore direct mutation on static area Node
+			&& oNode.getAttribute('id') !== 'sap-ui-static'
 
-					var bRelevantNode = jQuery.contains(document, oTarget)
-						&& oTarget.id !== "sap-ui-static"
-						&& jQuery(oTarget).closest("#sap-ui-preserve").length === 0;
+			// 3. Node is not part of preserve area
+			&& !DOMUtil.contains('sap-ui-preserve', oNode)
 
-					if (bRelevantNode && !bIsFromRTA) {
-						var bIgnore = this._aIgnoredMutations.some(function(oIgnoredMutation, iIndex, aSource) {
-							if (oIgnoredMutation.target === oMutation.target
-									&& (oIgnoredMutation.type ? oIgnoredMutation.type === oMutation.type : true)) {
-								aSource.splice(iIndex, 1);
-								return true;
-							}
-						});
+			// 4. Node must be white listed OR meet certain criteria
+			&& (
+				this._aWhiteList.some(function (sId) {
+					return (
+						// 4.1. Target Node is inside one of the white listed element
+						DOMUtil.contains(sId, oNode)
+						// 4.2. Target Node is an ancestor of one of the white listed element, but not a static area
+						|| oNode.contains(document.getElementById(sId))
+					);
+				})
+			)
+		);
+	};
 
+	MutationObserver.prototype._isRelevantMutation = function (oMutation) {
+		return (
+			this._isRelevantNode(this._getTargetNode(oMutation))
+			|| (
+				oMutation.target.id === 'sap-ui-static'
+				&& Util.intersection(
+					[]
+						.concat(
+							Array.prototype.slice.call(oMutation.addedNodes),
+							Array.prototype.slice.call(oMutation.removedNodes)
+						)
+						.map(function (oNode) {
+							return oNode.id;
+						}),
+					this._aWhiteList
+				).length > 0
+			)
+		);
+	};
 
-						if (!bIgnore) {
-							aTargetNodes.push(oTarget);
+	MutationObserver.prototype._getTargetNode = function (oMutation) {
+		// text mutations have no class list, so we use a parent node as a target
+		return (
+			oMutation.type === "characterData"
+			? oMutation.target.parentNode
+			: oMutation.target
+		);
+	};
 
-							// define closest element to notify it's overlay about the dom mutation
-							var oOverlay = OverlayUtil.getClosestOverlayForNode(oTarget);
-							var sElementId = oOverlay ? oOverlay.getElementInstance().getId() : undefined;
-							if (sElementId) {
-								aElementIds.push(sElementId);
-							}
+	MutationObserver.prototype._startMutationObserver = function () {
+		this._oMutationObserver = new window.MutationObserver(function(aMutations) {
+			var aTargetNodes = [];
+			aMutations.forEach(function(oMutation) {
+				if (this._isRelevantMutation(oMutation)) {
+					var oTarget = this._getTargetNode(oMutation);
+					var bIgnore = this._aIgnoredMutations.some(function(oIgnoredMutation, iIndex, aSource) {
+						if (
+							oIgnoredMutation.target === oMutation.target
+							&& (!oIgnoredMutation.type || oIgnoredMutation.type === oMutation.type)
+						) {
+							aSource.splice(iIndex, 1);
+							return true;
 						}
-					}
-
-				}.bind(this));
-
-				if (aTargetNodes.length) {
-					this.fireDomChanged({
-						type : "mutation",
-						elementIds : aElementIds,
-						targetNodes : aTargetNodes
 					});
+
+					if (!bIgnore) {
+						aTargetNodes.push(oTarget);
+					}
 				}
 			}.bind(this));
 
-			// we should observe whole DOM, otherwise position change of elements can be triggered via outter changes
-			// (like change of body size, container insertions etc.)
-			this._oMutationObserver.observe(window.document, {
-				childList : true,
-				subtree : true,
-				attributes : true,
-				attributeFilter : ["style", "class", "width", "height", "border"],
-				characterData : true // also observe text node changes, see https://dom.spec.whatwg.org/#characterdata
-			});
-		} else {
-			jQuery.sap.log.error("Mutation Observer is not available");
-		}
+			if (aTargetNodes.length) {
+				this.fireDomChanged({
+					type: "mutation",
+					targetNodes: aTargetNodes
+				});
+			}
+		}.bind(this));
+
+		// we should observe whole DOM, otherwise position change of elements can be triggered via outter changes
+		// (like change of body size, container insertions etc.)
+		this._oMutationObserver.observe(window.document, {
+			childList : true,
+			subtree : true,
+			attributes : true,
+			attributeFilter : ["style", "class", "width", "height", "border"],
+			characterData : true // also observe text node changes, see https://dom.spec.whatwg.org/#characterdata
+		});
 	};
 
-
-	/**
-	 * @private
-	 */
 	MutationObserver.prototype._stopMutationObserver = function() {
 		if (this._oMutationObserver) {
 			this._oMutationObserver.disconnect();
@@ -189,17 +214,36 @@ sap.ui.define([
 		}
 	};
 
-	/**
-	 * @private
-	 */
-	MutationObserver.prototype._fireDomChangeOnScroll = function(oEvent) {
-		var oTarget = oEvent.target;
-		if (!OverlayUtil.isInOverlayContainer(oTarget) &&
-			!OverlayUtil.getClosestOverlayForNode(oTarget) &&
-			oTarget !== document) {
+	MutationObserver.prototype._fireDomChangeOnTransitionEnd = function () {
+		this.fireDomChanged({
+			type: "transitionend"
+		});
+	};
 
+
+	MutationObserver.prototype._fireDomChangeOnAnimationEnd = function () {
+		this.fireDomChanged({
+			type: "animationend"
+		});
+	};
+
+	MutationObserver.prototype._fireDomChangeOnResize = function () {
+		this.fireDomChanged({
+			type: "resize"
+		});
+	};
+
+	MutationObserver.prototype._fireDomChangeOnScroll = function (oEvent) {
+		var oTarget = oEvent.target;
+		if (
+			this._isRelevantNode(oTarget)
+			&& !OverlayUtil.getClosestOverlayForNode(oTarget)
+			// The line below is required to avoid double scrollbars on the browser
+			// when the document is scrolled to negative values (relevant for Mac)
+			&& oTarget !== document
+		) {
 			this.fireDomChanged({
-				type : "scroll"
+				type: "scroll"
 			});
 		}
 	};

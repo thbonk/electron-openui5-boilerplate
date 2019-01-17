@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.MenuItem.
-sap.ui.define(['jquery.sap.global', './MenuItemBase', './library', 'sap/ui/unified/MenuItem'],
-	function(jQuery, MenuItemBase, library, MenuItem1) {
+sap.ui.define(['./MenuItemBase', './library', 'sap/ui/unified/MenuItem'],
+	function(MenuItemBase, library, UnifiedMenuItem) {
 	"use strict";
 
 
@@ -22,17 +22,16 @@ sap.ui.define(['jquery.sap.global', './MenuItemBase', './library', 'sap/ui/unifi
 	 * @extends sap.ui.unified.MenuItem
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @since 1.0.0
 	 *
 	 * @constructor
 	 * @public
-	 * @deprecated Since version 1.21.0.
-	 * Please use the element <code>sap.ui.unified.MenuItem</code> of the library <code>sap.ui.unified</code> instead.
+	 * @deprecated as of version 1.21.0, replaced by {@link sap.ui.unified.MenuItem}
 	 * @alias sap.ui.commons.MenuItem
 	 * @ui5-metamodel This control/element will also be described in the UI5 (legacy) design time meta model
 	 */
-	var MenuItem = MenuItem1.extend("sap.ui.commons.MenuItem", /** @lends sap.ui.commons.MenuItem.prototype */ { metadata : {
+	var MenuItem = UnifiedMenuItem.extend("sap.ui.commons.MenuItem", /** @lends sap.ui.commons.MenuItem.prototype */ { metadata : {
 
 		deprecated : true,
 		library : "sap.ui.commons"
@@ -42,4 +41,4 @@ sap.ui.define(['jquery.sap.global', './MenuItemBase', './library', 'sap/ui/unifi
 
 	return MenuItem;
 
-}, /* bExport= */ true);
+});

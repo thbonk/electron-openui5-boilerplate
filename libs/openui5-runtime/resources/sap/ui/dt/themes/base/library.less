@@ -2,7 +2,7 @@
 
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -16,10 +16,9 @@
 @_sap_ui_dt_Overlay_CuttedColor : white;
 
 #overlay-container {
-	>.sapUiDtOverlay {
-		// prevents body from expanding if overlays are bigger, then dom
-		overflow: hidden !important;
-	}
+	position: absolute;
+	top: 0;
+	left: 0;
 }
 
 .sapUiDtOverlay {
@@ -64,11 +63,6 @@
 }
 
 .sapUiDtOverlayTargetZone {
-	.sapUiDtOverlaySelected {
-		&:after {
-			content: none;
-		}
-	}
 	&:after {
 		content: " ";
 		border: 1px dashed @_sap_ui_dt_Overlay_TargetZoneColor;
@@ -94,6 +88,12 @@
 .sapUiDtDragGhostWrapper {
 	position: fixed;
 	pointer-events: none;
+}
+
+/* fix ghost blinking in FireFox */
+.sap-desktop[data-sap-ui-browser^="ff"] .sapUiDtDragGhostWrapper {
+	top: -9999px;
+	left: -9999px;
 }
 
 /* fix for chrome */
@@ -122,6 +122,37 @@
 	position: absolute;
 }
 /* END "Overlay.less" */
+
+/* START "ContextMenu.less" */
+.sapUiDtContextMenu .sapMPopoverScroll {
+	margin-right: 0 !important;
+}
+
+.sapUiDtContextMenu .sapMBtnInner {
+	text-align: left;
+}
+
+.sapUiDtContextMenu.sapContrast.sapMPopover, .sapUiDtContextMenu.sapContrast .sapMPopover {
+	opacity: 0;
+	min-width: 0;
+	border: 1px solid #3f5161;
+	box-shadow: 0 0 0 1px #cae4fb inset, 3px 3px 8px 0 rgba(0, 0, 0, 0.3);
+	padding: 0.2rem;
+}
+
+.sapUiDtContextMenu.sapContrast.sapMPopoverArr:after, .sapUiDtContextMenu.sapContrast .sapMPopoverArr:after {
+	border: 1px solid #3f5161;
+	box-shadow: 0 0 0 1px #cae4fb inset;
+}
+
+.sapUiDtContextMenu.sapContrast.sapMPopoverArr, .sapUiDtContextMenu.sapContrast .sapMPopoverArr{
+	bottom: -8px;
+}
+
+.sapUiDtContextMenu.sapContrast.sapMPopover.sapUiDtContextMenuVisible, .sapUiDtContextMenu.sapContrast .sapMPopover.sapUiDtContextMenuVisible {
+	opacity: 1;
+}
+/* END "ContextMenu.less" */
 
 /* START "shared.less" */
 /* This CSS shares it rules with all other CSS of this library */

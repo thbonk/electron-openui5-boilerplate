@@ -1,20 +1,24 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
-	"jquery.sap.global",
+	"sap/base/Log",
 	"sap/ui/core/format/DateFormat",
 	"sap/ui/model/FormatException",
-	"sap/ui/model/odata/type/ODataType",
 	"sap/ui/model/ParseException",
-	"sap/ui/model/ValidateException"
-], function (jQuery, DateFormat, FormatException, ODataType, ParseException, ValidateException) {
+	"sap/ui/model/ValidateException",
+	"sap/ui/model/odata/type/ODataType",
+	"sap/ui/thirdparty/jquery"
+], function (Log, DateFormat, FormatException, ParseException, ValidateException, ODataType,
+		jQuery) {
 	"use strict";
 
-	var oDemoDate = new Date(2014, 10, 27, 13, 47, 26);
+	var iFullYear = new Date().getFullYear(),
+		oDemoDate = new Date(Date.UTC(iFullYear, 11, 31)), // UTC
+		oDemoDateTime = new Date(iFullYear, 11, 31, 23, 59, 58); // local time
 
 	/*
 	 * Returns true if the type uses only the date.
@@ -37,7 +41,7 @@ sap.ui.define([
 	function getErrorMessage(oType) {
 		return sap.ui.getCore().getLibraryResourceBundle().getText(
 			isDateOnly(oType) ? "EnterDate" : "EnterDateTime",
-				[oType.formatValue(oDemoDate, "string")]);
+				[oType.formatValue(isDateOnly(oType) ? oDemoDate : oDemoDateTime, "string")]);
 	}
 
 	/*
@@ -72,23 +76,16 @@ sap.ui.define([
 	 *   Constraints, see {@link #constructor}
 	 */
 	function setConstraints(oType, oConstraints) {
-		var iPrecision;
+		var vNullable,
+			iPrecision;
 
 		oType.oConstraints = undefined;
 		if (oConstraints) {
-			switch (oConstraints.nullable) {
-			case undefined:
-			case true:
-			case "true":
-				break;
-			case false:
-			case "false":
-				oType.oConstraints = oType.oConstraints || {};
-				oType.oConstraints.nullable = false;
-				break;
-			default:
-				jQuery.sap.log.warning("Illegal nullable: " + oConstraints.nullable, null,
-					oType.getName());
+			vNullable = oConstraints.nullable;
+			if (vNullable === false || vNullable === "false") {
+				oType.oConstraints = {nullable : false};
+			} else if (vNullable !== undefined && vNullable !== true && vNullable !== "true") {
+				Log.warning("Illegal nullable: " + vNullable, null, oType.getName());
 			}
 
 			if (oConstraints.isDateOnly === true) {
@@ -102,8 +99,7 @@ sap.ui.define([
 					oType.oConstraints = oType.oConstraints || {};
 					oType.oConstraints.precision = iPrecision;
 				} else if (iPrecision !== 0) {
-					jQuery.sap.log.warning("Illegal precision: " + iPrecision, null,
-						oType.getName());
+					Log.warning("Illegal precision: " + iPrecision, null, oType.getName());
 				} // else: 0 is the default!
 			}
 		}
@@ -136,7 +132,7 @@ sap.ui.define([
 	 * @extends sap.ui.model.odata.type.ODataType
 	 * @public
 	 * @since 1.27.0
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 */
 	var DateTimeBase = ODataType.extend("sap.ui.model.odata.type.DateTimeBase", {
 			constructor : function (oFormatOptions, oConstraints) {
@@ -164,7 +160,8 @@ sap.ui.define([
 	 *   The formatted output value in the target type; <code>undefined</code> or <code>null</code>
 	 *   are formatted to <code>null</code>
 	 * @throws {sap.ui.model.FormatException}
-	 *   If <code>sTargetType</code> is not supported
+	 *   If <code>sTargetType</code> is not supported or <code>oValue</code> is not a model value
+	 *   for this type.
 	 *
 	 * @public
 	 * @since 1.27.0
@@ -177,6 +174,9 @@ sap.ui.define([
 		case "any":
 			return oValue;
 		case "string":
+			if (!(oValue instanceof Date)) {
+				throw new FormatException("Illegal " + this.getName() + " value: " + oValue);
+			}
 			return getFormatter(this).format(oValue);
 		default:
 			throw new FormatException("Don't know how to format " + this.getName() + " to "

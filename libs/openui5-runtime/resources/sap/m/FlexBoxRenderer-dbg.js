@@ -1,17 +1,23 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './FlexBoxStylingHelper'],
-	function(jQuery, FlexBoxStylingHelper) {
+sap.ui.define([
+	'./FlexBoxStylingHelper',
+	'sap/m/library',
+	"sap/base/security/encodeXML",
+	"sap/base/Log"
+],
+	function(FlexBoxStylingHelper, library, encodeXML, Log) {
 	"use strict";
 
-	// Issue warning if flex algorithm is unsupported
-	if (!jQuery.support.flexBoxLayout && !jQuery.support.newFlexBoxLayout && !jQuery.support.ie10FlexBoxLayout) {
-		jQuery.sap.log.warning("This browser does not support flexible box layouts natively.");
-	}
+	// shortcut for sap.m.FlexDirection
+	var FlexDirection = library.FlexDirection;
+
+	// shortcut for sap.m.FlexRendertype
+	var FlexRendertype = library.FlexRendertype;
 
 	/**
 	 * FlexBox renderer
@@ -19,7 +25,6 @@ sap.ui.define(['jquery.sap.global', './FlexBoxStylingHelper'],
 	 */
 
 	var FlexBoxRenderer = {};
-
 
 	/**
 	 * Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
@@ -29,7 +34,7 @@ sap.ui.define(['jquery.sap.global', './FlexBoxStylingHelper'],
 	 */
 	FlexBoxRenderer.render = function(oRm, oControl) {
 		// Open FlexBox HTML element
-		if (oControl.getRenderType() === sap.m.FlexRendertype.List) {
+		if (oControl.getRenderType() === FlexRendertype.List) {
 			oRm.write('<ul');
 		} else {
 			oRm.write('<div');
@@ -39,7 +44,7 @@ sap.ui.define(['jquery.sap.global', './FlexBoxStylingHelper'],
 
 		// Special treatment if FlexBox is itself an item of a parent FlexBox
 		var oParent = oControl.getParent();
-		if (oControl.getParent() instanceof sap.m.FlexBox) {
+		if (oParent && oParent.isA("sap.m.FlexBox")) {
 			oRm.addClass("sapMFlexItem");
 
 			// Set layout properties for flex item
@@ -49,7 +54,7 @@ sap.ui.define(['jquery.sap.global', './FlexBoxStylingHelper'],
 			}
 
 			// Wrap in list item
-			if (oParent.getRenderType() === sap.m.FlexRendertype.List) {
+			if (oParent.getRenderType() === FlexRendertype.List) {
 				oRm.write('<li');
 			}
 		} else if (oControl.getFitContainer()) {
@@ -62,13 +67,13 @@ sap.ui.define(['jquery.sap.global', './FlexBoxStylingHelper'],
 			oRm.addClass("sapMFlexBoxInline");
 		}
 
-		if (oControl.getDirection() === sap.m.FlexDirection.Column || oControl.getDirection() === sap.m.FlexDirection.ColumnReverse) {
+		if (oControl.getDirection() === FlexDirection.Column || oControl.getDirection() === FlexDirection.ColumnReverse) {
 			oRm.addClass("sapMVBox");
 		} else {
 			oRm.addClass("sapMHBox");
 		}
 
-		if (oControl.getDirection() === sap.m.FlexDirection.RowReverse || oControl.getDirection() === sap.m.FlexDirection.ColumnReverse) {
+		if (oControl.getDirection() === FlexDirection.RowReverse || oControl.getDirection() === FlexDirection.ColumnReverse) {
 			oRm.addClass("sapMFlexBoxReverse");
 		}
 
@@ -101,7 +106,7 @@ sap.ui.define(['jquery.sap.global', './FlexBoxStylingHelper'],
 		FlexBoxRenderer.renderItems(oControl, oRm);
 
 		// Close FlexBox HTML element
-		if (oControl.getRenderType() === sap.m.FlexRendertype.List) {
+		if (oControl.getRenderType() === FlexRendertype.List) {
 			oRm.write("</ul>");
 		} else {
 			oRm.write("</div>");
@@ -114,9 +119,9 @@ sap.ui.define(['jquery.sap.global', './FlexBoxStylingHelper'],
 
 		for (var i = 0; i < aChildren.length; i++) {
 			// Don't wrap if it's a FlexBox control
-			if (aChildren[i] instanceof sap.m.FlexBox || oControl.getRenderType() === sap.m.FlexRendertype.Bare) {
+			if (aChildren[i].isA('sap.m.FlexBox') || oControl.getRenderType() === FlexRendertype.Bare) {
 				sWrapperTag = "";
-			} else if (oControl.getRenderType() === sap.m.FlexRendertype.List) {
+			} else if (oControl.getRenderType() === FlexRendertype.List) {
 				sWrapperTag = "li";
 			} else {
 				sWrapperTag = "div";
@@ -152,7 +157,9 @@ sap.ui.define(['jquery.sap.global', './FlexBoxStylingHelper'],
 		}
 
 		if (!(oLayoutData instanceof sap.m.FlexItemData)) {
-			jQuery.sap.log.warning(oLayoutData + " set on " + oItem + " is not of type sap.m.FlexItemData");
+			if (oLayoutData) {
+				Log.warning(oLayoutData + " set on " + oItem + " is not of type sap.m.FlexItemData");
+			}
 		} else {
 			// FlexItemData is an element not a control, so we need to write id and style class ourselves if a wrapper tag is used
 			if (sWrapperTag && oLayoutData.getId()) {
@@ -161,7 +168,7 @@ sap.ui.define(['jquery.sap.global', './FlexBoxStylingHelper'],
 
 			// Add style class set by app
 			if (oLayoutData.getStyleClass()) {
-				FlexBoxRenderer.addItemClass(jQuery.sap.encodeHTML(oLayoutData.getStyleClass()), oItem, sWrapperTag, oRm);
+				FlexBoxRenderer.addItemClass(encodeXML(oLayoutData.getStyleClass()), oItem, sWrapperTag, oRm);
 			}
 
 			// Add classes relevant for flex item

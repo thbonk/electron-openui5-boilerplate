@@ -1,17 +1,31 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.f.Avatar.
 sap.ui.define([
-	"jquery.sap.global",
-	"./library",
-	"sap/ui/core/Control",
-	"sap/ui/core/IconPool"
-], function (jQuery, library, Control, IconPool) {
+    "./library",
+    "sap/ui/core/Control",
+    "sap/ui/core/IconPool",
+    "./AvatarRenderer",
+    "sap/ui/events/KeyCodes",
+    "sap/base/Log"
+], function(library, Control, IconPool, AvatarRenderer, KeyCodes, Log) {
 	"use strict";
+
+	// shortcut for sap.f.AvatarType
+	var AvatarType = library.AvatarType;
+
+	// shortcut for sap.f.AvatarImageFitType
+	var AvatarImageFitType = library.AvatarImageFitType;
+
+	// shortcut for sap.f.AvatarSize
+	var AvatarSize = library.AvatarSize;
+
+	// shortcut for sap.f.AvatarShape
+	var AvatarShape = library.AvatarShape;
 
 	/**
 	 * Constructor for a new <code>Avatar</code>.
@@ -52,11 +66,12 @@ sap.ui.define([
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.46
+	 * @see {@link fiori:https://experience.sap.com/fiori-design-web/avatar/ Avatar}
 	 * @alias sap.f.Avatar
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -75,11 +90,11 @@ sap.ui.define([
 				/**
 				 * Defines the shape of the <code>Avatar</code>.
 				 */
-				displayShape: {type: "sap.f.AvatarShape", group: "Appearance", defaultValue: sap.f.AvatarShape.Circle},
+				displayShape: {type: "sap.f.AvatarShape", group: "Appearance", defaultValue: AvatarShape.Circle},
 				/**
 				 * Sets a predefined display size of the <code>Avatar</code>.
 				 */
-				displaySize: {type: "sap.f.AvatarSize", group: "Appearance", defaultValue: sap.f.AvatarSize.S},
+				displaySize: {type: "sap.f.AvatarSize", group: "Appearance", defaultValue: AvatarSize.S},
 				/**
 				 * Specifies custom display size of the <code>Avatar</code>.
 				 *
@@ -95,7 +110,7 @@ sap.ui.define([
 				/**
 				 * Specifies how an image would fit in the <code>Avatar</code>.
 				 */
-				imageFitType: {type: "sap.f.AvatarImageFitType", group: "Appearance", defaultValue: sap.f.AvatarImageFitType.Cover}
+				imageFitType: {type: "sap.f.AvatarImageFitType", group: "Appearance", defaultValue: AvatarImageFitType.Cover}
 			},
 			aggregations : {
 				/**
@@ -107,12 +122,24 @@ sap.ui.define([
 				 */
 				detailBox: {type: 'sap.m.LightBox', multiple: false, bindable: "bindable"}
 			},
+			associations : {
+				/**
+				 * Association to controls / ids which describe this control (see WAI-ARIA attribute aria-describedby).
+				 */
+				ariaDescribedBy : {type : "sap.ui.core.Control", multiple : true, singularName : "ariaDescribedBy"},
+
+				/**
+				 * Association to controls / ids which label this control (see WAI-ARIA attribute aria-labelledBy).
+				 */
+				ariaLabelledBy: {type : "sap.ui.core.Control", multiple : true, singularName : "ariaLabelledBy"}
+			},
 			events : {
 				/**
 				 * Fired when the user selects the control.
 				 */
 				press: {}
-			}
+			},
+			designtime: "sap/f/designtime/Avatar.designtime"
 		}
 	});
 
@@ -180,6 +207,28 @@ sap.ui.define([
 		return this.setAggregation("detailBox", oLightBox);
 	};
 
+	/**
+	 * @override
+	 */
+	Avatar.prototype.clone = function () {
+		var oClone = Control.prototype.clone.apply(this, arguments),
+			oCloneDetailBox = oClone.getDetailBox();
+
+		// Handle press event if DetailBox is available
+		if (oCloneDetailBox) {
+
+			// Detach the old event
+			oClone.detachPress(this._fnLightBoxOpen, this.getDetailBox());
+
+			// Attach new event with the cloned detail box
+			oClone._fnLightBoxOpen = oCloneDetailBox.open;
+			oClone.attachPress(oClone._fnLightBoxOpen, oCloneDetailBox);
+
+		}
+
+		return oClone;
+	};
+
 	Avatar.prototype.attachPress = function() {
 		Array.prototype.unshift.apply(arguments, ["press"]);
 		Control.prototype.attachEvent.apply(this, arguments);
@@ -198,7 +247,7 @@ sap.ui.define([
 
 		if (!this.hasListeners("press")) {
 			this.$().removeAttr("tabindex");
-			this.$().removeAttr("role");
+			this.$().attr("role", "img");
 		}
 
 		return this;
@@ -209,7 +258,7 @@ sap.ui.define([
 	 *
 	 * @private
 	 */
-	Avatar.prototype.ontap = function (oEvent) {
+	Avatar.prototype.ontap = function () {
 		this.firePress({/* no parameters */});
 	};
 
@@ -220,7 +269,7 @@ sap.ui.define([
 	 * @private
 	 */
 	Avatar.prototype.onkeyup = function (oEvent) {
-		if (oEvent.which === jQuery.sap.KeyCodes.SPACE || oEvent.which === jQuery.sap.KeyCodes.ENTER) {
+		if (oEvent.which === KeyCodes.SPACE || oEvent.which === KeyCodes.ENTER) {
 			this.firePress({/* no parameters */});
 
 			//stop the propagation, it is handled by the control
@@ -232,15 +281,15 @@ sap.ui.define([
 	 * Checks the validity of the <code>initials</code> parameter and returns <code>true</code> if the
 	 * initials are correct.
 	 *
-	 * @param {string} sInitials
-	 * @returns {boolean}
+	 * @param {string} sInitials The initials value
+	 * @returns {boolean} The initials are valid or not
 	 * @private
 	 */
 	Avatar.prototype._areInitialsValid = function (sInitials) {
 		var validInitials = /^[a-zA-Z]{1,2}$/;
 		if (!validInitials.test(sInitials)) {
-			jQuery.sap.log.warning("Initials should consist of only 1 or 2 latin letters", this);
-			this._sActualType = sap.f.AvatarType.Icon;
+			Log.warning("Initials should consist of only 1 or 2 latin letters", this);
+			this._sActualType = AvatarType.Icon;
 			this._bIsDefaultIcon = true;
 			return false;
 		}
@@ -257,10 +306,10 @@ sap.ui.define([
 	 */
 	Avatar.prototype._validateSrc = function (sSrc) {
 		if (IconPool.isIconURI(sSrc)) {
-			this._sActualType = sap.f.AvatarType.Icon;
+			this._sActualType = AvatarType.Icon;
 			this._bIsDefaultIcon = false;
 		} else {
-			this._sActualType = sap.f.AvatarType.Image;
+			this._sActualType = AvatarType.Image;
 		}
 
 		return this;
@@ -279,10 +328,10 @@ sap.ui.define([
 		if (sSrc) {
 			this._validateSrc(sSrc);
 		} else if (sInitials && this._areInitialsValid(sInitials)) {
-			this._sActualType = sap.f.AvatarType.Initials;
+			this._sActualType = AvatarType.Initials;
 		} else {
-			jQuery.sap.log.warning("No src and initials were provided", this);
-			this._sActualType = sap.f.AvatarType.Icon;
+			Log.warning("No src and initials were provided", this);
+			this._sActualType = AvatarType.Icon;
 			this._bIsDefaultIcon = true;
 		}
 
@@ -299,9 +348,9 @@ sap.ui.define([
 	Avatar.prototype._getDefaultIconPath = function (sDisplayShape) {
 		var sDefaultIconPath = null;
 
-		if (sDisplayShape === sap.f.AvatarShape.Circle) {
+		if (sDisplayShape === AvatarShape.Circle) {
 			sDefaultIconPath = Avatar.DEFAULT_CIRCLE_PLACEHOLDER;
-		} else if (sDisplayShape === sap.f.AvatarShape.Square) {
+		} else if (sDisplayShape === AvatarShape.Square) {
 			sDefaultIconPath = Avatar.DEFAULT_SQUARE_PLACEHOLDER;
 		}
 
@@ -335,25 +384,21 @@ sap.ui.define([
 		return this._icon;
 	};
 
+	// Escape single quotes. BCP: 1780430119
+	Avatar.prototype._getEscapedSrc = function () {
+		var sSrc = this.getSrc();
 
-	/**
-	 * @see sap.ui.core.Control#getAccessibilityInfo
-	 * @protected
-	 */
-	Avatar.prototype.getAccessibilityInfo = function() {
-		var bHasPressListeners = this.hasListeners("press");
-
-		if (!bHasPressListeners) {
-			return null;
+		if (!sSrc) {
+			return '';
 		}
 
-		return {
-			role: bHasPressListeners ? "button" : "img",
-			type: sap.ui.getCore().getLibraryResourceBundle("sap.f").getText(bHasPressListeners ? "ACC_CTR_TYPE_BUTTON" : "ACC_CTR_TYPE_IMAGE"),
-			focusable: bHasPressListeners
-		};
+		return sSrc.replace(/'/g, "\\'");
+	};
+
+	Avatar.prototype._getDefaultTooltip = function() {
+		return sap.ui.getCore().getLibraryResourceBundle("sap.f").getText("AVATAR_TOOLTIP");
 	};
 
 	return Avatar;
 
-}, /* bExport= */ true);
+});

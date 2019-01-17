@@ -1,13 +1,46 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.Label
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/LabelEnablement'],
-	function(jQuery, library, Control, LabelEnablement) {
+sap.ui.define([
+	'./library',
+	'sap/ui/core/Control',
+	'sap/ui/core/LabelEnablement',
+	'sap/m/HyphenationSupport',
+	'sap/ui/core/library',
+	'./LabelRenderer',
+	"sap/base/Log",
+	"sap/base/security/encodeXML"
+],
+function(
+	library,
+	Control,
+	LabelEnablement,
+	HyphenationSupport,
+	coreLibrary,
+	LabelRenderer,
+	Log,
+	encodeXML
+) {
 	"use strict";
+
+	// shortcut for sap.ui.core.TextDirection
+	var TextDirection = coreLibrary.TextDirection;
+
+	// shortcut for sap.ui.core.TextAlign
+	var TextAlign = coreLibrary.TextAlign;
+
+	// shortcut for sap.m.LabelDesign
+	var LabelDesign = library.LabelDesign;
+
+	// shortcut for sap.ui.core.VerticalAlign
+	var VerticalAlign = coreLibrary.VerticalAlign;
+
+	// shortcut for sap.m.WrappingType
+	var WrappingType = library.WrappingType;
 
 	/**
 	 * Constructor for a new Label.
@@ -16,12 +49,23 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
-	 * The Label control is used in a UI5 mobile application to provide label text for other controls. Design such as bold, and text alignment can be specified.
-	 * As of version 1.50 the default value of the <code>wrapping</code> property is set to <code>false</code>
+	 * Provides a textual label for other controls.
 	 *
-	 * Labels for required fields are marked with an asterisk.
 	 * <h3>Overview</h3>
 	 * Labels are used as titles for single controls or groups of controls.
+	 * Labels for required fields are marked with an asterisk.
+	 *
+	 * Label appearance can be influenced by properties, such as <code>textAlign</code>,
+	 * <code>design</code>, <code>displayOnly</code>, <code>wrapping</code> and
+	 * <code>wrappingType</code>.
+	 *
+	 * As of version 1.50, the default value of the <code>wrapping</code> property is set
+	 * to <code>false</code>.
+	 *
+	 * As of version 1.60, you can hyphenate the label's text with the use of the
+	 * <code>wrappingType</code> property. For more information, see
+	 * {@link topic:6322164936f047de941ec522b95d7b70 Text Controls Hyphenation}.
+	 *
 	 * <h3>Usage</h3>
 	 * <h4>When to use</h4>
 	 * <ul>
@@ -33,21 +77,24 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * <li> It is not recommended to use labels in Bold.</li>
 	 * </ul>
 	 * @extends sap.ui.core.Control
-	 * @implements sap.ui.core.Label,sap.ui.core.IShrinkable
+	 * @implements sap.ui.core.Label, sap.ui.core.IShrinkable
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
 	 * @alias sap.m.Label
+	 * @see {@link fiori:https://experience.sap.com/fiori-design-web/label/ Label}
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var Label = Control.extend("sap.m.Label", /** @lends sap.m.Label.prototype */ { metadata : {
 
 		interfaces : [
 			"sap.ui.core.Label",
-			"sap.ui.core.IShrinkable"
+			"sap.ui.core.IShrinkable",
+			"sap.m.IOverflowToolbarContent",
+			"sap.m.IHyphenation"
 		],
 		library : "sap.m",
 		properties : {
@@ -55,7 +102,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			/**
 			 * Sets the design of a Label to either Standard or Bold.
 			 */
-			design : {type : "sap.m.LabelDesign", group : "Appearance", defaultValue : sap.m.LabelDesign.Standard},
+			design : {type : "sap.m.LabelDesign", group : "Appearance", defaultValue : LabelDesign.Standard},
 
 			/**
 			 * Determines the Label text to be displayed.
@@ -65,12 +112,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			/**
 			 * Available alignment settings are "Begin", "Center", "End", "Left", and "Right".
 			 */
-			textAlign : {type : "sap.ui.core.TextAlign", group : "Appearance", defaultValue : sap.ui.core.TextAlign.Begin},
+			textAlign : {type : "sap.ui.core.TextAlign", group : "Appearance", defaultValue : TextAlign.Begin},
 
 			/**
 			 * Options for the text direction are RTL and LTR. Alternatively, the control can inherit the text direction from its parent container.
 			 */
-			textDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : sap.ui.core.TextDirection.Inherit},
+			textDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : TextDirection.Inherit},
 
 			/**
 			 * Determines the width of the label.
@@ -84,7 +131,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			required : {type : "boolean", group : "Misc", defaultValue : false},
 
 			/**
-			 * Determines if the label is in displayOnly mode. Controls in this mode are neither interactive, nor editable, nor focusable, and not in the tab chain.
+			 * Determines if the label is in displayOnly mode.
 			 *
 			 * <b>Note:</b> This property should be used only in Form controls in preview mode.
 			 *
@@ -98,7 +145,23 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			 *
 			 * @since 1.50
 			 */
-			wrapping: {type : "boolean", group : "Appearance", defaultValue : false}
+			wrapping: {type : "boolean", group : "Appearance", defaultValue : false},
+
+			/**
+			 * Defines the type of text wrapping to be used (hyphenated or normal).
+			 *
+			 * <b>Note:</b> This property takes effect only when the <code>wrapping</code>
+			 * property is set to <code>true</code>.
+			 *
+			 * @since 1.60
+			 */
+			wrappingType : {type: "sap.m.WrappingType", group : "Appearance", defaultValue : WrappingType.Normal},
+
+			/**
+			 * Specifies the vertical alignment of the <code>Label</code> related to the tallest and lowest element on the line.
+			 * @since 1.54
+			 */
+			vAlign : {type : "sap.ui.core.VerticalAlign", group : "Appearance", defaultValue : VerticalAlign.Inherit}
 		},
 		associations : {
 
@@ -108,14 +171,20 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			 */
 			labelFor : {type : "sap.ui.core.Control", multiple : false}
 		},
-		designTime : true
+		designtime: "sap/m/designtime/Label.designtime"
 	}});
 
 	Label.prototype.setText = function(sText) {
+
 		var sValue = this.getText();
+
 		if (sValue !== sText) {
+
 			this.setProperty("text", sText, true);
-			this.$().html(jQuery.sap.encodeHTML(this.getProperty("text")));
+
+			this.$("bdi").html(encodeXML(HyphenationSupport.getTextForRender(this, "main")));
+
+
 			if (sText) {
 				this.$().removeClass("sapMLabelNoText");
 			}else {
@@ -125,6 +194,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		return this;
 	};
 
+	/**
+	* Sets the tooltip of the <code>sap.m.Label</code>.
+	*
+	* @public
+	* @param {string} sTooltip Tooltip's value represented in string format.
+	* @returns {sap.m.Label} <code>this</code> pointer for chaining.
+	*/
 	Label.prototype.setTooltip = function(oTooltip) {
 		var oValue = this.getTooltip();
 		if (oValue !== oTooltip) {
@@ -136,26 +212,120 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 	Label.prototype.setDisplayOnly = function(displayOnly) {
 		if (typeof displayOnly !== "boolean") {
-			jQuery.sap.log.error("DisplayOnly property should be boolean. The new value will not be set");
+			Log.error("DisplayOnly property should be boolean. The new value will not be set");
 			return this;
 		}
 
 		this.$().toggleClass("sapMLabelDisplayOnly", displayOnly);
 
-		return sap.ui.core.Control.prototype.setProperty.call(this, "displayOnly", displayOnly);
+		return Control.prototype.setProperty.call(this, "displayOnly", displayOnly);
 	};
 
 	/**
-	 * @see sap.ui.core.Control#getAccessibilityInfo Provides the current accessibility state of the control.
+	 * Provides the current accessibility state of the control.
+	 * @see {@link sap.ui.core.Control#getAccessibilityInfo}.
+	 *
 	 * @protected
+	 *
+	 * @returns {object} AccessibilityInfo of the <code>sap.m.Label</code>
 	 */
 	Label.prototype.getAccessibilityInfo = function() {
 		return {description: this.getText()};
 	};
 
+	/**
+	 * Enables the <code>sap.m.Label</code> to move inside the sap.m.OverflowToolbar.
+	 * Required by the {@link sap.m.IOverflowToolbarContent} interface.
+	 *
+	 * @public
+	 * @returns {object} Configuration information for the <code>sap.m.IOverflowToolbarContent</code> interface.
+	 */
+	Label.prototype.getOverflowToolbarConfig = function() {
+		var oConfig = {
+			canOverflow: true,
+			propsUnrelatedToSize: ["design", "required", "displayOnly"]
+		};
+
+		function getOwnGroup(oControl) {
+			var oLayoutData = oControl && oControl.getLayoutData();
+
+			if (isInstanceOf(oLayoutData, "sap/m/OverflowToolbarLayoutData")) {
+				return oLayoutData.getGroup();
+			}
+		}
+
+		oConfig.onBeforeEnterOverflow = function(oLabel) {
+			var bIsLabelFor = false,
+				oToolbar,
+				sLabelledControlId,
+				oLabelledControl,
+				sLabelGroupId,
+				sLabelledControlGroupId;
+
+			oToolbar = oLabel.getParent();
+			if (!isInstanceOf(oToolbar, "sap/m/OverflowToolbar")) {
+				return;
+			}
+
+			// check that the label is for a control from the same toolbar
+			sLabelledControlId = oLabel.getLabelFor();
+			oLabelledControl = sLabelledControlId && sap.ui.getCore().byId(sLabelledControlId);
+			if (!oLabelledControl || (oToolbar.indexOfContent(oLabelledControl) < 0)) {
+				return;
+			}
+
+			// check that the label and the labeled control are grouped in the toolbar
+			sLabelGroupId = getOwnGroup(oLabel);
+			sLabelledControlGroupId = getOwnGroup(oLabelledControl);
+			bIsLabelFor = sLabelGroupId && (sLabelGroupId === sLabelledControlGroupId);
+
+			oLabel.toggleStyleClass("sapMLabelMediumMarginTop", bIsLabelFor, true /* suppress invalidate */);
+		};
+
+		oConfig.onAfterExitOverflow = function(oLabel) {
+			oLabel.toggleStyleClass("sapMLabelMediumMarginTop", false, true /* suppress invalidate */);
+		};
+
+		return oConfig;
+	};
+
+	/**
+	 * Gets a map of texts which should be hyphenated.
+	 *
+	 * @private
+	 * @returns {map} The texts to be hyphenated.
+	 */
+	Label.prototype.getTextsToBeHyphenated = function () {
+		return {
+			"main": this.getText()
+		};
+	};
+
+	/**
+	 * Gets the DOM refs where the hyphenated texts should be placed.
+	 *
+	 * @private
+	 * @returns {map|null} The elements in which the hyphenated texts should be placed
+	 */
+	Label.prototype.getDomRefsForHyphenatedTexts = function () {
+		return {
+			"main": this.$("bdi")[0]
+		};
+	};
+
 	// enrich Label functionality
 	LabelEnablement.enrich(Label.prototype);
+	HyphenationSupport.mixInto(Label.prototype);
+
+	// utility function to check if an object is an instance of a class
+	// without forcing the loading of the module that defines the class
+	function isInstanceOf (oObject, sModule) {
+		if (oObject && sModule) {
+			var fnClass = sap.ui.require(sModule); // will return the fnClass only if the module is already loaded
+			return (typeof fnClass === 'function')  && (oObject instanceof fnClass);
+		}
+	}
 
 	return Label;
 
-}, /* bExport= */ true);
+});

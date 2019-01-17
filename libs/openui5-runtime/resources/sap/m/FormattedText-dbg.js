@@ -1,13 +1,33 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.FormattedText.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './FormattedTextAnchorGenerator'],
-	function (jQuery, library, Control, FormattedTextAnchorGenerator) {
+sap.ui.define([
+	'./library',
+	'sap/ui/core/Control',
+	'./FormattedTextAnchorGenerator',
+	'./FormattedTextRenderer',
+	"sap/base/Log",
+	"sap/base/security/URLWhitelist",
+	"sap/base/security/sanitizeHTML"
+],
+function(
+	library,
+	Control,
+	FormattedTextAnchorGenerator,
+	FormattedTextRenderer,
+	Log,
+	URLWhitelist,
+	sanitizeHTML0
+	) {
 		"use strict";
+
+
+		// shortcut for sap.m.LinkConversion
+		var LinkConversion = library.LinkConversion;
 
 
 		/**
@@ -19,7 +39,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Forma
 		 * @class
 		 * The FormattedText control allows the usage of a limited set of tags for inline display of formatted text in HTML format.
 		 * @extends sap.ui.core.Control
-		 * @version 1.50.6
+		 * @version 1.61.2
 		 *
 		 * @constructor
 		 * @public
@@ -63,7 +83,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Forma
 					 * </ul>
 					 * <p><code>class, style,</code> and <code>target</code> attributes are allowed.
 					 * If <code>target</code> is not set, links open in a new window by default.
-					 * <p>Only safe <code>href</code> attributes can be used. See {@link jQuery.sap.validateUrl}.
+					 * <p>Only safe <code>href</code> attributes can be used. See {@link sap.base.security.URLWhiteList}.
 					 *
 					 * <b>Note:</b> Keep in mind that not supported HTML tags and
 					 * the content nested inside them are both not rendered by the control.
@@ -80,7 +100,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Forma
 					 * and what are the criteria for recognizing them.
 					 * @since 1.45.5
 					 */
-					convertLinksToAnchorTags: {type: "sap.m.LinkConversion", group: "Behavior", defaultValue: sap.m.LinkConversion.None},
+					convertLinksToAnchorTags: {type: "sap.m.LinkConversion", group: "Behavior", defaultValue: LinkConversion.None},
 
 					/**
 					 * Determines the <code>target</code> attribute of the generated HTML anchor tags.
@@ -153,8 +173,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Forma
 				'strong': 1,
 				'u': 1
 			}
-		},
-		_renderingRules = _defaultRenderingRules;
+		};
+
+		/**
+		 * Holds the internal list of allowed and evaluated HTML elements and attributes
+		 * @private
+		 */
+		FormattedText.prototype._renderingRules = _defaultRenderingRules;
 
 		/**
 		 * Initialization hook for the FormattedText, which creates a list of rules with allowed tags and attributes.
@@ -177,7 +202,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Forma
 				value,
 				addTarget = tagName === "a";
 			// add UI5 specific classes when appropriate
-			var cssClass = _renderingRules.ELEMENTS[tagName].cssClass || "";
+			var cssClass = this._renderingRules.ELEMENTS[tagName].cssClass || "";
 
 			for (var i = 0; i < attribs.length; i += 2) {
 				// attribs[i] is the name of the tag's attribute.
@@ -186,9 +211,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Forma
 				attr = attribs[i];
 				value = attribs[i + 1];
 
-				if (!_renderingRules.ATTRIBS[attr] && !_renderingRules.ATTRIBS[tagName + "::" + attr]) {
+				if (!this._renderingRules.ATTRIBS[attr] && !this._renderingRules.ATTRIBS[tagName + "::" + attr]) {
 					sWarning = 'FormattedText: <' + tagName + '> with attribute [' + attr + '="' + value + '"] is not allowed';
-					jQuery.sap.log.warning(sWarning, this);
+					Log.warning(sWarning, this);
 					// to remove the attribute by the sanitizer, set the value to null
 					attribs[i + 1] = null;
 					continue;
@@ -196,8 +221,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Forma
 
 				// sanitize hrefs
 				if (attr == "href") { // a::href
-					if (!jQuery.sap.validateUrl(value)) {
-						jQuery.sap.log.warning("FormattedText: incorrect href attribute:" + value, this);
+					if (!URLWhitelist.validate(value)) {
+						Log.warning("FormattedText: incorrect href attribute:" + value, this);
 						attribs[i + 1] = "#";
 						addTarget = false;
 					}
@@ -228,11 +253,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Forma
 		}
 
 		function fnPolicy (tagName, attribs) {
-			if (_renderingRules.ELEMENTS[tagName]) {
-				return fnSanitizeAttribs(tagName, attribs);
+			if (this._renderingRules.ELEMENTS[tagName]) {
+				return fnSanitizeAttribs.call(this, tagName, attribs);
 			} else {
 				var sWarning = '<' + tagName + '> is not allowed';
-				jQuery.sap.log.warning(sWarning, this);
+				Log.warning(sWarning, this);
 			}
 		}
 
@@ -244,11 +269,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Forma
 		 * @private
 		 */
 		function sanitizeHTML(sText) {
-			return jQuery.sap._sanitizeHTML(sText, {
-				tagPolicy: fnPolicy,
+			return sanitizeHTML0(sText, {
+				tagPolicy: fnPolicy.bind(this),
 				uriRewriter: function (sUrl) {
 					// by default we use the URL whitelist to check the URLs
-					if (jQuery.sap.validateUrl(sUrl)) {
+					if (URLWhitelist.validate(sUrl)) {
 						return sUrl;
 					}
 				}
@@ -277,7 +302,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Forma
 
 			sText = FormattedTextAnchorGenerator.generateAnchors(sText, sAutoGenerateLinkTags, this.getConvertedLinksDefaultTarget());
 
-			return sanitizeHTML(sText);
+			return sanitizeHTML.call(this, sText);
 		};
 
 		/**
@@ -287,7 +312,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Forma
 		 * @public
 		 */
 		FormattedText.prototype.setHtmlText = function (sText) {
-			return this.setProperty("htmlText", sanitizeHTML(sText));
+			return this.setProperty("htmlText", sanitizeHTML.call(this, sText));
 		};
 
 		/**
@@ -298,10 +323,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './Forma
 		 * @private
 		 */
 		FormattedText.prototype._setUseLimitedRenderingRules = function (bLimit) {
-			_renderingRules = bLimit ? _limitedRenderingRules : _defaultRenderingRules;
+			this._renderingRules = bLimit ? _limitedRenderingRules : _defaultRenderingRules;
 		};
 
 
 		return FormattedText;
-
-	}, /* bExport= */ true);
+	});

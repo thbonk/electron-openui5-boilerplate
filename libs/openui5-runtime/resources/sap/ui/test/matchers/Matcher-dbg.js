@@ -1,10 +1,13 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(["jquery.sap.global", "sap/ui/base/ManagedObject", "sap/ui/test/_LogCollector"], function ($, ManagedObject, _LogCollector) {
+sap.ui.define([
+	"sap/ui/test/_OpaLogger",
+	"sap/ui/base/ManagedObject"
+], function (_OpaLogger, ManagedObject) {
 	"use strict";
 
 	/**
@@ -23,7 +26,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/base/ManagedObject", "sap/ui/test/_L
 		},
 
 		constructor: function () {
-			this._oLogger = $.sap.log.getLogger(this.getMetadata().getName(), _LogCollector.DEFAULT_LEVEL_FOR_OPA_LOGGERS);
+			this._oLogger = _OpaLogger.getLogger(this.getMetadata().getName());
 			return ManagedObject.prototype.constructor.apply(this, arguments);
 		},
 
@@ -44,4 +47,4 @@ sap.ui.define(["jquery.sap.global", "sap/ui/base/ManagedObject", "sap/ui/test/_L
 	});
 
 	return Matcher;
-}, /* bExport= */ true);
+});

@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
  // Provides
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Element'],
+sap.ui.define(["sap/ui/thirdparty/jquery", 'sap/ui/core/Control', 'sap/ui/core/Element'],
 	function(jQuery, Control, Element) {
 	"use strict";
 
@@ -164,7 +164,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Element'
 				if (!oControl._sorted) {
 					var aItems = oControl.removeAllAggregation("items", true);
 					aItems.sort(function(a, b) {
-						return (parseInt(a.getOrder(), 10) - parseInt(b.getOrder(), 10));
+						return (parseInt(a.getOrder()) - parseInt(b.getOrder()));
 					});
 					jQuery.each(aItems, function(i,oItem) {oControl.addAggregation("items",oItem,false);});
 					oControl._sorted = true;

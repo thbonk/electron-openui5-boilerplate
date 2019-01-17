@@ -1,12 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.model.odata.ODataAnnotations
-sap.ui.define(['./AnnotationParser', 'jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/EventProvider'],
-	function(AnnotationParser, jQuery, Device, EventProvider) {
+sap.ui.define([
+	"./AnnotationParser",
+	"sap/base/assert",
+	"sap/base/Log",
+	"sap/ui/Device",
+	"sap/ui/base/EventProvider",
+	"sap/ui/thirdparty/jquery"
+], function (AnnotationParser, assert, Log, Device, EventProvider, jQuery) {
 	"use strict";
 
 	/*global ActiveXObject */
@@ -22,9 +28,8 @@ sap.ui.define(['./AnnotationParser', 'jquery.sap.global', 'sap/ui/Device', 'sap/
 	 *
 	 * @author SAP SE
 	 * @version
-	 * 1.50.6
+	 * 1.61.2
 	 *
-	 * @constructor
 	 * @public
 	 * @alias sap.ui.model.odata.ODataAnnotations
 	 * @extends sap.ui.base.EventProvider
@@ -63,12 +68,12 @@ sap.ui.define(['./AnnotationParser', 'jquery.sap.global', 'sap/ui/Device', 'sap/
 
 				if (!this.bAsync) {
 					// Synchronous loading, we can directly check for errors
-					jQuery.sap.assert(
+					assert(
 						!jQuery.isEmptyObject(this.oMetadata),
 						"Metadata must be available for synchronous annotation loading"
 					);
 					if (this.oError) {
-						jQuery.sap.log.error(
+						Log.error(
 							"OData annotations could not be loaded: " + this.oError.message
 						);
 					}
@@ -272,7 +277,7 @@ sap.ui.define(['./AnnotationParser', 'jquery.sap.global', 'sap/ui/Device', 'sap/
 		} else if (window.DOMParser) {
 			oXMLDoc = new DOMParser().parseFromString(sXMLContent, 'application/xml');
 		} else {
-			jQuery.sap.log.fatal("The browser does not support XML parsing. Annotations are not available.");
+			Log.fatal("The browser does not support XML parsing. Annotations are not available.");
 		}
 
 
@@ -507,13 +512,13 @@ sap.ui.define(['./AnnotationParser', 'jquery.sap.global', 'sap/ui/Device', 'sap/
 					type:			"fail",
 					url:			sUrl,
 					message:		sStatusText,
-					statusCode:		oJQXHR.statusCode,
+					statusCode:		oJQXHR.status,
 					statusText:		oJQXHR.statusText,
 					responseText:	oJQXHR.responseText
 				};
 
 				if (that.bAsync) {
-					that.oFailedEvent = jQuery.sap.delayedCall(0, that, that.fireFailed, [ that.oError ]);
+					that.oFailedEvent = setTimeout(that.fireFailed.bind(that, that.oError), 0);
 				} else {
 					that.fireFailed(that.oError);
 				}
@@ -529,7 +534,7 @@ sap.ui.define(['./AnnotationParser', 'jquery.sap.global', 'sap/ui/Device', 'sap/
 							type:			"success",
 							url: 			sUrl,
 							message:		sStatusText,
-							statusCode:		oJQXHR.statusCode,
+							statusCode:		oJQXHR.status,
 							statusText:		oJQXHR.statusText,
 							responseText:		oJQXHR.responseText
 						});
@@ -558,10 +563,10 @@ sap.ui.define(['./AnnotationParser', 'jquery.sap.global', 'sap/ui/Device', 'sap/
 
 		EventProvider.prototype.destroy.apply(this, arguments);
 		if (this.oLoadEvent) {
-			jQuery.sap.clearDelayedCall(this.oLoadEvent);
+			clearTimeout(this.oLoadEvent);
 		}
 		if (this.oFailedEvent) {
-			jQuery.sap.clearDelayedCall(this.oFailedEvent);
+			clearTimeout(this.oFailedEvent);
 		}
 	};
 

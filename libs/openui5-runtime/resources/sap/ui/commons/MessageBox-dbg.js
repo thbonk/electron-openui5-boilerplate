@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.commons.MessageBox
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/core/ElementMetadata', 'sap/ui/core/Control',
+sap.ui.define(["sap/ui/thirdparty/jquery", 'sap/ui/core/library', 'sap/ui/core/ElementMetadata', 'sap/ui/core/Control',
 		'./library', './Button', './Dialog', './Image', './TextView', './layout/MatrixLayout', './layout/MatrixLayoutCell'],
 	function (jQuery, core, ElementMetadata, Control,
 			  commons, Button, Dialog, Image, TextView, MatrixLayout, MatrixLayoutCell) {
@@ -31,7 +31,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/core/ElementM
 		 *
 		 * @namespace
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.61.2
 		 * @public
 		 * @since 0.8.8
 		 * @deprecated Since version 1.38. Instead, use the <code>sap.m.MessageBox</code> control.
@@ -46,6 +46,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/core/ElementM
 		 * specifying the set of allowed actions as well as reporting back the user choice.
 		 * @enum
 		 * @public
+		 * @deprecated as of version 1.38
 		 */
 		MessageBox.Action = {
 
@@ -102,6 +103,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/core/ElementM
 		 * Enumeration of the pre-defined icons that can be used in a MessageBox.
 		 * @enum
 		 * @public
+		 * @deprecated as of version 1.38
 		 */
 		MessageBox.Icon = {
 
@@ -203,7 +205,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/core/ElementM
 				oDialog, oResult, oContent, oMsg, oDefaultButton;
 
 			// normalize the vActions array
-			if (typeof vActions !== "undefined" && !jQuery.isArray(vActions)) {
+			if (typeof vActions !== "undefined" && !Array.isArray(vActions)) {
 				vActions = [vActions];
 			}
 			if (!vActions || vActions.length === 0) {

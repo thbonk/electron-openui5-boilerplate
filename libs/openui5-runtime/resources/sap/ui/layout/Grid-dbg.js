@@ -1,28 +1,58 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.layout.Grid.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
-	function(jQuery, Control, library) {
+sap.ui.define([
+	'sap/ui/core/Control',
+	'./library',
+	'sap/ui/Device',
+	'sap/ui/core/ResizeHandler',
+	'sap/ui/base/ManagedObjectObserver',
+	"./GridRenderer",
+	"sap/ui/thirdparty/jquery"
+],
+	function(
+		Control,
+		library,
+		Device,
+		ResizeHandler,
+		ManagedObjectObserver,
+		GridRenderer,
+		jQuery
+	) {
 	"use strict";
 
 
 
 	/**
-	 * Constructor for a new Grid.
+	 * Constructor for a new <code>Grid</code>.
 	 *
-	 * @param {string} [sId] id for the new control, generated automatically if no id is given
-	 * @param {object} [mSettings] initial settings for the new control
+	 * @param {string} [sId] ID for the new control, generated automatically if no ID is given
+	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
-	 * The Grid control is a layout which positions its child controls in a 12 column flow layout. Its children can be specified to take on a variable amount of columns depending on available screen size. With this control it is possible to achieve flexible layouts and line-breaks for extra large-, large-, medium- and small-sized screens, such as large desktop, desktop, tablet, and mobile. The Grid control's width can be percentage- or pixel-based and the spacing between its columns can be set to various pre-defined values.
+	 * A layout control which positions its child controls in a 12 column flow layout.
+	 *
+	 * The <code>Grid</code> control's children can be specified to take on a variable
+	 * amount of columns depending on available screen size. With this control it is possible
+	 * to achieve flexible layouts and line-breaks for extra large-, large-, medium- and
+	 * small-sized screens, such as large desktop, desktop, tablet, and mobile.
+	 *
+	 * The <code>Grid</code> control's width can be percentage- or pixel-based and the spacing between
+	 * its columns can be set to various predefined values.
+	 *
+	 * <b>Note:</b> The visibility of the child control does not affect the horizontal space it occupies.
+	 * This means that even if the control is not visible, its horizontal space will still exist, even if it is empty.
+	 *
+	 * @see {@link fiori:https://experience.sap.com/fiori-design-web/grid-layout/#responsive-grid Grid}
+	 *
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -36,37 +66,50 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 		properties : {
 
 			/**
-			 * Optional. Width of the Grid. If not specified, then 100%.
+			 * Optional. Defines the width of the <code>Grid</code>. If not specified, then 100%.
 			 */
 			width : {type : "sap.ui.core.CSSSize", group : "Dimension", defaultValue : '100%'},
 
 			/**
-			 * Optional. Vertical spacing between the rows in the Grid. In rem, allowed values are 0, 0.5, 1 and 2.
+			 * Optional. Defines the vertical spacing between the rows in the <code>Grid</code>.
+			 * In rem, allowed values are 0, 0.5, 1 and 2.
 			 */
 			vSpacing : {type : "float", group : "Dimension", defaultValue : 1},
 
 			/**
-			 * Optional. Horizontal spacing between the content in the Grid. In rem, allowed values are 0, 0.5 , 1 or 2.
+			 * Optional. Defines the horizontal spacing between the content in the <code>Grid</code>.
+			 * In rem, allowed values are 0, 0.5 , 1 or 2.
 			 */
 			hSpacing : {type : "float", group : "Dimension", defaultValue : 1},
 
 			/**
-			 * Optional. Position of the Grid in the window or surrounding container. Possible values are "Center", "Left" and "Right".
+			 * Optional. Defines the position of the <code>Grid</code> in the window or surrounding container.
 			 */
 			position : {type : "sap.ui.layout.GridPosition", group : "Dimension", defaultValue : "Left"},
 
 			/**
-			 * Optional. A string type that represents Grid's default span values for large, medium and small screens for the whole Grid. Allowed values are separated by space Letters L, M or S followed by number of columns from 1 to 12 that the container has to take, for example: "L2 M4 S6", "M12", "s10" or "l4 m4". Note that the parameters has to be provided in the order large medium small.
+			 * Optional. A string type that represents the span values of the <code>Grid</code> for
+			 * large, medium and small screens. Allowed values are separated by space Letters L, M or S followed
+			 * by number of columns from 1 to 12 that the container has to take, for example, <code>L2 M4 S6</code>,
+			 * <code>M12</code>, <code>s10</code> or <code>l4 m4</code>.
+			 *
+			 * <b>Note:</b> The parameters must be provided in the order <large medium small>.
 			 */
 			defaultSpan : {type : "sap.ui.layout.GridSpan", group : "Behavior", defaultValue : "XL3 L3 M6 S12"},
 
 			/**
-			 * Optional. Defines default for the whole Grid numbers of empty columns before the current span begins. It can be defined for large, medium and small screens. Allowed values are separated by space Letters L, M or S followed by number of columns from 0 to 11 that the container has to take, for example: "L2 M4 S6", "M11", "s10" or "l4 m4". Note that the parameters has to be provided in the order large medium small.
+			 * Optional. Defines default for the whole Grid numbers of empty columns before the current span begins.
+			 * It can be defined for large, medium and small screens. Allowed values are separated by space Letters
+			 * L, M or S followed by number of columns from 0 to 11 that the container has to take, for example,
+			 * <code>L2 M4 S6</code>, <code>M11</code>, <code>s10</code> or <code>l4 m4</code>.
+			 *
+			 * <b>Note:</b> The parameters must be provided in the order <large medium small>.
 			 */
 			defaultIndent : {type : "sap.ui.layout.GridIndent", group : "Behavior", defaultValue : "XL0 L0 M0 S0"},
 
 			/**
-			 * If true then not the media Query ( device screen size), but the size of the container surrounding the grid defines the current range (large, medium or small).
+			 * If set to <code>true</code>, the current range (large, medium or small) is defined by the size of the
+			 * container surrounding the <code>Grid</code> instead of the device screen size (media Query).
 			 */
 			containerQuery : {type : "boolean", group : "Behavior", defaultValue : false}
 		},
@@ -86,7 +129,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 			 */
 			ariaLabelledBy: { type: "sap.ui.core.Control", multiple: true, singularName: "ariaLabelledBy" }
 		},
-		designTime: true
+		designtime: "sap/ui/layout/designtime/Grid.designtime"
 	}});
 
 	/**
@@ -95,13 +138,24 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	(function() {
 
 		Grid.prototype.init = function() {
-			this._iBreakPointTablet = sap.ui.Device.media._predefinedRangeSets[sap.ui.Device.media.RANGESETS.SAP_STANDARD_EXTENDED].points[0];
-			this._iBreakPointDesktop = sap.ui.Device.media._predefinedRangeSets[sap.ui.Device.media.RANGESETS.SAP_STANDARD_EXTENDED].points[1];
-			this._iBreakPointLargeDesktop = sap.ui.Device.media._predefinedRangeSets[sap.ui.Device.media.RANGESETS.SAP_STANDARD_EXTENDED].points[2];
+			// Library specific class
+			var sClass = library.GridHelper.getLibrarySpecificClass();
+			if (sClass) {
+				this.addStyleClass(sClass);
+			}
+
+			this._iBreakPointTablet = Device.media._predefinedRangeSets[Device.media.RANGESETS.SAP_STANDARD_EXTENDED].points[0];
+			this._iBreakPointDesktop = Device.media._predefinedRangeSets[Device.media.RANGESETS.SAP_STANDARD_EXTENDED].points[1];
+			this._iBreakPointLargeDesktop = Device.media._predefinedRangeSets[Device.media.RANGESETS.SAP_STANDARD_EXTENDED].points[2];
 
 			// Backward compatibility - if no any settings for XL - the settings for L are used
 			this._indentXLChanged = false;
 			this._spanXLChanged = false;
+
+			this._oObserver = new ManagedObjectObserver(Grid.prototype._observeChanges.bind(this));
+			this._oObserver.observe(this, {
+				aggregations: ["content"]
+			});
 		};
 
 		/**
@@ -111,10 +165,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 		 */
 		Grid.prototype.onAfterRendering = function() {
 			if (this.getContainerQuery()) {
-				this._sContainerResizeListener = sap.ui.core.ResizeHandler.register(this, jQuery.proxy(this._onParentResize, this));
+				this._sContainerResizeListener = ResizeHandler.register(this, jQuery.proxy(this._onParentResize, this));
 				this._onParentResize();
 			} else {
-				this._attachMediaContainerWidthChange(this._handleMediaChange, this, sap.ui.Device.media.RANGESETS.SAP_STANDARD_EXTENDED);
+				this._attachMediaContainerWidthChange(this._handleMediaChange, this, Device.media.RANGESETS.SAP_STANDARD_EXTENDED);
 			}
 		};
 
@@ -126,6 +180,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 		Grid.prototype.exit = function() {
 			// Cleanup resize event registration on exit
 			this._cleanup();
+
+			if (this._oObserver) {
+				this._oObserver.disconnect();
+				this._oObserver = null;
+			}
 		};
 
 		/**
@@ -136,12 +195,46 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 		Grid.prototype._cleanup = function() {
 			// Cleanup resize event registration
 			if (this._sContainerResizeListener) {
-				sap.ui.core.ResizeHandler.deregister(this._sContainerResizeListener);
+				ResizeHandler.deregister(this._sContainerResizeListener);
 				this._sContainerResizeListener = null;
 			}
 
 			// Device Media Change handler
-			this._detachMediaContainerWidthChange(this._handleMediaChange, this, sap.ui.Device.media.RANGESETS.SAP_STANDARD_EXTENDED);
+			this._detachMediaContainerWidthChange(this._handleMediaChange, this, Device.media.RANGESETS.SAP_STANDARD_EXTENDED);
+		};
+
+		Grid.prototype._observeVisibility = function (oControl) {
+			this._oObserver.observe(oControl, {
+				properties: ["visible"]
+			});
+		};
+
+		Grid.prototype._unobserveVisibility = function (oControl) {
+			this._oObserver.unobserve(oControl, {
+				properties: ["visible"]
+			});
+		};
+
+		Grid.prototype._observeChanges = function (oChanges) {
+			var oObject = oChanges.object,
+				sChangeName = oChanges.name,
+				sMutationName = oChanges.mutation,
+				oChild = oChanges.child;
+
+			if (oObject === this) {
+				if (sMutationName === "insert") {
+					this._observeVisibility(oChild);
+				} else if (sMutationName === "remove") {
+					this._unobserveVisibility(oChild);
+				}
+			} else if (sChangeName === "visible") {
+				// We need to get the grid's internal spans, because they are responsible for the margin
+				// indexOf is used, because when an element is hidden, a placeholder is rendered rather than that specific element.
+				// Because we do not have that element in the DOM, we access it's container through the grid.
+				// Children array consists of DOM refs, not jQuery objects, so we need to convert them.
+				var iElementIndex = this.getContent().indexOf(oObject);
+				jQuery(this.$().children()[iElementIndex]).toggleClass("sapUiRespGridSpanInvisible", !oChanges.current);
+			}
 		};
 
 		Grid.prototype._handleMediaChange  = function(oParams) {
@@ -242,11 +335,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 
 
 		/*
-	     * Get span information for the Control
-	     * @param {sap.ui.core.Control} Control instance
-	     * @return {Object} Grid layout data
-	     * @private
-	     */
+		 * Get span information for the Control
+		 * @param {sap.ui.core.Control} Control instance
+		 * @return {Object} Grid layout data
+		 * @private
+		 */
 		Grid.prototype._getLayoutDataForControl = function(oControl) {
 			var oLayoutData = oControl.getLayoutData();
 
@@ -278,24 +371,28 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 		};
 
 		/**
-		 * Gets the role used for accessibility
+		 * Gets the role used for accessibility.
 		 * Set by the Form control if Grid represents a FormContainer
 		 * @return {string} sRole accessibility role
 		 * @since 1.28.0
 		 * @private
 		 */
 		Grid.prototype._getAccessibleRole = function() {
-
 			return null;
-
 		};
 
 		/**
+		 * Returns the <code>Grid</code> accessibility information.
 		 * @see sap.ui.core.Control#getAccessibilityInfo
 		 * @protected
+		 * @returns {object} The <code>Grid</code> accessibility information
 		 */
 		Grid.prototype.getAccessibilityInfo = function() {
-			return {children: this.getContent()};
+			return {
+				children: this.getContent().filter(function(oContent) {
+					return oContent.$().is(':visible');
+				})
+			};
 		};
 
 	}());
@@ -303,4 +400,4 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 
 	return Grid;
 
-}, /* bExport= */ true);
+});

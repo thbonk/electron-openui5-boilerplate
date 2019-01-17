@@ -1,13 +1,38 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.ux3.FeedChunk.
-sap.ui.define(['jquery.sap.global', 'sap/ui/commons/MenuButton', 'sap/ui/core/Control', 'sap/ui/core/theming/Parameters', './Feeder', './library'],
-	function(jQuery, MenuButton, Control, Parameters, Feeder, library) {
+sap.ui.define([
+    'sap/ui/thirdparty/jquery',
+    'sap/ui/commons/MenuButton',
+    'sap/ui/core/Control',
+    'sap/ui/core/theming/Parameters',
+    './Feeder',
+    './library',
+    './FeedChunkRenderer',
+    'sap/ui/commons/Menu',
+    'sap/ui/commons/MenuItem'
+],
+	function(
+	    jQuery,
+		MenuButton,
+		Control,
+		Parameters,
+		Feeder,
+		library,
+		FeedChunkRenderer,
+		Menu,
+		MenuItem
+	) {
 	"use strict";
+
+
+
+	// shortcut for sap.ui.ux3.FeederType
+	var FeederType = library.FeederType;
 
 
 
@@ -24,7 +49,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/MenuButton', 'sap/ui/core/Co
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -255,7 +280,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/MenuButton', 'sap/ui/core/Co
 		// create comment feeder if needed
 		if (!this.oCommentFeeder) {
 			this.oCommentFeeder = new Feeder( this.getId() + '-CommentFeeder', {
-				type: sap.ui.ux3.FeederType.Comment
+				type: FeederType.Comment
 			}).setParent(this);
 			this.oCommentFeeder.attachEvent('submit', this.handleCommentFeederSubmit, this); // attach event this way to have the right this-reference in handler
 			this.showCommentFeeder = true;
@@ -269,7 +294,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/MenuButton', 'sap/ui/core/Co
 			this.oToolsButton = new MenuButton( this.getId() + '-toolsButton', {
 				tooltip: this.rb.getText('FEED_TOOLS'),
 				lite: true,
-				menu: new sap.ui.commons.Menu(this.getId() + '-toolsMenu')
+				menu: new Menu(this.getId() + '-toolsMenu')
 			}).setParent(this);
 			this.oToolsButton.attachEvent('itemSelected', this.handleToolsButtonSelected, this); // attach event this way to have the right this-reference in handler
 
@@ -313,7 +338,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/MenuButton', 'sap/ui/core/Co
 		if (this.oText.clientHeight < this.oText.scrollHeight) {
 			// if tags are rendered put button in tag-DIV
 			var oFather = this.$().children(".sapUiFeedChunkByline").get(0);
-			jQuery(oFather).append(sap.ui.ux3.FeedChunkRenderer.renderExpander(this));
+			jQuery(oFather).append(FeedChunkRenderer.renderExpander(this));
 
 			if (this.expanded) {
 				// expanded
@@ -360,7 +385,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/MenuButton', 'sap/ui/core/Co
 					sNewTitle = this.rb.getText("FEED_COLLAPSE");
 					this.expanded = true;
 				}
-				jQuery.sap.byId(sTargetId).attr('title',sNewTitle).toggleClass('sapUiFeedChunkExpand sapUiFeedChunkCollapse');
+				jQuery(document.getElementById(sTargetId)).attr('title',sNewTitle).toggleClass('sapUiFeedChunkExpand sapUiFeedChunkCollapse');
 			break;
 			case ( this.getId() + '-all' ):
 				// Click on sender
@@ -417,7 +442,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/MenuButton', 'sap/ui/core/Co
 
 		this.allComments = !this.allComments;
 
-		var $commentSection = jQuery.sap.byId(this.getId() + " > section"); // use sap function instead of jQuery child selector because of escaping ID
+		var $commentSection = this.$().children("section");
 		if ($commentSection.length > 0) {
 			var rm = sap.ui.getCore().createRenderManager();
 			this.getRenderer().renderComments(rm, this);
@@ -498,7 +523,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/MenuButton', 'sap/ui/core/Co
 		if (bDeletionAllowed) {
 			this.initToolsButton();
 			//add deletion item from menu
-			this.oToolsButton.getMenu().insertItem(new sap.ui.commons.MenuItem(this.getId() + '-actDelete',{text: this.rb.getText('FEED_DELETE')}), 0);
+			this.oToolsButton.getMenu().insertItem(new MenuItem(this.getId() + '-actDelete',{text: this.rb.getText('FEED_DELETE')}), 0);
 		} else {
 			//remove deletion item from menu
 			if (this.oToolsButton) {
@@ -698,4 +723,4 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/MenuButton', 'sap/ui/core/Co
 
 	return FeedChunk;
 
-}, /* bExport= */ true);
+});

@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define([ 'jquery.sap.global', './library'],
-	function(jQuery, library) {
+sap.ui.define(['./library', "sap/base/security/encodeCSS"],
+	function(library, encodeCSS) {
 	"use strict";
 
 	// shortcut for sap.m.GenericTileScope
@@ -26,7 +26,7 @@ sap.ui.define([ 'jquery.sap.global', './library'],
 	SlideTileRenderer.render = function(oRm, oControl) {
 		var sTooltip = oControl.getTooltip_AsString(),
 			sScope = oControl.getScope(),
-			sScopeClass = jQuery.sap.encodeCSS("sapMSTScope" + sScope),
+			sScopeClass = encodeCSS("sapMSTScope" + sScope),
 			iLength;
 
 		oRm.write("<div");

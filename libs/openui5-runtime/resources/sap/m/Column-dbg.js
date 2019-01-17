@@ -1,13 +1,34 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.Column.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', 'sap/ui/core/Renderer'],
-	function(jQuery, library, Element, Renderer) {
+sap.ui.define([
+	'./library',
+	'sap/ui/core/Element',
+	'sap/ui/core/Renderer',
+	'sap/ui/core/library',
+	'sap/ui/Device',
+	"sap/ui/thirdparty/jquery"
+],
+	function(library, Element, Renderer, coreLibrary, Device, jQuery) {
 	"use strict";
+
+
+
+	// shortcut for sap.m.PopinDisplay
+	var PopinDisplay = library.PopinDisplay;
+
+	// shortcut for sap.ui.core.VerticalAlign
+	var VerticalAlign = coreLibrary.VerticalAlign;
+
+	// shortcut for sap.ui.core.TextAlign
+	var TextAlign = coreLibrary.TextAlign;
+
+	// shortcut for sap.ui.core.SortOrder
+	var SortOrder = coreLibrary.SortOrder;
 
 
 
@@ -19,10 +40,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', 'sap/ui/
 	 *
 	 * @class
 	 * The <code>sap.m.Column</code> allows to define column specific properties that will be applied when rendering the <code>sap.m.Table</code>.
+	 *
+	 * See section "{@link topic:6f778a805bc3453dbb66e246d8271839 Defining Column Width}"
+	 * in the documentation to understand how to define the <code>width</code> property of the <code>sap.m.Column</code> to render a <code>sap.m.Table</code> control properly.
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -41,17 +65,17 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', 'sap/ui/
 			width : {type : "sap.ui.core.CSSSize", group : "Dimension", defaultValue : null},
 
 			/**
-			 * Horizontal alignment of the column content. Available alignment settings are "Begin", "Center", "End", "Left", and "Right".
+			 * Defines the horizontal alignment of the column content.
 			 *
-			 * NOTE: Control with a "textAlign" property inherits the horizontal alignment.
+			 * <b>Note:</b> Text controls with a <code>textAlign</code> property inherits the horizontal alignment.
 			 */
-			hAlign : {type : "sap.ui.core.TextAlign", group : "Appearance", defaultValue : sap.ui.core.TextAlign.Begin},
+			hAlign : {type : "sap.ui.core.TextAlign", group : "Appearance", defaultValue : TextAlign.Begin},
 
 			/**
-			 * Vertical alignment of the cells in a column. Possible values are "Inherit", "Top", "Middle", "Bottom"
+			 * Defines the vertical alignment of the cells in a column.
 			 * This property does not affect the vertical alignment of header and footer.
 			 */
-			vAlign : {type : "sap.ui.core.VerticalAlign", group : "Appearance", defaultValue : sap.ui.core.VerticalAlign.Inherit},
+			vAlign : {type : "sap.ui.core.VerticalAlign", group : "Appearance", defaultValue : VerticalAlign.Inherit},
 
 			/**
 			 * CSS class name for column contents(header, cells and footer of column). This property can be used for different column styling. If column is shown as pop-in then this class name is applied to related pop-in row.
@@ -64,13 +88,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', 'sap/ui/
 			visible : {type : "boolean", group : "Appearance", defaultValue : true},
 
 			/**
-			 * By default column is always shown. If you set this property, control checks the minimum width of the screen to show or hide this column.
-			 * As you can give specific CSS sizes(e.g: "480px" or "40em"), you can also use sap.m.ScreenSize enumeration(e.g: "Phone", "Tablet", "Desktop", "Small", "Medium", "Large", ....).
-			 *
-			 * sap.m.Column.MediaQuery1->Range1 = 199
-			 *
-			 * This property can be used for responsive design. e.g: "40em"(or "640px" or "Tablet") setting shows this column in iPad(and Desktop) but hides in iPhone.
-			 * Please also see "demandPopin" property
+			 * Defines the minimum screen width to show or hide this column. By default column is always shown.
+			 * The responsive behavior of the <code>sap.m.Table</code> is determined by this property. As an example by setting <code>minScreenWidth</code> property to "40em" (or "640px" or "Tablet") shows this column on tablet (and desktop) but hides on mobile.
+			 * As you can give specific CSS sizes (e.g: "480px" or "40em"), you can also use the {@link sap.m.ScreenSize} enumeration (e.g: "Phone", "Tablet", "Desktop", "Small", "Medium", "Large", ....).
+			 * Please also see <code>demandPopin</code> property for further responsive design options.
 			 */
 			minScreenWidth : {type : "string", group : "Behavior", defaultValue : null},
 
@@ -83,35 +104,41 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', 'sap/ui/
 			/**
 			 * Horizontal alignment of the pop-in content. Available alignment settings are "Begin", "Center", "End", "Left", and "Right".
 			 *
-			 * NOTE: Controls with a text align do not inherit the horizontal alignment.
+			 * <b>Note:</b> Controls with a text align do not inherit the horizontal alignment.
 			 * @deprecated Since version 1.14.
 			 * Use popinDisplay property instead.
 			 */
-			popinHAlign : {type : "sap.ui.core.TextAlign", group : "Appearance", defaultValue : sap.ui.core.TextAlign.Begin, deprecated: true},
+			popinHAlign : {type : "sap.ui.core.TextAlign", group : "Appearance", defaultValue : TextAlign.Begin, deprecated: true},
 
 			/**
 			 * Defines enumerated display options for the pop-in.
 			 * @since 1.13.2
 			 */
-			popinDisplay : {type : "sap.m.PopinDisplay", group : "Appearance", defaultValue : sap.m.PopinDisplay.Block},
+			popinDisplay : {type : "sap.m.PopinDisplay", group : "Appearance", defaultValue : PopinDisplay.Block},
 
 			/**
-			 * Set "true" to merge repeating cells(duplicates) into one cell block.
-			 * Please see "mergeFunctionName" property to customize this property.
-			 * Note: This feature must not be used together with two-way binding. This property is ignored if a column is shown in the pop-in.
+			 * Set <code>true</code> to merge repeating/duplicate cells into one cell block. See <code>mergeFunctionName</code> property to customize.
+			 * <b>Note:</b> Merging only happens at the rendering of the <code>sap.m.Table</code> control, subsequent changes on the cell or item do not have any effect on the merged state of the cells, therefore this feature should not be used together with two-way binding.
+			 * This property is ignored if any column is configured to be shown as a pop-in.
 			 * @since 1.16
 			 */
 			mergeDuplicates : {type : "boolean", group : "Behavior", defaultValue : false},
 
 			/**
-			 * Defines the value getter(serialization) function if "mergeDuplicates" property is set "true"
-			 * Control itself uses this function to compare values of two repeating cells.
-			 * Default value "getText" is suitable for Label and Text control.
-			 * e.g. For "Icon" control "getSrc" can be used.
-			 * Note: You can pass one string parameter to given function after "#" sign. e.g. "data#myparameter"
+			 * Defines the control serialization function if <code>mergeDuplicates<code> property is set to <code>true</code>. The control itself uses this function to compare values of two repeating cells.
+			 * Default value "getText" is suitable for <code>sap.m.Label</code> and <code>sap.m.Text</code> controls but for the <code>sap.ui.core.Icon</code> control "getSrc" function should be used to merge icons.
+			 * <b>Note:</b> You can pass one string parameter to given function after "#" sign. e.g. "data#myparameter"
 			 * @since 1.16
 			 */
-			mergeFunctionName : {type : "string", group : "Misc", defaultValue : 'getText'}
+			mergeFunctionName : {type : "string", group : "Misc", defaultValue : 'getText'},
+
+			/**
+			 * Defines if a column is sorted by setting the sort indicator for this column.
+			 *
+			 * <b>Note:</b> Defining this property does not trigger the sorting.
+			 * @since 1.61
+			 */
+			sortIndicator : {type : "sap.ui.core.SortOrder", group : "Appearance", defaultValue : SortOrder.None}
 		},
 		defaultAggregation : "header",
 		aggregations : {
@@ -125,7 +152,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', 'sap/ui/
 			 * Control to be displayed in the column footer.
 			 */
 			footer : {type : "sap.ui.core.Control", multiple : false}
-		}
+		},
+		designtime: "sap/m/designtime/Column.designtime"
 	}});
 
 
@@ -142,10 +170,55 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', 'sap/ui/
 		this._clearMedia();
 	};
 
+	Column.prototype.getTable = function() {
+		var oParent = this.getParent();
+		if (oParent && oParent.isA("sap.m.Table")) {
+			return oParent;
+		}
+	};
+
+	Column.prototype.informTable = function(sEvent, vParam1, vParam2) {
+		var oTable = this.getTable();
+		if (oTable) {
+			var sMethod = "onColumn" + sEvent;
+			if (oTable[sMethod]) {
+				oTable[sMethod](this, vParam1, vParam2);
+			}
+		}
+	};
+
+	Column.prototype.ontouchstart = function(oEvent) {
+		this._bTouchStartMarked = oEvent.isMarked();
+	};
+
+	Column.prototype.ontap = function(oEvent) {
+		if (!this._bTouchStartMarked && !oEvent.isMarked()) {
+			this.informTable("Press");
+		}
+	};
+
+	Column.prototype.onsapspace = function(oEvent) {
+		if (oEvent.srcControl === this) {
+			this.informTable("Press");
+			oEvent.preventDefault();
+		}
+	};
+
+	Column.prototype.onsapenter = Column.prototype.onsapspace;
+
+	Column.prototype.invalidate = function() {
+		var oParent = this.getParent();
+		if (!oParent || !oParent.bOutput) {
+			return;
+		}
+
+		Element.prototype.invalidate.apply(this, arguments);
+	};
+
 	Column.prototype._clearMedia = function() {
 		if (this._media && this._minWidth) {
 			this._detachMediaContainerWidthChange(this._notifyResize, this, this.getId());
-			sap.ui.Device.media.removeRangeSet(this.getId());
+			Device.media.removeRangeSet(this.getId());
 			this._media = null;
 		}
 	};
@@ -153,7 +226,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', 'sap/ui/
 	Column.prototype._addMedia = function() {
 		delete this._bShouldAddMedia;
 		if (this._minWidth) {
-			sap.ui.Device.media.initRangeSet(this.getId(), [parseFloat(this._minWidth)]);
+			Device.media.initRangeSet(this.getId(), [parseFloat(this._minWidth)]);
 			this._attachMediaContainerWidthChange(this._notifyResize, this, this.getId());
 			this._media = this._getCurrentMediaContainerRange(this.getId());
 			if (this._media) {
@@ -179,13 +252,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', 'sap/ui/
 		this._media.matches = !!oMedia.from;
 
 		// inform parent delayed
-		jQuery.sap.delayedCall(0, this, function() {
-			var parent = this.getParent();
+		setTimeout(function() {
 			this.fireEvent("media", this);
-			if (parent && parent.onColumnResize) {
-				parent.onColumnResize(this);
-			}
-		});
+			this.informTable("Resize");
+		}.bind(this), 0);
 	};
 
 	Column.prototype._validateMinWidth = function(sWidth) {
@@ -195,7 +265,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', 'sap/ui/
 		if (Object.prototype.toString.call(sWidth) != "[object String]") {
 			throw new Error('expected string for property "minScreenWidth" of ' + this);
 		}
-		if (Object.keys(sap.m.ScreenSizes).indexOf(sWidth.toLowerCase()) != -1) {
+		if (Object.keys(library.ScreenSizes).indexOf(sWidth.toLowerCase()) != -1) {
 			return;
 		}
 		if (!/^\d+(\.\d+)?(px|em|rem)$/i.test(sWidth)) {
@@ -208,9 +278,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', 'sap/ui/
 	Column.prototype._isWidthPredefined = function(sWidth) {
 		var that = this,
 			unit = sWidth.replace(/[^a-z]/ig, ""),
-			baseFontSize = parseFloat(sap.m.BaseFontSize) || 16;
+			baseFontSize = parseFloat(library.BaseFontSize) || 16;
 
-		jQuery.each(sap.m.ScreenSizes, function(screen, size) {
+		jQuery.each(library.ScreenSizes, function(screen, size) {
 			if (unit != "px") {
 				size /= baseFontSize;
 			}
@@ -233,39 +303,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', 'sap/ui/
 	};
 
 	/**
-	 * Apply text alignment of the Column to Text/Label/Link...
-	 *
-	 * TODO: This is so ugly to check content functions
-	 * instead we should document how to use our controls
-	 * to inherit text-alignment and we should add a new
-	 * sap.ui.core.TextAlign type called "Inherit"
-	 *
-	 * @param {sap.ui.core.Control} oControl List control
-	 * @param {String} [sAlign] TextAlign enumeration
-	 * @return {sap.ui.core.Control} oControl
-	 * @protected
-	 */
-	Column.prototype.applyAlignTo = function(oControl, sAlign) {
-		sAlign = sAlign || this.getHAlign();
-		if (sAlign === sap.ui.core.TextAlign.Initial ||
-			!oControl.getMetadata().getProperties().textAlign ||
-			oControl.getTextAlign() === sAlign) {
-			return oControl;
-		}
-
-		oControl.setProperty("textAlign", sAlign, true);
-		var oDomRef = oControl.getDomRef();
-		sAlign = this.getCssAlign(sAlign);
-
-		if (oDomRef && sAlign) {
-			oDomRef.style.textAlign = sAlign;
-		}
-
-		return oControl;
-	};
-
-
-	/**
 	 * Returns CSS alignment according to column hAlign setting or given parameter
 	 * for Begin/End values checks the locale settings
 	 *
@@ -276,8 +313,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', 'sap/ui/
 	Column.prototype.getCssAlign = function(sAlign) {
 		sAlign = sAlign || this.getHAlign();
 
-		var mTextAlign = sap.ui.core.TextAlign;
-		if (sAlign === mTextAlign.Begin || sAlign === mTextAlign.End || sAlign === mTextAlign.Initial) {
+		if (sAlign === TextAlign.Begin || sAlign === TextAlign.End || sAlign === TextAlign.Initial) {
 			sAlign = Renderer.getTextAlign(sAlign);
 		}
 
@@ -354,12 +390,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', 'sap/ui/
 			return this._initialOrder;
 		}
 
-		var oParent = this.getParent();
-		if (oParent && oParent.indexOfColumn) {
-			return oParent.indexOfColumn(this);
+		var oTable = this.getTable();
+		if (!oTable) {
+			return -1;
 		}
 
-		return -1;
+		return oTable.indexOfColumn(this);
 	};
 
 	/**
@@ -462,7 +498,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', 'sap/ui/
 		if (sWidth) {
 			// check given width is known screen-size
 			sWidth = sWidth.toLowerCase();
-			var width = sap.m.ScreenSizes[sWidth];
+			var width = library.ScreenSizes[sWidth];
 			if (width) {
 				this._screen = sWidth;
 				this._minWidth = width + "px";
@@ -499,6 +535,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', 'sap/ui/
 		return this.setProperty("demandPopin", bValue);
 	};
 
+	Column.prototype.setSortIndicator = function(sSortIndicator) {
+		this.setProperty("sortIndicator", sSortIndicator, true);
+		this.$().attr("aria-sort", this.getSortIndicator().toLowerCase());
+		return this;
+	};
 
 	/**
 	 * Determines whether the column will be shown as pop-in or not
@@ -577,6 +618,19 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', 'sap/ui/
 		this.clearLastValue();
 	};
 
+	// when the popover opens and later closed, the focus is lost
+	// hence overwriting the getFocusDomRef to restore the focus on the active column header
+	Column.prototype.getFocusDomRef = function() {
+		var oParent = this.getParent();
+		if (oParent && oParent.bActiveHeaders) {
+			var oColumnDomRef = this.getDomRef();
+			if (oColumnDomRef) {
+				return oColumnDomRef.firstChild;
+			}
+		}
+		return Element.prototype.getFocusDomRef.apply(this, arguments);
+	};
+
 	return Column;
 
-}, /* bExport= */ true);
+});

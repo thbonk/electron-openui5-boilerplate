@@ -2,7 +2,7 @@
 
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -17,50 +17,101 @@
 /* ============================================== */
 
 .sapUiFlVarMngmt {
-	display: inline
+	display: inline-block;
+	text-align: center;
 }
 
-.sapUiFlVarMngmt .sapMLabelMaxWidth {
-	max-width:25rem;
+.sapUiFlVarMngmt .sapMTitle.sapUiFlVarMngmtTitle {
+	padding-top: 0rem;
+	vertical-align: top;
 }
 
-.sapUiFlVarMngmt .sapUiFlVarMngmtTextMaxWidth.sapMLabelMaxWidth {
+.sapUiSizeCompact .sapUiFlVarMngmt .sapMTitle.sapUiFlVarMngmtTitle {		
+	padding-top: 0.4rem;
+	vertical-align: top;	
+}
+
+.sapMFlexBox .sapUiFlVarMngmt .sapUiFlVarMngmtTitle {
+	padding-top: 0.9rem;
+	 	vertical-align: top;
+}
+
+.sapUiSizeCompact .sapMFlexBox .sapUiFlVarMngmt .sapUiFlVarMngmtTitle {
+	padding-top: 0.4rem; 
+	vertical-align: top;	
+}
+
+.sapUiSizeCompact .sapUxAPObjectPageHeader .sapUiFlVarMngmt .sapMTitle.sapUiFlVarMngmtTitle {		
+	padding-top: 0rem;
+	vertical-align: top;	
+}
+
+.sapUiSizeCozy .sapUxAPObjectPageHeader .sapUiFlVarMngmt .sapMTitle.sapUiFlVarMngmtTitle {		
+	padding-top: 0rem;
+	vertical-align: top;	
+}
+
+
+.sapMIBar .sapUiFlVarMngmt.sapMBarChild {
+    margin-left: 0rem;
+}
+
+.sapUiFlVarMngmtModified {
+	color: @sapUiGroupTitleTextColor;
+	font-weight: bold;
+	padding-left: 0.125rem;
+	padding-right: 0.125rem;
+    margin-top: 0.4rem;
+}
+
+.sapUiFlVarMngmtTriggerBtnHover>span {
+	background-image: none;
+	border-color: @sapUiButtonLiteHoverBorderColor;
+	background-color: @sapUiButtonLiteHoverBackground;
+    border-radius: 0.2rem;
+}
+
+.sapUiFlVarMngmtErrorPopover>div {
+	padding-top: 1rem;
+}
+
+.sapUiFlVarMngmtErrorPopover>div:last-child {
+	padding-left: 4rem;
+	padding-right: 4rem;
+}
+
+.sapUiFlVarMngmt .sapUiFlVarMngmtTextPhoneMaxWidth {
 	max-width: 5em;
 }
 
-.sapUiFlVarMngmt .sapUiFlVarMngmtText {
-	padding-top: 0.9rem;
-	margin-right: 0.125rem;
+.sapUiFlVarMngmt .sapUiFlVarMngmtTextMaxWidth {
+	max-width: 25rem;
 }
 
-.sapUiSizeCompact .sapUiFlVarMngmt .sapUiFlVarMngmtText {
-	padding-top: 0.4rem;
+.sapUiFlVarMngmt .sapUiFlVarMngmtClickable {
+	cursor: pointer;
+	color: @sapUiButtonTextColor;
+	text-shadow: @sapUiShadowText;
 }
 
-.sapUiFlVarMngmt .sapUiFlVarMngmtModified {
-	margin-left: 0.2rem;
+.sapUiFlVarMngmt .sapUiFlVarMngmtClickable:hover {
+	color: @sapUiHighlight;
+}
+
+.sapUiFlVarMngmt .sapUiFlVarMngmtDisabled {
+	opacity: 0.5;
+}
+
+.sapUiFlVarMngmt .sapUiFlVarMngmtTriggerBtn>span>span {
+	font-size: 1.375rem;
 }
 
 .sapUiFlVarMngmtPopover .sapMSelectList {
 	border: 0rem solid;
 }
 
-.sapUiFlFilterBar .sapUiSizeCondensed .sapUiFlVarMngmtTriggerBtn.sapMBtn {
-	height: 3rem;
-}
-
-.sapUiSizeCondensed .sapUiFlVarMngmtTriggerBtn.sapMBtn {
-	height: 2rem;
-}
-
-.sapUiFlVarMngmtImageExpand {
-    -ms-transform: rotate(180deg); /* IE 9 */
-    -webkit-transform: rotate(180deg); /* Chrome, Safari, Opera */
-    transform: rotate(180deg);
-}
-
-.sapUiFlVarMngmtModified {
-	color: @sapUiContentMarkerIconColor
+.sapUiFlVarMngmtFavColor {
+	color: @sapUiButtonIconColor;
 }
 /* END "VariantManagement.less" */
 

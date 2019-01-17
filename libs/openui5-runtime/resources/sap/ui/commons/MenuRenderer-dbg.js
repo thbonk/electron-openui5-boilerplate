@@ -1,16 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides default renderer for control sap.ui.commons.Menu
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', 'sap/ui/unified/MenuRenderer'],
-	function(jQuery, Renderer, MenuRenderer1) {
+sap.ui.define(['sap/ui/core/Renderer', 'sap/ui/unified/MenuRenderer'],
+	function(Renderer, UnifiedMenuRenderer) {
 	"use strict";
 
 
-	var MenuRenderer = Renderer.extend(MenuRenderer1);
+	var MenuRenderer = Renderer.extend(UnifiedMenuRenderer);
 
 	return MenuRenderer;
 

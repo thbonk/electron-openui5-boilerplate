@@ -1,12 +1,19 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.Message.
-sap.ui.define(['jquery.sap.global', './Dialog', './library', 'sap/ui/core/Control'],
-	function(jQuery, Dialog, library, Control) {
+sap.ui.define([
+  'sap/ui/thirdparty/jquery',
+  './Dialog',
+  './library',
+  'sap/ui/core/Control',
+  './MessageRenderer',
+  './Button'
+],
+	function(jQuery, Dialog, library, Control, MessageRenderer, Button) {
 	"use strict";
 
 
@@ -20,7 +27,7 @@ sap.ui.define(['jquery.sap.global', './Dialog', './library', 'sap/ui/core/Contro
 	 * @class
 	 * Creates the "Message"s to be supplied to the "MessageBar" Control.
 	 * @extends sap.ui.core.Control
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -134,7 +141,7 @@ sap.ui.define(['jquery.sap.global', './Dialog', './library', 'sap/ui/core/Contro
 		// Reading the HTML details as is, styles included:
 		var	htmlDetails = this.fnCallBack(this.getId());
 		this.oDetails   = new Message({type: this.getType(), text: htmlDetails});
-		this.oBtnOK     = new sap.ui.commons.Button({text: OK, press:Message.closeDetails});
+		this.oBtnOK     = new Button({text: OK, press:Message.closeDetails});
 		this.oContainer = new Dialog();
 		this.oContainer.addContent(this.oDetails);
 		this.oContainer.setTitle(title);
@@ -240,7 +247,6 @@ sap.ui.define(['jquery.sap.global', './Dialog', './library', 'sap/ui/core/Contro
 
 
 	// Begin of Dialog-Offsets-Stacking facilities
-	(function() {
 		var oLastOffsets = null;
 		/**
 		 * @static
@@ -259,7 +265,6 @@ sap.ui.define(['jquery.sap.global', './Dialog', './library', 'sap/ui/core/Contro
 		Message.prototype.getNextOffsets = function(){
 			return Message.getNextOffsets();
 		};
-	}());
 	// End of Dialog-Offsets-Stacking facilities
 
 
@@ -286,4 +291,4 @@ sap.ui.define(['jquery.sap.global', './Dialog', './library', 'sap/ui/core/Contro
 
 	return Message;
 
-}, /* bExport= */ true);
+});

@@ -1,14 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './ListItemBase', './Text',
-        './Image', './OverflowToolbar', 'sap/ui/core/Icon'],
-    function (jQuery, library, Control, ListItemBase, Text, Image, OverflowToolbar, Icon) {
-
+sap.ui.define(['./library', 'sap/ui/core/Control', './ListItemBase', './Text',
+        './Image', './OverflowToolbar', 'sap/ui/core/Icon', 'sap/ui/core/library', 'sap/ui/core/Element'],
+    function (library, Control, ListItemBase, Text, Image, OverflowToolbar, Icon, coreLibrary, Element) {
         'use strict';
+
+        // shortcut for sap.ui.core.Priority
+        var Priority = coreLibrary.Priority;
 
         /**
          * Constructor for a new NotificationListBase.
@@ -39,7 +41,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './ListI
          * @extends sap.m.ListItemBase
          *
          * @author SAP SE
-         * @version 1.50.6
+         * @version 1.61.2
          *
          * @constructor
          * @public
@@ -59,7 +61,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './ListI
                     priority: {
                         type: 'sap.ui.core.Priority',
                         group: 'Appearance',
-                        defaultValue: sap.ui.core.Priority.None
+                        defaultValue: Priority.None
                     },
 
                     /**
@@ -151,6 +153,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './ListI
             }
         });
 
+        /**
+         * Sets initial values of the control.
+         *
+         * @protected
+         */
         NotificationListBase.prototype.init = function () {
             this.setAggregation('_overflowToolbar', new OverflowToolbar());
         };
@@ -159,6 +166,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './ListI
         // Overwritten setters and getters
         //================================================================================
 
+        /**
+         * Overwrites the setter of the title property.
+         *
+         * @public
+         * @param {string} title Title.
+         * @returns {sap.m.NotificationListBase} NotificationListBase reference for chaining.
+         */
         NotificationListBase.prototype.setTitle = function (title) {
             var result = this.setProperty('title', title);
 
@@ -167,6 +181,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './ListI
             return result;
         };
 
+        /**
+         * Overwrites the setter for the datetime property.
+         *
+         * @public
+         * @param {string} dateTime The datetime in string format.
+         * @returns {string} The set datetime value.
+         */
         NotificationListBase.prototype.setDatetime = function (dateTime) {
             var result = this.setProperty('datetime', dateTime);
 
@@ -175,6 +196,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './ListI
             return result;
         };
 
+        /**
+         * Overwrites the authorName property.
+         *
+         * @public
+         * @param {string} authorName The author name in string format.
+         * @returns {string} The set author name.
+         */
         NotificationListBase.prototype.setAuthorName = function(authorName) {
             var result = this.setProperty('authorName', authorName);
 
@@ -187,24 +215,19 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './ListI
         // Control methods
         //================================================================================
 
-        NotificationListBase.prototype.clone = function () {
-            var clonedObject = Control.prototype.clone.apply(this, arguments);
-
-            // "_overflowToolbar" aggregation is hidden and it is not cloned by default
-            var overflowToolbar = this.getAggregation('_overflowToolbar');
-            clonedObject.setAggregation("_overflowToolbar", overflowToolbar.clone(), true);
-
-            return clonedObject;
-        };
-
+        /**
+         * Closes the NotificationListBase.
+         *
+         * @public
+         */
         NotificationListBase.prototype.close = function () {
             var parent = this.getParent();
             this.fireClose();
 
-            if (parent && parent instanceof sap.ui.core.Element) {
+            if (parent && parent instanceof Element) {
                 var delegate = {
                     onAfterRendering: function() {
-                        parent.getDomRef().focus();
+                        parent.focus();
                         parent.removeEventDelegate(delegate);
                     }
                 };
@@ -212,123 +235,35 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './ListI
             }
         };
 
-        //================================================================================
+	    /* Clones the NotificationListBase.
+	     *
+	     * @public
+	     * @returns {sap.m.NotificationListBase} The cloned NotificationListBase.
+	     */
+	    NotificationListBase.prototype.clone = function () {
+		    var clonedObject = Control.prototype.clone.apply(this, arguments);
+		    // overflow toolbar has been created but the clone of this item does no longer have bindings for the “buttons” aggregation; workaround: destroy and create anew as clone
+		    clonedObject.destroyAggregation('_overflowToolbar');
+		    var overflowToolbar = this.getAggregation('_overflowToolbar');
+		    clonedObject.setAggregation("_overflowToolbar", overflowToolbar.clone(), true);
+
+		    return clonedObject;
+	    };
+
+	    //================================================================================
         // Delegation aggregation methods to the Overflow Toolbar
         //================================================================================
 
-        NotificationListBase.prototype.bindAggregation = function (aggregationName, bindingInfo) {
-            if (aggregationName == 'buttons') {
-                this.getAggregation('_overflowToolbar').bindAggregation('content', bindingInfo);
-                return this;
-            } else {
-                return sap.ui.core.Control.prototype.bindAggregation.call(this, aggregationName, bindingInfo);
+        NotificationListBase.getMetadata().forwardAggregation(
+            "buttons",
+            {
+                getter: function() {
+                    return this.getAggregation('_overflowToolbar');
+                },
+                aggregation: "content",
+                forwardBinding: true
             }
-        };
-
-        NotificationListBase.prototype.validateAggregation = function (aggregationName, object, multiple) {
-            if (aggregationName == 'buttons') {
-                this.getAggregation('_overflowToolbar').validateAggregation('content', object, multiple);
-                return this;
-            } else {
-                return sap.ui.core.Control.prototype.validateAggregation.call(this, aggregationName, object, multiple);
-            }
-        };
-
-        NotificationListBase.prototype.setAggregation = function (aggregationName, object, suppressInvalidate) {
-            if (aggregationName == 'buttons') {
-                this.getAggregation('_overflowToolbar').setAggregation('content', object, suppressInvalidate);
-                return this;
-            } else {
-                return sap.ui.core.Control.prototype.setAggregation.call(this, aggregationName, object, suppressInvalidate);
-            }
-        };
-
-        NotificationListBase.prototype.getAggregation = function (aggregationName, defaultObjectToBeCreated) {
-            if (aggregationName == 'buttons') {
-                var toolbar = this.getAggregation('_overflowToolbar');
-
-                return toolbar.getContent().filter(function (item) {
-                    return item instanceof sap.m.Button;
-                });
-            } else {
-                return sap.ui.core.Control.prototype.getAggregation.call(this, aggregationName, defaultObjectToBeCreated);
-            }
-        };
-
-        NotificationListBase.prototype.indexOfAggregation = function (aggregationName, object) {
-            if (aggregationName == 'buttons') {
-                return this.getAggregation('_overflowToolbar').indexOfAggregation('content', object);
-            } else {
-                return sap.ui.core.Control.prototype.indexOfAggregation.call(this, aggregationName, object);
-            }
-        };
-
-        NotificationListBase.prototype.insertAggregation = function (aggregationName, object, index, suppressInvalidate) {
-            if (aggregationName == 'buttons') {
-                this.getAggregation('_overflowToolbar').insertAggregation('content', object, index, suppressInvalidate);
-                return this;
-            } else {
-                return sap.ui.core.Control.prototype.insertAggregation.call(this, object, index, suppressInvalidate);
-            }
-        };
-
-        NotificationListBase.prototype.addAggregation = function (aggregationName, object, suppressInvalidate) {
-            if (aggregationName == 'buttons') {
-                var toolbar = this.getAggregation('_overflowToolbar');
-
-                return toolbar.addAggregation('content', object, suppressInvalidate);
-            } else {
-                return sap.ui.core.Control.prototype.addAggregation.call(this, aggregationName, object, suppressInvalidate);
-            }
-        };
-
-        NotificationListBase.prototype.removeAggregation = function (aggregationName, object, suppressInvalidate) {
-            if (aggregationName == 'buttons') {
-                return this.getAggregation('_overflowToolbar').removeAggregation('content', object, suppressInvalidate);
-            } else {
-                return sap.ui.core.Control.prototype.removeAggregation.call(this, aggregationName, object, suppressInvalidate);
-            }
-        };
-
-        NotificationListBase.prototype.removeAllAggregation = function (aggregationName, suppressInvalidate) {
-            if (aggregationName == 'buttons') {
-                return this.getAggregation('_overflowToolbar').removeAllAggregation('content', suppressInvalidate);
-            } else {
-                return sap.ui.core.Control.prototype.removeAllAggregation.call(this, aggregationName, suppressInvalidate);
-            }
-        };
-
-        NotificationListBase.prototype.destroyAggregation = function (aggregationName, suppressInvalidate) {
-            if (aggregationName == 'buttons') {
-                return this.getAggregation('_overflowToolbar').destroyAggregation('content', suppressInvalidate);
-            } else {
-                return sap.ui.core.Control.prototype.destroyAggregation.call(this, aggregationName, suppressInvalidate);
-            }
-        };
-
-        NotificationListBase.prototype.getBinding = function (aggregationName) {
-            if (aggregationName == 'buttons') {
-                return this.getAggregation('_overflowToolbar').getBinding('content');
-            } else {
-                return sap.ui.core.Control.prototype.getBinding.call(this, aggregationName);
-            }
-        };
-
-        NotificationListBase.prototype.getBindingInfo = function (aggregationName) {
-            if (aggregationName == 'buttons') {
-                return this.getAggregation('_overflowToolbar').getBindingInfo('content');
-            } else {
-                return sap.ui.core.Control.prototype.getBindingInfo.call(this, aggregationName);
-            }
-        };
-
-        NotificationListBase.prototype.getBindingPath = function (aggregationName) {
-            if (aggregationName == 'buttons') {
-                return this.getAggregation('_overflowToolbar').getBindingPath('content');
-            } else {
-                return sap.ui.core.Control.prototype.getBindingPath.call(this, aggregationName);
-            }
-        };
+        );
 
         //================================================================================
         // Private and protected getters and setters
@@ -336,8 +271,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './ListI
 
         /**
          * Returns the sap.m.Text control used in the NotificationListBase's header title.
-         * @returns {sap.m.Text} The title control inside the Notification List Base control
+         *
          * @protected
+         * @returns {sap.m.Text} The title control inside the NotificationListBase control.
          */
         NotificationListBase.prototype._getHeaderTitle = function () {
             var title = this.getAggregation("_headerTitle");
@@ -357,15 +293,16 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './ListI
 
         /**
          * Returns the sap.m.Text control used in the NotificationListBase's header title.
-         * @returns {sap.m.Text} The datetime control inside the Notification List Base control
+         *
          * @protected
+         * @returns {sap.m.Text} The datetime control inside the NotificationListBase control.
          */
         NotificationListBase.prototype._getDateTimeText = function () {
             /** @type {sap.m.Text} */
             var dateTime = this.getAggregation('_dateTime');
 
             if (!dateTime) {
-                dateTime = new sap.m.Text({
+                dateTime = new Text({
                     id: this.getId() + '-datetime',
                     text: this.getDatetime()
                 }).addStyleClass('sapMNLI-Datetime');
@@ -378,8 +315,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './ListI
 
         /**
          * Returns the sap.m.Text control used in the NotificationListBase's author name.
-         * @returns {sap.m.Text} The notification author name text
+         *
          * @protected
+         * @returns {sap.m.Text} The notification author name text.
          */
         NotificationListBase.prototype._getAuthorName = function() {
             /** @type {sap.m.Text} */
@@ -398,8 +336,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './ListI
 
         /**
          * Returns the sap.m.Image or the sap.ui.core.Control used in the NotificationListBase's author picture.
-         * @returns {sap.m.Image|sap.ui.core.Control} The notification author picture text
+         *
          * @protected
+         * @returns {sap.m.Image|sap.ui.core.Control} The notification author picture text.
          */
         NotificationListBase.prototype._getAuthorImage = function() {
             /** @type {sap.m.Image|sap.ui.core.Control} */
@@ -429,8 +368,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './ListI
 
         /**
          * Returns the sap.m.OverflowToolbar control used in the NotificationListBase.
-         * @returns {sap.m.OverflowToolbar} The footer toolbar
+         *
          * @protected
+         * @returns {sap.m.OverflowToolbar} The footer toolbar.
          */
         NotificationListBase.prototype._getToolbar = function () {
             var toolbar = this.getAggregation("_overflowToolbar");
@@ -449,10 +389,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './ListI
         //================================================================================
 
         /**
-         * Checks is an sap.ui.core.URI parameter is an icon src or not.
-         * @param {string} source The source to be checked.
-         * @returns {boolean} The result of the check
+         * Checks if an sap.ui.core.URI parameter is an icon src or not.
+         *
          * @protected
+         * @param {string} source The source to be checked.
+         * @returns {boolean} The result of the check.
          */
         function isIcon(source) {
             if (!source) {
@@ -464,4 +405,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', './ListI
         }
 
         return NotificationListBase;
-    }, /* bExport= */ true);
+    });

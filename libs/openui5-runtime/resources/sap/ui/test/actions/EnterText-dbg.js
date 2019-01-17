@@ -1,11 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './Action', 'sap/ui/Device'], function ($, Action, Device) {
+sap.ui.define([
+	"sap/ui/test/_OpaLogger",
+	"sap/ui/test/actions/Action",
+	"sap/ui/events/KeyCodes",
+	"sap/base/Log"
+], function(_OpaLogger, Action, KeyCodes, Log) {
 	"use strict";
+
+	var oLogger = _OpaLogger.getLogger("sap.ui.test.actions.EnterText");
 
 	/**
 	 * The EnterText action is used to simulate a user entering texts to inputs.
@@ -62,25 +69,30 @@ sap.ui.define(['jquery.sap.global', './Action', 'sap/ui/Device'], function ($, A
 				return;
 			}
 			if (this.getText() === undefined || (!this.getClearTextFirst() && !this.getText())) {
-				$.sap.log.error("Please provide a text for this EnterText action", this._sLogPrefix);
+				Log.error("Please provide a text for this EnterText action", this._sLogPrefix);
 				return;
 			}
 
 			var oUtils = this.getUtils();
 
+			oLogger.timestamp("opa.actions.enterText");
+			oLogger.debug("Enter text in control " + oControl);
+
 			this._tryOrSimulateFocusin($ActionDomRef, oControl);
 
 			if (this.getClearTextFirst()) {
-				oUtils.triggerKeydown(oActionDomRef, $.sap.KeyCodes.DELETE);
-				oUtils.triggerKeyup(oActionDomRef, $.sap.KeyCodes.DELETE);
+				oUtils.triggerKeydown(oActionDomRef, KeyCodes.DELETE);
+				oUtils.triggerKeyup(oActionDomRef, KeyCodes.DELETE);
 				$ActionDomRef.val("");
 				oUtils.triggerEvent("input", oActionDomRef);
 			}
 
 			// Trigger events for every keystroke - livechange controls
+			var sValueBuffer = $ActionDomRef.val();
 			this.getText().split("").forEach(function (sChar) {
+				sValueBuffer += sChar;
 				// Change the domref and fire the input event
-				oUtils.triggerCharacterInput(oActionDomRef, sChar);
+				oUtils.triggerCharacterInput(oActionDomRef, sChar, sValueBuffer);
 				oUtils.triggerEvent("input", oActionDomRef);
 			});
 
@@ -92,4 +104,4 @@ sap.ui.define(['jquery.sap.global', './Action', 'sap/ui/Device'], function ($, A
 		}
 	});
 
-}, /* bExport= */ true);
+});

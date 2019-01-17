@@ -1,15 +1,41 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.model.odata.ODataListBinding
 sap.ui.define([
-		'jquery.sap.global',
-		'sap/ui/model/ChangeReason', 'sap/ui/model/Filter', 'sap/ui/model/FilterType', 'sap/ui/model/ListBinding', 'sap/ui/model/Sorter',
-		'./ODataUtils', './CountMode'
-	], function(jQuery, ChangeReason, Filter, FilterType, ListBinding, Sorter, ODataUtils, CountMode) {
+	'sap/ui/model/ChangeReason',
+	'sap/ui/model/Filter',
+	'sap/ui/model/odata/Filter',
+	'sap/ui/model/FilterType',
+	'sap/ui/model/FilterProcessor',
+	'sap/ui/model/ListBinding',
+	'sap/ui/model/Sorter',
+	'./ODataUtils',
+	'./CountMode',
+	'sap/base/util/deepEqual',
+	'sap/base/util/merge',
+	'sap/base/Log',
+	'sap/base/assert',
+	'sap/ui/thirdparty/jquery'
+], function(
+	ChangeReason,
+	Filter,
+	ODataFilter,
+	FilterType,
+	FilterProcessor,
+	ListBinding,
+	Sorter,
+	ODataUtils,
+	CountMode,
+	deepEqual,
+	merge,
+	Log,
+	assert,
+	jQuery
+) {
 	"use strict";
 
 	/**
@@ -49,6 +75,7 @@ sap.ui.define([
 			this.bNeedsUpdate = false;
 			this.bDataAvailable = false;
 			this.bIgnoreSuspend = false;
+			this.oCombinedFilter = null;
 
 			// check filter integrity
 			this.oModel.checkFilterOperation(this.aApplicationFilters);
@@ -163,8 +190,9 @@ sap.ui.define([
 				//Check diff
 				if (this.aLastContexts && iStartIndex < this.iLastEndIndex) {
 					var that = this;
+					//global jQuery call is left in place to be backward compatible for deprecated V1 model
 					var aDiff = jQuery.sap.arrayDiff(this.aLastContexts, aContexts, function(oOldContext, oNewContext) {
-						return jQuery.sap.equal(
+						return deepEqual(
 								oOldContext && that.oLastContextData && that.oLastContextData[oOldContext.getPath()],
 								oNewContext && oContextData && oContextData[oNewContext.getPath()]
 							);
@@ -175,7 +203,7 @@ sap.ui.define([
 
 			this.iLastEndIndex = iStartIndex + iLength;
 			this.aLastContexts = aContexts.slice(0);
-			this.oLastContextData = jQuery.sap.extend(true, {}, oContextData);
+			this.oLastContextData = merge({}, oContextData);
 		}
 
 		return aContexts;
@@ -419,7 +447,7 @@ sap.ui.define([
 
 			// update iLength (only when the inline count was requested and is available)
 			if (bInlineCountRequested && oData.__count) {
-				that.iLength = parseInt(oData.__count, 10);
+				that.iLength = parseInt(oData.__count);
 				that.bLengthFinal = true;
 			}
 
@@ -522,7 +550,7 @@ sap.ui.define([
 	/**
 	 * Return the length of the list
 	 *
-	 * @return {number} the length
+	 * @return {int} the length
 	 */
 	ODataListBinding.prototype._getLength = function() {
 
@@ -544,7 +572,7 @@ sap.ui.define([
 		}
 
 		function _handleSuccess(oData) {
-			that.iLength = parseInt(oData, 10);
+			that.iLength = parseInt(oData);
 			that.bLengthFinal = true;
 		}
 
@@ -553,7 +581,7 @@ sap.ui.define([
 			if (oError.response) {
 				sErrorMsg += ", " + oError.response.statusCode + ", " + oError.response.statusText + ", " + oError.response.body;
 			}
-			jQuery.sap.log.warning(sErrorMsg);
+			Log.warning(sErrorMsg);
 		}
 
 		// Use context and check for relative binding
@@ -573,10 +601,10 @@ sap.ui.define([
 	};
 
 	/**
-	 * Refreshes the binding, check whether the model data has been changed and fire change event
+	 * Refreshes the binding, checks whether the model data has been changed and fires a change event
 	 * if this is the case. For server side models this should refetch the data from the server.
 	 * To update a control, even if no data has been changed, e.g. to reset a control after failed
-	 * validation, please use the parameter bForceUpdate.
+	 * validation, use the parameter <code>bForceUpdate</code>.
 	 *
 	 * @param {boolean} [bForceUpdate] Update the bound control even if no data has been changed
 	 * @public
@@ -664,7 +692,7 @@ sap.ui.define([
 			// - set the new keys if there are no sortes/filters set
 			// - trigger a refresh if there are sorters/filters set
 			oRef = this.oModel._getObject(this.sPath, this.oContext);
-			bRefChanged = Array.isArray(oRef) && !jQuery.sap.equal(oRef,this.aExpandRefs);
+			bRefChanged = Array.isArray(oRef) && !deepEqual(oRef,this.aExpandRefs);
 			this.aExpandRefs = oRef;
 			if (bRefChanged) {
 				if (this.aSorters.length > 0 || this.aFilters.length > 0) {
@@ -699,7 +727,7 @@ sap.ui.define([
 						oLastData = that.oLastContextData[oContext.getPath()];
 						oCurrentData = aContexts[iIndex].getObject();
 						// Compare whether last data is completely contained in current data
-						if (!jQuery.sap.equal(oLastData, oCurrentData, true)) {
+						if (!deepEqual(oLastData, oCurrentData, true)) {
 							bChangeDetected = true;
 							return false;
 						}
@@ -839,7 +867,9 @@ sap.ui.define([
 		}
 
 		//if we have some Application Filters, they will ANDed to the Control-Filters
-		this.createFilterParams(this.aFilters, this.aApplicationFilters);
+		this.convertFilters();
+		this.oCombinedFilter = FilterProcessor.combineFilters(this.aFilters, this.aApplicationFilters);
+		this.createFilterParams(this.oCombinedFilter);
 
 		if (!this.bInitial) {
 			this.resetData();
@@ -863,45 +893,28 @@ sap.ui.define([
 	};
 
 	/**
-	 * Creates a $filter query option string, which will be used
-	 * as part of URL for OData-Requests. If an Array of Application Filters is given as the second
-	 * If an array of application filters is given as second argument, the control filters and application filters are combined with AND.
-	 * @param {sap.ui.model.Filter[]|sap.ui.model.odata.Filter[]} aControlFilters An Array of control filters
-	 * @param {sap.ui.model.Filter[]|sap.ui.model.odata.Filter[]} [aApplicationFilters] An Array of application filters
+	 * Convert sap.ui.model.odata.Filter to sap.ui.model.Filter
+	 *
 	 * @private
 	 */
-	ODataListBinding.prototype.createFilterParams = function(aControlFilters, aApplicationFilters) {
-		// create URL Parameters for the Control- and Application-Filters
-		// either one or both may return undefined if the arrays given are wrong somehow
-		var sFilterParams,
-			sControlParams = ODataUtils._createFilterParams(aControlFilters, this.oModel.oMetadata, this.oEntityType),
-			sApplicationParams = ODataUtils._createFilterParams(aApplicationFilters, this.oModel.oMetadata, this.oEntityType);
-
-		if (sControlParams) {
-			sFilterParams = sControlParams;
-		}
-
-		if (sApplicationParams) {
-			//if there are control-filtes, AND the application filters
-			if (sControlParams) {
-				//Apply braces to the ANDed parts
-				sFilterParams = "(" + sFilterParams + ")" + "%20and%20" + "(" + sApplicationParams + ")";
-			} else {
-				//if the control-filters are undefined, we just use the application filter as a fallback
-				sFilterParams = sApplicationParams;
-			}
-		}
-
-		//prepend the system query option "$filter=" to the parameters (if parameters are given...)
-		if (sFilterParams) {
-			this.sFilterParams = "$filter=" + sFilterParams;
-		} else {
-			// no filter params could be constructed, since no control/application filter are given
-			// reset the filter params to 'undefined', so following requests exclude the filter query
-			this.sFilterParams = undefined;
-		}
+	ODataListBinding.prototype.convertFilters = function() {
+		this.aFilters = this.aFilters.map(function(oFilter) {
+			return oFilter instanceof ODataFilter ? oFilter.convert() : oFilter;
+		});
+		this.aApplicationFilters = this.aApplicationFilters.map(function(oFilter) {
+			return oFilter instanceof ODataFilter ? oFilter.convert() : oFilter;
+		});
 	};
 
+	/**
+	 * Creates a $filter query option string, which will be used
+	 * as part of URL for OData-Requests.
+	 * @param {sap.ui.model.Filter} oFilter The root filter object of the filter tree
+	 * @private
+	 */
+	ODataListBinding.prototype.createFilterParams = function(oFilter) {
+		this.sFilterParams = ODataUtils.createFilterParams(oFilter, this.oModel.oMetadata, this.oEntityType);
+	};
 
 	ODataListBinding.prototype._initSortersFilters = function() {
 		// if path could not be resolved entity type cannot be retrieved and
@@ -911,8 +924,10 @@ sap.ui.define([
 			return;
 		}
 		this.oEntityType = this._getEntityType();
+		this.convertFilters();
+		this.oCombinedFilter = FilterProcessor.combineFilters(this.aFilters, this.aApplicationFilters);
 		this.createSortParams(this.aSorters);
-		this.createFilterParams(this.aFilters.concat(this.aApplicationFilters));
+		this.createFilterParams(this.oCombinedFilter);
 	};
 
 	ODataListBinding.prototype._getEntityType = function(){
@@ -920,7 +935,7 @@ sap.ui.define([
 
 		if (sResolvedPath) {
 			var oEntityType = this.oModel.oMetadata._getEntityTypeByPath(sResolvedPath);
-			jQuery.sap.assert(oEntityType, "EntityType for path " + sResolvedPath + " could not be found!");
+			assert(oEntityType, "EntityType for path " + sResolvedPath + " could not be found!");
 			return oEntityType;
 
 		}

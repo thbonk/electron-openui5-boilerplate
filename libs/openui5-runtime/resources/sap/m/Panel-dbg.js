@@ -1,13 +1,24 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.Panel.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/IconPool'],
-	function(jQuery, library, Control, IconPool) {
+sap.ui.define([
+	'./library',
+	'sap/ui/core/Control',
+	'sap/ui/core/IconPool',
+	'./PanelRenderer'
+],
+	function(library, Control, IconPool, PanelRenderer) {
 	"use strict";
+
+	// shortcut for sap.m.PanelAccessibleRole
+	var PanelAccessibleRole = library.PanelAccessibleRole;
+
+	// shortcut for sap.m.BackgroundDesign
+	var BackgroundDesign = library.BackgroundDesign;
 
 	/**
 	 * Constructor for a new Panel.
@@ -50,12 +61,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.16
 	 * @alias sap.m.Panel
+	 * @see {@link fiori:https://experience.sap.com/fiori-design-web/panel/ Panel}
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var Panel = Control.extend("sap.m.Panel", /** @lends sap.m.Panel.prototype */ { metadata: {
@@ -107,14 +119,14 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			 * Depending on the theme you can change the state of the background from "Solid" over "Translucent" to "Transparent".
 			 * @since 1.30
 			 */
-			backgroundDesign: {type: "sap.m.BackgroundDesign", group: "Appearance", defaultValue: sap.m.BackgroundDesign.Translucent},
+			backgroundDesign: {type: "sap.m.BackgroundDesign", group: "Appearance", defaultValue: BackgroundDesign.Translucent},
 
 			/**
 			 * This property is used to set the accessible aria role of the Panel.
 			 * Depending on the usage you can change the role from the default <code>Form</code> to <code>Region</code> or <code>Complementary</code>.
 			 * @since 1.46
 			 */
-			accessibleRole: {type: "sap.m.PanelAccessibleRole", group: "Accessibility", defaultValue: sap.m.PanelAccessibleRole.Form}
+			accessibleRole: {type: "sap.m.PanelAccessibleRole", group: "Accessibility", defaultValue: PanelAccessibleRole.Form}
 
 		},
 		defaultAggregation: "content",
@@ -166,7 +178,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				}
 			}
 		},
-		designTime: true
+		designtime: "sap/m/designtime/Panel.designtime"
 	}});
 
 	Panel.prototype.init = function () {
@@ -288,13 +300,15 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	};
 
 	Panel.prototype.onAfterRendering = function () {
-		var $this = this.$(),
-			$icon;
+		var $this = this.$(), $icon,
+			oPanelContent = this.getDomRef("content");
 
 		this._setContentHeight();
 
 		if (this.getExpandable()) {
 			$icon = this.oIconCollapsed.$();
+			oPanelContent && $icon.attr("aria-controls", oPanelContent.id);
+
 			if (this.getExpanded()) {
 				//ARIA
 				$icon.attr("aria-expanded", "true");
@@ -316,17 +330,18 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 	Panel.prototype._createIcon = function () {
 		var that = this,
-			sCollapsedIconURI = IconPool.getIconURI("navigation-right-arrow");
+			sCollapsedIconURI = IconPool.getIconURI("navigation-right-arrow"),
+			sTooltipBundleText = sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("PANEL_ICON");
 
 		return IconPool.createControlByURI({
 			id: that.getId() + "-CollapsedImg",
 			src: sCollapsedIconURI,
 			decorative: false,
-			useIconTooltip: false,
 			press: function () {
 				that._bInteractiveExpand = true;
 				that.setExpanded(!that.getExpanded());
-			}
+			},
+			tooltip: sTooltipBundleText
 		}).addStyleClass("sapMPanelExpandableIcon");
 	};
 
@@ -368,10 +383,14 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	};
 
 	Panel.prototype._updateIconAriaLabelledBy = function () {
-		var sLabelId, aAriaLabels;
+		var sLabelId, aAriaLabels, bFormRole;
 
 		if (!this.oIconCollapsed) {
 			return;
+		}
+
+		if (this.getAccessibleRole() === PanelAccessibleRole.Form) {
+			bFormRole = true;
 		}
 
 		sLabelId = this._getLabellingElementId();
@@ -380,7 +399,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		// If the old label is different we should reinitialize the association, because we can have only one label
 		if (aAriaLabels.indexOf(sLabelId) === -1) {
 			this.oIconCollapsed.removeAllAssociation("ariaLabelledBy");
-			this.oIconCollapsed.addAriaLabelledBy(sLabelId);
+			!bFormRole && this.oIconCollapsed.addAriaLabelledBy(sLabelId);
 		}
 	};
 
@@ -399,4 +418,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 	return Panel;
 
-}, /* bExport= */ true);
+});

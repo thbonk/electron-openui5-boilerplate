@@ -1,13 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.unified.DateTypeRange.
-sap.ui.define(['jquery.sap.global', './DateRange', './library'],
-	function(jQuery, DateRange, library) {
+sap.ui.define(['./DateRange', './library'],
+	function(DateRange, library) {
 	"use strict";
+
+
+
+	// shortcut for sap.ui.unified.CalendarDayType
+	var CalendarDayType = library.CalendarDayType;
 
 
 
@@ -20,7 +25,7 @@ sap.ui.define(['jquery.sap.global', './DateRange', './library'],
 	 * @class
 	 * Date range with calendar day type information. Used to visualize special days in the Calendar.
 	 * @extends sap.ui.unified.DateRange
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -36,7 +41,7 @@ sap.ui.define(['jquery.sap.global', './DateRange', './library'],
 			/**
 			 * Type of the date range.
 			 */
-			type : {type : "sap.ui.unified.CalendarDayType", group : "Appearance", defaultValue : sap.ui.unified.CalendarDayType.Type01}
+			type : {type : "sap.ui.unified.CalendarDayType", group : "Appearance", defaultValue : CalendarDayType.Type01}
 		}
 	}});
 
@@ -50,4 +55,4 @@ sap.ui.define(['jquery.sap.global', './DateRange', './library'],
 
 	return DateTypeRange;
 
-}, /* bExport= */ true);
+});

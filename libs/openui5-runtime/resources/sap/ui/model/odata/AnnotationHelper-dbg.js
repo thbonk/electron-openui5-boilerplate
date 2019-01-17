@@ -1,16 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides object sap.ui.model.odata.AnnotationHelper
 sap.ui.define([
-	"jquery.sap.global",
-	"sap/ui/base/BindingParser",
 	"./_AnnotationHelperBasics",
-	"./_AnnotationHelperExpression"
-], function(jQuery, BindingParser, Basics, Expression) {
+	"./_AnnotationHelperExpression",
+	"sap/base/Log",
+	"sap/ui/base/BindingParser"
+], function (Basics, Expression, Log, BindingParser) {
 		'use strict';
 
 		/**
@@ -388,7 +388,7 @@ sap.ui.define([
 				}
 
 				if (!sEntitySetPath) {
-					jQuery.sap.log.warning(oContext.getPath() + ": found '" + sEntitySet
+					Log.warning(oContext.getPath() + ": found '" + sEntitySet
 						+ "' which is not a name of an entity set", undefined,
 						"sap.ui.model.odata.AnnotationHelper");
 				}
@@ -422,7 +422,7 @@ sap.ui.define([
 					oResult = oContext.getModel().getODataEntityType(sEntityType, true);
 
 				if (!oResult) {
-					jQuery.sap.log.warning(oContext.getPath() + ": found '" + sEntityType
+					Log.warning(oContext.getPath() + ": found '" + sEntityType
 						+ "' which is not a name of an entity type", undefined,
 						"sap.ui.model.odata.AnnotationHelper");
 				}
@@ -460,7 +460,7 @@ sap.ui.define([
 					oResult = oContext.getModel().getODataFunctionImport(sFunctionImport, true);
 
 				if (!oResult) {
-					jQuery.sap.log.warning(oContext.getPath() + ": found '" + sFunctionImport
+					Log.warning(oContext.getPath() + ": found '" + sFunctionImport
 						+ "' which is not a name of a function import", undefined,
 						"sap.ui.model.odata.AnnotationHelper");
 				}
@@ -558,7 +558,7 @@ sap.ui.define([
 				var oResult = Basics.followPath(oContext, oContext.getObject());
 
 				if (!oResult) {
-					jQuery.sap.log.warning(oContext.getPath() + ": Path could not be resolved ",
+					Log.warning(oContext.getPath() + ": Path could not be resolved ",
 						undefined, "sap.ui.model.odata.AnnotationHelper");
 				}
 

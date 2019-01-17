@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -47,6 +47,9 @@ sap.ui.define(['jquery.sap.global'],
 	 *
 	 * @public
 	 * @since 0.9.0
+	 * @deprecated since 1.58. It is no longer recommended to use synchronous calls at all. There are
+	 *  alternatives like native <code>XMLHttpRequest</code> or <code>jQuery.ajax</code> but try to
+	 *  avoid the sync flag. There will be no replacement for <code>jQuery.sap.sjax</code>.
 	 * @SecSink {0|PATH} Parameter is used for future HTTP requests
 	 */
 	jQuery.sap.sjax = function sjax(oOrigSettings) {
@@ -78,6 +81,7 @@ sap.ui.define(['jquery.sap.global'],
 
 	/**
 	 * Convenience wrapper that checks whether a given web resource could be accessed.
+	 * @deprecated since 1.58 see {@link jQuery.sap.sjax}
 	 * @SecSink {0|PATH} Parameter is used for future HTTP requests
 	 * @SecSource {return} Returned value is under control of an external resource
 	 */
@@ -96,6 +100,7 @@ sap.ui.define(['jquery.sap.global'],
 	 *
 	 * @public
 	 * @since 0.9.0
+	 * @deprecated since 1.58 see {@link jQuery.sap.sjax}
 	 * @SecSink {0 1|PATH} Parameter is used for future HTTP requests
 	 * @SecSource {return} Returned value is under control of an external resource
 	 */
@@ -119,6 +124,7 @@ sap.ui.define(['jquery.sap.global'],
 	 *
 	 * @public
 	 * @since 0.9.0
+	 * @deprecated since 1.58 see {@link jQuery.sap.sjax}
 	 * @SecSink {0 1|PATH} Parameter is used for future HTTP requests
 	 * @SecSource {return} Returned value is under control of an external resource
 	 */
@@ -147,6 +153,7 @@ sap.ui.define(['jquery.sap.global'],
 	 *
 	 * @public
 	 * @since 0.9.0
+	 * @deprecated since 1.58 see {@link jQuery.sap.sjax}
 	 * @SecSink {0 1|PATH} Parameter is used for future HTTP requests
 	 */
 	jQuery.sap.syncGetText = function syncGetText(sUrl, data, fallback) {
@@ -178,6 +185,7 @@ sap.ui.define(['jquery.sap.global'],
 	 *
 	 * @public
 	 * @since 0.9.0
+	 * @deprecated since 1.58 see {@link jQuery.sap.sjax}
 	 * @SecSink {0 1|PATH} Parameter is used for future HTTP requests
 	 */
 	jQuery.sap.syncGetJSON = function syncGetJSON(sUrl, data, fallback) {

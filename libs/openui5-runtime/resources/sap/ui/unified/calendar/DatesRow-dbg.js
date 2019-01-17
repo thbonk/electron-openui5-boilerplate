@@ -1,13 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 //Provides control sap.ui.unified.Calendar.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleData', 'sap/ui/core/delegate/ItemNavigation',
-		'sap/ui/model/type/Date', 'sap/ui/unified/calendar/CalendarUtils', 'sap/ui/unified/calendar/CalendarDate', 'sap/ui/unified/calendar/Month', 'sap/ui/unified/library'],
-	function(jQuery, Control, LocaleData, ItemNavigation, Date1, CalendarUtils, CalendarDate, Month, library) {
+sap.ui.define([
+	'sap/ui/unified/calendar/CalendarUtils',
+	'sap/ui/unified/calendar/CalendarDate',
+	'sap/ui/unified/calendar/Month',
+	'sap/ui/unified/library',
+	"./DatesRowRenderer",
+	"sap/ui/thirdparty/jquery"
+], function(CalendarUtils, CalendarDate, Month, library, DatesRowRenderer, jQuery) {
 	"use strict";
 
 	/*
@@ -27,7 +32,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 	 * If used inside the calendar the properties and aggregation are directly taken from the parent
 	 * (To not duplicate and sync DateRanges and so on...)
 	 * @extends sap.ui.unified.calendar.Month
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -69,6 +74,21 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 
 		this._iColumns = 1;
 
+		//holds objects describing the weeks of the currently displayed days
+		//example: [{ len: 3, number: 12 }, { len: 7, number: 13 }, ...]
+		this._aWeekNumbers = [];
+
+	};
+
+	DatesRow.prototype._setAriaRole = function(sRole){
+		this._ariaRole = sRole;
+
+		return this;
+	};
+
+	DatesRow.prototype._getAriaRole = function(){
+
+		return this._ariaRole ? this._ariaRole : "gridcell";
 	};
 
 	/*
@@ -123,8 +143,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 	 * @param {object} oDate JavaScript date object for start date.
 	 * @returns {sap.ui.unified.calendar.DatesRow} <code>this</code> to allow method chaining
 	 * @public
-	 * @name sap.ui.unified.calendar.DatesRow#setDate
-	 * @function
 	 */
 	DatesRow.prototype.setDate = function(oDate){
 
@@ -183,9 +201,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 	 *
 	 * @protected
 	 * @param {int} iFirstDayOfWeek The first day of the week
-	 * @name sap.ui.unified.calendar.DatesRow#setFirstDayOfWeek
-	 * @returns {sap.ui.unified.DatesRow} <code>this</code> to allow method chaining
-	 * @function
+	 * @returns {sap.ui.unified.calendar.DatesRow} <code>this</code> to allow method chaining
 	 */
 	DatesRow.prototype.setFirstDayOfWeek = function(iFirstDayOfWeek){
 
@@ -305,6 +321,53 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 
 	};
 
+	/**
+	 * Returns the weeks with their length and number for the displayed dates.
+	 * @returns {Array} Array with objects containing info about the weeks. Example: [{ len: 3, number: 12 }, { len: 7, number: 13 }, ...]
+	 * @private
+	 */
+	DatesRow.prototype.getWeekNumbers = function() {
+		var iDays = this.getDays(),
+			oLocale = this._getLocale(),
+			oLocaleData = this._getLocaleData(),
+			oCalType = this.getPrimaryCalendarType(),
+			oStartDate = this._getStartDate(),
+			oDate = new CalendarDate(oStartDate, oCalType),
+			oEndDate = new CalendarDate(oStartDate, oCalType).setDate(oDate.getDate() + iDays),
+			aDisplayedDates = [];
+
+		while (oDate.isBefore(oEndDate)) {
+			aDisplayedDates.push(new CalendarDate(oDate, oCalType));
+			oDate.setDate(oDate.getDate() + 1);
+		}
+
+		this._aWeekNumbers = aDisplayedDates.reduce(function (aWeekNumbers, oDay) {
+			var iWeekNumber = CalendarUtils.calculateWeekNumber(oDay.toUTCJSDate(), oDay.getYear(), oLocale, oLocaleData);
+
+			if (!aWeekNumbers.length || aWeekNumbers[aWeekNumbers.length - 1].number !== iWeekNumber) {
+				aWeekNumbers.push({
+					len: 0,
+					number: iWeekNumber
+				});
+			}
+
+			aWeekNumbers[aWeekNumbers.length - 1].len++;
+
+			return aWeekNumbers;
+		}, []);
+
+		return this._aWeekNumbers;
+	};
+
+	/**
+	 * Returns the cached week numbers.
+	 * @returns {Array} Array with objects containing info about the weeks. Example: [{ len: 3, number: 12 }, { len: 7, number: 13 }, ...]
+	 * @private
+	 */
+	DatesRow.prototype._getCachedWeekNumbers = function() {
+		return this._aWeekNumbers;
+	};
+
 	return DatesRow;
 
-}, /* bExport= */ true);
+});

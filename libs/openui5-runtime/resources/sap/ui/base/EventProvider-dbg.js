@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.base.EventProvider
-sap.ui.define(['jquery.sap.global', './Event', './Object', './ObjectPool'],
-	function(jQuery, Event, BaseObject, ObjectPool) {
+sap.ui.define(['./Event', './Object', './ObjectPool', "sap/base/assert"],
+	function(Event, BaseObject, ObjectPool, assert) {
 	"use strict";
 
 
@@ -18,8 +18,7 @@ sap.ui.define(['jquery.sap.global', './Event', './Object', './ObjectPool'],
 	 * @abstract
 	 * @extends sap.ui.base.Object
 	 * @author SAP SE
-	 * @version 1.50.6
-	 * @constructor
+	 * @version 1.61.2
 	 * @public
 	 * @alias sap.ui.base.EventProvider
 	 */
@@ -74,7 +73,7 @@ sap.ui.define(['jquery.sap.global', './Event', './Object', './ObjectPool'],
 	 */
 	EventProvider.prototype.attachEvent = function(sEventId, oData, fnFunction, oListener) {
 		var mEventRegistry = this.mEventRegistry;
-		jQuery.sap.assert(typeof (sEventId) === "string" && sEventId, "EventProvider.attachEvent: sEventId must be a non-empty string");
+		assert(typeof (sEventId) === "string" && sEventId, "EventProvider.attachEvent: sEventId must be a non-empty string");
 		if (typeof (oData) === "function") {
 		//one could also increase the check in the line above
 		//if(typeof(oData) === "function" && oListener === undefined) {
@@ -82,8 +81,8 @@ sap.ui.define(['jquery.sap.global', './Event', './Object', './ObjectPool'],
 			fnFunction = oData;
 			oData = undefined;
 		}
-		jQuery.sap.assert(typeof (fnFunction) === "function", "EventProvider.attachEvent: fnFunction must be a function");
-		jQuery.sap.assert(!oListener || typeof (oListener) === "object", "EventProvider.attachEvent: oListener must be empty or an object");
+		assert(typeof (fnFunction) === "function", "EventProvider.attachEvent: fnFunction must be a function");
+		assert(!oListener || typeof (oListener) === "object", "EventProvider.attachEvent: oListener must be empty or an object");
 
 		var aEventListeners = mEventRegistry[sEventId];
 		if ( !Array.isArray(aEventListeners) ) {
@@ -94,7 +93,7 @@ sap.ui.define(['jquery.sap.global', './Event', './Object', './ObjectPool'],
 
 		// Inform interested parties about changed EventHandlers
 		if ( mEventRegistry[EVENT__LISTENERS_CHANGED] ) {
-			this.fireEvent(EVENT__LISTENERS_CHANGED, {EventId: sEventId, type: 'listenerAttached'});
+			this.fireEvent(EVENT__LISTENERS_CHANGED, {EventId: sEventId, type: 'listenerAttached', listener: oListener, func: fnFunction, data: oData});
 		}
 
 		return this;
@@ -126,7 +125,7 @@ sap.ui.define(['jquery.sap.global', './Event', './Object', './ObjectPool'],
 			fnFunction = oData;
 			oData = undefined;
 		}
-		jQuery.sap.assert(typeof (fnFunction) === "function", "EventProvider.attachEventOnce: fnFunction must be a function");
+		assert(typeof (fnFunction) === "function", "EventProvider.attachEventOnce: fnFunction must be a function");
 		function fnOnce() {
 			this.detachEvent(sEventId, fnOnce);  // ‘this’ is always the control, due to the context ‘undefined’ in the attach call below
 			fnFunction.apply(oListener || this, arguments);  // needs to do the same resolution as in fireEvent
@@ -151,24 +150,24 @@ sap.ui.define(['jquery.sap.global', './Event', './Object', './ObjectPool'],
 	 */
 	EventProvider.prototype.detachEvent = function(sEventId, fnFunction, oListener) {
 		var mEventRegistry = this.mEventRegistry;
-		jQuery.sap.assert(typeof (sEventId) === "string" && sEventId, "EventProvider.detachEvent: sEventId must be a non-empty string" );
-		jQuery.sap.assert(typeof (fnFunction) === "function", "EventProvider.detachEvent: fnFunction must be a function");
-		jQuery.sap.assert(!oListener || typeof (oListener) === "object", "EventProvider.detachEvent: oListener must be empty or an object");
+		assert(typeof (sEventId) === "string" && sEventId, "EventProvider.detachEvent: sEventId must be a non-empty string" );
+		assert(typeof (fnFunction) === "function", "EventProvider.detachEvent: fnFunction must be a function");
+		assert(!oListener || typeof (oListener) === "object", "EventProvider.detachEvent: oListener must be empty or an object");
 
 		var aEventListeners = mEventRegistry[sEventId];
 		if ( !Array.isArray(aEventListeners) ) {
 			return this;
 		}
 
-		var bListenerDetached = false;
+		var oListener;
 
 		//PERFOPT use array. remember length to not re-calculate over and over again
 		for (var i = 0, iL = aEventListeners.length; i < iL; i++) {
 			//PERFOPT check for identity instead of equality... avoid type conversion
 			if (aEventListeners[i].fFunction === fnFunction && aEventListeners[i].oListener === oListener) {
 				//delete aEventListeners[i];
+				oListener = aEventListeners[i];
 				aEventListeners.splice(i,1);
-				bListenerDetached = true;
 				break;
 			}
 		}
@@ -177,9 +176,9 @@ sap.ui.define(['jquery.sap.global', './Event', './Object', './ObjectPool'],
 			delete mEventRegistry[sEventId];
 		}
 
-		if (bListenerDetached && mEventRegistry[EVENT__LISTENERS_CHANGED] ) {
+		if (oListener && mEventRegistry[EVENT__LISTENERS_CHANGED] ) {
 			// Inform interested parties about changed EventHandlers
-			this.fireEvent(EVENT__LISTENERS_CHANGED, {EventId: sEventId, type: 'listenerDetached' });
+			this.fireEvent(EVENT__LISTENERS_CHANGED, {EventId: sEventId, type: 'listenerDetached', listener: oListener.listener, func: oListener.fFunction, data: oListener.oData});
 		}
 
 		return this;
@@ -273,6 +272,41 @@ sap.ui.define(['jquery.sap.global', './Event', './Object', './ObjectPool'],
 	 */
 	EventProvider.getEventList = function(oEventProvider) {
 		return oEventProvider.mEventRegistry;
+	};
+
+	/**
+	 * Checks whether the given event provider has the given listener registered for the given event.
+	 *
+	 * Returns true if function and listener object both match the corresponding parameters of
+	 * at least one listener registered for the named event.
+	 *
+	 * @param {sap.ui.base.EventProvider}
+	 *            oEventProvider The event provider to get the registered events for
+	 * @param {string}
+	 *            sEventId The identifier of the event to check listeners for
+	 * @param {function}
+	 *            fnFunction The handler function to check for
+	 * @param {object}
+	 *            [oListener] The listener object to check for
+	 * @return {boolean} Returns whether a listener with the same parameters exists
+	 * @private
+	 * @ui5-restricted sap.ui.base, sap.ui.core
+	 */
+	EventProvider.hasListener = function (oEventProvider, sEventId, fnFunction, oListener) {
+		assert(typeof (sEventId) === "string" && sEventId, "EventProvider.hasListener: sEventId must be a non-empty string" );
+		assert(typeof (fnFunction) === "function", "EventProvider.hasListener: fnFunction must be a function");
+		assert(!oListener || typeof (oListener) === "object", "EventProvider.hasListener: oListener must be empty or an object");
+
+		var aEventListeners = oEventProvider && oEventProvider.mEventRegistry[sEventId];
+		if ( aEventListeners ) {
+			for (var i = 0, iL = aEventListeners.length; i < iL; i++) {
+				if (aEventListeners[i].fFunction === fnFunction && aEventListeners[i].oListener === oListener) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	};
 
 	/**

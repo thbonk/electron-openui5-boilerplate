@@ -1,13 +1,24 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.Image.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
-	function(jQuery, library, Control) {
+sap.ui.define([
+	'./library',
+	'sap/ui/core/Control',
+	'./ImageRenderer',
+	"sap/ui/events/KeyCodes",
+	"sap/ui/thirdparty/jquery"
+],
+	function(library, Control, ImageRenderer, KeyCodes, jQuery) {
 	"use strict";
+
+
+
+	// shortcut for sap.m.ImageMode
+	var ImageMode = library.ImageMode;
 
 
 
@@ -26,11 +37,14 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 *
 	 * From version 1.30, new image mode sap.m.ImageMode.Background is added. When this mode is set, the src property is set using the css style 'background-image'. The properties 'backgroundSize', 'backgroundPosition', 'backgroundRepeat' have effect only when image is in sap.m.ImageMode.Background mode. In order to make the high density image correctly displayed, the 'backgroundSize' should be set to the dimension of the normal density version.
 	 *
+	 * @see {@link topic:f86dbe9d7f7d48dea5286003b1322165 Image}
+	 * @see {@link fiori:https://experience.sap.com/fiori-design-web/image/ Image}
+	 *
 	 * @extends sap.ui.core.Control
 	 * @implements sap.ui.core.IFormContent
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -41,6 +55,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 
 		interfaces : ["sap.ui.core.IFormContent"],
 		library : "sap.m",
+		designtime: "sap/m/designtime/Image.designtime",
 		properties : {
 
 			/**
@@ -78,13 +93,19 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 			useMap : {type : "string", group : "Misc", defaultValue : null},
 
 			/**
-			 * If this is set to false, the src image will be loaded directly without attempting to fetch the density perfect image for high density device.
+			 * If this is set to <code>true</code>, one or more network requests will be made
+			 * that try to obtain the density perfect version of the image.
 			 *
-			 * By default, this is set to true but then one or more requests are sent trying to get the density perfect version of image if this version of image doesn't exist on the server.
+			 * By default, this is set to <code>false</code>, so the src image is loaded directly
+			 * without attempting to fetch the density perfect image for high-density devices.
 			 *
-			 * If bandwidth is the key for the application, set this value to false.
+			 * <b>Note:</b> Before 1.60, the default value was set to <code>true</code>, which
+			 * brought redundant network requests for apps that used the default but did not
+			 * provide density perfect image versions on server-side.
+			 * You should set this property to <code>true</code> only if you also provide the
+			 * corresponding image versions for high-density devices.
 			 */
-			densityAware : {type : "boolean", group : "Misc", defaultValue : true},
+			densityAware : {type : "boolean", group : "Misc", defaultValue : false},
 
 			/**
 			 * The source property which is used when the image is pressed.
@@ -124,6 +145,17 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 			 */
 			detailBox: {type: 'sap.m.LightBox', multiple: false, bindable: "bindable"}
 		},
+		associations : {
+			/**
+			 * Association to controls / ids which describe this control (see WAI-ARIA attribute aria-describedby).
+			 */
+			ariaDescribedBy : {type : "sap.ui.core.Control", multiple : true, singularName : "ariaDescribedBy"},
+
+			/**
+			 * Association to controls / ids which label this control (see WAI-ARIA attribute aria-labelledBy).
+			 */
+			ariaLabelledBy: {type : "sap.ui.core.Control", multiple : true, singularName : "ariaLabelledBy"}
+		},
 		events : {
 
 			/**
@@ -147,8 +179,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 			 * @since 1.36.2
 			 */
 			error : {}
-		},
-		designTime: true
+		}
 	}});
 
 	Image._currentDevicePixelRatio = (function() {
@@ -198,7 +229,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 			oDomRef = $DomNode[0];
 
 		// set the src to the real dom node
-		if (this.getMode() === sap.m.ImageMode.Background) {
+		if (this.getMode() === ImageMode.Background) {
 			// In Background mode, the src is applied to the output DOM element only when the source image is finally loaded to the client side
 			$DomNode.css("background-image", "url(\"" + this._oImage.src + "\")");
 		}
@@ -237,7 +268,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 		var $DomNode = this.$(),
 			sMode = this.getMode(),
 			// In Background mode, the src property should be read from the temp Image object
-			sSrc = (sMode === sap.m.ImageMode.Image) ? $DomNode.attr("src") : this._oImage.src,
+			sSrc = (sMode === ImageMode.Image) ? this._getDomImg().attr("src") : this._oImage.src,
 			d = Image._currentDevicePixelRatio,
 			sCurrentSrc = this._isActiveState ? this.getActiveSrc() : this.getSrc();
 
@@ -245,8 +276,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 
 		// if src is empty or there's no image existing, just stop
 		if (!sSrc || this._iLoadImageDensity === 1) {
-			// remove the "sapMNoImg" in order to show the alt text
-			$DomNode.removeClass("sapMNoImg");
+			// BCP: 1880526262
+			if (this.getAlt() && !this.getDecorative()) {
+				// remove the "sapMNoImg" in order to show the alt text
+				$DomNode.removeClass("sapMNoImg");
+			}
 			this.fireError();
 			return;
 		}
@@ -308,6 +342,28 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	};
 
 	/**
+	 * @override
+	 */
+	Image.prototype.clone = function () {
+		var oClone = Control.prototype.clone.apply(this, arguments),
+			oCloneDetailBox = oClone.getDetailBox();
+
+		// Handle press event if DetailBox is available
+		if (oCloneDetailBox) {
+
+			// Detach the old event
+			oClone.detachPress(this._fnLightBoxOpen, this.getDetailBox());
+
+			// Attach new event with the cloned detail box
+			oClone._fnLightBoxOpen = oCloneDetailBox.open;
+			oClone.attachPress(oClone._fnLightBoxOpen, oCloneDetailBox);
+
+		}
+
+		return oClone;
+	};
+
+	/**
 	 * the 'beforeRendering' event handler
 	 * @private
 	 */
@@ -323,11 +379,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * @private
 	 */
 	Image.prototype.onAfterRendering = function() {
-		var $DomNode = this.$(),
+		// BCP 1870456103. Error should be thrown when we have invalid src and DetailBox present.
+		var $DomNode = this.getDetailBox() ? this.$().find(".sapMImg") : this.$(),
 			sMode = this.getMode(),
 			oDomImageRef;
 
-		if (sMode === sap.m.ImageMode.Image) {
+		if (sMode === ImageMode.Image) {
 			// bind the load and error event handler
 			$DomNode.on("load", jQuery.proxy(this.onload, this));
 			$DomNode.on("error", jQuery.proxy(this.onerror, this));
@@ -335,7 +392,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 			oDomImageRef = $DomNode[0];
 		}
 
-		if (sMode === sap.m.ImageMode.Background) {
+		if (sMode === ImageMode.Background) {
 			oDomImageRef = this._oImage;
 		}
 
@@ -398,12 +455,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 		}
 	};
 
-	/**
-	 * This overrides the default setter of the src property and update the dom node.
-	 *
-	 * @param {sap.ui.core.URI} sSrc
-	 * @public
-	 */
 	Image.prototype.setSrc = function(sSrc) {
 		if (sSrc === this.getSrc()) {
 			return this;
@@ -419,13 +470,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 		return this;
 	};
 
-	/**
-	 * This overrides the default setter of the activeSrc property in order to avoid the rerendering.
-	 *
-	 * @param {sap.ui.core.URI} sActiveSrc
-	 * @returns {sap.m.Image} <code>this</code> pointer for chaining
-	 * @public
-	 */
 	Image.prototype.setActiveSrc = function(sActiveSrc) {
 		if (!sActiveSrc) {
 			sActiveSrc = "";
@@ -435,7 +479,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 
 	Image.prototype.attachPress = function() {
 		Array.prototype.unshift.apply(arguments, ["press"]);
-		sap.ui.core.Control.prototype.attachEvent.apply(this, arguments);
+		Control.prototype.attachEvent.apply(this, arguments);
 
 		if (this.hasListeners("press")) {
 			this.$().attr("tabindex", "0");
@@ -447,7 +491,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 
 	Image.prototype.detachPress = function() {
 		Array.prototype.unshift.apply(arguments, ["press"]);
-		sap.ui.core.Control.prototype.detachEvent.apply(this, arguments);
+		Control.prototype.detachEvent.apply(this, arguments);
 
 		if (!this.hasListeners("press")) {
 			this.$().removeAttr("tabindex");
@@ -479,7 +523,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * @private
 	 */
 	Image.prototype.onkeyup = function(oEvent) {
-		if (oEvent.which === jQuery.sap.KeyCodes.SPACE || oEvent.which === jQuery.sap.KeyCodes.ENTER) {
+		if (oEvent.which === KeyCodes.SPACE || oEvent.which === KeyCodes.ENTER) {
 			this.firePress({/* no parameters */});
 
 			// stop the propagation it is handled by the control
@@ -498,13 +542,23 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 		if ($DomNode.length) {
 			// the src is updated on the output DOM element when mode is set to Image
 			// the src is updated on the temp Image object when mode is set to Background
-			if (sMode === sap.m.ImageMode.Image) {
-				$DomNode.attr("src", sSrc);
+			if (sMode === ImageMode.Image) {
+				this._getDomImg().attr("src", sSrc);
 			} else {
 				$DomNode.addClass("sapMNoImg");
 				jQuery(this._oImage).attr("src", sSrc);
 			}
 		}
+	};
+
+	/**
+	 * Returns the img Dom element
+	 * @private
+	 */
+	Image.prototype._getDomImg = function() {
+		var $DomNode = this.$();
+
+		return this.getDetailBox() ? $DomNode.children("img") : $DomNode;
 	};
 
 	/**
@@ -515,7 +569,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	* @private
 	*/
 	Image.prototype._preLoadImage = function(sSrc) {
-		if (this.getMode() !== sap.m.ImageMode.Background) {
+		if (this.getMode() !== ImageMode.Background) {
 			return;
 		}
 
@@ -624,8 +678,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	};
 
 	/**
+	 * Returns the <code>sap.m.Image</code>  accessibility information.
+	 *
 	 * @see sap.ui.core.Control#getAccessibilityInfo
 	 * @protected
+	 * @returns {Object} The <code>sap.m.Image</code> accessibility information
 	 */
 	Image.prototype.getAccessibilityInfo = function() {
 		var bHasPressListeners = this.hasListeners("press");
@@ -652,4 +709,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 
 	return Image;
 
-}, /* bExport= */ true);
+});

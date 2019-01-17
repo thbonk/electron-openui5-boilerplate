@@ -2,7 +2,7 @@
 
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -145,6 +145,7 @@ html.sap-tablet:not(.sap-desktop) input, html.sap-tablet:not(.sap-desktop) texta
 .sapUiRootBackground,
 .sapMShellGlobalOuterBackground {
 	background: @sapUiShellBackgroundImage;
+	.sapGlobalBackgroundRepeatMixin;
 }
 
 .sapUshellShell .sapMShellGlobalOuterBackground {
@@ -220,6 +221,28 @@ html.sap-tablet:not(.sap-desktop) input, html.sap-tablet:not(.sap-desktop) texta
 	display: none;
 }
 
+// =====================================
+// Font "72"
+// =====================================
+
+@font-face {
+	font-family: '72';
+	font-style: normal;
+	font-weight: 400;
+	src: local('72'),
+		url('fonts/72-Regular.woff2') format('woff2'),
+		url('fonts/72-Regular.woff') format('woff');
+}
+
+@font-face {
+	font-family: '72';
+	font-style: normal;
+	font-weight: 700;
+	src: local('72-Bold'),
+		url('fonts/72-Bold.woff2') format('woff2'),
+		url('fonts/72-Bold.woff') format('woff');
+}
+
 /* END "shared.less" */
 
 
@@ -271,7 +294,7 @@ html.sap-desktop ::-webkit-scrollbar-corner {
 /* Belize theme                            */
 /* ======================================= */
 
-.sapUiDP{
+.sapUiDP {
 	width: 190px;
 }
 
@@ -318,7 +341,7 @@ html[data-sap-ui-browser^="ed"] .sapUiIcon:focus::after {
 }
 
 .sapUiIconBGColorNeutral {
-	background-color: @sapUiPositiveElement;
+	background-color: @sapUiNeutralElement;
 }
 
 .sapUiIconBGColorCritical {
@@ -331,6 +354,10 @@ html[data-sap-ui-browser^="ed"] .sapUiIcon:focus::after {
 
 .sapUiIconBGColorNegative {
 	background-color: @sapUiNegativeElement;
+}
+
+.sapUiIconBGColorContrast {
+	background-color: darken(@sapUiHighlight, 10);
 }
 /* END "Icon.less" */
 

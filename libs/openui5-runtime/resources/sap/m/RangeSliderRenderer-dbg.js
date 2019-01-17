@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -13,67 +13,22 @@ sap.ui.define(["sap/ui/core/Renderer", "./SliderRenderer"], function (Renderer, 
      */
     var RangeSliderRenderer = Renderer.extend(SliderRenderer);
 
-    RangeSliderRenderer.renderHandles = function (oRM, oControl) {
+    RangeSliderRenderer.renderHandles = function (oRM, oControl, sRangeSliderLabels) {
         this.renderHandle(oRM, oControl, {
             id: oControl.getId() + "-handle1",
-            position: "start"
+            position: "start",
+            forwardedLabels: sRangeSliderLabels
         });
         this.renderHandle(oRM, oControl, {
             id: oControl.getId() + "-handle2",
-            position: "end"
+            position: "end",
+            forwardedLabels: sRangeSliderLabels
         });
-
-        // Render tooltips
-        this.renderTooltips(oRM, oControl);
 
         // Render ARIA labels
         oRM.renderControl(oControl._mHandleTooltip.start.label);
         oRM.renderControl(oControl._mHandleTooltip.end.label);
-        oRM.renderControl(oControl._oRangeLabel);
-    };
-
-    RangeSliderRenderer.renderTooltips = function (oRM, oControl) {
-        // The tooltips container
-        oRM.write("<div");
-        oRM.writeAttribute("id", oControl.getId() + "-TooltipsContainer");
-        oRM.addClass(SliderRenderer.CSS_CLASS + "TooltipContainer");
-        oRM.addStyle("left","0%");
-        oRM.addStyle("right","0%");
-        oRM.addStyle("min-width", "0%");
-
-        oRM.writeClasses();
-        oRM.writeStyles();
-        oRM.write(">");
-
-        // The first tooltip
-        this.renderTooltip(oRM, oControl, oControl.getInputsAsTooltips(), "Left");
-
-        // The second tooltip
-        this.renderTooltip(oRM, oControl, oControl.getInputsAsTooltips(), "Right");
-
-        oRM.write("</div>");
-    };
-
-    RangeSliderRenderer.renderTooltip = function(oRM, oControl, bInput, sPosition){
-
-        if (bInput) {
-            if (sPosition === "Left") {
-                oRM.renderControl(oControl._mHandleTooltip.start.tooltip);
-            } else {
-                oRM.renderControl(oControl._mHandleTooltip.end.tooltip);
-            }
-
-        } else {
-            oRM.write("<span");
-            oRM.addClass(SliderRenderer.CSS_CLASS + "HandleTooltip");
-            oRM.addStyle("width", oControl._iLongestRangeTextWidth + "px");
-            oRM.writeAttribute("id", oControl.getId() + "-" + sPosition + "Tooltip");
-
-            oRM.writeClasses();
-            oRM.writeStyles();
-            oRM.write(">");
-            oRM.write("</span>");
-        }
+        oRM.renderControl(oControl.getAggregation("_handlesLabels")[2]);
     };
 
     /**
@@ -87,6 +42,7 @@ sap.ui.define(["sap/ui/core/Renderer", "./SliderRenderer"], function (Renderer, 
         var fValue,
             aRange = oControl.getRange(),
             bEnabled = oControl.getEnabled(),
+            oHandleTooltip = oControl._mHandleTooltip[mOptions.position].tooltip,
             bRTL = sap.ui.getCore().getConfiguration().getRTL();
 
         oRM.write("<span");
@@ -98,13 +54,13 @@ sap.ui.define(["sap/ui/core/Renderer", "./SliderRenderer"], function (Renderer, 
             fValue = aRange[mOptions.position === "start" ? 0 : 1];
 
             oRM.writeAttribute("data-range-val", mOptions.position);
-            oRM.writeAttribute("aria-labelledby", oControl._mHandleTooltip[mOptions.position].label.getId());
+            oRM.writeAttribute("aria-labelledby", (mOptions.forwardedLabels + " " + oControl._mHandleTooltip[mOptions.position].label.getId()).trim());
 
-            if (oControl.getInputsAsTooltips()) {
-                oRM.writeAttribute("aria-controls", oControl._mHandleTooltip[mOptions.position].tooltip.getId());
+            if (oControl.getInputsAsTooltips() && oHandleTooltip) {
+                oRM.writeAttribute("aria-controls", oHandleTooltip.getId());
             }
         }
-        if (oControl.getShowHandleTooltip()) {
+        if (oControl.getShowHandleTooltip() && !oControl.getShowAdvancedTooltip()) {
             this.writeHandleTooltip(oRM, oControl);
         }
 
@@ -133,15 +89,32 @@ sap.ui.define(["sap/ui/core/Renderer", "./SliderRenderer"], function (Renderer, 
      *
      * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer.
      * @param {sap.ui.core.Control} oSlider An object representation of the control that should be rendered.
+     * @param {string} fValue The current value for the accessibility state
      */
     RangeSliderRenderer.writeAccessibilityState = function(oRm, oSlider, fValue) {
+        var bNotNumericalLabel = oSlider._isElementsFormatterNotNumerical(fValue),
+            sScaleLabel = oSlider._formatValueByCustomElement(fValue),
+            sValueNow;
+
+        if (oSlider._getUsedScale() && !bNotNumericalLabel) {
+            sValueNow = sScaleLabel;
+        } else {
+            sValueNow = oSlider.toFixed(fValue);
+        }
+
         oRm.writeAccessibilityState(oSlider, {
             role: "slider",
             orientation: "horizontal",
             valuemin: oSlider.toFixed(oSlider.getMin()),
             valuemax: oSlider.toFixed(oSlider.getMax()),
-            valuenow: fValue
+            valuenow: sValueNow
         });
+
+        if (bNotNumericalLabel) {
+            oRm.writeAccessibilityState(oSlider, {
+                valuetext: sScaleLabel
+            });
+        }
     };
 
     /**
@@ -170,7 +143,9 @@ sap.ui.define(["sap/ui/core/Renderer", "./SliderRenderer"], function (Renderer, 
     RangeSliderRenderer.renderEndLabel = function (oRM, oControl) {
         oRM.write("<div");
         oRM.addClass(SliderRenderer.CSS_CLASS + "RangeLabel");
+        oRM.addStyle("width", oControl._getMaxTooltipWidth() + "px");
         oRM.writeClasses();
+        oRM.writeStyles();
         oRM.write(">");
 
         oRM.write(oControl.getMax());
@@ -197,8 +172,11 @@ sap.ui.define(["sap/ui/core/Renderer", "./SliderRenderer"], function (Renderer, 
         oRM.write("</div>");
     };
 
-    RangeSliderRenderer.renderProgressIndicator = function(oRm, oSlider) {
+    RangeSliderRenderer.renderProgressIndicator = function(oRm, oSlider, sForwardedLabels) {
         var aRange = oSlider.getRange();
+
+        aRange[0] = oSlider.toFixed(aRange[0], oSlider._iDecimalPrecision);
+        aRange[1] = oSlider.toFixed(aRange[1], oSlider._iDecimalPrecision);
 
         oRm.write("<div");
         oRm.writeAttribute("id", oSlider.getId() + "-progress");
@@ -216,8 +194,8 @@ sap.ui.define(["sap/ui/core/Renderer", "./SliderRenderer"], function (Renderer, 
             valuemin: oSlider.toFixed(oSlider.getMin()),
             valuemax: oSlider.toFixed(oSlider.getMax()),
             valuenow: aRange.join("-"),
-            valuetext: oSlider._oResourceBundle.getText('RANGE_SLIDER_RANGE_ANNOUNCEMENT', aRange),
-            labelledby: oSlider._oRangeLabel.getId()
+            valuetext: oSlider._oResourceBundle.getText('RANGE_SLIDER_RANGE_ANNOUNCEMENT', aRange.map(oSlider._formatValueByCustomElement, oSlider)),
+            labelledby: (sForwardedLabels + " " + oSlider.getAggregation("_handlesLabels")[2].getId()).trim() // range label
         });
 
         oRm.write('></div>');

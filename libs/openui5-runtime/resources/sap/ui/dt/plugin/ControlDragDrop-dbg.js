@@ -1,12 +1,21 @@
 /*
  * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.dt.plugin.ControlDragDrop.
-sap.ui.define(['sap/ui/dt/plugin/DragDrop', 'sap/ui/dt/plugin/ElementMover', 'sap/ui/dt/ElementUtil'], function(
-		DragDrop, ElementMover, ElementUtil) {
+sap.ui.define([
+	'sap/ui/dt/plugin/DragDrop',
+	'sap/ui/dt/plugin/ElementMover',
+	'sap/ui/dt/ElementUtil',
+	'sap/ui/dt/OverlayUtil'
+], function(
+	DragDrop,
+	ElementMover,
+	ElementUtil,
+	OverlayUtil
+) {
 	"use strict";
 
 	/**
@@ -17,9 +26,9 @@ sap.ui.define(['sap/ui/dt/plugin/DragDrop', 'sap/ui/dt/plugin/ElementMover', 'sa
 	 * @param {object}
 	 *          [mSettings] initial settings for the new object
 	 * @class The ControlDragDrop enables D&D functionality for the overlays based on aggregation types
-	 * @extends sap.ui.dt.plugin.DragDrop"
+	 * @extends sap.ui.dt.plugin.DragDrop
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @constructor
 	 * @private
 	 * @since 1.30
@@ -79,15 +88,20 @@ sap.ui.define(['sap/ui/dt/plugin/DragDrop', 'sap/ui/dt/plugin/ElementMover', 'sa
 	 * @override
 	 */
 	ControlDragDrop.prototype.registerElementOverlay = function(oOverlay) {
-		DragDrop.prototype.registerElementOverlay.apply(this, arguments);
-		var oElement = oOverlay.getElementInstance();
-		if (this.getElementMover().isMovableType(oElement) && this.getElementMover().checkMovable(oOverlay)) {
+		var oElement = oOverlay.getElement();
+		if (
+			this.getElementMover().isMovableType(oElement)
+			&& this.getElementMover().checkMovable(oOverlay)
+			&& !OverlayUtil.isInAggregationBinding(oOverlay, oElement.sParentAggregationName)
+		) {
 			oOverlay.setMovable(true);
 		}
 
 		if (this.oDraggedElement) {
 			this.getElementMover().activateTargetZonesFor(oOverlay, sDROP_ZONE_STYLE);
 		}
+
+		DragDrop.prototype.registerElementOverlay.apply(this, arguments);
 	};
 
 	/**
@@ -137,7 +151,7 @@ sap.ui.define(['sap/ui/dt/plugin/DragDrop', 'sap/ui/dt/plugin/ElementMover', 'sa
 	 */
 	ControlDragDrop.prototype.onDragEnter = function(oTargetOverlay) {
 		var oDraggedOverlay = this.getDraggedOverlay();
-		if (oTargetOverlay.getElementInstance() !== oDraggedOverlay.getElementInstance()
+		if (oTargetOverlay.getElement() !== oDraggedOverlay.getElement()
 				&& oTargetOverlay !== this._oPreviousTarget) {
 			this.getElementMover().repositionOn(oDraggedOverlay, oTargetOverlay);
 		}

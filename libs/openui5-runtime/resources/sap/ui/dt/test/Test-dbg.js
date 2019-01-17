@@ -1,15 +1,14 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.dt.test.Test.
 sap.ui.define([
-	'jquery.sap.global',
 	'sap/ui/base/ManagedObject'
 ],
-function(jQuery, ManagedObject) {
+function(ManagedObject) {
 	"use strict";
 
 	/**
@@ -18,12 +17,13 @@ function(jQuery, ManagedObject) {
 	 * @param {string} [sId] id for the new object, generated automatically if no id is given
 	 * @param {object} [mSettings] initial settings for the new object
 	 *
+	 * @abstract
 	 * @class
 	 * The Test class allows to create design time tests.
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @private

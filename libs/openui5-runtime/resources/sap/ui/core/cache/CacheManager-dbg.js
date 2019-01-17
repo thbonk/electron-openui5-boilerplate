@@ -1,11 +1,17 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './LRUPersistentCache', './CacheManagerNOP', 'sap/ui/Device'],
-	function (jQuery, LRUPersistentCache, CacheManagerNOP, Device) {
+sap.ui.define([
+	'./LRUPersistentCache',
+	'./CacheManagerNOP',
+	'sap/ui/Device',
+	"sap/base/Log",
+	"sap/ui/performance/Measurement"
+],
+	function(LRUPersistentCache, CacheManagerNOP, Device, Log, Measurement) {
 		"use strict";
 
 		/**
@@ -25,8 +31,8 @@ sap.ui.define(['jquery.sap.global', './LRUPersistentCache', './CacheManagerNOP',
 		 *
 		 * Example usage:
 		 * <pre>
-		 * sap.ui.define(['jquery.sap.global', 'sap/ui/core/cache/CacheManager'],
-		 *    function(jQuery, oCacheManager) {
+		 * sap.ui.define(['sap/ui/core/cache/CacheManager'],
+		 *    function(oCacheManager) {
 		 *       oCacheManager.get("myKey").then(function(value){
 		 *           if (value) {
 		 *               //process it
@@ -72,20 +78,20 @@ sap.ui.define(['jquery.sap.global', './LRUPersistentCache', './CacheManagerNOP',
 				pInstanceCreation = new Promise(function (resolve, reject) {
 					var oInstance;
 
-					jQuery.sap.log.debug("Cache Manager: Initialization...");
+					Log.debug("Cache Manager: Initialization...");
 					if (!CacheManager._instance) {
 						oInstance = that._findImplementation();
 
-						jQuery.sap.measure.start(S_MSR_INIT_IMPLEMENTATION, "CM", S_MSR_CAT_CACHE_MANAGER);
+						Measurement.start(S_MSR_INIT_IMPLEMENTATION, "CM", S_MSR_CAT_CACHE_MANAGER);
 						oInstance.init().then(resolveCacheManager, reject);
-						jQuery.sap.measure.end(S_MSR_INIT_IMPLEMENTATION, "CM");
+						Measurement.end(S_MSR_INIT_IMPLEMENTATION, "CM");
 					} else {
 						resolveCacheManager(CacheManager._instance);
 					}
 					function resolveCacheManager(instance) {
 						CacheManager._instance = instance;
 						oMsr.endAsync();
-						jQuery.sap.log.debug("Cache Manager initialized with implementation [" + CacheManager._instance.name + "], resolving _getInstance promise");
+						Log.debug("Cache Manager initialized with implementation [" + CacheManager._instance.name + "], resolving _getInstance promise");
 						resolve(instance);
 					}
 				});
@@ -103,7 +109,7 @@ sap.ui.define(['jquery.sap.global', './LRUPersistentCache', './CacheManagerNOP',
 				if (isSwitchedOn() && this._isSupportedEnvironment()) {
 					return LRUPersistentCache;
 				} else {
-					jQuery.sap.log.warning("UI5 Cache Manager is switched off");
+					Log.warning("UI5 Cache Manager is switched off");
 					return CacheManagerNOP;
 				}
 			},
@@ -119,14 +125,14 @@ sap.ui.define(['jquery.sap.global', './LRUPersistentCache', './CacheManagerNOP',
 			 */
 			set: function (key, value) {
 				var pSet, oMsr = startMeasurements("set", key);
-				jQuery.sap.log.debug("Cache Manager: Setting value of type[" + typeof value + "] with key [" + key + "]");
+				Log.debug("Cache Manager: Setting value of type[" + typeof value + "] with key [" + key + "]");
 
 				pSet = this._callInstanceMethod("set", arguments).then(function callInstanceHandler() {
-					jQuery.sap.log.debug("Cache Manager: Setting key [" + key + "] completed successfully");
+					Log.debug("Cache Manager: Setting key [" + key + "] completed successfully");
 					oMsr.endAsync();
 					//nothing to return, just logging.
 				}, function (e) {
-					jQuery.sap.log.error("Cache Manager: Setting key [" + key + "] failed. Error:" + e);
+					Log.error("Cache Manager: Setting key [" + key + "] failed. Error:" + e);
 					oMsr.endAsync();
 					throw e;
 				});
@@ -149,14 +155,14 @@ sap.ui.define(['jquery.sap.global', './LRUPersistentCache', './CacheManagerNOP',
 				var pGet,
 					oMsr = startMeasurements("get", key);
 
-				jQuery.sap.log.debug("Cache Manager: Getting key [" + key + "]");
+				Log.debug("Cache Manager: Getting key [" + key + "]");
 
 				pGet = this._callInstanceMethod("get", arguments).then(function callInstanceHandler(v) {
-					jQuery.sap.log.debug("Cache Manager: Getting key [" + key + "] done");
+					Log.debug("Cache Manager: Getting key [" + key + "] done");
 					oMsr.endAsync();
 					return v;
 				}, function (e) {
-					jQuery.sap.log.debug("Cache Manager: Getting key [" + key + "] failed. Error: " + e);
+					Log.debug("Cache Manager: Getting key [" + key + "] failed. Error: " + e);
 					oMsr.endAsync();
 					throw e;
 				});
@@ -174,11 +180,11 @@ sap.ui.define(['jquery.sap.global', './LRUPersistentCache', './CacheManagerNOP',
 			 */
 			has: function (key) {
 				var pHas, oMsr = startMeasurements("has", key);
-				jQuery.sap.log.debug("Cache Manager: has key [" + key + "] called");
+				Log.debug("Cache Manager: has key [" + key + "] called");
 
 				pHas = this._callInstanceMethod("has", arguments).then(function callInstanceHandler(result) {
 					oMsr.endAsync();
-					jQuery.sap.log.debug("Cache Manager: has key [" + key + "] returned " + result);
+					Log.debug("Cache Manager: has key [" + key + "] returned " + result);
 					return result;
 				});
 				oMsr.endSync();
@@ -194,14 +200,14 @@ sap.ui.define(['jquery.sap.global', './LRUPersistentCache', './CacheManagerNOP',
 			 */
 			del: function (key) {
 				var pDel, oMsr = startMeasurements("del", key);
-				jQuery.sap.log.debug("Cache Manager: del called.");
+				Log.debug("Cache Manager: del called.");
 
 				pDel = this._callInstanceMethod("del", arguments).then(function callInstanceHandler() {
-					jQuery.sap.log.debug("Cache Manager: del completed successfully.");
+					Log.debug("Cache Manager: del completed successfully.");
 					oMsr.endAsync();
 					//nothing to return, just logging.
 				}, function (e) {
-					jQuery.sap.log.debug("Cache Manager: del failed. Error: " + e);
+					Log.debug("Cache Manager: del failed. Error: " + e);
 					oMsr.endAsync();
 					throw e;
 				});
@@ -217,14 +223,14 @@ sap.ui.define(['jquery.sap.global', './LRUPersistentCache', './CacheManagerNOP',
 			 */
 			reset: function () {
 				var pReset, oMsr = startMeasurements("reset");
-				jQuery.sap.log.debug("Cache Manager: Reset called.");
+				Log.debug("Cache Manager: Reset called.");
 
 				pReset = this._callInstanceMethod("reset", arguments).then(function callInstanceHandler() {
-					jQuery.sap.log.debug("Cache Manager: Reset completed successfully.");
+					Log.debug("Cache Manager: Reset completed successfully.");
 					oMsr.endAsync();
 					//nothing to return, just logging.
 				}, function (e) {
-					jQuery.sap.log.debug("Cache Manager: Reset failed. Error: " + e);
+					Log.debug("Cache Manager: Reset failed. Error: " + e);
 					oMsr.endAsync();
 					throw e;
 				});
@@ -273,18 +279,18 @@ sap.ui.define(['jquery.sap.global', './LRUPersistentCache', './CacheManagerNOP',
 			 */
 			_callInstanceMethod: function (sMethodName, aArgs) {
 				var pCallInstance, sMsrCallInstance = "[sync ] _callInstanceMethod";
-				jQuery.sap.measure.start(sMsrCallInstance, "CM", S_MSR_CAT_CACHE_MANAGER);
+				Measurement.start(sMsrCallInstance, "CM", S_MSR_CAT_CACHE_MANAGER);
 
 				if (this._instance) {
-					jQuery.sap.log.debug("Cache Manager: calling instance...");
+					Log.debug("Cache Manager: calling instance...");
 					return this._instance[sMethodName].apply(this._instance, aArgs);
 				}
-				jQuery.sap.log.debug("Cache Manager: getting instance...");
+				Log.debug("Cache Manager: getting instance...");
 
 				pCallInstance = this._getInstance().then(function instanceResolving(instance) {
 					return instance[sMethodName].apply(instance, aArgs);
 				});
-				jQuery.sap.measure.end(sMsrCallInstance);
+				Measurement.end(sMsrCallInstance);
 
 				return pCallInstance;
 			},
@@ -313,7 +319,7 @@ sap.ui.define(['jquery.sap.global', './LRUPersistentCache', './CacheManagerNOP',
 							bSupportedBrowserName = oSuppportedEnv.browserName === Device.browser.name,
 							bSupportedBrowserVersion = Device.browser.version >= oSuppportedEnv.browserVersion;
 
-						return bSupportedSystem && bSupportedBrowserName && bSupportedBrowserVersion;
+						return bSupportedSystem && bSupportedBrowserName && bSupportedBrowserVersion && window.indexedDB;
 					});
 				}
 				return this._bSupportedEnvironment;
@@ -340,21 +346,20 @@ sap.ui.define(['jquery.sap.global', './LRUPersistentCache', './CacheManagerNOP',
 			var sMeasureAsync = "[async]  " + sOperation + "[" + key + "]- #" + (iMsrCounter),
 				sMeasureSync = "[sync ]  " + sOperation + "[" + key + "]- #" + (iMsrCounter);
 
-			jQuery.sap.measure.start(sMeasureAsync, "CM", [S_MSR_CAT_CACHE_MANAGER, sOperation]);
-			jQuery.sap.measure.start(sMeasureSync, "CM", [S_MSR_CAT_CACHE_MANAGER, sOperation]);
+			Measurement.start(sMeasureAsync, "CM", [S_MSR_CAT_CACHE_MANAGER, sOperation]);
+			Measurement.start(sMeasureSync, "CM", [S_MSR_CAT_CACHE_MANAGER, sOperation]);
 
 			return {
 				sMeasureAsync: sMeasureAsync,
 				sMeasureSync: sMeasureSync,
 				endAsync: function () {
-					jQuery.sap.measure.end(this.sMeasureAsync);
+					Measurement.end(this.sMeasureAsync);
 				},
 				endSync: function () {
-					jQuery.sap.measure.end(this.sMeasureSync);
+					Measurement.end(this.sMeasureSync);
 				}
 			};
 		}
 
 		return CacheManager;
 	}, /* bExport= */ false);
-

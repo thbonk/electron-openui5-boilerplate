@@ -1,14 +1,20 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 /*global Promise */
 
 // Provides class sap.ui.core.ElementMetadata
-sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObjectMetadata'],
-	function(jQuery, ManagedObjectMetadata) {
+sap.ui.define([
+	'sap/ui/thirdparty/jquery',
+	'sap/base/Log',
+	'sap/base/util/ObjectPath',
+	'sap/ui/base/ManagedObjectMetadata',
+	'sap/ui/core/Renderer'
+],
+	function(jQuery, Log, ObjectPath, ManagedObjectMetadata, Renderer) {
 	"use strict";
 
 
@@ -20,7 +26,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObjectMetadata'],
 	 *
 	 * @class
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @since 0.8.6
 	 * @alias sap.ui.core.ElementMetadata
 	 */
@@ -70,22 +76,29 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObjectMetadata'],
 			return;
 		}
 
-		// check if renderer class exists already
-		var fnRendererClass = jQuery.sap.getObject(sRendererName);
+		// check if renderer class exists already, in case it was passed inplace,
+		// and written to the global namespace during applySettings().
+		var fnRendererClass = ObjectPath.get(sRendererName);
 		if (fnRendererClass) {
 			return fnRendererClass;
 		}
 
 		// if not, try to load a module with the same name
-		jQuery.sap.require(sRendererName);
-		return jQuery.sap.getObject(sRendererName);
+		Log.warning("Synchronous loading of Renderer for control class '" + this.getName() + "', due to missing Renderer dependency.", "SyncXHR", null, function() {
+			return {
+				type: "SyncXHR",
+				name: sRendererName
+			};
+		});
+		var fnClass = sap.ui.requireSync(sRendererName.replace(/\./g, "/"));
+		return fnClass || ObjectPath.get(sRendererName);
 	};
 
 	ElementMetadata.prototype.applySettings = function(oClassInfo) {
 
 		var oStaticInfo = oClassInfo.metadata;
 
-		this._sVisibility = oStaticInfo["visibility"] || "public";
+		this._sVisibility = oStaticInfo.visibility || "public";
 
 		// remove renderer stuff before calling super.
 		var vRenderer = oClassInfo.hasOwnProperty("renderer") ? (oClassInfo.renderer || "") : undefined;
@@ -93,7 +106,15 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObjectMetadata'],
 
 		ManagedObjectMetadata.prototype.applySettings.call(this, oClassInfo);
 
+		var oParent = this.getParent();
 		this._sRendererName = this.getName() + "Renderer";
+		this.dnd = Object.assign({
+			draggable: false,
+			droppable: false
+		}, oParent.dnd, (typeof oStaticInfo.dnd == "boolean") ? {
+			draggable: oStaticInfo.dnd,
+			droppable: oStaticInfo.dnd
+		} : oStaticInfo.dnd);
 
 		if ( typeof vRenderer !== "undefined" ) {
 
@@ -110,12 +131,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObjectMetadata'],
 			if ( oParent instanceof ElementMetadata ) {
 				oBaseRenderer = oParent.getRenderer();
 			}
-			if ( !oBaseRenderer ) {
-				oBaseRenderer = sap.ui.requireSync('sap/ui/core/Renderer');
+			if (!oBaseRenderer) {
+				oBaseRenderer = Renderer;
 			}
 			var oRenderer = Object.create(oBaseRenderer);
 			jQuery.extend(oRenderer, vRenderer);
-			jQuery.sap.setObject(this.getRendererName(), oRenderer);
+			ObjectPath.set(this.getRendererName(), oRenderer);
 		}
 	};
 
@@ -126,6 +147,47 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObjectMetadata'],
 
 	ElementMetadata.prototype.isHidden = function() {
 		return this._sVisibility === "hidden";
+	};
+
+
+	// ---- Aggregation -----------------------------------------------------------------------
+
+	var fnMetaFactoryAggregation = ElementMetadata.prototype.metaFactoryAggregation;
+
+	function Aggregation(oClass, name, info) {
+		fnMetaFactoryAggregation.apply(this, arguments);
+		this.dnd = Object.assign({
+			draggable: false,
+			droppable: false,
+			layout: "Vertical"
+		}, (typeof info.dnd == "boolean") ? {
+			draggable: info.dnd,
+			droppable: info.dnd
+		} : info.dnd);
+	}
+
+	Aggregation.prototype = Object.create(fnMetaFactoryAggregation.prototype);
+	ElementMetadata.prototype.metaFactoryAggregation = Aggregation;
+
+	/**
+	 * Returns an info object describing the drag-and-drop behavior.
+	 *
+	 * @param {string} [sAggregationName] name of the aggregation or empty.
+	 * @returns {Object} An info object about the drag-and-drop behavior.
+	 * @public
+	 * @since 1.56
+	 */
+	ElementMetadata.prototype.getDragDropInfo = function(sAggregationName) {
+		if (!sAggregationName) {
+			return this.dnd;
+		}
+
+		var oAggregation = this._mAllAggregations[sAggregationName] || this._mAllPrivateAggregations[sAggregationName];
+		if (!oAggregation) {
+			return {};
+		}
+
+		return oAggregation.dnd;
 	};
 
 	return ElementMetadata;

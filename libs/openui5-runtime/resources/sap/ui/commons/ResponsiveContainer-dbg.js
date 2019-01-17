@@ -1,12 +1,17 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.ResponsiveContainer.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/ResizeHandler'],
-	function(jQuery, library, Control, ResizeHandler) {
+sap.ui.define([
+    './library',
+    'sap/ui/core/Control',
+    'sap/ui/core/ResizeHandler',
+    './ResponsiveContainerRenderer'
+],
+	function(library, Control, ResizeHandler, ResponsiveContainerRenderer) {
 	"use strict";
 
 
@@ -22,11 +27,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
-	 * @deprecated Since version 1.38.
+	 * @deprecated as of version 1.38. Use a container by choice from the {@link sap.m} library, instead.
 	 * @alias sap.ui.commons.ResponsiveContainer
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -121,7 +126,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * After rendering
 	 */
 	ResponsiveContainer.prototype.onAfterRendering = function() {
-		var fnResizeHandler = jQuery.proxy(this.onresize, this);
+		var fnResizeHandler = this.onresize.bind(this);
 		this.sResizeListenerId = ResizeHandler.register(this.getDomRef(), fnResizeHandler);
 		this.refreshRangeDimensions();
 		if (!this.oCurrentRange) {
@@ -159,7 +164,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		var aRanges = this.getRanges(),
 			aRangeDimensions = [],
 			$Range;
-		jQuery.each(aRanges, function(i, oRange) {
+		aRanges.forEach(function(oRange) {
 			$Range = oRange.$();
 			aRangeDimensions.push({
 				range: oRange,
@@ -182,7 +187,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			iRangeWidth, iRangeHeight,
 			aRangeDimensions = this.aRangeDimensions,
 			oMatch = null;
-		jQuery.each(aRangeDimensions, function(i, oRangeDim) {
+		aRangeDimensions.forEach(function(oRangeDim) {
 			iRangeWidth = oRangeDim.width || iWidth;
 			iRangeHeight = oRangeDim.height || iHeight;
 			if (iRangeWidth <= iWidth && iRangeHeight <= iHeight) {
@@ -199,4 +204,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 	return ResponsiveContainer;
 
-}, /* bExport= */ true);
+});

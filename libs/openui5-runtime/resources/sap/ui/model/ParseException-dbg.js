@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -11,10 +11,12 @@ sap.ui.define(['sap/ui/base/Exception'],
 
 
 	/**
-	 * ParseException class
+	 * Create a new ParseException.
 	 *
-	 * This exception is thrown, when a parse error occurs while converting a
-	 * string value to a specific property type in the model.
+	 * @class Instances of this exception are thrown when an error occurs while
+	 * converting a string value to a specific property type in the model.
+	 *
+	 * @param {string} message Message explaining how the validation failed
 	 * @alias sap.ui.model.ParseException
 	 * @public
 	 */

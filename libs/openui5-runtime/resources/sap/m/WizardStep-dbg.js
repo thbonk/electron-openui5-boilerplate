@@ -1,11 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(["./library", "sap/ui/core/Control"],
-	function (library, Control) {
+sap.ui.define([
+	"./library",
+	"sap/ui/core/Control",
+	"./WizardStepRenderer",
+	"./Button",
+	"./TitlePropagationSupport",
+	"sap/base/Log"
+],
+	function(library, Control, WizardStepRenderer, Button, TitlePropagationSupport, Log) {
 
 	"use strict";
 
@@ -28,7 +35,7 @@ sap.ui.define(["./library", "sap/ui/core/Control"],
 	 * <li>If the execution needs to branch after a given step, you should set all possible next steps in the <code>subsequentSteps</code> aggregation.
 	 * @extends sap.ui.core.Control
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -54,8 +61,15 @@ sap.ui.define(["./library", "sap/ui/core/Control"],
 				/**
 				 * Indicates whether or not the step is validated.
 				 * When a step is validated a Next button is visualized in the Wizard control.
+				 * @since 1.32
 				 */
-				validated: {type: "boolean", group: "Behavior", defaultValue: true}
+				validated: {type: "boolean", group: "Behavior", defaultValue: true},
+				/**
+				 * Indicates whether or not the step is optional.
+				 * When a step is optional an "(Optional)" label is displayed under the step's title.
+				 * @since 1.54
+				 */
+				optional: {type: "boolean", group: "Appearance", defaultValue: false}
 			},
 			events: {
 				/**
@@ -77,23 +91,67 @@ sap.ui.define(["./library", "sap/ui/core/Control"],
 				/**
 				 * The content of the Wizard Step.
 				 */
-				content: {type: "sap.ui.core.Control", multiple: true, singularName: "content"}
+				content: {type: "sap.ui.core.Control", multiple: true, singularName: "content"},
+				/**
+				 * The next button of the Wizard Step.
+				 * @since 1.58
+				 */
+				_nextButton: { type: "sap.m.Button", multiple: false, visibility: "hidden"}
 			},
 			associations: {
 				/**
 				 * This association is used only when the <code>enableBranching</code> property of the Wizard is set to true.
 				 * Use the association to store the next steps that are about to come after the current.
 				 * If this is going to be a final step - leave this association empty.
+				 * @since 1.32
 				 */
 				subsequentSteps : {type : "sap.m.WizardStep", multiple : true, singularName : "subsequentStep"},
 				/**
 				 * The next step to be taken after the step is completed.
 				 * Set this association value in the complete event of the current WizardStep.
+				 * @since 1.32
 				 */
 				nextStep : {type: "sap.m.WizardStep", multiple: false}
 			}
 		}
 	});
+
+	// Add title propagation support
+	TitlePropagationSupport.call(WizardStep.prototype, "content", function () {return this.getId() + "-title";});
+
+	WizardStep.prototype.init = function () {
+		this._resourceBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m");
+		this._fnNextButtonPress;
+
+		this._oNextButton = new Button(this.getId() + "-nextButton", {
+			text: this._resourceBundle.getText("WIZARD_STEP") + 2,
+			type: "Emphasized",
+			enabled: this.getValidated()
+		}).addStyleClass("sapMWizardNextButton");
+
+		this._oNextButton.addEventDelegate({
+			onAfterRendering: function () {
+				setTimeout(function () {
+					var oButton = this._oNextButton,
+						oButtonDomRef = oButton.getDomRef();
+
+					if (oButton.getEnabled()) {
+						oButton.addStyleClass("sapMWizardNextButtonVisible");
+						oButtonDomRef && oButtonDomRef.removeAttribute("aria-hidden");
+					} else {
+						oButton.removeStyleClass("sapMWizardNextButtonVisible");
+						// aria-hidden attribute is used instead of setVisible(false)
+						// in order to preserve the current animation implementation
+						oButtonDomRef && oButtonDomRef.setAttribute("aria-hidden", true);
+					}
+				}.bind(this), 0);
+			}
+		}, this);
+
+		this.setAggregation("_nextButton", this._oNextButton);
+
+		this._initTitlePropagationSupport();
+	};
 
 	WizardStep.prototype.setValidated = function (validated) {
 		this.setProperty("validated", validated, true);
@@ -124,15 +182,15 @@ sap.ui.define(["./library", "sap/ui/core/Control"],
 
 		return this;
 	};
-
 	/**
 	 * setVisible shouldn't be used on wizard steps.
 	 * If you need to show/hide steps based on some condition - use the branching property instead
-	 * @returns {WizardStep}
+	 * @param {boolean} visible Whether the step should be visible
+	 * @returns {sap.m.WizardStep} this instance for method chaining
 	 */
 	WizardStep.prototype.setVisible = function (visible) {
 		this.setProperty("visible", visible, true);
-		jQuery.sap.log.warning("Don't use the set visible method for wizard steps. If you need to show/hide steps based on some condition - use the branching property of the Wizard instead.");
+		Log.warning("Don't use the set visible method for wizard steps. If you need to show/hide steps based on some condition - use the branching property of the Wizard instead.");
 		return this;
 	};
 
@@ -185,9 +243,35 @@ sap.ui.define(["./library", "sap/ui/core/Control"],
 		this.removeStyleClass("sapMWizardLastActivatedStep");
 	};
 
+	/**
+	 * Attaches the press handler for the next button press
+	 * @param {function} fnPress The press handler to be executed on next button press
+	 * @sap-restricted sap.m.Wizard
+	 * @private
+	 */
+	WizardStep.prototype._attachNextButtonHandler = function (fnPress) {
+		this._fnNextButtonPress = fnPress;
+		this._oNextButton.attachPress(fnPress);
+	};
+
+	/**
+	 * Detaches the press handler for the next button press
+	 * @sap-restricted sap.m.Wizard
+	 * @private
+	 */
+	WizardStep.prototype._detachNextButtonHandler = function () {
+		this._oNextButton.detachPress(this._fnNextButtonPress);
+	};
+
 	WizardStep.prototype._activate = function () {
+		var parent = this._getWizardParent();
+
 		if (this.hasStyleClass("sapMWizardStepActivated")) {
 			return;
+		}
+
+		if (parent) {
+			this._oNextButton.setVisible(parent.getShowNextButton());
 		}
 
 		this._markAsLast();
@@ -206,4 +290,4 @@ sap.ui.define(["./library", "sap/ui/core/Control"],
 
 	return WizardStep;
 
-}, /* bExport= */ true);
+});

@@ -1,11 +1,17 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['sap/ui/core/Control', './library', 'sap/ui/core/ResizeHandler'],
-	function(Control, library, ResizeHandler) {
+sap.ui.define([
+	"sap/ui/core/Control",
+	"./library",
+	"sap/ui/core/ResizeHandler",
+	"./AlignedFlowLayoutRenderer",
+	"sap/ui/dom/units/Rem"
+],
+	function(Control, library, ResizeHandler, AlignedFlowLayoutRenderer, Rem) {
 		"use strict";
 
 		/**
@@ -24,7 +30,7 @@ sap.ui.define(['sap/ui/core/Control', './library', 'sap/ui/core/ResizeHandler'],
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.61.2
 		 *
 		 * @constructor
 		 * @private
@@ -87,7 +93,7 @@ sap.ui.define(['sap/ui/core/Control', './library', 'sap/ui/core/ResizeHandler'],
 			this._iEndItemWidth = -1;
 
 			// registration ID used for deregistering the resize handler
-			this._sResizeListenerId = ResizeHandler.register(this, this._onResize.bind(this));
+			this._sResizeListenerId = ResizeHandler.register(this, this.onResize.bind(this));
 		};
 
 		AlignedFlowLayout.prototype.exit = function() {
@@ -117,7 +123,7 @@ sap.ui.define(['sap/ui/core/Control', './library', 'sap/ui/core/ResizeHandler'],
 				mEndItemStyle.bottom = iLayoutPaddingTop;
 			}
 
-			this._onResize(null, oDomRef, oEndItemDomRef);
+			this.reflow({ domRef: oDomRef, endItemDomRef: oEndItemDomRef });
 
 			// update last spacer width
 			if (bEndItemAndContent) {
@@ -128,49 +134,57 @@ sap.ui.define(['sap/ui/core/Control', './library', 'sap/ui/core/ResizeHandler'],
 		AlignedFlowLayout.prototype.onAfterRendering = AlignedFlowLayout.prototype._onRenderingOrThemeChanged;
 		AlignedFlowLayout.prototype.onThemeChanged = AlignedFlowLayout.prototype._onRenderingOrThemeChanged;
 
-		function getRootFontSize() {
-			var oRootDomRef = document.documentElement;
-
-			if (!oRootDomRef) {
-				return 16; // browser default font size
-			}
-
-			return parseFloat(window.getComputedStyle(oRootDomRef).getPropertyValue("font-size"));
-		}
-
-		function remToPx(vRem) {
-			return parseFloat(vRem) * getRootFontSize();
-		}
-
 		// this resize handler needs to be called on after rendering, theme change, and whenever the width of this
 		// control changes
-		AlignedFlowLayout.prototype._onResize = function(oEvent, oDomRef, oEndItemDomRef) {
+		AlignedFlowLayout.prototype.onResize = function(oEvent, oDomRef, oEndItemDomRef) {
 
 			// called by resize handler, but only the height changed, so there is nothing to do;
 			// this is required to avoid a resizing loop
-			if ((oEvent && (oEvent.size.width === oEvent.oldSize.width)) || (this.getContent().length === 0)) {
+			if (oEvent && (oEvent.size.width === oEvent.oldSize.width)) {
 				return;
 			}
 
-			oDomRef = oDomRef || this.getDomRef();
+			this.reflow({ domRef: oDomRef, endItemDomRef: oEndItemDomRef });
+		};
 
-			if (!oDomRef) {
+		/**
+		 * Re-calculates the positions and geometries of items in the <code>AlignFlowLayout</code> control to re-arrange
+		 * items evenly across the horizontal space available (if necessary).
+		 *
+		 * @param {object} [oSettings] Settings to reflow the <code>AlignedFlowLayout</code> control
+		 * @param {HTMLDivElement} [oSettings.domRef] The root control's DOM reference
+		 * @param {HTMLDivElement} [oSettings.endItemDomRef] The end item's DOM reference
+		 * @protected
+		 * @since 1.60
+		 */
+		AlignedFlowLayout.prototype.reflow = function(oSettings) {
+
+			if (this.getContent().length === 0) {
+				return;
+			}
+
+			oSettings = oSettings || {};
+			var oDomRef = oSettings.domRef || this.getDomRef();
+
+			// skip unnecessary style recalculations if the control root DOM element has been removed from the DOM OR
+			// any ancestor is hidden (the "display" style property is set to "none")
+			if (!oDomRef || !oDomRef.offsetParent) {
 				return;
 			}
 
 			var CSS_CLASS_ONE_LINE = this.getRenderer().CSS_CLASS + "OneLine",
 				bEnoughSpaceForEndItem = true;
 
-			oEndItemDomRef = oEndItemDomRef || this.getDomRef("endItem");
+			var oEndItemDomRef = oSettings.endItemDomRef || this.getDomRef("endItem"),
+				oLastItemDomRef = this.getLastItemDomRef();
 
-			if (oEndItemDomRef) {
+			if (oEndItemDomRef && oLastItemDomRef) {
 				var mLastSpacerStyle = oDomRef.lastElementChild.style;
 				mLastSpacerStyle.height = "";
 				mLastSpacerStyle.display = "";
 				oDomRef.classList.remove(CSS_CLASS_ONE_LINE);
 
-				var oLastItemDomRef = this.getLastItemDomRef(),
-					iEndItemHeight = oEndItemDomRef.offsetHeight,
+				var iEndItemHeight = oEndItemDomRef.offsetHeight,
 					iEndItemWidth = oEndItemDomRef.offsetWidth,
 					iLastItemOffsetLeft = oLastItemDomRef.offsetLeft,
 					iAvailableWidthForEndItem;
@@ -296,9 +310,9 @@ sap.ui.define(['sap/ui/core/Control', './library', 'sap/ui/core/ResizeHandler'],
 
 			// the CSS unit of the minItemWidth control property is in rem
 			if (sMinItemWidth.lastIndexOf("rem") !== -1) {
-				fMinItemWidth = remToPx(sMinItemWidth);
+				fMinItemWidth = Rem.toPx(sMinItemWidth);
 
-				// the CSS unit of the minItemWidth control property is in px
+			// the CSS unit of the minItemWidth control property is in px
 			} else if (sMinItemWidth.lastIndexOf("px") !== -1) {
 				fMinItemWidth = parseFloat(sMinItemWidth);
 			}
@@ -307,8 +321,9 @@ sap.ui.define(['sap/ui/core/Control', './library', 'sap/ui/core/ResizeHandler'],
 
 			if (fMinItemWidth) {
 
-				// we do not need more spacers than (documentElement.clientWidth / minItemWidth)
-				iSpacers = Math.abs(document.documentElement.clientWidth / fMinItemWidth);
+				// we do not need more spacers than (iAvailableWidth / minItemWidth)
+				var iAvailableWidth = Math.max(document.documentElement.clientWidth, window.screen.width);
+				iSpacers = Math.abs(iAvailableWidth / fMinItemWidth);
 			}
 
 			// we do not need more spacers than items
@@ -320,4 +335,4 @@ sap.ui.define(['sap/ui/core/Control', './library', 'sap/ui/core/ResizeHandler'],
 		};
 
 		return AlignedFlowLayout;
-}, /* bExport= */ true);
+});

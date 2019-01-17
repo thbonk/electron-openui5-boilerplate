@@ -1,13 +1,15 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-//Provides class sap.ui.model.odata.v4.lib.Batch
+//Provides class sap.ui.model.odata.v4.lib._Batch
 sap.ui.define([
-	"jquery.sap.global"
-], function (jQuery) {
+	"jquery.sap.script",
+	"./_Helper",
+	"sap/base/strings/escapeRegExp"
+], function (jQuery, _Helper, escapeRegExp) {
 	"use strict";
 
 	var mAllowedChangeSetMethods = {"POST" : true, "PUT" : true, "PATCH" : true, "DELETE" : true},
@@ -33,8 +35,8 @@ sap.ui.define([
 		}
 
 		// escape RegExp-related characters
-		sBatchBoundary = jQuery.sap.escapeRegExp(sBatchBoundary);
-		return new RegExp('--' + sBatchBoundary + '-{0,2} *\r\n');
+		sBatchBoundary = escapeRegExp(sBatchBoundary);
+		return new RegExp('--' + sBatchBoundary + '(?:[ \t]*\r\n|--)');
 	}
 
 	/**
@@ -97,7 +99,7 @@ sap.ui.define([
 			throw new Error("Content-ID MIME header missing for the change set response.");
 		}
 
-		iResponseIndex = parseInt(sContentID, 10);
+		iResponseIndex = parseInt(sContentID);
 		if (isNaN(iResponseIndex)) {
 			throw new Error("Invalid Content-ID value in change set response.");
 		}
@@ -173,7 +175,7 @@ sap.ui.define([
 			// e.g. HTTP/1.1 200 OK
 			aHttpStatusInfos = aHttpHeaders[0].split(" ");
 
-			oResponse.status = parseInt(aHttpStatusInfos[1], 10);
+			oResponse.status = parseInt(aHttpStatusInfos[1]);
 			oResponse.statusText = aHttpStatusInfos.slice(2).join(' ');
 			oResponse.headers = {};
 
@@ -215,7 +217,7 @@ sap.ui.define([
 	 *   A map of request headers
 	 * @returns {object[]} Array representing the serialized headers
 	 */
-	function serializeHeaders (mHeaders) {
+	function serializeHeaders(mHeaders) {
 		var sHeaderName,
 			aHeaders = [];
 
@@ -282,7 +284,7 @@ sap.ui.define([
 					sContentIdHeader,
 					"\r\n",
 					oRequest.method, " ", sUrl, " HTTP/1.1\r\n",
-					serializeHeaders(oRequest.headers),
+					serializeHeaders(_Helper.resolveIfMatchHeader(oRequest.headers)),
 					"\r\n",
 					JSON.stringify(oRequest.body) || "", "\r\n");
 			}
@@ -306,7 +308,7 @@ sap.ui.define([
 		 *   returned responses has the following structure:
 		 *   <ul>
 		 *     <li><code>status</code>: {number} HTTP status code
-		 *     <li><code>statusText</code>: {string} HTTP status text
+		 *     <li><code>statusText</code>: {string} (optional) HTTP status text
 		 *     <li><code>headers</code>: {object} Map of the response headers
 		 *     <li><code>responseText</code>: {string} Response body
 		 *   </ul>
@@ -340,7 +342,8 @@ sap.ui.define([
 		 *   See example below.
 		 * @param {object} oRequest.headers
 		 *   Map of request headers. RFC-2047 encoding rules are not supported. Nevertheless non
-		 *   US-ASCII values can be used.
+		 *   US-ASCII values can be used. If the value of an "If-Match" header is an object, that
+		 *   object's ETag is used instead.
 		 * @param {object} oRequest.body
 		 *   Request body. If specified, oRequest.headers map must contain "Content-Type" header
 		 *   either without "charset" parameter or with "charset" parameter having value "UTF-8".
@@ -373,7 +376,8 @@ sap.ui.define([
 		 *           method : "POST",
 		 *           url : "$0/TEAM_2_Employees",
 		 *           headers : {
-		 *               "Content-Type" : "application/json"
+		 *               "Content-Type" : "application/json",
+		 *               "If-Match" : "etag0"
 		 *           },
 		 *           body : {"Name" : "John Smith"}
 		 *       }],
@@ -381,7 +385,10 @@ sap.ui.define([
 		 *           method : "PATCH",
 		 *           url : "/sap/opu/odata4/IWBEP/TEA/default/IWBEP/TEA_BUSI/0001/Employees('3')",
 		 *           headers : {
-		 *               "Content-Type" : "application/json"
+		 *               "Content-Type" : "application/json",
+		 *               "If-Match" : {
+		 *                   "@odata.etag" : "etag1"
+		 *               }
 		 *           },
 		 *           body : {"TEAM_ID" : "TEAM_01"}
 		 *       }

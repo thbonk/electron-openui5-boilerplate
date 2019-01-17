@@ -1,12 +1,10 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define([
-	"jquery.sap.global"
-], function (jQuery) {
+sap.ui.define(["sap/base/Log", "sap/ui/thirdparty/jquery"], function(Log, jQuery) {
 	"use strict";
 
 	/**
@@ -14,12 +12,11 @@ sap.ui.define([
 	 *
 	 * @alias sap.m.changeHandler.MoveTableColumns
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @experimental Since 1.48
 	 */
 	var MoveTableColumns = {};
 
-	var CHANGE_TYPE = "moveTableColumns";
 	var SOURCE_ALIAS = "source";
 	var TARGET_ALIAS = "target";
 	var MOVED_ELEMENTS_ALIAS = "movedElements";
@@ -33,7 +30,7 @@ sap.ui.define([
 	 * @param {sap.ui.core.Control} oRelevantContainer Control that matches the change selector for applying the change, which is the source of the move
 	 * @param {object} mPropertyBag Map of properties
 	 * @param {object} mPropertyBag.view XML node representing a ui5 view
-	 * @param {sap.ui.fl.changeHandler.BaseTreeModifier} mPropertyBag.modifier Modifier for the controls
+	 * @param {sap.ui.core.util.reflection.BaseTreeModifier} mPropertyBag.modifier Modifier for the controls
 	 * @param {sap.ui.core.UIComponent} mPropertyBag.appComponent AppComponent
 	 * @param {function} fnIterator - Iterator function which is called on each movedElement, as an argument it gets CurrentIndex
 	 *  of the element and may return TargetIndex as a result.
@@ -52,12 +49,12 @@ sap.ui.define([
 
 				// ColumnListItem and GroupHeaderListItem are only allowed for the tables items aggregation.
 				if (!aCells) {
-					jQuery.sap.log.warning("Aggregation cells to move not found");
+					Log.warning("Aggregation cells to move not found");
 					return;
 				}
 
 				if (iSourceIndex < 0 || iSourceIndex >= aCells.length) {
-					jQuery.sap.log.warning("Move cells in table item called with invalid index: " + iSourceIndex);
+					Log.warning("Move cells in table item called with invalid index: " + iSourceIndex);
 					return;
 				}
 
@@ -77,7 +74,7 @@ sap.ui.define([
 			};
 
 		if (oTargetSource !== oTable) {
-			jQuery.sap.log.warning("Moving columns between different tables is not yet supported.");
+			Log.warning("Moving columns between different tables is not yet supported.");
 			return false;
 		}
 
@@ -88,7 +85,7 @@ sap.ui.define([
 
 			if (!oMovedElement) {
 				sMovedElementId = mMovedElement.selector && mMovedElement.selector.id;
-				jQuery.sap.log.warning("The table column with id: '" + sMovedElementId + "' stored in the change is not found and the move operation cannot be applied");
+				Log.warning("The table column with id: '" + sMovedElementId + "' stored in the change is not found and the move operation cannot be applied");
 				return;
 			}
 
@@ -132,12 +129,10 @@ sap.ui.define([
 	 * @param {sap.ui.core.Control} oRelevantContainer Control that matches the change selector for applying the change, which is the source of the move
 	 * @param {object} mPropertyBag Map of properties
 	 * @param {object} mPropertyBag.view XML node representing a ui5 view
-	 * @param {sap.ui.fl.changeHandler.BaseTreeModifier} mPropertyBag.modifier Modifier for the controls
+	 * @param {sap.ui.core.util.reflection.BaseTreeModifier} mPropertyBag.modifier Modifier for the controls
 	 * @param {sap.ui.core.UIComponent} mPropertyBag.appComponent AppComponent
 	 * @return {boolean} true Indicates whether the change can be applied
 	 * @public
-	 * @function
-	 * @name sap.m.changeHandler.MoveTableColumns#applyChange
 	 */
 	MoveTableColumns.applyChange = function (oChange, oRelevantContainer, mPropertyBag) {
 		var aRevertData = [];
@@ -158,12 +153,10 @@ sap.ui.define([
 	 * @param {sap.ui.core.Control} oRelevantContainer Control that matches the change selector for applying the change, which is the source of the move
 	 * @param {object} mPropertyBag Map of properties
 	 * @param {object} mPropertyBag.view XML node representing a ui5 view
-	 * @param {sap.ui.fl.changeHandler.BaseTreeModifier} mPropertyBag.modifier Modifier for the controls
+	 * @param {sap.ui.core.util.reflection.BaseTreeModifier} mPropertyBag.modifier Modifier for the controls
 	 * @param {sap.ui.core.UIComponent} mPropertyBag.appComponent AppComponent
 	 * @return {boolean} true Indicates whether the change can be applied
 	 * @public
-	 * @function
-	 * @name sap.m.changeHandler.MoveTableColumns#revertChange
 	 */
 	MoveTableColumns.revertChange = function (oChange, oRelevantContainer, mPropertyBag) {
 		var aRevertData = oChange.getRevertData();
@@ -184,8 +177,6 @@ sap.ui.define([
 	 * @param {object} mPropertyBag Map of properties
 	 * @param {sap.ui.core.UiComponent} mPropertyBag.appComponent Component in which the change should be applied
 	 * @public
-	 * @function
-	 * @name sap.m.changeHandler.MoveTableColumns#completeChangeContent
 	 */
 	MoveTableColumns.completeChangeContent = function (oChange, mSpecificChangeInfo, mPropertyBag) {
 		var oModifier = mPropertyBag.modifier,
@@ -214,7 +205,6 @@ sap.ui.define([
 			});
 		});
 
-		mChangeData.changeType = CHANGE_TYPE;
 		oChange.addDependentControl(mSpecificChangeInfo.source.id, SOURCE_ALIAS, mPropertyBag, mAdditionalSourceInfo);
 		oChange.addDependentControl(mSpecificChangeInfo.target.id, TARGET_ALIAS, mPropertyBag, mAdditionalTargetInfo);
 		oChange.addDependentControl(mSpecificChangeInfo.movedElements.map(function (element) {

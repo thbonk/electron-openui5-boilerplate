@@ -1,11 +1,19 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/IconPool', 'sap/m/Image' ],
-	function(jQuery, library, Control, IconPool, Image) {
+sap.ui.define([
+	'./library',
+	'sap/ui/core/Control',
+	'sap/ui/core/IconPool',
+	'sap/m/Image',
+	'./NumericContentRenderer',
+	"sap/ui/events/KeyCodes",
+	"sap/base/util/deepEqual"
+],
+	function(library, Control, IconPool, Image, NumericContentRenderer, KeyCodes, deepEqual) {
 	"use strict";
 
 	/**
@@ -18,7 +26,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @since 1.34
 	 *
 	 * @public
@@ -128,7 +136,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui
 		this.$().bind("mouseleave", this._removeTooltip.bind(this));
 
 		if (library.LoadState.Loaded == this.getState() || this.getAnimateTextChange()) {
-			jQuery.sap.byId(this.getId()).animate({
+			jQuery(document.getElementById(this.getId())).animate({
 				opacity : "1"
 			}, 1000);
 		}
@@ -208,7 +216,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui
 	};
 
 	NumericContent.prototype.setIcon = function(uri) {
-		var bValueChanged = !jQuery.sap.equal(this.getIcon(), uri);
+		var bValueChanged = !deepEqual(this.getIcon(), uri);
 		if (bValueChanged) {
 			if (this._oIcon) {
 				this._oIcon.destroy();
@@ -256,7 +264,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui
 	 * @param {sap.ui.base.Event} oEvent which was fired
 	 */
 	NumericContent.prototype.onkeyup = function(oEvent) {
-		if (oEvent.which === jQuery.sap.KeyCodes.ENTER || oEvent.which === jQuery.sap.KeyCodes.SPACE) {
+		if (oEvent.which === KeyCodes.ENTER || oEvent.which === KeyCodes.SPACE) {
 			this.firePress();
 			oEvent.preventDefault();
 		}
@@ -268,7 +276,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui
 	 * @param {sap.ui.base.Event} oEvent which was fired
 	 */
 	NumericContent.prototype.onkeydown = function(oEvent) {
-		if (oEvent.which === jQuery.sap.KeyCodes.SPACE) {
+		if (oEvent.which === KeyCodes.SPACE) {
 			oEvent.preventDefault();
 		}
 	};

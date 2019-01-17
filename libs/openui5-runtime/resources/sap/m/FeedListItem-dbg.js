@@ -1,13 +1,44 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-// Provides control sap.m.FeedListItem.
-sap.ui.define(['jquery.sap.global', './ListItemBase', './library', './FormattedText'],
-	function(jQuery, ListItemBase, library, FormattedText) {
+sap.ui.define([
+	"./ListItemBase",
+	"./Link",
+	"./library",
+	"./FormattedText",
+	"sap/ui/core/Control",
+	"sap/ui/core/IconPool",
+	"sap/m/Button",
+	"sap/ui/Device",
+	"./FeedListItemRenderer"
+],
+function(
+	ListItemBase,
+	Link,
+	library,
+	FormattedText,
+	Control,
+	IconPool,
+	Button,
+	Device,
+	FeedListItemRenderer
+	) {
 	"use strict";
+
+	// shortcut for sap.m.ListType
+	var ListType = library.ListType;
+
+	// shortcut for sap.m.ImageHelper
+	var ImageHelper = library.ImageHelper;
+
+	// shortcut for sap.m.LinkConversion
+	var LinkConversion = library.LinkConversion;
+
+	// shortcut for sap.m.ButtonType
+	var ButtonType = library.ButtonType;
 
 	/**
 	 * Constructor for a new FeedListItem.
@@ -22,7 +53,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', './FormattedT
 	 * @extends sap.m.ListItemBase
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -30,138 +61,169 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', './FormattedT
 	 * @alias sap.m.FeedListItem
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	var FeedListItem = ListItemBase.extend("sap.m.FeedListItem", /** @lends sap.m.FeedListItem.prototype */ { metadata : {
+	var FeedListItem = ListItemBase.extend("sap.m.FeedListItem", /** @lends sap.m.FeedListItem.prototype */ {
+		metadata: {
 
-		library : "sap.m",
-		properties : {
+			library: "sap.m",
+			designtime: "sap/m/designtime/FeedListItem.designtime",
+			properties: {
 
-			/**
-			 * Icon to be displayed as graphical element within the FeedListItem. This can be an image or an icon from the icon font. If no icon is provided, a default person-placeholder icon is displayed.
-			 * Icon is only shown if showIcon = true.
-			 */
-			icon : {type : "sap.ui.core.URI", group : "Data", defaultValue : null},
+				/**
+				 * Icon to be displayed as graphical element within the FeedListItem. This can be an image or an icon from the icon font. If no icon is provided, a default person-placeholder icon is displayed.
+				 * Icon is only shown if showIcon = true.
+				 */
+				icon: {type: "sap.ui.core.URI", group: "Data", defaultValue: null},
 
-			/**
-			 * Icon displayed when the list item is active.
-			 */
-			activeIcon : {type : "sap.ui.core.URI", group : "Data", defaultValue : null},
+				/**
+				 * Icon displayed when the list item is active.
+				 */
+				activeIcon: {type: "sap.ui.core.URI", group: "Data", defaultValue: null},
 
-			/**
-			 * Sender of the chunk
-			 */
-			sender : {type : "string", group : "Data", defaultValue : null},
+				/**
+				 * Sender of the chunk
+				 */
+				sender: {type: "string", group: "Data", defaultValue: null},
 
-			/**
-			 * The FeedListItem text. It supports html formatted tags as described in the documentation of sap.m.FormattedText
-			 */
-			text : {type : "string", group : "Data", defaultValue : null},
+				/**
+				 * The FeedListItem text. It supports html formatted tags as described in the documentation of sap.m.FormattedText
+				 */
+				text: {type: "string", group: "Data", defaultValue: null},
 
-			/**
-			 * The Info text.
-			 */
-			info : {type : "string", group : "Data", defaultValue : null},
+				/**
+				 * Customizable text for the "MORE" link at the end of the feed list item.<br> When the maximum number of characters defined by the <code>maxCharacters</code> property is exceeded and the text of the feed list item is collapsed, the "MORE" link can be used to expand the feed list item and show the rest of the text.
+				 * @since 1.60
+				 */
+				moreLabel: {type: "string", group: "Data", defaultValue: null},
 
-			/**
-			 * This chunks timestamp
-			 */
-			timestamp : {type : "string", group : "Data", defaultValue : null},
+				/**
+				 * Customizable text for the "LESS" link at the end of the feed list item.<br> Clicking the "LESS" link collapses the item, hiding the text that exceeds the allowed maximum number of characters.
+				 * @since 1.60
+				 */
+				lessLabel: {type: "string", group: "Data", defaultValue: null},
 
-			/**
-			 * If true, sender string is a link, which will fire 'senderPress' events. If false, sender is normal text.
-			 */
-			senderActive : {type : "boolean", group : "Behavior", defaultValue : true},
+				/**
+				 * The Info text.
+				 */
+				info: {type: "string", group: "Data", defaultValue: null},
 
-			/**
-			 * If true, icon is a link, which will fire 'iconPress' events. If false, icon is normal image
-			 */
-			iconActive : {type : "boolean", group : "Behavior", defaultValue : true},
+				/**
+				 * This chunks timestamp
+				 */
+				timestamp: {type: "string", group: "Data", defaultValue: null},
 
-			/**
-			 * By default, this is set to true but then one or more requests are sent trying to get the density perfect version of image if this version of image doesn't exist on the server.
-			 *
-			 * If bandwidth is the key for the application, set this value to false.
-			 */
-			iconDensityAware : {type : "boolean", defaultValue : true},
+				/**
+				 * If true, sender string is a link, which will fire 'senderPress' events. If false, sender is normal text.
+				 */
+				senderActive: {type: "boolean", group: "Behavior", defaultValue: true},
 
-			/**
-			 * If set to "true" (default), icons will be displayed, if set to false icons are hidden
-			 */
-			showIcon : {type : "boolean", group : "Behavior", defaultValue : true},
+				/**
+				 * If true, icon is a link, which will fire 'iconPress' events. If false, icon is normal image
+				 */
+				iconActive: {type: "boolean", group: "Behavior", defaultValue: true},
 
-			/**
-			 * Determines whether strings that appear to be links will be converted to HTML anchor tags, and what are the criteria for recognizing them.
-			 * @since 1.46.1
-			 */
-			convertLinksToAnchorTags : {type : "sap.m.LinkConversion", group : "Behavior", defaultValue : sap.m.LinkConversion.None},
+				/**
+				 * By default, this is set to true but then one or more requests are sent trying to get the density perfect version of image if this version of image doesn't exist on the server.
+				 *
+				 * If bandwidth is the key for the application, set this value to false.
+				 */
+				iconDensityAware: {type: "boolean", defaultValue: true},
 
-			/**
-			 * Determines the target attribute of the generated HTML anchor tags. Note: Applicable only if ConvertLinksToAnchorTags property is used with a value other than sap.m.LinkConversion.None. Options are the standard values for the target attribute of the HTML anchor tag: _self, _top, _blank, _parent, _search.
-			 * @since 1.46.1
-			 */
-			convertedLinksDefaultTarget : {type : "string", group : "Behavior", defaultValue : "_blank"},
+				/**
+				 * If set to "true" (default), icons will be displayed, if set to false icons are hidden
+				 */
+				showIcon: {type: "boolean", group: "Behavior", defaultValue: true},
 
-			/**
-			 * The expand and collapse feature is set by default and uses 300 characters on mobile devices and 500 characters on desktops as limits. Based on these values, the text of the FeedListItem is collapsed once text reaches these limits. In this case, only the specified number of characters is displayed. By clicking on the text link More, the entire text can be displayed. The text link Less collapses the text. The application is able to set the value to its needs.
-			 */
-			maxCharacters : {type : "int", group : "Behavior", defaultValue : null}
-		},
-		defaultAggregation : "_text",
-		aggregations : {
-			/**
-			 * Hidden aggregation which contains the text value
-			 */
-			"_text" : {type : "sap.m.FormattedText", multiple : false, visibility : "hidden"}
-		},
-		events : {
+				/**
+				 * Determines whether strings that appear to be links will be converted to HTML anchor tags, and what are the criteria for recognizing them.
+				 * @since 1.46.1
+				 */
+				convertLinksToAnchorTags: {
+					type: "sap.m.LinkConversion",
+					group: "Behavior",
+					defaultValue: LinkConversion.None
+				},
 
-			/**
-			 * Event is fired when name of the sender is pressed.
-			 */
-			senderPress : {
-				parameters : {
+				/**
+				 * Determines the target attribute of the generated HTML anchor tags. Note: Applicable only if ConvertLinksToAnchorTags property is used with a value other than sap.m.LinkConversion.None. Options are the standard values for the target attribute of the HTML anchor tag: _self, _top, _blank, _parent, _search.
+				 * @since 1.46.1
+				 */
+				convertedLinksDefaultTarget: {type: "string", group: "Behavior", defaultValue: "_blank"},
 
-					/**
-					 * Dom reference of the feed item's sender string to be used for positioning.
-					 * @deprecated Since version 1.28.36. This parameter is deprecated, use parameter getDomRef instead.
-					 */
-
-					domRef : {type : "string"},
-					/**
-					 * Function to retrieve the DOM reference for the <code>senderPress</code> event.
-					 * The function returns the DOM element of the sender link or null
-					 */
-					getDomRef : {type : "function"}
-				}
+				/**
+				 * The expand and collapse feature is set by default and uses 300 characters on mobile devices and 500 characters on desktops as limits. Based on these values, the text of the FeedListItem is collapsed once text reaches these limits. In this case, only the specified number of characters is displayed. By clicking on the text link More, the entire text can be displayed. The text link Less collapses the text. The application is able to set the value to its needs.
+				 */
+				maxCharacters: {type: "int", group: "Behavior", defaultValue: null}
 			},
+			defaultAggregation: "actions",
+			aggregations: {
 
-			/**
-			 * Event is fired when the icon is pressed.
-			 */
-			iconPress : {
-				parameters : {
+				/**
+				 * Contains {@link sap.m.FeedListItemAction elements} that are displayed in the action sheet.
+				 * @since 1.52.0
+				 */
+				actions: {type: "sap.m.FeedListItemAction", multiple: true},
 
-					/**
-					 * Dom reference of the feed item's icon to be used for positioning.
-					 * @deprecated Since version 1.28.36. This parameter is deprecated, use parameter getDomRef instead.
-					 */
-					domRef : {type : "string"},
+				/**
+				 * Hidden aggregation which contains the text value
+				 */
+				_text: {type: "sap.m.FormattedText", multiple: false, visibility: "hidden"},
 
-					/**
-					 * Function to retrieve the DOM reference for the <code>iconPress</code> event.
-					 * The function returns the DOM element of the icon or null
-					 */
-					getDomRef : {type : "function"}
+				/**
+				 * Hidden aggregation that contains the actions.
+				 */
+				_actionSheet: {type: "sap.m.ActionSheet", multiple: false, visibility: "hidden"},
+
+				/**
+				 * Hidden aggregation that displays the action button.
+				 */
+				_actionButton: {type: "sap.m.Button", multiple: false, visibility: "hidden"}
+			},
+			events: {
+
+				/**
+				 * Event is fired when name of the sender is pressed.
+				 */
+				senderPress: {
+					parameters: {
+
+						/**
+						 * Dom reference of the feed item's sender string to be used for positioning.
+						 * @deprecated Since version 1.28.36. This parameter is deprecated, use parameter getDomRef instead.
+						 */
+
+						domRef: {type: "string"},
+						/**
+						 * Function to retrieve the DOM reference for the <code>senderPress</code> event.
+						 * The function returns the DOM element of the sender link or null
+						 */
+						getDomRef: {type: "function"}
+					}
+				},
+
+				/**
+				 * Event is fired when the icon is pressed.
+				 */
+				iconPress: {
+					parameters: {
+
+						/**
+						 * Dom reference of the feed item's icon to be used for positioning.
+						 * @deprecated Since version 1.28.36. This parameter is deprecated, use parameter getDomRef instead.
+						 */
+						domRef: {type: "string"},
+
+						/**
+						 * Function to retrieve the DOM reference for the <code>iconPress</code> event.
+						 * The function returns the DOM element of the icon or null
+						 */
+						getDomRef: {type: "function"}
+					}
 				}
 			}
 		}
-	}});
-
-	///**
-	// * This file defines behavior for the control,
-	// */
+	});
 
 	FeedListItem._oRb = sap.ui.getCore().getLibraryResourceBundle("sap.m");
-
 	FeedListItem._nMaxCharactersMobile = 300;
 	FeedListItem._nMaxCharactersDesktop = 500;
 
@@ -171,9 +233,91 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', './FormattedT
 	FeedListItem._sTextShowMore = FeedListItem._oRb.getText("TEXT_SHOW_MORE");
 	FeedListItem._sTextShowLess = FeedListItem._oRb.getText("TEXT_SHOW_LESS");
 
-	FeedListItem.prototype.init = function () {
+	FeedListItem.prototype.init = function() {
 		ListItemBase.prototype.init.apply(this);
 		this.setAggregation("_text", new FormattedText(this.getId() + "-formattedText"), true);
+		this.setAggregation("_actionButton", new Button({
+			id: this.getId() + "-actionButton",
+			type: ButtonType.Transparent,
+			icon: "sap-icon://overflow",
+			press: [ this._onActionButtonPress, this ]
+		}), true);
+	};
+
+	/**
+	 *
+	 * @private
+	 */
+	FeedListItem.prototype._onActionButtonPress = function () {
+		sap.ui.require(["sap/m/ActionSheet"], this._openActionSheet.bind(this));
+	};
+
+	/**
+	 *
+	 * @param {function} ActionSheet The constructor function of sap.m.ActionSheet
+	 * @private
+	 */
+	FeedListItem.prototype._openActionSheet = function(ActionSheet) {
+		var oActionSheet = this.getAggregation("_actionSheet");
+		var aActions = this.getActions();
+		var oAction;
+
+		if (!(oActionSheet && oActionSheet instanceof ActionSheet)) {
+			oActionSheet = new ActionSheet({
+				id: this.getId() + "-actionSheet",
+				beforeOpen: [ this._onBeforeOpenActionSheet, this ]
+			});
+			this.setAggregation("_actionSheet", oActionSheet, true);
+		}
+
+		oActionSheet.destroyAggregation("buttons", true);
+		for (var i = 0; i < aActions.length; i++) {
+			oAction = aActions[i];
+			oActionSheet.addButton(new Button({
+				icon: oAction.getIcon(),
+				text: oAction.getText(),
+				press: oAction.firePress.bind(oAction, { "item": this })
+			}));
+		}
+
+		oActionSheet.openBy(this.getAggregation("_actionButton"));
+	};
+
+	/**
+	 * Sets the contrast class on the ActionSheet's Popover based on the current theme.
+	 *
+	 * @param {sap.ui.base.Event} event The 'beforeOpen' event
+	 * @private
+	 */
+	FeedListItem.prototype._onBeforeOpenActionSheet = function(event) {
+		var oActionSheetPopover, sTheme;
+
+		// On phone there is no need to overstyle the ActionSheet's Popover with a contrast class
+		if (Device.system.phone) {
+			return;
+		}
+
+		sTheme = sap.ui.getCore().getConfiguration().getTheme();
+		oActionSheetPopover = event.getSource().getParent();
+		oActionSheetPopover.removeStyleClass("sapContrast sapContrastPlus");
+
+		if (sTheme === "sap_belize") {
+			oActionSheetPopover.addStyleClass("sapContrast");
+		} else if (sTheme === "sap_belize_plus") {
+			oActionSheetPopover.addStyleClass("sapContrastPlus");
+		}
+	};
+
+	FeedListItem.prototype.invalidate = function() {
+		Control.prototype.invalidate.apply(this, arguments);
+		var sMoreLabel = FeedListItem._sTextShowMore;
+		if (this.getMoreLabel()) {
+			sMoreLabel = this.getMoreLabel();
+		}
+		delete this._bTextExpanded;
+		if (this._oLinkExpandCollapse) {
+			this._oLinkExpandCollapse.setProperty("text", sMoreLabel, true);
+		}
 	};
 
 	FeedListItem.prototype.onBeforeRendering = function() {
@@ -201,7 +345,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', './FormattedT
 		// must be called manually with the correct context, providing access to the DOM elements that must be processed.
 		var $RealText = this.$("realtext");
 		FormattedText.prototype.onAfterRendering.apply({
-			$ : function () {
+			$: function() {
 				return $RealText;
 			}
 		});
@@ -235,10 +379,10 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', './FormattedT
 	FeedListItem.prototype.ontap = function(oEvent) {
 		if (oEvent.srcControl) {
 			if ((!this.getIconActive() && this._oImageControl && oEvent.srcControl.getId() === this._oImageControl.getId()) || // click on inactive image
-					(!this.getSenderActive() && this._oLinkControl && oEvent.srcControl.getId() === this._oLinkControl.getId()) || // click on inactive sender link
-					(!this._oImageControl || (oEvent.srcControl.getId() !== this._oImageControl.getId()) &&                        // no image clicked
-					(!this._oLinkControl || (oEvent.srcControl.getId() !== this._oLinkControl.getId())) &&                         // no sender link clicked
-					(!this._oLinkExpandCollapse || (oEvent.srcControl.getId() !== this._oLinkExpandCollapse.getId())))) {          // no expand/collapse link clicked
+				(!this.getSenderActive() && this._oLinkControl && oEvent.srcControl.getId() === this._oLinkControl.getId()) || // click on inactive sender link
+				(!this._oImageControl || (oEvent.srcControl.getId() !== this._oImageControl.getId()) &&                        // no image clicked
+				(!this._oLinkControl || (oEvent.srcControl.getId() !== this._oLinkControl.getId())) &&                         // no sender link clicked
+				(!this._oLinkExpandCollapse || (oEvent.srcControl.getId() !== this._oLinkExpandCollapse.getId())))) {          // no expand/collapse link clicked
 				ListItemBase.prototype.ontap.apply(this, [oEvent]);
 			}
 		}
@@ -259,9 +403,18 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', './FormattedT
 			if (oEvent.target.id === this.getId()) {
 				$icon.removeAttr("alt");
 			} else {
-				$icon.attr("alt"," ");
+				$icon.attr("alt", " ");
 			}
 		}
+		// Added for calculating List Count.
+        var oItem = oEvent.srcControl ,
+            oItemDomRef = oItem.getDomRef(),
+            mPosition = this.getParent().getAccessbilityPosition(oItem);
+
+        if ( oItem instanceof sap.m.FeedListItem ) {
+            oItemDomRef.setAttribute("aria-posinset", mPosition.posInset);
+            oItemDomRef.setAttribute("aria-setsize", mPosition.setSize);
+        }
 	};
 
 	/**
@@ -272,14 +425,15 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', './FormattedT
 	 */
 	FeedListItem.prototype._getImageControl = function() {
 		var sIcon = this.getIcon();
-		var sIconSrc = sIcon ? sIcon : sap.ui.core.IconPool.getIconURI("person-placeholder");
+		var sIconSrc = sIcon ? sIcon : IconPool.getIconURI("person-placeholder");
 		var sImgId = this.getId() + '-icon';
 		var mProperties = {
-			src : sIconSrc,
-			alt : encodeURI(this.getSender()),
-			densityAware : this.getIconDensityAware(),
-			decorative : false,
-			useIconTooltip : false };
+			src: sIconSrc,
+			alt: encodeURI(this.getSender()),
+			densityAware: this.getIconDensityAware(),
+			decorative: false,
+			useIconTooltip: false
+		};
 
 		var aCssClasses;
 		if (this.getIconActive()) {
@@ -289,12 +443,12 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', './FormattedT
 		}
 
 		var that = this;
-		this._oImageControl = sap.m.ImageHelper.getImageControl(sImgId, this._oImageControl, this, mProperties, aCssClasses);
+		this._oImageControl = ImageHelper.getImageControl(sImgId, this._oImageControl, this, mProperties, aCssClasses);
 		if (this.getIconActive()) {
 			this._oImageControl.attachPress(function() {
 				that.fireIconPress({
-					domRef : this.getDomRef(),
-					getDomRef : this.getDomRef.bind(this)
+					domRef: this.getDomRef(),
+					getDomRef: this.getDomRef.bind(this)
 				});
 			});
 		}
@@ -312,13 +466,12 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', './FormattedT
 	 */
 	FeedListItem.prototype._getLinkSender = function(withColon) {
 		if (!this._oLinkControl) {
-			jQuery.sap.require("sap.m.Link");
 			var that = this;
-			this._oLinkControl = new sap.m.Link({
-				press : function() {
+			this._oLinkControl = new Link({
+				press: function() {
 					that.fireSenderPress({
-						domRef : this.getDomRef(),
-						getDomRef : this.getDomRef.bind(this)
+						domRef: this.getDomRef(),
+						getDomRef: this.getDomRef.bind(this)
 					});
 				}
 			});
@@ -354,7 +507,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', './FormattedT
 	 * @private
 	 */
 	FeedListItem.prototype._inactiveHandlingInheritor = function() {
-		var sSrc = this.getIcon() ? this.getIcon() : sap.ui.core.IconPool.getIconURI("person-placeholder");
+		var sSrc = this.getIcon() ? this.getIcon() : IconPool.getIconURI("person-placeholder");
 		if (this._oImageControl) {
 			this._oImageControl.setSrc(sSrc);
 		}
@@ -374,7 +527,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', './FormattedT
 	FeedListItem.prototype._getCollapsedText = function() {
 		this._nMaxCollapsedLength = this.getMaxCharacters();
 		if (this._nMaxCollapsedLength === 0) {
-			if (sap.ui.Device.system.phone) {
+			if (Device.system.phone) {
 				this._nMaxCollapsedLength = FeedListItem._nMaxCharactersMobile;
 			} else {
 				this._nMaxCollapsedLength = FeedListItem._nMaxCharactersDesktop;
@@ -424,16 +577,24 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', './FormattedT
 	FeedListItem.prototype._toggleTextExpanded = function() {
 		var $text = this.$("realtext");
 		var $threeDots = this.$("threeDots");
+		var sMoreLabel = FeedListItem._sTextShowMore;
+		var sLessLabel = FeedListItem._sTextShowLess;
+		if (this.getMoreLabel()) {
+			sMoreLabel = this.getMoreLabel();
+		}
+		if (this.getLessLabel()) {
+			sLessLabel = this.getLessLabel();
+		}
 		if (this._bTextExpanded) {
 			$text.html(this._sShortText.replace(/&#xa;/g, "<br>"));
 			$threeDots.text(" ... ");
-			this._oLinkExpandCollapse.setText(FeedListItem._sTextShowMore);
+			this._oLinkExpandCollapse.setText(sMoreLabel);
 			this._bTextExpanded = false;
 			this._clearEmptyTagsInCollapsedText();
 		} else {
 			$text.html(this._sFullText.replace(/&#xa;/g, "<br>"));
 			$threeDots.text("  ");
-			this._oLinkExpandCollapse.setText(FeedListItem._sTextShowLess);
+			this._oLinkExpandCollapse.setText(sLessLabel);
 			this._bTextExpanded = true;
 		}
 	};
@@ -442,16 +603,17 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', './FormattedT
 	 * Gets the link for expanding/collapsing the text
 	 *
 	 * @private
-	 * @returns {sap.m.Link} Link control for expanded function ("MORE" or "LESS")
+	 * @returns {sap.m.Link} Link control for expanded function ("MORE" or "LESS" or Alternative texts)
 	 */
 	FeedListItem.prototype._getLinkExpandCollapse = function() {
+		var sMoreLabel = FeedListItem._sTextShowMore;
+		if (this.getMoreLabel()) {
+			sMoreLabel = this.getMoreLabel();
+		}
 		if (!this._oLinkExpandCollapse) {
-			jQuery.sap.require("sap.m.Link");
-			this._oLinkExpandCollapse = new sap.m.Link({
-				text : FeedListItem._sTextShowMore,
-				press : jQuery.proxy(function() {
-					this._toggleTextExpanded();
-				}, this)
+			this._oLinkExpandCollapse = new Link({
+				text: sMoreLabel,
+				press: [this._toggleTextExpanded, this]
 			});
 			this._bTextExpanded = false;
 			// Necessary so this gets garbage collected and the text of the link changes at clicking on it
@@ -529,25 +691,15 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', './FormattedT
 	 * @returns {sap.m.FeedListItem} this allows method chaining
 	 */
 	FeedListItem.prototype.setType = function(type) {
-		if (type === sap.m.ListType.Navigation) {
-			this.setProperty("type", sap.m.ListType.Active);
-		} else {
-			this.setProperty("type", type);
+		if (this.getType() !== type) {
+			if (type === ListType.Navigation) {
+				this.setProperty("type", ListType.Active);
+			} else {
+				this.setProperty("type", type);
+			}
 		}
 		return this;
 	};
 
-	/**
-	 * Redefinition of sap.m.ListItemBase.setUnread: Unread is not supported for FeedListItem
-	 * @public
-	 * @param {boolean} value new value for property unread is ignored
-	 * @returns {sap.m.FeedListItem} this allows method chaining
-	 */
-	FeedListItem.prototype.setUnread = function(value) {
-		this.setProperty("unread", false);
-		return this;
-	};
-
 	return FeedListItem;
-
-}, /* bExport= */ true);
+});

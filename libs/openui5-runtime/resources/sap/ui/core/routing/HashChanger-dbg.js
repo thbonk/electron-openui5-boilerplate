@@ -1,11 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider', 'sap/ui/thirdparty/hasher'],
-	function(jQuery, EventProvider, hasher) {
+sap.ui.define([
+	'sap/ui/base/EventProvider',
+	'sap/ui/thirdparty/hasher',
+	"sap/base/Log",
+	"sap/base/util/ObjectPath"
+],
+	function(EventProvider, hasher, Log, ObjectPath) {
 	"use strict";
 
 	/**
@@ -31,11 +36,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider', 'sap/ui/thirdpa
 	 * This will also fire a hashchanged event with the initial hash.
 	 *
 	 * @public
-	 * @return false if it was initialized before, true if it was initialized the first time
+	 * @return {boolean} false if it was initialized before, true if it was initialized the first time
 	 */
 	HashChanger.prototype.init = function() {
 		if (this._initialized) {
-			jQuery.sap.log.info("this HashChanger instance has already been initialized.");
+			Log.info("this HashChanger instance has already been initialized.");
 			return false;
 		}
 
@@ -101,9 +106,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider', 'sap/ui/thirdpa
 	};
 
 	/**
-	 * Sets the hash to a certain value. When using the set function a browser history  entry is written.
-	 * If you do not want to have an entry in the browser history, please use set replaceHash function.
-	 * @param {string} sHash the hash
+	 * Sets the hash to a certain value. When using this function, a browser history entry is written.
+	 * If you do not want to have an entry in the browser history, please use the {@link #replaceHash} function.
+	 * @param {string} sHash New hash
 	 * @public
 	 */
 	HashChanger.prototype.setHash = function(sHash) {
@@ -112,9 +117,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider', 'sap/ui/thirdpa
 	};
 
 	/**
-	 * Replaces the hash to a certain value. When using the replace function no browser history is written.
-	 * If you want to have an entry in the browser history, please use set setHash function.
-	 * @param {string} sHash the hash
+	 * Replaces the hash with a certain value. When using the replace function, no browser history entry is written.
+	 * If you want to have an entry in the browser history, please use the {@link #setHash} function.
+	 * @param {string} sHash New hash
 	 * @public
 	 */
 	HashChanger.prototype.replaceHash = function(sHash) {
@@ -133,11 +138,22 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider', 'sap/ui/thirdpa
 	};
 
 	/**
+	 * Defines the event names which should be used by {@link sap.ui.core.routing.History} to track the hash changes
+	 *
+	 * @return {array} the event names
+	 * @protected
+	 */
+	HashChanger.prototype.getEventNamesForHistory = function() {
+		return ["hashChanged"];
+	};
+
+	/**
 	 * Cleans the event registration
 	 * @see sap.ui.base.Object.prototype.destroy
 	 * @protected
 	 */
 	HashChanger.prototype.destroy = function() {
+		delete this._initialized;
 		hasher.changed.remove(this.fireHashChanged, this);
 		EventProvider.prototype.destroy.apply(this, arguments);
 	};
@@ -149,6 +165,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider', 'sap/ui/thirdpa
 		/**
 		 * Gets a global singleton of the HashChanger. The singleton will get created when this function is invoked for the first time.
 		 * @public
+		 * @return {sap.ui.core.routing.HashChanger} The global HashChanger
 		 * @static
 		 */
 		HashChanger.getInstance = function() {
@@ -189,7 +206,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider', 'sap/ui/thirdpa
 		HashChanger.replaceHashChanger = function(oHashChanger) {
 			if (_oHashChanger && oHashChanger) {
 
-				var fnGetHistoryInstance = jQuery.sap.getObject("sap.ui.core.routing.History.getInstance"),
+				var fnGetHistoryInstance = ObjectPath.get("sap.ui.core.routing.History.getInstance"),
 					oHistory;
 
 				if (fnGetHistoryInstance) {

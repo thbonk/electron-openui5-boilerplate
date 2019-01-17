@@ -1,12 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', 'sap/ui/core/Renderer'],
-	function(jQuery, ListItemBaseRenderer, Renderer) {
+sap.ui.define(["sap/ui/core/library", "sap/ui/core/Renderer", "./ListItemBaseRenderer"],
+	function(coreLibrary, Renderer, ListItemBaseRenderer) {
 	"use strict";
+
+
+	// shortcut for sap.ui.core.TextDirection
+	var TextDirection = coreLibrary.TextDirection;
 
 
 	/**
@@ -77,7 +81,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', 'sap/ui/core/Rende
 		var sTextDir = oLI.getTitleTextDirection();
 		rm.write("<span class='sapMGHLITitle'");
 
-		if (sTextDir != sap.ui.core.TextDirection.Inherit) {
+		if (sTextDir != TextDirection.Inherit) {
 			rm.writeAttribute("dir", sTextDir.toLowerCase());
 		}
 
@@ -97,6 +101,14 @@ sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', 'sap/ui/core/Rende
 		if (!oLI.getTable()) {
 			ListItemBaseRenderer.addLegacyOutlineClass.apply(this, arguments);
 		}
+	};
+
+	GroupHeaderListItemRenderer.getAriaRole = function(oLI) {
+		if (oLI.getTable()) {
+			return "row";
+		}
+
+		return ListItemBaseRenderer.getAriaRole.apply(this, arguments);
 	};
 
 	return GroupHeaderListItemRenderer;

@@ -16,6 +16,16 @@
 			"theme": "sap_belize"
 		},
 		{
+			"name": "DynamicPageHeader.less",
+			"designtime": true,
+			"theme": "sap_belize"
+		},
+		{
+			"name": "DynamicPageTitle.less",
+			"designtime": true,
+			"theme": "sap_belize"
+		},
+		{
 			"name": "FlexibleColumnLayout.less",
 			"designtime": true,
 			"theme": "sap_belize"

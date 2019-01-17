@@ -1,14 +1,27 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.StandardListItem.
-sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/EnabledPropagator', 'sap/ui/core/IconPool'],
-	function(jQuery, ListItemBase, library, EnabledPropagator, IconPool) {
+sap.ui.define([
+	"sap/ui/core/library",
+	"sap/ui/core/IconPool",
+	"./library",
+	"./ListItemBase",
+	"./Image",
+	"./StandardListItemRenderer"
+],
+	function(coreLibrary, IconPool, library, ListItemBase, Image, StandardListItemRenderer) {
 	"use strict";
 
+
+	// shortcut for sap.ui.core.TextDirection
+	var TextDirection = coreLibrary.TextDirection;
+
+	// shortcut for sap.ui.core.ValueState
+	var ValueState = coreLibrary.ValueState;
 
 
 	/**
@@ -22,7 +35,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 	 * @extends sap.m.ListItemBase
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -74,7 +87,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 			/**
 			 * Defines the state of the information text, e.g. <code>Error</code>, <code>Warning</code>, <code>Success</code>.
 			 */
-			infoState : {type : "sap.ui.core.ValueState", group : "Misc", defaultValue : sap.ui.core.ValueState.None},
+			infoState : {type : "sap.ui.core.ValueState", group : "Misc", defaultValue : ValueState.None},
 
 			/**
 			 * By default, the title size adapts to the available space and gets bigger if the description is empty. If you have list items with and without descriptions, this results in titles with different sizes. In this case, it can be better to switch the size adaption off by setting this property to <code>false</code>.
@@ -86,15 +99,15 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 			 * Defines the <code>title</code> text directionality with enumerated options. By default, the control inherits text direction from the DOM.
 			 * @since 1.28.0
 			 */
-			titleTextDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : sap.ui.core.TextDirection.Inherit},
+			titleTextDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : TextDirection.Inherit},
 
 			/**
 			 * Defines the <code>info</code> directionality with enumerated options. By default, the control inherits text direction from the DOM.
 			 * @since 1.28.0
 			 */
-			infoTextDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : sap.ui.core.TextDirection.Inherit}
+			infoTextDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : TextDirection.Inherit}
 		},
-		designTime : true
+		designtime: "sap/m/designtime/StandardListItem.designtime"
 	}});
 
 	StandardListItem.prototype.exit = function() {
@@ -126,20 +139,20 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 
 		if (oImage) {
 			oImage.setSrc(this.getIcon());
-			if (oImage instanceof sap.m.Image) {
+			if (oImage.setDensityAware) {
 				oImage.setDensityAware(this.getIconDensityAware());
 			}
 		} else {
 			oImage = IconPool.createControlByURI({
-				id : this.getId() + "-img",
-				src : this.getIcon(),
-				densityAware : this.getIconDensityAware(),
-				useIconTooltip : false
-			}, sap.m.Image).setParent(this, null, true);
+				id: this.getId() + "-img",
+				src: this.getIcon(),
+				densityAware: this.getIconDensityAware(),
+				useIconTooltip: false
+			}, Image).setParent(this, null, true);
 		}
 
 		var sImgStyle = this.getIconInset() ? "sapMSLIImg" : "sapMSLIImgThumb";
-		oImage.addStyleClass(oImage instanceof sap.m.Image ? sImgStyle : sImgStyle + "Icon", true);
+		oImage.addStyleClass(oImage instanceof Image ? sImgStyle : sImgStyle + "Icon", true);
 
 		this._oImage = oImage;
 		return this._oImage;
@@ -162,10 +175,8 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 
 	StandardListItem.prototype.getContentAnnouncement = function(oBundle) {
 		var sAnnouncement = "",
-			sInfoState = this.getInfoState(),
-			oIconInfo = IconPool.getIconInfo(this.getIcon()) || {};
+			sInfoState = this.getInfoState();
 
-		sAnnouncement += (oIconInfo.text || oIconInfo.name || "") + " ";
 		sAnnouncement += this.getTitle() + " " + this.getDescription() + " " + this.getInfo() + " ";
 
 		if (sInfoState != "None" && sInfoState != this.getHighlight()) {
@@ -177,4 +188,4 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 
 	return StandardListItem;
 
-}, /* bExport= */ true);
+});

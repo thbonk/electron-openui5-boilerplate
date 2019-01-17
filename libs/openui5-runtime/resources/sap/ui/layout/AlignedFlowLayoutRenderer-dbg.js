@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -31,7 +31,7 @@ sap.ui.define(['./library'],
 		AlignedFlowLayoutRenderer.render = function (oRm, oControl) {
 			var aContent = oControl.getContent();
 
-			oRm.write("<ul");
+			oRm.write("<div");
 			oRm.writeControlData(oControl);
 			oRm.addClass(AlignedFlowLayoutRenderer.CSS_CLASS);
 			oRm.writeClasses();
@@ -41,7 +41,7 @@ sap.ui.define(['./library'],
 			this.renderEndItem(oRm, oControl);
 			this.renderSpacers(oRm, oControl);
 
-			oRm.write("</ul>");
+			oRm.write("</div>");
 		};
 
 		/**
@@ -69,7 +69,7 @@ sap.ui.define(['./library'],
 		 * @param {sap.ui.core.Control} oContent The content to be rendered inside the item
 		 */
 		AlignedFlowLayoutRenderer.renderItem = function(oRm, oControl, oContent) {
-			oRm.write("<li");
+			oRm.write("<div");
 			oRm.addClass(AlignedFlowLayoutRenderer.CSS_CLASS + "Item");
 			oRm.addStyle("flex-basis", oControl.getMinItemWidth());
 			oRm.addStyle("max-width", oControl.getMaxItemWidth());
@@ -77,7 +77,7 @@ sap.ui.define(['./library'],
 			oRm.writeStyles();
 			oRm.write(">");
 			oRm.renderControl(oContent);
-			oRm.write("</li>");
+			oRm.write("</div>");
 		};
 
 		/**
@@ -92,7 +92,7 @@ sap.ui.define(['./library'],
 			aEndContent = aEndContent || oControl.getEndContent();
 
 			if (aEndContent.length) {
-				oRm.write("<li");
+				oRm.write("<div");
 				oRm.writeAttribute("id", oControl.getId() + "-endItem");
 				oRm.addClass(AlignedFlowLayoutRenderer.CSS_CLASS + "End");
 
@@ -101,6 +101,7 @@ sap.ui.define(['./library'],
 					oRm.addStyle("flex-basis", oControl.getMinItemWidth());
 				}
 
+				oRm.addStyle("max-width", oControl.getMaxItemWidth());
 				oRm.writeClasses();
 				oRm.writeStyles();
 				oRm.write(">");
@@ -109,7 +110,7 @@ sap.ui.define(['./library'],
 					this.renderEndContent(oRm, oControl, aEndContent[i]);
 				}
 
-				oRm.write("</li>");
+				oRm.write("</div>");
 			}
 		};
 
@@ -145,7 +146,7 @@ sap.ui.define(['./library'],
 				CSS_CLASS = AlignedFlowLayoutRenderer.CSS_CLASS;
 
 			for (var i = 0; i < iSpacers; i++) {
-				oRm.write("<li");
+				oRm.write("<div");
 
 				if (i === (iSpacers - 1)) {
 					oRm.writeAttribute("id", oControl.getId() + "-last");
@@ -157,7 +158,7 @@ sap.ui.define(['./library'],
 				oRm.addStyle("max-width", sMaxItemWidth);
 				oRm.writeClasses();
 				oRm.writeStyles();
-				oRm.write("></li>");
+				oRm.write("></div>");
 			}
 		};
 

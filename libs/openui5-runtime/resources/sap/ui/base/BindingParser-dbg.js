@@ -1,18 +1,27 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides static class sap.ui.base.BindingParser
 sap.ui.define([
-	'jquery.sap.global',
 	'./ExpressionParser',
 	'sap/ui/model/BindingMode',
 	'sap/ui/model/Filter',
 	'sap/ui/model/Sorter',
-	'jquery.sap.script'],
-	function(jQuery, ExpressionParser, BindingMode, Filter, Sorter/* , jQuerySap */) {
+	"sap/base/Log",
+	'sap/base/util/ObjectPath',
+	"sap/base/util/JSTokenizer"
+], function(
+		ExpressionParser,
+		BindingMode,
+		Filter,
+		Sorter,
+		Log,
+		ObjectPath,
+		JSTokenizer
+	) {
 	"use strict";
 
 	/**
@@ -142,7 +151,7 @@ sap.ui.define([
 		try {
 			BindingParser.mergeParts(oBindingInfo);
 		} catch (e) {
-			jQuery.sap.log.error("Cannot merge parts: " + e.message, sBinding,
+			Log.error("Cannot merge parts: " + e.message, sBinding,
 				"sap.ui.base.BindingParser");
 			// rely on error in ManagedObject
 		}
@@ -155,8 +164,9 @@ sap.ui.define([
 		 *
 		 * Names can consist of multiple segments, separated by dots.
 		 *
-		 * If the name starts with a dot ('.'), lookup will start with the
-		 * given context, otherwise it will start with the global context (window).
+		 * If the name starts with a dot ('.'), lookup happens within the given context only;
+		 * otherwise it will first happen within the given context (only if
+		 * <code>bPreferContext</code> is set) and then fall back to the global context (window).
 		 *
 		 * @param {object} o Object from which the property should be read and resolved
 		 * @param {string} sProp name of the property to resolve
@@ -165,17 +175,17 @@ sap.ui.define([
 			if ( typeof o[sProp] === "string" ) {
 				var fn, sName = o[sProp];
 				if ( o[sProp][0] === "." ) {
-					fn = jQuery.sap.getObject(o[sProp].slice(1), undefined, oEnv.oContext);
+					fn = ObjectPath.get(o[sProp].slice(1), oEnv.oContext);
 					o[sProp] = oEnv.bStaticContext ? fn : (fn && fn.bind(oEnv.oContext));
 				} else {
-					o[sProp] = jQuery.sap.getObject(o[sProp]);
+					o[sProp] = oEnv.bPreferContext && ObjectPath.get(o[sProp], oEnv.oContext) || ObjectPath.get(o[sProp]);
 				}
 				if (typeof (o[sProp]) !== "function") {
 					if (oEnv.bTolerateFunctionsNotFound) {
 						oEnv.aFunctionsNotFound = oEnv.aFunctionsNotFound || [];
 						oEnv.aFunctionsNotFound.push(sName);
 					} else {
-						jQuery.sap.log.error(sProp + " function " + sName + " not found!");
+						Log.error(sProp + " function " + sName + " not found!");
 					}
 				}
 			}
@@ -198,9 +208,9 @@ sap.ui.define([
 			var FNType;
 			if (typeof o.type === "string" ) {
 				if ( o.type[0] === "." ) {
-					FNType = jQuery.sap.getObject(o.type.slice(1), undefined, oEnv.oContext);
+					FNType = ObjectPath.get(o.type.slice(1), oEnv.oContext);
 				} else {
-					FNType = jQuery.sap.getObject(o.type);
+					FNType = ObjectPath.get(o.type);
 				}
 				// TODO find another solution for the type parameters?
 				if (typeof FNType === "function") {
@@ -322,7 +332,7 @@ sap.ui.define([
 	 *   (append only)
 	 * @param {string} sInput
 	 *   The input string from which to resolve an embedded binding
-	 * @param {number} iStart
+	 * @param {int} iStart
 	 *   The start index for binding resolution in the input string
 	 * @returns {object}
 	 *   An object with the following properties:
@@ -330,7 +340,7 @@ sap.ui.define([
 	 *   at: The position after the last character for the embedded binding in the input string
 	 */
 	function resolveEmbeddedBinding(oEnv, sInput, iStart) {
-		var parseObject = jQuery.sap.parseJS,
+		var parseObject = JSTokenizer.parseJS,
 			oParseResult,
 			iEnd;
 
@@ -353,7 +363,7 @@ sap.ui.define([
 
 	BindingParser.simpleParser = function(sString, oContext) {
 
-		if ( jQuery.sap.startsWith(sString, "{") && jQuery.sap.endsWith(sString, "}") ) {
+		if ( sString.startsWith("{") && sString.endsWith("}") ) {
 			return makeSimpleBindingInfo(sString.slice(1, -1));
 		}
 
@@ -372,15 +382,19 @@ sap.ui.define([
 	 * @param {boolean} [bStaticContext=false]
 	 *   if true, relative function names found via <code>oContext</code> will not be treated as
 	 *   instance methods of the context, but as static methods
+	 * @param {boolean} [bPreferContext=false]
+	 *   if true, names without an initial dot are searched in the given context first and then
+	 *   globally
 	 */
 	BindingParser.complexParser = function(sString, oContext, bUnescape,
-			bTolerateFunctionsNotFound, bStaticContext) {
+			bTolerateFunctionsNotFound, bStaticContext, bPreferContext) {
 		var b2ndLevelMergedNeeded = false, // whether some 2nd level parts again have parts
 			oBindingInfo = {parts:[]},
 			bMergeNeeded = false, // whether some top-level parts again have parts
 			oEnv = {
 				oContext: oContext,
 				aFunctionsNotFound: undefined, // lazy creation
+				bPreferContext : bPreferContext,
 				bStaticContext: bStaticContext,
 				bTolerateFunctionsNotFound: bTolerateFunctionsNotFound
 			},
@@ -394,7 +408,7 @@ sap.ui.define([
 		 * Parses an expression. Sets the flags accordingly.
 		 *
 		 * @param {string} sInput The input string to parse from
-		 * @param {number} iStart The start index
+		 * @param {int} iStart The start index
 		 * @param {sap.ui.model.BindingMode} oBindingMode the binding mode
 		 * @returns {object} a result object with the binding in <code>result</code> and the index
 		 * after the last character belonging to the expression in <code>at</code>
@@ -402,7 +416,7 @@ sap.ui.define([
 		 */
 		function expression(sInput, iStart, oBindingMode) {
 			var oBinding = ExpressionParser.parse(resolveEmbeddedBinding.bind(null, oEnv), sString,
-					iStart);
+					iStart, null, bStaticContext ? oContext : null);
 
 			/**
 			 * Recursively sets the mode <code>oBindingMode</code> on the given binding (or its
@@ -410,12 +424,17 @@ sap.ui.define([
 			 *
 			 * @param {object} oBinding
 			 *   a binding which may be composite
-			 * @param {number} [iIndex]
+			 * @param {int} [iIndex]
 			 *   index provided by <code>forEach</code>
 			 */
 			function setMode(oBinding, iIndex) {
 				if (oBinding.parts) {
-					oBinding.parts.forEach(setMode);
+					oBinding.parts.forEach(function (vPart, i) {
+						if (typeof vPart === "string") {
+							vPart = oBinding.parts[i] = {path : vPart};
+						}
+						setMode(vPart, i);
+					});
 					b2ndLevelMergedNeeded = b2ndLevelMergedNeeded || iIndex !== undefined;
 				} else {
 					oBinding.mode = oBindingMode;
@@ -599,8 +618,12 @@ sap.ui.define([
 	 *
 	 * @param {string} sInput
 	 *   the string to be parsed
-	 * @param {number} iStart
+	 * @param {int} iStart
 	 *   the index to start parsing
+	 * @param {object} [oEnv]
+	 *   the "environment" (see resolveEmbeddedBinding function for details)
+	 * @param {object} [mGlobals]
+	 *   global variables allowed in the expression as map of variable name to its value
 	 * @returns {object}
 	 *   the parse result with the following properties
 	 *   <ul>
@@ -615,8 +638,9 @@ sap.ui.define([
 	 *   the error contains the position where parsing failed.
 	 * @private
 	 */
-	BindingParser.parseExpression = function (sInput, iStart) {
-		return ExpressionParser.parse(resolveEmbeddedBinding.bind(null, {}), sInput, iStart);
+	BindingParser.parseExpression = function (sInput, iStart, oEnv, mGlobals) {
+		return ExpressionParser.parse(resolveEmbeddedBinding.bind(null, oEnv || {}), sInput, iStart,
+			mGlobals);
 	};
 
 	return BindingParser;

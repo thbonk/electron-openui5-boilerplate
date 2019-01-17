@@ -1,14 +1,20 @@
 /*
  * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.P13nFilterPanel.
 sap.ui.define([
-	'jquery.sap.global', './P13nConditionPanel', './P13nPanel', './library', 'sap/ui/core/Control'
-], function(jQuery, P13nConditionPanel, P13nPanel, library, Control) {
+	'./P13nConditionPanel', './P13nPanel', './library', 'sap/m/Panel', './P13nFilterItem'
+], function(P13nConditionPanel, P13nPanel, library, Panel, P13nFilterItem) {
 	"use strict";
+
+	// shortcut for sap.m.P13nPanelType
+	var P13nPanelType = library.P13nPanelType;
+
+	// shortcut for sap.m.P13nConditionOperation TODO: use enum in library.js or official API
+	var P13nConditionOperation = library.P13nConditionOperation;
 
 	/**
 	 * Constructor for a new P13nFilterPanel.
@@ -17,15 +23,14 @@ sap.ui.define([
 	 * @param {object} [mSettings] initial settings for the new control
 	 * @class The P13nFilterPanel control is used to define filter-specific settings for table personalization.
 	 * @extends sap.m.P13nPanel
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @constructor
 	 * @public
 	 * @since 1.26.0
 	 * @alias sap.m.P13nFilterPanel
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	var P13nFilterPanel = P13nPanel.extend("sap.m.P13nFilterPanel", /** @lends sap.m.P13nFilterPanel.prototype */
-	{
+	var P13nFilterPanel = P13nPanel.extend("sap.m.P13nFilterPanel", /** @lends sap.m.P13nFilterPanel.prototype */ {
 		metadata: {
 
 			library: "sap.m",
@@ -106,7 +111,34 @@ sap.ui.define([
 				/**
 				 * Event raised if a filter item has been updated.
 				 */
-				updateFilterItem: {}
+				updateFilterItem: {},
+
+				/**
+				 * Event raised if a filter item has been changed. reason can be added, updated or removed.
+				 * @experimental Since version 1.56
+				 */
+				filterItemChanged: {
+					parameters: {
+						/**
+						 * reason for the changeFilterItem event. Value can be added, updated or removed.
+						 */
+						reason: { type: "string" },
+						/**
+						 * key of the changed filterItem
+						 */
+						key: { type: "string" },
+						/**
+						 * index of the changed filterItem
+						 */
+						index: { type: "int" },
+						/**
+						 * JSON object of the changed filterItem instance (in case of reason=="removed" the itemData parameter does not exist)
+						 */
+						itemData: {
+							type: "object"
+						}
+					}
+				}
 			}
 		},
 		renderer: function(oRm, oControl) {
@@ -259,7 +291,7 @@ sap.ui.define([
 	 * Getter for the include operations.
 	 *
 	 * @public
-	 * @param {string} the type for which the operations are defined
+	 * @param {string} sType for which the operations are defined
 	 * @returns {sap.m.P13nConditionOperation} array of operations [<code>sap.m.P13nConditionOperation.BT</code>,
 	 *          <code>sap.m.P13nConditionOperation.EQ</code>]
 	 */
@@ -344,8 +376,8 @@ sap.ui.define([
 	};
 
 	P13nFilterPanel.prototype._updatePanel = function() {
-		var iMaxIncludes = this.getMaxIncludes() === "-1" ? 1000 : parseInt(this.getMaxIncludes(), 10);
-		var iMaxExcludes = this.getMaxExcludes() === "-1" ? 1000 : parseInt(this.getMaxExcludes(), 10);
+		var iMaxIncludes = this.getMaxIncludes() === "-1" ? 1000 : parseInt(this.getMaxIncludes());
+		var iMaxExcludes = this.getMaxExcludes() === "-1" ? 1000 : parseInt(this.getMaxExcludes());
 
 		if (iMaxIncludes > 0) {
 			if (iMaxExcludes <= 0) {
@@ -366,13 +398,10 @@ sap.ui.define([
 	};
 
 	P13nFilterPanel.prototype.init = function() {
-		this.setType(sap.m.P13nPanelType.filter);
+		this.setType(P13nPanelType.filter);
 		this.setTitle(sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("FILTERPANEL_TITLE"));
 
 		sap.ui.getCore().loadLibrary("sap.ui.layout");
-		jQuery.sap.require("sap.ui.layout.Grid");
-
-		sap.ui.layout.Grid.prototype.init.apply(this);
 
 		this._aKeyFields = [];
 		this.addStyleClass("sapMFilterPanel");
@@ -384,33 +413,43 @@ sap.ui.define([
 
 		if (!this._aIncludeOperations["default"]) {
 			this.setIncludeOperations([
-				sap.m.P13nConditionOperation.EQ, sap.m.P13nConditionOperation.BT, sap.m.P13nConditionOperation.LT, sap.m.P13nConditionOperation.LE, sap.m.P13nConditionOperation.GT, sap.m.P13nConditionOperation.GE
+				P13nConditionOperation.EQ, P13nConditionOperation.BT, P13nConditionOperation.LT, P13nConditionOperation.LE, P13nConditionOperation.GT, P13nConditionOperation.GE
 			]);
 		}
 
 		if (!this._aIncludeOperations["string"]) {
 			this.setIncludeOperations([
-				sap.m.P13nConditionOperation.Contains, sap.m.P13nConditionOperation.EQ, sap.m.P13nConditionOperation.BT, sap.m.P13nConditionOperation.StartsWith, sap.m.P13nConditionOperation.EndsWith, sap.m.P13nConditionOperation.LT, sap.m.P13nConditionOperation.LE, sap.m.P13nConditionOperation.GT, sap.m.P13nConditionOperation.GE
+				P13nConditionOperation.Contains, P13nConditionOperation.EQ, P13nConditionOperation.BT, P13nConditionOperation.StartsWith, P13nConditionOperation.EndsWith, P13nConditionOperation.LT, P13nConditionOperation.LE, P13nConditionOperation.GT, P13nConditionOperation.GE
 			], "string");
 		}
 		if (!this._aIncludeOperations["date"]) {
 			this.setIncludeOperations([
-				sap.m.P13nConditionOperation.EQ, sap.m.P13nConditionOperation.BT, sap.m.P13nConditionOperation.LT, sap.m.P13nConditionOperation.LE, sap.m.P13nConditionOperation.GT, sap.m.P13nConditionOperation.GE
+				P13nConditionOperation.EQ, P13nConditionOperation.BT, P13nConditionOperation.LT, P13nConditionOperation.LE, P13nConditionOperation.GT, P13nConditionOperation.GE
 			], "date");
 		}
 		if (!this._aIncludeOperations["time"]) {
 			this.setIncludeOperations([
-				sap.m.P13nConditionOperation.EQ, sap.m.P13nConditionOperation.BT, sap.m.P13nConditionOperation.LT, sap.m.P13nConditionOperation.LE, sap.m.P13nConditionOperation.GT, sap.m.P13nConditionOperation.GE
+				P13nConditionOperation.EQ, P13nConditionOperation.BT, P13nConditionOperation.LT, P13nConditionOperation.LE, P13nConditionOperation.GT, P13nConditionOperation.GE
 			], "time");
+		}
+		if (!this._aIncludeOperations["datetime"]) {
+			this.setIncludeOperations([
+				P13nConditionOperation.EQ, P13nConditionOperation.BT, P13nConditionOperation.LT, P13nConditionOperation.LE, P13nConditionOperation.GT, P13nConditionOperation.GE
+			], "datetime");
 		}
 		if (!this._aIncludeOperations["numeric"]) {
 			this.setIncludeOperations([
-				sap.m.P13nConditionOperation.EQ, sap.m.P13nConditionOperation.BT, sap.m.P13nConditionOperation.LT, sap.m.P13nConditionOperation.LE, sap.m.P13nConditionOperation.GT, sap.m.P13nConditionOperation.GE
+				P13nConditionOperation.EQ, P13nConditionOperation.BT, P13nConditionOperation.LT, P13nConditionOperation.LE, P13nConditionOperation.GT, P13nConditionOperation.GE
 			], "numeric");
+		}
+		if (!this._aIncludeOperations["numc"]) {
+			this.setIncludeOperations([
+				P13nConditionOperation.Contains, P13nConditionOperation.EQ, P13nConditionOperation.BT, P13nConditionOperation.EndsWith, P13nConditionOperation.LT, P13nConditionOperation.LE, P13nConditionOperation.GT, P13nConditionOperation.GE
+			], "numc");
 		}
 		if (!this._aIncludeOperations["boolean"]) {
 			this.setIncludeOperations([
-				sap.m.P13nConditionOperation.EQ
+				P13nConditionOperation.EQ
 			], "boolean");
 		}
 
@@ -418,11 +457,11 @@ sap.ui.define([
 
 		if (!this._aExcludeOperations["default"]) {
 			this.setExcludeOperations([
-				sap.m.P13nConditionOperation.EQ
+				P13nConditionOperation.EQ
 			]);
 		}
 
-		this._oIncludePanel = new sap.m.Panel({
+		this._oIncludePanel = new Panel({
 			expanded: true,
 			expandable: true,
 			headerText: this._oRb.getText("FILTERPANEL_INCLUDES"),
@@ -437,7 +476,7 @@ sap.ui.define([
 		});
 		this._oIncludeFilterPanel._sAddRemoveIconTooltipKey = "FILTER";
 
-		for ( var sType in this._aIncludeOperations) {
+		for (var sType in this._aIncludeOperations) {
 			this._oIncludeFilterPanel.setOperations(this._aIncludeOperations[sType], sType);
 		}
 
@@ -445,7 +484,7 @@ sap.ui.define([
 
 		this.addAggregation("content", this._oIncludePanel);
 
-		this._oExcludePanel = new sap.m.Panel({
+		this._oExcludePanel = new Panel({
 			expanded: false,
 			expandable: true,
 			headerText: this._oRb.getText("FILTERPANEL_EXCLUDES"),
@@ -461,7 +500,7 @@ sap.ui.define([
 		});
 		this._oExcludeFilterPanel._sAddRemoveIconTooltipKey = "FILTER";
 
-		for ( var sType in this._aExcludeOperations) {
+		for (var sType in this._aExcludeOperations) {
 			this._oExcludeFilterPanel.setOperations(this._aExcludeOperations[sType], sType);
 		}
 
@@ -515,6 +554,8 @@ sap.ui.define([
 					tooltip: fGetValueOfProperty("tooltip", oContext, oItem_),
 					maxLength: fGetValueOfProperty("maxLength", oContext, oItem_),
 					type: fGetValueOfProperty("type", oContext, oItem_),
+					typeInstance: fGetValueOfProperty("typeInstance", oContext, oItem_),
+					formatSettings: fGetValueOfProperty("formatSettings", oContext, oItem_),
 					precision: fGetValueOfProperty("precision", oContext, oItem_),
 					scale: fGetValueOfProperty("scale", oContext, oItem_),
 					isDefault: fGetValueOfProperty("isDefault", oContext, oItem_),
@@ -525,7 +566,7 @@ sap.ui.define([
 				var n = aKeyFields.length;
 				if (aKeyFields[n - 1].maxLength === 1 || aKeyFields[n - 1].maxLength === "1") {
 					aKeyFields[n - 1].operations = [
-						sap.m.P13nConditionOperation.EQ, sap.m.P13nConditionOperation.BT, sap.m.P13nConditionOperation.LT, sap.m.P13nConditionOperation.LE, sap.m.P13nConditionOperation.GT, sap.m.P13nConditionOperation.GE
+						P13nConditionOperation.EQ, P13nConditionOperation.BT, P13nConditionOperation.LT, P13nConditionOperation.LE, P13nConditionOperation.GT, P13nConditionOperation.GE
 					];
 				}
 			});
@@ -606,8 +647,9 @@ sap.ui.define([
 	P13nFilterPanel.prototype.updateFilterItems = function(sReason) {
 		this.updateAggregation("filterItems");
 
-		if (sReason == "change" && !this._bIgnoreBindCalls) {
+		if (sReason === "change" && !this._bIgnoreBindCalls) {
 			this._bUpdateRequired = true;
+			this.invalidate();
 		}
 	};
 
@@ -663,72 +705,86 @@ sap.ui.define([
 				return iConditionIndex < 0;
 			}, this);
 
-// that.getFilterItems().forEach(function(oItem, i) {
-// window.console.log(i+ " Items: " + oItem.getValue1());
-// }, this);
-//
-// var oData = that.getModel().getData();
-// oData.persistentData.filter.filterItems.forEach(function(oItem, i) {
-// window.console.log(i+ " model: " + oItem.value1);
-// });
+			switch (sOperation) {
+				case "update":
+					oFilterItem = that.getFilterItems()[iIndex];
+					if (oFilterItem) {
+						oFilterItem.setExclude(oNewData.exclude);
+						oFilterItem.setColumnKey(oNewData.keyField);
+						oFilterItem.setOperation(oNewData.operation);
+						oFilterItem.setValue1(oNewData.value1);
+						oFilterItem.setValue2(oNewData.value2);
+					}
+					that.fireUpdateFilterItem({
+						key: sKey,
+						index: iIndex,
+						filterItemData: oFilterItem
+					});
+					that.fireFilterItemChanged({
+						reason: "updated",
+						key: sKey,
+						index: iIndex,
+						itemData: {
+							columnKey: oNewData.keyField,
+							operation: oNewData.operation,
+							exclude: oNewData.exclude,
+							value1: oNewData.value1,
+							value2: oNewData.value2
+						}
+					});
+					break;
+				case "add":
+					if (iConditionIndex >= 0) {
+						iIndex++;
+					}
 
-			if (sOperation === "update") {
-				oFilterItem = that.getFilterItems()[iIndex];
-				if (oFilterItem) {
-					oFilterItem.setExclude(oNewData.exclude);
-					oFilterItem.setColumnKey(oNewData.keyField);
-					oFilterItem.setOperation(oNewData.operation);
+					oFilterItem = new P13nFilterItem({
+						columnKey: oNewData.keyField,
+						exclude: oNewData.exclude,
+						operation: oNewData.operation
+					});
 					oFilterItem.setValue1(oNewData.value1);
 					oFilterItem.setValue2(oNewData.value2);
-				}
-				that.fireUpdateFilterItem({
-					key: sKey,
-					index: iIndex,
-					filterItemData: oFilterItem
-				});
-				that._notifyChange();
-			}
-			if (sOperation === "add") {
-				if (iConditionIndex >= 0) {
-					iIndex++;
-				}
 
-				oFilterItem = new sap.m.P13nFilterItem({
-					key: sKey,
-					columnKey: oNewData.keyField,
-					exclude: oNewData.exclude,
-					operation: oNewData.operation,
-					value1: oNewData.value1,
-					value2: oNewData.value2
-				});
-				that._bIgnoreBindCalls = true;
-				that.fireAddFilterItem({
-					key: sKey,
-					index: iIndex,
-					filterItemData: oFilterItem
-				});
-				that._bIgnoreBindCalls = false;
-				that._notifyChange();
-			}
-			if (sOperation === "remove") {
-				that._bIgnoreBindCalls = true;
-				that.fireRemoveFilterItem({
-					key: sKey,
-					index: iIndex
-				});
-				that._bIgnoreBindCalls = false;
-				that._notifyChange();
-			}
+					that._bIgnoreBindCalls = true;
+					that.fireAddFilterItem({
+						key: sKey,
+						index: iIndex,
+						filterItemData: oFilterItem
+					});
 
-// that.getFilterItems().forEach(function(oItem, i) {
-// window.console.log(i+ " Items: " + oItem.getValue1());
-// }, this);
-//
-// var oData = that.getModel().getData();
-// oData.persistentData.filter.filterItems.forEach(function(oItem, i) {
-// window.console.log(i+ " model: " + oItem.value1);
-// });
+					that.fireFilterItemChanged({
+						reason: "added",
+						key: sKey,
+						index: iIndex,
+						itemData: {
+							columnKey: oNewData.keyField,
+							operation: oNewData.operation,
+							exclude: oNewData.exclude,
+							value1: oNewData.value1,
+							value2: oNewData.value2
+						}
+					});
 
+					that._bIgnoreBindCalls = false;
+					break;
+				case "remove":
+					that._bIgnoreBindCalls = true;
+					that.fireRemoveFilterItem({
+						key: sKey,
+						index: iIndex
+					});
+					that.fireFilterItemChanged({
+						reason: "removed",
+						key: sKey,
+						index: iIndex
+					});
+					that._bIgnoreBindCalls = false;
+					break;
+				default:
+					throw "Operation'" + sOperation + "' is not supported yet";
+			}
+			that._notifyChange();
 		};
 	};
 
@@ -741,4 +797,4 @@ sap.ui.define([
 
 	return P13nFilterPanel;
 
-}, /* bExport= */true);
+});

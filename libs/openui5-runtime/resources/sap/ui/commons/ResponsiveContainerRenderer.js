@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global'],function(q){"use strict";var R=function(){};R.render=function(r,c){var o=r,C=c.getAggregation("content");o.write("<div ");o.writeControlData(c);o.addStyle("width",c.getWidth());o.addStyle("height",c.getHeight());o.writeStyles();o.write(">");if(C){o.renderControl(C);}o.write("<div ");o.addStyle("width","0px");o.addStyle("height","0px");o.addStyle("overflow","hidden");o.writeStyles();o.write(">");q.each(c.getRanges(),function(i,a){o.write("<div ");o.writeElementData(a);o.addStyle("width",a.getWidth());o.addStyle("height",a.getHeight());o.writeStyles();o.write("></div>");});o.write("</div>");o.write("</div>");};return R;},true);
+sap.ui.define([],function(){"use strict";var R=function(){};R.render=function(r,c){var C=c.getAggregation("content");r.write("<div ");r.writeControlData(c);r.addStyle("width",c.getWidth());r.addStyle("height",c.getHeight());r.writeStyles();r.write(">");if(C){r.renderControl(C);}r.write("<div ");r.addStyle("width","0px");r.addStyle("height","0px");r.addStyle("overflow","hidden");r.writeStyles();r.write(">");c.getRanges().forEach(function(o){r.write("<div ");r.writeElementData(o);r.addStyle("width",o.getWidth());r.addStyle("height",o.getHeight());r.writeStyles();r.write("></div>");});r.write("</div>");r.write("</div>");};return R;},true);

@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides default renderer for control sap.ui.commons.ApplicationHeader
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define(['sap/ui/core/theming/Parameters'],
+	function(Parameters) {
 	"use strict";
 
 
@@ -61,8 +61,7 @@ sap.ui.define(['jquery.sap.global'],
 		//Add the logo, but first set the source to the right path
 		var sSrc = oAppHeader.getLogoSrc();
 		if (!sSrc) {
-			jQuery.sap.require("sap.ui.core.theming.Parameters");
-			sSrc = sap.ui.core.theming.Parameters._getThemeImage(); // theme logo
+			sSrc = Parameters._getThemeImage(); // theme logo
 		}
 		if (!sSrc) {
 			sSrc = sap.ui.resource("sap.ui.commons", "themes/" + sap.ui.getCore().getConfiguration().getTheme() + "/img/applicationheader/SAPLogo.png");

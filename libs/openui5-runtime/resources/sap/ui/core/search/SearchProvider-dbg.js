@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.core.search.SearchProvider.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/library'],
-	function(jQuery, Element, library) {
+sap.ui.define(['sap/ui/core/Element', 'sap/ui/core/library', "sap/base/Log"],
+	function(Element, library, Log) {
 	"use strict";
 
 
@@ -17,18 +17,21 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/library'
 	 * @param {string} [sId] id for the new control, generated automatically if no id is given
 	 * @param {object} [mSettings] initial settings for the new control
 	 *
+	 * @abstract
 	 * @class
-	 * Abstract base class for all SearchProviders which can be e.g. attached to a SearchField. Do not create instances of this class, but use a concrete sub class instead.
-	 * @extends sap.ui.core.Element
-	 * @version 1.50.6
+	 * Abstract base class for all SearchProviders which can be e.g. attached to a SearchField.
 	 *
-	 * @constructor
+	 * Do not create instances of this class, but use a concrete subclass instead.
+	 * @extends sap.ui.core.Element
+	 * @version 1.61.2
+	 *
 	 * @public
 	 * @alias sap.ui.core.search.SearchProvider
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var SearchProvider = Element.extend("sap.ui.core.search.SearchProvider", /** @lends sap.ui.core.search.SearchProvider.prototype */ { metadata : {
 
+		"abstract": true,
 		library : "sap.ui.core",
 		properties : {
 
@@ -51,7 +54,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/library'
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	SearchProvider.prototype.suggest = function(sValue, fnCallback) {
-		jQuery.sap.log.warning("sap.ui.core.search.SearchProvider is the abstract base class for all SearchProviders. Do not create instances of this class, but use a concrete sub class instead.");
+		Log.warning("sap.ui.core.search.SearchProvider is the abstract base class for all SearchProviders. Do not create instances of this class, but use a concrete sub class instead.");
 	};
 
 

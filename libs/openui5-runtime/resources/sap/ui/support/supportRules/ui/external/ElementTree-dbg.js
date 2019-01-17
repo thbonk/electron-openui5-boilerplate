@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(["jquery.sap.global", "sap/ui/base/ManagedObject"],
-	function (jQuery, ManagedObject) {
+sap.ui.define(["jquery.sap.global"],
+	function (jQuery) {
 		"use strict";
 
 		function _isObject(data) {
@@ -248,7 +248,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/base/ManagedObject"],
 				return;
 			}
 
-			selectedElement = this._ElementTreeContainer.querySelector("[data-id=" + elementID + "]");
+			selectedElement = this._ElementTreeContainer.querySelector("[data-id='" + elementID + "']");
 
 			if (selectedElement === null) {
 				jQuery.sap.log.warning("The selected element is not a child of the ElementTree");
@@ -423,13 +423,13 @@ sap.ui.define(["jquery.sap.global", "sap/ui/base/ManagedObject"],
 		/**
 		 * Scroll to element in the ElementTree.
 		 * @param {Element} target DOM element to which need to be scrolled
-		 * @param {document.window} window The window element. Passed as a parameter to enable parameter mockup and function testing
+		 * @param {document.window} oWindow The window element. Passed as a parameter to enable parameter mockup and function testing
 		 */
-		ElementTree.prototype._scrollToElement = function (target, window) {
+		ElementTree.prototype._scrollToElement = function (target, oWindow) {
 			var desiredViewBottomPosition = this._treeContainer.offsetHeight - this._treeContainer.offsetTop + this._treeContainer.scrollTop;
 
 			if (target.offsetTop > desiredViewBottomPosition || target.offsetTop < this._treeContainer.scrollTop) {
-				this._treeContainer.scrollTop = target.offsetTop - window.innerHeight / 6;
+				this._treeContainer.scrollTop = target.offsetTop - oWindow.innerHeight / 6;
 			}
 		};
 
@@ -484,7 +484,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/base/ManagedObject"],
 
 			if (target.nodeName === "ARROW") {
 				this._toggleCollapse(target);
-			} else {
+			} else if (jQuery(event.srcElement).hasClass("showNumbOfIssues")){
 				this._selectTreeElement(target, true);
 			}
 		};

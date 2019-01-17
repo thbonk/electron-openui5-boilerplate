@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -15,13 +15,26 @@ if (!window.QUnit) {
 
 // put qunit-coverage last so library files don't get measured
 sap.ui.define([
-  "jquery.sap.global", "sap/ui/base/Object", "sap/ui/test/opaQunit", "sap/ui/test/Opa5",
+  "jquery.sap.global", "sap/ui/test/opaQunit", "sap/ui/test/Opa5",
   "sap/ui/test/gherkin/GherkinTestGenerator", "sap/ui/test/gherkin/dataTableUtils", "sap/ui/test/gherkin/StepDefinitions",
   "sap/ui/test/launchers/componentLauncher", "sap/ui/test/launchers/iFrameLauncher", "sap/ui/qunit/qunit-css",
   "sap/ui/qunit/qunit-junit", "sap/ui/qunit/qunit-coverage"
-], function($, UI5Object, opaTest, Opa5, GherkinTestGenerator, dataTableUtils, StepDefinitions, componentLauncher,
+], function($, opaTest, Opa5, GherkinTestGenerator, dataTableUtils, StepDefinitions, componentLauncher,
   iFrameLauncher) {
   "use strict";
+
+  QUnit.config.urlConfig.splice(0, 0, {
+    id: "closeFrame",
+    label: "Close Frame",
+    tooltip: "Closes the application-under-test's frame after all tests have executed",
+    value: "true"
+  });
+
+  QUnit.done(function() {
+    if (jQuery.sap.getUriParameters().get("closeFrame")) {
+      sap.ui.test.Opa5.emptyQueue();
+    }
+  });
 
   /**
    * Dynamically generates and executes Opa5 tests based on a Gherkin feature file and step definitions.
@@ -133,13 +146,6 @@ sap.ui.define([
         afterEach: function() {
           if (this._oOpa5.hasAppStarted()) {
             this._oOpa5.iTeardownMyApp();
-          }
-
-          // Add a link to the page to allow the user to close the frame
-          if ($("#frame-close-link").length === 0) {
-            $("#qunit-header").append('<input id="frame-close-link" type="button"' +
-                'onclick="sap.ui.test.Opa5.emptyQueue(); $(\'#frame-close-link\').remove();" style="float: right; ' +
-                'margin-right: 0.5em; margin-top: -0.4em;" value="Close &#13;&#10;Frame"></input>');
           }
           oTestGenerator.tearDown();
         }.bind(this)

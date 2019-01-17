@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides the base implementation for all MessageProcessor implementations
-sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
-	function(jQuery, EventProvider) {
+sap.ui.define(['sap/ui/base/EventProvider', "sap/base/util/uid"],
+	function(EventProvider, uid) {
 	"use strict";
 
 
@@ -27,9 +27,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 	 * @extends sap.ui.base.EventProvider
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
-	 * @constructor
 	 * @public
 	 * @alias sap.ui.core.message.MessageProcessor
 	 */
@@ -39,7 +38,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider'],
 			EventProvider.apply(this, arguments);
 
 			this.mMessages = null;
-			this.id = jQuery.sap.uid();
+			this.id = uid();
 			sap.ui.getCore().getMessageManager().registerMessageProcessor(this);
 		},
 

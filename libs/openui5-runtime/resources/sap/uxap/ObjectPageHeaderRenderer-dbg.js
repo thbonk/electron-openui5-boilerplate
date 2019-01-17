@@ -1,10 +1,10 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(["./ObjectPageLayout", "sap/ui/core/Icon", "./ObjectImageHelper"], function (ObjectPageLayout, Icon, ObjectImageHelper) {
+sap.ui.define(["./ObjectImageHelper", "sap/ui/Device"], function (ObjectImageHelper, Device) {
 	"use strict";
 
 	/**
@@ -21,8 +21,8 @@ sap.ui.define(["./ObjectPageLayout", "sap/ui/core/Icon", "./ObjectImageHelper"],
 			oExpandButton = oControl.getAggregation("_expandButton"),
 			oObjectImage = oControl._lazyLoadInternalAggregation("_objectImage", true),
 			oPlaceholder,
-			bIsDesktop = sap.ui.Device.system.desktop,
-			bIsHeaderContentVisible = oParent && oParent instanceof ObjectPageLayout && ((oParent.getHeaderContent()
+			bIsDesktop = Device.system.desktop,
+			bIsHeaderContentVisible = oParent && oParent.isA("sap.uxap.ObjectPageLayout") && ((oParent.getHeaderContent()
 				&& oParent.getHeaderContent().length > 0 && oParent.getShowHeaderContent()) ||
 			(oParent.getShowHeaderContent() && oParent.getShowTitleInHeaderContent()));
 
@@ -53,7 +53,7 @@ sap.ui.define(["./ObjectPageLayout", "sap/ui/core/Icon", "./ObjectImageHelper"],
 		oRm.writeClasses();
 		oRm.write(">");
 
-		if (oParent && oParent instanceof ObjectPageLayout && oParent.getIsChildPage()) {
+		if (oParent && oParent.isA("sap.uxap.ObjectPageLayout") && oParent.getIsChildPage()) {
 			oRm.write("<div");
 			oRm.addClass('sapUxAPObjectChildPage');
 			oRm.writeClasses();
@@ -120,18 +120,16 @@ sap.ui.define(["./ObjectPageLayout", "sap/ui/core/Icon", "./ObjectImageHelper"],
 	/**
 	 * Renders the SelectTitleArrow icon.
 	 *
-	 * @param {sap.ui.core.RenderManager}
-	 *            oRm the RenderManager that can be used for writing to the render output buffer
-	 *
-	 * @param {sap.uxap.ObjecPageHeader}
-	 *            oControl the ObjectPageHeader
+	 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer
+	 * @param {sap.uxap.ObjecPageHeader} oControl The ObjectPageHeader
 	 *
 	 * @private
 	 */
 	ObjectPageHeaderRenderer._renderObjectPageTitle = function (oRm, oControl, bTitleInContent) {
 		var sOHTitle = oControl.getObjectTitle(),
 			bMarkers = (oControl.getShowMarkers() && (oControl.getMarkFavorite() || oControl.getMarkFlagged())),
-			oBreadCrumbsAggregation = oControl._getBreadcrumbsAggregation();
+			oBreadCrumbsAggregation = oControl._getBreadcrumbsAggregation(),
+			sTooltip = oControl.getTooltip_Text();
 
 		if (!bTitleInContent && oBreadCrumbsAggregation) {
 			oRm.renderControl(oBreadCrumbsAggregation);
@@ -156,6 +154,11 @@ sap.ui.define(["./ObjectPageLayout", "sap/ui/core/Icon", "./ObjectImageHelper"],
 		oRm.addClass("sapUxAPObjectPageHeaderTitleTextWrappable");
 		oRm.writeClasses();
 		oRm.writeAttributeEscaped("id", oControl.getId() + "-innerTitle");
+
+		if (sTooltip) {
+			oRm.writeAttributeEscaped("title", sTooltip);
+		}
+
 		oRm.write(">");
 
 		// if we have markers or arrow we have to cut the last word and bind it to the markers and arrow so that the icons never occur in one line but are accompanied by the last word of the title.

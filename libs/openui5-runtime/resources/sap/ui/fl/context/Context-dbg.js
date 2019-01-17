@@ -1,10 +1,10 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['sap/ui/base/ManagedObject'], function(ManagedObject) {
+sap.ui.define(['sap/ui/base/ManagedObject', "sap/base/Log"], function(ManagedObject, Log) {
 	"use strict";
 
 	/**
@@ -14,7 +14,7 @@ sap.ui.define(['sap/ui/base/ManagedObject'], function(ManagedObject) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @private
@@ -147,15 +147,22 @@ sap.ui.define(['sap/ui/base/ManagedObject'], function(ManagedObject) {
 
 			return new Promise(function(resolve, reject) {
 				try {
-					sap.ui.require([sActConfigPath], function(ProviderConstructor){
-						var oProvider = new ProviderConstructor();
-						resolve({
-							"domain" : sDomain,
-							"provider" : oProvider
-						});
-					});
+					sap.ui.require([sActConfigPath],
+						function(ProviderConstructor){
+							var oProvider = new ProviderConstructor();
+							resolve({
+								"domain" : sDomain,
+								"provider" : oProvider
+							});
+						},
+						function(oError) {
+							Log.error(oError);
+							resolve(); // recover from error, but deliver no information
+							return;
+						}
+					);
 				} catch (oError) {
-					jQuery.sap.log.error(oError);
+					Log.error(oError);
 					resolve(); // recover from error, but deliver no information
 					return;
 				}

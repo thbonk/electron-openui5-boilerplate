@@ -1,13 +1,23 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.StandardListItem.
-sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/EnabledPropagator', 'sap/ui/core/IconPool',  'sap/ui/core/Icon'],
-	function(jQuery, ListItemBase, library, EnabledPropagator, IconPool, Icon) {
+sap.ui.define([
+	'./ListItemBase',
+	'./library',
+	'sap/ui/core/IconPool',
+	'sap/ui/core/Icon',
+	'./TreeItemBaseRenderer',
+	'sap/ui/events/KeyCodes'
+],
+	function(ListItemBase, library, IconPool, Icon, TreeItemBaseRenderer, KeyCodes) {
 	"use strict";
+
+	// shortcut for sap.m.ListMode
+	var ListMode = library.ListMode;
 
 	/**
 	 * Constructor for a new TreeItemBase.
@@ -20,7 +30,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 	 * @extends sap.m.ListItemBase
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -37,7 +47,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 
 	TreeItemBase.prototype.getTree = function() {
 		var oParent = this.getParent();
-		if (oParent instanceof sap.m.Tree) {
+		if (oParent && oParent.isA("sap.m.Tree")) {
 			return oParent;
 		}
 	};
@@ -54,13 +64,15 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 	 */
 	TreeItemBase.prototype.getItemNodeContext = function() {
 		var oTree = this.getTree();
-		var oContext = null;
-		var oBinding = null;
-		if (oTree) {
+		var oNode = null;
+		var oBinding = oTree ? oTree.getBinding("items") : null;
+
+		if (oTree && oBinding) {
 			oBinding = oTree.getBinding("items");
-			oContext = oBinding.getNodeByIndex(oTree.indexOfItem(this));
+			oNode = oBinding.getNodeByIndex(oTree.indexOfItem(this));
 		}
-		return oContext;
+
+		return oNode;
 	};
 
 	/**
@@ -114,7 +126,10 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 	 * @since 1.42.0
 	 */
 	TreeItemBase.prototype.isLeaf = function() {
-		return (this.getItemNodeContext() || {}).isLeaf;
+		var oTree = this.getTree(),
+			oNode = this.getItemNodeContext();
+
+		return oNode ? !oTree.getBinding("items").nodeHasChildren(oNode) : false;
 	};
 
 	/**
@@ -147,11 +162,14 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 	 * @since 1.42.0
 	 */
 	TreeItemBase.prototype.getExpanded = function() {
-		var bExpanded = false;
-		if (this.getItemNodeContext() && this.getItemNodeContext().nodeState) {
-			bExpanded = this.getItemNodeContext().nodeState.expanded;
+		var oTree = this.getTree();
+		if (!oTree) {
+			return false;
 		}
-		return bExpanded;
+
+		var iIndex = oTree.indexOfItem(this);
+		var oBinding = oTree.getBinding("items");
+		return (oBinding && oBinding.isExpanded(iIndex));
 	};
 
 	TreeItemBase.prototype.setSelected = function (bSelected) {
@@ -165,10 +183,10 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 		if (oTree) {
 			oBinding = oTree.getBinding("items");
 			iIndex = oTree.indexOfItem(this);
-			if (oTree.getMode() === sap.m.ListMode.SingleSelect) {
+			if (oTree.getMode() === ListMode.SingleSelect) {
 				oBinding.setSelectedIndex(iIndex);
 			}
-			if (oTree.getMode() === sap.m.ListMode.MultiSelect) {
+			if (oTree.getMode() === ListMode.MultiSelect) {
 				if (bSelected) {
 					oBinding.addSelectionInterval(iIndex, iIndex);
 				} else {
@@ -188,9 +206,9 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 	 * @since 1.42.0
 	 */
 	TreeItemBase.prototype._getExpanderControl = function() {
-		var sSrc = "";
-		if (!this.isLeaf()) {
-			sSrc = this.getExpanded() ? this.ExpandedIconURI : this.CollapsedIconURI;
+		var sSrc = this.CollapsedIconURI;
+		if (this.getExpanded()) {
+			sSrc = this.ExpandedIconURI;
 		}
 
 		if (this._oExpanderControl) {
@@ -218,18 +236,29 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 	 */
 	TreeItemBase.prototype._updateExpander = function() {
 		if (this._oExpanderControl) {
-			var sSrc = "";
-			if (!this.isLeaf()) {
-				sSrc = this.getExpanded() ? this.ExpandedIconURI : this.CollapsedIconURI;
+			var sSrc = this.CollapsedIconURI;
+			if (this.getExpanded()) {
+				sSrc = this.ExpandedIconURI;
 			}
 			this._oExpanderControl.setSrc(sSrc);
+			this.$().attr("aria-expanded", this.getExpanded());
+
+			// make the expander visible
+			if (!this.isLeaf()) {
+				this.$().removeClass("sapMTreeItemBaseLeaf");
+			}
+
+			// update the indentation again
+			var iIndentation = this._getPadding(),
+				sStyleRule = sap.ui.getCore().getConfiguration().getRTL() ? "paddingRight" : "paddingLeft";
+			this.$().css(sStyleRule, iIndentation + "rem");
+
 		}
 	};
 
 	TreeItemBase.prototype.setBindingContext = function() {
 		ListItemBase.prototype.setBindingContext.apply(this, arguments);
 		this._updateExpander();
-
 		return this;
 	};
 
@@ -246,8 +275,15 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 		iIndentation = 0,
 		iDeepestLevel;
 
+		// use number count from hierarchy binding
 		if (oTree) {
 			iDeepestLevel = oTree.getDeepestLevel();
+		}
+
+		// for add node
+		if (iDeepestLevel < iNodeLevel) {
+			oTree._iDeepestLevel = iNodeLevel;
+			iDeepestLevel = oTree._iDeepestLevel;
 		}
 
 		if (iDeepestLevel < 2) {
@@ -295,7 +331,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 			this.informTree("ExpanderPressed", true);
 		} else {
 			// Change the keyCode so that the item navigation handles the down navigation.
-			oEvent.keyCode = jQuery.sap.KeyCodes.ARROW_DOWN;
+			oEvent.keyCode = KeyCodes.ARROW_DOWN;
 		}
 
 	};
@@ -342,6 +378,10 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 		this.destroyControls(["Expander"]);
 	};
 
+	TreeItemBase.prototype.onlongdragover = function(oEvent) {
+		this.informTree("LongDragOver");
+	};
+
 	return TreeItemBase;
 
-}, /* bExport= */ true);
+});

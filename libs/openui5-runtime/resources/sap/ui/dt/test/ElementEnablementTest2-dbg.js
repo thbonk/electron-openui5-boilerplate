@@ -1,17 +1,17 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.dt.test.ElementEnablementTest.
 sap.ui.define([
-	'jquery.sap.global',
 	'sap/ui/base/ManagedObject',
 	'sap/ui/dt/test/Element',
-	'sap/ui/fl/registry/ChangeRegistry'
+	'sap/ui/fl/registry/ChangeRegistry',
+	"sap/base/util/ObjectPath"
 ],
-function(jQuery, ManagedObject, ElementTest, ChangeRegistry) {
+function(ManagedObject, ElementTest, ChangeRegistry, ObjectPath) {
 	"use strict";
 
 
@@ -27,7 +27,7 @@ function(jQuery, ManagedObject, ElementTest, ChangeRegistry) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @private
@@ -90,7 +90,10 @@ function(jQuery, ManagedObject, ElementTest, ChangeRegistry) {
 			}
 
 			return this._mResult;
-		}.bind(this));
+		}.bind(this))
+		.catch(function(error) {
+			// do nothing
+		});
 	};
 
 
@@ -102,10 +105,13 @@ function(jQuery, ManagedObject, ElementTest, ChangeRegistry) {
 		this._bNotSupported = false;
 		this._bError = false;
 
-		var oElement = jQuery.sap.getObject(this.getType());
-		return oElement.getMetadata().loadDesignTime().catch(function(oError){
+		var oElement = ObjectPath.get(this.getType() || "");
+		try {
+			return oElement.getMetadata().loadDesignTime();
+		} catch (e) {
 			this._bError = true;
-		}.bind(this));
+			return Promise.reject(e);
+		}
 	};
 
 

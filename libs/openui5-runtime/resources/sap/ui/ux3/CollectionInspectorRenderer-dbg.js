@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides default renderer for the sap.ui.ux3.Collection
-sap.ui.define(['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define([],
+	function() {
 	"use strict";
 
 
@@ -20,16 +20,14 @@ sap.ui.define(['jquery.sap.global'],
 	 * Renders the Collection
 	 *
 	 * @param {sap.ui.core.RenderManager}
-	 *            oRenderManager the RenderManager that can be used for writing to
+	 *            rm the RenderManager that can be used for writing to
 	 *            the Render-Output-Buffer
 	 * @param {sap.ui.core.Control}
 	 *            oControl an object representation of the control that should be
 	 *            rendered
 	 */
-	CollectionInspectorRenderer.render = function(oRenderManager,
+	CollectionInspectorRenderer.render = function(rm,
 			oControl) {
-		// convenience variable
-		var rm = oRenderManager;
 
 		rm.write("<div");
 		rm.addClass("sapUiUx3CI");
@@ -82,7 +80,7 @@ sap.ui.define(['jquery.sap.global'],
 	 * Renders the ToggleButton to open and close the sidebar
 	 *
 	 * @param {sap.ui.core.RenderManager}
-	 *            oRenderManager the RenderManager that can be used for writing to
+	 *            rm the RenderManager that can be used for writing to
 	 *            the Render-Output-Buffer
 	 * @param {sap.ui.core.Control}
 	 *            oControl an object representation of the control that should be
@@ -105,7 +103,7 @@ sap.ui.define(['jquery.sap.global'],
 	 * Renders the collection selector which selects the current collection
 	 *
 	 * @param {sap.ui.core.RenderManager}
-	 *            oRenderManager the RenderManager that can be used for writing to
+	 *            rm the RenderManager that can be used for writing to
 	 *            the Render-Output-Buffer
 	 * @param {sap.ui.core.Control}
 	 *            oControl an object representation of the control that should be
@@ -127,7 +125,7 @@ sap.ui.define(['jquery.sap.global'],
 	 * Renders the Sidebar which displays all collections
 	 *
 	 * @param {sap.ui.core.RenderManager}
-	 *            oRenderManager the RenderManager that can be used for writing to
+	 *            rm the RenderManager that can be used for writing to
 	 *            the Render-Output-Buffer
 	 * @param {sap.ui.core.Control}
 	 *            oControl an object representation of the control that should be
@@ -153,7 +151,7 @@ sap.ui.define(['jquery.sap.global'],
 		rm.write(">");
 		if (oControl.getSelectedCollection()) {
 			var iItemCount = oCollection.getItems().length;
-			jQuery.each(oCollection.getItems(), function(iIndex, oCollectionItem) {
+			oCollection.getItems().forEach(function(oCollectionItem, iIndex) {
 				rm.write('<li tabindex="-1"');
 				rm.writeElementData(oCollectionItem);
 				rm.writeAttributeEscaped("title",oCollectionItem.getText());
@@ -163,7 +161,7 @@ sap.ui.define(['jquery.sap.global'],
 				// ARIA
 				rm.writeAccessibilityState(oCollectionItem, {
 					role: "option",
-					selected: (jQuery.inArray(oCollectionItem.getId(),oCollection.getSelectedItems()) >= 0),
+					selected: oCollection.getSelectedItems().indexOf(oCollectionItem.getId()) >= 0,
 					setsize: iItemCount,
 					posinset: iIndex
 				});
@@ -181,14 +179,14 @@ sap.ui.define(['jquery.sap.global'],
 	 * Renders the Content that is displayed
 	 *
 	 * @param {sap.ui.core.RenderManager}
-	 *            oRenderManager the RenderManager that can be used for writing to
+	 *            rm the RenderManager that can be used for writing to
 	 *            the Render-Output-Buffer
 	 * @param {sap.ui.core.Control}
 	 *            oControl an object representation of the control that should be
 	 *            rendered
 	 */
 	CollectionInspectorRenderer.renderContent = function(rm, oControl) {
-		jQuery.each(oControl.getContent(), function(iIndex, oContent) {
+		oControl.getContent().forEach(function(oContent) {
 			rm.renderControl(oContent);
 		});
 	};

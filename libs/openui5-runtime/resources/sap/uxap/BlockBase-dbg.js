@@ -1,55 +1,82 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.uxap.BlockBase.
 sap.ui.define([
+	"sap/ui/thirdparty/jquery",
 	"sap/ui/core/Control",
 	"sap/ui/core/CustomData",
 	"./BlockBaseMetadata",
-	"./ModelMapping",
 	"sap/ui/model/Context",
 	"sap/ui/Device",
-	"sap/ui/layout/form/ResponsiveGridLayout",
+	"sap/ui/layout/form/ColumnLayout",
 	"./library",
-	"sap/ui/core/Component"
-], function (Control, CustomData, BlockBaseMetadata, ModelMapping, Context, Device, ResponsiveGridLayout, library, Component) {
+	"sap/ui/core/Component",
+	"sap/ui/layout/library",
+	"sap/base/Log"
+], function(
+	jQuery,
+	Control,
+	CustomData,
+	BlockBaseMetadata,
+	Context,
+	Device,
+	ColumnLayout,
+	library,
+	Component,
+	layoutLibrary,
+	Log
+) {
 		"use strict";
 
+		// shortcut for sap.ui.layout.form.SimpleFormLayout
+		var SimpleFormLayout = layoutLibrary.form.SimpleFormLayout;
+
+		// shortcut for sap.uxap.BlockBaseFormAdjustment
+		var BlockBaseFormAdjustment = library.BlockBaseFormAdjustment;
+
 		/**
-		 * Constructor for a new BlockBase.
+		 * Constructor for a new <code>BlockBase</code>.
 		 *
-		 * @param {string} [sId] id for the new control, generated automatically if no id is given
-		 * @param {object} [mSettings] initial settings for the new control
+		 * @param {string} [sId] ID for the new control, generated automatically if no ID is given
+		 * @param {object} [mSettings] Initial settings for the new control
 		 *
 		 * @class
+		 * The main element that holds the content that is displayed in an
+		 * {@link sap.uxap.ObjectPageLayout ObjectPageLayout}, but not necessarily only there.
 		 *
-		 * A block is the main element that will be displayed, mainly in an object page, but not necessarily
-		 * only there.
+		 * <h3>Overview</h3>
 		 *
-		 * A block is a control that use an XML view for storing its internal control tree.
-		 * A block is a control that has modes and a view associated to each modes.
-		 * At rendering time, the view associated to the mode is rendered.
+		 * The blocks give the flexibility to combine different content types.
 		 *
-		 * <b>Note:</b> The control supports only XML views.
+		 * A block is a control that:
+		 * <ul>
+		 * <li>Has modes and a view associated to each mode. At rendering time, the view associated to the mode is rendered.</li>
+		 * <li>Can use all view types for storing its internal control tree (XML, JS, JSON, HTML)</li>
+		 * </ul>
 		 *
-		 * As any UI5 views, the XML view can have a controller which automatically comes a this.oParentBlock attribute (so that the controller can interacts with the block).
-		 * If the controller implements the onParentBlockModeChange method, this method will get called with the sMode parameter when the view is used or re-used by the block.
+		 * As any UI5 view, the XML view can have a controller which automatically comes with a
+		 * <code>this.oParentBlock</code> attribute (so that the controller can interact with the block).
+		 * If the controller implements the <code>onParentBlockModeChange</code> method, this method will
+		 * be called with the <code>sMode</code> parameter when the view is used or reused by the block.
 		 *
 		 * @extends sap.ui.core.Control
 		 * @author SAP SE
 		 * @constructor
 		 * @public
 		 * @since 1.26
+		 * @see {@link topic:4527729576cb4a4888275b6935aad03a Block Base}
+		 * @see {@link topic:2978f6064742456ebed31c5ccf4d051d Creating Blocks}
 		 * @alias sap.uxap.BlockBase
 		 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 		 */
 
 		var BlockBase = Control.extend("sap.uxap.BlockBase", {
 			metadata: {
-				designTime: true,
+				designtime: "sap/uxap/designtime/BlockBase.designtime",
 				library: "sap.uxap",
 				properties: {
 					/**
@@ -65,7 +92,7 @@ sap.ui.define([
 					"visible": {type: "boolean", group: "Appearance", defaultValue: true},
 
 					/**
-					 * Determines on how columns the layout will be rendered.
+					 * Determines on how many columns the layout will be rendered.
 					 * Allowed values are integers from 1 to 4 and "auto".
 					 */
 					"columnLayout": {type: "sap.uxap.BlockBaseColumnLayout", group: "Behavior", defaultValue: "auto"},
@@ -80,13 +107,13 @@ sap.ui.define([
 					"formAdjustment": {
 						type: "sap.uxap.BlockBaseFormAdjustment",
 						group: "Behavior",
-						defaultValue: sap.uxap.BlockBaseFormAdjustment.BlockColumns
+						defaultValue: BlockBaseFormAdjustment.BlockColumns
 					},
 
 					/**
 					 * Determines whether the show more button should be shown.
 					 *
-					 * <b>Note:</b> The property will take effect if the <code>BlockBase</code> is inside <ObjectPageSubSection</code>
+					 * <b>Note:</b> The property will take effect if the <code>BlockBase</code> is inside <code>ObjectPageSubSection</code>
 					 * and would be ignored in case the <code>BlockBase</code> is nested inside another <code>BlockBase</code>.
 					 */
 					"showSubSectionMore": {type: "boolean", group: "Behavior", defaultValue: false}
@@ -148,15 +175,19 @@ sap.ui.define([
 			this._bLazyLoading = false; //by default, no lazy loading so we can use it out of an objectPageLayout
 			this._bConnected = false;   //indicates connectToModels function has been called
 			this._oUpdatedModels = {};
+			this._oParentObjectPageSubSection = null; // the parent ObjectPageSubSection
 		};
 
 		BlockBase.prototype.onBeforeRendering = function () {
+			var oParentObjectPageLayout;
+
 			this._applyMapping();
+
 			if (!this.getMode() || this.getMode() === "") {
 				if (this.getMetadata().getView("defaultXML")) {
 					this.setMode("defaultXML");
 				} else {
-					jQuery.sap.log.error("BlockBase ::: there is no mode defined for rendering " + this.getMetadata().getName() +
+					Log.error("BlockBase ::: there is no mode defined for rendering " + this.getMetadata().getName() +
 						". You can either set a default mode on the block metadata or set the mode property before rendering the block.");
 				}
 			}
@@ -164,13 +195,15 @@ sap.ui.define([
 			this._applyFormAdjustment();
 
 			//TODO: for iconTabBar mode, specify lazyLoading for selectedTab only?
-			this._bLazyLoading = this._getObjectPageLayout()
-								&& (this._getObjectPageLayout().getEnableLazyLoading() || this._getObjectPageLayout().getUseIconTabBar());
+			oParentObjectPageLayout = this._getObjectPageLayout();
+			this._bLazyLoading = oParentObjectPageLayout && (oParentObjectPageLayout.getEnableLazyLoading() || oParentObjectPageLayout.getUseIconTabBar());
 		};
 
 		BlockBase.prototype.onAfterRendering = function () {
-			if (this._getObjectPageLayout()) {
-				this._getObjectPageLayout()._requestAdjustLayout();
+			var oParentObjectPageLayout = this._getObjectPageLayout();
+
+			if (oParentObjectPageLayout) {
+				oParentObjectPageLayout._requestAdjustLayout();
 			}
 		};
 
@@ -211,8 +244,8 @@ sap.ui.define([
 		 * @private
 		 */
 		BlockBase.prototype._applyMapping = function () {
-			if (this._bLazyLoading && !this._bConnected) {
-				jQuery.sap.log.debug("BlockBase ::: Ignoring the _applyMapping as the block is not connected");
+			if (this._shouldLazyLoad()) {
+				Log.debug("BlockBase ::: Ignoring the _applyMapping as the block is not connected");
 			} else {
 				this.getMappings().forEach(function (oMapping, iIndex) {
 					var oModel,
@@ -240,7 +273,7 @@ sap.ui.define([
 							|| (this.getModel(sInternalModelName) !== this.getModel(sExternalModelName)) /* model changed, then we have to update internal model mapping */
 							|| (oBindingContext && (oBindingContext.getPath() !== sPath)) /* sExternalPath changed, then we have to update internal model mapping */) {
 
-							jQuery.sap.log.info("BlockBase :: mapping external model " + sExternalModelName + " to " + sInternalModelName);
+							Log.info("BlockBase :: mapping external model " + sExternalModelName + " to " + sInternalModelName);
 
 							this._oMappingApplied[sInternalModelName] = true;
 							Control.prototype.setModel.call(this, oModel, sInternalModelName);
@@ -261,7 +294,7 @@ sap.ui.define([
 		 * @returns {*} propagateProperties function result
 		 */
 		BlockBase.prototype.propagateProperties = function (vName) {
-			if (this._bLazyLoading && !this._bConnected && !this._oUpdatedModels.hasOwnProperty(vName)) {
+			if (this._shouldLazyLoad() && !this._oUpdatedModels.hasOwnProperty(vName)) {
 				this._oUpdatedModels[vName] = true;
 			} else {
 				this._applyMapping(vName);
@@ -301,7 +334,7 @@ sap.ui.define([
 				this.setProperty("mode", sMode, false);
 				//if Lazy loading is enabled, and if the block is not connected
 				//delay the view creation (will be done in connectToModels function)
-				if (!this._bLazyLoading || this._bConnected) {
+				if (!this._shouldLazyLoad()) {
 					this._initView(sMode);
 				}
 			}
@@ -368,7 +401,7 @@ sap.ui.define([
 				//the view wasn't defined.
 				//as a fallback mechanism: we look for the defaultXML one and raise an error before raising an exception
 				if (this.getMetadata().getView("defaultXML")) {
-					jQuery.sap.log.warning("BlockBase :: no view defined for block " + sBlockName + " for mode " + sMode + ", loading defaultXML instead");
+					Log.warning("BlockBase :: no view defined for block " + sBlockName + " for mode " + sMode + ", loading defaultXML instead");
 					sMode = "defaultXML";
 				} else {
 					throw new Error("BlockBase :: no view defined for block " + sBlockName + " for mode " + sMode);
@@ -411,7 +444,7 @@ sap.ui.define([
 				fnCreateView;
 
 			fnCreateView = function () {
-				return sap.ui.xmlview(this.getId() + "-" + sMode, mParameter);
+				return sap.ui.view(this.getId() + "-" + sMode, mParameter);
 			}.bind(this);
 
 			oOwnerComponent = Component.getOwnerComponentFor(this);
@@ -451,7 +484,7 @@ sap.ui.define([
 			if (oView.getController() && oView.getController().onParentBlockModeChange) {
 				oView.getController().onParentBlockModeChange(sMode);
 			} else {
-				jQuery.sap.log.info("BlockBase ::: could not notify " + mParameter.viewName + " of loading in mode " + sMode + ": missing controller onParentBlockModeChange method");
+				Log.info("BlockBase ::: could not notify " + mParameter.viewName + " of loading in mode " + sMode + ": missing controller onParentBlockModeChange method");
 			}
 
 			return oView;
@@ -493,28 +526,17 @@ sap.ui.define([
 			return oView;
 		};
 
-		// This offset is needed so the breakpoints of the simpleForm match those of the GridLayout (offset = left-padding of grid + margins of grid-cells [that create the horizontal spacing between the cells])
-		BlockBase.FORM_ADUSTMENT_OFFSET = 32;
+		// This offset is needed so the breakpoints of the ColumnLayout match those of the GridLayout (offset = Grid container width - ColumnLayout container width)
+		BlockBase.FORM_ADUSTMENT_OFFSET = 16;
 
 		BlockBase._FORM_ADJUSTMENT_CONST = {
-			breakpoints: {
-				XL: Device.media._predefinedRangeSets.StdExt.points[2] - BlockBase.FORM_ADUSTMENT_OFFSET,
-				L: Device.media._predefinedRangeSets.StdExt.points[1] - BlockBase.FORM_ADUSTMENT_OFFSET,
-				M: Device.media._predefinedRangeSets.StdExt.points[0] - BlockBase.FORM_ADUSTMENT_OFFSET
-			},
 			labelSpan: {
 				/* values specified by design requirement */
-				XL: 12,
-				L: 12,
-				M: 12,
-				S: 12
+				L: 12
 			},
 			emptySpan: {
 				/* values specified by design requirement */
-				XL: 0,
-				L: 0,
-				M: 0,
-				S: 0
+				L: 0
 			},
 			columns: {
 				XL: 1,
@@ -525,93 +547,72 @@ sap.ui.define([
 
 		BlockBase._PARENT_GRID_SIZE = 12;
 
-		BlockBase.prototype._computeFormAdjustmentFields = function (oView, oLayoutData, sFormAdjustment, oParentColumns) {
+		BlockBase.prototype._computeFormAdjustmentFields = function (oView, sFormAdjustment, oParentColumns) {
 
-			if (oView && oLayoutData && sFormAdjustment && oParentColumns) {
+			if (oView && sFormAdjustment && oParentColumns) {
 
-				var oColumns = this._computeFormColumns(oLayoutData, sFormAdjustment, oParentColumns),
-					oBreakpoints = this._computeFormBreakpoints(oLayoutData, sFormAdjustment);
-
-				return jQuery.extend({},
-					BlockBase._FORM_ADJUSTMENT_CONST,
-					{columns: oColumns},
-					{breakpoints: oBreakpoints});
+				return sFormAdjustment === BlockBaseFormAdjustment.BlockColumns ?
+					jQuery.extend({}, BlockBase._FORM_ADJUSTMENT_CONST, {columns: oParentColumns}) :
+					BlockBase._FORM_ADJUSTMENT_CONST;
 			}
-		};
-
-		BlockBase.prototype._computeFormColumns = function (oLayoutData, sFormAdjustment, oParentColumns) {
-
-			var oColumns = jQuery.extend({}, BlockBase._FORM_ADJUSTMENT_CONST.columns);
-
-			if (sFormAdjustment === sap.uxap.BlockBaseFormAdjustment.BlockColumns) {
-
-				var iColumnSpanXL = BlockBase._PARENT_GRID_SIZE / oParentColumns.XL,
-					iColumnSpanL = BlockBase._PARENT_GRID_SIZE / oParentColumns.L,
-					iColumnSpanM = BlockBase._PARENT_GRID_SIZE / oParentColumns.M;
-
-				oColumns.XL = oLayoutData.getSpanXL() / iColumnSpanXL;
-				oColumns.L = oLayoutData.getSpanL() / iColumnSpanL;
-				oColumns.M = oLayoutData.getSpanM() / iColumnSpanM;
-			}
-
-			return oColumns;
-		};
-
-		BlockBase.prototype._computeFormBreakpoints = function (oLayoutData, sFormAdjustment) {
-
-			var oBreakpoints = jQuery.extend({}, BlockBase._FORM_ADJUSTMENT_CONST.breakpoints);
-
-			if (sFormAdjustment === sap.uxap.BlockBaseFormAdjustment.BlockColumns) {
-				oBreakpoints.XL = Math.round(oBreakpoints.XL * oLayoutData.getSpanXL() / BlockBase._PARENT_GRID_SIZE);
-				oBreakpoints.L = Math.round(oBreakpoints.L * oLayoutData.getSpanL() / BlockBase._PARENT_GRID_SIZE);
-				oBreakpoints.M = Math.round(oBreakpoints.M * oLayoutData.getSpanM() / BlockBase._PARENT_GRID_SIZE);
-			}
-
-			return oBreakpoints;
 		};
 
 		BlockBase.prototype._applyFormAdjustment = function () {
 
-			var oLayoutData = this.getLayoutData(),
-				sFormAdjustment = this.getFormAdjustment(),
+			var sFormAdjustment = this.getFormAdjustment(),
 				oView = this._getSelectedViewContent(),
 				oParent = this._oParentObjectPageSubSection,
-				oFormAdjustmentFields;
+				oFormAdjustmentFields,
+				oColumnLayout,
+				oLayout;
 
-			if (sFormAdjustment && (sFormAdjustment !== sap.uxap.BlockBaseFormAdjustment.None)
-				&& oView && oLayoutData && oParent) {
+			if (sFormAdjustment && (sFormAdjustment !== BlockBaseFormAdjustment.None)
+				&& oView && oParent) {
 
 				var oParentColumns = oParent._oLayoutConfig;
 
 				oView.getContent().forEach(function (oItem) {
 					if (oItem.getMetadata().getName() === "sap.ui.layout.form.SimpleForm") {
 
-						oItem.setLayout(sap.ui.layout.form.SimpleFormLayout.ResponsiveGridLayout);
+						oItem.setLayout(SimpleFormLayout.ColumnLayout);
 
 						if (!oFormAdjustmentFields) {
-							oFormAdjustmentFields = this._computeFormAdjustmentFields(oView, oLayoutData, sFormAdjustment, oParentColumns);
+							oFormAdjustmentFields = this._computeFormAdjustmentFields(oView, sFormAdjustment, oParentColumns);
 						}
 
+						oLayout = oItem.getAggregation("form").getLayout();
+
+						oLayout._iBreakPointTablet -= BlockBase.FORM_ADUSTMENT_OFFSET;
+						oLayout._iBreakPointDesktop -= BlockBase.FORM_ADUSTMENT_OFFSET;
+						oLayout._iBreakPointLargeDesktop -= BlockBase.FORM_ADUSTMENT_OFFSET;
+
+						oItem.setLabelSpanL(oFormAdjustmentFields.labelSpan.L);
+						oItem.setEmptySpanL(oFormAdjustmentFields.emptySpan.L);
 						this._applyFormAdjustmentFields(oFormAdjustmentFields, oItem);
 
 						oItem.setWidth("100%");
 					} else if (oItem.getMetadata().getName() === "sap.ui.layout.form.Form") {
 
-						var oLayout = oItem.getLayout(),
-							oResponsiveGridLayout;
+						oLayout = oItem.getLayout();
 
-						if (oLayout && oLayout.getMetadata().getName() === "sap.ui.layout.form.ResponsiveGridLayout") {
-							oResponsiveGridLayout = oLayout; // existing ResponsiveGridLayout must be reused, otherwise an error is thrown in the existing implementation
+						if (oLayout && oLayout.getMetadata().getName() === "sap.ui.layout.form.ColumnLayout") {
+							oColumnLayout = oLayout; // existing ColumnLayout must be reused, otherwise an error is thrown in the existing implementation
 						} else {
-							oResponsiveGridLayout = new ResponsiveGridLayout();
-							oItem.setLayout(oResponsiveGridLayout);
+							oColumnLayout = new ColumnLayout();
+							oItem.setLayout(oColumnLayout);
 						}
 
 						if (!oFormAdjustmentFields) {
-							oFormAdjustmentFields = this._computeFormAdjustmentFields(oView, oLayoutData, sFormAdjustment, oParentColumns);
+							oFormAdjustmentFields = this._computeFormAdjustmentFields(oView, sFormAdjustment, oParentColumns);
 						}
 
-						this._applyFormAdjustmentFields(oFormAdjustmentFields, oResponsiveGridLayout);
+						oColumnLayout._iBreakPointTablet -= BlockBase.FORM_ADUSTMENT_OFFSET;
+						oColumnLayout._iBreakPointDesktop -= BlockBase.FORM_ADUSTMENT_OFFSET;
+						oColumnLayout._iBreakPointLargeDesktop -= BlockBase.FORM_ADUSTMENT_OFFSET;
+
+						oColumnLayout.setLabelCellsLarge(oFormAdjustmentFields.labelSpan.L);
+						oColumnLayout.setEmptyCellsLarge(oFormAdjustmentFields.emptySpan.L);
+						this._applyFormAdjustmentFields(oFormAdjustmentFields, oColumnLayout);
 
 						oItem.setWidth("100%");
 					}
@@ -624,20 +625,6 @@ sap.ui.define([
 			oFormLayout.setColumnsXL(oFormAdjustmentFields.columns.XL);
 			oFormLayout.setColumnsL(oFormAdjustmentFields.columns.L);
 			oFormLayout.setColumnsM(oFormAdjustmentFields.columns.M);
-
-			oFormLayout.setLabelSpanXL(oFormAdjustmentFields.labelSpan.XL);
-			oFormLayout.setLabelSpanL(oFormAdjustmentFields.labelSpan.L);
-			oFormLayout.setLabelSpanM(oFormAdjustmentFields.labelSpan.M);
-			oFormLayout.setLabelSpanS(oFormAdjustmentFields.labelSpan.S);
-
-			oFormLayout.setEmptySpanXL(oFormAdjustmentFields.emptySpan.XL);
-			oFormLayout.setEmptySpanL(oFormAdjustmentFields.emptySpan.L);
-			oFormLayout.setEmptySpanM(oFormAdjustmentFields.emptySpan.M);
-			oFormLayout.setEmptySpanS(oFormAdjustmentFields.emptySpan.S);
-
-			oFormLayout.setBreakpointXL(oFormAdjustmentFields.breakpoints.XL);
-			oFormLayout.setBreakpointL(oFormAdjustmentFields.breakpoints.L);
-			oFormLayout.setBreakpointM(oFormAdjustmentFields.breakpoints.M);
 		};
 
 		/*************************************************************************************
@@ -658,19 +645,14 @@ sap.ui.define([
 		 * @public
 		 */
 		BlockBase.prototype.setVisible = function (bValue, bSuppressInvalidate) {
+			var oParentObjectPageLayout = this._getObjectPageLayout();
+
 			this.setProperty("visible", bValue, bSuppressInvalidate);
-			this._getObjectPageLayout() && this._getObjectPageLayout()._adjustLayoutAndUxRules();
+			oParentObjectPageLayout && oParentObjectPageLayout._requestAdjustLayoutAndUxRules();
 
 			return this;
 		};
 
-		/**
-		 * Set the showSubSectionMore property.
-		 * Ask the parent ObjectPageSubSection to refresh its see more visibility state if present.
-		 * @param {boolean} bValue
-		 * @param {boolean} bInvalidate
-		 * @returns {*}
-		 */
 		BlockBase.prototype.setShowSubSectionMore = function (bValue, bInvalidate) {
 			//suppress invalidate as ShowSubSectionMore has no impact on block itself.
 			if (bValue != this.getShowSubSectionMore()) {
@@ -686,13 +668,12 @@ sap.ui.define([
 		};
 
 		/**
-		 * Connect Block to the UI5 model tree.
-		 * Initialize view if lazy loading is enabled.
-		 * @returns {*}
+		 * Connects the <code>sap.uxap.Block</code> to the UI5 model tree.
+		 * Initializes a view, if the lazy loading is enabled.
 		 */
 		BlockBase.prototype.connectToModels = function () {
 			if (!this._bConnected) {
-				jQuery.sap.log.debug("BlockBase :: Connecting block to the UI5 model tree");
+				Log.debug("BlockBase :: Connecting block to the UI5 model tree");
 				this._bConnected = true;
 				if (this._bLazyLoading) {
 					//if lazy loading is enabled, the view has not been created during the setMode
@@ -724,10 +705,10 @@ sap.ui.define([
 		 * @returns {*}
 		 */
 		BlockBase.prototype.updateBindingContext = function (bSkipLocal, bSkipChildren, sModelName, bUpdateAll) {
-			if (!this._bLazyLoading || this._bConnected) {
+			if (!this._shouldLazyLoad()) {
 				return Control.prototype.updateBindingContext.call(this, bSkipLocal, bSkipChildren, sModelName, bUpdateAll);
 			} else {
-				jQuery.sap.log.debug("BlockBase ::: Ignoring the updateBindingContext as the block is not visible for now in the ObjectPageLayout");
+				Log.debug("BlockBase ::: Ignoring the updateBindingContext as the block is not visible for now in the ObjectPageLayout");
 			}
 		};
 
@@ -739,12 +720,23 @@ sap.ui.define([
 		 * @returns {*}
 		 */
 		BlockBase.prototype.updateBindings = function (bUpdateAll, sModelName) {
-			if (!this._bLazyLoading || this._bConnected) {
+			if (!this._shouldLazyLoad()) {
 				return Control.prototype.updateBindings.call(this, bUpdateAll, sModelName);
 			} else {
-				jQuery.sap.log.debug("BlockBase ::: Ignoring the updateBindingContext as the block is not visible for now in the ObjectPageLayout");
+				Log.debug("BlockBase ::: Ignoring the updateBindingContext as the block is not visible for now in the ObjectPageLayout");
 			}
 		};
 
-	return BlockBase;
+		/**
+		 * Determines whether the <code>sap.uxap.BlockBase</code> should be loaded lazily.
+		 * There are 3 prerequisites - lazy loading sould be enabled, the block should not be connected
+		 * and the block is used whithin <code>sap.uxap.ObjectPageSubSection</code>
+		 * @returns {Boolean}
+		 * @private
+		 */
+		BlockBase.prototype._shouldLazyLoad = function () {
+			return !!this._oParentObjectPageSubSection && this._bLazyLoading && !this._bConnected;
+		};
+
+		return BlockBase;
 });

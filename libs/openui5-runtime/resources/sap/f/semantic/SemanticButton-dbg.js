@@ -1,15 +1,14 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
 	"./SemanticControl",
-	"./SemanticConfiguration",
 	"sap/m/Button",
 	"sap/m/OverflowToolbarButton"
-], function(SemanticControl, SemanticConfiguration, Button, OverflowToolbarButton) {
+], function(SemanticControl, Button, OverflowToolbarButton) {
 	"use strict";
 
 	/**
@@ -26,7 +25,7 @@ sap.ui.define([
 	* @abstract
 	*
 	* @author SAP SE
-	* @version 1.50.6
+	* @version 1.61.2
 	*
 	* @constructor
 	* @public
@@ -89,4 +88,4 @@ sap.ui.define([
 	};
 
 	return SemanticButton;
-}, /* bExport= */ false);
+});

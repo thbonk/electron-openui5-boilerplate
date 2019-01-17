@@ -1,13 +1,20 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-// Provides class sap.ui.rta.plugin.Split.
 sap.ui.define([
-	'sap/ui/rta/plugin/Plugin', 'sap/ui/dt/Selection', 'sap/ui/dt/OverlayRegistry', 'sap/ui/rta/Utils', 'sap/ui/fl/Utils'
-], function(Plugin, Selection, OverlayRegistry, Utils, FlexUtils) {
+	'sap/ui/rta/plugin/Plugin',
+	'sap/ui/dt/Util',
+	'sap/ui/fl/Utils',
+	"sap/base/util/uid"
+], function(
+	Plugin,
+	DtUtil,
+	FlexUtils,
+	uid
+) {
 	"use strict";
 
 	/**
@@ -16,7 +23,7 @@ sap.ui.define([
 	 * @class
 	 * @extends sap.ui.rta.plugin.Plugin
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @constructor
 	 * @private
 	 * @since 1.46
@@ -41,46 +48,37 @@ sap.ui.define([
 	 * @returns {boolean} true if it's editable
 	 * @private
 	 */
-	Split.prototype._isEditable = function(oOverlay) {
-		if (!Utils.getRelevantContainerDesigntimeMetadata(oOverlay)) {
-			return false;
-		}
-		var oSplitAction = this._getSplitAction(oOverlay);
+	Split.prototype._isEditable = function (oOverlay) {
+		var oSplitAction = this.getAction(oOverlay);
 		if (oSplitAction && oSplitAction.changeType && oSplitAction.changeOnRelevantContainer) {
-			return this.hasStableId(oOverlay) && this.hasChangeHandler(oSplitAction.changeType, oOverlay.getRelevantContainer());
+			return this.hasChangeHandler(oSplitAction.changeType, oOverlay.getRelevantContainer()) &&
+					this.hasStableId(oOverlay) &&
+					this._checkRelevantContainerStableID(oSplitAction, oOverlay);
 		} else {
 			return false;
 		}
 	};
 
 	/**
-	 * @param	{sap.ui.dt.Overlay} oOverlay overlay object
-	 * @return {sap.ui.dt.DesignTimeMetadata} oDesignTimeMetadata
-	 * @private
-	 */
-	Split.prototype._getSplitAction = function(oOverlay) {
-		return oOverlay.getDesignTimeMetadata() ? oOverlay.getDesignTimeMetadata().getAction("split", oOverlay.getElementInstance()) : null;
-	};
-
-	/**
 	 * Checks if Split is available for oOverlay
 	 *
-	 * @param {sap.ui.dt.Overlay} oOverlay overlay object
+	 * @param {sap.ui.dt.ElementOverlay[]} aElementOverlays - Target overlays
 	 * @return {boolean} true if available
 	 * @public
 	 */
-	Split.prototype.isSplitAvailable = function(oOverlay) {
-		if (!this._isEditableByPlugin(oOverlay)) {
+	Split.prototype.isAvailable = function (aElementOverlays) {
+		if (aElementOverlays.length !== 1) {
 			return false;
 		}
 
-		var aSelectedOverlays = this.getDesignTime().getSelection();
-		if (aSelectedOverlays.length !== 1) {
+		var oElementOverlay = aElementOverlays[0];
+
+		if (!this._isEditableByPlugin(oElementOverlay)) {
 			return false;
 		}
 
-		var vSplitAction = this._getSplitAction(oOverlay);
-		var oElement = aSelectedOverlays[0].getElementInstance();
+		var vSplitAction = this.getAction(oElementOverlay);
+		var oElement = oElementOverlay.getElement();
 		if (vSplitAction && vSplitAction.getControlsCount(oElement) <= 1) {
 			return false;
 		}
@@ -91,15 +89,16 @@ sap.ui.define([
 	/**
 	 * Checks if Split is enabled for oOverlay
 	 *
-	 * @param {sap.ui.dt.Overlay} oOverlay overlay object
+	 * @param {sap.ui.dt.ElementOverlay[]} aElementOverlays - Target overlays
 	 * @return {boolean} true if enabled
 	 * @public
 	 */
-	Split.prototype.isSplitEnabled = function(oOverlay) {
+	Split.prototype.isEnabled = function (aElementOverlays) {
+		var oElementOverlay = aElementOverlays[0];
 
 		// check that each selected element has an enabled action
-		var oAction = this._getSplitAction(oOverlay);
-		if (!oAction || !this.isSplitAvailable(oOverlay)) {
+		var oAction = this.getAction(oElementOverlay);
+		if (!oAction || !this.isAvailable(aElementOverlays)) {
 			return false;
 		}
 
@@ -107,7 +106,7 @@ sap.ui.define([
 		var bActionIsEnabled = true;
 		if (typeof oAction.isEnabled !== "undefined") {
 			if (typeof oAction.isEnabled === "function") {
-				 bActionIsEnabled = oAction.isEnabled(oOverlay.getElementInstance());
+				 bActionIsEnabled = oAction.isEnabled(oElementOverlay.getElement());
 			} else {
 				bActionIsEnabled = oAction.isEnabled;
 			}
@@ -116,30 +115,69 @@ sap.ui.define([
 	};
 
 	/**
-	 * @param  {any} oSplitElement selected element
+	 * @param {sap.ui.dt.ElementOverlay} oElementOverlay - element overlay to split
 	 */
-	Split.prototype.handleSplit = function(oSplitElement) {
+	Split.prototype.handleSplit = function (oElementOverlay) {
+		var oSplitElement = oElementOverlay.getElement();
 		var oParent = oSplitElement.getParent();
-		var oElementOverlay = OverlayRegistry.getOverlay(oSplitElement);
 		var oDesignTimeMetadata = oElementOverlay.getDesignTimeMetadata();
 
-		var iFieldsLength = this._getSplitAction(oElementOverlay).getControlsCount(oSplitElement);
+		var iFieldsLength = this.getAction(oElementOverlay).getControlsCount(oSplitElement);
 		var oView = FlexUtils.getViewForControl(oSplitElement);
 		var aNewElementIds = [];
 		// Split needs iFieldsLength controls, only one is available so far
 		for (var i = 0; i < iFieldsLength - 1; i++){
-			aNewElementIds.push(oView.createId(jQuery.sap.uid()));
+			aNewElementIds.push(oView.createId(uid()));
 		}
 
-		var oSplitCommand = this.getCommandFactory().getCommandFor(oSplitElement, "split", {
+		var oSplitAction = this.getAction(oElementOverlay);
+		var sVariantManagementReference = this.getVariantManagementReference(oElementOverlay, oSplitAction);
+
+		return this.getCommandFactory().getCommandFor(oSplitElement, "split", {
 			newElementIds : aNewElementIds,
 			source : oSplitElement,
 			parentElement : oParent
-		}, oDesignTimeMetadata);
-		this.fireElementModified({
-			"command" : oSplitCommand
-		});
+		}, oDesignTimeMetadata, sVariantManagementReference)
 
+		.then(function(oSplitCommand) {
+			this.fireElementModified({
+				"command" : oSplitCommand
+			});
+		}.bind(this))
+
+		.catch(function(vError) {
+			throw DtUtil.propagateError(
+				vError,
+				"Split#handleSplit",
+				"Error occured during handleSplit execution",
+				"sap.ui.rta.plugin"
+			);
+		});
+	};
+
+	/**
+	 * Retrieve the context menu item for the action.
+	 * @param {sap.ui.dt.ElementOverlay|sap.ui.dt.ElementOverlay[]} aElementOverlays - overlays for which actions are requested
+	 * @return {object[]} - array of the items with required data
+	 */
+	Split.prototype.getMenuItems = function (vElementOverlays) {
+		return this._getMenuItems(vElementOverlays, {pluginId : "CTX_UNGROUP_FIELDS", rank : 100, icon : "sap-icon://split"});
+	};
+
+	/**
+	 * Get the name of the action related to this plugin.
+	 * @return {string} Returns the action name
+	 */
+	Split.prototype.getActionName = function(){
+		return "split";
+	};
+
+	/**
+	 * Trigger the plugin execution.
+	 * @param {sap.ui.dt.ElementOverlay[]} aElementOverlays - Target overlays
+	 */
+	Split.prototype.handler = function (aElementOverlays) {
+		this.handleSplit(aElementOverlays[0]);
 	};
 
 	return Split;

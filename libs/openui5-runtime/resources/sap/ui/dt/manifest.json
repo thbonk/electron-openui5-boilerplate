@@ -1,20 +1,19 @@
 {
-  "_version": "1.2.0",
+  "_version": "1.9.0",
   "sap.app": {
-    "_version": "1.2.0",
     "id": "sap.ui.dt",
     "type": "library",
     "embeds": [],
     "applicationVersion": {
-      "version": "1.50.6"
+      "version": "1.61.2"
     },
     "title": "SAP UI library: sap.ui.dt (by SAP, Author)",
     "description": "SAP UI library: sap.ui.dt (by SAP, Author)",
+    "ach": "CA-UI5-FL-RTA",
     "resources": "resources.json",
     "offline": true
   },
   "sap.ui": {
-    "_version": "1.1.0",
     "technology": "UI5",
     "supportedThemes": [
       "base",
@@ -22,13 +21,23 @@
     ]
   },
   "sap.ui5": {
-    "_version": "1.1.0",
     "dependencies": {
-      "minUI5Version": "1.50",
+      "minUI5Version": "1.61",
       "libs": {
         "sap.ui.core": {
-          "minVersion": "1.50.6"
+          "minVersion": "1.61.2"
         }
+      }
+    },
+    "library": {
+      "i18n": false,
+      "content": {
+        "controls": [],
+        "elements": [],
+        "types": [
+          "sap.ui.dt.SelectionMode"
+        ],
+        "interfaces": []
       }
     }
   }

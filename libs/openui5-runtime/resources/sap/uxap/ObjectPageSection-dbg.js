@@ -1,32 +1,49 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.uxap.ObjectPageSection.
 sap.ui.define([
-	"jquery.sap.global",
-	"sap/ui/core/InvisibleText",
-	"./ObjectPageSectionBase",
-	"sap/ui/Device",
-	"sap/m/Button",
-	"sap/ui/core/StashedControlSupport",
-	"./ObjectPageSubSection",
-	"./library"
-], function (jQuery, InvisibleText, ObjectPageSectionBase, Device, Button, StashedControlSupport, ObjectPageSubSection, library) {
+    "sap/ui/core/InvisibleText",
+    "./ObjectPageSectionBase",
+    "sap/ui/Device",
+    "sap/m/Button",
+    "sap/ui/core/StashedControlSupport",
+    "./ObjectPageSubSection",
+    "./library",
+    "sap/m/library",
+    "./ObjectPageSectionRenderer"
+], function(
+    InvisibleText,
+	ObjectPageSectionBase,
+	Device,
+	Button,
+	StashedControlSupport,
+	ObjectPageSubSection,
+	library,
+	mobileLibrary,
+	ObjectPageSectionRenderer
+) {
 	"use strict";
 
+	// shortcut for sap.m.ButtonType
+	var ButtonType = mobileLibrary.ButtonType;
+
 	/**
-	 * Constructor for a new ObjectPageSection.
+	 * Constructor for a new <code>ObjectPageSection</code>.
 	 *
-	 * @param {string} [sId] id for the new control, generated automatically if no id is given
-	 * @param {object} [mSettings] initial settings for the new control
+	 * @param {string} [sId] ID for the new control, generated automatically if no ID is given
+	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
+	 * Top-level information container of an {@link sap.uxap.ObjectPageLayout}.
 	 *
-	 * An ObjectPageSection is the top-level information container of an Object page. Its purpose is to aggregate Subsections.
-	 * Disclaimer: This control is intended to be used only as part of the Object page layout
+	 * The <code>ObjectPageSection</code>'s purpose is to aggregate subsections.
+	 *
+	 * <b>Note:</b> This control is intended to be used only as part of the <code>ObjectPageLayout</code>.
+	 *
 	 * @extends sap.uxap.ObjectPageSectionBase
 	 *
 	 * @constructor
@@ -73,7 +90,7 @@ sap.ui.define([
 				 */
 				selectedSubSection: {type: "sap.uxap.ObjectPageSubSection", multiple: false}
 			},
-			designTime: true
+			designtime: "sap/uxap/designtime/ObjectPageSection.designtime"
 		}
 	});
 
@@ -85,8 +102,19 @@ sap.ui.define([
 	 * @returns {sap.uxap.ObjectPageSection}
 	 * @private
 	 */
-	ObjectPageSection._getClosestSection = function (oSectionBase) {
+	ObjectPageSection._getClosestSection = function (vSectionBase) {
+		var oSectionBase = (typeof vSectionBase === "string" && sap.ui.getCore().byId(vSectionBase)) || vSectionBase;
 		return (oSectionBase instanceof ObjectPageSubSection) ? oSectionBase.getParent() : oSectionBase;
+	};
+
+	/**
+	 * Retrieves the resource bundle for the <code>sap.uxap</code> library.
+	 * @static
+	 * @private
+	 * @returns {Object} the resource bundle object
+	 */
+	ObjectPageSection._getLibraryResourceBundle = function() {
+		return sap.ui.getCore().getLibraryResourceBundle("sap.uxap");
 	};
 
 	ObjectPageSection.prototype._expandSection = function () {
@@ -101,6 +129,18 @@ sap.ui.define([
 
 	ObjectPageSection.prototype.exit = function () {
 		this._detachMediaContainerWidthChange(this._updateImportance, this);
+	};
+
+	ObjectPageSection.prototype.setTitle = function (sValue) {
+		ObjectPageSectionBase.prototype.setTitle.call(this, sValue);
+
+		var oAriaLabelledBy = this.getAggregation("ariaLabelledBy"),
+			sSectionText = ObjectPageSection._getLibraryResourceBundle().getText("SECTION_CONTROL_NAME");
+
+		if (oAriaLabelledBy) {
+			sap.ui.getCore().byId(oAriaLabelledBy.getId()).setText(sValue + " " + sSectionText);
+		}
+		return this;
 	};
 
 	ObjectPageSection.prototype._getImportanceLevelToHide = function (oCurrentMedia) {
@@ -172,9 +212,31 @@ sap.ui.define([
 	 * @returns {*} sap.ui.core.InvisibleText
 	 */
 	ObjectPageSection.prototype._getAriaLabelledBy = function () {
+		// Each section should be labelled as:
+		// 'titleName Section' - if the section has a title
+		// 'Section' - if it does not have a title
+
+		var sLabel = "",
+			sTitle = this._getTitle();
+
+		if (sTitle) {
+			sLabel += sTitle + " ";
+		}
+
+		sLabel += ObjectPageSection._getLibraryResourceBundle().getText("SECTION_CONTROL_NAME");
+
 		return new InvisibleText({
-			text: this._getInternalTitle() || this.getTitle()
+			text: sLabel
 		}).toStatic();
+	};
+
+	/**
+	 * Determines if the <code>ObjectPageSection</code> title is visible.
+	 * @private
+	 * @returns {Boolean}
+	 */
+	ObjectPageSection.prototype._isTitleVisible = function () {
+		return this.getShowTitle() && this._getInternalTitleVisible();
 	};
 
 	/**
@@ -273,7 +335,7 @@ sap.ui.define([
 				visible: this._getShouldDisplayShowHideAllButton(),
 				text: this._getShowHideAllButtonText(!this._thereAreHiddenSubSections()),
 				press: this._showHideContentAllContent.bind(this),
-				type: sap.m.ButtonType.Transparent
+				type: ButtonType.Transparent
 			}).addStyleClass("sapUxAPSectionShowHideButton"), true); // this is called from the renderer, so suppress invalidate
 		}
 
@@ -281,11 +343,11 @@ sap.ui.define([
 	};
 
 	ObjectPageSection.prototype._getShowHideButtonText = function (bHide) {
-		return library.i18nModel.getResourceBundle().getText(bHide ? "HIDE" : "SHOW");
+		return ObjectPageSection._getLibraryResourceBundle().getText(bHide ? "HIDE" : "SHOW");
 	};
 
 	ObjectPageSection.prototype._getShowHideAllButtonText = function (bHide) {
-		return library.i18nModel.getResourceBundle().getText(bHide ? "HIDE_ALL" : "SHOW_ALL");
+		return ObjectPageSection._getLibraryResourceBundle().getText(bHide ? "HIDE_ALL" : "SHOW_ALL");
 	};
 
 	ObjectPageSection.prototype._updateShowHideButton = function (bHide) {
@@ -300,7 +362,7 @@ sap.ui.define([
 				visible: this._shouldBeHidden(),
 				text: this._getShowHideButtonText(!this._getIsHidden()),
 				press: this._showHideContent.bind(this),
-				type: sap.m.ButtonType.Transparent
+				type: ButtonType.Transparent
 			}).addStyleClass("sapUxAPSectionShowHideButton"), true); // this is called from the renderer, so suppress invalidate
 		}
 

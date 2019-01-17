@@ -1,16 +1,23 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-/*global HTMLScriptElement, HTMLLinkElement */
+/*global HTMLScriptElement, HTMLLinkElement, XMLHttpRequest */
 
 /*
  * Provides the AppCacheBuster mechanism to load application files using a timestamp
  */
-sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Core', 'sap/ui/thirdparty/URI'],
-	function(jQuery, ManagedObject, Core, URI) {
+sap.ui.define([
+	'sap/ui/base/ManagedObject',
+	'./Core',
+	'sap/ui/thirdparty/URI',
+	"sap/base/Log",
+	"sap/base/strings/escapeRegExp",
+	"sap/ui/thirdparty/jquery"
+],
+	function(ManagedObject, Core, URI, Log, escapeRegExp, jQuery) {
 	"use strict";
 
 	/*
@@ -24,7 +31,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Core', 'sap/
 	// URL normalizer
 
 
-	// 1.) Enableable
+	// 1.) Can be enabled
 	// 2.) Must match to index
 	// 3.) hook to suppress
 
@@ -60,13 +67,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Core', 'sap/
 	};
 
 	// store the original function / property description to intercept
-	var fnAjaxOrig, fnValidateProperty, descScriptSrc, descLinkHref;
+	var fnValidateProperty, descScriptSrc, descLinkHref, fnXhrOpenOrig, fnEnhancedXhrOpen;
 
 	// determine the application base url
-	var sLocation = document.location.href.replace(/\?.*|#.*/g, "");
+	var sLocation = document.baseURI.replace(/\?.*|#.*/g, "");
 
 	// determine the base urls (normalize and then calculate the resources and test-resources urls)
-	var oUri = URI(jQuery.sap.getModulePath("", "/../"));
+	var oUri = URI(sap.ui.require.toUrl("") + "/../");
 	var sOrgBaseUrl = oUri.toString();
 	if (oUri.is("relative")) {
 		oUri = oUri.absoluteTo(sLocation);
@@ -76,7 +83,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Core', 'sap/
 	//var sTestResBaseUrl = URI("test-resources").absoluteTo(sBaseUrl).toString();
 
 	// create resources check regex
-	var oFilter = new RegExp("^" + jQuery.sap.escapeRegExp(sResBaseUrl));
+	var oFilter = new RegExp("^" + escapeRegExp(sResBaseUrl));
 
 	// helper function to append the trailing slashes if missing
 	var fnEnsureTrailingSlash = function(sUrl) {
@@ -121,13 +128,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Core', 'sap/
 			var sContent = [];
 
 			// log
-			jQuery.sap.log.debug("sap.ui.core.AppCacheBuster.register(\"" + sRootUrl + "\"); // BATCH MODE!");
+			Log.debug("sap.ui.core.AppCacheBuster.register(\"" + sRootUrl + "\"); // BATCH MODE!");
 
 			// determine the base URL
 			var sAbsoluteRootUrl = AppCacheBuster.normalizeURL(sRootUrl); // "./" removes the html doc from path
 
 			// log
-			jQuery.sap.log.debug("  --> normalized to: \"" + sAbsoluteRootUrl + "\"");
+			Log.debug("  --> normalized to: \"" + sAbsoluteRootUrl + "\"");
 
 			// create the list of absolute base urls
 			sBaseUrl.forEach(function(sUrlEntry) {
@@ -160,7 +167,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Core', 'sap/
 							jQuery.extend(mIndex, data);
 						},
 						error: function() {
-							jQuery.sap.log.error("Failed to batch load AppCacheBuster index file from: \"" + sUrl + "\".");
+							Log.error("Failed to batch load AppCacheBuster index file from: \"" + sUrl + "\".");
 						}
 				};
 
@@ -172,13 +179,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Core', 'sap/
 			sBaseUrl = fnEnsureTrailingSlash(sBaseUrl);
 
 			// log
-			jQuery.sap.log.debug("sap.ui.core.AppCacheBuster.register(\"" + sBaseUrl + "\");");
+			Log.debug("sap.ui.core.AppCacheBuster.register(\"" + sBaseUrl + "\");");
 
 			// determine the base URL
 			sAbsoluteBaseUrl = AppCacheBuster.normalizeURL(sBaseUrl); // "./" removes the html doc from path
 
 			// log
-			jQuery.sap.log.debug("  --> normalized to: \"" + sAbsoluteBaseUrl + "\"");
+			Log.debug("  --> normalized to: \"" + sAbsoluteBaseUrl + "\"");
 
 			// if the index file has not been loaded yet => load!
 			if (!mIndex[sAbsoluteBaseUrl]) {
@@ -198,7 +205,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Core', 'sap/
 							mIndex[sAbsoluteBaseUrl] = data;
 						},
 						error: function() {
-							jQuery.sap.log.error("Failed to load AppCacheBuster index file from: \"" + sUrl + "\".");
+							Log.error("Failed to load AppCacheBuster index file from: \"" + sUrl + "\".");
 						}
 				};
 
@@ -214,13 +221,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Core', 'sap/
 			// if anything else than undefined or null is returned we will use this
 			// content as data for the cache buster index
 			if (mIndexInfo != null) {
-				jQuery.sap.log.info("AppCacheBuster index file injected for: \"" + sUrl + "\".");
+				Log.info("AppCacheBuster index file injected for: \"" + sUrl + "\".");
 				oRequest.success(mIndexInfo);
 			} else {
 
 				// use the syncpoint only during boot => otherwise the syncpoint
 				// is not given because during runtime the registration needs to
-				// be done synchrously.
+				// be done synchronously.
 				if (oRequest.async) {
 					var iSyncPoint = oSyncPoint.startTask("load " + sUrl);
 					var fnSuccess = oRequest.success, fnError = oRequest.error;
@@ -237,7 +244,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Core', 'sap/
 				}
 
 				// load it
-				jQuery.sap.log.info("Loading AppCacheBuster index file from: \"" + sUrl + "\".");
+				Log.info("Loading AppCacheBuster index file from: \"" + sUrl + "\".");
 				jQuery.ajax(oRequest);
 
 			}
@@ -262,7 +269,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Core', 'sap/
 			 * Boots the AppCacheBuster by initializing and registering the
 			 * base URLs configured in the UI5 bootstrap.
 			 *
-			 * @param {jQuery.sap.syncPoint} [oSyncPoint] the sync point
+			 * @param {Object} [oSyncPoint] the sync point which is used to chain the execution of the AppCacheBuster
 			 *
 			 * @private
 			 */
@@ -316,7 +323,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Core', 'sap/
 			 *
 			 * The intercepted functions are:
 			 * <ul>
-			 * <li><code>jQuery.ajax</code></li>
+			 * <li><code>XMLHttpRequest.prototype.open</code></li>
 			 * <li><code>jQuery.sap.includeScript</code></li>
 			 * <li><code>jQuery.sap.includeStyleSheet</code></li>
 			 * <li><code>sap.ui.base.ManagedObject.prototype.validateProperty</code></li>
@@ -326,11 +333,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Core', 'sap/
 			 */
 			init: function() {
 
-				// activate the session (do not create the session for compat reasons with mIndex previously)
+				// activate the session (do not create the session for compatibility reasons with mIndex previously)
 				oSession.active = true;
 
 				// store the original function / property description to intercept
-				fnAjaxOrig = jQuery.ajax;
 				fnValidateProperty = ManagedObject.prototype.validateProperty;
 				descScriptSrc = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, "src");
 				descLinkHref = Object.getOwnPropertyDescriptor(HTMLLinkElement.prototype, "href");
@@ -349,13 +355,15 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Core', 'sap/
 					return false;
 				}.bind(oSession);
 
-				// enhance the original ajax function with appCacheBuster functionality
-				jQuery.ajax = function(url, options) {
-					if (url && url.url && fnIsACBUrl(url.url)) {
-						url.url = fnConvertUrl(url.url);
+				// enhance xhr with appCacheBuster functionality
+				fnXhrOpenOrig = XMLHttpRequest.prototype.open;
+				XMLHttpRequest.prototype.open = function(sMethod, sUrl) {
+					if (sUrl && fnIsACBUrl(sUrl)) {
+						arguments[1] = fnConvertUrl(sUrl);
 					}
-					return fnAjaxOrig.apply(this, arguments);
+					fnXhrOpenOrig.apply(this, arguments);
 				};
+				fnEnhancedXhrOpen = XMLHttpRequest.prototype.open;
 
 				// enhance the validateProperty function to intercept URI types
 				//  test via: new sap.ui.commons.Image({src: "acctest/img/Employee.png"}).getSrc()
@@ -401,13 +409,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Core', 'sap/
 				try {
 					Object.defineProperty(HTMLScriptElement.prototype, "src", fnCreateInterceptorDescriptor(descScriptSrc));
 				} catch (ex) {
-					jQuery.sap.log.error("Your browser doesn't support redefining the src property of the script tag. Disabling AppCacheBuster as it is not supported on your browser!\nError: " + ex);
+					Log.error("Your browser doesn't support redefining the src property of the script tag. Disabling AppCacheBuster as it is not supported on your browser!\nError: " + ex);
 					bError = true;
 				}
 				try {
 					Object.defineProperty(HTMLLinkElement.prototype, "href", fnCreateInterceptorDescriptor(descLinkHref));
 				} catch (ex) {
-					jQuery.sap.log.error("Your browser doesn't support redefining the href property of the link tag. Disabling AppCacheBuster as it is not supported on your browser!\nError: " + ex);
+					Log.error("Your browser doesn't support redefining the href property of the link tag. Disabling AppCacheBuster as it is not supported on your browser!\nError: " + ex);
 					bError = true;
 				}
 
@@ -428,8 +436,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Core', 'sap/
 			exit: function() {
 
 				// remove the function interceptions
-				jQuery.ajax = fnAjaxOrig;
 				ManagedObject.prototype.validateProperty = fnValidateProperty;
+
+				// only remove xhr interception if xhr#open was not modified meanwhile
+				if (XMLHttpRequest.prototype.open === fnEnhancedXhrOpen) {
+					XMLHttpRequest.prototype.open = fnXhrOpenOrig;
+				}
+
 				// remove the property descriptor interceptions (but only if not overridden again)
 				var descriptor;
 				if ((descriptor = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, "src")) && descriptor.set && descriptor.set._sapUiCoreACB === true) {
@@ -456,7 +469,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Core', 'sap/
 			 * locations. All registered files will be considered by the cachebuster
 			 * and the URLs will be prefixed with the timestamp of the index file.
 			 *
-			 * @param {string} base URL of an application providing a cachebuster index file
+			 * @param {string} sBaseUrl base URL of an application providing a cachebuster index file
 			 *
 			 * @public
 			 */
@@ -477,7 +490,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Core', 'sap/
 			 */
 			convertURL: function(sUrl) {
 
-				jQuery.sap.log.debug("sap.ui.core.AppCacheBuster.convertURL(\"" + sUrl + "\");");
+				Log.debug("sap.ui.core.AppCacheBuster.convertURL(\"" + sUrl + "\");");
 
 				var mIndex = oSession.index;
 
@@ -488,7 +501,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Core', 'sap/
 					// local resources are registered with "./" => we remove the leading "./"!
 					// (code location for this: sap/ui/Global.js:sap.ui.localResources)
 					var sNormalizedUrl = AppCacheBuster.normalizeURL(sUrl);
-					jQuery.sap.log.debug("  --> normalized to: \"" + sNormalizedUrl + "\"");
+					Log.debug("  --> normalized to: \"" + sNormalizedUrl + "\"");
 
 					// should the URL be handled?
 					if (sNormalizedUrl && AppCacheBuster.handleURL(sNormalizedUrl)) {
@@ -500,10 +513,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', './Core', 'sap/
 							var sUrlPath;
 							if (sBaseUrl && sNormalizedUrl.length >= sBaseUrl.length && sNormalizedUrl.slice(0, sBaseUrl.length) === sBaseUrl ) {
 								sUrlPath = sNormalizedUrl.slice(sBaseUrl.length);
+								sUrlPath = sUrlPath.match(/([^?#]*)/)[1];
 								if (mBaseUrlIndex[sUrlPath]) {
 									// return the normalized URL only if found in the index
 									sUrl = sBaseUrl + "~" + mBaseUrlIndex[sUrlPath] + "~/" + sUrlPath;
-									jQuery.sap.log.debug("  ==> rewritten to \"" + sUrl + "\";");
+									Log.debug("  ==> rewritten to \"" + sUrl + "\";");
 									return false;
 								}
 							}

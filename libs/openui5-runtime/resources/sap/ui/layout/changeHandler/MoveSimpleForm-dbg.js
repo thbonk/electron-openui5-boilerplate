@@ -1,11 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(["jquery.sap.global", "sap/ui/fl/changeHandler/JsControlTreeModifier", "sap/ui/fl/Utils"],
-		function(jQuery, JsControlTreeModifier, Utils) {
+sap.ui.define([
+	"sap/ui/core/util/reflection/JsControlTreeModifier",
+	"sap/base/util/uid",
+	"sap/base/Log",
+	"sap/ui/thirdparty/jquery"
+],
+		function(JsControlTreeModifier, uid, Log, jQuery) {
 			"use strict";
 
 			/**
@@ -13,7 +18,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/fl/changeHandler/JsControlTreeModifi
 			 *
 			 * @alias sap.ui.fl.changeHandler.MoveElements
 			 * @author SAP SE
-			 * @version 1.50.6
+			 * @version 1.61.2
 			 * @experimental Since 1.34.0
 			 */
 			var MoveSimpleForm = {};
@@ -45,7 +50,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/fl/changeHandler/JsControlTreeModifi
 				if (fnFirstGroupWithoutTitle(oModifier, aStopToken, aContent)) {
 					var oView = mPropertyBag.view;
 					var oAppComponent = mPropertyBag.appComponent;
-					var sGroupId = oAppComponent.createId(jQuery.sap.uid());
+					var sGroupId = oAppComponent.createId(uid());
 
 					var oTitle = oModifier.createControl("sap.ui.core.Title", oAppComponent, oView, sGroupId);
 					oModifier.setProperty(oTitle, "text", "");
@@ -76,11 +81,11 @@ sap.ui.define(["jquery.sap.global", "sap/ui/fl/changeHandler/JsControlTreeModifi
 				return aContent.indexOf(oResult);
 			};
 
-			var fnIsTitleOrToolbar = function(aElements, iIndex) {
+			var fnIsTitleOrToolbar = function(aElements, iIndex, oModifier) {
 				if (iIndex >= aElements.length || iIndex === -1) {
 					return true;
 				}
-				var sType = aElements[iIndex].getMetadata().getName();
+				var sType = oModifier.getControlType(aElements[iIndex]);
 				return (MoveSimpleForm.sTypeTitle === sType
 						|| MoveSimpleForm.sTypeToolBar === sType
 						|| MoveSimpleForm.sTypeMTitle === sType
@@ -110,8 +115,8 @@ sap.ui.define(["jquery.sap.global", "sap/ui/fl/changeHandler/JsControlTreeModifi
 			};
 
 			var fnMapFieldIndexToContentAggregationIndex = function(oModifier, aContent, iGroupStart, iFieldIndex, bUp) {
-				if (!fnIsTitleOrToolbar(aContent, iGroupStart)) {
-					jQuery.sap.log.error("Illegal argument. iIndex has to point to a Label.");
+				if (!fnIsTitleOrToolbar(aContent, iGroupStart, oModifier)) {
+					Log.error("Illegal argument. iIndex has to point to a Label.");
 				} else {
 					iFieldIndex = bUp ? iFieldIndex + 1 : iFieldIndex;
 					var iCurrentRelativeFieldIndex = 0;
@@ -203,16 +208,16 @@ sap.ui.define(["jquery.sap.global", "sap/ui/fl/changeHandler/JsControlTreeModifi
 			};
 
 			/**
-			 * Moves an element from one aggregation to another.
+			 * Moves an element from one aggregation to another
 			 *
 			 * @param {sap.ui.fl.Change} oChangeWrapper
-			 *          change object with instructions to be applied on the control map
+			 *          Change object with instructions to be applied to the control map
 			 * @param {sap.ui.core.Control} oSimpleForm
 			 *          oSourceParent control that matches the change selector for applying the change, which is the source of
 			 *          the move
 			 * @param {object} mPropertyBag
-			 *          map containing the control modifier object (either sap.ui.fl.changeHandler.JsControlTreeModifier or
-			 *          sap.ui.fl.changeHandler.XmlTreeModifier), the view object where the controls are embedded and the application component
+			 *          Map containing the control modifier object (either sap.ui.core.util.reflection.JsControlTreeModifier or
+			 *          sap.ui.core.util.reflection.XmlTreeModifier), the view object where the controls are embedded and the application component
 			 * @returns {boolean} true - if change could be applied
 			 * @public
 			 */
@@ -225,6 +230,12 @@ sap.ui.define(["jquery.sap.global", "sap/ui/fl/changeHandler/JsControlTreeModifi
 				var oContent = oChangeWrapper.getContent();
 				var mMovedElement = oContent.movedElements[0];
 				var aContent = oModifier.getAggregation(oSimpleForm, MoveSimpleForm.CONTENT_AGGREGATION);
+
+				var aContentSelectors = aContent.map(function(oContentControl) {
+					return oModifier.getSelector(oContentControl, oAppComponent);
+				});
+				var mState = {content: aContentSelectors};
+				oChangeWrapper.setRevertData(mState);
 
 				if (oChangeWrapper.getChangeType() === MoveSimpleForm.CHANGE_TYPE_MOVE_FIELD) {
 					// !important : element was used in 1.40, do not remove for compatibility!
@@ -302,7 +313,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/fl/changeHandler/JsControlTreeModifi
 
 					fnRemoveAndInsertAggregation(oModifier, oSimpleForm, MoveSimpleForm, aContentClone, oView);
 				} else {
-					jQuery.sap.log.warning("Unknown change type detected. Cannot apply to SimpleForm");
+					Log.warning("Unknown change type detected. Cannot apply to SimpleForm");
 				}
 
 				return true;
@@ -330,7 +341,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/fl/changeHandler/JsControlTreeModifi
 				var oSimpleForm = oModifier.bySelector(mSpecificChangeInfo.selector, oAppComponent, oView);
 				var aMovedElements = mSpecificChangeInfo.movedElements;
 				if (aMovedElements.length > 1) {
-					jQuery.sap.log.warning("Moving more than 1 Formelement is not yet supported.");
+					Log.warning("Moving more than 1 Formelement is not yet supported.");
 				}
 				var mMovedElement = aMovedElements[0];
 				mMovedElement.element = sap.ui.getCore().byId(mMovedElement.id);
@@ -349,7 +360,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/fl/changeHandler/JsControlTreeModifi
 						mStableChangeInfo = fnMoveFormElement(oSimpleForm, mMovedElement, oSource, oTarget, mPropertyBag);
 					}
 				} else {
-					jQuery.sap.log.error("Element not found. This may caused by an instable id!");
+					Log.error("Element not found. This may caused by an instable id!");
 				}
 
 				var mChangeData = oChangeWrapper.getDefinition();
@@ -361,6 +372,36 @@ sap.ui.define(["jquery.sap.global", "sap/ui/fl/changeHandler/JsControlTreeModifi
 					oChangeWrapper.addDependentControl(mStableChangeInfo.target, "targetParent", mPropertyBag);
 				}
 				oChangeWrapper.addDependentControl([mStableChangeInfo.movedControl], "movedElements", mPropertyBag);
+			};
+
+			/**
+			 * Reverts the applied change
+			 *
+			 * @param {sap.ui.fl.Change} oChangeWrapper
+			 *          Change object with instructions to be applied to the control map
+			 * @param {sap.ui.core.Control} oSimpleForm
+			 *          oSourceParent control that matches the change selector for applying the change, which is the source of
+			 *          the move
+			 * @param {object} mPropertyBag
+			 *          Map containing the control modifier object (either sap.ui.core.util.reflection.JsControlTreeModifier or
+			 *          sap.ui.core.util.reflection.XmlTreeModifier), the view object where the controls are embedded and the application component
+			 * @returns {boolean} true - if change could be reverted
+			 * @public
+			 */
+			MoveSimpleForm.revertChange = function(oChangeWrapper, oSimpleForm, mPropertyBag) {
+				var oModifier = mPropertyBag.modifier;
+				var oAppComponent = mPropertyBag.appComponent;
+				var oView = mPropertyBag.view;
+				var aContentSelectors = oChangeWrapper.getRevertData().content;
+
+				var aContent = aContentSelectors.map(function(oSelector) {
+					return oModifier.bySelector(oSelector, oAppComponent, oView);
+				});
+				fnRemoveAndInsertAggregation(oModifier, oSimpleForm, MoveSimpleForm, aContent, oView);
+				oChangeWrapper.resetRevertData();
+
+				return true;
+
 			};
 
 			return MoveSimpleForm;

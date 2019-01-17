@@ -26,6 +26,16 @@
 			"theme": "base"
 		},
 		{
+			"name": "CSSGrid.less",
+			"designtime": true,
+			"theme": "base"
+		},
+		{
+			"name": "ColumnLayout.less",
+			"designtime": true,
+			"theme": "base"
+		},
+		{
 			"name": "DynamicSideContent.less",
 			"designtime": true,
 			"theme": "base"

@@ -1,14 +1,82 @@
 /*
  * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.P13nDimMeasurePanel.
 sap.ui.define([
-	'jquery.sap.global', './ColumnListItem', './P13nPanel', './P13nDimMeasureItem', './SearchField', './Table', './library', 'sap/ui/core/Control', 'sap/ui/model/ChangeReason', 'sap/ui/model/json/JSONModel'
-], function(jQuery, ColumnListItem, P13nPanel, P13nDimMeasureItem, SearchField, Table, library, Control, ChangeReason, JSONModel) {
+	'./library',
+	'./P13nPanel',
+	'./P13nDimMeasureItem',
+	'./SearchField',
+	'./Table',
+	'./Column',
+	'./ColumnListItem',
+	'./ScrollContainer',
+	'./Text',
+	'./Select',
+	'./ComboBox',
+	'./Button',
+	'./OverflowToolbar',
+	'./OverflowToolbarLayoutData',
+	'./OverflowToolbarButton',
+	'./ToolbarSpacer',
+	'sap/ui/core/library',
+	'sap/ui/model/ChangeReason',
+	'sap/ui/model/json/JSONModel',
+	'sap/ui/model/BindingMode',
+	'sap/ui/core/ResizeHandler',
+	'sap/ui/core/Item',
+	'sap/ui/core/InvisibleText',
+	'sap/ui/core/IconPool',
+	"sap/ui/thirdparty/jquery"
+], function(
+	library,
+	P13nPanel,
+	P13nDimMeasureItem,
+	SearchField,
+	Table,
+	Column,
+	ColumnListItem,
+	ScrollContainer,
+	Text,
+	Select,
+	ComboBox,
+	Button,
+	OverflowToolbar,
+	OverflowToolbarLayoutData,
+	OverflowToolbarButton,
+	ToolbarSpacer,
+	CoreLibrary,
+	ChangeReason,
+	JSONModel,
+	BindingMode,
+	ResizeHandler,
+	Item,
+	InvisibleText,
+	IconPool,
+	jQuery
+) {
 	"use strict";
+
+	// shortcut for sap.m.OverflowToolbarPriority
+	var OverflowToolbarPriority = library.OverflowToolbarPriority;
+
+	// shortcut for sap.m.ButtonType
+	var ButtonType = library.ButtonType;
+
+	// shortcut for sap.m.ToolbarDesign
+	var ToolbarDesign = library.ToolbarDesign;
+
+	// shortcut for sap.m.ListType
+	var ListType = library.ListType;
+
+	// shortcut for sap.m.ListMode
+	var ListMode = library.ListMode;
+
+	// shortcut for sap.m.P13nPanelType
+	var P13nPanelType = library.P13nPanelType;
 
 	/**
 	 * Constructor for a new P13nDimMeasurePanel.
@@ -19,7 +87,7 @@ sap.ui.define([
 	 *        dimensions and measures for table personalization.
 	 * @extends sap.m.P13nPanel
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @constructor
 	 * @public
 	 * @since 1.34.0
@@ -74,7 +142,7 @@ sap.ui.define([
 				// TODO
 				/**
 				 * Event raised when one or more <code>DimMeasureItems</code> has been updated.
-                 * Aggregation <code>DimMeasureItems</code> should be updated outside...
+				 * Aggregation <code>DimMeasureItems</code> should be updated outside...
 				 * @since 1.50.0
 				 */
 				changeDimMeasureItems: {},
@@ -142,6 +210,9 @@ sap.ui.define([
 					key: "category",
 					text: oRb.getText('COLUMNSPANEL_CHARTROLE_CATEGORY')
 				}, {
+					key: "category2",
+					text: oRb.getText('COLUMNSPANEL_CHARTROLE_CATEGORY2')
+				}, {
 					key: "series",
 					text: oRb.getText('COLUMNSPANEL_CHARTROLE_SERIES')
 				}
@@ -153,6 +224,12 @@ sap.ui.define([
 				}, {
 					key: "axis2",
 					text: oRb.getText('COLUMNSPANEL_CHARTROLE_AXIS2')
+				}, {
+					key: "axis3",
+					text: oRb.getText('COLUMNSPANEL_CHARTROLE_AXIS3')
+				}, {
+					key: "axis4",
+					text: oRb.getText('COLUMNSPANEL_CHARTROLE_AXIS4')
 				}
 			]
 		};
@@ -168,18 +245,18 @@ sap.ui.define([
 			countOfSelectedItems: 0,
 			countOfItems: 0
 		});
-		oModel.setDefaultBindingMode(sap.ui.model.BindingMode.TwoWay);
+		oModel.setDefaultBindingMode(BindingMode.TwoWay);
 		oModel.setSizeLimit(1000);
 		this.setModel(oModel, "$sapmP13nDimMeasurePanel");
 
-		this.setType(sap.m.P13nPanelType.dimeasure);
+		this.setType(P13nPanelType.dimeasure);
 		this.setTitle(oRb.getText("CHARTPANEL_TITLE"));
 
 		this._createTable();
 		this._createToolbar();
 
 		this.setVerticalScrolling(false);
-		var oScrollContainer = new sap.m.ScrollContainer({
+		var oScrollContainer = new ScrollContainer({
 			horizontal: false,
 			vertical: true,
 			content: [
@@ -199,8 +276,8 @@ sap.ui.define([
 				var $dialogCont = null, iContentHeight, iHeaderHeight;
 				var oParent = that.getParent();
 				var oToolbar = that._getToolbar();
-				if (oParent) {
-					$dialogCont = jQuery("#" + oParent.getId() + "-cont");
+				if (oParent && oParent.$) {
+					$dialogCont = oParent.$("cont");
 					if ($dialogCont.children().length > 0 && oToolbar.$().length > 0) {
 						iScrollContainerHeightOld = oScrollContainer.$()[0].clientHeight;
 
@@ -218,7 +295,7 @@ sap.ui.define([
 			}
 			return bChangeResult;
 		};
-		this._sContainerResizeListener = sap.ui.core.ResizeHandler.register(oScrollContainer, this._fnHandleResize);
+		this._sContainerResizeListener = ResizeHandler.register(oScrollContainer, this._fnHandleResize);
 	};
 
 	P13nDimMeasurePanel.prototype.onBeforeRendering = function() {
@@ -266,7 +343,7 @@ sap.ui.define([
 				return;
 			}
 			// Create a new dimMeasureItem if an item have been changed to 'selected'
-			this.addAggregation("dimMeasureItems", new sap.m.P13nDimMeasureItem({
+			this.addAggregation("dimMeasureItems", new P13nDimMeasureItem({
 				columnKey: oMItem.columnKey,
 				visible: oMItem.persistentSelected,
 				index: oMItem.persistentIndex === -1 ? undefined : oMItem.persistentIndex,
@@ -284,7 +361,7 @@ sap.ui.define([
 
 	P13nDimMeasurePanel.prototype.exit = function() {
 
-		sap.ui.core.ResizeHandler.deregister(this._sContainerResizeListener);
+		ResizeHandler.deregister(this._sContainerResizeListener);
 		this._sContainerResizeListener = null;
 
 		this._getToolbar().destroy();
@@ -295,6 +372,11 @@ sap.ui.define([
 		// destroy model and its data
 		if (this._getInternalModel()) {
 			this._getInternalModel().destroy();
+		}
+
+		if (this.oInvisibleChartTypeText) {
+			this.oInvisibleChartTypeText.destroy();
+			this.oInvisibleChartTypeText = null;
 		}
 
 		window.clearTimeout(this._iLiveChangeTimer);
@@ -432,49 +514,6 @@ sap.ui.define([
 		return this;
 	};
 
-	P13nDimMeasurePanel.prototype.onBeforeNavigationFrom = function() {
-		// Check if chart type fits selected dimensions and measures
-		var sChartType = this.getChartTypeKey();
-		var aDimensionItems = [];
-		var aMeasureItems = [];
-
-		this.getDimMeasureItems().forEach(function(oDimMeasureItem) {
-			var oMItem = this._getModelItemByColumnKey(oDimMeasureItem.getColumnKey());
-			if (!oMItem) {
-				return;
-			}
-			if (oMItem.aggregationRole === "Dimension") {
-				aDimensionItems.push(oDimMeasureItem);
-			} else if (oMItem.aggregationRole === "Measure") {
-				aMeasureItems.push(oDimMeasureItem);
-			}
-		}, this);
-
-		aDimensionItems = aDimensionItems.filter(function(oItem) {
-			return oItem.getVisible();
-		}).map(function(oItem) {
-			return {
-				name: oItem.getColumnKey()
-			};
-		});
-		aMeasureItems = aMeasureItems.filter(function(oItem) {
-			return oItem.getVisible();
-		}).map(function(oItem) {
-			return {
-				name: oItem.getColumnKey()
-			};
-		});
-
-		sap.ui.getCore().loadLibrary("sap.chart");
-		var oResult;
-		try {
-			oResult = sap.chart.api.getChartTypeLayout(sChartType, aDimensionItems, aMeasureItems);
-		} catch (oException) {
-			return false;
-		}
-		return oResult.errors.length === 0;
-	};
-
 	P13nDimMeasurePanel.prototype._notifyChange = function() {
 		var fListener = this.getChangeNotifier();
 		if (fListener) {
@@ -500,13 +539,14 @@ sap.ui.define([
 	P13nDimMeasurePanel.prototype._createTable = function() {
 		var oRb = sap.ui.getCore().getLibraryResourceBundle("sap.m");
 		this._oTable = new Table({
-			mode: sap.m.ListMode.MultiSelect,
+			mode: ListMode.MultiSelect,
 			rememberSelections: false,
 			itemPress: jQuery.proxy(this._onItemPressed, this),
 			selectionChange: jQuery.proxy(this._onSelectionChange, this),
 			columns: [
-				new sap.m.Column({
-					header: new sap.m.Text({
+				new Column({
+					vAlign: CoreLibrary.VerticalAlign.Middle,
+					header: new Text({
 						text: {
 							parts: [
 								{
@@ -522,12 +562,14 @@ sap.ui.define([
 							}
 						}
 					})
-				}), new sap.m.Column({
-					header: new sap.m.Text({
+				}), new Column({
+					vAlign: CoreLibrary.VerticalAlign.Middle,
+					header: new Text({
 						text: oRb.getText('COLUMNSPANEL_COLUMN_TYPE')
 					})
-				}), new sap.m.Column({
-					header: new sap.m.Text({
+				}), new Column({
+					vAlign: CoreLibrary.VerticalAlign.Middle,
+					header: new Text({
 						text: oRb.getText('COLUMNSPANEL_COLUMN_ROLE')
 					})
 				})
@@ -535,11 +577,11 @@ sap.ui.define([
 			items: {
 				path: "/items",
 				templateShareable: false,
-				template: new sap.m.ColumnListItem({
+				template: new ColumnListItem({
 					cells: [
-						new sap.m.Text({
+						new Text({
 							text: "{text}"
-						}), new sap.m.Text({
+						}), new Text({
 							text: {
 								path: '',
 								formatter: function(oMItem) {
@@ -551,7 +593,7 @@ sap.ui.define([
 									}
 								}
 							}
-						}), new sap.m.Select({
+						}), new Select({
 							selectedKey: "{role}",
 							items: {
 								path: 'availableRoleTypes',
@@ -560,7 +602,7 @@ sap.ui.define([
 								// ],
 								factory: function(sId, oBindingContext) {
 									var oAvailableRoleType = oBindingContext.getObject();
-									return new sap.ui.core.Item({
+									return new Item({
 										key: oAvailableRoleType.key,
 										text: oAvailableRoleType.text
 									});
@@ -572,7 +614,7 @@ sap.ui.define([
 					visible: "{visible}",
 					selected: "{persistentSelected}",
 					tooltip: "{tooltip}",
-					type: sap.m.ListType.Active
+					type: ListType.Active
 				})
 			}
 		});
@@ -586,10 +628,14 @@ sap.ui.define([
 		var that = this;
 		var oRb = sap.ui.getCore().getLibraryResourceBundle("sap.m");
 
-		var oInvisibleChartTypeText = new sap.ui.core.InvisibleText({
+		var oInvisibleChartTypeText = new InvisibleText({
 			text: oRb.getText('COLUMNSPANEL_CHARTTYPE')
 		});
-		var oChartTypeComboBox = new sap.m.ComboBox({
+
+		// set a reference on the instance so it can be later destroyed
+		this.oInvisibleChartTypeText = oInvisibleChartTypeText;
+
+		var oChartTypeComboBox = new ComboBox({
 			placeholder: oInvisibleChartTypeText.getText(),
 			selectedKey: {
 				path: '/selectedChartTypeKey'
@@ -598,22 +644,22 @@ sap.ui.define([
 			items: {
 				path: '/availableChartTypes',
 				templateShareable: false,
-				template: new sap.ui.core.Item({
+				template: new Item({
 					key: "{key}",
 					text: "{text}"
 				})
 			},
-            selectionChange: jQuery.proxy(this._onChartTypeChange, this),
-			layoutData: new sap.m.OverflowToolbarLayoutData({
+			selectionChange: jQuery.proxy(this._onChartTypeChange, this),
+			layoutData: new OverflowToolbarLayoutData({
 				moveToOverflow: false,
 				stayInOverflow: false
 			})
 		});
 
-		var oToolbar = new sap.m.OverflowToolbar(this.getId() + "-toolbar", {
-			design: sap.m.ToolbarDesign.Auto,
+		var oToolbar = new OverflowToolbar(this.getId() + "-toolbar", {
+			design: ToolbarDesign.Auto,
 			content: [
-				oInvisibleChartTypeText, oChartTypeComboBox, new sap.m.ToolbarSpacer(), new SearchField(this.getId() + "-searchField", {
+				oInvisibleChartTypeText, oChartTypeComboBox, new ToolbarSpacer(), new SearchField(this.getId() + "-searchField", {
 					liveChange: function(oEvent) {
 						var sValue = oEvent.getSource().getValue(), iDelay = (sValue ? 300 : 0); // no delay if value is empty
 						// execute search after user stops typing for 300ms
@@ -628,14 +674,14 @@ sap.ui.define([
 					},
 					// execute the standard search
 					search: jQuery.proxy(this._onExecuteSearch, this),
-					layoutData: new sap.m.OverflowToolbarLayoutData({
+					layoutData: new OverflowToolbarLayoutData({
 						minWidth: "12.5rem",
 						maxWidth: "23.077rem",
 						shrinkable: true,
 						moveToOverflow: false,
 						stayInOverflow: false
 					})
-				}), new sap.m.Button({
+				}), new Button({
 					text: {
 						path: '/showOnlySelectedItems',
 						formatter: function(bShowOnlySelectedItems) {
@@ -648,66 +694,66 @@ sap.ui.define([
 							return bShowOnlySelectedItems ? oRb.getText('COLUMNSPANEL_SHOW_ALL') : oRb.getText('COLUMNSPANEL_SHOW_SELECTED');
 						}
 					},
-					type: sap.m.ButtonType.Transparent,
+					type: ButtonType.Transparent,
 					press: jQuery.proxy(this._onSwitchButtonShowSelected, this),
-					layoutData: new sap.m.OverflowToolbarLayoutData({
+					layoutData: new OverflowToolbarLayoutData({
 						moveToOverflow: true,
-						priority: sap.m.OverflowToolbarPriority.High
+						priority: OverflowToolbarPriority.High
 					})
-				}), new sap.m.OverflowToolbarButton({
-					icon: sap.ui.core.IconPool.getIconURI("collapse-group"),
+				}), new OverflowToolbarButton({
+					icon: IconPool.getIconURI("collapse-group"),
 					text: oRb.getText('COLUMNSPANEL_MOVE_TO_TOP'),
 					tooltip: oRb.getText('COLUMNSPANEL_MOVE_TO_TOP'),
-					type: sap.m.ButtonType.Transparent,
+					type: ButtonType.Transparent,
 					enabled: {
 						path: '/isMoveUpButtonEnabled'
 					},
 					press: jQuery.proxy(this.onPressButtonMoveToTop, this),
-					layoutData: new sap.m.OverflowToolbarLayoutData({
+					layoutData: new OverflowToolbarLayoutData({
 						moveToOverflow: true,
-						priority: sap.m.OverflowToolbarPriority.Low,
+						priority: OverflowToolbarPriority.Low,
 						group: 2
 					})
-				}), new sap.m.OverflowToolbarButton({
-					icon: sap.ui.core.IconPool.getIconURI("slim-arrow-up"),
+				}), new OverflowToolbarButton({
+					icon: IconPool.getIconURI("slim-arrow-up"),
 					text: oRb.getText('COLUMNSPANEL_MOVE_UP'),
 					tooltip: oRb.getText('COLUMNSPANEL_MOVE_UP'),
-					type: sap.m.ButtonType.Transparent,
+					type: ButtonType.Transparent,
 					enabled: {
 						path: '/isMoveUpButtonEnabled'
 					},
 					press: jQuery.proxy(this.onPressButtonMoveUp, this),
-					layoutData: new sap.m.OverflowToolbarLayoutData({
+					layoutData: new OverflowToolbarLayoutData({
 						moveToOverflow: true,
-						priority: sap.m.OverflowToolbarPriority.High,
+						priority: OverflowToolbarPriority.High,
 						group: 1
 					})
-				}), new sap.m.OverflowToolbarButton({
-					icon: sap.ui.core.IconPool.getIconURI("slim-arrow-down"),
+				}), new OverflowToolbarButton({
+					icon: IconPool.getIconURI("slim-arrow-down"),
 					text: oRb.getText('COLUMNSPANEL_MOVE_DOWN'),
 					tooltip: oRb.getText('COLUMNSPANEL_MOVE_DOWN'),
-					type: sap.m.ButtonType.Transparent,
+					type: ButtonType.Transparent,
 					enabled: {
 						path: '/isMoveDownButtonEnabled'
 					},
 					press: jQuery.proxy(this.onPressButtonMoveDown, this),
-					layoutData: new sap.m.OverflowToolbarLayoutData({
+					layoutData: new OverflowToolbarLayoutData({
 						moveToOverflow: true,
-						priority: sap.m.OverflowToolbarPriority.High,
+						priority: OverflowToolbarPriority.High,
 						group: 1
 					})
-				}), new sap.m.OverflowToolbarButton({
-					icon: sap.ui.core.IconPool.getIconURI("expand-group"),
+				}), new OverflowToolbarButton({
+					icon: IconPool.getIconURI("expand-group"),
 					text: oRb.getText('COLUMNSPANEL_MOVE_TO_BOTTOM'),
 					tooltip: oRb.getText('COLUMNSPANEL_MOVE_TO_BOTTOM'),
-					type: sap.m.ButtonType.Transparent,
+					type: ButtonType.Transparent,
 					enabled: {
 						path: '/isMoveDownButtonEnabled'
 					},
 					press: jQuery.proxy(this.onPressButtonMoveToBottom, this),
-					layoutData: new sap.m.OverflowToolbarLayoutData({
+					layoutData: new OverflowToolbarLayoutData({
 						moveToOverflow: true,
-						priority: sap.m.OverflowToolbarPriority.Low,
+						priority: OverflowToolbarPriority.Low,
 						group: 2
 					})
 				})
@@ -748,9 +794,6 @@ sap.ui.define([
 	P13nDimMeasurePanel.prototype._onExecuteSearch = function() {
 		this._switchVisibilityOfUnselectedModelItems();
 		this._filterModelItemsBySearchText();
-
-		this._scrollToSelectedItem(this._getMarkedTableItem());
-
 		this._updateControlLogic();
 	};
 
@@ -1086,30 +1129,29 @@ sap.ui.define([
 		}
 
 		this._getVisibleModelItems().forEach(function(oMItem) {
+			var oItem = this._getTableItemByColumnKey(oMItem.columnKey);
+			var aCells = oItem.getCells();
+
 			oMItem.visible = false;
 			// Search in item text
-			if (oMItem.text && oMItem.text.match(oRegExp)) {
+			if (aCells[0] && aCells[0].getText().match(oRegExp)) {
 				oMItem.visible = true;
 			}
 			// Search in aggregationRole
-			if (oMItem.aggregationRole && oMItem.aggregationRole.match(oRegExp)) {
+			if (aCells[1] && aCells[1].getText().match(oRegExp)) {
 				oMItem.visible = true;
 			}
 			// Search in role
-			if (oMItem.role && oMItem.role.match(oRegExp)) {
+			if (aCells[2] && aCells[2].getSelectedItem() && aCells[2].getSelectedItem().getText().match(oRegExp)) {
 				oMItem.visible = true;
 			}
 			// Search in tooltip
 			if (oMItem.tooltip && oMItem.tooltip.match(oRegExp)) {
 				oMItem.visible = true;
 			}
-		});
+		}, this);
 		this._getInternalModel().refresh();
 	};
-
-	// P13nDimMeasurePanel.prototype._isDimMeasureItemEqualToModelItem = function(oDimMeasureItem, oMItem) {
-	// 	return oMItem.persistentIndex === oDimMeasureItem.getIndex() && oMItem.persistentSelected === oDimMeasureItem.getVisible() && oMItem.role === oDimMeasureItem.getRole();
-	// };
 
 	P13nDimMeasurePanel.prototype._updateInternalModel = function() {
 		if (!this._bUpdateInternalModel) {
@@ -1164,8 +1206,8 @@ sap.ui.define([
 			}
 		}, this);
 
-        this._switchVisibilityOfUnselectedModelItems();
-        this._filterModelItemsBySearchText();
+		this._switchVisibilityOfUnselectedModelItems();
+		this._filterModelItemsBySearchText();
 
 		var aMItems = this._getInternalModel().getProperty("/items");
 		// Sort the table items only by persistentIndex
@@ -1179,4 +1221,4 @@ sap.ui.define([
 
 	return P13nDimMeasurePanel;
 
-}, /* bExport= */true);
+});

@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.FileUploaderParameter.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/unified/FileUploaderParameter'],
-	function(jQuery, library, UnifiedFileUploaderParameter) {
+sap.ui.define(['sap/base/Log', './library', 'sap/ui/unified/FileUploaderParameter'],
+	function(Log, library, UnifiedFileUploaderParameter) {
 	"use strict";
 
 	/**
@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/unified/FileUploaderPar
 	 * @extends sap.ui.unified.FileUploaderParameter
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -38,10 +38,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/unified/FileUploaderPar
 	try {
 		sap.ui.getCore().loadLibrary("sap.ui.unified");
 	} catch (e) {
-		jQuery.sap.log.error("The element 'sap.ui.commons.FileUploaderParameter' needs library 'sap.ui.unified'.");
+		Log.error("The element 'sap.ui.commons.FileUploaderParameter' needs library 'sap.ui.unified'.");
 		throw (e);
 	}
 
 	return FileUploaderParameter;
 
-}, /* bExport= */ true);
+});

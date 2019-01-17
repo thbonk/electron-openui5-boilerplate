@@ -1,12 +1,17 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.SegmentedButton.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate/ItemNavigation'],
-	function(jQuery, Control, ItemNavigation) {
+sap.ui.define([
+    'sap/ui/thirdparty/jquery',
+    'sap/ui/core/Control',
+    'sap/ui/core/delegate/ItemNavigation',
+    './SegmentedButtonRenderer'
+],
+	function(jQuery, Control, ItemNavigation, SegmentedButtonRenderer) {
 	"use strict";
 
 
@@ -21,11 +26,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 	 * The SegmentedButton provides a group of multiple buttons. Only one button can be active. The behaviour is more ore less like a radio button group.
 	 * @extends sap.ui.core.Control
 	 * @implements sap.ui.commons.ToolbarItem, sap.ui.core.IFormContent
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
-	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.SegmentedButton</code> control.
+	 * @deprecated as of version 1.38, replaced by {@link sap.m.SegmentedButton}
 	 * @alias sap.ui.commons.SegmentedButton
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -189,7 +194,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 		var $content = this.$();
 		if ($content.length > 0) {
 			var rm = sap.ui.getCore().createRenderManager();
-			sap.ui.commons.SegmentedButtonRenderer.renderButtons(rm, this);
+			SegmentedButtonRenderer.renderButtons(rm, this);
 			rm.flush($content[0]);
 			rm.destroy();
 		}
@@ -269,6 +274,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 			this.addDelegate(this._oItemNavigation);
 		}
 		this.setProperty("enabled", bEnabled);
+		return this;
 	};
 
 	/*
@@ -284,7 +290,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 			oButton.detachPress(this._buttonSelected, this);
 		}
 
-		var oClone = sap.ui.core.Element.prototype.clone.apply(this, arguments);
+		var oClone = Control.prototype.clone.apply(this, arguments);
 
 		for (i = 0; i < aButtons.length; i++) {
 			oButton = aButtons[i];
@@ -302,4 +308,4 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 
 	return SegmentedButton;
 
-}, /* bExport= */ true);
+});

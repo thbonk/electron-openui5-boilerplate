@@ -1,11 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['sap/ui/core/Control', './library'],
-	function(Control, library) {
+sap.ui.define([
+	'sap/ui/core/Control',
+	'./library',
+	'sap/ui/core/ResizeHandler',
+	"./BlockLayoutRenderer"
+],
+	function(Control, library, ResizeHandler, BlockLayoutRenderer) {
 		"use strict";
 
 		/**
@@ -20,6 +25,8 @@ sap.ui.define(['sap/ui/core/Control', './library'],
 		 * The BlockLayout uses horizontal and vertical subdivisions, and full-width banners to display a set of elements.
 		 * By placing pictorial and textual elements side-by-side in different blocks, you can establish a visual connection between blocks and between similar elements.
 		 * <h3>Structure</h3>
+		 * The BlockLayout contains BlockLayout cells. Every cell consists of a title and content. The title can be text or a link.
+		 *
 		 * The BlockLayout comes in five predefined types for background colors:
 		 * <ul>
 		 * <li>Layout only (default) - a layout scheme and no background colors</li>
@@ -36,6 +43,8 @@ sap.ui.define(['sap/ui/core/Control', './library'],
 		 * The main colors of the sets can be changed in Theme Designer. To change the background of a particular cell, set <code>backgroundColorSet</code> (main color)
 		 * and <code>backgroundColorShade</code> (shade).
 		 *
+		 * <b>Note:</b> Usage of disabled, emphasized or subtle links as titles is not recommended. Dark background designs, for example Accent, are not fully supported with regards to Аccessibility when used with links as titles.
+		 *
 		 * <h3>Usage</h3>
 		 * <h4>When to use</h4>
 		 * <ul>
@@ -44,7 +53,7 @@ sap.ui.define(['sap/ui/core/Control', './library'],
 		 * </ul>
 		 * <h4>When not to use</h4>
 		 * <ul>
-		 * <li>You want to display properties or features of one content item. Use a {@link sap.uxap.ObjectPage object page} or {@link sap.f.DynamicPage dynamic page} instead.</li>
+		 * <li>You want to display properties or features of one content item. Use a {@link sap.uxap.ObjectPageLayout object page} or {@link sap.f.DynamicPage dynamic page} instead.</li>
 		 * </ul>
 		 * <h3>Responsive Behavior</h3>
 		 * <ul>
@@ -54,12 +63,13 @@ sap.ui.define(['sap/ui/core/Control', './library'],
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.50.6
+		 * @version 1.61.2
 		 *
 		 * @constructor
 		 * @public
 		 * @since 1.34
 		 * @alias sap.ui.layout.BlockLayout
+		 * @see {@link fiori:https://experience.sap.com/fiori-design-web/block-layout/ Block Layout}
 		 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 		 */
 		var BlockLayout = Control.extend("sap.ui.layout.BlockLayout", { metadata : {
@@ -70,8 +80,13 @@ sap.ui.define(['sap/ui/core/Control', './library'],
 				 * Determines the background used for the Layout
 				 * @since 1.42
 				 */
-				background: { type: "sap.ui.layout.BlockBackgroundType", group: "Appearance", defaultValue: "Default" }
+				background: { type: "sap.ui.layout.BlockBackgroundType", group: "Appearance", defaultValue: "Default" },
 
+				/**
+				 * Keeps the font-size of the contents as is, independent from the screen size.
+				 * @since 1.52
+				 */
+				keepFontSize: { type: "boolean", group:"Behavior", defaultValue: false}
 			},
 			defaultAggregation : "content",
 			aggregations : {
@@ -79,7 +94,8 @@ sap.ui.define(['sap/ui/core/Control', './library'],
 				 * The Rows to be included in the content of the control
 				 */
 				content: { type: "sap.ui.layout.BlockLayoutRow", multiple: true }
-			}
+			},
+			designtime: "sap/ui/layout/designtime/BlockLayout.designtime"
 		}});
 
 		/**
@@ -108,11 +124,12 @@ sap.ui.define(['sap/ui/core/Control', './library'],
 		 */
 		BlockLayout.prototype.onAfterRendering = function () {
 			this._onParentResize();
+			this._notifySizeListeners();
 		};
-
 		/**
 		 * Changes background type
 		 *
+		 * @public
 		 * @param {string} sNewBackground Background's style of type sap.ui.layout.BlockBackgroundType
 		 * @returns {sap.ui.layout.BlockLayout} BlockLayout instance. Allows method chaining
 		 */
@@ -145,23 +162,24 @@ sap.ui.define(['sap/ui/core/Control', './library'],
 				mSizes = BlockLayout.CONSTANTS.SIZES;
 
 			this._detachResizeHandler();
-			this._removeBreakpointClasses();
-
 			// Put additional styles according to SAP_STANDARD_EXTENDED from sap.ui.Device.media.RANGESETS
 			// Not possible to use sap.ui.Device directly as it calculates window size, but here is needed parent's size
-			for (sProp in mSizes) {
-				if (mSizes.hasOwnProperty(sProp) && (mSizes[sProp] === null || mSizes[sProp] > iWidth)) {
-					if (this._currentBreakpoint != sProp) {
-						this._currentBreakpoint = sProp;
-						this._notifySizeListeners();
-					}
+			if (iWidth > 0){
+				this._removeBreakpointClasses();
+				for (sProp in mSizes) {
+					if (mSizes.hasOwnProperty(sProp) && (mSizes[sProp] === null || mSizes[sProp] > iWidth)) {
+						if (this._currentBreakpoint != sProp) {
+							this._currentBreakpoint = sProp;
+							this._notifySizeListeners();
+						}
 
-					this.addStyleClass("sapUiBlockLayoutSize" + sProp, true);
-					break;
+						this.addStyleClass("sapUiBlockLayoutSize" + sProp, true);
+						break;
+					}
 				}
 			}
 
-			jQuery.sap.delayedCall(0, this, "_attachResizeHandler");
+			this._attachResizeHandler();
 		};
 
 		BlockLayout.prototype._notifySizeListeners = function () {
@@ -191,7 +209,7 @@ sap.ui.define(['sap/ui/core/Control', './library'],
 		 */
 		BlockLayout.prototype._attachResizeHandler = function () {
 			if (!this._parentResizeHandler) {
-				this._parentResizeHandler = sap.ui.core.ResizeHandler.register(this, this._onParentResize.bind(this));
+				this._parentResizeHandler = ResizeHandler.register(this, this._onParentResize.bind(this));
 			}
 		};
 
@@ -201,7 +219,7 @@ sap.ui.define(['sap/ui/core/Control', './library'],
 		 */
 		BlockLayout.prototype._detachResizeHandler = function () {
 			if (this._parentResizeHandler) {
-				sap.ui.core.ResizeHandler.deregister(this._parentResizeHandler);
+				ResizeHandler.deregister(this._parentResizeHandler);
 				this._parentResizeHandler = null;
 			}
 		};
@@ -215,4 +233,4 @@ sap.ui.define(['sap/ui/core/Control', './library'],
 
 		return BlockLayout;
 
-	}, /* bExport= */ true);
+	});

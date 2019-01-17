@@ -1,12 +1,34 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/GenericTile', 'sap/ui/Device', 'sap/ui/core/Icon' ],
-	function(jQuery, library, Control, GenericTile, Device, Icon) {
+sap.ui.define([
+	'./library',
+	'sap/ui/core/Control',
+	'sap/m/GenericTile',
+	'sap/ui/Device',
+	'sap/ui/core/Icon',
+	'./SlideTileRenderer',
+	"sap/ui/events/KeyCodes",
+	"sap/ui/events/PseudoEvents",
+	"sap/ui/thirdparty/jquery"
+],
+	function(
+		library,
+		Control,
+		GenericTile,
+		Device,
+		Icon,
+		SlideTileRenderer,
+		KeyCodes,
+		PseudoEvents,
+		jQuery
+	) {
 	"use strict";
+
+	var TileSizeBehavior = library.TileSizeBehavior;
 
 	/**
 	 * Constructor for a new sap.m.SlideTile control.
@@ -18,76 +40,86 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @since 1.34
 	 *
 	 * @public
 	 * @alias sap.m.SlideTile
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	var SlideTile = Control.extend("sap.m.SlideTile", /** @lends sap.m.SlideTile.prototype */ { metadata : {
-		library : "sap.m",
-		properties : {
-			/**
-			 * The time of the slide display in milliseconds.
-			 */
-			"displayTime" : {type : "int", group : "Appearance", defaultValue : 5000},
-			/**
-			 * The time of the slide changing in milliseconds.
-			 */
-			"transitionTime" : {type : "int", group : "Appearance", defaultValue : 500},
-			/**
-			 * Changes the visualization in order to enable additional actions with the SlideTile control.
-			 * @since 1.46.0
-			 */
-			"scope": { type: "sap.m.GenericTileScope", group: "Misc", defaultValue: "Display" }
-		},
-		defaultAggregation : "tiles",
-		aggregations : {
-			/**
-			 * The set of Generic Tiles to be shown in the control.
-			 */
-			"tiles" : {type : "sap.m.GenericTile", multiple : true, singularName : "tile", bindable : "bindable"},
-			/**
-			 * The pause/play icon that is being used to display the pause/play state of the control.
-			 */
-			"_pausePlayIcon" : {type : "sap.ui.core.Icon", multiple : false, visibility: "hidden"}
-		},
-		events : {
-			/**
-			 * The event is fired when the user chooses the tile. The event is available only in Actions scope.
-			 * @since 1.46.0
-			 */
-			"press" : {
-				parameters: {
-					/**
-					 * The current scope the SlideTile was in when the event occurred.
-					 * @since 1.46.0
-					 */
-					"scope": { type: "sap.m.GenericTileScope" },
+	var SlideTile = Control.extend("sap.m.SlideTile", /** @lends sap.m.SlideTile.prototype */ {
+		metadata: {
+			library: "sap.m",
+			properties: {
+				/**
+				 * The time of the slide display in milliseconds.
+				 */
+				displayTime: {type: "int", group: "Appearance", defaultValue: 5000},
+				/**
+				 * The time of the slide changing in milliseconds.
+				 */
+				transitionTime: {type: "int", group: "Appearance", defaultValue: 500},
+				/**
+				 * Changes the visualization in order to enable additional actions with the SlideTile control.
+				 * @since 1.46.0
+				 */
+				scope: {type: "sap.m.GenericTileScope", group: "Misc", defaultValue: "Display"},
+				/**
+				 *  If set to <code>TileSizeBehavior.Small</code>, the tile size is the same as it would be on a small-screened phone (374px wide and lower),
+				 *  regardless of the screen size of the actual device being used.
+				 *  If set to <code>TileSizeBehavior.Responsive</code>, the tile size adapts to the size of the screen.
+				 *  This property has to be set consistently for the <code>SlideTile</code> along with all its inner <code>GenericTile</code>
+				 *  elements, so that they match one another visually.
+				 */
+				sizeBehavior: {type: "sap.m.TileSizeBehavior", defaultValue: TileSizeBehavior.Responsive}
+			},
+			defaultAggregation: "tiles",
+			aggregations: {
+				/**
+				 * The set of Generic Tiles to be shown in the control.
+				 */
+				tiles: {type: "sap.m.GenericTile", multiple: true, singularName: "tile", bindable: "bindable"},
+				/**
+				 * The pause/play icon that is being used to display the pause/play state of the control.
+				 */
+				_pausePlayIcon: {type: "sap.ui.core.Icon", multiple: false, visibility: "hidden"}
+			},
+			events: {
+				/**
+				 * The event is fired when the user chooses the tile. The event is available only in Actions scope.
+				 * @since 1.46.0
+				 */
+				press: {
+					parameters: {
+						/**
+						 * The current scope the SlideTile was in when the event occurred.
+						 * @since 1.46.0
+						 */
+						scope: {type: "sap.m.GenericTileScope"},
 
-					/**
-					 * The action that was pressed on the tile. In the Actions scope, the available actions are Press and Remove.
-					 * @since 1.46.0
-					 */
-					"action": { type: "string" },
+						/**
+						 * The action that was pressed on the tile. In the Actions scope, the available actions are Press and Remove.
+						 * @since 1.46.0
+						 */
+						action: {type: "string"},
 
-					/**
-					 * The Element's DOM Element.
-					 * In Actions scope the domRef points to the DOM Element of the remove button (if pressed) or the more icon.
-					 * @since 1.46.0
-					 */
-					"domRef" : { type: "any" }
+						/**
+						 * The Element's DOM Element.
+						 * In Actions scope the domRef points to the DOM Element of the remove button (if pressed) or the more icon.
+						 * @since 1.46.0
+						 */
+						domRef: {type: "any"}
+					}
 				}
 			}
 		}
-	}});
+	});
 
 	/* --- Lifecycle Handling --- */
 	/**
 	 * Init function for the control
 	 */
-	SlideTile.prototype.init = function() {
+	SlideTile.prototype.init = function () {
 		this._oRb = sap.ui.getCore().getLibraryResourceBundle("sap.m");
 		this.setAggregation("_pausePlayIcon", new Icon({
 			id: this.getId() + "-pause-play-icon",
@@ -101,7 +133,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	/**
 	 * Handler for beforerendering
 	 */
-	SlideTile.prototype.onBeforeRendering = function() {
+	SlideTile.prototype.onBeforeRendering = function () {
 		// initialize SlideTile scope with SlideTile CSS class name
 		GenericTile.prototype._initScopeContent.call(this, "sapMST");
 		var bActionsView = this.getScope() === library.GenericTileScope.Actions;
@@ -122,7 +154,9 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	/**
 	 * Handler for afterrendering
 	 */
-	SlideTile.prototype.onAfterRendering = function() {
+	SlideTile.prototype.onAfterRendering = function () {
+		this._setupResizeClassHandler();
+
 		var cTiles = this.getTiles().length,
 			sScope = this.getScope();
 		this._removeGTFocus();
@@ -139,7 +173,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 		}
 		// in actions scope, the more icon color is changed when the displayed tile has news content (dark background)
 		if (sScope === library.GenericTileScope.Actions && this._iCurrentTile >= 0 &&
-				this._hasNewsContent(this._iCurrentTile)) {
+			this._hasNewsContent(this._iCurrentTile)) {
 			this.addStyleClass("sapMSTDarkBackground");
 		}
 	};
@@ -147,7 +181,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	/**
 	 * Exit function for the control
 	 */
-	SlideTile.prototype.exit = function() {
+	SlideTile.prototype.exit = function () {
 		this._stopAnimation();
 		if (this._oMoreIcon) {
 			this._oMoreIcon.destroy();
@@ -163,10 +197,10 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 *
 	 * @param {sap.ui.base.Event} oEvent which was fired
 	 */
-	SlideTile.prototype.ontap = function(oEvent) {
+	SlideTile.prototype.ontap = function (oEvent) {
 		var sScope = this.getScope();
 		this.$().focus();
-		if (sScope === library.GenericTileScope.Actions){
+		if (sScope === library.GenericTileScope.Actions) {
 			var oParams = this._getEventParams(oEvent);
 			this.firePress(oParams);
 			oEvent.preventDefault();
@@ -178,7 +212,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 *
 	 * @param {sap.ui.base.Event} oEvent which was fired
 	 */
-	SlideTile.prototype.ontouchstart = function(oEvent) {
+	SlideTile.prototype.ontouchstart = function (oEvent) {
 		if (this.getScope() === library.GenericTileScope.Display) {
 			// hover of SlideTile should not be triggered when user only touch the Play/Pause button on mobile devices
 			if (jQuery(oEvent.target).hasClass("sapMSTIconClickTapArea")) {
@@ -194,7 +228,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 *
 	 * @param {sap.ui.base.Event} oEvent which was fired
 	 */
-	SlideTile.prototype.ontouchend = function(oEvent) {
+	SlideTile.prototype.ontouchend = function (oEvent) {
 		this.removeStyleClass("sapMSTHvr");
 	};
 
@@ -203,7 +237,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 *
 	 * @param {sap.ui.base.Event} oEvent which was fired
 	 */
-	SlideTile.prototype.ontouchcancel = function(oEvent) {
+	SlideTile.prototype.ontouchcancel = function (oEvent) {
 		if (this.hasStyleClass("sapMSTIconPressed")) {
 			this.removeStyleClass("sapMSTIconPressed");
 		} else {
@@ -216,9 +250,9 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 *
 	 * @param {sap.ui.base.Event} oEvent which was fired
 	 */
-	SlideTile.prototype.onkeydown = function(oEvent) {
+	SlideTile.prototype.onkeydown = function (oEvent) {
 		if (this.getScope() === library.GenericTileScope.Display) {
-			if (jQuery.sap.PseudoEvents.sapenter.fnCheck(oEvent)) {
+			if (PseudoEvents.events.sapenter.fnCheck(oEvent)) {
 				var oGenericTile = this.getTiles()[this._iCurrentTile];
 				oGenericTile.onkeydown(oEvent);
 			}
@@ -230,32 +264,32 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 *
 	 * @param {sap.ui.base.Event} oEvent which was fired
 	 */
-	SlideTile.prototype.onkeyup = function(oEvent) {
+	SlideTile.prototype.onkeyup = function (oEvent) {
 		var oParams;
 		if (this.getScope() === library.GenericTileScope.Display) {
-			if (jQuery.sap.PseudoEvents.sapenter.fnCheck(oEvent)) {
+			if (PseudoEvents.events.sapenter.fnCheck(oEvent)) {
 				var oGenericTile = this.getTiles()[this._iCurrentTile];
 				oGenericTile.onkeyup(oEvent);
 				return;
 			}
-			if (jQuery.sap.PseudoEvents.sapspace.fnCheck(oEvent)) {
+			if (PseudoEvents.events.sapspace.fnCheck(oEvent)) {
 				this._toggleAnimation();
 			}
-			if (oEvent.which === jQuery.sap.KeyCodes.B && this._bAnimationPause) {
+			if (oEvent.which === KeyCodes.B && this._bAnimationPause) {
 				this._scrollToNextTile(true, true);
 			}
-			if (oEvent.which === jQuery.sap.KeyCodes.F && this._bAnimationPause) {
+			if (oEvent.which === KeyCodes.F && this._bAnimationPause) {
 				this._scrollToNextTile(true, false);
 			}
 		} else if (this.getScope() === library.GenericTileScope.Actions) {
-			if (jQuery.sap.PseudoEvents.sapselect.fnCheck(oEvent)) {
+			if (PseudoEvents.events.sapselect.fnCheck(oEvent)) {
 				this.firePress(this._getEventParams(oEvent));
 				oEvent.preventDefault();
-			} else if (jQuery.sap.PseudoEvents.sapdelete.fnCheck(oEvent) || jQuery.sap.PseudoEvents.sapbackspace.fnCheck(oEvent)) {
+			} else if (PseudoEvents.events.sapdelete.fnCheck(oEvent) || PseudoEvents.events.sapbackspace.fnCheck(oEvent)) {
 				oParams = {
-						scope : this.getScope(),
-						action : GenericTile._Action.Remove,
-						domRef : this._oRemoveButton.getPopupAnchorDomRef()
+					scope: this.getScope(),
+					action: GenericTile._Action.Remove,
+					domRef: this._oRemoveButton.getPopupAnchorDomRef()
 				};
 				this.firePress(oParams);
 				oEvent.preventDefault();
@@ -268,14 +302,11 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 *
 	 * @param {sap.ui.base.Event} oEvent which was fired
 	 */
-	SlideTile.prototype.onmouseup = function(oEvent) {
+	SlideTile.prototype.onmouseup = function (oEvent) {
 		if (this.getScope() === library.GenericTileScope.Display) {
 			if (this.hasStyleClass("sapMSTIconPressed")) {
 				this._toggleAnimation();
 				this.removeStyleClass("sapMSTIconPressed");
-			} else if (Device.system.desktop) {
-				oEvent.preventDefault();
-				this.getTiles()[this._iCurrentTile].firePress();
 			}
 		}
 	};
@@ -285,7 +316,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 *
 	 * @param {sap.ui.base.Event} oEvent which was fired
 	 */
-	SlideTile.prototype.onmousedown = function(oEvent) {
+	SlideTile.prototype.onmousedown = function (oEvent) {
 		if (jQuery(oEvent.target).hasClass("sapMSTIconClickTapArea")) {
 			this.addStyleClass("sapMSTIconPressed");
 		}
@@ -310,7 +341,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	/* --- Public methods --- */
 
 	// Overwrites setScope of SlideTile control to be able to call method _setTilePressState
-	SlideTile.prototype.setScope = function(value) {
+	SlideTile.prototype.setScope = function (value) {
 		if (this.getScope() !== value) {
 			if (value === library.GenericTileScope.Actions) {
 				this.setProperty("scope", value, true);
@@ -327,12 +358,28 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 
 	/* --- Helpers --- */
 	/**
+	 * @private
+	 */
+	SlideTile.prototype._setupResizeClassHandler = function () {
+		var fnCheckMedia = function () {
+			if (this.getSizeBehavior() === TileSizeBehavior.Small || window.matchMedia("(max-width: 374px)").matches) {
+				this.$().addClass("sapMTileSmallPhone");
+			} else {
+				this.$().removeClass("sapMTileSmallPhone");
+			}
+		}.bind(this);
+
+		jQuery(window).resize(fnCheckMedia);
+		fnCheckMedia();
+	};
+
+	/**
 	 * Checks if the focus is inside of SlideTile
 	 *
 	 * @private
 	 * @returns {boolean} True if focus is inside of SlideTile
 	 */
-	SlideTile.prototype._isFocusInsideST = function() {
+	SlideTile.prototype._isFocusInsideST = function () {
 		return this.$()[0] === document.activeElement || this.$().find(document.activeElement).length;
 	};
 
@@ -341,7 +388,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 *
 	 * @private
 	 */
-	SlideTile.prototype._removeGTFocus = function() {
+	SlideTile.prototype._removeGTFocus = function () {
 		for (var i = 0; i < this.getTiles().length; i++) {
 			this.getTiles()[i].$().removeAttr("tabindex");
 		}
@@ -352,7 +399,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 *
 	 * @private
 	 */
-	SlideTile.prototype._toggleAnimation = function() {
+	SlideTile.prototype._toggleAnimation = function () {
 		if (this.getTiles().length > 1) {
 			if (this._bAnimationPause) {
 				this._startAnimation();
@@ -369,7 +416,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 * @param {boolean} needInvalidate decides whether invalidates the control for setScope
 	 * @private
 	 */
-	SlideTile.prototype._stopAnimation = function(needInvalidate) {
+	SlideTile.prototype._stopAnimation = function (needInvalidate) {
 		this._iCurrAnimationTime += Date.now() - this._iStartTime;
 		clearTimeout(this._sTimerId);
 		if (this._iCurrentTile != undefined) {
@@ -398,11 +445,11 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 *
 	 * @private
 	 */
-	SlideTile.prototype._startAnimation = function() {
+	SlideTile.prototype._startAnimation = function () {
 		var iDisplayTime = this.getDisplayTime() - this._iCurrAnimationTime;
 
 		clearTimeout(this._sTimerId);
-		this._sTimerId = setTimeout(function() {
+		this._sTimerId = setTimeout(function () {
 			this._scrollToNextTile();
 		}.bind(this), iDisplayTime);
 		this._iStartTime = Date.now();
@@ -415,7 +462,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 * @private
 	 * @param {int} tileIndex Index of the tile in the tiles aggregation
 	 */
-	SlideTile.prototype._scrollToTile = function(tileIndex) {
+	SlideTile.prototype._scrollToTile = function (tileIndex) {
 		if (tileIndex >= 0) {
 			var oWrapperTo = this.$("wrapper-" + tileIndex);
 			var sDir = sap.ui.getCore().getConfiguration().getRTL() ? "right" : "left";
@@ -438,7 +485,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 * @param {Boolean} pause Triggers if the animation gets paused or not
 	 * @param {Boolean} backward Sets the direction backward or forward
 	 */
-	SlideTile.prototype._scrollToNextTile = function(pause, backward) {
+	SlideTile.prototype._scrollToNextTile = function (pause, backward) {
 		var iTransitionTime = this._iCurrAnimationTime - this.getDisplayTime(),
 			bFirstAnimation, iNxtTile, oWrapperFrom, oWrapperTo, sWidthFrom, fWidthTo, fWidthFrom, bChangeSizeBefore, sDir, oDir;
 
@@ -481,8 +528,8 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 			}
 
 			oWrapperFrom.animate(oDir, {
-				duration : iTransitionTime,
-				done : function() {
+				duration: iTransitionTime,
+				done: function () {
 					if (!bChangeSizeBefore) {
 						this._changeSizeTo(this._iCurrentTile);
 					}
@@ -497,8 +544,8 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 			oDir[sDir] = "0rem";
 
 			oWrapperTo.animate(oDir, {
-				duration : iTransitionTime,
-				done : function() {
+				duration: iTransitionTime,
+				done: function () {
 					this._iCurrAnimationTime = 0;
 					if (this._bNeedInvalidate) {
 						this.invalidate();
@@ -524,7 +571,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 *
 	 * @private
 	 */
-	SlideTile.prototype._setAriaDescriptor = function() {
+	SlideTile.prototype._setAriaDescriptor = function () {
 		var sText, sScope, aTiles, oCurrentTile;
 
 		sScope = this.getScope();
@@ -552,7 +599,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 * @private
 	 * @param {int} tileIndex Index of the element in the tiles aggregation
 	 */
-	SlideTile.prototype._changeSizeTo = function(tileIndex) {
+	SlideTile.prototype._changeSizeTo = function (tileIndex) {
 		var oTile = this.getTiles()[tileIndex];
 		if (!oTile) {
 			return;
@@ -576,7 +623,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 * @param {int} tileIndex Index of the element in the tiles aggregation
 	 * @returns {int} Index of the previous tile
 	 */
-	SlideTile.prototype._getPreviousTileIndex = function(tileIndex) {
+	SlideTile.prototype._getPreviousTileIndex = function (tileIndex) {
 		if (tileIndex > 0) {
 			return tileIndex - 1;
 		} else {
@@ -591,7 +638,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 * @param {int} tileIndex Index of the element in the tiles aggregation
 	 * @returns {int} Index of the next tile
 	 */
-	SlideTile.prototype._getNextTileIndex = function(tileIndex) {
+	SlideTile.prototype._getNextTileIndex = function (tileIndex) {
 		if (tileIndex + 1 < this.getTiles().length) {
 			return tileIndex + 1;
 		} else {
@@ -604,11 +651,11 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 *
 	 * @private
 	 */
-	SlideTile.prototype._updateTilesIndicator = function() {
+	SlideTile.prototype._updateTilesIndicator = function () {
 		var $currentBullet;
 
 		for (var i = 0; i < this.getTiles().length; i++) {
-			$currentBullet =  this.$("tileIndicator-" + i);
+			$currentBullet = this.$("tileIndicator-" + i);
 			if (i === this._iCurrentTile) {
 				$currentBullet.addClass("sapMSTActive");
 			} else {
@@ -622,7 +669,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 *
 	 * @private
 	 */
-	SlideTile.prototype._updatePausePlayIcon = function() {
+	SlideTile.prototype._updatePausePlayIcon = function () {
 		if (this._bAnimationPause) {
 			this.getAggregation("_pausePlayIcon").setSrc("sap-icon://media-play");
 			this.$().removeClass("sapMSTPauseIcon");
@@ -637,7 +684,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 *
 	 * @private
 	 */
-	SlideTile.prototype._setTilePressState = function() {
+	SlideTile.prototype._setTilePressState = function () {
 		var oTiles = this.getTiles(),
 			bTilePressEnabled = this.getScope() === library.GenericTileScope.Display;//if scope is 'Display', enable press events of GenericTiles
 
@@ -653,7 +700,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/
 	 * @returns {boolean} True when the tile has NewsContent, otherwise false
 	 * @private
 	 */
-	SlideTile.prototype._hasNewsContent = function(tileIndex) {
+	SlideTile.prototype._hasNewsContent = function (tileIndex) {
 		var aTileContent = this.getTiles()[tileIndex].getTileContent();
 		for (var i = 0; i < aTileContent.length; i++) {
 			if (aTileContent[i]._getContentType() === "News") {

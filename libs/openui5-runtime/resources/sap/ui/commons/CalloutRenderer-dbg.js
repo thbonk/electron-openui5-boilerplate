@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './CalloutBaseRenderer', 'sap/ui/core/Renderer'],
-	function(jQuery, CalloutBaseRenderer, Renderer) {
+sap.ui.define(['./CalloutBaseRenderer', 'sap/ui/core/Renderer'],
+	function(CalloutBaseRenderer, Renderer) {
 	"use strict";
 
 
@@ -18,12 +18,11 @@ sap.ui.define(['jquery.sap.global', './CalloutBaseRenderer', 'sap/ui/core/Render
 	/**
 	 * Renders the HTML for content.
 	 *
-	 * @param {sap.ui.core.RenderManager} oRenderManager the RenderManager that can be used for writing to the Render-Output-Buffer
+	 * @param {sap.ui.core.RenderManager} rm the RenderManager that can be used for writing to the Render-Output-Buffer
 	 * @param {sap.ui.core.Control} oCallout an object representation of the Callout that should be rendered
 	 */
-	CalloutRenderer.renderContent = function(oRenderManager, oCallout){
+	CalloutRenderer.renderContent = function(rm, oCallout){
 
-		var rm = oRenderManager;
 		var content = oCallout.getContent();
 
 		// content

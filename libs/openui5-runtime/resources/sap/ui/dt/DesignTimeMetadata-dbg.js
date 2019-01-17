@@ -1,19 +1,24 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-// Provides class sap.ui.dt.DesignTimeMetadata.
 sap.ui.define([
-	'jquery.sap.global',
+	"sap/ui/thirdparty/jquery",
 	'sap/ui/base/ManagedObject',
 	'sap/ui/dt/ElementUtil',
-	'sap/ui/dt/DOMUtil'
+	'sap/ui/dt/DOMUtil',
+	'sap/base/util/merge'
 ],
-function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
+function(
+	jQuery,
+	ManagedObject,
+	ElementUtil,
+	DOMUtil,
+	merge
+) {
 	"use strict";
-
 
 	/**
 	 * Constructor for a new DesignTimeMetadata.
@@ -26,7 +31,7 @@ function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @private
@@ -35,22 +40,16 @@ function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
 	 * @experimental Since 1.30. This class is experimental and provides only limited functionality. Also the API might be changed in future.
 	 */
 	var DesignTimeMetadata = ManagedObject.extend("sap.ui.dt.DesignTimeMetadata", /** @lends sap.ui.dt.DesignTimeMetadata.prototype */ {
-		metadata : {
-			// ---- object ----
-
-			// ---- control specific ----
-			library : "sap.ui.dt",
-			properties : {
+		metadata: {
+			library: "sap.ui.dt",
+			properties: {
 				/**
 				 * Data to be used as DT metadata
 				 */
-				data : {
-					type : "any"
-				},
-				/**
-				* Name of the library the control belongs to
-				*/
-				libraryName : "string"
+				data: {
+					type: "any",
+					defaultValue: {}
+				}
 			}
 		}
 	});
@@ -62,26 +61,8 @@ function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
 	 * @protected
 	 */
 	DesignTimeMetadata.prototype.setData = function(oData) {
-
-		var oMergedData = jQuery.extend(true, this.getDefaultData(), oData || {});
-
-		this.setProperty("data", oMergedData);
+		this.setProperty("data", merge({}, this.getDefaultData(), oData));
 		return this;
-	};
-
-	/**
-	 * Returns data, if no data is set, creates a default data
-	 * @return {object} returns data
-	 * @public
-	 */
-	DesignTimeMetadata.prototype.getData = function() {
-		var oData = this.getProperty("data");
-		if (!oData) {
-			this.setData({});
-			oData = this.getProperty("data");
-		}
-
-		return oData;
 	};
 
 	/**
@@ -91,9 +72,8 @@ function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
 	 */
 	DesignTimeMetadata.prototype.getDefaultData = function() {
 		return {
-			ignore : false,
-			domRef : undefined,
-			cloneDomRef : false
+			ignore: false,
+			domRef: undefined
 		};
 	};
 
@@ -113,12 +93,14 @@ function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
 	};
 
 	/**
-	 * Returns property "copyDom" of the DT metadata
-	 * @return {boolean} if overlay should copy the DOM of its associated element
+	 * Returns 'not-adaptable' flag as boolean
+	 * @param {Object} oElement Element instance
+	 * @return {boolean} Returns 'true' if not adaptable
 	 * @public
 	 */
-	DesignTimeMetadata.prototype.getCloneDomRef = function() {
-		return this.getData().cloneDomRef;
+	DesignTimeMetadata.prototype.markedAsNotAdaptable = function() {
+		var vActions = this.getData().actions;
+		return vActions === "not-adaptable";
 	};
 
 	/**
@@ -130,29 +112,30 @@ function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
 		return this.getData().domRef;
 	};
 
-
 	/**
 	 * Returns a DOM representation for an Element or aggregation, if it can be found or undefined
 	 * @param {Object} oElement Element we need DomRef for
 	 * @param {String|Function} vDomRef Selector or Function for fetchting DomRef
-	 * @param {String} sAggregationName Aggregation Name
+	 * @param {String} [sAggregationName] Aggregation Name
 	 * @return {jQuery} Returns associated DOM references wrapped by jQuery object
 	 * @public
 	 */
 	DesignTimeMetadata.prototype.getAssociatedDomRef = function(oElement, vDomRef, sAggregationName) {
-		var oElementDomRef = ElementUtil.getDomRef(oElement);
-		var aArguments = [];
-		aArguments.push(oElement);
-		if (sAggregationName) {
-			aArguments.push(sAggregationName);
-		}
+		if (oElement) {
+			var oElementDomRef = ElementUtil.getDomRef(oElement);
+			var aArguments = [];
+			aArguments.push(oElement);
+			if (sAggregationName) {
+				aArguments.push(sAggregationName);
+			}
 
-		if (typeof (vDomRef) === "function") {
-			var vRes = vDomRef.apply(null, aArguments);
+			if (typeof (vDomRef) === "function") {
+				var vRes = vDomRef.apply(null, aArguments);
 
-			return vRes ? jQuery(vRes) : vRes;
-		} else if (oElementDomRef && typeof (vDomRef) === "string") {
-			return DOMUtil.getDomRefForCSSSelector(oElementDomRef, vDomRef);
+				return vRes ? jQuery(vRes) : vRes;
+			} else if (oElementDomRef && typeof (vDomRef) === "string") {
+				return DOMUtil.getDomRefForCSSSelector(oElementDomRef, vDomRef);
+			}
 		}
 	};
 
@@ -190,6 +173,7 @@ function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
 	 * For more details on this replacement mechanism refer also:
 	 * @see jQuery.sap.formatMessage
 	 *
+	 * @param {sap.ui.core.Element} oElement Element for which the text is being retrieved
 	 * @param {string} sKey Key
 	 * @param {string[]} [aArgs] List of parameters which should replace the place holders "{n}" (n is the index) in the found locale-specific string value.
 	 * @return {string} The value belonging to the key, if found; otherwise the key itself.
@@ -197,25 +181,60 @@ function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
 	 * @function
 	 * @public
 	 */
-	DesignTimeMetadata.prototype.getLibraryText = function(sKey, aArgs) {
-		var oLibResourceBundle = sap.ui.getCore().getLibraryResourceBundle(this.getLibraryName());
-		return oLibResourceBundle.getText(sKey, aArgs);
+	DesignTimeMetadata.prototype.getLibraryText = function(oElement, sKey, aArgs) {
+		var oElementMetadata = oElement.getMetadata();
+		return this._lookForLibraryTextInHierarchy(oElementMetadata, sKey, aArgs);
+	};
+
+	DesignTimeMetadata.prototype._lookForLibraryTextInHierarchy = function(oMetadata, sKey, aArgs){
+		var sLibraryName;
+		var oParentMetadata;
+		var sResult;
+
+		sLibraryName = oMetadata.getLibraryName();
+		sResult = this._getTextFromLibrary(sLibraryName, sKey, aArgs);
+		if (!sResult){
+			oParentMetadata = oMetadata.getParent();
+			if (oParentMetadata && oParentMetadata.getLibraryName){ // Parents from the core library don't have Library Name
+				// If the control is inheriting from another library, the text must be searched in the hierarchy
+				sResult = this._lookForLibraryTextInHierarchy(oParentMetadata, sKey, aArgs);
+			} else {
+				// Nothing was found -> return the key
+				sResult = sKey;
+			}
+		}
+
+		return sResult;
+	};
+
+	DesignTimeMetadata.prototype._getTextFromLibrary = function(sLibraryName, sKey, aArgs){
+		var oLibResourceBundle = sap.ui.getCore().getLibraryResourceBundle(sLibraryName + ".designtime");
+		if (oLibResourceBundle && oLibResourceBundle.hasText(sKey)){
+			return oLibResourceBundle.getText(sKey, aArgs);
+		} else {
+			//Fallback to old logic that tries to get the text from the libraries resource bundle
+			//TODO: remove the fallback after all libraries have introduced a library.designtime.js that will provide the resource bundle and texts
+			oLibResourceBundle = sap.ui.getCore().getLibraryResourceBundle(sLibraryName);
+			if (oLibResourceBundle && oLibResourceBundle.hasText(sKey)) {
+				return oLibResourceBundle.getText(sKey, aArgs);
+			}
+		}
 	};
 
 	/**
-	 * Returns all available triggers from designtime metadata
-	 * @return {Array.<Object>} array of available triggers
+	 * Returns "label" from designtime metadata
+	 * @return {string|undefined} Returns the label calculated from getLabel() in designtime metadata
 	 * @public
 	 */
-	DesignTimeMetadata.prototype.getTriggers = function() {
-		var mData = this.getData();
-		var aTriggers = [];
+	DesignTimeMetadata.prototype.getLabel = function() {
+		var vLabel = this.getData().getLabel;
+		return typeof vLabel === "function"
+			? vLabel.apply(this, arguments)
+			: undefined;
+	};
 
-		if (mData && Array.isArray(mData.triggers)) {
-			aTriggers = mData.triggers;
-		}
-
-		return aTriggers;
+	DesignTimeMetadata.prototype.getControllerExtensionTemplate = function() {
+		return this.getData().controllerExtensionTemplate;
 	};
 
 	return DesignTimeMetadata;

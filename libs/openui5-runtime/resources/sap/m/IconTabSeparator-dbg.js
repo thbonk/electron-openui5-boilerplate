@@ -1,13 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.IconTabSeparator.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element'],
-	function(jQuery, library, Element) {
+sap.ui.define(['./library', 'sap/ui/core/Element', 'sap/ui/core/Item'],
+	function(library, Element, Item) {
 	"use strict";
+
+
+
+	// shortcut for sap.m.ImageHelper
+	var ImageHelper = library.ImageHelper;
 
 
 
@@ -24,7 +29,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element'],
 	 * @implements sap.m.IconTab
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -37,6 +42,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element'],
 			"sap.m.IconTab"
 		],
 		library : "sap.m",
+		designtime: "sap/m/designtime/IconTabSeparator.designtime",
 		properties : {
 
 			/**
@@ -74,7 +80,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element'],
 			useIconTooltip : false
 		};
 
-		this._oImageControl = sap.m.ImageHelper.getImageControl(this.getId() + "-icon", this._oImageControl, oParent, mProperties, aCssClasses);
+		this._oImageControl = ImageHelper.getImageControl(this.getId() + "-icon", this._oImageControl, oParent, mProperties, aCssClasses);
 
 		return this._oImageControl;
 	};
@@ -90,8 +96,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element'],
 			this._oImageControl.destroy();
 		}
 
-		if (sap.ui.core.Item.prototype.exit) {
-			sap.ui.core.Item.prototype.exit.call(this, oEvent);
+		if (Item.prototype.exit) {
+			Item.prototype.exit.call(this, oEvent);
 		}
 	};
 
@@ -148,4 +154,4 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element'],
 
 	return IconTabSeparator;
 
-}, /* bExport= */ true);
+});

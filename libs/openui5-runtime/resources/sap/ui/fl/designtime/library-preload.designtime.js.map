@@ -1,0 +1,9 @@
+{
+"version":3,
+"file":"sap/ui/fl/designtime/library-preload.designtime.js",
+"sourceroot":".",
+"sources":["variants/VariantManagement.designtime-dbg.js","library.designtime-dbg.js"],
+"names":["oVariantManagement"],
+"mappings":";;;;;AAOA,gBAAa,8DAAC,GAAI,UAAW,CAC5B,aACA,MAAO,CACN,YAAa,GACb,WAAY,CACX,uBAAwB,CACvB,OAAQ,KACT,EACA,iBAAkB,CACjB,OAAQ,KACT,EACA,iBAAkB,CACjB,OAAQ,KACT,EACA,aAAc,CACb,OAAQ,KACT,EACA,SAAU,CACT,OAAQ,KACT,EACA,UAAW,CACV,OAAQ,KACT,EACA,mBAAoB,CACnB,OAAQ,KACT,CACD,EACA,oBAAqB,SAASA,CAAkB,CAAE,CACjD,OAAOA,CAAkB,+BAC1B,EACA,WAAY,GACZ,OAAQ,CACP,MAAO,SAASA,CAAkB,CAAE,CAEpC,EACA,KAAM,SAASA,CAAkB,CAAE,CAEnC,CACD,CACD,EACD,EAAiB;;;;;;ACtCjB,gBAAa,2CAAC,GAAI,UAAW,CAC5B,aACA,MAAO,GACR;",
+"x_com_sap_openui5_sections":[0,686,686,971]
+}

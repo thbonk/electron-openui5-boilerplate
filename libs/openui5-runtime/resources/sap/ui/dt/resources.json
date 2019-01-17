@@ -12,7 +12,6 @@
 			"module": "sap/ui/dt/AggregationDesignTimeMetadata.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/dt/DesignTimeMetadata.js"
 			]
 		},
@@ -20,7 +19,6 @@
 			"name": "AggregationDesignTimeMetadata.js",
 			"module": "sap/ui/dt/AggregationDesignTimeMetadata.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/dt/DesignTimeMetadata.js"
 			]
 		},
@@ -29,31 +27,24 @@
 			"module": "sap/ui/dt/AggregationOverlay.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/dt/Overlay.js"
+				"sap/base/util/merge.js",
+				"sap/ui/dt/ElementUtil.js",
+				"sap/ui/dt/Overlay.js",
+				"sap/ui/dt/OverlayRegistry.js",
+				"sap/ui/dt/Util.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "AggregationOverlay.js",
 			"module": "sap/ui/dt/AggregationOverlay.js",
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/dt/Overlay.js"
-			]
-		},
-		{
-			"name": "AggregationOverlayRenderer-dbg.js",
-			"module": "sap/ui/dt/AggregationOverlayRenderer.js",
-			"isDebug": true,
-			"required": [
-				"sap/ui/dt/RenderingUtil.js"
-			]
-		},
-		{
-			"name": "AggregationOverlayRenderer.js",
-			"module": "sap/ui/dt/AggregationOverlayRenderer.js",
-			"required": [
-				"sap/ui/dt/RenderingUtil.js"
+				"sap/base/util/merge.js",
+				"sap/ui/dt/ElementUtil.js",
+				"sap/ui/dt/Overlay.js",
+				"sap/ui/dt/OverlayRegistry.js",
+				"sap/ui/dt/Util.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -61,20 +52,32 @@
 			"module": "sap/ui/dt/ContextMenuControl.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/m/Button.js",
+				"sap/m/FlexItemData.js",
+				"sap/m/HBox.js",
+				"sap/m/Popover.js",
+				"sap/m/VBox.js",
+				"sap/ui/base/ManagedObject.js",
+				"sap/ui/dom/jquery/rect.js",
 				"sap/ui/dt/library.js",
-				"sap/ui/unified/Menu.js",
-				"sap/ui/unified/MenuItem.js"
+				"sap/ui/thirdparty/jquery.js",
+				"sap/ui/unified/Menu.js"
 			]
 		},
 		{
 			"name": "ContextMenuControl.js",
 			"module": "sap/ui/dt/ContextMenuControl.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/m/Button.js",
+				"sap/m/FlexItemData.js",
+				"sap/m/HBox.js",
+				"sap/m/Popover.js",
+				"sap/m/VBox.js",
+				"sap/ui/base/ManagedObject.js",
+				"sap/ui/dom/jquery/rect.js",
 				"sap/ui/dt/library.js",
-				"sap/ui/unified/Menu.js",
-				"sap/ui/unified/MenuItem.js"
+				"sap/ui/thirdparty/jquery.js",
+				"sap/ui/unified/Menu.js"
 			]
 		},
 		{
@@ -82,7 +85,6 @@
 			"module": "sap/ui/dt/ControlObserver.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/dt/ManagedObjectObserver.js"
 			]
 		},
@@ -90,7 +92,6 @@
 			"name": "ControlObserver.js",
 			"module": "sap/ui/dt/ControlObserver.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/dt/ManagedObjectObserver.js"
 			]
 		},
@@ -99,14 +100,20 @@
 			"module": "sap/ui/dt/DOMUtil.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js"
+				"sap/ui/Device.js",
+				"sap/ui/dom/jquery/zIndex.js",
+				"sap/ui/dt/Util.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "DOMUtil.js",
 			"module": "sap/ui/dt/DOMUtil.js",
 			"required": [
-				"jquery.sap.global.js"
+				"sap/ui/Device.js",
+				"sap/ui/dom/jquery/zIndex.js",
+				"sap/ui/dt/Util.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -114,30 +121,50 @@
 			"module": "sap/ui/dt/DesignTime.js",
 			"isDebug": true,
 			"required": [
+				"sap/base/Log.js",
+				"sap/base/util/includes.js",
+				"sap/base/util/isPlainObject.js",
+				"sap/base/util/merge.js",
 				"sap/ui/base/ManagedObject.js",
+				"sap/ui/dt/AggregationDesignTimeMetadata.js",
+				"sap/ui/dt/AggregationOverlay.js",
 				"sap/ui/dt/ElementDesignTimeMetadata.js",
 				"sap/ui/dt/ElementOverlay.js",
 				"sap/ui/dt/ElementUtil.js",
+				"sap/ui/dt/MetadataPropagationUtil.js",
 				"sap/ui/dt/Overlay.js",
 				"sap/ui/dt/OverlayRegistry.js",
 				"sap/ui/dt/OverlayUtil.js",
-				"sap/ui/dt/Selection.js",
-				"sap/ui/dt/library.js"
+				"sap/ui/dt/SelectionManager.js",
+				"sap/ui/dt/SelectionMode.js",
+				"sap/ui/dt/TaskManager.js",
+				"sap/ui/dt/Util.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "DesignTime.js",
 			"module": "sap/ui/dt/DesignTime.js",
 			"required": [
+				"sap/base/Log.js",
+				"sap/base/util/includes.js",
+				"sap/base/util/isPlainObject.js",
+				"sap/base/util/merge.js",
 				"sap/ui/base/ManagedObject.js",
+				"sap/ui/dt/AggregationDesignTimeMetadata.js",
+				"sap/ui/dt/AggregationOverlay.js",
 				"sap/ui/dt/ElementDesignTimeMetadata.js",
 				"sap/ui/dt/ElementOverlay.js",
 				"sap/ui/dt/ElementUtil.js",
+				"sap/ui/dt/MetadataPropagationUtil.js",
 				"sap/ui/dt/Overlay.js",
 				"sap/ui/dt/OverlayRegistry.js",
 				"sap/ui/dt/OverlayUtil.js",
-				"sap/ui/dt/Selection.js",
-				"sap/ui/dt/library.js"
+				"sap/ui/dt/SelectionManager.js",
+				"sap/ui/dt/SelectionMode.js",
+				"sap/ui/dt/TaskManager.js",
+				"sap/ui/dt/Util.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -145,20 +172,22 @@
 			"module": "sap/ui/dt/DesignTimeMetadata.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/util/merge.js",
 				"sap/ui/base/ManagedObject.js",
 				"sap/ui/dt/DOMUtil.js",
-				"sap/ui/dt/ElementUtil.js"
+				"sap/ui/dt/ElementUtil.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "DesignTimeMetadata.js",
 			"module": "sap/ui/dt/DesignTimeMetadata.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/util/merge.js",
 				"sap/ui/base/ManagedObject.js",
 				"sap/ui/dt/DOMUtil.js",
-				"sap/ui/dt/ElementUtil.js"
+				"sap/ui/dt/ElementUtil.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -166,18 +195,18 @@
 			"module": "sap/ui/dt/ElementDesignTimeMetadata.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/dt/AggregationDesignTimeMetadata.js",
-				"sap/ui/dt/DesignTimeMetadata.js"
+				"sap/ui/dt/DesignTimeMetadata.js",
+				"sap/ui/dt/ElementUtil.js"
 			]
 		},
 		{
 			"name": "ElementDesignTimeMetadata.js",
 			"module": "sap/ui/dt/ElementDesignTimeMetadata.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/dt/AggregationDesignTimeMetadata.js",
-				"sap/ui/dt/DesignTimeMetadata.js"
+				"sap/ui/dt/DesignTimeMetadata.js",
+				"sap/ui/dt/ElementUtil.js"
 			]
 		},
 		{
@@ -185,47 +214,36 @@
 			"module": "sap/ui/dt/ElementOverlay.js",
 			"isDebug": true,
 			"required": [
-				"sap/ui/dt/AggregationDesignTimeMetadata.js",
-				"sap/ui/dt/AggregationOverlay.js",
+				"sap/base/Log.js",
+				"sap/base/util/isPlainObject.js",
+				"sap/base/util/merge.js",
+				"sap/ui/core/Control.js",
 				"sap/ui/dt/ControlObserver.js",
 				"sap/ui/dt/DOMUtil.js",
 				"sap/ui/dt/ElementDesignTimeMetadata.js",
 				"sap/ui/dt/ElementUtil.js",
 				"sap/ui/dt/ManagedObjectObserver.js",
 				"sap/ui/dt/Overlay.js",
-				"sap/ui/dt/OverlayRegistry.js",
-				"sap/ui/dt/OverlayUtil.js"
+				"sap/ui/dt/Util.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "ElementOverlay.js",
 			"module": "sap/ui/dt/ElementOverlay.js",
 			"required": [
-				"sap/ui/dt/AggregationDesignTimeMetadata.js",
-				"sap/ui/dt/AggregationOverlay.js",
+				"sap/base/Log.js",
+				"sap/base/util/isPlainObject.js",
+				"sap/base/util/merge.js",
+				"sap/ui/core/Control.js",
 				"sap/ui/dt/ControlObserver.js",
 				"sap/ui/dt/DOMUtil.js",
 				"sap/ui/dt/ElementDesignTimeMetadata.js",
 				"sap/ui/dt/ElementUtil.js",
 				"sap/ui/dt/ManagedObjectObserver.js",
 				"sap/ui/dt/Overlay.js",
-				"sap/ui/dt/OverlayRegistry.js",
-				"sap/ui/dt/OverlayUtil.js"
-			]
-		},
-		{
-			"name": "ElementOverlayRenderer-dbg.js",
-			"module": "sap/ui/dt/ElementOverlayRenderer.js",
-			"isDebug": true,
-			"required": [
-				"sap/ui/dt/RenderingUtil.js"
-			]
-		},
-		{
-			"name": "ElementOverlayRenderer.js",
-			"module": "sap/ui/dt/ElementOverlayRenderer.js",
-			"required": [
-				"sap/ui/dt/RenderingUtil.js"
+				"sap/ui/dt/Util.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -233,14 +251,24 @@
 			"module": "sap/ui/dt/ElementUtil.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js"
+				"sap/base/Log.js",
+				"sap/ui/base/ManagedObject.js",
+				"sap/ui/base/Object.js",
+				"sap/ui/core/Component.js",
+				"sap/ui/dt/Util.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "ElementUtil.js",
 			"module": "sap/ui/dt/ElementUtil.js",
 			"required": [
-				"jquery.sap.global.js"
+				"sap/base/Log.js",
+				"sap/ui/base/ManagedObject.js",
+				"sap/ui/base/Object.js",
+				"sap/ui/core/Component.js",
+				"sap/ui/dt/Util.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -261,24 +289,47 @@
 			]
 		},
 		{
+			"name": "MetadataPropagationUtil-dbg.js",
+			"module": "sap/ui/dt/MetadataPropagationUtil.js",
+			"isDebug": true,
+			"required": [
+				"sap/base/util/merge.js",
+				"sap/ui/dt/Util.js",
+				"sap/ui/thirdparty/jquery.js"
+			]
+		},
+		{
+			"name": "MetadataPropagationUtil.js",
+			"module": "sap/ui/dt/MetadataPropagationUtil.js",
+			"required": [
+				"sap/base/util/merge.js",
+				"sap/ui/dt/Util.js",
+				"sap/ui/thirdparty/jquery.js"
+			]
+		},
+		{
 			"name": "MutationObserver-dbg.js",
 			"module": "sap/ui/dt/MutationObserver.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/base/ManagedObject.js",
+				"sap/ui/dt/DOMUtil.js",
 				"sap/ui/dt/ElementUtil.js",
-				"sap/ui/dt/OverlayUtil.js"
+				"sap/ui/dt/OverlayUtil.js",
+				"sap/ui/dt/Util.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "MutationObserver.js",
 			"module": "sap/ui/dt/MutationObserver.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/base/ManagedObject.js",
+				"sap/ui/dt/DOMUtil.js",
 				"sap/ui/dt/ElementUtil.js",
-				"sap/ui/dt/OverlayUtil.js"
+				"sap/ui/dt/OverlayUtil.js",
+				"sap/ui/dt/Util.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -286,26 +337,32 @@
 			"module": "sap/ui/dt/Overlay.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.dom.js",
-				"jquery.sap.global.js",
-				"sap/ui/core/Control.js",
+				"sap/base/Log.js",
+				"sap/ui/core/Element.js",
 				"sap/ui/dt/DOMUtil.js",
 				"sap/ui/dt/ElementUtil.js",
 				"sap/ui/dt/MutationObserver.js",
-				"sap/ui/dt/OverlayUtil.js"
+				"sap/ui/dt/OverlayUtil.js",
+				"sap/ui/dt/ScrollbarSynchronizer.js",
+				"sap/ui/dt/Util.js",
+				"sap/ui/dt/util/getNextZIndex.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "Overlay.js",
 			"module": "sap/ui/dt/Overlay.js",
 			"required": [
-				"jquery.sap.dom.js",
-				"jquery.sap.global.js",
-				"sap/ui/core/Control.js",
+				"sap/base/Log.js",
+				"sap/ui/core/Element.js",
 				"sap/ui/dt/DOMUtil.js",
 				"sap/ui/dt/ElementUtil.js",
 				"sap/ui/dt/MutationObserver.js",
-				"sap/ui/dt/OverlayUtil.js"
+				"sap/ui/dt/OverlayUtil.js",
+				"sap/ui/dt/ScrollbarSynchronizer.js",
+				"sap/ui/dt/Util.js",
+				"sap/ui/dt/util/getNextZIndex.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -314,7 +371,8 @@
 			"isDebug": true,
 			"required": [
 				"sap/ui/base/ManagedObject.js",
-				"sap/ui/dt/ElementUtil.js"
+				"sap/ui/dt/ElementUtil.js",
+				"sap/ui/dt/Util.js"
 			]
 		},
 		{
@@ -322,7 +380,8 @@
 			"module": "sap/ui/dt/OverlayRegistry.js",
 			"required": [
 				"sap/ui/base/ManagedObject.js",
-				"sap/ui/dt/ElementUtil.js"
+				"sap/ui/dt/ElementUtil.js",
+				"sap/ui/dt/Util.js"
 			]
 		},
 		{
@@ -330,7 +389,6 @@
 			"module": "sap/ui/dt/OverlayUtil.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/dt/ElementUtil.js",
 				"sap/ui/dt/OverlayRegistry.js"
 			]
@@ -339,7 +397,6 @@
 			"name": "OverlayUtil.js",
 			"module": "sap/ui/dt/OverlayUtil.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/dt/ElementUtil.js",
 				"sap/ui/dt/OverlayRegistry.js"
 			]
@@ -360,87 +417,160 @@
 			]
 		},
 		{
-			"name": "RenderingUtil-dbg.js",
-			"module": "sap/ui/dt/RenderingUtil.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js"
-			]
-		},
-		{
-			"name": "RenderingUtil.js",
-			"module": "sap/ui/dt/RenderingUtil.js",
-			"required": [
-				"jquery.sap.global.js"
-			]
-		},
-		{
-			"name": "Selection-dbg.js",
-			"module": "sap/ui/dt/Selection.js",
+			"name": "ScrollbarSynchronizer-dbg.js",
+			"module": "sap/ui/dt/ScrollbarSynchronizer.js",
 			"isDebug": true,
 			"required": [
 				"sap/ui/base/ManagedObject.js",
-				"sap/ui/dt/library.js"
+				"sap/ui/dt/DOMUtil.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
-			"name": "Selection.js",
-			"module": "sap/ui/dt/Selection.js",
+			"name": "ScrollbarSynchronizer.js",
+			"module": "sap/ui/dt/ScrollbarSynchronizer.js",
 			"required": [
 				"sap/ui/base/ManagedObject.js",
-				"sap/ui/dt/library.js"
+				"sap/ui/dt/DOMUtil.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
-			"name": "library-all-dbg.js",
+			"name": "SelectionManager-dbg.js",
+			"module": "sap/ui/dt/SelectionManager.js",
 			"isDebug": true,
-			"merged": true
+			"required": [
+				"sap/base/util/includes.js",
+				"sap/ui/base/ManagedObject.js",
+				"sap/ui/dt/ElementOverlay.js",
+				"sap/ui/dt/OverlayRegistry.js",
+				"sap/ui/dt/SelectionMode.js",
+				"sap/ui/dt/Util.js"
+			]
 		},
 		{
-			"name": "library-all.js",
-			"merged": true
+			"name": "SelectionManager.js",
+			"module": "sap/ui/dt/SelectionManager.js",
+			"required": [
+				"sap/base/util/includes.js",
+				"sap/ui/base/ManagedObject.js",
+				"sap/ui/dt/ElementOverlay.js",
+				"sap/ui/dt/OverlayRegistry.js",
+				"sap/ui/dt/SelectionMode.js",
+				"sap/ui/dt/Util.js"
+			]
+		},
+		{
+			"name": "SelectionMode-dbg.js",
+			"module": "sap/ui/dt/SelectionMode.js",
+			"isDebug": true
+		},
+		{
+			"name": "SelectionMode.js",
+			"module": "sap/ui/dt/SelectionMode.js"
+		},
+		{
+			"name": "TaskManager-dbg.js",
+			"module": "sap/ui/dt/TaskManager.js",
+			"isDebug": true,
+			"required": [
+				"sap/base/util/isPlainObject.js",
+				"sap/ui/base/ManagedObject.js",
+				"sap/ui/thirdparty/jquery.js"
+			]
+		},
+		{
+			"name": "TaskManager.js",
+			"module": "sap/ui/dt/TaskManager.js",
+			"required": [
+				"sap/base/util/isPlainObject.js",
+				"sap/ui/base/ManagedObject.js",
+				"sap/ui/thirdparty/jquery.js"
+			]
+		},
+		{
+			"name": "Util-dbg.js",
+			"module": "sap/ui/dt/Util.js",
+			"isDebug": true,
+			"required": [
+				"sap/base/util/includes.js",
+				"sap/base/util/isPlainObject.js",
+				"sap/ui/Device.js",
+				"sap/ui/thirdparty/jquery.js"
+			]
+		},
+		{
+			"name": "Util.js",
+			"module": "sap/ui/dt/Util.js",
+			"required": [
+				"sap/base/util/includes.js",
+				"sap/base/util/isPlainObject.js",
+				"sap/ui/Device.js",
+				"sap/ui/thirdparty/jquery.js"
+			]
 		},
 		{
 			"name": "library-dbg.js",
 			"module": "sap/ui/dt/library.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/core/library.js"
+				"sap/ui/core/library.js",
+				"sap/ui/dt/SelectionMode.js"
 			]
 		},
 		{
-			"name": "library-preload.js",
-			"module": "sap/ui/dt/library-preload.js",
+			"name": "library-h2-preload-dbg.js",
+			"module": "sap/ui/dt/library-h2-preload.js",
+			"isDebug": true,
 			"merged": true,
 			"required": [
-				"jquery.sap.dom.js",
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/base/assert.js",
+				"sap/base/util/ObjectPath.js",
+				"sap/base/util/includes.js",
+				"sap/base/util/isPlainObject.js",
+				"sap/base/util/merge.js",
 				"sap/m/Button.js",
+				"sap/m/FlexItemData.js",
+				"sap/m/HBox.js",
 				"sap/m/Label.js",
+				"sap/m/Popover.js",
 				"sap/m/RatingIndicator.js",
 				"sap/m/SearchField.js",
 				"sap/m/Text.js",
 				"sap/m/Title.js",
 				"sap/m/Toolbar.js",
 				"sap/m/ToolbarSpacer.js",
+				"sap/m/VBox.js",
+				"sap/ui/Device.js",
 				"sap/ui/base/ManagedObject.js",
+				"sap/ui/base/Object.js",
+				"sap/ui/core/BusyIndicator.js",
+				"sap/ui/core/Component.js",
 				"sap/ui/core/Control.js",
+				"sap/ui/core/Element.js",
+				"sap/ui/core/Popup.js",
 				"sap/ui/core/library.js",
+				"sap/ui/dom/jquery/Selectors.js",
+				"sap/ui/dom/jquery/rect.js",
+				"sap/ui/dom/jquery/zIndex.js",
+				"sap/ui/events/KeyCodes.js",
 				"sap/ui/fl/registry/ChangeRegistry.js",
 				"sap/ui/layout/form/SimpleForm.js",
 				"sap/ui/model/Filter.js",
 				"sap/ui/model/FilterOperator.js",
 				"sap/ui/model/json/JSONModel.js",
+				"sap/ui/model/resource/ResourceModel.js",
 				"sap/ui/table/Column.js",
 				"sap/ui/table/TreeTable.js",
-				"sap/ui/unified/Menu.js",
-				"sap/ui/unified/MenuItem.js"
+				"sap/ui/thirdparty/jquery.js",
+				"sap/ui/unified/Menu.js"
 			],
 			"included": [
+				"sap/ui/dt/library.js",
+				"sap/ui/dt/manifest.json",
 				"sap/ui/dt/AggregationDesignTimeMetadata.js",
 				"sap/ui/dt/AggregationOverlay.js",
-				"sap/ui/dt/AggregationOverlayRenderer.js",
 				"sap/ui/dt/ContextMenuControl.js",
 				"sap/ui/dt/ControlObserver.js",
 				"sap/ui/dt/DOMUtil.js",
@@ -448,16 +578,211 @@
 				"sap/ui/dt/DesignTimeMetadata.js",
 				"sap/ui/dt/ElementDesignTimeMetadata.js",
 				"sap/ui/dt/ElementOverlay.js",
-				"sap/ui/dt/ElementOverlayRenderer.js",
 				"sap/ui/dt/ElementUtil.js",
 				"sap/ui/dt/ManagedObjectObserver.js",
+				"sap/ui/dt/MetadataPropagationUtil.js",
 				"sap/ui/dt/MutationObserver.js",
 				"sap/ui/dt/Overlay.js",
 				"sap/ui/dt/OverlayRegistry.js",
 				"sap/ui/dt/OverlayUtil.js",
 				"sap/ui/dt/Plugin.js",
-				"sap/ui/dt/RenderingUtil.js",
-				"sap/ui/dt/Selection.js",
+				"sap/ui/dt/ScrollbarSynchronizer.js",
+				"sap/ui/dt/SelectionManager.js",
+				"sap/ui/dt/SelectionMode.js",
+				"sap/ui/dt/TaskManager.js",
+				"sap/ui/dt/Util.js",
+				"sap/ui/dt/plugin/ContextMenu.js",
+				"sap/ui/dt/plugin/ControlDragDrop.js",
+				"sap/ui/dt/plugin/CutPaste.js",
+				"sap/ui/dt/plugin/DragDrop.js",
+				"sap/ui/dt/plugin/ElementMover.js",
+				"sap/ui/dt/plugin/MouseSelection.js",
+				"sap/ui/dt/plugin/TabHandling.js",
+				"sap/ui/dt/plugin/ToolHooks.js",
+				"sap/ui/dt/test/Element.js",
+				"sap/ui/dt/test/ElementEnablementTest.js",
+				"sap/ui/dt/test/ElementEnablementTest2.js",
+				"sap/ui/dt/test/LibraryEnablementTest.js",
+				"sap/ui/dt/test/LibraryEnablementTest2.js",
+				"sap/ui/dt/test/LibraryTest.js",
+				"sap/ui/dt/test/Test.js",
+				"sap/ui/dt/test/report/QUnit.js",
+				"sap/ui/dt/test/report/Statistic.js",
+				"sap/ui/dt/test/report/StatisticRenderer.js",
+				"sap/ui/dt/test/report/Table.js",
+				"sap/ui/dt/test/report/TableRenderer.js",
+				"sap/ui/dt/util/getNextZIndex.js"
+			]
+		},
+		{
+			"name": "library-h2-preload.js",
+			"module": "sap/ui/dt/library-h2-preload.js",
+			"merged": true,
+			"required": [
+				"sap/base/Log.js",
+				"sap/base/assert.js",
+				"sap/base/util/ObjectPath.js",
+				"sap/base/util/includes.js",
+				"sap/base/util/isPlainObject.js",
+				"sap/base/util/merge.js",
+				"sap/m/Button.js",
+				"sap/m/FlexItemData.js",
+				"sap/m/HBox.js",
+				"sap/m/Label.js",
+				"sap/m/Popover.js",
+				"sap/m/RatingIndicator.js",
+				"sap/m/SearchField.js",
+				"sap/m/Text.js",
+				"sap/m/Title.js",
+				"sap/m/Toolbar.js",
+				"sap/m/ToolbarSpacer.js",
+				"sap/m/VBox.js",
+				"sap/ui/Device.js",
+				"sap/ui/base/ManagedObject.js",
+				"sap/ui/base/Object.js",
+				"sap/ui/core/BusyIndicator.js",
+				"sap/ui/core/Component.js",
+				"sap/ui/core/Control.js",
+				"sap/ui/core/Element.js",
+				"sap/ui/core/Popup.js",
+				"sap/ui/core/library.js",
+				"sap/ui/dom/jquery/Selectors.js",
+				"sap/ui/dom/jquery/rect.js",
+				"sap/ui/dom/jquery/zIndex.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/fl/registry/ChangeRegistry.js",
+				"sap/ui/layout/form/SimpleForm.js",
+				"sap/ui/model/Filter.js",
+				"sap/ui/model/FilterOperator.js",
+				"sap/ui/model/json/JSONModel.js",
+				"sap/ui/model/resource/ResourceModel.js",
+				"sap/ui/table/Column.js",
+				"sap/ui/table/TreeTable.js",
+				"sap/ui/thirdparty/jquery.js",
+				"sap/ui/unified/Menu.js"
+			],
+			"included": [
+				"sap/ui/dt/library.js",
+				"sap/ui/dt/manifest.json",
+				"sap/ui/dt/AggregationDesignTimeMetadata.js",
+				"sap/ui/dt/AggregationOverlay.js",
+				"sap/ui/dt/ContextMenuControl.js",
+				"sap/ui/dt/ControlObserver.js",
+				"sap/ui/dt/DOMUtil.js",
+				"sap/ui/dt/DesignTime.js",
+				"sap/ui/dt/DesignTimeMetadata.js",
+				"sap/ui/dt/ElementDesignTimeMetadata.js",
+				"sap/ui/dt/ElementOverlay.js",
+				"sap/ui/dt/ElementUtil.js",
+				"sap/ui/dt/ManagedObjectObserver.js",
+				"sap/ui/dt/MetadataPropagationUtil.js",
+				"sap/ui/dt/MutationObserver.js",
+				"sap/ui/dt/Overlay.js",
+				"sap/ui/dt/OverlayRegistry.js",
+				"sap/ui/dt/OverlayUtil.js",
+				"sap/ui/dt/Plugin.js",
+				"sap/ui/dt/ScrollbarSynchronizer.js",
+				"sap/ui/dt/SelectionManager.js",
+				"sap/ui/dt/SelectionMode.js",
+				"sap/ui/dt/TaskManager.js",
+				"sap/ui/dt/Util.js",
+				"sap/ui/dt/plugin/ContextMenu.js",
+				"sap/ui/dt/plugin/ControlDragDrop.js",
+				"sap/ui/dt/plugin/CutPaste.js",
+				"sap/ui/dt/plugin/DragDrop.js",
+				"sap/ui/dt/plugin/ElementMover.js",
+				"sap/ui/dt/plugin/MouseSelection.js",
+				"sap/ui/dt/plugin/TabHandling.js",
+				"sap/ui/dt/plugin/ToolHooks.js",
+				"sap/ui/dt/test/Element.js",
+				"sap/ui/dt/test/ElementEnablementTest.js",
+				"sap/ui/dt/test/ElementEnablementTest2.js",
+				"sap/ui/dt/test/LibraryEnablementTest.js",
+				"sap/ui/dt/test/LibraryEnablementTest2.js",
+				"sap/ui/dt/test/LibraryTest.js",
+				"sap/ui/dt/test/Test.js",
+				"sap/ui/dt/test/report/QUnit.js",
+				"sap/ui/dt/test/report/Statistic.js",
+				"sap/ui/dt/test/report/StatisticRenderer.js",
+				"sap/ui/dt/test/report/Table.js",
+				"sap/ui/dt/test/report/TableRenderer.js",
+				"sap/ui/dt/util/getNextZIndex.js"
+			]
+		},
+		{
+			"name": "library-h2-preload.js.map",
+			"isDebug": true
+		},
+		{
+			"name": "library-preload.js",
+			"module": "sap/ui/dt/library-preload.js",
+			"merged": true,
+			"required": [
+				"sap/base/Log.js",
+				"sap/base/assert.js",
+				"sap/base/util/ObjectPath.js",
+				"sap/base/util/includes.js",
+				"sap/base/util/isPlainObject.js",
+				"sap/base/util/merge.js",
+				"sap/m/Button.js",
+				"sap/m/FlexItemData.js",
+				"sap/m/HBox.js",
+				"sap/m/Label.js",
+				"sap/m/Popover.js",
+				"sap/m/RatingIndicator.js",
+				"sap/m/SearchField.js",
+				"sap/m/Text.js",
+				"sap/m/Title.js",
+				"sap/m/Toolbar.js",
+				"sap/m/ToolbarSpacer.js",
+				"sap/m/VBox.js",
+				"sap/ui/Device.js",
+				"sap/ui/base/ManagedObject.js",
+				"sap/ui/base/Object.js",
+				"sap/ui/core/BusyIndicator.js",
+				"sap/ui/core/Component.js",
+				"sap/ui/core/Control.js",
+				"sap/ui/core/Element.js",
+				"sap/ui/core/Popup.js",
+				"sap/ui/core/library.js",
+				"sap/ui/dom/jquery/Selectors.js",
+				"sap/ui/dom/jquery/rect.js",
+				"sap/ui/dom/jquery/zIndex.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/fl/registry/ChangeRegistry.js",
+				"sap/ui/layout/form/SimpleForm.js",
+				"sap/ui/model/Filter.js",
+				"sap/ui/model/FilterOperator.js",
+				"sap/ui/model/json/JSONModel.js",
+				"sap/ui/model/resource/ResourceModel.js",
+				"sap/ui/table/Column.js",
+				"sap/ui/table/TreeTable.js",
+				"sap/ui/thirdparty/jquery.js",
+				"sap/ui/unified/Menu.js"
+			],
+			"included": [
+				"sap/ui/dt/AggregationDesignTimeMetadata.js",
+				"sap/ui/dt/AggregationOverlay.js",
+				"sap/ui/dt/ContextMenuControl.js",
+				"sap/ui/dt/ControlObserver.js",
+				"sap/ui/dt/DOMUtil.js",
+				"sap/ui/dt/DesignTime.js",
+				"sap/ui/dt/DesignTimeMetadata.js",
+				"sap/ui/dt/ElementDesignTimeMetadata.js",
+				"sap/ui/dt/ElementOverlay.js",
+				"sap/ui/dt/ElementUtil.js",
+				"sap/ui/dt/ManagedObjectObserver.js",
+				"sap/ui/dt/MetadataPropagationUtil.js",
+				"sap/ui/dt/MutationObserver.js",
+				"sap/ui/dt/Overlay.js",
+				"sap/ui/dt/OverlayRegistry.js",
+				"sap/ui/dt/OverlayUtil.js",
+				"sap/ui/dt/Plugin.js",
+				"sap/ui/dt/ScrollbarSynchronizer.js",
+				"sap/ui/dt/SelectionManager.js",
+				"sap/ui/dt/SelectionMode.js",
+				"sap/ui/dt/TaskManager.js",
+				"sap/ui/dt/Util.js",
 				"sap/ui/dt/library.js",
 				"sap/ui/dt/manifest.json",
 				"sap/ui/dt/plugin/ContextMenu.js",
@@ -467,17 +792,20 @@
 				"sap/ui/dt/plugin/ElementMover.js",
 				"sap/ui/dt/plugin/MouseSelection.js",
 				"sap/ui/dt/plugin/TabHandling.js",
+				"sap/ui/dt/plugin/ToolHooks.js",
 				"sap/ui/dt/test/Element.js",
 				"sap/ui/dt/test/ElementEnablementTest.js",
 				"sap/ui/dt/test/ElementEnablementTest2.js",
 				"sap/ui/dt/test/LibraryEnablementTest.js",
 				"sap/ui/dt/test/LibraryEnablementTest2.js",
+				"sap/ui/dt/test/LibraryTest.js",
 				"sap/ui/dt/test/Test.js",
 				"sap/ui/dt/test/report/QUnit.js",
 				"sap/ui/dt/test/report/Statistic.js",
 				"sap/ui/dt/test/report/StatisticRenderer.js",
 				"sap/ui/dt/test/report/Table.js",
-				"sap/ui/dt/test/report/TableRenderer.js"
+				"sap/ui/dt/test/report/TableRenderer.js",
+				"sap/ui/dt/util/getNextZIndex.js"
 			]
 		},
 		{
@@ -489,34 +817,52 @@
 			"module": "sap/ui/dt/library-preload.json",
 			"merged": true,
 			"required": [
-				"jquery.sap.dom.js",
-				"jquery.sap.global.js",
+				"sap/base/Log.js",
+				"sap/base/assert.js",
+				"sap/base/util/ObjectPath.js",
+				"sap/base/util/includes.js",
+				"sap/base/util/isPlainObject.js",
+				"sap/base/util/merge.js",
 				"sap/m/Button.js",
+				"sap/m/FlexItemData.js",
+				"sap/m/HBox.js",
 				"sap/m/Label.js",
+				"sap/m/Popover.js",
 				"sap/m/RatingIndicator.js",
 				"sap/m/SearchField.js",
 				"sap/m/Text.js",
 				"sap/m/Title.js",
 				"sap/m/Toolbar.js",
 				"sap/m/ToolbarSpacer.js",
+				"sap/m/VBox.js",
+				"sap/ui/Device.js",
 				"sap/ui/base/ManagedObject.js",
+				"sap/ui/base/Object.js",
+				"sap/ui/core/BusyIndicator.js",
+				"sap/ui/core/Component.js",
 				"sap/ui/core/Control.js",
+				"sap/ui/core/Element.js",
+				"sap/ui/core/Popup.js",
 				"sap/ui/core/library-preload.json",
 				"sap/ui/core/library.js",
+				"sap/ui/dom/jquery/Selectors.js",
+				"sap/ui/dom/jquery/rect.js",
+				"sap/ui/dom/jquery/zIndex.js",
+				"sap/ui/events/KeyCodes.js",
 				"sap/ui/fl/registry/ChangeRegistry.js",
 				"sap/ui/layout/form/SimpleForm.js",
 				"sap/ui/model/Filter.js",
 				"sap/ui/model/FilterOperator.js",
 				"sap/ui/model/json/JSONModel.js",
+				"sap/ui/model/resource/ResourceModel.js",
 				"sap/ui/table/Column.js",
 				"sap/ui/table/TreeTable.js",
-				"sap/ui/unified/Menu.js",
-				"sap/ui/unified/MenuItem.js"
+				"sap/ui/thirdparty/jquery.js",
+				"sap/ui/unified/Menu.js"
 			],
 			"included": [
 				"sap/ui/dt/AggregationDesignTimeMetadata.js",
 				"sap/ui/dt/AggregationOverlay.js",
-				"sap/ui/dt/AggregationOverlayRenderer.js",
 				"sap/ui/dt/ContextMenuControl.js",
 				"sap/ui/dt/ControlObserver.js",
 				"sap/ui/dt/DOMUtil.js",
@@ -524,16 +870,19 @@
 				"sap/ui/dt/DesignTimeMetadata.js",
 				"sap/ui/dt/ElementDesignTimeMetadata.js",
 				"sap/ui/dt/ElementOverlay.js",
-				"sap/ui/dt/ElementOverlayRenderer.js",
 				"sap/ui/dt/ElementUtil.js",
 				"sap/ui/dt/ManagedObjectObserver.js",
+				"sap/ui/dt/MetadataPropagationUtil.js",
 				"sap/ui/dt/MutationObserver.js",
 				"sap/ui/dt/Overlay.js",
 				"sap/ui/dt/OverlayRegistry.js",
 				"sap/ui/dt/OverlayUtil.js",
 				"sap/ui/dt/Plugin.js",
-				"sap/ui/dt/RenderingUtil.js",
-				"sap/ui/dt/Selection.js",
+				"sap/ui/dt/ScrollbarSynchronizer.js",
+				"sap/ui/dt/SelectionManager.js",
+				"sap/ui/dt/SelectionMode.js",
+				"sap/ui/dt/TaskManager.js",
+				"sap/ui/dt/Util.js",
 				"sap/ui/dt/library.js",
 				"sap/ui/dt/manifest.json",
 				"sap/ui/dt/plugin/ContextMenu.js",
@@ -543,17 +892,20 @@
 				"sap/ui/dt/plugin/ElementMover.js",
 				"sap/ui/dt/plugin/MouseSelection.js",
 				"sap/ui/dt/plugin/TabHandling.js",
+				"sap/ui/dt/plugin/ToolHooks.js",
 				"sap/ui/dt/test/Element.js",
 				"sap/ui/dt/test/ElementEnablementTest.js",
 				"sap/ui/dt/test/ElementEnablementTest2.js",
 				"sap/ui/dt/test/LibraryEnablementTest.js",
 				"sap/ui/dt/test/LibraryEnablementTest2.js",
+				"sap/ui/dt/test/LibraryTest.js",
 				"sap/ui/dt/test/Test.js",
 				"sap/ui/dt/test/report/QUnit.js",
 				"sap/ui/dt/test/report/Statistic.js",
 				"sap/ui/dt/test/report/StatisticRenderer.js",
 				"sap/ui/dt/test/report/Table.js",
-				"sap/ui/dt/test/report/TableRenderer.js"
+				"sap/ui/dt/test/report/TableRenderer.js",
+				"sap/ui/dt/util/getNextZIndex.js"
 			]
 		},
 		{
@@ -568,8 +920,8 @@
 			"name": "library.js",
 			"module": "sap/ui/dt/library.js",
 			"required": [
-				"jquery.sap.global.js",
-				"sap/ui/core/library.js"
+				"sap/ui/core/library.js",
+				"sap/ui/dt/SelectionMode.js"
 			]
 		},
 		{
@@ -585,18 +937,28 @@
 			"module": "sap/ui/dt/plugin/ContextMenu.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/assert.js",
+				"sap/base/util/merge.js",
+				"sap/ui/Device.js",
 				"sap/ui/dt/ContextMenuControl.js",
-				"sap/ui/dt/Plugin.js"
+				"sap/ui/dt/Plugin.js",
+				"sap/ui/dt/Util.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "plugin/ContextMenu.js",
 			"module": "sap/ui/dt/plugin/ContextMenu.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/assert.js",
+				"sap/base/util/merge.js",
+				"sap/ui/Device.js",
 				"sap/ui/dt/ContextMenuControl.js",
-				"sap/ui/dt/Plugin.js"
+				"sap/ui/dt/Plugin.js",
+				"sap/ui/dt/Util.js",
+				"sap/ui/events/KeyCodes.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -605,6 +967,7 @@
 			"isDebug": true,
 			"required": [
 				"sap/ui/dt/ElementUtil.js",
+				"sap/ui/dt/OverlayUtil.js",
 				"sap/ui/dt/plugin/DragDrop.js",
 				"sap/ui/dt/plugin/ElementMover.js"
 			]
@@ -614,6 +977,7 @@
 			"module": "sap/ui/dt/plugin/ControlDragDrop.js",
 			"required": [
 				"sap/ui/dt/ElementUtil.js",
+				"sap/ui/dt/OverlayUtil.js",
 				"sap/ui/dt/plugin/DragDrop.js",
 				"sap/ui/dt/plugin/ElementMover.js"
 			]
@@ -626,7 +990,8 @@
 				"sap/ui/dt/OverlayRegistry.js",
 				"sap/ui/dt/OverlayUtil.js",
 				"sap/ui/dt/Plugin.js",
-				"sap/ui/dt/plugin/ElementMover.js"
+				"sap/ui/dt/plugin/ElementMover.js",
+				"sap/ui/events/KeyCodes.js"
 			]
 		},
 		{
@@ -636,7 +1001,8 @@
 				"sap/ui/dt/OverlayRegistry.js",
 				"sap/ui/dt/OverlayUtil.js",
 				"sap/ui/dt/Plugin.js",
-				"sap/ui/dt/plugin/ElementMover.js"
+				"sap/ui/dt/plugin/ElementMover.js",
+				"sap/ui/events/KeyCodes.js"
 			]
 		},
 		{
@@ -644,20 +1010,26 @@
 			"module": "sap/ui/dt/plugin/DragDrop.js",
 			"isDebug": true,
 			"required": [
+				"sap/ui/base/Object.js",
 				"sap/ui/dt/DOMUtil.js",
 				"sap/ui/dt/ElementUtil.js",
+				"sap/ui/dt/OverlayRegistry.js",
 				"sap/ui/dt/OverlayUtil.js",
-				"sap/ui/dt/Plugin.js"
+				"sap/ui/dt/Plugin.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "plugin/DragDrop.js",
 			"module": "sap/ui/dt/plugin/DragDrop.js",
 			"required": [
+				"sap/ui/base/Object.js",
 				"sap/ui/dt/DOMUtil.js",
 				"sap/ui/dt/ElementUtil.js",
+				"sap/ui/dt/OverlayRegistry.js",
 				"sap/ui/dt/OverlayUtil.js",
-				"sap/ui/dt/Plugin.js"
+				"sap/ui/dt/Plugin.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -666,8 +1038,9 @@
 			"isDebug": true,
 			"required": [
 				"sap/ui/base/ManagedObject.js",
+				"sap/ui/base/Object.js",
+				"sap/ui/dt/DOMUtil.js",
 				"sap/ui/dt/ElementUtil.js",
-				"sap/ui/dt/OverlayRegistry.js",
 				"sap/ui/dt/OverlayUtil.js"
 			]
 		},
@@ -676,8 +1049,9 @@
 			"module": "sap/ui/dt/plugin/ElementMover.js",
 			"required": [
 				"sap/ui/base/ManagedObject.js",
+				"sap/ui/base/Object.js",
+				"sap/ui/dt/DOMUtil.js",
 				"sap/ui/dt/ElementUtil.js",
-				"sap/ui/dt/OverlayRegistry.js",
 				"sap/ui/dt/OverlayUtil.js"
 			]
 		},
@@ -701,17 +1075,36 @@
 			"module": "sap/ui/dt/plugin/TabHandling.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/dom/jquery/Selectors.js",
 				"sap/ui/dt/Overlay.js",
-				"sap/ui/dt/Plugin.js"
+				"sap/ui/dt/OverlayRegistry.js",
+				"sap/ui/dt/Plugin.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "plugin/TabHandling.js",
 			"module": "sap/ui/dt/plugin/TabHandling.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/dom/jquery/Selectors.js",
 				"sap/ui/dt/Overlay.js",
+				"sap/ui/dt/OverlayRegistry.js",
+				"sap/ui/dt/Plugin.js",
+				"sap/ui/thirdparty/jquery.js"
+			]
+		},
+		{
+			"name": "plugin/ToolHooks-dbg.js",
+			"module": "sap/ui/dt/plugin/ToolHooks.js",
+			"isDebug": true,
+			"required": [
+				"sap/ui/dt/Plugin.js"
+			]
+		},
+		{
+			"name": "plugin/ToolHooks.js",
+			"module": "sap/ui/dt/plugin/ToolHooks.js",
+			"required": [
 				"sap/ui/dt/Plugin.js"
 			]
 		},
@@ -723,18 +1116,20 @@
 			"module": "sap/ui/dt/test/Element.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/dt/DOMUtil.js",
 				"sap/ui/dt/ElementUtil.js",
-				"sap/ui/dt/OverlayRegistry.js"
+				"sap/ui/dt/OverlayRegistry.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "test/Element.js",
 			"module": "sap/ui/dt/test/Element.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/ui/dt/DOMUtil.js",
 				"sap/ui/dt/ElementUtil.js",
-				"sap/ui/dt/OverlayRegistry.js"
+				"sap/ui/dt/OverlayRegistry.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -742,20 +1137,22 @@
 			"module": "sap/ui/dt/test/ElementEnablementTest.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/util/ObjectPath.js",
 				"sap/ui/dt/DesignTime.js",
 				"sap/ui/dt/test/Element.js",
-				"sap/ui/dt/test/Test.js"
+				"sap/ui/dt/test/Test.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "test/ElementEnablementTest.js",
 			"module": "sap/ui/dt/test/ElementEnablementTest.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/util/ObjectPath.js",
 				"sap/ui/dt/DesignTime.js",
 				"sap/ui/dt/test/Element.js",
-				"sap/ui/dt/test/Test.js"
+				"sap/ui/dt/test/Test.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -763,7 +1160,7 @@
 			"module": "sap/ui/dt/test/ElementEnablementTest2.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/util/ObjectPath.js",
 				"sap/ui/base/ManagedObject.js",
 				"sap/ui/dt/test/Element.js",
 				"sap/ui/fl/registry/ChangeRegistry.js"
@@ -773,7 +1170,7 @@
 			"name": "test/ElementEnablementTest2.js",
 			"module": "sap/ui/dt/test/ElementEnablementTest2.js",
 			"required": [
-				"jquery.sap.global.js",
+				"sap/base/util/ObjectPath.js",
 				"sap/ui/base/ManagedObject.js",
 				"sap/ui/dt/test/Element.js",
 				"sap/ui/fl/registry/ChangeRegistry.js"
@@ -784,18 +1181,18 @@
 			"module": "sap/ui/dt/test/LibraryEnablementTest.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/dt/test/ElementEnablementTest.js",
-				"sap/ui/dt/test/Test.js"
+				"sap/ui/dt/test/Test.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
 			"name": "test/LibraryEnablementTest.js",
 			"module": "sap/ui/dt/test/LibraryEnablementTest.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/dt/test/ElementEnablementTest.js",
-				"sap/ui/dt/test/Test.js"
+				"sap/ui/dt/test/Test.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -803,7 +1200,6 @@
 			"module": "sap/ui/dt/test/LibraryEnablementTest2.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/base/ManagedObject.js",
 				"sap/ui/dt/test/ElementEnablementTest2.js"
 			]
@@ -812,9 +1208,27 @@
 			"name": "test/LibraryEnablementTest2.js",
 			"module": "sap/ui/dt/test/LibraryEnablementTest2.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/base/ManagedObject.js",
 				"sap/ui/dt/test/ElementEnablementTest2.js"
+			]
+		},
+		{
+			"name": "test/LibraryTest-dbg.js",
+			"module": "sap/ui/dt/test/LibraryTest.js",
+			"isDebug": true,
+			"required": [
+				"sap/ui/model/json/JSONModel.js",
+				"sap/ui/model/resource/ResourceModel.js",
+				"sap/ui/thirdparty/jquery.js"
+			]
+		},
+		{
+			"name": "test/LibraryTest.js",
+			"module": "sap/ui/dt/test/LibraryTest.js",
+			"required": [
+				"sap/ui/model/json/JSONModel.js",
+				"sap/ui/model/resource/ResourceModel.js",
+				"sap/ui/thirdparty/jquery.js"
 			]
 		},
 		{
@@ -822,7 +1236,6 @@
 			"module": "sap/ui/dt/test/Test.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/base/ManagedObject.js"
 			]
 		},
@@ -830,7 +1243,6 @@
 			"name": "test/Test.js",
 			"module": "sap/ui/dt/test/Test.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/base/ManagedObject.js"
 			]
 		},
@@ -839,7 +1251,6 @@
 			"module": "sap/ui/dt/test/report/QUnit.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/base/ManagedObject.js"
 			]
 		},
@@ -847,7 +1258,6 @@
 			"name": "test/report/QUnit.js",
 			"module": "sap/ui/dt/test/report/QUnit.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/ui/base/ManagedObject.js"
 			]
 		},
@@ -856,10 +1266,10 @@
 			"module": "sap/ui/dt/test/report/Statistic.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/m/Label.js",
 				"sap/m/Text.js",
 				"sap/ui/core/Control.js",
+				"sap/ui/dt/test/report/StatisticRenderer.js",
 				"sap/ui/layout/form/SimpleForm.js",
 				"sap/ui/model/json/JSONModel.js"
 			]
@@ -868,10 +1278,10 @@
 			"name": "test/report/Statistic.js",
 			"module": "sap/ui/dt/test/report/Statistic.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/m/Label.js",
 				"sap/m/Text.js",
 				"sap/ui/core/Control.js",
+				"sap/ui/dt/test/report/StatisticRenderer.js",
 				"sap/ui/layout/form/SimpleForm.js",
 				"sap/ui/model/json/JSONModel.js"
 			]
@@ -879,24 +1289,17 @@
 		{
 			"name": "test/report/StatisticRenderer-dbg.js",
 			"module": "sap/ui/dt/test/report/StatisticRenderer.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"isDebug": true
 		},
 		{
 			"name": "test/report/StatisticRenderer.js",
-			"module": "sap/ui/dt/test/report/StatisticRenderer.js",
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"module": "sap/ui/dt/test/report/StatisticRenderer.js"
 		},
 		{
 			"name": "test/report/Table-dbg.js",
 			"module": "sap/ui/dt/test/report/Table.js",
 			"isDebug": true,
 			"required": [
-				"jquery.sap.global.js",
 				"sap/m/Button.js",
 				"sap/m/RatingIndicator.js",
 				"sap/m/SearchField.js",
@@ -905,6 +1308,7 @@
 				"sap/m/Toolbar.js",
 				"sap/m/ToolbarSpacer.js",
 				"sap/ui/core/Control.js",
+				"sap/ui/dt/test/report/TableRenderer.js",
 				"sap/ui/model/Filter.js",
 				"sap/ui/model/FilterOperator.js",
 				"sap/ui/model/json/JSONModel.js",
@@ -916,7 +1320,6 @@
 			"name": "test/report/Table.js",
 			"module": "sap/ui/dt/test/report/Table.js",
 			"required": [
-				"jquery.sap.global.js",
 				"sap/m/Button.js",
 				"sap/m/RatingIndicator.js",
 				"sap/m/SearchField.js",
@@ -925,6 +1328,7 @@
 				"sap/m/Toolbar.js",
 				"sap/m/ToolbarSpacer.js",
 				"sap/ui/core/Control.js",
+				"sap/ui/dt/test/report/TableRenderer.js",
 				"sap/ui/model/Filter.js",
 				"sap/ui/model/FilterOperator.js",
 				"sap/ui/model/json/JSONModel.js",
@@ -935,20 +1339,19 @@
 		{
 			"name": "test/report/TableRenderer-dbg.js",
 			"module": "sap/ui/dt/test/report/TableRenderer.js",
-			"isDebug": true,
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"isDebug": true
 		},
 		{
 			"name": "test/report/TableRenderer.js",
-			"module": "sap/ui/dt/test/report/TableRenderer.js",
-			"required": [
-				"jquery.sap.global.js"
-			]
+			"module": "sap/ui/dt/test/report/TableRenderer.js"
 		},
 		{
 			"name": "themes/base/.theming",
+			"theme": "base"
+		},
+		{
+			"name": "themes/base/ContextMenu.less",
+			"designtime": true,
 			"theme": "base"
 		},
 		{
@@ -1033,6 +1436,25 @@
 			"name": "themes/sap_hcb/library.source.less",
 			"designtime": true,
 			"theme": "sap_hcb"
+		},
+		{
+			"name": "util/getNextZIndex-dbg.js",
+			"module": "sap/ui/dt/util/getNextZIndex.js",
+			"isDebug": true,
+			"required": [
+				"sap/base/Log.js",
+				"sap/ui/core/BusyIndicator.js",
+				"sap/ui/core/Popup.js"
+			]
+		},
+		{
+			"name": "util/getNextZIndex.js",
+			"module": "sap/ui/dt/util/getNextZIndex.js",
+			"required": [
+				"sap/base/Log.js",
+				"sap/ui/core/BusyIndicator.js",
+				"sap/ui/core/Popup.js"
+			]
 		}
 	]
 }

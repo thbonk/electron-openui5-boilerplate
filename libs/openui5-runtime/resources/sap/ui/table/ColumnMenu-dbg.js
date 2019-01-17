@@ -1,12 +1,22 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.table.ColumnMenu.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/RenderManager', './library', 'sap/ui/unified/Menu', 'sap/ui/unified/MenuItem', 'sap/ui/unified/MenuTextFieldItem', 'sap/ui/Device', './TableUtils'],
-	function(jQuery, RenderManager, library, Menu, MenuItem, MenuTextFieldItem, Device, TableUtils) {
+sap.ui.define([
+	'./library',
+	'sap/ui/unified/Menu',
+	'sap/ui/unified/MenuItem',
+	'sap/ui/unified/MenuTextFieldItem',
+	"sap/ui/unified/MenuRenderer",
+	'sap/ui/Device',
+	'./TableUtils',
+	"sap/base/assert",
+	"sap/ui/thirdparty/jquery"
+],
+	function(library, Menu, MenuItem, MenuTextFieldItem, MenuRenderer, Device, TableUtils, assert, jQuery) {
 	"use strict";
 
 	/**
@@ -23,7 +33,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/RenderManager', './library', 's
 	 * @class
 	 * The column menu provides all common actions that can be performed on a column.
 	 * @extends sap.ui.unified.Menu
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -47,7 +57,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/RenderManager', './library', 's
 			Menu.prototype.init.apply(this, arguments);
 		}
 		this.addStyleClass("sapUiTableColumnMenu");
-		this._oResBundle = sap.ui.getCore().getLibraryResourceBundle("sap.ui.table");
 		this._bInvalidated = true;
 		this._iPopupClosedTimeoutId = null;
 		this._oColumn = null;
@@ -88,10 +97,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/RenderManager', './library', 's
 	 * its old parent.
 	 *
 	 * @param {sap.ui.base.ManagedObject} oParent the object that becomes this object's new parent
+	 * @returns {sap.ui.base.ManagedObject} Returns <code>this</code> to allow method chaining
 	 * @see {sap.ui.base.ManagedObject}
-	 *
-	 * @return {sap.ui.base.ManagedObject}
-	 *            Returns <code>this</code> to allow method chaining
 	 * @private
 	 */
 	ColumnMenu.prototype.setParent = function(oParent) {
@@ -104,12 +111,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/RenderManager', './library', 's
 
 	ColumnMenu.prototype._updateReferences = function(oParent) {
 		this._oColumn = oParent;
-		if (oParent) {
-			jQuery.sap.assert(TableUtils.isInstanceOf(oParent, "sap/ui/table/Column"), "ColumnMenu.setParent: parent must be a subclass of sap.ui.table.Column");
+		if (this._oColumn) {
+			assert(TableUtils.isA(this._oColumn, "sap.ui.table.Column"), "ColumnMenu.setParent: parent must be a subclass of sap.ui.table.Column");
 
 			this._oTable = this._oColumn.getParent();
 			if (this._oTable) {
-				jQuery.sap.assert(TableUtils.isInstanceOf(this._oTable, "sap/ui/table/Table"), "ColumnMenu.setParent: parent of parent must be subclass of sap.ui.table.Table");
+				assert(TableUtils.isA(this._oTable, "sap.ui.table.Table"),
+					"ColumnMenu.setParent: parent of parent must be subclass of sap.ui.table.Table");
 			}
 		}
 	};
@@ -144,15 +152,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/RenderManager', './library', 's
 	 */
 	ColumnMenu.prototype._invalidate = function() {
 		this._bInvalidated = true;
-	};
-
-	/**
-	 * Invalidates the column menu control items and refreshes the loaded language bundle.
-	 * @private
-	 */
-	ColumnMenu.prototype._updateResourceBundle = function() {
-		this._oResBundle = sap.ui.getCore().getLibraryResourceBundle("sap.ui.table");
-		this._invalidate();
 	};
 
 	/**
@@ -234,7 +233,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/RenderManager', './library', 's
 				sDir,
 					"TBL_SORT_" + sDir.toUpperCase(),
 				sIcon,
-				function (oEvent) {
+				function(oEvent) {
 					oColumn.sort(bDesc, oEvent.getParameter("ctrlKey") === true);
 				}
 			));
@@ -286,7 +285,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/RenderManager', './library', 's
 	ColumnMenu.prototype._addGroupMenuItem = function() {
 		var oColumn = this._oColumn;
 
-		if (oColumn.isGroupableByMenu()) {
+		if (oColumn.isGroupable()) {
 			var oTable = this._oTable;
 
 			this.addItem(this._createMenuItem(
@@ -312,7 +311,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/RenderManager', './library', 's
 
 		if (bColumnFreezeEnabled) {
 			var iColumnIndex = oColumn.getIndex();
-			var bIsFixedColumn = iColumnIndex + TableUtils.Column.getHeaderSpan(oColumn) == oTable.getFixedColumnCount();
+			var bIsFixedColumn = iColumnIndex + TableUtils.Column.getHeaderSpan(oColumn) == oTable.getComputedFixedColumnCount();
 
 			this.addItem(this._createMenuItem(
 				"freeze",
@@ -362,12 +361,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/RenderManager', './library', 's
 			}
 
 			var oBinding = oTable.getBinding();
-			var bAnalyticalBinding = TableUtils.isInstanceOf(oBinding, "sap/ui/model/analytics/AnalyticalBinding");
+			var bAnalyticalBinding = TableUtils.isA(oBinding, "sap.ui.model.analytics.AnalyticalBinding");
+			var aVisibleColumns = oTable._getVisibleColumns();
 
 			for (var i = 0, l = aColumns.length; i < l; i++) {
 				var oColumn = aColumns[i];
 				// skip columns which are set to invisible by analytical metadata
-				if (bAnalyticalBinding && TableUtils.isInstanceOf(oColumn, "sap/ui/table/AnalyticalColumn")) {
+				if (bAnalyticalBinding && oColumn.isA("sap.ui.table.AnalyticalColumn")) {
 
 					var oQueryResult = oBinding.getAnalyticalQueryResult();
 					var oEntityType = oQueryResult.getEntityType();
@@ -379,6 +379,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/RenderManager', './library', 's
 				}
 				var oMenuItem = this._createColumnVisibilityMenuItem(oColumnVisibiltyMenu.getId() + "-item-" + i, oColumn);
 				oColumnVisibiltyMenu.addItem(oMenuItem);
+
+				if (aVisibleColumns.length == 1 && aVisibleColumns[0] === oColumn) {
+					oMenuItem.setEnabled(false); // Indicate to the user that changing the visibility of the least visible column is not allowed
+				}
 			}
 		}
 	};
@@ -388,10 +392,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/RenderManager', './library', 's
 	 * Factory method for the column visibility menu item.
 	 * @param {string} sId the id of the menu item.
 	 * @param {sap.ui.table.Column} oColumn the associated column to the menu item.
-	 * @return {sap.ui.unified.MenuItem} the created menu item.
+	 * @returns {sap.ui.unified.MenuItem} the created menu item.
 	 * @private
 	 */
 	ColumnMenu.prototype._createColumnVisibilityMenuItem = function(sId, oColumn) {
+		var oTable = this._oTable;
 
 		function getLabelText(oLabel) {
 			return oLabel && oLabel.getText && oLabel.getText();
@@ -409,13 +414,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/RenderManager', './library', 's
 		return new MenuItem(sId, {
 			text: sText,
 			icon: oColumn.getVisible() ? "sap-icon://accept" : null,
+			ariaLabelledBy: [oTable.getId() + (oColumn.getVisible() ? "-ariahidecolmenu" : "-ariashowcolmenu")],
 			select: jQuery.proxy(function(oEvent) {
 				var oMenuItem = oEvent.getSource();
 				var bVisible = !oColumn.getVisible();
 				if (bVisible || TableUtils.getVisibleColumnCount(this._oTable) > 1) {
 					var oTable = oColumn.getParent();
 					var bExecuteDefault = true;
-					if (oTable && TableUtils.isInstanceOf(oTable, "sap/ui/table/Table")) {
+					if (TableUtils.isA(oTable, "sap.ui.table.Table")) {
 						bExecuteDefault = oTable.fireColumnVisibility({
 							column: oColumn,
 							newVisible: bVisible
@@ -437,12 +443,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/RenderManager', './library', 's
 	 * @param {string} sTextI18nKey the i18n key that should be used for the menu item text.
 	 * @param {string} sIcon the icon name
 	 * @param {function} fHandler the handler function to call when the item gets selected.
-	 * @return {sap.ui.unified.MenuItem} the created menu item.
+	 * @returns {sap.ui.unified.MenuItem} the created menu item.
 	 * @private
 	 */
 	ColumnMenu.prototype._createMenuItem = function(sId, sTextI18nKey, sIcon, fHandler) {
 		return new MenuItem(this.getId() + "-" + sId, {
-			text: this._oResBundle.getText(sTextI18nKey),
+			text: TableUtils.getResourceText(sTextI18nKey),
 			icon: sIcon ? "sap-icon://" + sIcon : null,
 			select: fHandler || function() {}
 		});
@@ -456,13 +462,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/RenderManager', './library', 's
 	 * @param {string} sIcon the icon name
 	 * @param {string} sValue the default value of the text field
 	 * @param {function} fHandler the handler function to call when the item gets selected.
-	 * @return {sap.ui.unified.MenuTextFieldItem} the created menu text field item.
+	 * @returns {sap.ui.unified.MenuTextFieldItem} the created menu text field item.
 	 * @private
 	 */
 	ColumnMenu.prototype._createMenuTextFieldItem = function(sId, sTextI18nKey, sIcon, sValue, fHandler) {
 		fHandler = fHandler || function() {};
 		return new MenuTextFieldItem(this.getId() + "-" + sId, {
-			label: this._oResBundle.getText(sTextI18nKey),
+			label: TableUtils.getResourceText(sTextI18nKey),
 			icon: sIcon ? "sap-icon://" + sIcon : null,
 			value: sValue,
 			select: fHandler || function() {}
@@ -473,7 +479,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/RenderManager', './library', 's
 	/**
 	 * sets a new filter value into the filter field
 	 * @param {String} sValue value of the filter input field to be set
-	 * @return {sap.ui.table.ColumnMenu} this reference for chaining
+	 * @returns {sap.ui.table.ColumnMenu} this reference for chaining
 	 * @private
 	 */
 	ColumnMenu.prototype._setFilterValue = function(sValue) {
@@ -490,7 +496,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/RenderManager', './library', 's
 	/**
 	 * sets a new filter value into the filter field
 	 * @param {sap.ui.core.ValueState} sFilterState value state for filter text field item
-	 * @return {sap.ui.table.ColumnMenu} this reference for chaining
+	 * @returns {sap.ui.table.ColumnMenu} this reference for chaining
 	 * @private
 	 */
 	ColumnMenu.prototype._setFilterState = function(sFilterState) {

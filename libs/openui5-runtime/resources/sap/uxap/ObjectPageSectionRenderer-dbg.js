@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -14,21 +14,35 @@ sap.ui.define(function () {
 	var ObjectPageSectionRenderer = {};
 
 	ObjectPageSectionRenderer.render = function (oRm, oControl) {
+		var sTitle, bTitleVisible,
+			bAccessibilityOn = sap.ui.getCore().getConfiguration().getAccessibility(),
+			oLabelledBy = oControl.getAggregation("ariaLabelledBy");
 
 		if (!oControl.getVisible() || !oControl._getInternalVisible()) {
 			return;
 		}
-		var sTitle = oControl._getInternalTitle() ? oControl._getInternalTitle() : oControl.getTitle();
+
+		sTitle = oControl._getTitle();
+		bTitleVisible = oControl._isTitleVisible();
 
 		oRm.write("<section ");
 		oRm.addClass("sapUxAPObjectPageSection");
+
+		if (!bTitleVisible) {
+			oRm.addClass("sapUxAPObjectPageSectionNoTitle");
+		}
+
 		oRm.writeClasses();
 		oRm.writeAttribute("role", "region");
-		oRm.writeAttributeEscaped("aria-labelledby", oControl.getAggregation("ariaLabelledBy").getId());
+
+		if (bAccessibilityOn && oLabelledBy) {
+			oRm.writeAttribute("aria-labelledby", oLabelledBy.getId());
+		}
+
 		oRm.writeControlData(oControl);
 		oRm.write(">");
 
-		if (oControl.getShowTitle() && oControl._getInternalTitleVisible()) {
+		if (bTitleVisible) {
 			oRm.write("<div");
 			oRm.writeAttribute("role", "heading");
 			oRm.writeAttribute("aria-level", oControl._getARIALevel());
@@ -61,7 +75,7 @@ sap.ui.define(function () {
 		oRm.writeStyles();
 		oRm.write(">");
 
-		oControl.getSubSections().forEach(oRm.renderControl);
+		oControl.getSubSections().forEach(oRm.renderControl, oRm);
 
 		oRm.write("</div>");
 

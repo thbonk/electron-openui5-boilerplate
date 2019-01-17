@@ -1,12 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.ToggleButton.
-sap.ui.define(['jquery.sap.global', './Button', './library', 'sap/ui/core/EnabledPropagator'],
-	function(jQuery, Button, library, EnabledPropagator) {
+sap.ui.define([
+	'./Button',
+	'./library',
+	'sap/ui/core/EnabledPropagator',
+	'./ToggleButtonRenderer',
+	"sap/ui/events/KeyCodes"
+],
+	function(Button, library, EnabledPropagator, ToggleButtonRenderer, KeyCodes) {
 	"use strict";
 
 
@@ -26,16 +32,18 @@ sap.ui.define(['jquery.sap.global', './Button', './library', 'sap/ui/core/Enable
 	 * @extends sap.m.Button
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
 	 * @alias sap.m.ToggleButton
+	 * @see {@link fiori:https://experience.sap.com/fiori-design-web/button/ Toggle Button}
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var ToggleButton = Button.extend("sap.m.ToggleButton", /** @lends sap.m.ToggleButton.prototype */ { metadata : {
 
 		library : "sap.m",
+		designtime: "sap/m/designtime/ToggleButton.designtime",
 		properties : {
 
 			/**
@@ -79,7 +87,7 @@ sap.ui.define(['jquery.sap.global', './Button', './library', 'sap/ui/core/Enable
 	 */
 	ToggleButton.prototype.onkeydown = function(oEvent) {
 
-		if (oEvent.which === jQuery.sap.KeyCodes.SPACE || oEvent.which === jQuery.sap.KeyCodes.ENTER) {
+		if (oEvent.which === KeyCodes.SPACE || oEvent.which === KeyCodes.ENTER) {
 			this.ontap(oEvent);
 		}
 	};
@@ -89,7 +97,7 @@ sap.ui.define(['jquery.sap.global', './Button', './library', 'sap/ui/core/Enable
 	 * @param {jQuery.Event} oEvent The fired event
 	 */
 	ToggleButton.prototype.onkeyup = function(oEvent) {
-		if (oEvent.which === jQuery.sap.KeyCodes.SPACE || oEvent.which === jQuery.sap.KeyCodes.ENTER) {
+		if (oEvent.which === KeyCodes.SPACE || oEvent.which === KeyCodes.ENTER) {
 			oEvent.setMarked();
 		}
 	};
@@ -111,4 +119,4 @@ sap.ui.define(['jquery.sap.global', './Button', './library', 'sap/ui/core/Enable
 
 	return ToggleButton;
 
-}, /* bExport= */ true);
+});

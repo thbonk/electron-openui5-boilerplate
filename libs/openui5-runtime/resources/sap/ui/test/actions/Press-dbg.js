@@ -1,11 +1,18 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './Action'], function ($, Action) {
+sap.ui.define([
+	"sap/ui/test/_OpaLogger",
+	"sap/ui/test/actions/Action",
+	"sap/base/Log",
+	"sap/ui/thirdparty/jquery"
+], function (_OpaLogger, Action, Log, jQueryDOM) {
 	"use strict";
+
+	var oLogger = _OpaLogger.getLogger("sap.ui.test.actions.Press");
 
 	/**
 	 * The Press action is used to simulate a press interaction on a Control's dom ref.
@@ -46,7 +53,7 @@ sap.ui.define(['jquery.sap.global', './Action'], function ($, Action) {
 
 		init: function () {
 			Action.prototype.init.apply(this, arguments);
-			this.controlAdapters = $.extend(this.controlAdapters, Press.controlAdapters);
+			this.controlAdapters = jQueryDOM.extend(this.controlAdapters, Press.controlAdapters);
 		},
 
 		/**
@@ -62,7 +69,9 @@ sap.ui.define(['jquery.sap.global', './Action'], function ($, Action) {
 				oActionDomRef = $ActionDomRef[0];
 
 			if ($ActionDomRef.length) {
-				$.sap.log.debug("Pressed the control " + oControl, this._sLogPrefix);
+				oLogger.timestamp("opa.actions.press");
+				Log.debug("Pressed the control " + oControl, this._sLogPrefix);
+
 				this._tryOrSimulateFocusin($ActionDomRef, oControl);
 
 				// the missing events like saptouchstart and tap will be fired by the event simulation
@@ -135,4 +144,4 @@ sap.ui.define(['jquery.sap.global', './Action'], function ($, Action) {
 
 	return Press;
 
-}, /* bExport= */ true);
+});

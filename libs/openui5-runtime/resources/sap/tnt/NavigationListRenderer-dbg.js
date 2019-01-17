@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides the default renderer for control sap.tnt.NavigationList
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer'],
-	function(jQuery, Renderer) {
+sap.ui.define(['sap/ui/core/Renderer'],
+	function(Renderer) {
 		"use strict";
 
 		/**
@@ -24,11 +24,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer'],
 		 * @param {sap.ui.core.Control} control An object representation of the control that should be rendered
 		 */
 		NavigationListRenderer.render = function (rm, control) {
-			var group,
-				role,
+			var role,
+				visibleGroupsCount,
 				groups = control.getItems(),
-				length = groups.length,
-				expanded = control.getExpanded();
+				expanded = control.getExpanded(),
+				visibleGroups = [];
 
 			rm.write("<ul");
 			rm.writeControlData(control);
@@ -54,10 +54,17 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer'],
 
 			rm.write(">");
 
-			for (var i = 0; i < length; i++) {
-				group = groups[i];
-				group.render(rm, control, i, length);
-			}
+			//Checking which groups should render
+			groups.forEach(function(group) {
+				if (group.getVisible()) {
+					visibleGroups.push(group);
+				}
+			});
+
+			// Rendering the visible groups
+			visibleGroups.forEach(function(group, index) {
+				group.render(rm, control, index, visibleGroupsCount);
+			});
 
 			rm.write("</ul>");
 		};

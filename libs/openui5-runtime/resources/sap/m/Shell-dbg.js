@@ -1,13 +1,26 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.Shell.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
-	function(jQuery, library, Control) {
+sap.ui.define([
+	'./library',
+	'sap/ui/core/Control',
+	'sap/ui/core/library',
+	'sap/m/ShellRenderer',
+	"sap/ui/util/Mobile",
+	"sap/base/Log",
+	"sap/ui/thirdparty/jquery"
+],
+	function(library, Control, coreLibrary, ShellRenderer, Mobile, Log, jQuery) {
 		"use strict";
+
+
+
+		// shortcut for sap.ui.core.TitleLevel
+		var TitleLevel = coreLibrary.TitleLevel;
 
 
 
@@ -21,7 +34,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 		 * The Shell control can be used as root element of applications. It can contain an App or a <code>SplitApp</code> control.
 		 * The Shell provides some overarching functionality for the overall application and takes care of visual adaptation, such as a frame around the App, on desktop browser platforms.
 		 * @extends sap.ui.core.Control
-		 * @version 1.50.6
+		 * @version 1.61.2
 		 *
 		 * @constructor
 		 * @public
@@ -115,7 +128,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 				 * This information is used by assistive technologies, such as screen readers to create a hierarchical site map for faster navigation.
 				 * Depending on this setting an HTML h1-h6 element is used.
 				 */
-				titleLevel : {type : "sap.ui.core.TitleLevel", group : "Appearance", defaultValue : sap.ui.core.TitleLevel.H1}
+				titleLevel : {type : "sap.ui.core.TitleLevel", group : "Appearance", defaultValue : TitleLevel.H1}
 			},
 			defaultAggregation : "app",
 			aggregations : {
@@ -141,13 +154,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 				var $hdr = this.$("hdr");
 				if ($hdr.length) {
 					$hdr.find(".sapMShellLogo").remove(); // remove old logo, if present
-					var html = sap.m.ShellRenderer.getLogoImageHtml(this);
+					var html = ShellRenderer.getLogoImageHtml(this);
 					$hdr.prepend(jQuery(html)); // insert new logo
 				}
 			}, this));
 
 
-			jQuery.sap.initMobile({
+			Mobile.init({
 				statusBar: "default",
 				hideBrowser: true
 			});
@@ -207,7 +220,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 
 		Shell.prototype.setBackgroundOpacity = function(fOpacity) {
 			if (fOpacity > 1 || fOpacity < 0) {
-				jQuery.sap.log.warning("Invalid value " + fOpacity + " for Shell.setBackgroundOpacity() ignored. Valid values are: floats between 0 and 1.");
+				Log.warning("Invalid value " + fOpacity + " for Shell.setBackgroundOpacity() ignored. Valid values are: floats between 0 and 1.");
 				return this;
 			}
 			this.$("BG").css("opacity", fOpacity);
@@ -216,10 +229,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 
 		Shell.prototype.setHomeIcon = function(oIcons) {
 			this.setProperty("homeIcon", oIcons, true); // no rerendering
-			jQuery.sap.setIcons(oIcons);
+			Mobile.setIcons(oIcons);
 			return this;
 		};
 
 		return Shell;
-
-	}, /* bExport= */ true);
+	});

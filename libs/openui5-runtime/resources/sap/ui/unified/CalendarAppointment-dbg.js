@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.unified.CalendarAppointment.
-sap.ui.define(['jquery.sap.global', './DateTypeRange', 'sap/ui/core/format/DateFormat', './library'],
-	function(jQuery, DateTypeRange, DateFormat, library) {
+sap.ui.define(['./DateTypeRange', 'sap/ui/core/format/DateFormat', './library', "sap/base/Log"],
+	function(DateTypeRange, DateFormat, library, Log) {
 	"use strict";
 
 	/**
@@ -21,7 +21,7 @@ sap.ui.define(['jquery.sap.global', './DateTypeRange', 'sap/ui/core/format/DateF
 	 *
 	 * Applications could inherit from this element to add own fields.
 	 * @extends sap.ui.unified.DateTypeRange
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -165,7 +165,7 @@ sap.ui.define(['jquery.sap.global', './DateTypeRange', 'sap/ui/core/format/DateF
 	 */
 	CalendarAppointment.prototype.setColor = function (sColor) {
 		if (sColor && sColor.match(/^#[0-9a-f]{6}$/i)) {
-			jQuery.sap.log.warning("setColor accepts only full hex color value with pound symbol.");
+			Log.warning("setColor accepts only full hex color value with pound symbol.");
 		}
 		return this.setProperty("color", sColor);
 	};
@@ -186,4 +186,4 @@ sap.ui.define(['jquery.sap.global', './DateTypeRange', 'sap/ui/core/format/DateF
 
 	return CalendarAppointment;
 
-}, /* bExport= */ true);
+});

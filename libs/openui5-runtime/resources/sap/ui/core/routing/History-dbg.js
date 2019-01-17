@@ -1,15 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', './HashChanger'],
-	function(jQuery, library, HashChanger) {
+sap.ui.define(['sap/ui/core/library', './HashChanger', "sap/base/Log", "sap/ui/thirdparty/URI", "sap/ui/Device"],
+	function(library, HashChanger, Log, URI, Device) {
 	"use strict";
 
 
 	// shortcut for enum(s)
 	var HistoryDirection = library.routing.HistoryDirection;
+
 
 
 	/**
@@ -29,14 +30,34 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', './HashChanger'],
 		this.aHistory = [];
 		this._bIsInitial = true;
 
+		if (!Device.browser.msie) { // the state information isn't used for IE
+			// because it doesn't clear the state after new hash is set
+			var oState = window.history.state === null ? {} : window.history.state;
+
+			if (typeof oState === "object") {
+				History._aStateHistory.push(window.location.hash);
+				oState.sap = {};
+				oState.sap.history = History._aStateHistory;
+				window.history.replaceState(oState, window.document.title);
+			} else {
+				Log.debug("Unable to determine HistoryDirection as history.state is already set: " + window.history.state, "sap.ui.core.routing.History");
+			}
+		}
+
 		if (!oHashChanger) {
-			jQuery.sap.log.error("sap.ui.core.routing.History constructor was called and it did not get a hashChanger as parameter");
+			Log.error("sap.ui.core.routing.History constructor was called and it did not get a hashChanger as parameter");
 		}
 
 		this._setHashChanger(oHashChanger);
 
 		this._reset();
 	};
+
+	/**
+	 * Stores the history of full hashes to compare with window.history.state
+	 * @private
+	 */
+	History._aStateHistory = [];
 
 	/**
 	 * Detaches all events and cleans up this instance
@@ -77,18 +98,28 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', './HashChanger'],
 	};
 
 	History.prototype._setHashChanger = function(oHashChanger) {
+		var aHashChangeEvents = oHashChanger.getEventNamesForHistory();
 		if (this._oHashChanger) {
 			this._unRegisterHashChanger();
 		}
 
 		this._oHashChanger = oHashChanger;
-		this._oHashChanger.attachEvent("hashChanged", this._onHashChange, this);
+
+		aHashChangeEvents.forEach(function(sEvent) {
+			this._oHashChanger.attachEvent(sEvent, this._onHashChange, this);
+		}.bind(this));
+
 		this._oHashChanger.attachEvent("hashReplaced", this._hashReplaced, this);
 		this._oHashChanger.attachEvent("hashSet", this._hashSet, this);
 	};
 
 	History.prototype._unRegisterHashChanger = function() {
-		this._oHashChanger.detachEvent("hashChanged", this._onHashChange, this);
+		var aHashChangeEvents = this._oHashChanger.getEventNamesForHistory();
+
+		aHashChangeEvents.forEach(function(sEvent) {
+			this._oHashChanger.detachEvent(sEvent, this._onHashChange, this);
+		}.bind(this));
+
 		this._oHashChanger.detachEvent("hashReplaced", this._hashReplaced, this);
 		this._oHashChanger.detachEvent("hashSet", this._hashSet, this);
 
@@ -159,15 +190,59 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', './HashChanger'],
 		return HistoryDirection.Unknown;
 	};
 
+	/**
+	 * Determine HistoryDirection leveraging the full hash as in window.location.hash
+	 * and window.history.state.
+	 *
+	 * @param {string} sHash the complete hash, same as window.location.hash
+	 * @return {sap.ui.core.routing.HistoryDirection} The determined HistoryDirection
+	 * @private
+	 */
+	History.prototype._getDirectionWithState = function(sHash) {
+		var oState = window.history.state === null ? {} : window.history.state,
+			bBackward,
+			sDirection;
+
+		if (typeof oState === "object") {
+			if (oState.sap === undefined) {
+				History._aStateHistory.push(sHash);
+				oState.sap = {};
+				oState.sap.history = History._aStateHistory;
+				history.replaceState(oState, document.title);
+				sDirection = HistoryDirection.NewEntry;
+			} else {
+				bBackward = oState.sap.history.every(function(sURL, index) {
+					return sURL === History._aStateHistory[index];
+				});
+
+				// If the state history is identical with the history trace, it means
+				// that a hashChanged event is fired without a real brower hash change.
+				// In this case, the _getDirectionWithState can't be used to determine
+				// the history direction and should fallback to the legacy function
+				if (bBackward && oState.sap.history.length === History._aStateHistory.length) {
+					sDirection = undefined;
+				} else {
+					sDirection = bBackward ? HistoryDirection.Backwards : HistoryDirection.Forwards;
+					History._aStateHistory = oState.sap.history;
+				}
+			}
+		} else {
+			Log.debug("Unable to determine HistoryDirection as history.state is already set: " + window.history.state, "sap.ui.core.routing.History");
+		}
+
+		return sDirection;
+	};
+
 	History.prototype._onHashChange = function(oEvent) {
-		this._hashChange(oEvent.getParameter("newHash"));
+		// Leverage the fullHash parameter if available
+		this._hashChange(oEvent.getParameter("newHash"), oEvent.getParameter("oldHash"), oEvent.getParameter("fullHash"));
 	};
 
 	/**
 	 * Handles a hash change and cleans up the History
 	 * @private
 	 */
-	History.prototype._hashChange = function(sNewHash) {
+	History.prototype._hashChange = function(sNewHash, sOldHash, sFullHash) {
 		var actualHistoryLength = window.history.length,
 			sDirection;
 
@@ -175,6 +250,19 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', './HashChanger'],
 		if (this._oNextHash && this._oNextHash.bWasReplaced && this._oNextHash.sHash === sNewHash) {
 			//Since a replace has taken place, the current history entry is also replaced
 			this.aHistory[this.iHistoryPosition] = sNewHash;
+
+			if (sFullHash !== undefined && !Device.browser.msie && this === History.getInstance()) {
+				// after the hash is replaced, the history state is cleared.
+				// We need to update the last entry in _aStateHistory and save the
+				// history back to the browser history state
+				History._aStateHistory[History._aStateHistory.length - 1] = sFullHash;
+				window.history.replaceState({
+					sap: {
+						history: History._aStateHistory
+					}
+				}, window.document.title);
+			}
+
 			this._oNextHash = null;
 			//reset the direction to Unknown when hash is replaced after history is already initialized
 			if (!this._bIsInitial) {
@@ -186,7 +274,25 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', './HashChanger'],
 		//a navigation has taken place so the history is not initial anymore.
 		this._bIsInitial = false;
 
-		sDirection = this._sCurrentDirection = this._getDirection(sNewHash, this._iHistoryLength < window.history.length, true);
+		// Extended direction determination with window.history.state
+		// IE 11 doesn't clear the window.history.state when new hash is set
+		// therefore the state solution can't be used
+		//
+		// The enhancement for direction determination is only done for the global
+		// instance because the window.history.state can only be used once for the
+		// new entry determination. Once the window.history.state is changed, it
+		// can't be used again for the same hashchange event to determine the
+		// direction which is the case if additional History instance is created
+		if (sFullHash && !Device.browser.msie && this === History.getInstance()) {
+			sDirection = this._getDirectionWithState(sFullHash);
+		}
+
+		// if the direction can't be decided by using the state method, the fallback to the legacy method is taken
+		if (!sDirection) {
+			sDirection = this._getDirection(sNewHash, this._iHistoryLength < window.history.length, true);
+		}
+
+		this._sCurrentDirection = sDirection;
 
 		// Remember the new history length, after it has been taken into account by getDirection
 		this._iHistoryLength = actualHistoryLength;

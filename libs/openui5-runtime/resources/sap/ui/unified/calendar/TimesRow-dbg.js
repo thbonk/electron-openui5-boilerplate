@@ -1,14 +1,43 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 //Provides control sap.ui.unified.CalendarTimeInterval.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleData', 'sap/ui/core/delegate/ItemNavigation',
-               'sap/ui/model/type/Date', 'sap/ui/unified/calendar/CalendarUtils', 'sap/ui/core/date/UniversalDate', 'sap/ui/unified/library'],
-               function(jQuery, Control, LocaleData, ItemNavigation, Date1, CalendarUtils, UniversalDate, library) {
+sap.ui.define([
+	'sap/ui/core/Control',
+	'sap/ui/core/LocaleData',
+	'sap/ui/core/delegate/ItemNavigation',
+	'sap/ui/unified/calendar/CalendarUtils',
+	'sap/ui/core/date/UniversalDate',
+	'sap/ui/unified/library',
+	'sap/ui/core/format/DateFormat',
+	'sap/ui/core/library',
+	'sap/ui/core/Locale',
+	"./TimesRowRenderer",
+	"sap/ui/dom/containsOrEquals",
+	"sap/base/util/deepEqual",
+	"sap/ui/thirdparty/jquery"
+], function(
+	Control,
+	LocaleData,
+	ItemNavigation,
+	CalendarUtils,
+	UniversalDate,
+	library,
+	DateFormat,
+	coreLibrary,
+	Locale,
+	TimesRowRenderer,
+	containsOrEquals,
+	deepEqual,
+	jQuery
+) {
 	"use strict";
+
+	// shortcut for sap.ui.core.CalendarType
+	var CalendarType = coreLibrary.CalendarType;
 
 	/*
 	 * <code>UniversalDate</code> objects are used inside the <code>TimesRow</code>, whereas JavaScript dates are used in the API.
@@ -31,7 +60,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 	 *
 	 * The TimesRow works with JavaScript Date objects.
 	 * @extends sap.ui.core.Control
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -145,9 +174,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 
 	TimesRow.prototype.init = function(){
 
-		this._oFormatYyyyMMddHHmm = sap.ui.core.format.DateFormat.getInstance({pattern: "yyyyMMddHHmm", calendarType: sap.ui.core.CalendarType.Gregorian});
-		this._oFormatLong = sap.ui.core.format.DateFormat.getDateTimeInstance({style: "long/short"});
-		this._oFormatDate = sap.ui.core.format.DateFormat.getDateInstance({style: "medium"});
+		this._oFormatYyyyMMddHHmm = DateFormat.getInstance({pattern: "yyyyMMddHHmm", calendarType: CalendarType.Gregorian});
+		this._oFormatLong = DateFormat.getDateTimeInstance({style: "long/short"});
+		this._oFormatDate = DateFormat.getDateInstance({style: "medium"});
 
 		this._mouseMoveProxy = jQuery.proxy(this._handleMouseMove, this);
 
@@ -164,7 +193,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		}
 
 		if (this._sInvalidateTimes) {
-			jQuery.sap.clearDelayedCall(this._sInvalidateTimes);
+			clearTimeout(this._sInvalidateTimes);
 		}
 
 	};
@@ -177,7 +206,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 
 	TimesRow.prototype.onsapfocusleave = function(oEvent){
 
-		if (!oEvent.relatedControlId || !jQuery.sap.containsOrEquals(this.getDomRef(), sap.ui.getCore().byId(oEvent.relatedControlId).getFocusDomRef())) {
+		if (!oEvent.relatedControlId || !containsOrEquals(this.getDomRef(), sap.ui.getCore().byId(oEvent.relatedControlId).getFocusDomRef())) {
 			if (this._bMouseMove) {
 				_unbindMousemove.call(this, true);
 
@@ -207,7 +236,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 			if (this._bInvalidateSync) { // set if calendar already invalidates in delayed call
 				_invalidateTimes.call(this);
 			} else {
-				this._sInvalidateTimes = jQuery.sap.delayedCall(0, this, _invalidateTimes);
+				this._sInvalidateTimes = setTimeout(_invalidateTimes.bind(this), 0);
 			}
 		}
 
@@ -371,7 +400,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 			return oParent._getLocaleData();
 		} else if (!this._oLocaleData) {
 			var sLocale = this._getLocale();
-			var oLocale = new sap.ui.core.Locale(sLocale);
+			var oLocale = new Locale(sLocale);
 			this._oLocaleData = LocaleData.getInstance(oLocale);
 		}
 
@@ -387,8 +416,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		var sLocale = this._getLocale();
 
 		if (this._oFormatLong.oLocale.toString() != sLocale) {
-			var oLocale = new sap.ui.core.Locale(sLocale);
-			this._oFormatLong = sap.ui.core.format.DateFormat.getInstance({style: "long/short"}, oLocale);
+			var oLocale = new Locale(sLocale);
+			this._oFormatLong = DateFormat.getInstance({style: "long/short"}, oLocale);
 		}
 
 		return this._oFormatLong;
@@ -403,7 +432,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		var sLocale = this._getLocale();
 
 		if (!this._oFormatTime || this._oFormatTime.oLocale.toString() != sLocale) {
-			var oLocale = new sap.ui.core.Locale(sLocale);
+			var oLocale = new Locale(sLocale);
 			var iIntervalMinutes = this.getIntervalMinutes();
 			var oLocaleData = this._getLocaleData();
 			var sPattern;
@@ -414,7 +443,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 				sPattern = oLocaleData.getPreferredHourSymbol();
 				if (oLocaleData.getTimePattern("short").search("a") >= 0) {
 					// AP/PM indicator used
-					this._oFormatTimeAmPm = sap.ui.core.format.DateFormat.getTimeInstance({pattern: "a"}, oLocale);
+					this._oFormatTimeAmPm = DateFormat.getTimeInstance({pattern: "a"}, oLocale);
 				}
 			} else {
 				sPattern = oLocaleData.getTimePattern("short");
@@ -423,11 +452,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 				sPattern = sPattern.replace("hh", "h");
 				if (sPattern.search("a") >= 0) {
 					// AP/PM indicator used
-					this._oFormatTimeAmPm = sap.ui.core.format.DateFormat.getTimeInstance({pattern: "a"}, oLocale);
+					this._oFormatTimeAmPm = DateFormat.getTimeInstance({pattern: "a"}, oLocale);
 					sPattern = sPattern.replace("a", "").trim();
 				}
 			}
-			this._oFormatTime = sap.ui.core.format.DateFormat.getTimeInstance({pattern: sPattern}, oLocale);
+			this._oFormatTime = DateFormat.getTimeInstance({pattern: sPattern}, oLocale);
 		}
 
 		return this._oFormatTime;
@@ -442,8 +471,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		var sLocale = this._getLocale();
 
 		if (this._oFormatDate.oLocale.toString() != sLocale) {
-			var oLocale = new sap.ui.core.Locale(sLocale);
-			this._oFormatDate = sap.ui.core.format.DateFormat.getDateInstance({style: "medium"}, oLocale);
+			var oLocale = new Locale(sLocale);
+			this._oFormatDate = DateFormat.getDateInstance({style: "medium"}, oLocale);
 		}
 
 		return this._oFormatDate;
@@ -890,7 +919,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 	TimesRow.prototype.applyFocusInfo = function(oInfo){
 		this._oItemNavigation.focusItem(this._oItemNavigation.getFocusedIndex());
 		return this;
-   };
+	};
 
 	/*
 	 * calculates the start of the corresponding interval
@@ -916,6 +945,17 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 
 		return oIntervalDate;
 
+	};
+
+	TimesRow.prototype._setAriaRole = function(sRole){
+		this._ariaRole = sRole;
+
+		return this;
+	};
+
+	TimesRow.prototype._getAriaRole = function(){
+
+		return this._ariaRole ? this._ariaRole : "gridcell";
 	};
 
 	function _initItemNavigation(){
@@ -1078,7 +1118,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		CalendarUtils._checkYearInValidRange(iYear);
 
 		var bFocusable = true; // if date not changed it is still focusable
-		if (!jQuery.sap.equal(this.getDate(), oDate)) {
+		if (!deepEqual(this.getDate(), oDate)) {
 			var oUTCDate = CalendarUtils._createUniversalUTCDate(oDate, undefined, true);
 			oUTCDate = this._getIntervalStart(oUTCDate);
 			bFocusable = this.checkDateFocusable(oDate);
@@ -1444,4 +1484,4 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 
 	return TimesRow;
 
-}, /* bExport= */ true);
+});

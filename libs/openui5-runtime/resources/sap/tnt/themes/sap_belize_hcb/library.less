@@ -2,7 +2,7 @@
 
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -10,6 +10,42 @@
 @import "../../../../../Base/baseLib/sap_belize_hcb/base.less"; /* ORIGINAL IMPORT PATH: "../../../../sap/ui/core/themes/sap_belize_hcb/base.less" */
 
 @import "../../../../sap/ui/core/themes/sap_belize_hcb/global.less";
+
+/* START "InfoLabel.less" */
+/* ================================= */
+/* CSS for control sap.tnt/InfoLabel */
+/* Belize HCB theme                  */
+/* ================================= */
+
+
+.sapTntInfoLabel {
+	background-color: @sapUiGroupContentBackground;
+	border: 1px solid @sapUiGroupContentBorderColor;
+	line-height: 85%;
+
+	.sapTntInfoLabelInner{
+		line-height: 1rem;
+	}
+}
+
+/* ==========================================================================
+   InfoLabel Display Only
+   ========================================================================== */
+   .sapTntInfoLabel.sapTntInfoLabelDisplayOnly .sapTntInfoLabelInner {
+		line-height: 0.875rem;
+}
+
+/* ==========================================================================
+   InfoLabel No Text
+   ========================================================================== */
+   .sapTntInfoLabel.sapTntInfoLabelNoText {
+	padding: 0 0.5rem;
+
+		&.sapTntInfoLabelDisplayOnly{
+			padding: 0 0.4375rem;
+		}
+   }
+/* END "InfoLabel.less" */
 
 /* START "NavigationList.less" */
 /* ======================================= */
@@ -22,7 +58,7 @@
 	border: 0.125rem dotted @sapUiContentFocusColor;
 }
 
-html[data-sap-ui-browser^="ie"].sap-desktop,
+html[data-sap-ui-browser^="ie"].sap-desktop,// TODO remove after 1.62 version
 html[data-sap-ui-browser^="ed"].sap-desktop {
 	.sapTntNavLI li:focus::before,
 	.sapTntNavLIItem:focus::before {

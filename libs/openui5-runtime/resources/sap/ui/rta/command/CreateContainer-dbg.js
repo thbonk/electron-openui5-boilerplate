@@ -1,9 +1,9 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global', 'sap/ui/rta/command/FlexCommand'], function(jQuery, FlexCommand) {
+sap.ui.define(['sap/ui/rta/command/FlexCommand'], function(FlexCommand) {
 	"use strict";
 
 	/**
@@ -12,7 +12,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/rta/command/FlexCommand'], function(
 	 * @class
 	 * @extends sap.ui.rta.command.FlexCommand
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -32,6 +32,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/rta/command/FlexCommand'], function(
 				},
 				label : {
 					type : "string"
+				},
+				parentId : {
+					type : "string"
 				}
 			},
 			associations : {},
@@ -45,7 +48,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/rta/command/FlexCommand'], function(
 			changeType : this.getChangeType(),
 			index : this.getIndex(),
 			newControlId : this.getNewControlId(),
-			newLabel : this.getLabel()
+			newLabel : this.getLabel(),
+			parentId : this.getParentId()
 		};
 
 		return mSpecificInfo;

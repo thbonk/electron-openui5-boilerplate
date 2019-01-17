@@ -1,12 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.ui.commons.form.Form.
-sap.ui.define(['jquery.sap.global', 'sap/ui/commons/library', 'sap/ui/layout/form/Form'],
-	function(jQuery, library, Form1) {
+sap.ui.define([
+ 'sap/ui/commons/library',
+ 'sap/ui/layout/form/Form',
+ './FormRenderer'
+],
+	function(library, LayoutForm, FormRenderer) {
 	"use strict";
 
 
@@ -24,7 +28,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/library', 'sap/ui/layout/for
 	 * @extends sap.ui.layout.form.Form
 	 *
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
@@ -34,15 +38,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/library', 'sap/ui/layout/for
 	 * @alias sap.ui.commons.form.Form
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	var Form = Form1.extend("sap.ui.commons.form.Form", /** @lends sap.ui.commons.form.Form.prototype */ { metadata : {
+	var Form = LayoutForm.extend("sap.ui.commons.form.Form", /** @lends sap.ui.commons.form.Form.prototype */ { metadata : {
 
 		deprecated : true,
 		library : "sap.ui.commons"
 	}});
-
-	/**
-	 * This file defines behavior for the control,
-	 */
 
 	/* Overwrite to have right "since" in there */
 
@@ -74,4 +74,4 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/library', 'sap/ui/layout/for
 
 	return Form;
 
-}, /* bExport= */ true);
+});

@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define([ "sap/m/GenericTileRenderer", "sap/m/library"],
-	function(TileRenderer, library) {
+sap.ui.define(["sap/m/library", "sap/base/security/encodeCSS", "sap/ui/thirdparty/jquery"],
+	function(library, encodeCSS, jQuery) {
 	"use strict";
 
 	// shortcut for sap.m.GenericTileScope
@@ -30,7 +30,7 @@ sap.ui.define([ "sap/m/GenericTileRenderer", "sap/m/library"],
 		var sTooltipText = oControl._getTooltipText(),
 			bIsScreenLarge = oControl._isScreenLarge(),
 			sAriaText = oControl._getAriaText(),
-			sScopeClass = jQuery.sap.encodeCSS("sapMGTScope" + oControl.getScope()),
+			sScopeClass = encodeCSS("sapMGTScope" + oControl.getScope()),
 			bHasPress = oControl.hasListeners("press");
 		this._bRTL = sap.ui.getCore().getConfiguration().getRTL();
 
@@ -69,7 +69,7 @@ sap.ui.define([ "sap/m/GenericTileRenderer", "sap/m/library"],
 			oRm.writeAttribute("id", oControl.getId() + "-startMarker");
 			oRm.addClass("sapMGTStartMarker");
 			oRm.writeClasses();
-			oRm.write("/>");
+			oRm.write("></div>");
 
 			this._renderFailedIcon(oRm, oControl);
 			this._renderHeader(oRm, oControl);
@@ -94,7 +94,7 @@ sap.ui.define([ "sap/m/GenericTileRenderer", "sap/m/library"],
 			oRm.writeAttribute("id", oControl.getId() + "-styleHelper");
 			oRm.addClass("sapMGTStyleHelper");
 			oRm.writeClasses();
-			oRm.write("/>");
+			oRm.write("></div>");
 
 		} else {
 			// small
@@ -167,7 +167,7 @@ sap.ui.define([ "sap/m/GenericTileRenderer", "sap/m/library"],
 		oRm.writeClasses();
 		oRm.writeAttribute("id", oControl.getId() + "-subHdr-text");
 		oRm.write(">");
-		oRm.writeEscaped(oControl.getSubheader());
+		oRm.writeEscaped(oControl._oSubTitle.getText());
 		oRm.write("</span>");
 	};
 
@@ -225,7 +225,7 @@ sap.ui.define([ "sap/m/GenericTileRenderer", "sap/m/library"],
 				height: oLine.height
 			});
 
-			sHelpers += $Rect.outerHTML();
+			sHelpers += jQuery.trim($Rect.get(0).outerHTML);
 		}
 
 		$StyleHelper.html(sHelpers);

@@ -1,13 +1,30 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.ObjectStatus.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/IconPool', 'sap/ui/core/ValueStateSupport'],
-	function(jQuery, library, Control, IconPool, ValueStateSupport) {
+sap.ui.define([
+	'./library',
+	'sap/ui/core/Control',
+	'sap/ui/core/ValueStateSupport',
+	'sap/ui/core/library',
+	'./ObjectStatusRenderer'
+],
+	function(library, Control, ValueStateSupport, coreLibrary, ObjectStatusRenderer) {
 	"use strict";
+
+
+
+	// shortcut for sap.m.ImageHelper
+	var ImageHelper = library.ImageHelper;
+
+	// shortcut for sap.ui.core.TextDirection
+	var TextDirection = coreLibrary.TextDirection;
+
+	// shortcut for sap.ui.core.ValueState
+	var ValueState = coreLibrary.ValueState;
 
 
 
@@ -21,17 +38,19 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * Status information that can be either text with a value state, or an icon.
 	 * @extends sap.ui.core.Control
 	 * @implements sap.ui.core.IFormContent
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 *
 	 * @constructor
 	 * @public
 	 * @alias sap.m.ObjectStatus
+	 * @see {@link fiori:https://experience.sap.com/fiori-design-web/object-display-elements/#-object-status Object Status}
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var ObjectStatus = Control.extend("sap.m.ObjectStatus", /** @lends sap.m.ObjectStatus.prototype */ { metadata : {
 
 		interfaces : ["sap.ui.core.IFormContent"],
 		library : "sap.m",
+		designtime: "sap/m/designtime/ObjectStatus.designtime",
 		properties : {
 
 			/**
@@ -45,9 +64,18 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			text : {type : "string", group : "Misc", defaultValue : null},
 
 			/**
+			 * Indicates if the <code>ObjectStatus</code> text and icon can be clicked/tapped by the user.
+			 *
+			 * <b>Note:</b> If you set this property to <code>true</code>, you have to also set the <code>text</code> or <code>icon</code> property.
+			 *
+			 * @since 1.54
+			 */
+			active : {type : "boolean", group : "Misc", defaultValue : false},
+
+			/**
 			 * Defines the text value state.
 			 */
-			state : {type : "sap.ui.core.ValueState", group : "Misc", defaultValue : sap.ui.core.ValueState.None},
+			state : {type : "sap.ui.core.ValueState", group : "Misc", defaultValue : ValueState.None},
 
 			/**
 			 * Icon URI. This may be either an icon font or image path.
@@ -65,7 +93,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			 * Determines the direction of the text, not including the title.
 			 * Available options for the text direction are LTR (left-to-right) and RTL (right-to-left). By default the control inherits the text direction from its parent control.
 			 */
-			textDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : sap.ui.core.TextDirection.Inherit}
+			textDirection : {type : "sap.ui.core.TextDirection", group : "Appearance", defaultValue : TextDirection.Inherit}
 		},
 		associations : {
 
@@ -73,6 +101,14 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			 * Association to controls / IDs, which describe this control (see WAI-ARIA attribute aria-describedby).
 			 */
 			ariaDescribedBy : {type : "sap.ui.core.Control", multiple : true, singularName : "ariaDescribedBy"}
+		},
+		events : {
+
+			/**
+			 * Fires when the user clicks/taps on active text.
+			 * @since 1.54
+			 */
+			press : {}
 		}
 	}});
 
@@ -102,7 +138,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			useIconTooltip : false
 		};
 
-		this._oImageControl = sap.m.ImageHelper.getImageControl(sImgId, this._oImageControl, this, mProperties);
+		this._oImageControl = ImageHelper.getImageControl(sImgId, this._oImageControl, this, mProperties);
 
 		return this._oImageControl;
 	};
@@ -148,6 +184,47 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	};
 
 	/**
+	 * @private
+	 * @param {object} oEvent The fired event
+	 */
+	ObjectStatus.prototype.ontap = function(oEvent) {
+		if (this._isClickable(oEvent)) {
+			this.firePress();
+		}
+	};
+
+	/**
+	 * @private
+	 * @param {object} oEvent The fired event
+	 */
+	ObjectStatus.prototype.onsapenter = function(oEvent) {
+		if (this._isActive()) {
+			this.firePress();
+
+			// mark the event that it is handled by the control
+			oEvent.setMarked();
+		}
+	};
+
+	/**
+	 * @private
+	 * @param {object} oEvent The fired event
+	 */
+	ObjectStatus.prototype.onsapspace = function(oEvent) {
+		this.onsapenter(oEvent);
+	};
+
+	/**
+	 * Checks if the ObjectStatus should be set to active.
+	 * @private
+	 * @returns {boolean} If the ObjectStatus is active
+	 */
+	ObjectStatus.prototype._isActive = function() {
+
+		return  this.getActive() && (this.getText().trim() || this.getIcon().trim());
+	};
+
+	/**
 	 * Checks if the ObjectStatus is empty.
 	 * @private
 	 * @returns {boolean} If the ObjectStatus is empty
@@ -158,19 +235,38 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	};
 
 	/**
+	 * Called when the control is touched.
+	 * @param {object} oEvent The fired event
+	 * @private
+	 */
+	ObjectStatus.prototype.ontouchstart = function(oEvent) {
+		if (this._isClickable(oEvent)) {
+			// mark the event that it is handled by the control
+			oEvent.setMarked();
+		}
+	};
+
+	/**
 	 * @see sap.ui.core.Control#getAccessibilityInfo
 	 *
 	 * @returns {Object} Current accessibility state of the control
 	 * @protected
 	 */
 	ObjectStatus.prototype.getAccessibilityInfo = function() {
-		var sState = this.getState() != sap.ui.core.ValueState.None ? ValueStateSupport.getAdditionalText(this.getState()) : "";
+		var sState = this.getState() != ValueState.None ? ValueStateSupport.getAdditionalText(this.getState()) : "";
 
 		return {
-			description: ((this.getTitle() || "") + " " + (this.getText() || "") + " " + sState).trim()
+			description: ((this.getTitle() || "") + " " + (this.getText() || "") + " " + sState + " " + (this.getTooltip() || "")).trim()
 		};
+	};
+
+	ObjectStatus.prototype._isClickable = function(oEvent) {
+		var sSourceId = oEvent.target.id;
+
+		//event should only be fired if the click is on the text, link or icon
+		return this._isActive() && (sSourceId === this.getId() + "-link" || sSourceId === this.getId() + "-text" || sSourceId === this.getId() + "-icon");
 	};
 
 	return ObjectStatus;
 
-}, /* bExport= */ true);
+});

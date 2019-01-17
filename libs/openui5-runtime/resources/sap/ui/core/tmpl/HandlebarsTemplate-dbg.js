@@ -1,11 +1,29 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Core', './Template', './TemplateControl', 'sap/ui/thirdparty/handlebars', 'sap/ui/base/ManagedObject'],
-	function(jQuery, Core, Template, TemplateControl, Handlebars, ManagedObject) {
+sap.ui.define([
+	'sap/ui/core/Core',
+	'./Template',
+	'./TemplateControl',
+	'sap/ui/thirdparty/handlebars',
+	'sap/ui/base/ManagedObject',
+	'sap/base/util/ObjectPath',
+	"sap/base/security/encodeXML",
+	"sap/ui/thirdparty/jquery"
+],
+	function(
+		Core,
+		Template,
+		TemplateControl,
+		Handlebars,
+		ManagedObject,
+		ObjectPath,
+		encodeXML,
+		jQuery
+	) {
 	"use strict";
 
 
@@ -29,9 +47,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Core', './Template', './Templat
 	 * @extends sap.ui.core.tmpl.Template
 	 * @abstract
 	 * @author SAP SE
-	 * @version 1.50.6
+	 * @version 1.61.2
 	 * @alias sap.ui.core.tmpl.HandlebarsTemplate
 	 * @since 1.15
+	 * @deprecated since 1.56
 	 */
 	var HandlebarsTemplate = Template.extend("sap.ui.core.tmpl.HandlebarsTemplate", /** @lends sap.ui.core.tmpl.HandlebarsTemplate.prototype */
 	{
@@ -241,7 +260,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Core', './Template', './Templat
 				if (sPath) {
 					// bind and return the text
 					var oValue = oRootControl.bindProp(sPath);
-					return oValue && new Handlebars.SafeString(jQuery.sap.encodeHTML(oValue));
+					return oValue && new Handlebars.SafeString(encodeXML(oValue));
 				} else {
 					throw new Error("The expression \"text\" requires the option \"path\"!");
 				}
@@ -312,7 +331,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Core', './Template', './Templat
 					sParentPath = options.data.path,
 					mParentChildren = options.data.children,
 					sType = options.hash["sap-ui-type"],
-					oClass = jQuery.sap.getObject(sType),
+					oClass = ObjectPath.get(sType || ""),
 					oMetadata = oClass && oClass.getMetadata(),
 					sDefaultAggregation = options.hash["sap-ui-default-aggregation"] || oMetadata && oMetadata.getDefaultAggregationName(),
 					oView = options.data.view;

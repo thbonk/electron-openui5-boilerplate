@@ -1,10 +1,14 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global', './InputBaseRenderer', 'sap/ui/core/Renderer'],
-	function(jQuery, InputBaseRenderer, Renderer) {
+sap.ui.define([
+	'./InputBaseRenderer',
+	'sap/ui/core/Renderer',
+	'sap/ui/core/LabelEnablement'
+],
+	function(InputBaseRenderer, Renderer, LabelEnablement) {
 		"use strict";
 
 		/**
@@ -59,6 +63,7 @@ sap.ui.define(['jquery.sap.global', './InputBaseRenderer', 'sap/ui/core/Renderer
 		 * To be overwritten by subclasses.
 		 *
 		 * @param {sap.ui.core.Control} oControl An object representation of the control that should be rendered.
+		 * @returns {object} The accessibility state of the control
 		 */
 		ComboBoxTextFieldRenderer.getAccessibilityState = function(oControl) {
 			var mAccessibilityState = InputBaseRenderer.getAccessibilityState.call(this, oControl);
@@ -74,123 +79,6 @@ sap.ui.define(['jquery.sap.global', './InputBaseRenderer', 'sap/ui/core/Renderer
 		 */
 		ComboBoxTextFieldRenderer.addOuterStyles = function(oRm, oControl) {
 			oRm.addStyle("max-width", oControl.getMaxWidth());
-		};
-
-		/**
-		 * Add classes to the control.
-		 *
-		 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer.
-		 * @param {sap.ui.core.Control} oControl An object representation of the control that should be rendered.
-		 */
-		ComboBoxTextFieldRenderer.addOuterClasses = function(oRm, oControl) {
-			var CSS_CLASS = ComboBoxTextFieldRenderer.CSS_CLASS_COMBOBOXTEXTFIELD;
-
-			oRm.addClass(CSS_CLASS);
-
-			if (!oControl.getEnabled()) {
-				oRm.addClass(CSS_CLASS + "Disabled");
-			}
-
-			if (!oControl.getEditable()) {
-				oRm.addClass(CSS_CLASS + "Readonly");
-			}
-		};
-
-		/**
-		 * Add padding class to input container.
-		 * May be overwritten by subclasses.
-		 *
-		 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer.
-		 * @param {sap.ui.core.Control} oControl An object representation of the control that should be rendered.
-		 */
-		ComboBoxTextFieldRenderer.addPaddingClass = jQuery.noop;
-
-		/**
-		 * Add inner classes to the control's input element.
-		 *
-		 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer.
-		 * @param {sap.ui.core.Control} oControl An object representation of the control that should be rendered.
-		 */
-		ComboBoxTextFieldRenderer.addInnerClasses = function(oRm, oControl) {
-			var CSS_CLASS = ComboBoxTextFieldRenderer.CSS_CLASS_COMBOBOXTEXTFIELD;
-			oRm.addClass(CSS_CLASS + "Inner");
-
-			if (!oControl.getEditable()) {
-				oRm.addClass(CSS_CLASS + "InnerReadonly");
-			}
-
-			if (oControl.getShowButton()) {
-				oRm.addClass(CSS_CLASS + "InnerWidthExtraPadding");
-			}
-		};
-
-		/**
-		 * Add the CSS value state classes to the control's root element using the provided {@link sap.ui.core.RenderManager}.
-		 * To be overwritten by subclasses.
-		 *
-		 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer.
-		 * @param {sap.ui.core.Control} oControl An object representation of the control that should be rendered.
-		 */
-		ComboBoxTextFieldRenderer.addValueStateClasses = function(oRm, oControl) {
-			var CSS_CLASS = ComboBoxTextFieldRenderer.CSS_CLASS_COMBOBOXTEXTFIELD;
-			oRm.addClass(CSS_CLASS + "State");
-			oRm.addClass(CSS_CLASS + oControl.getValueState());
-		};
-
-		/**
-		 * Write the decorations of the input.
-		 *
-		 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer.
-		 * @param {sap.ui.core.Control} oControl An object representation of the control that should be rendered.
-		 */
-		ComboBoxTextFieldRenderer.writeDecorations = function(oRm, oControl) {
-			if (oControl.getShowButton()) {
-				this.renderButton(oRm, oControl);
-			}
-		};
-
-		/**
-		 * Renders the control button, using the provided {@link sap.ui.core.RenderManager}.
-		 * To be overwritten by subclasses.
-		 *
-		 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer.
-		 * @param {sap.ui.core.Control} oControl An object representation of the control that should be rendered.
-		 */
-		ComboBoxTextFieldRenderer.renderButton = function(oRm, oControl) {
-			var sId = oControl.getId(),
-				sButtonId = sId + "-arrow",
-				bAccessibilityOn = sap.ui.getCore().getConfiguration().getAccessibility(),
-				oArrowDownInvisibleLabel = oControl.getAggregation("_buttonLabelText");
-
-			oRm.write('<span tabindex="-1" ');
-			oRm.writeAttribute("id", sButtonId);
-
-			if (bAccessibilityOn) {
-				oRm.writeAttribute("role", "button");
-				oRm.writeAttribute("aria-labelledby", oArrowDownInvisibleLabel.getId());
-			}
-
-			this.addButtonClasses(oRm, oControl);
-			oRm.writeClasses();
-			oRm.write(">");
-			bAccessibilityOn && oRm.renderControl(oArrowDownInvisibleLabel);
-			oRm.write("</span>");
-		};
-
-		/**
-		 * Add CSS classes to the button, using the provided {@link sap.ui.core.RenderManager}.
-		 * To be overwritten by subclasses.
-		 *
-		 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer.
-		 * @param {sap.ui.core.Control} oControl An object representation of the control that should be rendered.
-		 */
-		ComboBoxTextFieldRenderer.addButtonClasses = function(oRm, oControl) {
-			var CLASS = ComboBoxTextFieldRenderer.CSS_CLASS_COMBOBOXTEXTFIELD + "Arrow";
-			oRm.addClass(CLASS);
-
-			if (!oControl.getEnabled()) {
-				oRm.addClass(CLASS + "Disabled");
-			}
 		};
 
 		return ComboBoxTextFieldRenderer;

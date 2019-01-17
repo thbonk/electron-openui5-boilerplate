@@ -1,16 +1,20 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 sap.ui.define([
 	"sap/uxap/library",
 	"sap/ui/core/UIComponent",
-	"sap/ui/model/json/JSONModel",
+	"sap/ui/core/library",
+	"sap/base/Log",
 	"sap/ui/core/Component"
-], function (library, UIComponent, JSONModel /*, Component*/) {
+], function (library, UIComponent, coreLibrary, Log) {
 	"use strict";
+
+	// shortcut for sap.ui.core.mvc.ViewType
+	var ViewType = coreLibrary.mvc.ViewType;
 
 	// shortcut for sap.uxap.ObjectPageConfigurationMode
 	var ObjectPageConfigurationMode = library.ObjectPageConfigurationMode;
@@ -40,15 +44,15 @@ sap.ui.define([
 					// case 1: load from an XML view + json for the object page layout configuration
 					this._oModel = new UIComponent(this.oComponentData.jsonConfigurationURL);
 					this._oViewConfig.viewName = "sap.uxap.component.ObjectPageLayoutUXDrivenFactory";
-					this._oViewConfig.type = sap.ui.core.mvc.ViewType.XML;
+					this._oViewConfig.type = ViewType.XML;
 					break;
 				case ObjectPageConfigurationMode.JsonModel:
 					// JsonModel bootstraps the ObjectPageLayout from the external model objectPageLayoutMedatadata
 					this._oViewConfig.viewName = "sap.uxap.component.ObjectPageLayoutUXDrivenFactory";
-					this._oViewConfig.type = sap.ui.core.mvc.ViewType.XML;
+					this._oViewConfig.type = ViewType.XML;
 					break;
 				default:
-					jQuery.sap.log.error("UxAPComponent :: missing bootstrap information. Expecting one of the following: JsonURL, JsonModel and FacetsAnnotation");
+					Log.error("UxAPComponent :: missing bootstrap information. Expecting one of the following: JsonURL, JsonModel and FacetsAnnotation");
 			}
 			//create the UIComponent
 			UIComponent.prototype.init.call(this);

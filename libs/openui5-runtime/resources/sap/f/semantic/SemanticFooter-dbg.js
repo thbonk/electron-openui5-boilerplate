@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2018 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -8,15 +8,11 @@
 * Provides a private class <code>sap.f.semantic.SemanticFooter</code>.
 */
 sap.ui.define([
-	"jquery.sap.global",
 	"sap/m/ToolbarSpacer",
 	"sap/m/library",
-	"./SemanticConfiguration",
 	"./SemanticContainer"
-], function(jQuery,
-			ToolBarSpacer,
+], function(ToolBarSpacer,
 			mobileLibrary,
-			SemanticConfiguration,
 			SemanticContainer) {
 	"use strict";
 
@@ -150,7 +146,7 @@ sap.ui.define([
 		this._oSpacer = null;
 
 		return SemanticContainer.prototype.destroy.call(this);
-};
+	};
 
 	/*
 	* Inserts the <code>sap.f.semantic.SemanticControl</code> in the <code>footerLeft</code> area.
@@ -306,4 +302,4 @@ sap.ui.define([
 
 	return SemanticFooter;
 
-}, /* bExport= */ false);
+});
